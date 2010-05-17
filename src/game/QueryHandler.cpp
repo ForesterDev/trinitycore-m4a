@@ -349,7 +349,7 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket & recv_data)
             data << "[Missing gossip text!]";
             data << "[Missing gossip text!]";
             data << uint32(0);
-            for (int j = 0; i < 3; ++j)
+            for (int j = 0; j < 3; ++j)
                 data << uint32(0) << uint32(0);
         }
     }
