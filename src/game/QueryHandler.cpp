@@ -337,7 +337,8 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket & recv_data)
 
     GossipText const* pGossip = objmgr.GetGossipText(textID);
 
-    WorldPacket data(SMSG_NPC_TEXT_UPDATE, 100);          // guess size
+    WorldPacket data(SMSG_NPC_TEXT_UPDATE,
+            4 + (4 + 3000 + 3000 + 4 + (4 + 4) * 3) * 8);    // guess size
     data << textID;
 
     if (!pGossip)
@@ -345,15 +346,11 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket & recv_data)
         for (uint32 i = 0; i < 8; ++i)
         {
             data << float(0);
-            data << "Greetings $N";
-            data << "Greetings $N";
+            data << "[Missing gossip text!]";
+            data << "[Missing gossip text!]";
             data << uint32(0);
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(0);
+            for (int j = 0; i < 3; ++j)
+                data << uint32(0) << uint32(0);
         }
     }
     else
