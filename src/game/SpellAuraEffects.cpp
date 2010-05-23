@@ -2477,11 +2477,10 @@ void AuraEffect::HandleShapeshiftBoosts(Unit * target, bool apply) const
                 Unit::AuraEffectList const& mModTotalStatPct = target->GetAuraEffectsByType(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE);
                 for (Unit::AuraEffectList::const_iterator i = mModTotalStatPct.begin(); i != mModTotalStatPct.end(); ++i)
                 {
+                    // Heart of the Wild
                     if ((*i)->GetSpellProto()->SpellIconID == 240 && (*i)->GetMiscValue() == 3)
                     {
-                        int32 HotWMod = (*i)->GetAmount();
-                        if (GetMiscValue() == FORM_CAT)
-                            HotWMod /= 2;
+                        int32 HotWMod = (*i)->GetSpellProto()->EffectBasePoints[1] + 1;
 
                         target->CastCustomSpell(target, HotWSpellId, &HotWMod, NULL, NULL, true, NULL, this);
                         break;
@@ -2527,8 +2526,8 @@ void AuraEffect::HandleShapeshiftBoosts(Unit * target, bool apply) const
                     // Survival of the Fittest
                     if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE,SPELLFAMILY_DRUID, 961, 0))
                     {
-                        int32 bp = target->CalculateSpellDamage(target, aurEff->GetSpellProto(),2);
-                        target->CastCustomSpell(target, 62069,&bp, NULL, NULL, true, 0, this);
+                        int32 bp = 100 + aurEff->GetSpellProto()->CalculateSimpleValue(2);
+                        target->CastCustomSpell(target, 62069, &bp, NULL, NULL, true, 0, this);
                     }
                 break;
                 case FORM_MOONKIN:
