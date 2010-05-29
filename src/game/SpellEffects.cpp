@@ -1630,10 +1630,16 @@ void Spell::EffectDummy(uint32 i)
             // Life Tap
             if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_WARLOCK_LIFETAP)
             {
-                // Health = [effectBasePoints1 + SPI * 1.5]
-                int32 damage = 1 + m_spellInfo->EffectBasePoints[0] + (m_caster->GetStat(STAT_SPIRIT) * 1.5);
-                // Mana = [effectBasePoints1 + SPS * 0.5]
-                int32 mana = 1 + m_spellInfo->EffectBasePoints[0] + (m_caster->ToPlayer()->GetBaseSpellPowerBonus() * 0.5);
+                float spFactor = 0;
+                switch (m_spellInfo->Id)
+                {
+                    case 11689: spFactor = 0.2; break;
+                    case 27222: 
+                    case 57946: spFactor = 0.5; break;
+                    default:    spFactor = 0; break;
+                }
+                int32 damage = m_spellInfo->EffectBasePoints[0] + (6.3875 * m_spellInfo->baseLevel);
+                int32 mana = damage + (m_caster->ToPlayer()->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+SPELL_SCHOOL_SHADOW) * spFactor);
 
                 if (unitTarget && (int32(unitTarget->GetHealth()) > damage))
                 {
@@ -3394,13 +3400,14 @@ void Spell::EffectOpenLock(uint32 effIndex)
             // in battleground check
             if (BattleGround *bg = player->GetBattleGround())
             {
-                if (bg->GetTypeID() == BATTLEGROUND_EY)
+                if (bg->GetTypeID(true) == BATTLEGROUND_EY)
                     bg->EventPlayerClickedOnFlag(player, gameObjTarget);
                 return;
             }
-        }else if (gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP && gameObjTarget->GetOwner())
+        }else if (m_spellInfo->Id == 1842 && gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP && gameObjTarget->GetOwner())
         {
             gameObjTarget->SetLootState(GO_JUST_DEACTIVATED);
+            return;
         }
         // TODO: Add script for spell 41920 - Filling, becouse server it freze when use this spell
         // handle outdoor pvp object opening, return true if go was registered for handling
@@ -3765,12 +3772,13 @@ void Spell::EffectLearnSpell(uint32 i)
 }
 
 typedef std::list< std::pair<uint32, uint64> > DispelList;
+typedef std::list< std::pair<Aura *, uint8> > DispelChargesList;
 void Spell::EffectDispel(uint32 i)
 {
     if (!unitTarget)
         return;
 
-    Unit::AuraList dispel_list;
+    DispelChargesList dispel_list;
 
     // Create dispel mask by dispel type
     uint32 dispel_type = m_spellInfo->EffectMiscValue[i];
@@ -3795,10 +3803,13 @@ void Spell::EffectDispel(uint32 i)
                     continue;
             }
 
+            // The charges / stack amounts don't count towards the total number of auras that can be dispelled.
+            // Ie: A dispel on a target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) -> 50% chance to dispell
+            // Polymorph instead of 1 / (5 + 1) -> 16%.
             bool dispel_charges = aura->GetSpellProto()->AttributesEx7 & SPELL_ATTR_EX7_DISPEL_CHARGES;
-
-            for (uint8 i = dispel_charges ? aura->GetCharges() : aura->GetStackAmount(); i; --i)
-                dispel_list.push_back(aura);
+            uint8 charges = dispel_charges ? aura->GetCharges() : aura->GetStackAmount();
+            if (charges > 0)
+                dispel_list.push_back(std::make_pair(aura, charges));
         }
     }
 
@@ -3810,28 +3821,41 @@ void Spell::EffectDispel(uint32 i)
     DispelList success_list;
     WorldPacket dataFail(SMSG_DISPEL_FAILED, 8+8+4+4+damage*4);
     // dispel N = damage buffs (or while exist buffs for dispel)
-    for (int32 count = 0; count < damage && !dispel_list.empty(); ++count)
+    for (int32 count = 0; count < damage && !dispel_list.empty();)
     {
         // Random select buff for dispel
-        Unit::AuraList::iterator itr = dispel_list.begin();
+        DispelChargesList::iterator itr = dispel_list.begin();
         std::advance(itr, urand(0, dispel_list.size() - 1));
 
-        if (GetDispelChance((*itr)->GetCaster(), (*itr)->GetId()))
+        bool success = false;
+        // 2.4.3 Patch Notes: "Dispel effects will no longer attempt to remove effects that have 100% dispel resistance."
+        if (GetDispelChance(itr->first->GetCaster(), unitTarget, itr->first->GetId(), !unitTarget->IsFriendlyTo(m_caster), &success) > 99)
         {
-            success_list.push_back(std::make_pair((*itr)->GetId(), (*itr)->GetCasterGUID()));
             dispel_list.erase(itr);
+            continue;
         }
         else
         {
-            if (!failCount)
+            if (success)
             {
-                // Failed to dispell
-                dataFail << uint64(m_caster->GetGUID());            // Caster GUID
-                dataFail << uint64(unitTarget->GetGUID());          // Victim GUID
-                dataFail << uint32(m_spellInfo->Id);                // dispel spell id
+                success_list.push_back(std::make_pair(itr->first->GetId(), itr->first->GetCasterGUID()));
+                --itr->second;
+                if (itr->second <= 0)
+                    dispel_list.erase(itr);
             }
-            ++failCount;
-            dataFail << uint32((*itr)->GetId());                         // Spell Id
+            else
+            {
+                if (!failCount)
+                {
+                    // Failed to dispell
+                    dataFail << uint64(m_caster->GetGUID());            // Caster GUID
+                    dataFail << uint64(unitTarget->GetGUID());          // Victim GUID
+                    dataFail << uint32(m_spellInfo->Id);                // dispel spell id
+                }
+                ++failCount;
+                dataFail << uint32(itr->first->GetId());                         // Spell Id
+            }
+            ++count;
         }
     }
 
@@ -4222,8 +4246,8 @@ void Spell::EffectEnchantItemTmp(uint32 i)
     // other cases with this SpellVisual already selected
     else if (m_spellInfo->SpellVisual[0] == 215)
         duration = 1800;                                    // 30 mins
-    // some fishing pole bonuses
-    else if (m_spellInfo->SpellVisual[0] == 563)
+    // some fishing pole bonuses except Glow Worm which lasts full hour
+    else if (m_spellInfo->SpellVisual[0] == 563 && m_spellInfo->Id != 64401)
         duration = 600;                                     // 10 mins
     // shaman rockbiter enchantments
     else if (m_spellInfo->SpellVisual[0] == 0)
@@ -4844,7 +4868,7 @@ void Spell::EffectSummonObjectWild(uint32 i)
         {
             case 489:                                       //WS
             {
-                if (bg && bg->GetTypeID() == BATTLEGROUND_WS && bg->GetStatus() == STATUS_IN_PROGRESS)
+                if (bg && bg->GetTypeID(true) == BATTLEGROUND_WS && bg->GetStatus() == STATUS_IN_PROGRESS)
                 {
                     uint32 team = ALLIANCE;
 
@@ -4857,7 +4881,7 @@ void Spell::EffectSummonObjectWild(uint32 i)
             }
             case 566:                                       //EY
             {
-                if (bg && bg->GetTypeID() == BATTLEGROUND_EY && bg->GetStatus() == STATUS_IN_PROGRESS)
+                if (bg && bg->GetTypeID(true) == BATTLEGROUND_EY && bg->GetStatus() == STATUS_IN_PROGRESS)
                 {
                     ((BattleGroundEY*)bg)->SetDroppedFlagGUID(pGameObj->GetGUID());
                 }
@@ -5725,6 +5749,79 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                             unitTarget->CastSpell(unitTarget, 74855, true);
                         else
                             unitTarget->CastSpell(unitTarget, 74854, true);
+                    }
+                    return;
+                }
+                case 75614:                                     // Celestial Steed
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    // Prevent stacking of mounts and client crashes upon dismounting
+                    unitTarget->RemoveAurasByType(SPELL_AURA_MOUNTED);
+
+                    // Triggered spell id dependent on riding skill and zone
+                    bool canFly = true;
+                    uint32 v_map = GetVirtualMapForMapAndZone(unitTarget->GetMapId(), unitTarget->GetZoneId());
+                    if (v_map != 530 && v_map != 571)
+                        canFly = false;
+
+                    if (canFly && v_map == 571 && !unitTarget->ToPlayer()->HasSpell(54197))
+                        canFly = false;
+
+                    float x, y, z;
+                    unitTarget->GetPosition(x, y, z);
+                    uint32 areaFlag = unitTarget->GetBaseMap()->GetAreaFlag(x, y, z);
+                    AreaTableEntry const *pArea = sAreaStore.LookupEntry(areaFlag);
+                    if (canFly && pArea->flags & AREA_FLAG_NO_FLY_ZONE)
+                        canFly = false;
+
+                    switch(unitTarget->ToPlayer()->GetBaseSkillValue(SKILL_RIDING))
+                    {
+                    case 75: unitTarget->CastSpell(unitTarget, 75619, true); break;
+                    case 150: unitTarget->CastSpell(unitTarget, 75620, true); break;
+                    case 225:
+                        {
+                            if (canFly)
+                                unitTarget->CastSpell(unitTarget, 75617, true);
+                            else
+                                unitTarget->CastSpell(unitTarget, 75620, true);
+                        }break;
+                    case 300:
+                        {
+                            if (canFly)
+                            {
+                                if (unitTarget->ToPlayer()->Has310Flyer(false))
+                                    unitTarget->CastSpell(unitTarget, 76153, true);
+                                else
+                                    unitTarget->CastSpell(unitTarget, 75618, true);
+                            }
+                            else
+                                unitTarget->CastSpell(unitTarget, 75620, true);
+                        }break;
+                    }
+                    return;
+                }
+                case 75973:                                     // X-53 Touring Rocket
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    // Prevent stacking of mounts
+                    unitTarget->RemoveAurasByType(SPELL_AURA_MOUNTED);
+
+                    // Triggered spell id dependent on riding skill
+                    if (uint16 skillval = unitTarget->ToPlayer()->GetSkillValue(SKILL_RIDING))
+                    {
+                        if (skillval >= 300)
+                        {
+                            if (unitTarget->ToPlayer()->Has310Flyer(false))
+                                unitTarget->CastSpell(unitTarget, 76154, true);
+                            else
+                                unitTarget->CastSpell(unitTarget, 75972, true);
+                        }
+                        else
+                            unitTarget->CastSpell(unitTarget, 75957, true);
                     }
                     return;
                 }
@@ -7053,10 +7150,10 @@ void Spell::EffectDispelMechanic(uint32 i)
         Aura * aura = itr->second;
         if (!aura->GetApplicationOfTarget(unitTarget->GetGUID()))
             continue;
-        if ((GetAllSpellMechanicMask(aura->GetSpellProto()) & (1<<(mechanic))) && GetDispelChance(aura->GetCaster(), aura->GetId()))
-        {
+        bool success = false;
+        GetDispelChance(aura->GetCaster(), unitTarget, aura->GetId(), !unitTarget->IsFriendlyTo(m_caster), &success);
+        if((GetAllSpellMechanicMask(aura->GetSpellProto()) & (1<<(mechanic))) && success)
             dispel_list.push(std::make_pair(aura->GetId(), aura->GetCasterGUID()));
-        }
     }
 
     for (; dispel_list.size(); dispel_list.pop())
@@ -7407,7 +7504,8 @@ void Spell::EffectStealBeneficialBuff(uint32 i)
     if (!unitTarget || unitTarget == m_caster)                 // can't steal from self
         return;
 
-    Unit::AuraList steal_list;
+    DispelChargesList steal_list;
+
     // Create dispel mask by dispel type
     uint32 dispelMask  = GetDispellMask(DispelType(m_spellInfo->EffectMiscValue[i]));
     Unit::AuraMap const& auras = unitTarget->GetOwnedAuras();
@@ -7424,43 +7522,81 @@ void Spell::EffectStealBeneficialBuff(uint32 i)
             if (!aurApp->IsPositive() || aura->IsPassive() || aura->GetSpellProto()->AttributesEx4 & SPELL_ATTR_EX4_NOT_STEALABLE)
                 continue;
 
+            // The charges / stack amounts don't count towards the total number of auras that can be dispelled.
+            // Ie: A dispel on a target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) -> 50% chance to dispell
+            // Polymorph instead of 1 / (5 + 1) -> 16%.
             bool dispel_charges = aura->GetSpellProto()->AttributesEx7 & SPELL_ATTR_EX7_DISPEL_CHARGES;
-
-            for (uint8 i = dispel_charges ? aura->GetCharges() : aura->GetStackAmount(); i; --i)
-                steal_list.push_back(aura);
+            uint8 charges = dispel_charges ? aura->GetCharges() : aura->GetStackAmount();
+            if (charges > 0)
+                steal_list.push_back(std::make_pair(aura, charges));
         }
     }
+
+    if (steal_list.empty())
+        return;
+
     // Ok if exist some buffs for dispel try dispel it
-    if (uint32 list_size = steal_list.size())
+    uint32 failCount = 0;
+    DispelList success_list;
+    WorldPacket dataFail(SMSG_DISPEL_FAILED, 8+8+4+4+damage*4);
+    // dispel N = damage buffs (or while exist buffs for dispel)
+    for (int32 count = 0; count < damage && !steal_list.empty();)
     {
-        DispelList success_list;
+        // Random select buff for dispel
+        DispelChargesList::iterator itr = steal_list.begin();
+        std::advance(itr, urand(0, steal_list.size() - 1));
 
-        // dispel N = damage buffs (or while exist buffs for dispel)
-        for (int32 count=0; count < damage && list_size > 0; ++count, list_size = steal_list.size())
+        bool success = false;
+        // 2.4.3 Patch Notes: "Dispel effects will no longer attempt to remove effects that have 100% dispel resistance."
+        if (GetDispelChance(itr->first->GetCaster(), unitTarget, itr->first->GetId(), !unitTarget->IsFriendlyTo(m_caster), &success) > 99)
         {
-            // Random select buff for dispel
-            Unit::AuraList::iterator itr = steal_list.begin();
-            std::advance(itr, urand(0, list_size-1));
-            success_list.push_back(std::make_pair((*itr)->GetId(), (*itr)->GetCasterGUID()));
             steal_list.erase(itr);
+            continue;
         }
-        if (success_list.size())
+        else
         {
-            WorldPacket data(SMSG_SPELLSTEALLOG, 8+8+4+1+4+damage*5);
-            data.append(unitTarget->GetPackGUID());  // Victim GUID
-            data.append(m_caster->GetPackGUID());    // Caster GUID
-            data << uint32(m_spellInfo->Id);         // dispel spell id
-            data << uint8(0);                        // not used
-            data << uint32(success_list.size());     // count
-            for (DispelList::iterator itr = success_list.begin(); itr != success_list.end(); ++itr)
+            if (success)
             {
-                data << uint32(itr->first);          // Spell Id
-                data << uint8(0);                    // 0 - steals !=0 transfers
-                unitTarget->RemoveAurasDueToSpellBySteal(itr->first, itr->second, m_caster);
+                success_list.push_back(std::make_pair(itr->first->GetId(), itr->first->GetCasterGUID()));
+                --itr->second;
+                if (itr->second <= 0)
+                    steal_list.erase(itr);
             }
-            m_caster->SendMessageToSet(&data, true);
+            else
+            {
+                if (!failCount)
+                {
+                    // Failed to dispell
+                    dataFail << uint64(m_caster->GetGUID());            // Caster GUID
+                    dataFail << uint64(unitTarget->GetGUID());          // Victim GUID
+                    dataFail << uint32(m_spellInfo->Id);                // dispel spell id
+                }
+                ++failCount;
+                dataFail << uint32(itr->first->GetId());                         // Spell Id
+            }
+            ++count;
         }
     }
+
+    if (failCount)
+        m_caster->SendMessageToSet(&dataFail, true);
+
+    if (success_list.empty())
+        return;
+
+    WorldPacket dataSuccess(SMSG_SPELLSTEALLOG, 8+8+4+1+4+damage*5);
+    dataSuccess.append(unitTarget->GetPackGUID());  // Victim GUID
+    dataSuccess.append(m_caster->GetPackGUID());    // Caster GUID
+    dataSuccess << uint32(m_spellInfo->Id);         // dispel spell id
+    dataSuccess << uint8(0);                        // not used
+    dataSuccess << uint32(success_list.size());     // count
+    for (DispelList::iterator itr = success_list.begin(); itr!=success_list.end(); ++itr)
+    {
+        dataSuccess << uint32(itr->first);          // Spell Id
+        dataSuccess << uint8(0);                    // 0 - steals !=0 transfers
+        unitTarget->RemoveAurasDueToSpellBySteal(itr->first, itr->second, m_caster);
+    }
+    m_caster->SendMessageToSet(&dataSuccess, true);
 }
 
 void Spell::EffectKillCreditPersonal(uint32 i)

@@ -944,8 +944,8 @@ Server.LoginInfo = 0
 #    AllowTwoSide.Accounts
 #        Allow or not accounts to create characters in the 2 teams
 #         in any game type.
-#        Default: 0 (Not allowed)
-#                 1 (Allowed)
+#        Default: 1 (Allowed)
+#                 0 (Not allowed)
 #
 #    AllowTwoSide.Interaction.Chat
 #    AllowTwoSide.Interaction.Channel
@@ -986,7 +986,7 @@ Server.LoginInfo = 0
 #
 ###############################################################################
 
-AllowTwoSide.Accounts = 0
+AllowTwoSide.Accounts = 1
 AllowTwoSide.Interaction.Chat = 0
 AllowTwoSide.Interaction.Channel = 0
 AllowTwoSide.Interaction.Group = 0
@@ -1667,6 +1667,10 @@ AutoBroadcast.Timer = 60000
 #        Default: 0 (disable)
 #                 1 (enable)
 #
+#    Battleground.Random.ResetHour
+#        Reset random battlegrounds at specified hour of the day (0-23)
+#        Default: 6
+#
 ###############################################################################
 
 Battleground.CastDeserter = 1
@@ -1676,6 +1680,7 @@ Battleground.InvitationType = 0
 BattleGround.PrematureFinishTimer = 300000
 BattleGround.PremadeGroupWaitForMatch = 1800000
 Battleground.GiveXPForKills = 0
+Battleground.Random.ResetHour = 6
 
 ###############################################################################
 # ARENA CONFIG

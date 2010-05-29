@@ -723,7 +723,7 @@ CREATE TABLE `creature` (
   `position_z` float NOT NULL DEFAULT '0',
   `orientation` float NOT NULL DEFAULT '0',
   `spawntimesecs` int(10) unsigned NOT NULL DEFAULT '120',
-  `spawndist` float NOT NULL DEFAULT '5',
+  `spawndist` float NOT NULL DEFAULT '0',
   `currentwaypoint` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `curhealth` int(10) unsigned NOT NULL DEFAULT '1',
   `curmana` int(10) unsigned NOT NULL DEFAULT '0',
@@ -4914,6 +4914,8 @@ INSERT INTO `spell_bonus_data` (`entry`,`direct_bonus`,`dot_bonus`,`ap_bonus`,`a
 (34913, 0, 0, 0, 0, 'Mage - Molten Armor Triggered Rank 1'),
 (11366, 1.15, 0.05, -1, -1, 'Mage - Pyroblast'),
 (2948, 0.4286, -1, -1, -1, 'Mage - Scorch'),
+(59638, 0.3, -1, 0, -1, 'Mage - Mirror Image Frostbolt'),
+(59637, 0.15, -1, 0, -1, 'Mage - Mirror Image Fire Blast'),
 (31935, 0.07, -1, 0.07, -1, 'Paladin - Avenger Shield'),
 (53742, -1, 0.0176, -1, 0.03, 'Paladin - Blood Corruption'),
 (26573, -1, 0.04, -1, 0.04, 'Paladin - Consecration'),
@@ -4932,7 +4934,6 @@ INSERT INTO `spell_bonus_data` (`entry`,`direct_bonus`,`dot_bonus`,`ap_bonus`,`a
 (32220, 0.0833, -1, 0.0533, -1, 'Paladin - Judgement of Blood Self'),
 (20467, 0.25, -1, 0.16, -1, 'Paladin - Judgement of Command'),
 (53733, 0.22, -1, 0.14, -1, 'Paladin - Judgement of Corruption'),
-(20267, 0.1, -1, 0.1, -1, 'Paladin - Judgement of Light Proc'),
 -- (20187, 0.4, -1, 0.25, -1, 'Paladin - Judgement of Righteousness'),
 (20187, 0, 0, 0, 0, 'Paladin - Judgement of Righteousness'),
 (53726, 0.25, -1, 0.16, -1, 'Paladin - Judgement of the Martyr Enemy'),
@@ -4949,6 +4950,8 @@ INSERT INTO `spell_bonus_data` (`entry`,`direct_bonus`,`dot_bonus`,`ap_bonus`,`a
 (25742, 0.07, -1, 0.039, -1, 'Paladin - Seal of Righteousness Dummy Proc'),
 (53719, 0, 0, 0, 0, 'Paladin - Seal of the Martyr Proc Enemy'),
 (53718, 0, 0, 0, 0, 'Paladin - Seal of the Martyr Proc Self'),
+(20267, 0, 0, 0, 0, 'Paladin - Judgement of Light Proc'),
+(25997, 0, 0, 0, 0, 'Paladin - Eye for an Eye'),
 (50256, -1, -1, 0.08, -1, 'Pet Skills - Bear (Swipe)'),
 (32546, 0.8068, -1, -1, -1, 'Priest - Binding Heal'),
 (27813, 0, 0, 0, 0, 'Priest - Blessed Recovery Rank 1'),
@@ -5251,8 +5254,10 @@ INSERT INTO `spell_dbc` (`Id`,`Dispel`,`Mechanic`,`Attributes`,`AttributesEx`,`A
 (72235,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Spelldifficulty_dbc id:2146 spellid3 serverside spell'),
 (24899,  0,  0, 400, 1024,  0, 0, 2097152, 0, 0, 1, 0, 0, 101, 0, 0, 0, 0, 21, 1, 0, -1, 0, 0, 6, 0, 0, 1, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 137, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 'Heart of the Wild Bear Effect'),
 (24900,  0,  0, 400, 1024,  0, 0, 2097152, 0, 0, 1, 0, 0, 101, 0, 0, 0, 0, 21, 1, 0, -1, 0, 0, 6, 0, 0, 1, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 166, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 'Heart of the Wild Cat Effect'),
-(43503,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Quest 11261 reward serverside spell');
-
+(43503,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Quest 11261 reward serverside spell'),
+(39613,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Quest 10967  reward serverside spell'),
+(34448, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 77, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  'Serverside spell orb of translocation (gobjid=180911)' ), 
+(34452, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 77, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  'Serverside spell orb of translocation (gobjid=180912)' );
 /*!40000 ALTER TABLE `spell_dbc` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -6001,7 +6006,6 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`,`spell_effect`,`type`,`comment
 ( 32390, 60467, 2, 'Shadow Embrace Rank4'),
 ( 32391, 60468, 2, 'Shadow Embrace Rank5'),
 ( 33206, 44416, 2, 'Pain Suppression (threat)'),
-( 50720, 59665, 0, 'Vigilance (redirect threat)'),
 ( 52610, 62071, 0, 'Savage Roar'),
 (-52610,-62071, 0, 'Savage Roar'),
 ( 51209, 55095, 1, 'Hungering cold - frost fever'),
@@ -7155,7 +7159,9 @@ INSERT INTO `spell_proc_event` (`entry`,`SchoolMask`,`SpellFamilyName`,`SpellFam
 ( 63320, 0x00,   5, 0x80040000, 0x00000000, 0x00008000, 0x00000400, 0x00000000,   0,   0,   0), -- Glyph of Life Tap
 ( 67356, 0x08,   7, 0x00000010, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Item - Druid T9 Restoration Relic (Rejuvenation)
 ( 67771,    1,   0, 0x00000000, 0x00000000, 0x00000000,  0x0851154,       0x03,   0,  35,  45), -- Item - Coliseum Melee Trinket 10men
-( 67702,    1,   0, 0x00000000, 0x00000000, 0x00000000,  0x0851154,       0x03,   0,  35,  45); -- Item - Coliseum Melee Trinket 25men
+( 67702,    1,   0, 0x00000000, 0x00000000, 0x00000000,  0x0851154,       0x03,   0,  35,  45), -- Item - Coliseum Melee Trinket 25men
+( 71519, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0, 105), -- Item - Deathbringer's Will Trinket Normal
+( 71562, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0, 105); -- Item - Deathbringer's Will Trinket Heroic
 /*!40000 ALTER TABLE `spell_proc_event` ENABLE KEYS */;
 UNLOCK TABLES;
 
