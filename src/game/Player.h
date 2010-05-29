@@ -485,6 +485,7 @@ enum PlayerExtraFlags
     PLAYER_EXTRA_TAXICHEAT          = 0x0008,
     PLAYER_EXTRA_GM_INVISIBLE       = 0x0010,
     PLAYER_EXTRA_GM_CHAT            = 0x0020,               // Show GM badge in chat messages
+    PLAYER_EXTRA_HAS_310_FLYER      = 0x0040,               // Marks if player already has 310% speed flying mount
 
     // other states
     PLAYER_EXTRA_PVP_DEATH          = 0x0100                // store PvP death status until corpse creating.
@@ -784,7 +785,8 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADACCOUNTDATA          = 24,
     PLAYER_LOGIN_QUERY_LOADSKILLS               = 25,
     PLAYER_LOGIN_QUERY_LOADWEKLYQUESTSTATUS     = 26,
-    MAX_PLAYER_LOGIN_QUERY                      = 27
+    PLAYER_LOGIN_QUERY_LOADRANDOMBG             = 27,
+    MAX_PLAYER_LOGIN_QUERY                      = 28
 };
 
 enum PlayerDelayedOperations
@@ -1005,6 +1007,8 @@ class Player : public Unit, public GridObject<Player>
         void SetTaxiCheater(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_TAXICHEAT; else m_ExtraFlags &= ~PLAYER_EXTRA_TAXICHEAT; }
         bool isGMVisible() const { return !(m_ExtraFlags & PLAYER_EXTRA_GM_INVISIBLE); }
         void SetGMVisible(bool on);
+        bool Has310Flyer(bool checkAllSpells, uint32 excludeSpellId = 0);
+        void SetHas310Flyer(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_HAS_310_FLYER; else m_ExtraFlags &= ~PLAYER_EXTRA_HAS_310_FLYER; }
         void SetPvPDeath(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; else m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH; }
 
         void GiveXP(uint32 xp, Unit* victim);
@@ -1220,7 +1224,7 @@ class Player : public Unit, public GridObject<Player>
         /***                    GOSSIP SYSTEM                  ***/
         /*********************************************************/
 
-        void PrepareGossipMenu(WorldObject *pSource, uint32 menuId = 0);
+        void PrepareGossipMenu(WorldObject *pSource, uint32 menuId = 0, bool showQuests = false);
         void SendPreparedGossip(WorldObject *pSource);
         void OnGossipSelect(WorldObject *pSource, uint32 gossipListId, uint32 menuId);
 
@@ -1937,6 +1941,7 @@ class Player : public Unit, public GridObject<Player>
         void SendInitWorldStates(uint32 zone, uint32 area);
         void SendUpdateWorldState(uint32 Field, uint32 Value);
         void SendDirectMessage(WorldPacket *data);
+        void SendBGWeekendWorldStates();
 
         void SendAurasForTarget(Unit *target);
 
@@ -2053,6 +2058,9 @@ class Player : public Unit, public GridObject<Player>
         bool CanUseBattleGroundObject();
         bool isTotalImmune();
         bool CanCaptureTowerPoint();
+
+        bool GetRandomWinner() { return m_IsBGRandomWinner; }
+        void SetRandomWinner(bool isWinner);
 
         /*********************************************************/
         /***               OUTDOOR PVP SYSTEM                  ***/
@@ -2299,6 +2307,8 @@ class Player : public Unit, public GridObject<Player>
         BgBattleGroundQueueID_Rec m_bgBattleGroundQueueID[PLAYER_MAX_BATTLEGROUND_QUEUES];
         BGData                    m_bgData;
 
+        bool m_IsBGRandomWinner;
+
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/
         /*********************************************************/
@@ -2326,6 +2336,7 @@ class Player : public Unit, public GridObject<Player>
         void _LoadQuestStatus(QueryResult_AutoPtr result);
         void _LoadDailyQuestStatus(QueryResult_AutoPtr result);
         void _LoadWeeklyQuestStatus(QueryResult_AutoPtr result);
+        void _LoadRandomBGStatus(QueryResult_AutoPtr result);
         void _LoadGroup(QueryResult_AutoPtr result);
         void _LoadSkills(QueryResult_AutoPtr result);
         void _LoadSpells(QueryResult_AutoPtr result);

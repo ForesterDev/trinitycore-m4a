@@ -2823,9 +2823,6 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     // Reduce spell hit chance for Area of effect spells from victim SPELL_AURA_MOD_AOE_AVOIDANCE aura
     if (IsAreaOfEffectSpell(spell))
         modHitChance-=pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_AOE_AVOIDANCE);
-    // Reduce spell hit chance for dispel mechanic spells from victim SPELL_AURA_MOD_DISPEL_RESIST
-    if (IsDispelSpell(spell))
-        modHitChance-=pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_DISPEL_RESIST);
 
     int32 HitChance = modHitChance * 100;
     // Increase hit chance from attacker SPELL_AURA_MOD_SPELL_HIT_CHANCE and attacker ratings
@@ -5642,6 +5639,97 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 case 63320:
                 {
                     triggered_spell_id = 63321; // Life Tap
+                    break;
+                }
+                case 71519: // Deathbringer's Will Normal
+                {
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return false;
+
+                    std::vector<uint32> RandomSpells;
+                    switch (getClass())
+                    {
+                        case CLASS_WARRIOR:
+                        case CLASS_PALADIN:
+                        case CLASS_DEATH_KNIGHT:
+                            RandomSpells.push_back(71484);
+                            RandomSpells.push_back(71491);
+                            RandomSpells.push_back(71492);
+                            break;
+                        case CLASS_SHAMAN:
+                        case CLASS_ROGUE:
+                            RandomSpells.push_back(71486);
+                            RandomSpells.push_back(71485);
+                            RandomSpells.push_back(71492);
+                            break;
+                        case CLASS_DRUID:
+                            RandomSpells.push_back(71484);
+                            RandomSpells.push_back(71485);
+                            RandomSpells.push_back(71486);
+                            break;
+                        case CLASS_HUNTER:
+                            RandomSpells.push_back(71486);
+                            RandomSpells.push_back(71491);
+                            RandomSpells.push_back(71485);
+                            break;
+                        default:
+                            return false;
+                    }
+                    if (RandomSpells.empty()) //shouldn't happen
+                        return false;
+
+                    uint8 rand_spell = irand(0,(RandomSpells.size() - 1));
+                    CastSpell(target,RandomSpells[rand_spell],true,castItem,triggeredByAura, originalCaster);
+                    for (std::vector<uint32>::iterator itr = RandomSpells.begin(); itr != RandomSpells.end(); ++itr)
+                    {
+                        if (!ToPlayer()->HasSpellCooldown(*itr))
+                            ToPlayer()->AddSpellCooldown(*itr,0,time(NULL) + cooldown);
+                    }
+                    break;
+                }
+                case 71562: // Deahtbringer's Will Heroic
+                {
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return false;
+
+                    std::vector<uint32> RandomSpells;
+                    switch (getClass())
+                    {
+                        case CLASS_WARRIOR:
+                        case CLASS_PALADIN:
+                        case CLASS_DEATH_KNIGHT:
+                            RandomSpells.push_back(71561);
+                            RandomSpells.push_back(71559);
+                            RandomSpells.push_back(71560);
+                            break;
+                        case CLASS_SHAMAN:
+                        case CLASS_ROGUE:
+                            RandomSpells.push_back(71558);
+                            RandomSpells.push_back(71556);
+                            RandomSpells.push_back(71560);
+                            break;
+                        case CLASS_DRUID:
+                            RandomSpells.push_back(71561);
+                            RandomSpells.push_back(71556);
+                            RandomSpells.push_back(71558);
+                            break;
+                        case CLASS_HUNTER:
+                            RandomSpells.push_back(71558);
+                            RandomSpells.push_back(71559);
+                            RandomSpells.push_back(71556);
+                            break;
+                        default:
+                            return false;
+                    }
+                    if (RandomSpells.empty()) //shouldn't happen
+                        return false;
+
+                    uint8 rand_spell = irand(0,(RandomSpells.size() - 1));
+                    CastSpell(target,RandomSpells[rand_spell],true,castItem,triggeredByAura, originalCaster);
+                    for (std::vector<uint32>::iterator itr = RandomSpells.begin(); itr != RandomSpells.end(); ++itr)
+                    {
+                        ToPlayer()->AddSpellCooldown(*itr,0,time(NULL) + cooldown);
+                    }
                     break;
                 }
             }
