@@ -20827,6 +20827,13 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
 void Player::SendInitialPacketsAfterAddToMap()
 {
+    if (getRace() == RACE_DRAENEI && getClass() == CLASS_DRUID)
+    {
+        WorldPacket msg(SMSG_LEARNED_SPELL, 4);
+        msg << GetLanguageDescByID(LANG_COMMON)->spell_id;
+        m_session->SendPacket(&msg);
+    }
+
     // update zone
     uint32 newzone, newarea;
     GetZoneAndAreaId(newzone,newarea);
