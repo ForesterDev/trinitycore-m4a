@@ -1214,8 +1214,6 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     recv_data >> guid;
     DEBUG_LOG("Inspected guid is " UI64FMTD, guid);
 
-    _player->SetSelection(guid);
-
     Player *plr = objmgr.GetPlayer(guid);
     if (!plr)                                                // wrong player
         return;
