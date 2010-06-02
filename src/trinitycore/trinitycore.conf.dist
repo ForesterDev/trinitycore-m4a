@@ -81,8 +81,8 @@ EAIErrorLevel = 2
 #
 #    ProcessPriority
 #        Process priority setting (Used only at Windows)
-#        Default: 1 (HIGH)
-#                 0 (Normal)
+#        Default: 0 (Normal)
+#                 1 (HIGH)
 #
 #    Compression
 #        Compression level for update packages sent to client (1..9)
@@ -223,7 +223,7 @@ EAIErrorLevel = 2
 ###############################################################################
 
 UseProcessors = 0
-ProcessPriority = 1
+ProcessPriority = 0
 Compression = 1
 PlayerLimit = 100
 SaveRespawnTimeImmediately = 1
