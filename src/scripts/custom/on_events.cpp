@@ -20,9 +20,9 @@ void OnPVPKill(Player * /*killer*/, Player * /*killed*/)
 }
 
 //This function is called when a players AreaID changes
-void OnAreaChange(Player * /*pPlayer*/, AreaTableEntry const * /*pArea*/)
+void OnAreaChange(Player *pPlayer, const AreaTableEntry *pArea)
 {
-
+    pPlayer->RemoveAura(45614 /* Shroud of the Scourge */);
 }
 
 //This is called when a player kills a creature (non pvp)
@@ -79,9 +79,22 @@ void OnServerShutdown()
 }
 
 //this function is called when a player casts a spell
-bool OnSpellCast(Unit * /*pUnitTarget*/, Item * /*pItemTarget*/, GameObject * /*pGoTarget*/, uint32 /*i*/, SpellEntry const * /*spell*/)
+bool OnSpellCast(Unit *pUnitTarget, Item * /*pItemTarget*/,
+        GameObject * /*pGoTarget*/, uint32 /*i*/, const SpellEntry *spell)
 {
-    return true;
+    switch (spell->Id)
+    {
+    default:
+        return true;
+    case 45614 /* Shroud of the Scourge */:
+        if (pUnitTarget->GetAreaId() == 4125 /* Temple City of En'kilah */)
+            return true;
+        else
+        {
+            pUnitTarget->RemoveOwnedAura(45614 /* Shroud of the Scourge */);
+            return false;
+        }
+    }
 }
 
  void AddSC_onevents()
