@@ -52,7 +52,7 @@ Channel::Channel
     else if (!custom)
     {
         m_announce = false;
-        m_flags |= CHANNEL_FLAG_GENERAL;
+        m_flags |= CHANNEL_FLAG_NOT_LFG | CHANNEL_FLAG_GENERAL;
         m_IsSaved = false;
     }
     else                                                    // it's custom channel
