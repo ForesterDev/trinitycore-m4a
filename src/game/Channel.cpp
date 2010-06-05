@@ -24,7 +24,8 @@
 #include "SocialMgr.h"
 #include "World.h"
 
-Channel::Channel(const std::string& name, uint32 channel_id, uint32 Team)
+Channel::Channel
+    (const std::string &name, uint32 channel_id, uint32 Team, bool custom)
  : m_name(name), m_announce(true), m_moderate(false), m_channelId(channel_id), m_ownerGUID(0), m_password(""), m_flags(0), m_Team(Team)
 {
     // set special flags if built-in channel
@@ -46,6 +47,12 @@ Channel::Channel(const std::string& name, uint32 channel_id, uint32 Team)
             m_flags |= CHANNEL_FLAG_LFG;
         else                                                // for all other channels
             m_flags |= CHANNEL_FLAG_NOT_LFG;
+        m_IsSaved = false;
+    }
+    else if (!custom)
+    {
+        m_announce = false;
+        m_flags |= CHANNEL_FLAG_GENERAL;
         m_IsSaved = false;
     }
     else                                                    // it's custom channel

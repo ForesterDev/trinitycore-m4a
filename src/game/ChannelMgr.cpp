@@ -52,7 +52,12 @@ Channel *ChannelMgr::GetJoinChannel(std::string name, uint32 channel_id)
 
     if (channels.find(wname) == channels.end())
     {
-        Channel *nchan = new Channel(name,channel_id, team);
+        bool custom = false;
+        if (wname == L"global")
+            name = "Global";
+        else
+            custom = true;
+        Channel *nchan = new Channel(name, channel_id, team, custom);
         channels[wname] = nchan;
         return nchan;
     }
