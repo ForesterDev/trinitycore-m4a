@@ -57,12 +57,14 @@ class ChannelMgr
 class AllianceChannelMgr
     : public ChannelMgr
 {
+public:
     AllianceChannelMgr();
 };
 
 class HordeChannelMgr
     : public ChannelMgr
 {
+public:
     HordeChannelMgr();
 };
 
