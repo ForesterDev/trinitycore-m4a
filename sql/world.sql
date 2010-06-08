@@ -268,7 +268,7 @@ INSERT INTO `battleground_template` (`id`,`MinPlayersPerTeam`,`MaxPlayersPerTeam
 (10,5,5,10,80,1362,0,1363,0,1),
 (11,5,5,10,80,1364,0,1365,0,1),
 (30,20,40,71,80,1485,0,1486,0,0),
-(32,0,40,0,80,0,0,0,0,0);
+(32,10,10,0,80,0,0,0,0,0);
 /*!40000 ALTER TABLE `battleground_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4988,6 +4988,8 @@ INSERT INTO `spell_bonus_data` (`entry`,`direct_bonus`,`dot_bonus`,`ap_bonus`,`a
 (34914, -1, 0.4, -1, -1, 'Priest - Vampiric Touch'),
 (7001, -1, 0.3333, -1, -1, 'Priest - Lightwell Renew Rank 1'),
 (63675, 0, 0, 0, 0, 'Priest - Improved Devouring Plague'),
+(56131, 0, 0, 0, 0, 'Priest - Glyph of Dispel Magic'),
+(56160, 0, 0, 0, 0, 'Priest - Glyph of Power Word: Shield'),
 (2818, -1, -1, -1, 0.03, 'Rogue - Deadly Poison Rank 1($AP*0.12 / number of ticks)'),
 (2819, -1, -1, -1, 0.03, 'Rogue - Deadly Poison Rank 2($AP*0.12 / number of ticks)'),
 (11353, -1, -1, -1, 0.03, 'Rogue - Deadly Poison Rank 3($AP*0.12 / number of ticks)'),
@@ -5066,6 +5068,8 @@ INSERT INTO `spell_bonus_data` (`entry`,`direct_bonus`,`dot_bonus`,`ap_bonus`,`a
 (25530, 0.1667, -1, -1, -1, 'Shaman - Searing Totem Attack Rank 7'),
 (58700, 0.1667, -1, -1, -1, 'Shaman - Searing Totem Attack Rank 8'),
 (58701, 0.1667, -1, -1, -1, 'Shaman - Searing Totem Attack Rank 9'),
+(52752, 0, 0, 0, 0, 'Ancestral Awakening'),
+(55533, 0, 0, 0, 0, 'Shaman - Glyph of Healing Wave'),
 (50796, 0.7139, -1, -1, -1, 'Warlock - Chaos Bolt'),
 (17962, 0, 0, 0, 0, 'Warlock - Conflagrate'),
 (172, -1, 0.2, -1, -1, 'Warlock - Corruption'),
@@ -5949,6 +5953,7 @@ LOCK TABLES `spell_linked_spell` WRITE;
 /*!40000 ALTER TABLE `spell_linked_spell` DISABLE KEYS */;
 INSERT INTO `spell_linked_spell` (`spell_trigger`,`spell_effect`,`type`,`comment`) VALUES
 -- class
+( 16857, 60089, 0, 'Faerie Fire (Feral)'),
 ( 31224, -1543, 2, 'Cloak of Shadows - Flare'),
 ( 15237, 23455, 0, 'Holy Nova (rank1)'),
 ( 15430, 23458, 0, 'Holy Nova (rank2)'),
@@ -6086,8 +6091,6 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`,`spell_effect`,`type`,`comment
 -- Archavon
 ( 58666, 58672, 1, 'Impale (Archavon)'),
 ( 60882, 58672, 1, 'Impale (Archavon)'),
--- Missing in full
-( 16857, 60089, 0, 'Faerie Fire (Feral)'),
 -- Violet Hold
 (-54361, 54343, 0, 'Void Shift (Normal) - Void Shifted'),
 (-59743, 54343, 0, 'Void Shift (Heroic) - Void Shifted'),
@@ -6095,7 +6098,14 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`,`spell_effect`,`type`,`comment
 ( 54850, 54851, 1, 'Emerge - Emerge Summon'),
 -- Trial of the Champion
 ( 66680, 66547, 0, 'Confess - Confess'),
-( 66889,-66865, 0, 'Remove Vengeance');
+( 66889,-66865, 0, 'Remove Vengeance'),
+-- Strand of the Ancients
+( 52415, 52418, 0, 'Carrying Seaforium - Add'),
+( 52410,-52418, 0, 'Carrying Seaforium - Remove'),
+-- Item
+( 69381, 72588, 1, 'Drums of the Wild'),
+( 69378, 72586, 1, 'Drums of the Forgotten Kings'),
+( 69377, 72590, 1, 'Runescroll of Fortitude');
 /*!40000 ALTER TABLE `spell_linked_spell` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -6967,6 +6977,7 @@ INSERT INTO `spell_proc_event` (`entry`,`SchoolMask`,`SpellFamilyName`,`SpellFam
 ( 56835, 0x00,  15, 0x00400000, 0x00010000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Reaping (Rank 3)
 ( 57345, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,  45), -- Darkmoon Card: Greatness
 ( 57352, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00051154, 0x00000000,   0,   0,  45), -- Darkmoon Card: Death
+( 57870, 0x00,   9, 0x00800000, 0x00000000, 0x00000000, 0x00040000, 0x00000000,   0,   0,   0), -- Glyph of Mend Pet
 ( 57878, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000010,   0,   0,   0), -- Natural Reaction (Rank 1)
 ( 57880, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000010,   0,   0,   0), -- Natural Reaction (Rank 2)
 ( 57881, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000010,   0,   0,   0), -- Natural Reaction (Rank 3)
@@ -7158,8 +7169,13 @@ INSERT INTO `spell_proc_event` (`entry`,`SchoolMask`,`SpellFamilyName`,`SpellFam
 ( 54925, 0x02,  10, 0x00000000, 0x00000208, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Glyph of Seal of Command
 ( 63320, 0x00,   5, 0x80040000, 0x00000000, 0x00008000, 0x00000400, 0x00000000,   0,   0,   0), -- Glyph of Life Tap
 ( 67356, 0x08,   7, 0x00000010, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Item - Druid T9 Restoration Relic (Rejuvenation)
-( 67771,    1,   0, 0x00000000, 0x00000000, 0x00000000,  0x0851154,       0x03,   0,  35,  45), -- Item - Coliseum Melee Trinket 10men
-( 67702,    1,   0, 0x00000000, 0x00000000, 0x00000000,  0x0851154,       0x03,   0,  35,  45), -- Item - Coliseum Melee Trinket 25men
+( 67653, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00400028, 0x00000000,   0,   0,  45), -- Item - Coliseum Tank Trinket 5men
+( 67667, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00004000, 0x00000000,   0,   0,  45), -- Item - Coliseum Healer Trinket 5men
+( 67670, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00010000, 0x00000000,   0,   0,  45), -- Item - Coliseum Caster Trinket 5men
+( 67672, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00800154, 0x00000000,   0,   0,  45), -- Item - Coliseum Melee Trinket 5men
+( 67771, 0x01,   0, 0x00000000, 0x00000000, 0x00000000, 0x00851154, 0x00000003,   0,  35,  45), -- Item - Coliseum Melee Trinket 10men
+( 67702, 0x01,   0, 0x00000000, 0x00000000, 0x00000000, 0x00851154, 0x00000003,   0,  35,  45), -- Item - Coliseum Melee Trinket 25men
+( 70807, 0x00,  11, 0x00000000, 0x00000000, 0x00000010, 0x00000000, 0x00000000,   0, 100,   0), -- Item - Shaman T10 Restoration 2P Bonus
 ( 71519, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0, 105), -- Item - Deathbringer's Will Trinket Normal
 ( 71562, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0, 105); -- Item - Deathbringer's Will Trinket Heroic
 /*!40000 ALTER TABLE `spell_proc_event` ENABLE KEYS */;
@@ -15354,12 +15370,24 @@ INSERT INTO `trinity_string` (`entry`,`content_default`,`content_loc1`,`content_
 (10053, 'Take me to Crown Guard Tower.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (10054, 'Give me the flag, I''ll take it to the central beacon for the glory of the Alliance!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (10055, 'Give me the flag, I''ll take it to the central beacon for the glory of the Horde!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(10056, 'The battle for Strand of the Ancients begins in 2 minutes.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(10057, 'The battle for Strand of the Ancients begins in 1 minute.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(10058, 'The battle for Strand of the Ancients begins in 30 seconds. Prepare yourselves!.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(10059, 'Let the battle for Strand of the Ancients begin!.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(10061, '%s is destroyed!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(10060, '%s is under attack!', NULL, NULL ,NULL , NULL, NULL, NULL, NULL, NULL),
+(10056,'The battle for Strand of the Ancients begins in 2 minutes.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(10057,'The battle for Strand of the Ancients begins in 1 minute.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(10058,'The battle for Strand of the Ancients begins in 30 seconds. Prepare yourselves!.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(10059,'Let the battle for Strand of the Ancients begin!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(10060,'The %s is under attack!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(10061,'The %s was destroyed!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(10062,'Round 1 -  finished!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(10063,'The Alliance captured the titan portal!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(10064,'The Horde captured the titan portal!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(10065,'Round 2 of the Battle for the Strand of the Ancients begins in 1 minute.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(10066,'Round 2 begins in 30 seconds. Prepare yourselves!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(10067,'The chamber has been breached! The titan relic is vulnerable!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(10068,'The Alliance captured the South Graveyard!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(10069,'The Alliance captured the West Graveyard!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(10070,'The Alliance captured the East Graveyard!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(10071,'The Horde captured the South Graveyard!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(10072,'The Horde captured the West Graveyard!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(10073,'The Horde captured the East Graveyard!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (11000, '|cffffff00[|c00077766Autobroadcast|cffffff00]: |cFFF222FF%s|r', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (11001, 'You have not chosen -1 or the current realmID that you are on.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 /*!40000 ALTER TABLE `trinity_string` ENABLE KEYS */;

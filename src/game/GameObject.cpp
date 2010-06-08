@@ -39,6 +39,7 @@
 #include "Util.h"
 #include "OutdoorPvPMgr.h"
 #include "BattleGroundAV.h"
+#include "ScriptMgr.h"
 
 GameObject::GameObject() : WorldObject(), m_goValue(new GameObjectValue)
 {
@@ -1599,6 +1600,7 @@ void GameObject::TakenDamage(uint32 damage, Unit *who)
 
     if (HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED)) // from damaged to destroyed
     {
+        uint8 hitType = BG_OBJECT_DMG_HIT_TYPE_HIGH_DAMAGED;
         if (!m_goValue->building.health)
         {
             RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
@@ -1608,11 +1610,20 @@ void GameObject::TakenDamage(uint32 damage, Unit *who)
             EventInform(m_goInfo->building.destroyedEvent);
             if (pwho)
                 if (BattleGround* bg = pwho->GetBattleGround())
-                    bg->EventPlayerDamagedGO(pwho, this, m_goInfo->building.destroyedEvent);
+                    bg->DestroyGate(pwho, this, m_goInfo->building.destroyedEvent);
+            hitType = BG_OBJECT_DMG_HIT_TYPE_JUST_DESTROYED;
+            sScriptMgr.GODestroyed(pwho, this, m_goInfo->building.destroyedEvent);
         }
+        if (pwho)
+            if (BattleGround* bg = pwho->GetBattleGround())
+                bg->EventPlayerDamagedGO(pwho, this, hitType, m_goInfo->building.destroyedEvent);
     }
     else // from intact to damaged
     {
+        uint8 hitType = BG_OBJECT_DMG_HIT_TYPE_JUST_DAMAGED;
+        if (m_goValue->building.health + damage < m_goInfo->building.intactNumHits + m_goInfo->building.damagedNumHits)
+            hitType = BG_OBJECT_DMG_HIT_TYPE_DAMAGED;
+
         if (m_goValue->building.health <= m_goInfo->building.damagedNumHits)
         {
             if (!m_goInfo->building.destroyedDisplayId)
@@ -1623,7 +1634,11 @@ void GameObject::TakenDamage(uint32 damage, Unit *who)
             SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
             SetUInt32Value(GAMEOBJECT_DISPLAYID, m_goInfo->building.damagedDisplayId);
             EventInform(m_goInfo->building.damagedEvent);
+            hitType = BG_OBJECT_DMG_HIT_TYPE_JUST_HIGH_DAMAGED;
         }
+        if (pwho)
+            if (BattleGround* bg = pwho->GetBattleGround())
+                 bg->EventPlayerDamagedGO(pwho, this, hitType, m_goInfo->building.destroyedEvent);
     }
     SetGoAnimProgress(m_goValue->building.health*255/(m_goInfo->building.intactNumHits + m_goInfo->building.damagedNumHits));
 }

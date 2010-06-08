@@ -440,6 +440,9 @@ enum WorldStates
 #define SCRIPT_COMMAND_REMOVE_AURA          14              // source (datalong2 != 0) or target (datalong == 0) unit, datalong = spell_id
 #define SCRIPT_COMMAND_CAST_SPELL           15              // source/target cast spell at target/source (script->datalong2: 0: s->t 1: s->s 2: t->t 3: t->s
 #define SCRIPT_COMMAND_PLAY_SOUND           16              // source = any object, target=any/player, datalong (sound_id), datalong2 (bitmask: 0/1=anyone/target, 0/2=with distance dependent, so 1|2 = 3 is target with distance dependent)
+#define SCRIPT_COMMAND_CREATE_ITEM          17              // source or target must be player, datalong = item entry, datalong2 = amount
+#define SCRIPT_COMMAND_DESPAWN_SELF         18              // source or target must be creature, datalong = despawn delay
+
 #define SCRIPT_COMMAND_LOAD_PATH            20              // source = unit, path = datalong, repeatable datalong2
 #define SCRIPT_COMMAND_CALLSCRIPT_TO_UNIT   21              // datalong scriptid, lowguid datalong2, dataint table
 #define SCRIPT_COMMAND_KILL                 22              // datalong removecorpse
@@ -450,6 +453,7 @@ enum WorldStates
 #define SCRIPT_COMMAND_MODEL                32              // datalong = model id
 #define SCRIPT_COMMAND_CLOSE_GOSSIP         33              // close gossip window -- no values
 #define SCRIPT_COMMAND_PLAYMOVIE            34              // datalong = movie id
+#define SCRIPT_COMMAND_SET_FLAG             35              // dataint: 1=apply,0=remove, datalong = index, datalong2 = newvalue
 
 /// Storage class for commands issued for delayed execution
 struct CliCommandHolder
