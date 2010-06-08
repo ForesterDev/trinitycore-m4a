@@ -238,7 +238,7 @@ void Channel::Leave(uint64 p, bool send)
             data.clear();
         }
 
-        bool changeowner = players[p].IsOwner();
+        bool changeowner = !IsConstant() && players[p].IsOwner();
 
         players.erase(p);
         if (m_announce && (!plr || plr->GetSession()->GetSecurity() < SEC_GAMEMASTER || !sWorld.getConfig(CONFIG_SILENTLY_GM_JOIN_TO_CHANNEL)))
@@ -295,7 +295,7 @@ void Channel::KickOrBan(uint64 good, const char *badname, bool ban)
         }
         else
         {
-            bool changeowner = (m_ownerGUID == bad->GetGUID());
+            bool changeowner = !IsConstant() && m_ownerGUID == bad->GetGUID();
 
             WorldPacket data;
 
