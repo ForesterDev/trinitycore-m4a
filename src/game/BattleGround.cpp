@@ -416,7 +416,7 @@ void BattleGround::Update(uint32 diff)
 
             StartingEventOpenDoors();
 
-            SendMessageToAll(m_StartMessageIds[BG_STARTING_EVENT_FOURTH], CHAT_MSG_BG_SYSTEM_NEUTRAL);
+            SendWarningToAll(m_StartMessageIds[BG_STARTING_EVENT_FOURTH]);
             SetStatus(STATUS_IN_PROGRESS);
             SetStartDelayTime(m_StartDelayTimes[BG_STARTING_EVENT_FOURTH]);
 
@@ -805,7 +805,7 @@ void BattleGround::EndBattleGround(uint32 winner)
         {
             if (IsRandom() || BattleGroundMgr::IsBGWeekend(GetTypeID()))
             {
-                UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(win_kills*2));
+                UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(win_kills));
                 plr->ModifyArenaPoints(win_arena);
                 if (!plr->GetRandomWinner())
                     plr->SetRandomWinner(true);
@@ -816,7 +816,7 @@ void BattleGround::EndBattleGround(uint32 winner)
         else
         {
             if (IsRandom() || BattleGroundMgr::IsBGWeekend(GetTypeID()))
-                UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(loos_kills*4));
+                UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(loos_kills));
         }           
 
 
@@ -856,7 +856,8 @@ void BattleGround::EndBattleGround(uint32 winner)
 uint32 BattleGround::GetBonusHonorFromKill(uint32 kills) const
 {
     //variable kills means how many honorable kills you scored (so we need kills * honor_for_one_kill)
-    return Trinity::Honor::hk_honor_at_level(GetMaxLevel(), kills);
+    uint32 maxLevel = (GetMaxLevel()<80)?GetMaxLevel():80;
+    return Trinity::Honor::hk_honor_at_level(maxLevel, kills);
 }
 
 uint32 BattleGround::GetBattlemasterEntry() const
@@ -1079,6 +1080,8 @@ void BattleGround::AddPlayer(Player *plr)
     uint32 queueSlot = plr->GetBattleGroundQueueIndex(bgQueueTypeId);
     sBattleGroundMgr.BuildBattleGroundStatusPacket(&status, this, queueSlot, STATUS_IN_PROGRESS, 0, GetStartTime(), GetArenaType());
     plr->GetSession()->SendPacket(&status);
+
+    plr->RemoveAurasByType(SPELL_AURA_MOUNTED);
 
     // add arena specific auras
     if (isArena())
@@ -1485,7 +1488,7 @@ void BattleGround::SpawnBGObject(uint32 type, uint32 respawntime)
     }
 }
 
-Creature* BattleGround::AddCreature(uint32 entry, uint32 type, uint32 teamval, float x, float y, float z, float o, uint32 /*respawntime*/)
+Creature* BattleGround::AddCreature(uint32 entry, uint32 type, uint32 teamval, float x, float y, float z, float o, uint32 respawntime)
 {
     Map * map = GetBgMap();
     if (!map)
@@ -1513,6 +1516,9 @@ Creature* BattleGround::AddCreature(uint32 entry, uint32 type, uint32 teamval, f
 
     map->Add(pCreature);
     m_BgCreatures[type] = pCreature->GetGUID();
+
+    if (respawntime)
+        pCreature->SetRespawnDelay(respawntime);
 
     return  pCreature;
 }
@@ -1629,6 +1635,34 @@ void BattleGround::PSendMessageToAll(int32 entry, ChatMsg type, Player const* so
     BroadcastWorker(bg_do);
 
     va_end(ap);
+}
+
+void BattleGround::SendWarningToAll(int32 entry, ...)
+{
+    const char *format = objmgr.GetTrinityStringForDBCLocale(entry);
+    va_list ap;
+    char str [1024];
+    va_start(ap, entry);
+    vsnprintf(str,1024,format, ap);
+    va_end(ap);
+    std::string msg = (std::string)str;
+
+    WorldPacket data(SMSG_MESSAGECHAT, 200);
+
+    data << (uint8)CHAT_MSG_RAID_BOSS_EMOTE;
+    data << (uint32)LANG_UNIVERSAL;
+    data << (uint64)0;
+    data << (uint32)0;                                     // 2.1.0
+    data << (uint32)1;
+    data << (uint8)0; 
+    data << (uint64)0;
+    data << (uint32)(strlen(msg.c_str())+1);
+    data << msg.c_str();
+    data << (uint8)0;
+    for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+        if (Player *plr = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER)))
+            if (plr->GetSession())
+                plr->GetSession()->SendPacket(&data);
 }
 
 void BattleGround::SendMessage2ToAll(int32 entry, ChatMsg type, Player const* source, int32 arg1, int32 arg2)
