@@ -20,6 +20,7 @@
 #ifndef __TRINITY_CHANNELMGR_H
 #define __TRINITY_CHANNELMGR_H
 
+#include <memory>
 #include "Common.h"
 #include "Channel.h"
 #include "Singleton.h"
@@ -34,7 +35,12 @@ class ChannelMgr
     public:
         uint32 team;
         typedef std::map<std::wstring,Channel*> ChannelMap;
-        ChannelMgr() {team = 0;}
+
+        explicit ChannelMgr(uint32 team)
+            : team(std::move(team))
+        {
+        }
+
         ~ChannelMgr();
 
         Channel *GetJoinChannel(std::string name, uint32 channel_id);
@@ -45,8 +51,19 @@ class ChannelMgr
         void MakeNotOnPacket(WorldPacket *data, std::string name);
 };
 
-class AllianceChannelMgr : public ChannelMgr {};
-class HordeChannelMgr    : public ChannelMgr {};
+class AllianceChannelMgr
+    : public ChannelMgr
+{
+public:
+    AllianceChannelMgr();
+};
+
+class HordeChannelMgr
+    : public ChannelMgr
+{
+public:
+    HordeChannelMgr();
+};
 
 ChannelMgr* channelMgr(uint32 team);
 
