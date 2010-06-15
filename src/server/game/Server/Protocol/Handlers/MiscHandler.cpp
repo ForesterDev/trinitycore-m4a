@@ -1214,8 +1214,6 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     recv_data >> guid;
     DEBUG_LOG("Inspected guid is " UI64FMTD, guid);
 
-    _player->SetSelection(guid);
-
     Player *plr = objmgr.GetPlayer(guid);
     if (!plr)                                                // wrong player
         return;
@@ -1255,7 +1253,7 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
 
     WorldPacket data(MSG_INSPECT_HONOR_STATS, 8+1+4*4);
     data << uint64(player->GetGUID());
-    data << uint8(player->GetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY));
+    data << uint8(0);
     data << uint32(player->GetUInt32Value(PLAYER_FIELD_KILLS));
     data << uint32(player->GetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION));
     data << uint32(player->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION));
