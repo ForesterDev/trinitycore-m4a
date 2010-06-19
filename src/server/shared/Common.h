@@ -92,6 +92,7 @@
 #define STRCASECMP strcasecmp
 #endif
 
+#include <iterator>
 #include <set>
 #include <list>
 #include <string>
@@ -131,8 +132,8 @@ namespace std
     template<class ty> inline
         ty *addressof(ty &val)
     {	// return address of val
-        return reinterpret_cast<ty *>(const_cast<unsigned char *>
-                (&reinterpret_cast<const unsigned char &>(val)));
+        return reinterpret_cast<ty *>(&const_cast<unsigned char &>
+                (reinterpret_cast<const volatile unsigned char &>(val)));
     }
 }
 
