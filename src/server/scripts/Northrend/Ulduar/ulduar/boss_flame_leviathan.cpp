@@ -145,7 +145,14 @@ struct boss_flame_leviathanAI : public BossAI
         _Reset();
         assert(vehicle);
         uiActiveTowers = 0;
-        me->SetReactState(REACT_AGGRESSIVE);
+        if (pInstance && 2 <= pInstance->GetData(TYPE_COLOSSUS))
+        {
+            me->GetMotionMaster()->MovePoint(0, Center[0]);
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
+        else
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
     }
 
     void EnterCombat(Unit* /*who*/)

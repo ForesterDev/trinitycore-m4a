@@ -190,6 +190,8 @@ struct instance_ulduar : public ScriptedInstance
             case GO_LEVIATHAN_GATE:
                 uiLeviathanGateGUID = pGO->GetGUID();
                 HandleGameObject(NULL, false, pGO);
+                if (2 <= uiEncounter[TYPE_COLOSSUS])
+                    pGO->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
                 break;
         }
     }
@@ -218,8 +220,7 @@ struct instance_ulduar : public ScriptedInstance
 
     void SetData(uint32 type, uint32 data)
     {
-        if (type != TYPE_COLOSSUS)
-            uiEncounter[type] = data;
+        uiEncounter[type] = data;
 
         switch(type)
         {
@@ -350,10 +351,10 @@ struct instance_ulduar : public ScriptedInstance
         OUT_SAVE_INST_DATA;
 
         std::ostringstream saveStream;
-        saveStream << "U U " << uiEncounter[0] << " " << uiEncounter[1] << " " << uiEncounter[2] << " " << uiEncounter[3]
-                   << uiEncounter[4] << " " << uiEncounter[5] << " " << uiEncounter[6] << " " << uiEncounter[7]
-                   << uiEncounter[8] << " " << uiEncounter[9] << " " << uiEncounter[10] << " " << uiEncounter[11]
-                   << uiEncounter[12] << " " << uiEncounter[13] << " " << uiEncounter[14];
+        saveStream << "U U";
+        for (const uint32 *it = std::begin(uiEncounter), *last = std::end(uiEncounter);
+                it != last; )
+            saveStream << ' ' << *it++;
 
         m_strInstData = saveStream.str();
 
@@ -372,12 +373,9 @@ struct instance_ulduar : public ScriptedInstance
         OUT_LOAD_INST_DATA(strIn);
 
         char dataHead1, dataHead2;
-        uint32 data0, data1, data2, data3, data4, data5, data6,
-            data7, data8, data9, data10, data11, data12, data13, data14;
 
         std::istringstream loadStream(strIn);
-        loadStream >> dataHead1 >> dataHead2 >> data0 >> data1 >> data2 >> data3 >> data4 >> data5 >> data6
-            >> data7 >> data8 >> data9 >> data10 >> data11 >> data12 >> data13 >> data14;
+        loadStream >> dataHead1 >> dataHead2;
 
         if (dataHead1 == 'U' && dataHead2 == 'U')
         {
