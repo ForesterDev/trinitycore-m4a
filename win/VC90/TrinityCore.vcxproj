@@ -26,21 +26,25 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -69,13 +73,13 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\trinitycore__$(Platform)_$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\trinitycore__$(Platform)_$(Configuration)\</IntDir>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\trinitycore__$(Platform)_$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\trinitycore__$(Platform)_$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\trinitycore__$(Platform)_$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\trinitycore__$(Platform)_$(Configuration)\</IntDir>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
     <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
@@ -109,7 +113,6 @@
       <ProgramDataBaseFileName>.\trinitycore__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CallingConvention>Cdecl</CallingConvention>
       <CompileAs>Default</CompileAs>
     </ClCompile>
@@ -148,7 +151,6 @@ copy ..\..\README.* ..\..\bin\$(Platform)_$(Configuration)
       <TypeLibraryName>.\trinitycore__$(Platform)_$(Configuration)\trinitycore.tlb</TypeLibraryName>
     </Midl>
     <ClCompile>
-      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\externals;..\..\externals\mersennetwister;..\..\externals\sockets\include;..\..\src\server\game\Accounts;..\..\src\server\game\Achievements;..\..\src\server\game\Addons;..\..\src\server\game\BattleGrounds;..\..\src\server\game\Chat;..\..\src\server\game\Combat;..\..\src\server\game\Conditions;..\..\src\server\game\DataStores;..\..\src\server\game\DungeonFinding;..\..\src\server\game\Entities\Corpse;..\..\src\server\game\Entities\Creature;..\..\src\server\game\Entities\DynamicObject;..\..\src\server\game\Entities\GameObject;..\..\src\server\game\Entities\Item;..\..\src\server\game\Entities\Item\Container;..\..\src\server\game\Entities\Object;..\..\src\server\game\Entities\Object\Updates;..\..\src\server\game\Entities\Pet;..\..\src\server\game\Entities\Player;..\..\src\server\game\Entities\Unit;..\..\src\server\game\Entities\Vehicle;..\..\src\server\game\Globals;..\..\src\server\game\Grids;..\..\src\server\game\Grids\Cells;..\..\src\server\game\Groups;..\..\src\server\game\Loot;..\..\src\server\game\Mails;..\..\src\server\game\Maps;..\..\src\server\game\Miscellaneous;..\..\src\server\game\Movement;..\..\src\server\game\Movement\Waypoints;..\..\src\server\game\Quests;..\..\src\server\game\Reputation;..\..\src\server\game\Server;..\..\src\server\game\Server\Protocol;..\..\src\server\game\Server\Protocol\Handlers;..\..\src\server\game\Spells\Auras;..\..\src\server\game\World;..\..\src\server\shared;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Cryptography\Authentication;..\..\src\server\shared\Database;..\..\src\server\shared\DataStores;..\..\src\server\shared\Dynamic;..\..\src\server\shared\Dynamic\LinkedReference;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Policies;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\worldserver;..\..\src\server\worldserver\CommandLine;..\..\src\server\worldserver\RemoteAccess;..\..\src\server\worldserver\WorldThread;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;TRINITY_DEBUG;_CONSOLE;ENABLE_CLI;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -163,7 +165,6 @@ copy ..\..\README.* ..\..\bin\$(Platform)_$(Configuration)
       <ProgramDataBaseFileName>.\trinitycore__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <CallingConvention>Cdecl</CallingConvention>
       <CompileAs>Default</CompileAs>
     </ClCompile>
@@ -219,7 +220,6 @@ copy ..\..\README.* ..\..\bin\$(Platform)_$(Configuration)
       <ProgramDataBaseFileName>.\trinitycore__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CallingConvention>Cdecl</CallingConvention>
       <CompileAs>Default</CompileAs>
     </ClCompile>
@@ -273,7 +273,6 @@ copy ..\..\README.* ..\..\bin\$(Platform)_$(Configuration)
       <ProgramDataBaseFileName>.\trinitycore__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CallingConvention>Cdecl</CallingConvention>
       <CompileAs>Default</CompileAs>
     </ClCompile>
