@@ -22,6 +22,7 @@
 #define TRINITY_INSTANCE_DATA_H
 
 #include <memory>
+#include <sstream>
 #include "ZoneScript.h"
 #include "World.h"
 //#include "GameObject.h"
