@@ -35,9 +35,14 @@ enum eGameObjects
 
 struct instance_ulduar : public ScriptedInstance
 {
-    instance_ulduar(Map* pMap) : ScriptedInstance(pMap) { Initialize(); };
+    instance_ulduar(Map *pMap)
+        : ScriptedInstance(pMap)
+    {
+        SetBossNumber(num_bosses);
+        Initialize();
+    }
 
-    uint32 uiEncounter[MAX_ENCOUNTER];
+    uint32 colossi;
     std::string m_strInstData;
     uint8  flag;
 
@@ -65,6 +70,7 @@ struct instance_ulduar : public ScriptedInstance
 
     void Initialize()
     {
+        colossi = 0;
         uiLeviathanGUID       = 0;
         uiIgnisGUID           = 0;
         uiRazorscaleGUID      = 0;
@@ -85,20 +91,8 @@ struct instance_ulduar : public ScriptedInstance
         uiLeviathanGateGUID   = 0;
         flag                  = 0;
 
-        memset(&uiEncounter, 0, sizeof(uiEncounter));
         memset(&uiAssemblyGUIDs, 0, sizeof(uiAssemblyGUIDs));
         memset(&uiLeviathanDoor, 0, sizeof(uiLeviathanDoor));
-    }
-
-    bool IsEncounterInProgress() const
-    {
-        for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-        {
-            if (uiEncounter[i] == IN_PROGRESS)
-                return true;
-        }
-
-        return false;
     }
 
     void OnCreatureCreate(Creature* pCreature, bool /*add*/)
@@ -190,7 +184,7 @@ struct instance_ulduar : public ScriptedInstance
             case GO_LEVIATHAN_GATE:
                 uiLeviathanGateGUID = pGO->GetGUID();
                 HandleGameObject(NULL, false, pGO);
-                if (2 <= uiEncounter[TYPE_COLOSSUS])
+                if (2 <= colossi)
                     pGO->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
                 break;
         }
@@ -218,99 +212,60 @@ struct instance_ulduar : public ScriptedInstance
             }
     }
 
-    void SetData(uint32 type, uint32 data)
+    void SetData(uint32 DataId, uint32 Value)
     {
-        uiEncounter[type] = data;
-
-        switch(type)
+        switch (DataId)
         {
-            /*case TYPE_IGNIS:
-            case TYPE_RAZORSCALE:
-            case TYPE_XT002:
-            case TYPE_ASSEMBLY:
-            case TYPE_AURIAYA:
-            case TYPE_MIMIRON:
-            case TYPE_VEZAX:
-            case TYPE_YOGGSARON:
-                break;*/
-            case TYPE_LEVIATHAN:
-                if (data == IN_PROGRESS)
+            case DATA_COLOSSUS:
+                if (colossi != Value)
                 {
-                    for (uint8 uiI = 0; uiI < 7; uiI++)
-                        HandleGameObject(uiLeviathanDoor[uiI],false);
-                }
-                else
-                {
-                    for (uint8 uiI = 0; uiI < 7; uiI++)
-                        HandleGameObject(uiLeviathanDoor[uiI],true);
-                }
-                break;
-            case TYPE_KOLOGARN:
-                if (data == DONE)
-                    if (GameObject* pGO = instance->GetGameObject(uiKologarnChestGUID))
-                        pGO->SetRespawnTime(pGO->GetRespawnDelay());
-                break;
-            case TYPE_HODIR:
-                if (data == DONE)
-                    if (GameObject* pGO = instance->GetGameObject(uiHodirChestGUID))
-                        pGO->SetRespawnTime(pGO->GetRespawnDelay());
-                break;
-            case TYPE_THORIM:
-                if (data == DONE)
-                    if (GameObject* pGO = instance->GetGameObject(uiThorimChestGUID))
-                        pGO->SetRespawnTime(pGO->GetRespawnDelay());
-                break;
-            case TYPE_FREYA:
-                if (data == DONE)
-                    if (GameObject* pGO = instance->GetGameObject(uiFreyaChestGUID))
-                        pGO->SetRespawnTime(pGO->GetRespawnDelay());
-                break;
-            case TYPE_COLOSSUS:
-                if (data == 2)
-                {
-                    if (Creature* pBoss = instance->GetCreature(uiLeviathanGUID))
-                        pBoss->AI()->DoAction(10);
-                    if (GameObject* pGate = instance->GetGameObject(uiLeviathanGateGUID))
-                        pGate->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                    colossi = Value;
+                    if (colossi == 2)
+                    {
+                        if (Creature* pBoss = instance->GetCreature(uiLeviathanGUID))
+                            pBoss->AI()->DoAction(10);
+                        if (GameObject* pGate = instance->GetGameObject(uiLeviathanGateGUID))
+                            pGate->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                    }
+
+                    SaveToDB();
                 }
                 break;
             default:
                 break;
         }
-
-        if (data == DONE)
-        {
-            OUT_SAVE_INST_DATA;
-
-            std::ostringstream saveStream;
-
-            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                saveStream << uiEncounter[i] << " ";
-
-            m_strInstData = saveStream.str();
-
-            SaveToDB();
-            OUT_SAVE_INST_DATA_COMPLETE;
-        }
     }
 
-    uint64 GetData64(uint32 data)
+    uint64 GetData64(uint32 DataId)
     {
-        switch(data)
+        switch (DataId)
         {
-            case TYPE_LEVIATHAN:            return uiLeviathanGUID;
-            case TYPE_IGNIS:                return uiIgnisGUID;
-            case TYPE_RAZORSCALE:           return uiRazorscaleGUID;
-            case TYPE_XT002:                return uiXT002GUID;
-            case TYPE_KOLOGARN:             return uiKologarnGUID;
-            case TYPE_AURIAYA:              return uiAuriayaGUID;
-            case TYPE_MIMIRON:              return uiMimironGUID;
-            case TYPE_HODIR:                return uiMimironGUID;
-            case TYPE_THORIM:               return uiThorimGUID;
-            case TYPE_FREYA:                return uiFreyaGUID;
-            case TYPE_VEZAX:                return uiVezaxGUID;
-            case TYPE_YOGGSARON:            return uiYoggSaronGUID;
-            case TYPE_ALGALON:              return uiAlgalonGUID;
+            case data64_leviathan:
+                return uiLeviathanGUID;
+            case data64_ignis:
+                return uiIgnisGUID;
+            case data64_razorscale:
+                return uiRazorscaleGUID;
+            case data64_xt002:
+                return uiXT002GUID;
+            case data64_kologarn:
+                return uiKologarnGUID;
+            case data64_auriaya:
+                return uiAuriayaGUID;
+            case data64_mimiron:
+                return uiMimironGUID;
+            case data64_hodir:
+                return uiMimironGUID;
+            case data64_thorim:
+                return uiThorimGUID;
+            case data64_freya:
+                return uiFreyaGUID;
+            case data64_vezax:
+                return uiVezaxGUID;
+            case data64_yoggsaron:
+                return uiYoggSaronGUID;
+            case data64_algalon:
+                return uiAlgalonGUID;
 
             // Assembly of Iron
             case DATA_STEELBREAKER:         return uiAssemblyGUIDs[0];
@@ -321,26 +276,12 @@ struct instance_ulduar : public ScriptedInstance
         return 0;
     }
 
-    uint32 GetData(uint32 type)
+    uint32 GetData(uint32 DataId)
     {
-        switch(type)
+        switch (DataId)
         {
-            case TYPE_LEVIATHAN:
-            case TYPE_IGNIS:
-            case TYPE_RAZORSCALE:
-            case TYPE_XT002:
-            case TYPE_ASSEMBLY:
-            case TYPE_KOLOGARN:
-            case TYPE_AURIAYA:
-            case TYPE_MIMIRON:
-            case TYPE_HODIR:
-            case TYPE_THORIM:
-            case TYPE_FREYA:
-            case TYPE_VEZAX:
-            case TYPE_YOGGSARON:
-            case TYPE_ALGALON:
-            case TYPE_COLOSSUS:
-                return uiEncounter[type];
+        case DATA_COLOSSUS:
+            return colossi;
         }
 
         return 0;
@@ -351,10 +292,7 @@ struct instance_ulduar : public ScriptedInstance
         OUT_SAVE_INST_DATA;
 
         std::ostringstream saveStream;
-        saveStream << "U U";
-        for (const uint32 *it = std::begin(uiEncounter), *last = std::end(uiEncounter);
-                it != last; )
-            saveStream << ' ' << *it++;
+        saveStream << "U U " << GetBossSaveData() << ' ' << colossi;
 
         m_strInstData = saveStream.str();
 
@@ -378,16 +316,53 @@ struct instance_ulduar : public ScriptedInstance
         loadStream >> dataHead1 >> dataHead2;
 
         if (dataHead1 == 'U' && dataHead2 == 'U')
-        {
-            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-            {
-                loadStream >> uiEncounter[i];
-
-                if (uiEncounter[i] == IN_PROGRESS)
-                    uiEncounter[i] = NOT_STARTED;
-            }
-        }
+            LoadBossState(std::move(loadStream)) >> colossi;
         OUT_LOAD_INST_DATA_COMPLETE;
+    }
+
+    bool SetBossState(uint32 id, EncounterState state)
+    {
+        if (InstanceData::SetBossState(id, state))
+        {
+            switch (id)
+            {
+            case boss_leviathan:
+                if (state == IN_PROGRESS)
+                {
+                    for (uint8 uiI = 0; uiI < 7; uiI++)
+                        HandleGameObject(uiLeviathanDoor[uiI],false);
+                }
+                else
+                {
+                    for (uint8 uiI = 0; uiI < 7; uiI++)
+                        HandleGameObject(uiLeviathanDoor[uiI],true);
+                }
+                break;
+            case boss_kologarn:
+                if (state == DONE)
+                    if (GameObject* pGO = instance->GetGameObject(uiKologarnChestGUID))
+                        pGO->SetRespawnTime(pGO->GetRespawnDelay());
+                break;
+            case boss_hodir:
+                if (state == DONE)
+                    if (GameObject* pGO = instance->GetGameObject(uiHodirChestGUID))
+                        pGO->SetRespawnTime(pGO->GetRespawnDelay());
+                break;
+            case boss_thorim:
+                if (state == DONE)
+                    if (GameObject* pGO = instance->GetGameObject(uiThorimChestGUID))
+                        pGO->SetRespawnTime(pGO->GetRespawnDelay());
+                break;
+            case boss_freya:
+                if (state == DONE)
+                    if (GameObject* pGO = instance->GetGameObject(uiFreyaChestGUID))
+                        pGO->SetRespawnTime(pGO->GetRespawnDelay());
+                break;
+            }
+            return true;
+        }
+        else
+            return false;
     }
 };
 

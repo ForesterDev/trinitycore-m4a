@@ -148,7 +148,7 @@ struct boss_steelbreakerAI : public ScriptedAI
         phase = 0;
         me->RemoveAllAuras();
         if (pInstance)
-            pInstance->SetData(TYPE_ASSEMBLY, NOT_STARTED);
+            pInstance->SetBossState(boss_assembly, NOT_STARTED);
     }
 
     EventMap events;
@@ -195,7 +195,7 @@ struct boss_steelbreakerAI : public ScriptedAI
     {
         DoScriptText(RAND(SAY_STEELBREAKER_DEATH_1,SAY_STEELBREAKER_DEATH_2), me);
         if (IsEncounterComplete(pInstance, me) && pInstance)
-            pInstance->SetData(TYPE_ASSEMBLY, DONE);
+            pInstance->SetBossState(boss_assembly, DONE);
     }
 
     void KilledUnit(Unit * /*who*/)
@@ -258,7 +258,7 @@ struct boss_runemaster_molgeimAI : public ScriptedAI
     void Reset()
     {
         if (pInstance)
-            pInstance->SetData(TYPE_ASSEMBLY, NOT_STARTED);
+            pInstance->SetBossState(boss_assembly, NOT_STARTED);
         events.Reset();
         me->RemoveAllAuras();
         phase = 0;
@@ -308,7 +308,7 @@ struct boss_runemaster_molgeimAI : public ScriptedAI
     {
         DoScriptText(RAND(SAY_MOLGEIM_DEATH_1,SAY_MOLGEIM_DEATH_2), me);
         if (IsEncounterComplete(pInstance, me) && pInstance)
-            pInstance->SetData(TYPE_ASSEMBLY, DONE);
+            pInstance->SetBossState(boss_assembly, DONE);
     }
 
     void KilledUnit(Unit * /*who*/)
@@ -425,7 +425,7 @@ struct boss_stormcaller_brundirAI : public ScriptedAI
     void Reset()
     {
         if (pInstance)
-            pInstance->SetData(TYPE_ASSEMBLY, NOT_STARTED);
+            pInstance->SetBossState(boss_assembly, NOT_STARTED);
         me->RemoveAllAuras();
         events.Reset();
         phase = 0;
@@ -478,7 +478,7 @@ struct boss_stormcaller_brundirAI : public ScriptedAI
     {
         DoScriptText(RAND(SAY_BRUNDIR_DEATH_1,SAY_BRUNDIR_DEATH_2), me);
         if (IsEncounterComplete(pInstance, me) && pInstance)
-            pInstance->SetData(TYPE_ASSEMBLY, DONE);
+            pInstance->SetBossState(boss_assembly, DONE);
     }
 
     void KilledUnit(Unit * /*who*/)

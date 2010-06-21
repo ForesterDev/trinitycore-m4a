@@ -126,7 +126,7 @@ struct boss_algalonAI : public ScriptedAI
         }
 
         if (pInstance)
-            pInstance->SetData(TYPE_ALGALON, IN_PROGRESS);
+            pInstance->SetBossState(boss_algalon, IN_PROGRESS);
     }
 
     void KilledUnit(Unit * /*victim*/)
@@ -140,7 +140,7 @@ struct boss_algalonAI : public ScriptedAI
 
         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         if (pInstance)
-            pInstance->SetData(TYPE_ALGALON, NOT_STARTED);
+            pInstance->SetBossState(boss_algalon, NOT_STARTED);
 
         BlackHoleGUID = 0;
 
@@ -221,7 +221,7 @@ struct boss_algalonAI : public ScriptedAI
             me->DisappearAndDie();
 
             if (pInstance)
-                pInstance->SetData(TYPE_ALGALON, DONE);
+                pInstance->SetBossState(boss_algalon, DONE);
 
             return;
         }

@@ -19,26 +19,28 @@
 #ifndef DEF_ULDUAR_H
 #define DEF_ULDUAR_H
 
+enum
+{
+    boss_leviathan,
+    boss_ignis,
+    boss_razorscale,
+    boss_xt002,
+    boss_assembly,
+    boss_kologarn,
+    boss_auriaya,
+    boss_mimiron,
+    boss_hodir,
+    boss_thorim,
+    boss_freya,
+    boss_vezax,
+    boss_yoggsaron,
+    boss_algalon,
+    num_bosses
+};
+
 enum eTypes
 {
-    MAX_ENCOUNTER               = 15,
-
-    TYPE_LEVIATHAN              = 0,
-    TYPE_IGNIS                  = 1,
-    TYPE_RAZORSCALE             = 2,
-    TYPE_XT002                  = 3,
-    TYPE_ASSEMBLY               = 4,
-    TYPE_KOLOGARN               = 5,
-    TYPE_AURIAYA                = 6,
-    TYPE_MIMIRON                = 7,
-    TYPE_HODIR                  = 8,
-    TYPE_THORIM                 = 9,
-    TYPE_FREYA                  = 10,
-    TYPE_VEZAX                  = 11,
-    TYPE_YOGGSARON              = 12,
-    TYPE_ALGALON                = 13,
-    TYPE_COLOSSUS               = 14,
-
+    DATA_COLOSSUS               = 14,
     DATA_STEELBREAKER           = 20,
     DATA_MOLGEIM                = 21,
     DATA_BRUNDIR                = 22,
@@ -66,6 +68,23 @@ enum eTypes
     EVENT_TOWER_OF_FROST_DESTROYED     = 21032,
     EVENT_TOWER_OF_FLAMES_DESTROYED    = 21033,
     EVENT_TOWER_OF_NATURE_DESTROYED    = 21030
+};
+
+enum
+{
+    data64_leviathan = 0,
+    data64_ignis = 1,
+    data64_razorscale = 2,
+    data64_xt002 = 3,
+    data64_kologarn = 5,
+    data64_auriaya = 6,
+    data64_mimiron = 7,
+    data64_hodir = 8,
+    data64_thorim = 9,
+    data64_freya = 10,
+    data64_vezax = 11,
+    data64_yoggsaron = 12,
+    data64_algalon = 13,
 };
 
 #endif

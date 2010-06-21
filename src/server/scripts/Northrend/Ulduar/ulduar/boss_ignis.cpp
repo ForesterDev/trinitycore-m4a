@@ -43,7 +43,10 @@ enum
 
 struct boss_ignis_AI : public BossAI
 {
-    boss_ignis_AI(Creature *pCreature) : BossAI(pCreature, TYPE_IGNIS) {}
+    boss_ignis_AI(Creature *pCreature)
+        : BossAI(pCreature, boss_ignis)
+    {
+    }
 
     uint32 uiFlameJetsTimer;
     uint32 uiScorchTimer;

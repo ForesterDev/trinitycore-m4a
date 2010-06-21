@@ -167,7 +167,8 @@ enum
  *///----------------------------------------------------
 struct boss_xt002_AI : public BossAI
 {
-    boss_xt002_AI(Creature *pCreature) : BossAI(pCreature, TYPE_XT002)
+    boss_xt002_AI(Creature *pCreature)
+        : BossAI(pCreature, boss_xt002)
     {
     }
 
@@ -530,7 +531,8 @@ struct mob_xt002_heartAI : public ScriptedAI
     void JustDied(Unit * /*victim*/)
     {
         if (m_pInstance)
-            if (Creature* pXT002 = me->GetCreature(*me, m_pInstance->GetData64(TYPE_XT002)))
+            if (Creature
+                    *pXT002 = me->GetCreature(*me, m_pInstance->GetData64(data64_xt002)))
                 if (pXT002->AI())
                     pXT002->AI()->DoAction(ACTION_ENTER_HARD_MODE);
 
@@ -540,7 +542,8 @@ struct mob_xt002_heartAI : public ScriptedAI
 
     void DamageTaken(Unit * /*pDone*/, uint32 &damage)
     {
-        if (Creature* pXT002 = me->GetCreature(*me, m_pInstance->GetData64(TYPE_XT002)))
+        if (Creature
+                *pXT002 = me->GetCreature(*me, m_pInstance->GetData64(data64_xt002)))
             if (pXT002->AI())
             {
                 uint32 health = me->GetHealth();
@@ -576,13 +579,15 @@ struct mob_scrapbotAI : public ScriptedAI
     {
         me->SetReactState(REACT_PASSIVE);
 
-        if (Creature* pXT002 = me->GetCreature(*me, m_pInstance->GetData64(TYPE_XT002)))
+        if (Creature
+                *pXT002 = me->GetCreature(*me, m_pInstance->GetData64(data64_xt002)))
             me->GetMotionMaster()->MoveChase(pXT002);
     }
 
     void UpdateAI(const uint32 /*diff*/)
     {
-        if (Creature* pXT002 = me->GetCreature(*me, m_pInstance->GetData64(TYPE_XT002)))
+        if (Creature
+                *pXT002 = me->GetCreature(*me, m_pInstance->GetData64(data64_xt002)))
         {
             if (me->GetDistance2d(pXT002) <= 0.5)
             {
@@ -680,7 +685,8 @@ struct mob_boombotAI : public ScriptedAI
     {
         me->SetReactState(REACT_PASSIVE);
 
-        if (Creature* pXT002 = me->GetCreature(*me, m_pInstance->GetData64(TYPE_XT002)))
+        if (Creature
+                *pXT002 = me->GetCreature(*me, m_pInstance->GetData64(data64_xt002)))
             me->GetMotionMaster()->MoveChase(pXT002);
     }
 
@@ -691,7 +697,8 @@ struct mob_boombotAI : public ScriptedAI
 
     void UpdateAI(const uint32 /*diff*/)
     {
-        if (Creature* pXT002 = me->GetCreature(*me, m_pInstance->GetData64(TYPE_XT002)))
+        if (Creature
+                *pXT002 = me->GetCreature(*me, m_pInstance->GetData64(data64_xt002)))
         {
             if (me->GetDistance2d(pXT002) <= 0.5)
             {

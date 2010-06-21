@@ -34,7 +34,8 @@ enum Yells
 
 struct boss_hodirAI : public BossAI
 {
-    boss_hodirAI(Creature *pCreature) : BossAI(pCreature, TYPE_HODIR)
+    boss_hodirAI(Creature *pCreature)
+        : BossAI(pCreature, boss_hodir)
     {
     }
 
