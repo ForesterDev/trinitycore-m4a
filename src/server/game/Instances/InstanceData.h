@@ -22,7 +22,6 @@
 #define TRINITY_INSTANCE_DATA_H
 
 #include <memory>
-#include <sstream>
 #include "ZoneScript.h"
 #include "World.h"
 //#include "GameObject.h"
@@ -125,11 +124,7 @@ class InstanceData : public ZoneScript
         virtual void Initialize() {}
 
         //On load
-        virtual void Load(const char *data)
-        {
-            if (data)
-                LoadBossState(std::istringstream(data));
-        }
+        virtual void Load(const char *data);
 
         //When save is needed, this function generates the data
         virtual std::string GetSaveData() { return GetBossSaveData(); }

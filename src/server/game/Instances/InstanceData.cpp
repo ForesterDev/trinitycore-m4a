@@ -27,6 +27,12 @@
 #include "CreatureAI.h"
 #include "Log.h"
 
+void InstanceData::Load(const char *data)
+{
+    if (data)
+        LoadBossState(std::istringstream(data));
+}
+
 void InstanceData::SaveToDB()
 {
     std::string data = GetSaveData();
