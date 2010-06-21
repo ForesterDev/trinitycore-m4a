@@ -128,7 +128,9 @@ static Position Center[]=
 
 struct boss_flame_leviathanAI : public BossAI
 {
-    boss_flame_leviathanAI(Creature* pCreature) : BossAI(pCreature, TYPE_LEVIATHAN), vehicle(pCreature->GetVehicleKit())
+    boss_flame_leviathanAI(Creature *pCreature)
+        : BossAI(pCreature, boss_leviathan),
+            vehicle(pCreature->GetVehicleKit())
     {
         assert(vehicle);
 
@@ -145,7 +147,7 @@ struct boss_flame_leviathanAI : public BossAI
         _Reset();
         assert(vehicle);
         uiActiveTowers = 0;
-        if (pInstance && 2 <= pInstance->GetData(TYPE_COLOSSUS))
+        if (pInstance && 2 <= pInstance->GetData(DATA_COLOSSUS))
         {
             me->GetMotionMaster()->MovePoint(0, Center[0]);
             me->SetReactState(REACT_AGGRESSIVE);
@@ -495,7 +497,7 @@ struct npc_colossusAI : public ScriptedAI
         if (me->GetHomePosition().IsInDist(Center,50.f))
         {
             if (pInstance)
-                pInstance->SetData(TYPE_COLOSSUS,pInstance->GetData(TYPE_COLOSSUS)+1);
+                pInstance->SetData(DATA_COLOSSUS, pInstance->GetData(DATA_COLOSSUS) + 1);
         }
     }
 
