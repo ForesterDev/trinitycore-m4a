@@ -81,8 +81,8 @@ EAIErrorLevel = 2
 #
 #    ProcessPriority
 #        Process priority setting (Used only at Windows)
-#        Default: 1 (HIGH)
-#                 0 (Normal)
+#        Default: 0 (Normal)
+#                 1 (HIGH)
 #
 #    Compression
 #        Compression level for update packages sent to client (1..9)
@@ -227,7 +227,7 @@ EAIErrorLevel = 2
 ###############################################################################
 
 UseProcessors = 0
-ProcessPriority = 1
+ProcessPriority = 0
 Compression = 1
 PlayerLimit = 100
 SaveRespawnTimeImmediately = 1
@@ -1730,11 +1730,11 @@ Battleground.Random.ResetHour = 6
 #
 #    Arena.ArenaStartRating
 #	 Start arena team command rating
-#	 Default: 1500 
+#	 Default: 0
 #
-#    Arena.StartPersonalRating
+#    Arena.ArenaStartPersonalRating
 #	 Start personal rating on entry in team
-#	 Default: 1500
+#	 Default: 0
 #
 ###############################################################################
 

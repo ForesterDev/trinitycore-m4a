@@ -57,7 +57,9 @@ enum
 
 struct boss_kologarnAI : public BossAI
 {
-    boss_kologarnAI(Creature *pCreature) : BossAI(pCreature, TYPE_KOLOGARN), vehicle(pCreature->GetVehicleKit()),
+    boss_kologarnAI(Creature *pCreature)
+        : BossAI(pCreature, boss_kologarn),
+            vehicle(pCreature->GetVehicleKit()),
         left(false), right(false)
     {
         assert(vehicle);

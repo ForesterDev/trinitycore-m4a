@@ -43,7 +43,8 @@ enum Yells
 
 struct boss_thorimAI : public BossAI
 {
-    boss_thorimAI(Creature* pCreature) : BossAI(pCreature, TYPE_THORIM)
+    boss_thorimAI(Creature *pCreature)
+        : BossAI(pCreature, boss_thorim)
     {
     }
 

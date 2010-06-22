@@ -50,7 +50,10 @@ enum Mobs
 
 struct boss_razorscaleAI : public BossAI
 {
-    boss_razorscaleAI(Creature *pCreature) : BossAI(pCreature, TYPE_RAZORSCALE) {}
+    boss_razorscaleAI(Creature *pCreature)
+        : BossAI(pCreature, boss_razorscale)
+    {
+    }
 
     uint8 Phase;
 

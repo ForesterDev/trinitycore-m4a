@@ -1199,7 +1199,7 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, bool rate, uint16
 
             const_cast<LootTemplate*>(Referenced)->CopyConditions(i->conditions);//copy conditions from referer template
 
-            for (uint32 loop = 0; loop < i->maxcount; ++loop) // Ref multiplicator
+            for (uint32 loop = 0; loop < i->maxcount * 2; ++loop)   // Ref multiplicator
                 Referenced->Process(loot, store, rate, lootMode, i->group);
         }
         else                                                  // Plain entries (not a reference, not grouped)

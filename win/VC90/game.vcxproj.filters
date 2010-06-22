@@ -1,0 +1,3207 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="AI">
+      <UniqueIdentifier>{a7b9e6f5-a290-4c98-8eae-6a4d0652035b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AI\EventAI">
+      <UniqueIdentifier>{0d816653-4d81-4421-9cf4-13ccb790c1b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AI\ScriptedAI">
+      <UniqueIdentifier>{07fc30be-6de2-4221-9799-1b8691f4dc51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AI\CoreAI">
+      <UniqueIdentifier>{de371889-1554-429f-83c8-2ae642102a09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Events">
+      <UniqueIdentifier>{352b3dd2-fdf6-476b-a832-a749d506742a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Groups">
+      <UniqueIdentifier>{37ad9136-b203-4fa1-bf9b-5d9eace3e539}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Guilds">
+      <UniqueIdentifier>{e66c0304-7f9a-4fb3-8218-876853951383}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OutdoorPvP">
+      <UniqueIdentifier>{92bb8740-c786-48c5-8290-c1db45db362f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OutdoorPvP\Zones">
+      <UniqueIdentifier>{a31ee8b7-876b-446b-86bd-53ff0d5a240d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting">
+      <UniqueIdentifier>{8c2cb46b-7845-4fa5-8564-828ad290699c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\System">
+      <UniqueIdentifier>{d754fe89-4a02-4f15-88b7-14eb448354e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Custom">
+      <UniqueIdentifier>{ba1cf94d-c61b-4151-9080-00168397322a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\World">
+      <UniqueIdentifier>{2d2362d4-85b3-4ea0-82a9-4377212ea95e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Eastern Kingdoms">
+      <UniqueIdentifier>{6b923014-3878-4795-9586-1e33d50c0919}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Eastern Kingdoms\Alterac Valley">
+      <UniqueIdentifier>{cd786863-27fb-4f69-be90-9f0a3d09abea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Eastern Kingdoms\Blackrock Depths">
+      <UniqueIdentifier>{f69e76d5-7384-43cc-9aa8-62bfc6e6f673}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Eastern Kingdoms\Blackrock Spire">
+      <UniqueIdentifier>{f977d80c-f467-4e39-a109-b6378b3de4a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Eastern Kingdoms\Blackwing Lair">
+      <UniqueIdentifier>{31ff4a0b-1135-4fbb-a8d1-c6b5c9964b65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Eastern Kingdoms\Deadmines">
+      <UniqueIdentifier>{e306912c-fc47-424b-b1a7-5addd5404088}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Eastern Kingdoms\Gnomeregan">
+      <UniqueIdentifier>{5ae88921-e4a6-42fb-b6fc-cd145065a252}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Eastern Kingdoms\Karazhan">
+      <UniqueIdentifier>{5e800482-d21c-443f-b14f-d287de395f63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Eastern Kingdoms\Magister%27s Terrace">
+      <UniqueIdentifier>{7d33f6d3-6b28-4d6c-a186-04987166062e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Eastern Kingdoms\Molten Core">
+      <UniqueIdentifier>{5884050b-6109-4153-99c6-abc1e9258bea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Eastern Kingdoms\Scarlet Enclave">
+      <UniqueIdentifier>{95683696-251a-4886-8c39-23078844daac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Eastern Kingdoms\Scarlet Monastery">
+      <UniqueIdentifier>{4956c59f-9f40-44d6-b952-11ba623fc052}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Eastern Kingdoms\Scholomance">
+      <UniqueIdentifier>{a640688c-0770-49f6-980a-3b3d4dbc0388}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Eastern Kingdoms\Shadowfang Keep">
+      <UniqueIdentifier>{9bafce01-c906-41be-9afb-e21d756cb4f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Eastern Kingdoms\Stratholme">
+      <UniqueIdentifier>{010777a3-95d0-43a6-ab9b-1bbcaee3679b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Eastern Kingdoms\Sunken Temple">
+      <UniqueIdentifier>{7f6c261e-6880-4542-9237-9d0bbff513f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Eastern Kingdoms\Sunwell Plateau">
+      <UniqueIdentifier>{a1f0cda7-7f5a-46f0-8d27-21c307a6ec74}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Eastern Kingdoms\Uldaman">
+      <UniqueIdentifier>{deae2f4c-b2f3-40e8-b2a6-d2d29b6ee27b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Eastern Kingdoms\Zul%27Aman">
+      <UniqueIdentifier>{9efc43ce-66e3-4d00-9554-b9a44fc82f10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Eastern Kingdoms\Zul%27Gurub">
+      <UniqueIdentifier>{43ed182e-ff0b-4f6e-aca4-2f4c296cd776}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Examples">
+      <UniqueIdentifier>{c821ccec-6533-4c33-be30-b5eebfe1729f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Kalimdor">
+      <UniqueIdentifier>{4c9c1050-a36f-4cce-a17b-a17e75872433}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Kalimdor\Blackfathom Depths">
+      <UniqueIdentifier>{7faa4c58-49e3-4486-aa03-75d86647fe98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Kalimdor\Caverns of Time">
+      <UniqueIdentifier>{f8c0adff-1a05-4f39-9dbc-75c2781d620b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Kalimdor\Caverns of Time\Battle for Mt. Hyjal">
+      <UniqueIdentifier>{5d4bb0ca-0eba-449b-a729-8419277b7c2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Kalimdor\Caverns of Time\Culling of Stratholme">
+      <UniqueIdentifier>{6a846757-0bb1-453e-a1e0-7c04d1ff483f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Kalimdor\Caverns of Time\Old Hillsbrad">
+      <UniqueIdentifier>{00b9c83d-1ca5-4364-a604-2456564c9f5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Kalimdor\Caverns of Time\The Dark Portal">
+      <UniqueIdentifier>{54e60d3d-c443-41d8-937a-5fb31305b079}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Kalimdor\Maraudon">
+      <UniqueIdentifier>{0436fb90-95e3-4ffd-96fa-58a13c04e875}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Kalimdor\Onyxia%27s Lair">
+      <UniqueIdentifier>{1998efc7-7a07-443a-a472-777d27211887}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Kalimdor\Razorfen Downs">
+      <UniqueIdentifier>{17680fd9-425e-4fcd-81f9-41e1d39e087a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Kalimdor\Razorfen Kraul">
+      <UniqueIdentifier>{9ed37e8c-4fe4-4843-a714-48fc9d0a1ef0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Kalimdor\Ruins of Ahn%27Qiraj">
+      <UniqueIdentifier>{0e57709a-6a58-4223-bc8c-f4d5884fefe0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Kalimdor\Temple of Ahn%27Qiraj">
+      <UniqueIdentifier>{e252ee56-6b0b-4e35-9cdf-dd5e62c09967}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Kalimdor\Wailing Caverns">
+      <UniqueIdentifier>{abdafbf8-fe2b-4c58-a54c-65f6ac6a7a90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Kalimdor\Zul%27Farrak">
+      <UniqueIdentifier>{8622b592-a46e-42bf-be03-7c00c110b749}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend">
+      <UniqueIdentifier>{7684983d-ec45-49ec-b976-020495dda188}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Azjol-Nerub">
+      <UniqueIdentifier>{aac9c6fb-28e6-4352-929e-ba2407f198ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Azjol-Nerub\Ahn%27kahet">
+      <UniqueIdentifier>{40b5b2af-5c95-4753-9482-9501783bfcd8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Azjol-Nerub\Azjol-Nerub">
+      <UniqueIdentifier>{b690da8f-4ab4-49cd-bc65-f696ebabaa94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Drak%27Tharon Keep">
+      <UniqueIdentifier>{81bb8589-58d0-4d87-bc23-8074e6948a95}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Icecrown Citadel">
+      <UniqueIdentifier>{0b43a1b6-96b8-4396-a28a-dcfcb932aedf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Icecrown Citadel\Forge of Souls">
+      <UniqueIdentifier>{9534502d-a331-4f53-9009-6f1b36e8bea8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Icecrown Citadel\Halls of Reflection">
+      <UniqueIdentifier>{6a003e23-c6bd-43c3-bf32-f5ab13e91f04}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Icecrown Citadel\Pit of Saron">
+      <UniqueIdentifier>{6e2dc303-36dd-4827-93d4-57e7cdc608ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Gundrak">
+      <UniqueIdentifier>{5e79cc4c-238d-4ab1-a29d-dac84274d557}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Naxxramas">
+      <UniqueIdentifier>{add3280e-8a8a-446f-a9f2-ba11cf9ad6c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Obsidian Sanctum">
+      <UniqueIdentifier>{05865218-03d2-4929-92d4-dd96a71dd3d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Trial of the Champion">
+      <UniqueIdentifier>{5eb02c00-4631-411d-bcc1-09650ba7867e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Ulduar">
+      <UniqueIdentifier>{b5c1186d-607b-4d1a-ad09-7287d890466b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Ulduar\Halls of Stone">
+      <UniqueIdentifier>{4d34a65e-0cc2-424d-a005-f3506a02f345}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Ulduar\Halls of Lightning">
+      <UniqueIdentifier>{5f081fc3-e665-4853-90c3-3caf4a34bb55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Ulduar\Ulduar">
+      <UniqueIdentifier>{8356b470-de61-4b19-8b7c-38a80fb0c58c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Utgarde Keep">
+      <UniqueIdentifier>{ee70b80c-5e21-4ebf-8c34-3bf5e4ca8a2f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Utgarde Keep\Utgarde Keep">
+      <UniqueIdentifier>{bfdaca30-cb36-483a-975f-3517f6e6742f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Utgarde Keep\Utgarde Pinnacle">
+      <UniqueIdentifier>{66f4962a-7ec5-4c94-a9a3-f423741e0a4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Vault of Archavon">
+      <UniqueIdentifier>{13647af7-1e20-4211-b51d-d04ab36cf8ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Violet Hold">
+      <UniqueIdentifier>{1c075930-1c20-4502-91cf-9b5a84803041}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Nexus">
+      <UniqueIdentifier>{5254c03c-5dc1-4d6d-bdab-c20da2a6a5d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Nexus\Eye of Eternity">
+      <UniqueIdentifier>{d89bc5ed-987c-4635-b022-744f9c5da4c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Nexus\Nexus">
+      <UniqueIdentifier>{ae221027-9c08-4b33-b3db-e527cdcd871f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Northrend\Nexus\Oculus">
+      <UniqueIdentifier>{75369910-4651-473c-a99c-f60a7d4fda01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland">
+      <UniqueIdentifier>{a9060910-5fa9-4a30-8792-3027a994d66b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland\Aunchindoun">
+      <UniqueIdentifier>{a3f3b80e-38ff-4b63-aa31-7faefa4c2cbd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland\Aunchindoun\Auchenai Crypts">
+      <UniqueIdentifier>{9b2f4f8a-40b1-4af0-a9ee-59740b801725}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland\Aunchindoun\Mana Tombs">
+      <UniqueIdentifier>{61f19b3d-92ab-41c0-b09d-114758e24ae1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland\Aunchindoun\Sethekk Halls">
+      <UniqueIdentifier>{7770f755-3694-440d-9181-bd2dac1c1b21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland\Aunchindoun\Shadow Labyrinth">
+      <UniqueIdentifier>{14b4dd8e-1e9a-420e-806c-076a15f69208}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland\Black Temple">
+      <UniqueIdentifier>{9fa79693-c964-442c-ab40-49f238fc8c05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland\Coilfang Resevoir">
+      <UniqueIdentifier>{633911a9-c3a0-40b6-9d47-0ee0aec1f141}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland\Coilfang Resevoir\Serpent Shrine Cavern">
+      <UniqueIdentifier>{f860b0a8-1f1a-4bf9-80b4-3c309e5e5d0f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland\Coilfang Resevoir\Steam Vault">
+      <UniqueIdentifier>{dc9f7368-46ec-4f8b-aa62-3a794f365c09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland\Coilfang Resevoir\Underbog">
+      <UniqueIdentifier>{0ddc1a6c-8c89-4bd0-91e9-47189b74813a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland\Gruul%27s Lair">
+      <UniqueIdentifier>{8133cd01-51b8-454c-a561-7959e3497318}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland\Hellfire Citadel">
+      <UniqueIdentifier>{90e87a19-6a71-4561-9bf1-5a35c69cfcc5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland\Hellfire Citadel\Blood Furnace">
+      <UniqueIdentifier>{ee28cdbd-c71d-444b-83a0-4039d59f9cc3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland\Hellfire Citadel\Hellfire Ramparts">
+      <UniqueIdentifier>{0f25ab34-f141-4c10-91c4-61a661080f52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland\Hellfire Citadel\Magtheridon%27s lair">
+      <UniqueIdentifier>{437238bd-6734-4780-bf16-a81f9cd54d2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland\Hellfire Citadel\Shattered Halls">
+      <UniqueIdentifier>{45268206-8dff-4321-bf4e-07c28218dee1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland\Tempest Keep">
+      <UniqueIdentifier>{760d3745-75d4-479a-b0e8-223e42c555a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland\Tempest Keep\Arcatraz">
+      <UniqueIdentifier>{55f62590-a0f3-491d-a16b-da50c40ed61b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland\Tempest Keep\Botanica">
+      <UniqueIdentifier>{4967bf99-cc98-418d-bd37-edf9e8b6d8ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland\Tempest Keep\The Eye">
+      <UniqueIdentifier>{417f31c3-4734-4007-8f39-0924e0bd985f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\Outland\Tempest Keep\The Mechanar">
+      <UniqueIdentifier>{949e4a6c-5647-459f-9aeb-bf978bf7945c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Accounts">
+      <UniqueIdentifier>{3ffcbbb5-6d89-4d9a-ae6e-3928c19226d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Achievements">
+      <UniqueIdentifier>{f9e38081-9b08-4c93-a6a4-ec411357c943}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Addons">
+      <UniqueIdentifier>{2ff853d5-6e20-4fb4-a875-4ca78b68eb4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AuctionHouse">
+      <UniqueIdentifier>{964d38ef-4aeb-44d4-86a3-2f4ab29968ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AuctionHouse\AuctionHouseBot">
+      <UniqueIdentifier>{0e771b40-8c91-469a-bd91-feb2f9c87c86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BattleGrounds">
+      <UniqueIdentifier>{a74343f7-67d9-4f59-85a6-9bbe9ce63a1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BattleGrounds\Zones">
+      <UniqueIdentifier>{70fc5928-9830-4deb-b520-8ee96cc944c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Calendar">
+      <UniqueIdentifier>{b833ef99-c648-41b1-b3b4-91b15cbe9473}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Chat">
+      <UniqueIdentifier>{59d2dcf5-abce-48fb-ad25-23a6685daf52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Chat\Channels">
+      <UniqueIdentifier>{f998b97c-9178-486e-8d70-6db24d622a75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Chat\Commands">
+      <UniqueIdentifier>{7bf9813d-d398-4e80-91eb-1accbb1ab1dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Combat">
+      <UniqueIdentifier>{39dd8c18-d0dd-4f4a-9684-c1656bfbf359}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Conditions">
+      <UniqueIdentifier>{fb7486b3-2a7c-48a1-9d04-a65be4cba0c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DataStores">
+      <UniqueIdentifier>{a7be65d0-d96c-4367-a208-62d659dec68e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entities">
+      <UniqueIdentifier>{88304e60-451c-4f6a-b77d-ccd9301291b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entities\Creature">
+      <UniqueIdentifier>{f95f5d17-f736-40ff-a64a-be15c799a533}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entities\DynamicObject">
+      <UniqueIdentifier>{98fd845c-ff25-4630-875b-5bdcfe4e2b9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entities\GameObject">
+      <UniqueIdentifier>{04a5b381-e72b-451d-aae7-9871fbfe6569}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entities\Item">
+      <UniqueIdentifier>{6ffb969b-3485-4965-a8e8-a5353f1e43f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entities\Item\Container">
+      <UniqueIdentifier>{c1941766-7903-4caf-8563-0fc2fd5d0f3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entities\Object">
+      <UniqueIdentifier>{b363011c-1b8b-4013-a5d8-498c34f0e8c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entities\Object\Updates">
+      <UniqueIdentifier>{0d857cbd-42b4-425e-9c98-978ae78c85a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entities\Pet">
+      <UniqueIdentifier>{380f6e02-cd0b-4529-b73e-5314223a7ddd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entities\Player">
+      <UniqueIdentifier>{2a835d33-c3a6-4c51-ab69-c8cf6749ac3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entities\Totem">
+      <UniqueIdentifier>{75df871f-9bca-4526-b745-f495b9b5d0d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entities\Transport">
+      <UniqueIdentifier>{710dd739-3aba-430d-bf77-ea3d8143a84f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entities\Corpse">
+      <UniqueIdentifier>{50ac2b08-0f91-4fc8-932b-b72dfb9aeb61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entities\Unit">
+      <UniqueIdentifier>{e8238699-9f32-4b66-965f-819c34ffd37a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entities\Vehicle">
+      <UniqueIdentifier>{67b96302-5797-4901-b49e-09a0fbc98116}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Globals">
+      <UniqueIdentifier>{73661675-d09a-48ee-a5cf-aad18493c2b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Instances">
+      <UniqueIdentifier>{d97f55c4-5479-4534-9b78-9869dbc2fcc4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DungeonFinding">
+      <UniqueIdentifier>{a31f83ab-3816-427b-b23d-38faaf2dd680}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Loot">
+      <UniqueIdentifier>{379c3414-b881-48e4-ba31-c9a2c596062b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Mails">
+      <UniqueIdentifier>{cf35385f-5b8d-42ac-b699-0ace71821d3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Maps">
+      <UniqueIdentifier>{334c435f-478b-4157-be3a-ef2ddcc2a865}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Movement">
+      <UniqueIdentifier>{15b84b81-f4d2-47a6-9052-443f9a128d55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Movement\MovementGenerators">
+      <UniqueIdentifier>{baf3087a-adca-4a1d-8a05-9a22e1cfa8ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Movement\Waypoints">
+      <UniqueIdentifier>{01ea53e8-650e-40f3-87e5-eefc54f3a0a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server">
+      <UniqueIdentifier>{395fcba3-b3c5-4f9a-a2f7-5c459a51f070}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server\Protocol">
+      <UniqueIdentifier>{346976ac-3ad5-46d6-87dc-eeec1da68db0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server\Protocol\Handlers">
+      <UniqueIdentifier>{ba2e3d4b-d9c7-43ac-8edb-7d032d2b698b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pools">
+      <UniqueIdentifier>{83742c31-f18a-4796-996c-45b344f1c56f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PrecompiledHeaders">
+      <UniqueIdentifier>{7e2f358e-8b26-4032-be40-9636b0a60dc8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quests">
+      <UniqueIdentifier>{d1256742-da8f-4d50-904c-485ca60e2a93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Reputation">
+      <UniqueIdentifier>{d97704a1-5e9f-4125-87aa-38f543eea89a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Skills">
+      <UniqueIdentifier>{53c38de6-0bf5-468d-beb6-9d43bbad0f40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Spells">
+      <UniqueIdentifier>{8bc0b195-e4a5-45da-9175-5dc22b84b16d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Spells\Auras">
+      <UniqueIdentifier>{f27a1a82-e066-4a12-b785-e8e2945d9a6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tools">
+      <UniqueIdentifier>{c4b58393-cbfc-427a-80c4-73d83c3f1a7a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Weather">
+      <UniqueIdentifier>{d78094b4-3546-4b15-83f4-0cf285102b62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Grids">
+      <UniqueIdentifier>{48503986-7bad-4515-ae04-37e649ad3ca9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Grids\Notifiers">
+      <UniqueIdentifier>{d86adbdb-82df-4109-a768-b45bd2d8550c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Grids\Cells">
+      <UniqueIdentifier>{73da393c-df7e-401e-b356-37d5a3f9a769}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Miscellaneous">
+      <UniqueIdentifier>{a0510323-2b51-4f82-ac73-1411f67089af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Collision">
+      <UniqueIdentifier>{cc709d23-69c8-4066-af47-ce795d776185}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Collision\Management">
+      <UniqueIdentifier>{0d649aba-b565-4e66-a8aa-d9546dfa1b06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Collision\Maps">
+      <UniqueIdentifier>{4900a61d-259f-46ce-a2f7-426584cd291e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Collision\Models">
+      <UniqueIdentifier>{699b7bd9-0255-4e3c-841b-1de2779e08c9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\server\game\AI\CreatureAI.cpp">
+      <Filter>AI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\AI\CreatureAIRegistry.cpp">
+      <Filter>AI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\AI\CreatureAISelector.cpp">
+      <Filter>AI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\AI\EventAI\CreatureEventAI.cpp">
+      <Filter>AI\EventAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\AI\EventAI\CreatureEventAIMgr.cpp">
+      <Filter>AI\EventAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\AI\ScriptedAI\ScriptedCreature.cpp">
+      <Filter>AI\ScriptedAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\AI\ScriptedAI\ScriptedEscortAI.cpp">
+      <Filter>AI\ScriptedAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\AI\ScriptedAI\ScriptedFollowerAI.cpp">
+      <Filter>AI\ScriptedAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\AI\ScriptedAI\ScriptedGuardAI.cpp">
+      <Filter>AI\ScriptedAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\AI\ScriptedAI\ScriptedSimpleAI.cpp">
+      <Filter>AI\ScriptedAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\AI\ScriptedAI\ScriptedSmartAI.cpp">
+      <Filter>AI\ScriptedAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\AI\CoreAI\CombatAI.cpp">
+      <Filter>AI\CoreAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\AI\CoreAI\GuardAI.cpp">
+      <Filter>AI\CoreAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\AI\CoreAI\PassiveAI.cpp">
+      <Filter>AI\CoreAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\AI\CoreAI\PetAI.cpp">
+      <Filter>AI\CoreAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\AI\CoreAI\ReactorAI.cpp">
+      <Filter>AI\CoreAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\AI\CoreAI\TotemAI.cpp">
+      <Filter>AI\CoreAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\AI\CoreAI\UnitAI.cpp">
+      <Filter>AI\CoreAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Events\GameEventMgr.cpp">
+      <Filter>Events</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Groups\Group.cpp">
+      <Filter>Groups</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Groups\GroupReference.cpp">
+      <Filter>Groups</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Guilds\Guild.cpp">
+      <Filter>Guilds</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\OutdoorPvP\OutdoorPvP.cpp">
+      <Filter>OutdoorPvP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\OutdoorPvP\OutdoorPvPMgr.cpp">
+      <Filter>OutdoorPvP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\OutdoorPvP\Zones\OutdoorPvPEP.cpp">
+      <Filter>OutdoorPvP\Zones</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\OutdoorPvP\Zones\OutdoorPvPHP.cpp">
+      <Filter>OutdoorPvP\Zones</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\OutdoorPvP\Zones\OutdoorPvPNA.cpp">
+      <Filter>OutdoorPvP\Zones</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\OutdoorPvP\Zones\OutdoorPvPSI.cpp">
+      <Filter>OutdoorPvP\Zones</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\OutdoorPvP\Zones\OutdoorPvPTF.cpp">
+      <Filter>OutdoorPvP\Zones</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\OutdoorPvP\Zones\OutdoorPvPZM.cpp">
+      <Filter>OutdoorPvP\Zones</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Scripting\ScriptLoader.cpp">
+      <Filter>Scripting\System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Scripting\ScriptMgr.cpp">
+      <Filter>Scripting\System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Scripting\ScriptSystem.cpp">
+      <Filter>Scripting\System</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Custom\npc_acherus_taxi.cpp">
+      <Filter>Scripting\Custom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Custom\npc_wyrmresttempel_taxi.cpp">
+      <Filter>Scripting\Custom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Custom\on_events.cpp">
+      <Filter>Scripting\Custom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\World\areatrigger_scripts.cpp">
+      <Filter>Scripting\World</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\World\boss_emeriss.cpp">
+      <Filter>Scripting\World</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\World\boss_lethon.cpp">
+      <Filter>Scripting\World</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\World\boss_taerar.cpp">
+      <Filter>Scripting\World</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\World\boss_ysondre.cpp">
+      <Filter>Scripting\World</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\World\go_scripts.cpp">
+      <Filter>Scripting\World</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\World\guards.cpp">
+      <Filter>Scripting\World</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\World\item_scripts.cpp">
+      <Filter>Scripting\World</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\World\mob_generic_creature.cpp">
+      <Filter>Scripting\World</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\World\npc_innkeeper.cpp">
+      <Filter>Scripting\World</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\World\npc_professions.cpp">
+      <Filter>Scripting\World</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\World\npc_taxi.cpp">
+      <Filter>Scripting\World</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\World\npcs_special.cpp">
+      <Filter>Scripting\World</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\alterac_mountains.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\arathi_highlands.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\blasted_lands.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\boss_kruul.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\burning_steppes.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\dun_morogh.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\duskwood.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\eastern_plaguelands.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\elwynn_forest.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\eversong_woods.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ghostlands.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\hinterlands.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ironforge.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\isle_of_queldanas.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\loch_modan.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\redridge_mountains.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\searing_gorge.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\silvermoon_city.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\silverpine_forest.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\stormwind_city.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\stranglethorn_vale.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\tirisfal_glades.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\undercity.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\western_plaguelands.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\westfall.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\wetlands.cpp">
+      <Filter>Scripting\Eastern Kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\AlteracValley\alterac_valley.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Alterac Valley</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\AlteracValley\boss_balinda.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Alterac Valley</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\AlteracValley\boss_drekthar.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Alterac Valley</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\AlteracValley\boss_galvangar.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Alterac Valley</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\AlteracValley\boss_vanndar.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Alterac Valley</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockDepths\blackrock_depths.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockDepths\boss_ambassador_flamelash.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockDepths\boss_anubshiah.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockDepths\boss_emperor_dagran_thaurissan.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockDepths\boss_general_angerforge.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockDepths\boss_gorosh_the_dervish.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockDepths\boss_grizzle.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockDepths\boss_high_interrogator_gerstahn.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockDepths\boss_magmus.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockDepths\boss_moira_bronzebeard.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockDepths\boss_tomb_of_seven.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockDepths\instance_blackrock_depths.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockSpire\blackrock_spire.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Spire</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockSpire\boss_drakkisath.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Spire</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockSpire\boss_gyth.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Spire</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockSpire\boss_halycon.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Spire</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockSpire\boss_highlord_omokk.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Spire</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockSpire\boss_mother_smolderweb.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Spire</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockSpire\boss_overlord_wyrmthalak.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Spire</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockSpire\boss_pyroguard_emberseer.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Spire</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockSpire\boss_quartermaster_zigris.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Spire</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockSpire\boss_rend_blackhand.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Spire</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockSpire\boss_shadow_hunter_voshgajin.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Spire</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockSpire\boss_the_beast.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Spire</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockSpire\boss_warmaster_voone.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Spire</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackrockSpire\instance_blackrock_spire.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Spire</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackwingLair\boss_broodlord_lashlayer.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackwing Lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackwingLair\boss_chromaggus.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackwing Lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackwingLair\boss_ebonroc.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackwing Lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackwingLair\boss_firemaw.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackwing Lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackwingLair\boss_flamegor.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackwing Lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackwingLair\boss_nefarian.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackwing Lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackwingLair\boss_razorgore.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackwing Lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackwingLair\boss_vaelastrasz.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackwing Lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackwingLair\boss_victor_nefarius.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackwing Lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\BlackwingLair\instance_blackwing_lair.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Blackwing Lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Deadmines\boss_mr_smite.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Deadmines</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Deadmines\deadmines.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Deadmines</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Deadmines\instance_deadmines.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Deadmines</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Gnomeregan\gnomeregan.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Gnomeregan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Gnomeregan\instance_gnomeregan.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Gnomeregan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Karazhan\boss_curator.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Karazhan\boss_maiden_of_virtue.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Karazhan\boss_midnight.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Karazhan\boss_moroes.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Karazhan\boss_netherspite.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Karazhan\boss_nightbane.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Karazhan\boss_prince_malchezaar.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Karazhan\boss_shade_of_aran.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Karazhan\boss_terestian_illhoof.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Karazhan\bosses_opera.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Karazhan\instance_karazhan.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Karazhan\karazhan.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\MagistersTerrace\boss_felblood_kaelthas.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Magister%27s Terrace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\MagistersTerrace\boss_priestess_delrissa.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Magister%27s Terrace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\MagistersTerrace\boss_selin_fireheart.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Magister%27s Terrace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\MagistersTerrace\boss_vexallus.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Magister%27s Terrace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\MagistersTerrace\instance_magisters_terrace.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Magister%27s Terrace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\MagistersTerrace\magisters_terrace.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Magister%27s Terrace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\MoltenCore\boss_baron_geddon.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Molten Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\MoltenCore\boss_garr.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Molten Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\MoltenCore\boss_gehennas.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Molten Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\MoltenCore\boss_golemagg.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Molten Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\MoltenCore\boss_lucifron.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Molten Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\MoltenCore\boss_magmadar.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Molten Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\MoltenCore\boss_majordomo_executus.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Molten Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\MoltenCore\boss_ragnaros.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Molten Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\MoltenCore\boss_shazzrah.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Molten Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\MoltenCore\boss_sulfuron_harbinger.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Molten Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\MoltenCore\instance_molten_core.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Molten Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\MoltenCore\molten_core.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Molten Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ScarletEnclave\chapter1.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scarlet Enclave</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ScarletEnclave\chapter2.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scarlet Enclave</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ScarletEnclave\chapter5.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scarlet Enclave</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ScarletEnclave\the_scarlet_enclave.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scarlet Enclave</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ScarletMonastery\boss_arcanist_doan.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scarlet Monastery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ScarletMonastery\boss_azshir_the_sleepless.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scarlet Monastery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ScarletMonastery\boss_bloodmage_thalnos.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scarlet Monastery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ScarletMonastery\boss_headless_horseman.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scarlet Monastery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ScarletMonastery\boss_herod.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scarlet Monastery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ScarletMonastery\boss_high_inquisitor_fairbanks.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scarlet Monastery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ScarletMonastery\boss_houndmaster_loksey.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scarlet Monastery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ScarletMonastery\boss_interrogator_vishas.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scarlet Monastery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ScarletMonastery\boss_mograine_and_whitemane.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scarlet Monastery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ScarletMonastery\boss_scorn.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scarlet Monastery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ScarletMonastery\instance_scarlet_monastery.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scarlet Monastery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Scholomance\boss_darkmaster_gandling.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Scholomance\boss_death_knight_darkreaver.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Scholomance\boss_doctor_theolen_krastinov.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Scholomance\boss_illucia_barov.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Scholomance\boss_instructor_malicia.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Scholomance\boss_jandice_barov.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Scholomance\boss_kormok.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Scholomance\boss_lord_alexei_barov.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Scholomance\boss_lorekeeper_polkelt.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Scholomance\boss_ras_frostwhisper.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Scholomance\boss_the_ravenian.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Scholomance\boss_vectus.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Scholomance\instance_scholomance.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ShadowfangKeep\instance_shadowfang_keep.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Shadowfang Keep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ShadowfangKeep\shadowfang_keep.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Shadowfang Keep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Stratholme\boss_baron_rivendare.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Stratholme\boss_baroness_anastari.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Stratholme\boss_cannon_master_willey.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Stratholme\boss_dathrohan_balnazzar.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Stratholme\boss_magistrate_barthilas.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Stratholme\boss_maleki_the_pallid.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Stratholme\boss_nerubenkan.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Stratholme\boss_order_of_silver_hand.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Stratholme\boss_postmaster_malown.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Stratholme\boss_ramstein_the_gorger.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Stratholme\boss_timmy_the_cruel.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Stratholme\instance_stratholme.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Stratholme\stratholme.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\SunkenTemple\instance_sunken_temple.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Sunken Temple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\SunkenTemple\sunken_temple.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Sunken Temple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\SunwellPlateau\boss_brutallus.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Sunwell Plateau</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\SunwellPlateau\boss_eredar_twins.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Sunwell Plateau</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\SunwellPlateau\boss_felmyst.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Sunwell Plateau</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\SunwellPlateau\boss_kalecgos.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Sunwell Plateau</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\SunwellPlateau\boss_kiljaeden.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Sunwell Plateau</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\SunwellPlateau\boss_muru.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Sunwell Plateau</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\SunwellPlateau\instance_sunwell_plateau.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Sunwell Plateau</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\SunwellPlateau\sunwell_plateau.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Sunwell Plateau</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Uldaman\boss_archaedas.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Uldaman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Uldaman\boss_ironaya.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Uldaman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Uldaman\instance_uldaman.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Uldaman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\Uldaman\uldaman.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Uldaman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulAman\boss_akilzon.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Aman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulAman\boss_halazzi.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Aman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulAman\boss_hexlord.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Aman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulAman\boss_janalai.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Aman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulAman\boss_nalorakk.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Aman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulAman\boss_zuljin.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Aman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulAman\instance_zulaman.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Aman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulAman\zulaman.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Aman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulGurub\boss_arlokk.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Gurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulGurub\boss_gahzranka.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Gurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulGurub\boss_grilek.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Gurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulGurub\boss_hakkar.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Gurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulGurub\boss_hazzarah.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Gurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulGurub\boss_jeklik.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Gurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulGurub\boss_jindo.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Gurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulGurub\boss_mandokir.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Gurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulGurub\boss_marli.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Gurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulGurub\boss_renataki.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Gurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulGurub\boss_thekal.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Gurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulGurub\boss_venoxis.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Gurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulGurub\boss_wushoolay.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Gurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\EasternKingdoms\ZulGurub\instance_zulgurub.cpp">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Gurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Examples\example_creature.cpp">
+      <Filter>Scripting\Examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Examples\example_escort.cpp">
+      <Filter>Scripting\Examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Examples\example_gossip_codebox.cpp">
+      <Filter>Scripting\Examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Examples\example_misc.cpp">
+      <Filter>Scripting\Examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\ashenvale.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\azshara.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\azuremyst_isle.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\bloodmyst_isle.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\boss_azuregos.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\darkshore.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\desolace.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\durotar.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\dustwallow_marsh.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\felwood.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\feralas.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\moonglade.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\mulgore.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\orgrimmar.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\silithus.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\stonetalon_mountains.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\tanaris.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\teldrassil.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\the_barrens.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\thousand_needles.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\thunder_bluff.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\ungoro_crater.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\winterspring.cpp">
+      <Filter>Scripting\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\BlackfathomDeeps\blackfathom_deeps.cpp">
+      <Filter>Scripting\Kalimdor\Blackfathom Depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\BlackfathomDeeps\boss_aku_mai.cpp">
+      <Filter>Scripting\Kalimdor\Blackfathom Depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\BlackfathomDeeps\boss_gelihast.cpp">
+      <Filter>Scripting\Kalimdor\Blackfathom Depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\BlackfathomDeeps\boss_kelris.cpp">
+      <Filter>Scripting\Kalimdor\Blackfathom Depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\BlackfathomDeeps\instance_blackfathom_deeps.cpp">
+      <Filter>Scripting\Kalimdor\Blackfathom Depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\BattleForMountHyjal\boss_anetheron.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Battle for Mt. Hyjal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\BattleForMountHyjal\boss_archimonde.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Battle for Mt. Hyjal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\BattleForMountHyjal\boss_azgalor.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Battle for Mt. Hyjal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\BattleForMountHyjal\boss_kazrogal.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Battle for Mt. Hyjal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\BattleForMountHyjal\boss_rage_winterchill.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Battle for Mt. Hyjal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\BattleForMountHyjal\hyjal.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Battle for Mt. Hyjal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\BattleForMountHyjal\hyjal_trash.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Battle for Mt. Hyjal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\BattleForMountHyjal\hyjalAI.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Battle for Mt. Hyjal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\BattleForMountHyjal\instance_hyjal.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Battle for Mt. Hyjal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\CullingOfStratholme\boss_epoch.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Culling of Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\CullingOfStratholme\boss_infinite.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Culling of Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\CullingOfStratholme\boss_mal_ganis.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Culling of Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\CullingOfStratholme\boss_meathook.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Culling of Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\CullingOfStratholme\boss_salramm.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Culling of Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\CullingOfStratholme\culling_of_stratholme.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Culling of Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\CullingOfStratholme\instance_culling_of_stratholme.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Culling of Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\EscapeFromDurnholdeKeep\boss_captain_skarloc.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Old Hillsbrad</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\EscapeFromDurnholdeKeep\boss_epoch_hunter.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Old Hillsbrad</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\EscapeFromDurnholdeKeep\boss_leutenant_drake.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Old Hillsbrad</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\EscapeFromDurnholdeKeep\instance_old_hillsbrad.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Old Hillsbrad</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\EscapeFromDurnholdeKeep\old_hillsbrad.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Old Hillsbrad</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\DarkPortal\boss_aeonus.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\The Dark Portal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\DarkPortal\boss_chrono_lord_deja.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\The Dark Portal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\DarkPortal\boss_temporus.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\The Dark Portal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\DarkPortal\dark_portal.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\The Dark Portal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\DarkPortal\instance_dark_portal.cpp">
+      <Filter>Scripting\Kalimdor\Caverns of Time\The Dark Portal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\Maraudon\boss_celebras_the_cursed.cpp">
+      <Filter>Scripting\Kalimdor\Maraudon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\Maraudon\boss_landslide.cpp">
+      <Filter>Scripting\Kalimdor\Maraudon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\Maraudon\boss_noxxion.cpp">
+      <Filter>Scripting\Kalimdor\Maraudon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\Maraudon\boss_princess_theradras.cpp">
+      <Filter>Scripting\Kalimdor\Maraudon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\OnyxiasLair\boss_onyxia.cpp">
+      <Filter>Scripting\Kalimdor\Onyxia%27s Lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\OnyxiasLair\instance_onyxias_lair.cpp">
+      <Filter>Scripting\Kalimdor\Onyxia%27s Lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\RazorfenDowns\boss_amnennar_the_coldbringer.cpp">
+      <Filter>Scripting\Kalimdor\Razorfen Downs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\RazorfenDowns\instance_razorfen_downs.cpp">
+      <Filter>Scripting\Kalimdor\Razorfen Downs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\RazorfenDowns\razorfen_downs.cpp">
+      <Filter>Scripting\Kalimdor\Razorfen Downs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\RazorfenKraul\instance_razorfen_kraul.cpp">
+      <Filter>Scripting\Kalimdor\Razorfen Kraul</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\RazorfenKraul\razorfen_kraul.cpp">
+      <Filter>Scripting\Kalimdor\Razorfen Kraul</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\RuinsOfAhnQiraj\boss_ayamiss.cpp">
+      <Filter>Scripting\Kalimdor\Ruins of Ahn%27Qiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\RuinsOfAhnQiraj\boss_buru.cpp">
+      <Filter>Scripting\Kalimdor\Ruins of Ahn%27Qiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\RuinsOfAhnQiraj\boss_kurinnaxx.cpp">
+      <Filter>Scripting\Kalimdor\Ruins of Ahn%27Qiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\RuinsOfAhnQiraj\boss_moam.cpp">
+      <Filter>Scripting\Kalimdor\Ruins of Ahn%27Qiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\RuinsOfAhnQiraj\boss_ossirian.cpp">
+      <Filter>Scripting\Kalimdor\Ruins of Ahn%27Qiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\RuinsOfAhnQiraj\boss_rajaxx.cpp">
+      <Filter>Scripting\Kalimdor\Ruins of Ahn%27Qiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\RuinsOfAhnQiraj\instance_ruins_of_ahnqiraj.cpp">
+      <Filter>Scripting\Kalimdor\Ruins of Ahn%27Qiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\TempleOfAhnQiraj\boss_bug_trio.cpp">
+      <Filter>Scripting\Kalimdor\Temple of Ahn%27Qiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\TempleOfAhnQiraj\boss_cthun.cpp">
+      <Filter>Scripting\Kalimdor\Temple of Ahn%27Qiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\TempleOfAhnQiraj\boss_fankriss.cpp">
+      <Filter>Scripting\Kalimdor\Temple of Ahn%27Qiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\TempleOfAhnQiraj\boss_huhuran.cpp">
+      <Filter>Scripting\Kalimdor\Temple of Ahn%27Qiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\TempleOfAhnQiraj\boss_ouro.cpp">
+      <Filter>Scripting\Kalimdor\Temple of Ahn%27Qiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\TempleOfAhnQiraj\boss_sartura.cpp">
+      <Filter>Scripting\Kalimdor\Temple of Ahn%27Qiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\TempleOfAhnQiraj\boss_skeram.cpp">
+      <Filter>Scripting\Kalimdor\Temple of Ahn%27Qiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\TempleOfAhnQiraj\boss_twinemperors.cpp">
+      <Filter>Scripting\Kalimdor\Temple of Ahn%27Qiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\TempleOfAhnQiraj\boss_viscidus.cpp">
+      <Filter>Scripting\Kalimdor\Temple of Ahn%27Qiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\TempleOfAhnQiraj\instance_temple_of_ahnqiraj.cpp">
+      <Filter>Scripting\Kalimdor\Temple of Ahn%27Qiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\TempleOfAhnQiraj\mob_anubisath_sentinel.cpp">
+      <Filter>Scripting\Kalimdor\Temple of Ahn%27Qiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\WailingCaverns\instance_wailing_caverns.cpp">
+      <Filter>Scripting\Kalimdor\Wailing Caverns</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\WailingCaverns\wailing_caverns.cpp">
+      <Filter>Scripting\Kalimdor\Wailing Caverns</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\ZulFarrak\instance_zulfarrak.cpp">
+      <Filter>Scripting\Kalimdor\Zul%27Farrak</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Kalimdor\ZulFarrak\zulfarrak.cpp">
+      <Filter>Scripting\Kalimdor\Zul%27Farrak</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\borean_tundra.cpp">
+      <Filter>Scripting\Northrend</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\crystalsong_forest.cpp">
+      <Filter>Scripting\Northrend</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\dalaran.cpp">
+      <Filter>Scripting\Northrend</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\dragonblight.cpp">
+      <Filter>Scripting\Northrend</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\grizzly_hills.cpp">
+      <Filter>Scripting\Northrend</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\howling_fjord.cpp">
+      <Filter>Scripting\Northrend</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\icecrown.cpp">
+      <Filter>Scripting\Northrend</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\sholazar_basin.cpp">
+      <Filter>Scripting\Northrend</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\storm_peaks.cpp">
+      <Filter>Scripting\Northrend</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\zuldrak.cpp">
+      <Filter>Scripting\Northrend</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\AzjolNerub\ahnkahet\boss_amanitar.cpp">
+      <Filter>Scripting\Northrend\Azjol-Nerub\Ahn%27kahet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\AzjolNerub\ahnkahet\boss_elder_nadox.cpp">
+      <Filter>Scripting\Northrend\Azjol-Nerub\Ahn%27kahet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\AzjolNerub\ahnkahet\boss_herald_volazj.cpp">
+      <Filter>Scripting\Northrend\Azjol-Nerub\Ahn%27kahet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\AzjolNerub\ahnkahet\boss_jedoga_shadowseeker.cpp">
+      <Filter>Scripting\Northrend\Azjol-Nerub\Ahn%27kahet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\AzjolNerub\ahnkahet\boss_prince_taldaram.cpp">
+      <Filter>Scripting\Northrend\Azjol-Nerub\Ahn%27kahet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\AzjolNerub\ahnkahet\instance_ahnkahet.cpp">
+      <Filter>Scripting\Northrend\Azjol-Nerub\Ahn%27kahet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\AzjolNerub\AzjolNerub\boss_anubarak.cpp">
+      <Filter>Scripting\Northrend\Azjol-Nerub\Azjol-Nerub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\AzjolNerub\AzjolNerub\boss_hadronox.cpp">
+      <Filter>Scripting\Northrend\Azjol-Nerub\Azjol-Nerub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\AzjolNerub\AzjolNerub\boss_krikthir_the_gatewatcher.cpp">
+      <Filter>Scripting\Northrend\Azjol-Nerub\Azjol-Nerub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\AzjolNerub\AzjolNerub\instance_azjol_nerub.cpp">
+      <Filter>Scripting\Northrend\Azjol-Nerub\Azjol-Nerub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\DraktharonKeep\boss_dred.cpp">
+      <Filter>Scripting\Northrend\Drak%27Tharon Keep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\DraktharonKeep\boss_novos.cpp">
+      <Filter>Scripting\Northrend\Drak%27Tharon Keep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\DraktharonKeep\boss_tharon_ja.cpp">
+      <Filter>Scripting\Northrend\Drak%27Tharon Keep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\DraktharonKeep\boss_trollgore.cpp">
+      <Filter>Scripting\Northrend\Drak%27Tharon Keep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\DraktharonKeep\instance_drak_tharon_keep.cpp">
+      <Filter>Scripting\Northrend\Drak%27Tharon Keep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\FrozenHalls\ForgeOfSouls\boss_bronjahm.cpp">
+      <Filter>Scripting\Northrend\Icecrown Citadel\Forge of Souls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\FrozenHalls\ForgeOfSouls\boss_devourer_of_souls.cpp">
+      <Filter>Scripting\Northrend\Icecrown Citadel\Forge of Souls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\FrozenHalls\ForgeOfSouls\forge_of_souls.cpp">
+      <Filter>Scripting\Northrend\Icecrown Citadel\Forge of Souls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\FrozenHalls\ForgeOfSouls\instance_forge_of_souls.cpp">
+      <Filter>Scripting\Northrend\Icecrown Citadel\Forge of Souls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\FrozenHalls\HallsOfReflection\boss_falric.cpp">
+      <Filter>Scripting\Northrend\Icecrown Citadel\Halls of Reflection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\FrozenHalls\HallsOfReflection\boss_marwyn.cpp">
+      <Filter>Scripting\Northrend\Icecrown Citadel\Halls of Reflection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\FrozenHalls\HallsOfReflection\halls_of_reflection.cpp">
+      <Filter>Scripting\Northrend\Icecrown Citadel\Halls of Reflection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\FrozenHalls\HallsOfReflection\instance_halls_of_reflection.cpp">
+      <Filter>Scripting\Northrend\Icecrown Citadel\Halls of Reflection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\FrozenHalls\PitOfSaron\boss_forgemaster_garfrost.cpp">
+      <Filter>Scripting\Northrend\Icecrown Citadel\Pit of Saron</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\FrozenHalls\PitOfSaron\boss_krickandick.cpp">
+      <Filter>Scripting\Northrend\Icecrown Citadel\Pit of Saron</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\FrozenHalls\PitOfSaron\boss_scourgelord_tyrannus.cpp">
+      <Filter>Scripting\Northrend\Icecrown Citadel\Pit of Saron</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\FrozenHalls\PitOfSaron\instance_pit_of_saron.cpp">
+      <Filter>Scripting\Northrend\Icecrown Citadel\Pit of Saron</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\FrozenHalls\PitOfSaron\pit_of_saron.cpp">
+      <Filter>Scripting\Northrend\Icecrown Citadel\Pit of Saron</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Gundrak\boss_drakkari_colossus.cpp">
+      <Filter>Scripting\Northrend\Gundrak</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Gundrak\boss_eck.cpp">
+      <Filter>Scripting\Northrend\Gundrak</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Gundrak\boss_gal_darah.cpp">
+      <Filter>Scripting\Northrend\Gundrak</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Gundrak\boss_moorabi.cpp">
+      <Filter>Scripting\Northrend\Gundrak</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Gundrak\boss_slad_ran.cpp">
+      <Filter>Scripting\Northrend\Gundrak</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Gundrak\instance_gundrak.cpp">
+      <Filter>Scripting\Northrend\Gundrak</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Naxxramas\boss_anubrekhan.cpp">
+      <Filter>Scripting\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Naxxramas\boss_faerlina.cpp">
+      <Filter>Scripting\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Naxxramas\boss_four_horsemen.cpp">
+      <Filter>Scripting\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Naxxramas\boss_gluth.cpp">
+      <Filter>Scripting\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Naxxramas\boss_gothik.cpp">
+      <Filter>Scripting\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Naxxramas\boss_grobbulus.cpp">
+      <Filter>Scripting\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Naxxramas\boss_heigan.cpp">
+      <Filter>Scripting\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Naxxramas\boss_kelthuzad.cpp">
+      <Filter>Scripting\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Naxxramas\boss_loatheb.cpp">
+      <Filter>Scripting\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Naxxramas\boss_maexxna.cpp">
+      <Filter>Scripting\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Naxxramas\boss_noth.cpp">
+      <Filter>Scripting\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Naxxramas\boss_patchwerk.cpp">
+      <Filter>Scripting\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Naxxramas\boss_razuvious.cpp">
+      <Filter>Scripting\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Naxxramas\boss_sapphiron.cpp">
+      <Filter>Scripting\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Naxxramas\boss_thaddius.cpp">
+      <Filter>Scripting\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Naxxramas\instance_naxxramas.cpp">
+      <Filter>Scripting\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\ObsidianSanctum\boss_sartharion.cpp">
+      <Filter>Scripting\Northrend\Obsidian Sanctum</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\ObsidianSanctum\instance_obsidian_sanctum.cpp">
+      <Filter>Scripting\Northrend\Obsidian Sanctum</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\CrusadersColiseum\TrialOfTheChampion\boss_argent_challenge.cpp">
+      <Filter>Scripting\Northrend\Trial of the Champion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\CrusadersColiseum\TrialOfTheChampion\boss_black_knight.cpp">
+      <Filter>Scripting\Northrend\Trial of the Champion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\CrusadersColiseum\TrialOfTheChampion\boss_grand_champions.cpp">
+      <Filter>Scripting\Northrend\Trial of the Champion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\CrusadersColiseum\TrialOfTheChampion\instance_trial_of_the_champion.cpp">
+      <Filter>Scripting\Northrend\Trial of the Champion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\CrusadersColiseum\TrialOfTheChampion\trial_of_the_champion.cpp">
+      <Filter>Scripting\Northrend\Trial of the Champion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\HallsOfStone\boss_krystallus.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Halls of Stone</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\HallsOfStone\boss_maiden_of_grief.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Halls of Stone</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\HallsOfStone\boss_sjonnir.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Halls of Stone</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\HallsOfStone\halls_of_stone.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Halls of Stone</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\HallsOfStone\instance_halls_of_stone.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Halls of Stone</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\HallsOfLightning\boss_bjarngrim.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Halls of Lightning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\HallsOfLightning\boss_ionar.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Halls of Lightning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\HallsOfLightning\boss_loken.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Halls of Lightning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\HallsOfLightning\boss_volkhan.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Halls of Lightning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\HallsOfLightning\instance_halls_of_lightning.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Halls of Lightning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\boss_algalon.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\boss_assembly_of_iron.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\boss_auriaya.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\boss_flame_leviathan.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\boss_freya.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\boss_general_vezax.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\boss_hodir.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\boss_ignis.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\boss_kologarn.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\boss_mimiron.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\boss_razorscale.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\boss_thorim.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\boss_xt002.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\boss_yoggsaron.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\instance_ulduar.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\ulduar_teleporter.cpp">
+      <Filter>Scripting\Northrend\Ulduar\Ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\UtgardeKeep\UtgardeKeep\boss_ingvar_the_plunderer.cpp">
+      <Filter>Scripting\Northrend\Utgarde Keep\Utgarde Keep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\UtgardeKeep\UtgardeKeep\boss_keleseth.cpp">
+      <Filter>Scripting\Northrend\Utgarde Keep\Utgarde Keep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\UtgardeKeep\UtgardeKeep\boss_skarvald_dalronn.cpp">
+      <Filter>Scripting\Northrend\Utgarde Keep\Utgarde Keep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\UtgardeKeep\UtgardeKeep\instance_utgarde_keep.cpp">
+      <Filter>Scripting\Northrend\Utgarde Keep\Utgarde Keep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\UtgardeKeep\UtgardeKeep\utgarde_keep.cpp">
+      <Filter>Scripting\Northrend\Utgarde Keep\Utgarde Keep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\UtgardeKeep\UtgardePinnacle\boss_palehoof.cpp">
+      <Filter>Scripting\Northrend\Utgarde Keep\Utgarde Pinnacle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\UtgardeKeep\UtgardePinnacle\boss_skadi.cpp">
+      <Filter>Scripting\Northrend\Utgarde Keep\Utgarde Pinnacle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\UtgardeKeep\UtgardePinnacle\boss_svala.cpp">
+      <Filter>Scripting\Northrend\Utgarde Keep\Utgarde Pinnacle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\UtgardeKeep\UtgardePinnacle\boss_ymiron.cpp">
+      <Filter>Scripting\Northrend\Utgarde Keep\Utgarde Pinnacle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\UtgardeKeep\UtgardePinnacle\instance_pinnacle.cpp">
+      <Filter>Scripting\Northrend\Utgarde Keep\Utgarde Pinnacle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\VaultOfArchavon\boss_archavon.cpp">
+      <Filter>Scripting\Northrend\Vault of Archavon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\VaultOfArchavon\boss_emalon.cpp">
+      <Filter>Scripting\Northrend\Vault of Archavon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\VaultOfArchavon\boss_koralon.cpp">
+      <Filter>Scripting\Northrend\Vault of Archavon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\VaultOfArchavon\boss_toravon.cpp">
+      <Filter>Scripting\Northrend\Vault of Archavon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\VaultOfArchavon\instance_vault_of_archavon.cpp">
+      <Filter>Scripting\Northrend\Vault of Archavon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\VioletHold\boss_cyanigosa.cpp">
+      <Filter>Scripting\Northrend\Violet Hold</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\VioletHold\boss_erekem.cpp">
+      <Filter>Scripting\Northrend\Violet Hold</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\VioletHold\boss_ichoron.cpp">
+      <Filter>Scripting\Northrend\Violet Hold</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\VioletHold\boss_lavanthor.cpp">
+      <Filter>Scripting\Northrend\Violet Hold</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\VioletHold\boss_moragg.cpp">
+      <Filter>Scripting\Northrend\Violet Hold</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\VioletHold\boss_xevozz.cpp">
+      <Filter>Scripting\Northrend\Violet Hold</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\VioletHold\boss_zuramat.cpp">
+      <Filter>Scripting\Northrend\Violet Hold</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\VioletHold\instance_violet_hold.cpp">
+      <Filter>Scripting\Northrend\Violet Hold</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\VioletHold\violet_hold.cpp">
+      <Filter>Scripting\Northrend\Violet Hold</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Nexus\EyeOfEternity\boss_malygos.cpp">
+      <Filter>Scripting\Northrend\Nexus\Eye of Eternity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Nexus\EyeOfEternity\instance_eye_of_eternity.cpp">
+      <Filter>Scripting\Northrend\Nexus\Eye of Eternity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Nexus\Nexus\boss_anomalus.cpp">
+      <Filter>Scripting\Northrend\Nexus\Nexus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Nexus\Nexus\boss_keristrasza.cpp">
+      <Filter>Scripting\Northrend\Nexus\Nexus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Nexus\Nexus\boss_magus_telestra.cpp">
+      <Filter>Scripting\Northrend\Nexus\Nexus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Nexus\Nexus\boss_ormorok.cpp">
+      <Filter>Scripting\Northrend\Nexus\Nexus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Nexus\Nexus\commander_kolurg.cpp">
+      <Filter>Scripting\Northrend\Nexus\Nexus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Nexus\Nexus\commander_stoutbeard.cpp">
+      <Filter>Scripting\Northrend\Nexus\Nexus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Nexus\Nexus\instance_nexus.cpp">
+      <Filter>Scripting\Northrend\Nexus\Nexus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Nexus\Oculus\boss_drakos.cpp">
+      <Filter>Scripting\Northrend\Nexus\Oculus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Nexus\Oculus\boss_eregos.cpp">
+      <Filter>Scripting\Northrend\Nexus\Oculus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Nexus\Oculus\boss_urom.cpp">
+      <Filter>Scripting\Northrend\Nexus\Oculus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Nexus\Oculus\boss_varos.cpp">
+      <Filter>Scripting\Northrend\Nexus\Oculus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Nexus\Oculus\instance_oculus.cpp">
+      <Filter>Scripting\Northrend\Nexus\Oculus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Northrend\Nexus\Oculus\oculus.cpp">
+      <Filter>Scripting\Northrend\Nexus\Oculus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\blades_edge_mountains.cpp">
+      <Filter>Scripting\Outland</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\boss_doomlord_kazzak.cpp">
+      <Filter>Scripting\Outland</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\boss_doomwalker.cpp">
+      <Filter>Scripting\Outland</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\hellfire_peninsula.cpp">
+      <Filter>Scripting\Outland</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\nagrand.cpp">
+      <Filter>Scripting\Outland</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\netherstorm.cpp">
+      <Filter>Scripting\Outland</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\shadowmoon_valley.cpp">
+      <Filter>Scripting\Outland</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\shattrath_city.cpp">
+      <Filter>Scripting\Outland</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\terokkar_forest.cpp">
+      <Filter>Scripting\Outland</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\zangarmarsh.cpp">
+      <Filter>Scripting\Outland</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\Auchindoun\AuchenaiCrypts\boss_exarch_maladaar.cpp">
+      <Filter>Scripting\Outland\Aunchindoun\Auchenai Crypts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\Auchindoun\AuchenaiCrypts\boss_shirrak_the_dead_watcher.cpp">
+      <Filter>Scripting\Outland\Aunchindoun\Auchenai Crypts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\Auchindoun\ManaTombs\boss_nexusprince_shaffar.cpp">
+      <Filter>Scripting\Outland\Aunchindoun\Mana Tombs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\Auchindoun\ManaTombs\boss_pandemonius.cpp">
+      <Filter>Scripting\Outland\Aunchindoun\Mana Tombs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\Auchindoun\SethekkHalls\boss_darkweaver_syth.cpp">
+      <Filter>Scripting\Outland\Aunchindoun\Sethekk Halls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\Auchindoun\SethekkHalls\boss_tailonking_ikiss.cpp">
+      <Filter>Scripting\Outland\Aunchindoun\Sethekk Halls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\Auchindoun\SethekkHalls\instance_sethekk_halls.cpp">
+      <Filter>Scripting\Outland\Aunchindoun\Sethekk Halls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\Auchindoun\ShadowLabyrinth\boss_ambassador_hellmaw.cpp">
+      <Filter>Scripting\Outland\Aunchindoun\Shadow Labyrinth</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\Auchindoun\ShadowLabyrinth\boss_blackheart_the_inciter.cpp">
+      <Filter>Scripting\Outland\Aunchindoun\Shadow Labyrinth</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\Auchindoun\ShadowLabyrinth\boss_grandmaster_vorpil.cpp">
+      <Filter>Scripting\Outland\Aunchindoun\Shadow Labyrinth</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\Auchindoun\ShadowLabyrinth\boss_murmur.cpp">
+      <Filter>Scripting\Outland\Aunchindoun\Shadow Labyrinth</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\Auchindoun\ShadowLabyrinth\instance_shadow_labyrinth.cpp">
+      <Filter>Scripting\Outland\Aunchindoun\Shadow Labyrinth</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\BlackTemple\black_temple.cpp">
+      <Filter>Scripting\Outland\Black Temple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\BlackTemple\boss_bloodboil.cpp">
+      <Filter>Scripting\Outland\Black Temple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\BlackTemple\boss_illidan.cpp">
+      <Filter>Scripting\Outland\Black Temple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\BlackTemple\boss_mother_shahraz.cpp">
+      <Filter>Scripting\Outland\Black Temple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\BlackTemple\boss_reliquary_of_souls.cpp">
+      <Filter>Scripting\Outland\Black Temple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\BlackTemple\boss_shade_of_akama.cpp">
+      <Filter>Scripting\Outland\Black Temple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\BlackTemple\boss_supremus.cpp">
+      <Filter>Scripting\Outland\Black Temple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\BlackTemple\boss_teron_gorefiend.cpp">
+      <Filter>Scripting\Outland\Black Temple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\BlackTemple\boss_warlord_najentus.cpp">
+      <Filter>Scripting\Outland\Black Temple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\BlackTemple\illidari_council.cpp">
+      <Filter>Scripting\Outland\Black Temple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\BlackTemple\instance_black_temple.cpp">
+      <Filter>Scripting\Outland\Black Temple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\CoilfangReservoir\SerpentShrine\boss_fathomlord_karathress.cpp">
+      <Filter>Scripting\Outland\Coilfang Resevoir\Serpent Shrine Cavern</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\CoilfangReservoir\SerpentShrine\boss_hydross_the_unstable.cpp">
+      <Filter>Scripting\Outland\Coilfang Resevoir\Serpent Shrine Cavern</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\CoilfangReservoir\SerpentShrine\boss_lady_vashj.cpp">
+      <Filter>Scripting\Outland\Coilfang Resevoir\Serpent Shrine Cavern</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\CoilfangReservoir\SerpentShrine\boss_leotheras_the_blind.cpp">
+      <Filter>Scripting\Outland\Coilfang Resevoir\Serpent Shrine Cavern</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\CoilfangReservoir\SerpentShrine\boss_lurker_below.cpp">
+      <Filter>Scripting\Outland\Coilfang Resevoir\Serpent Shrine Cavern</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\CoilfangReservoir\SerpentShrine\boss_morogrim_tidewalker.cpp">
+      <Filter>Scripting\Outland\Coilfang Resevoir\Serpent Shrine Cavern</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\CoilfangReservoir\SerpentShrine\instance_serpent_shrine.cpp">
+      <Filter>Scripting\Outland\Coilfang Resevoir\Serpent Shrine Cavern</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\CoilfangReservoir\SteamVault\boss_hydromancer_thespia.cpp">
+      <Filter>Scripting\Outland\Coilfang Resevoir\Steam Vault</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\CoilfangReservoir\SteamVault\boss_mekgineer_steamrigger.cpp">
+      <Filter>Scripting\Outland\Coilfang Resevoir\Steam Vault</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\CoilfangReservoir\SteamVault\boss_warlord_kalithresh.cpp">
+      <Filter>Scripting\Outland\Coilfang Resevoir\Steam Vault</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\CoilfangReservoir\SteamVault\instance_steam_vault.cpp">
+      <Filter>Scripting\Outland\Coilfang Resevoir\Steam Vault</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\CoilfangReservoir\underbog\boss_hungarfen.cpp">
+      <Filter>Scripting\Outland\Coilfang Resevoir\Underbog</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\CoilfangReservoir\underbog\boss_the_black_stalker.cpp">
+      <Filter>Scripting\Outland\Coilfang Resevoir\Underbog</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\GruulsLair\boss_gruul.cpp">
+      <Filter>Scripting\Outland\Gruul%27s Lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\GruulsLair\boss_high_king_maulgar.cpp">
+      <Filter>Scripting\Outland\Gruul%27s Lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\GruulsLair\instance_gruuls_lair.cpp">
+      <Filter>Scripting\Outland\Gruul%27s Lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\HellfireCitadel\BloodFurnace\boss_broggok.cpp">
+      <Filter>Scripting\Outland\Hellfire Citadel\Blood Furnace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\HellfireCitadel\BloodFurnace\boss_kelidan_the_breaker.cpp">
+      <Filter>Scripting\Outland\Hellfire Citadel\Blood Furnace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\HellfireCitadel\BloodFurnace\boss_the_maker.cpp">
+      <Filter>Scripting\Outland\Hellfire Citadel\Blood Furnace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\HellfireCitadel\BloodFurnace\instance_blood_furnace.cpp">
+      <Filter>Scripting\Outland\Hellfire Citadel\Blood Furnace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\HellfireCitadel\HellfireRamparts\boss_omor_the_unscarred.cpp">
+      <Filter>Scripting\Outland\Hellfire Citadel\Hellfire Ramparts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\HellfireCitadel\HellfireRamparts\boss_vazruden_the_herald.cpp">
+      <Filter>Scripting\Outland\Hellfire Citadel\Hellfire Ramparts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\HellfireCitadel\HellfireRamparts\boss_watchkeeper_gargolmar.cpp">
+      <Filter>Scripting\Outland\Hellfire Citadel\Hellfire Ramparts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\HellfireCitadel\HellfireRamparts\instance_hellfire_ramparts.cpp">
+      <Filter>Scripting\Outland\Hellfire Citadel\Hellfire Ramparts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\HellfireCitadel\MagtheridonsLair\boss_magtheridon.cpp">
+      <Filter>Scripting\Outland\Hellfire Citadel\Magtheridon%27s lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\HellfireCitadel\MagtheridonsLair\instance_magtheridons_lair.cpp">
+      <Filter>Scripting\Outland\Hellfire Citadel\Magtheridon%27s lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\HellfireCitadel\ShatteredHalls\boss_nethekurse.cpp">
+      <Filter>Scripting\Outland\Hellfire Citadel\Shattered Halls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\HellfireCitadel\ShatteredHalls\boss_warbringer_omrogg.cpp">
+      <Filter>Scripting\Outland\Hellfire Citadel\Shattered Halls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\HellfireCitadel\ShatteredHalls\boss_warchief_kargath_bladefist.cpp">
+      <Filter>Scripting\Outland\Hellfire Citadel\Shattered Halls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\HellfireCitadel\ShatteredHalls\instance_shattered_halls.cpp">
+      <Filter>Scripting\Outland\Hellfire Citadel\Shattered Halls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\TempestKeep\arcatraz\arcatraz.cpp">
+      <Filter>Scripting\Outland\Tempest Keep\Arcatraz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\TempestKeep\arcatraz\boss_harbinger_skyriss.cpp">
+      <Filter>Scripting\Outland\Tempest Keep\Arcatraz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\TempestKeep\arcatraz\instance_arcatraz.cpp">
+      <Filter>Scripting\Outland\Tempest Keep\Arcatraz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\TempestKeep\botanica\boss_high_botanist_freywinn.cpp">
+      <Filter>Scripting\Outland\Tempest Keep\Botanica</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\TempestKeep\botanica\boss_laj.cpp">
+      <Filter>Scripting\Outland\Tempest Keep\Botanica</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\TempestKeep\botanica\boss_warp_splinter.cpp">
+      <Filter>Scripting\Outland\Tempest Keep\Botanica</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\TempestKeep\Eye\boss_alar.cpp">
+      <Filter>Scripting\Outland\Tempest Keep\The Eye</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\TempestKeep\Eye\boss_astromancer.cpp">
+      <Filter>Scripting\Outland\Tempest Keep\The Eye</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\TempestKeep\Eye\boss_kaelthas.cpp">
+      <Filter>Scripting\Outland\Tempest Keep\The Eye</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\TempestKeep\Eye\boss_void_reaver.cpp">
+      <Filter>Scripting\Outland\Tempest Keep\The Eye</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\TempestKeep\Eye\instance_the_eye.cpp">
+      <Filter>Scripting\Outland\Tempest Keep\The Eye</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\TempestKeep\Eye\the_eye.cpp">
+      <Filter>Scripting\Outland\Tempest Keep\The Eye</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\TempestKeep\Mechanar\boss_gatewatcher_gyrokill.cpp">
+      <Filter>Scripting\Outland\Tempest Keep\The Mechanar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\TempestKeep\Mechanar\boss_gatewatcher_ironhand.cpp">
+      <Filter>Scripting\Outland\Tempest Keep\The Mechanar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\TempestKeep\Mechanar\boss_nethermancer_sepethrea.cpp">
+      <Filter>Scripting\Outland\Tempest Keep\The Mechanar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\TempestKeep\Mechanar\boss_pathaleon_the_calculator.cpp">
+      <Filter>Scripting\Outland\Tempest Keep\The Mechanar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\scripts\Outland\TempestKeep\Mechanar\instance_mechanar.cpp">
+      <Filter>Scripting\Outland\Tempest Keep\The Mechanar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Accounts\AccountMgr.cpp">
+      <Filter>Accounts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Achievements\AchievementMgr.cpp">
+      <Filter>Achievements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Addons\AddonMgr.cpp">
+      <Filter>Addons</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\AuctionHouse\AuctionHouseMgr.cpp">
+      <Filter>AuctionHouse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\AuctionHouse\AuctionHouseBot\AuctionHouseBot.cpp">
+      <Filter>AuctionHouse\AuctionHouseBot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\BattleGrounds\ArenaTeam.cpp">
+      <Filter>BattleGrounds</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\BattleGrounds\BattleGround.cpp">
+      <Filter>BattleGrounds</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\BattleGrounds\BattleGroundMgr.cpp">
+      <Filter>BattleGrounds</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundAA.cpp">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundAB.cpp">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundAV.cpp">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundBE.cpp">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundDS.cpp">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundEY.cpp">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundIC.cpp">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundNA.cpp">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundRB.cpp">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundRL.cpp">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundRV.cpp">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundSA.cpp">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundWS.cpp">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Calendar\Calendar.cpp">
+      <Filter>Calendar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Chat\Chat.cpp">
+      <Filter>Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Chat\Channels\Channel.cpp">
+      <Filter>Chat\Channels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Chat\Channels\ChannelMgr.cpp">
+      <Filter>Chat\Channels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Chat\Commands\Debugcmds.cpp">
+      <Filter>Chat\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Chat\Commands\Level0.cpp">
+      <Filter>Chat\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Chat\Commands\Level1.cpp">
+      <Filter>Chat\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Chat\Commands\Level2.cpp">
+      <Filter>Chat\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Chat\Commands\Level3.cpp">
+      <Filter>Chat\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Combat\HostileRefManager.cpp">
+      <Filter>Combat</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Combat\ThreatManager.cpp">
+      <Filter>Combat</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Conditions\ConditionMgr.cpp">
+      <Filter>Conditions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\DataStores\DBCStores.cpp">
+      <Filter>DataStores</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Entities\Creature\Creature.cpp">
+      <Filter>Entities\Creature</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Entities\Creature\CreatureGroups.cpp">
+      <Filter>Entities\Creature</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Entities\Creature\GossipDef.cpp">
+      <Filter>Entities\Creature</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Entities\Creature\TemporarySummon.cpp">
+      <Filter>Entities\Creature</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Entities\DynamicObject\DynamicObject.cpp">
+      <Filter>Entities\DynamicObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Entities\GameObject\GameObject.cpp">
+      <Filter>Entities\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Entities\Item\Item.cpp">
+      <Filter>Entities\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Entities\Item\ItemEnchantmentMgr.cpp">
+      <Filter>Entities\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Entities\Item\Container\Bag.cpp">
+      <Filter>Entities\Item\Container</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Entities\Object\Object.cpp">
+      <Filter>Entities\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Entities\Object\ObjectPosSelector.cpp">
+      <Filter>Entities\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Entities\Object\Updates\UpdateData.cpp">
+      <Filter>Entities\Object\Updates</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Entities\Pet\Pet.cpp">
+      <Filter>Entities\Pet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Entities\Player\Player.cpp">
+      <Filter>Entities\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Entities\Player\SocialMgr.cpp">
+      <Filter>Entities\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Entities\Totem\Totem.cpp">
+      <Filter>Entities\Totem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Entities\Transport\Transport.cpp">
+      <Filter>Entities\Transport</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Entities\Corpse\Corpse.cpp">
+      <Filter>Entities\Corpse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Entities\Unit\StatSystem.cpp">
+      <Filter>Entities\Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Entities\Unit\Unit.cpp">
+      <Filter>Entities\Unit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Entities\Vehicle\Vehicle.cpp">
+      <Filter>Entities\Vehicle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Globals\GlobalEvents.cpp">
+      <Filter>Globals</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Globals\ObjectAccessor.cpp">
+      <Filter>Globals</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Globals\ObjectMgr.cpp">
+      <Filter>Globals</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Instances\InstanceData.cpp">
+      <Filter>Instances</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Instances\InstanceSaveMgr.cpp">
+      <Filter>Instances</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\DungeonFinding\LFGMgr.cpp">
+      <Filter>DungeonFinding</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Loot\LootMgr.cpp">
+      <Filter>Loot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Mails\Mail.cpp">
+      <Filter>Mails</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Maps\Map.cpp">
+      <Filter>Maps</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Maps\MapInstanced.cpp">
+      <Filter>Maps</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Maps\MapManager.cpp">
+      <Filter>Maps</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Maps\MapUpdater.cpp">
+      <Filter>Maps</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Movement\DestinationHolder.cpp">
+      <Filter>Movement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Movement\FollowerReference.cpp">
+      <Filter>Movement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Movement\MotionMaster.cpp">
+      <Filter>Movement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Movement\MovementGenerator.cpp">
+      <Filter>Movement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Movement\MovementGenerators\ConfusedMovementGenerator.cpp">
+      <Filter>Movement\MovementGenerators</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Movement\MovementGenerators\FleeingMovementGenerator.cpp">
+      <Filter>Movement\MovementGenerators</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Movement\MovementGenerators\HomeMovementGenerator.cpp">
+      <Filter>Movement\MovementGenerators</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Movement\MovementGenerators\IdleMovementGenerator.cpp">
+      <Filter>Movement\MovementGenerators</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Movement\MovementGenerators\PointMovementGenerator.cpp">
+      <Filter>Movement\MovementGenerators</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Movement\MovementGenerators\RandomMovementGenerator.cpp">
+      <Filter>Movement\MovementGenerators</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Movement\MovementGenerators\TargetedMovementGenerator.cpp">
+      <Filter>Movement\MovementGenerators</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Movement\MovementGenerators\WaypointMovementGenerator.cpp">
+      <Filter>Movement\MovementGenerators</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Movement\Waypoints\WaypointManager.cpp">
+      <Filter>Movement\Waypoints</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\WorldSession.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\WorldSocket.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\WorldSocketMgr.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Opcodes.cpp">
+      <Filter>Server\Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\WorldLog.cpp">
+      <Filter>Server\Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\AddonHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\ArenaTeamHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\AuctionHouseHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\BattleGroundHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\CalendarHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\ChannelHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\CharacterHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\ChatHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\CombatHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\DuelHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\GroupHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\GuildHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\ItemHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\LFGHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\LootHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\MiscHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\MovementHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\NPCHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\PetHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\PetitionsHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\QueryHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\QuestHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\SkillHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\SpellHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\TaxiHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\TicketHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\TradeHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\VoiceChatHandler.cpp">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Pools\PoolHandler.cpp">
+      <Filter>Pools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\PrecompiledHeaders\ScriptPCH.cpp">
+      <Filter>PrecompiledHeaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\PrecompiledHeaders\WinCorePCH.cpp">
+      <Filter>PrecompiledHeaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Quests\QuestDef.cpp">
+      <Filter>Quests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Reputation\ReputationMgr.cpp">
+      <Filter>Reputation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Skills\SkillDiscovery.cpp">
+      <Filter>Skills</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Skills\SkillExtraItems.cpp">
+      <Filter>Skills</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Spells\Spell.cpp">
+      <Filter>Spells</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Spells\Auras\SpellEffects.cpp">
+      <Filter>Spells</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Spells\SpellMgr.cpp">
+      <Filter>Spells</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Spells\Auras\SpellAuraEffects.cpp">
+      <Filter>Spells\Auras</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Spells\Auras\SpellAuras.cpp">
+      <Filter>Spells\Auras</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Tools\PlayerDump.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Tools\Tools.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Weather\Weather.cpp">
+      <Filter>Weather</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\World\World.cpp">
+      <Filter>Scripting\World</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Grids\GridStates.cpp">
+      <Filter>Grids</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Grids\ObjectGridLoader.cpp">
+      <Filter>Grids</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Grids\Notifiers\GridNotifiers.cpp">
+      <Filter>Grids\Notifiers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\collision\BoundingIntervalHierarchy.cpp">
+      <Filter>Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\collision\Management\VMapFactory.cpp">
+      <Filter>Collision\Management</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\collision\Management\VMapManager2.cpp">
+      <Filter>Collision\Management</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\collision\Maps\MapTree.cpp">
+      <Filter>Collision\Maps</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\collision\Maps\TileAssembler.cpp">
+      <Filter>Collision\Maps</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\collision\Models\ModelInstance.cpp">
+      <Filter>Collision\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\server\collision\Models\WorldModel.cpp">
+      <Filter>Collision\Models</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\server\game\AI\CreatureAI.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\CreatureAIFactory.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\CreatureAIImpl.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\CreatureAIRegistry.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\CreatureAISelector.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\EventAI\CreatureEventAI.h">
+      <Filter>AI\EventAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\EventAI\CreatureEventAIMgr.h">
+      <Filter>AI\EventAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\ScriptedAI\ScriptedCreature.h">
+      <Filter>AI\ScriptedAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\ScriptedAI\ScriptedEscortAI.h">
+      <Filter>AI\ScriptedAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\ScriptedAI\ScriptedFollowerAI.h">
+      <Filter>AI\ScriptedAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\ScriptedAI\ScriptedGossip.h">
+      <Filter>AI\ScriptedAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\ScriptedAI\ScriptedGuardAI.h">
+      <Filter>AI\ScriptedAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\ScriptedAI\ScriptedInstance.h">
+      <Filter>AI\ScriptedAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\ScriptedAI\ScriptedSimpleAI.h">
+      <Filter>AI\ScriptedAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\ScriptedAI\ScriptedSmartAI.h">
+      <Filter>AI\ScriptedAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\CoreAI\CombatAI.h">
+      <Filter>AI\CoreAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\CoreAI\GuardAI.h">
+      <Filter>AI\CoreAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\CoreAI\PassiveAI.h">
+      <Filter>AI\CoreAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\CoreAI\PetAI.h">
+      <Filter>AI\CoreAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\CoreAI\ReactorAI.h">
+      <Filter>AI\CoreAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\CoreAI\TotemAI.h">
+      <Filter>AI\CoreAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\CoreAI\UnitAI.h">
+      <Filter>AI\CoreAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Events\GameEventMgr.h">
+      <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Groups\Group.h">
+      <Filter>Groups</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Groups\GroupReference.h">
+      <Filter>Groups</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Groups\GroupRefManager.h">
+      <Filter>Groups</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Guilds\Guild.h">
+      <Filter>Guilds</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\OutdoorPvP\OutdoorPvP.h">
+      <Filter>OutdoorPvP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\OutdoorPvP\OutdoorPvPImpl.h">
+      <Filter>OutdoorPvP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\OutdoorPvP\OutdoorPvPMgr.h">
+      <Filter>OutdoorPvP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\OutdoorPvP\Zones\OutdoorPvPEP.h">
+      <Filter>OutdoorPvP\Zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\OutdoorPvP\Zones\OutdoorPvPHP.h">
+      <Filter>OutdoorPvP\Zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\OutdoorPvP\Zones\OutdoorPvPNA.h">
+      <Filter>OutdoorPvP\Zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\OutdoorPvP\Zones\OutdoorPvPSI.h">
+      <Filter>OutdoorPvP\Zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\OutdoorPvP\Zones\OutdoorPvPTF.h">
+      <Filter>OutdoorPvP\Zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\OutdoorPvP\Zones\OutdoorPvPZM.h">
+      <Filter>OutdoorPvP\Zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Scripting\ScriptLoader.h">
+      <Filter>Scripting\System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Scripting\ScriptMgr.h">
+      <Filter>Scripting\System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Scripting\ScriptSystem.h">
+      <Filter>Scripting\System</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\EasternKingdoms\BlackrockDepths\blackrock_depths.h">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Depths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\EasternKingdoms\BlackrockSpire\blackrock_spire.h">
+      <Filter>Scripting\Eastern Kingdoms\Blackrock Spire</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\EasternKingdoms\Deadmines\deadmines.h">
+      <Filter>Scripting\Eastern Kingdoms\Deadmines</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\EasternKingdoms\Gnomeregan\gnomeregan.h">
+      <Filter>Scripting\Eastern Kingdoms\Gnomeregan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\EasternKingdoms\Karazhan\karazhan.h">
+      <Filter>Scripting\Eastern Kingdoms\Karazhan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\EasternKingdoms\MagistersTerrace\magisters_terrace.h">
+      <Filter>Scripting\Eastern Kingdoms\Magister%27s Terrace</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\EasternKingdoms\MoltenCore\molten_core.h">
+      <Filter>Scripting\Eastern Kingdoms\Molten Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\EasternKingdoms\ScarletMonastery\scarlet_monastery.h">
+      <Filter>Scripting\Eastern Kingdoms\Scarlet Monastery</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\EasternKingdoms\Scholomance\scholomance.h">
+      <Filter>Scripting\Eastern Kingdoms\Scholomance</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\EasternKingdoms\ShadowfangKeep\shadowfang_keep.h">
+      <Filter>Scripting\Eastern Kingdoms\Shadowfang Keep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\EasternKingdoms\Stratholme\stratholme.h">
+      <Filter>Scripting\Eastern Kingdoms\Stratholme</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\EasternKingdoms\SunkenTemple\sunken_temple.h">
+      <Filter>Scripting\Eastern Kingdoms\Sunken Temple</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\EasternKingdoms\SunwellPlateau\sunwell_plateau.h">
+      <Filter>Scripting\Eastern Kingdoms\Sunwell Plateau</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\EasternKingdoms\ZulAman\zulaman.h">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Aman</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\EasternKingdoms\ZulGurub\zulgurub.h">
+      <Filter>Scripting\Eastern Kingdoms\Zul%27Gurub</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Kalimdor\BlackfathomDeeps\blackfathom_deeps.h">
+      <Filter>Scripting\Kalimdor\Blackfathom Depths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\BattleForMountHyjal\hyjal.h">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Battle for Mt. Hyjal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\BattleForMountHyjal\hyjal_trash.h">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Battle for Mt. Hyjal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\BattleForMountHyjal\hyjalAI.h">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Battle for Mt. Hyjal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\CullingOfStratholme\culling_of_stratholme.h">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Culling of Stratholme</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\EscapeFromDurnholdeKeep\old_hillsbrad.h">
+      <Filter>Scripting\Kalimdor\Caverns of Time\Old Hillsbrad</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Kalimdor\CavernsOfTime\DarkPortal\dark_portal.h">
+      <Filter>Scripting\Kalimdor\Caverns of Time\The Dark Portal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Kalimdor\OnyxiasLair\onyxias_lair.h">
+      <Filter>Scripting\Kalimdor\Onyxia%27s Lair</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Kalimdor\RazorfenDowns\razorfen_downs.h">
+      <Filter>Scripting\Kalimdor\Razorfen Downs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Kalimdor\RazorfenKraul\razorfen_kraul.h">
+      <Filter>Scripting\Kalimdor\Razorfen Kraul</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Kalimdor\RuinsOfAhnQiraj\ruins_of_ahnqiraj.h">
+      <Filter>Scripting\Kalimdor\Ruins of Ahn%27Qiraj</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Kalimdor\TempleOfAhnQiraj\temple_of_ahnqiraj.h">
+      <Filter>Scripting\Kalimdor\Temple of Ahn%27Qiraj</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Kalimdor\WailingCaverns\wailing_caverns.h">
+      <Filter>Scripting\Kalimdor\Wailing Caverns</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Northrend\AzjolNerub\ahnkahet\ahnkahet.h">
+      <Filter>Scripting\Northrend\Azjol-Nerub\Ahn%27kahet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Northrend\AzjolNerub\AzjolNerub\azjol_nerub.h">
+      <Filter>Scripting\Northrend\Azjol-Nerub\Azjol-Nerub</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Northrend\DraktharonKeep\drak_tharon_keep.h">
+      <Filter>Scripting\Northrend\Drak%27Tharon Keep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Northrend\FrozenHalls\ForgeOfSouls\forge_of_souls.h">
+      <Filter>Scripting\Northrend\Icecrown Citadel\Forge of Souls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Northrend\FrozenHalls\HallsOfReflection\halls_of_reflection.h">
+      <Filter>Scripting\Northrend\Icecrown Citadel\Halls of Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Northrend\FrozenHalls\PitOfSaron\pit_of_saron.h">
+      <Filter>Scripting\Northrend\Icecrown Citadel\Pit of Saron</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Northrend\Gundrak\gundrak.h">
+      <Filter>Scripting\Northrend\Gundrak</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Northrend\Naxxramas\naxxramas.h">
+      <Filter>Scripting\Northrend\Naxxramas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Northrend\ObsidianSanctum\obsidian_sanctum.h">
+      <Filter>Scripting\Northrend\Obsidian Sanctum</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Northrend\CrusadersColiseum\TrialOfTheChampion\trial_of_the_champion.h">
+      <Filter>Scripting\Northrend\Trial of the Champion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Northrend\Ulduar\HallsOfStone\halls_of_stone.h">
+      <Filter>Scripting\Northrend\Ulduar\Halls of Stone</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Northrend\Ulduar\HallsOfLightning\halls_of_lightning.h">
+      <Filter>Scripting\Northrend\Ulduar\Halls of Lightning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\ulduar.h">
+      <Filter>Scripting\Northrend\Ulduar\Ulduar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Northrend\UtgardeKeep\UtgardeKeep\utgarde_keep.h">
+      <Filter>Scripting\Northrend\Utgarde Keep\Utgarde Keep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Northrend\UtgardeKeep\UtgardePinnacle\utgarde_pinnacle.h">
+      <Filter>Scripting\Northrend\Utgarde Keep\Utgarde Pinnacle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Northrend\VaultOfArchavon\vault_of_archavon.h">
+      <Filter>Scripting\Northrend\Vault of Archavon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Northrend\VioletHold\violet_hold.h">
+      <Filter>Scripting\Northrend\Violet Hold</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Northrend\Nexus\EyeOfEternity\eye_of_eternity.h">
+      <Filter>Scripting\Northrend\Nexus\Eye of Eternity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Northrend\Nexus\Nexus\nexus.h">
+      <Filter>Scripting\Northrend\Nexus\Nexus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Northrend\Nexus\Oculus\oculus.h">
+      <Filter>Scripting\Northrend\Nexus\Oculus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Outland\Auchindoun\SethekkHalls\sethekk_halls.h">
+      <Filter>Scripting\Outland\Aunchindoun\Sethekk Halls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Outland\Auchindoun\ShadowLabyrinth\shadow_labyrinth.h">
+      <Filter>Scripting\Outland\Aunchindoun\Shadow Labyrinth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Outland\BlackTemple\black_temple.h">
+      <Filter>Scripting\Outland\Black Temple</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Outland\CoilfangReservoir\SerpentShrine\serpent_shrine.h">
+      <Filter>Scripting\Outland\Coilfang Resevoir\Serpent Shrine Cavern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Outland\CoilfangReservoir\SteamVault\steam_vault.h">
+      <Filter>Scripting\Outland\Coilfang Resevoir\Steam Vault</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Outland\GruulsLair\gruuls_lair.h">
+      <Filter>Scripting\Outland\Gruul%27s Lair</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Outland\HellfireCitadel\BloodFurnace\blood_furnace.h">
+      <Filter>Scripting\Outland\Hellfire Citadel\Blood Furnace</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Outland\HellfireCitadel\HellfireRamparts\hellfire_ramparts.h">
+      <Filter>Scripting\Outland\Hellfire Citadel\Hellfire Ramparts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Outland\HellfireCitadel\MagtheridonsLair\magtheridons_lair.h">
+      <Filter>Scripting\Outland\Hellfire Citadel\Magtheridon%27s lair</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Outland\HellfireCitadel\ShatteredHalls\shattered_halls.h">
+      <Filter>Scripting\Outland\Hellfire Citadel\Shattered Halls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Outland\TempestKeep\arcatraz\arcatraz.h">
+      <Filter>Scripting\Outland\Tempest Keep\Arcatraz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Outland\TempestKeep\Eye\the_eye.h">
+      <Filter>Scripting\Outland\Tempest Keep\The Eye</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Outland\TempestKeep\Mechanar\mechanar.h">
+      <Filter>Scripting\Outland\Tempest Keep\The Mechanar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Accounts\AccountMgr.h">
+      <Filter>Accounts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Achievements\AchievementMgr.h">
+      <Filter>Achievements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Addons\AddonMgr.h">
+      <Filter>Addons</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AuctionHouse\AuctionHouseMgr.h">
+      <Filter>AuctionHouse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AuctionHouse\AuctionHouseBot\AuctionHouseBot.h">
+      <Filter>AuctionHouse\AuctionHouseBot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\BattleGrounds\ArenaTeam.h">
+      <Filter>BattleGrounds</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\BattleGrounds\BattleGround.h">
+      <Filter>BattleGrounds</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\BattleGrounds\BattleGroundMgr.h">
+      <Filter>BattleGrounds</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundAA.h">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundAB.h">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundAV.h">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundBE.h">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundDS.h">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundEY.h">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundIC.h">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundNA.h">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundRB.h">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundRL.h">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundRV.h">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundSA.h">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\BattleGrounds\Zones\BattleGroundWS.h">
+      <Filter>BattleGrounds\Zones</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Calendar\Calendar.h">
+      <Filter>Calendar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Chat\Chat.h">
+      <Filter>Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Chat\Channels\Channel.h">
+      <Filter>Chat\Channels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Chat\Channels\ChannelMgr.h">
+      <Filter>Chat\Channels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Combat\HostileRefManager.h">
+      <Filter>Combat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Combat\ThreatManager.h">
+      <Filter>Combat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Combat\UnitEvents.h">
+      <Filter>Combat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Conditions\ConditionMgr.h">
+      <Filter>Conditions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\DataStores\DBCEnums.h">
+      <Filter>DataStores</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\DataStores\DBCfmt.h">
+      <Filter>DataStores</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\DataStores\DBCStores.h">
+      <Filter>DataStores</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\DataStores\DBCStructure.h">
+      <Filter>DataStores</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Creature\Creature.h">
+      <Filter>Entities\Creature</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Creature\CreatureGroups.h">
+      <Filter>Entities\Creature</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Creature\GossipDef.h">
+      <Filter>Entities\Creature</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Creature\TemporarySummon.h">
+      <Filter>Entities\Creature</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\DynamicObject\DynamicObject.h">
+      <Filter>Entities\DynamicObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\GameObject\GameObject.h">
+      <Filter>Entities\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Item\Item.h">
+      <Filter>Entities\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Item\ItemEnchantmentMgr.h">
+      <Filter>Entities\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Item\ItemPrototype.h">
+      <Filter>Entities\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Item\Container\Bag.h">
+      <Filter>Entities\Item\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Object\Object.h">
+      <Filter>Entities\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Object\ObjectDefines.h">
+      <Filter>Entities\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Object\ObjectPosSelector.h">
+      <Filter>Entities\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Object\Updates\UpdateData.h">
+      <Filter>Entities\Object\Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Object\Updates\UpdateFields.h">
+      <Filter>Entities\Object\Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Object\Updates\UpdateMask.h">
+      <Filter>Entities\Object\Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Pet\Pet.h">
+      <Filter>Entities\Pet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Player\Player.h">
+      <Filter>Entities\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Player\SocialMgr.h">
+      <Filter>Entities\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Totem\Totem.h">
+      <Filter>Entities\Totem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Transport\Transport.h">
+      <Filter>Entities\Transport</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Corpse\Corpse.h">
+      <Filter>Entities\Corpse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Unit\Unit.h">
+      <Filter>Entities\Unit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Entities\Vehicle\Vehicle.h">
+      <Filter>Entities\Vehicle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Globals\GlobalEvents.h">
+      <Filter>Globals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Globals\ObjectAccessor.h">
+      <Filter>Globals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Globals\ObjectMgr.h">
+      <Filter>Globals</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Instances\InstanceData.h">
+      <Filter>Instances</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Instances\InstanceSaveMgr.h">
+      <Filter>Instances</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\DungeonFinding\LFG.h">
+      <Filter>DungeonFinding</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\DungeonFinding\LFGMgr.h">
+      <Filter>DungeonFinding</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Loot\LootMgr.h">
+      <Filter>Loot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Mails\Mail.h">
+      <Filter>Mails</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Maps\Map.h">
+      <Filter>Maps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Maps\MapInstanced.h">
+      <Filter>Maps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Maps\MapManager.h">
+      <Filter>Maps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Maps\MapReference.h">
+      <Filter>Maps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Maps\MapRefManager.h">
+      <Filter>Maps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Maps\MapUpdater.h">
+      <Filter>Maps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Maps\ZoneScript.h">
+      <Filter>Maps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Movement\DestinationHolder.h">
+      <Filter>Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Movement\DestinationHolderImp.h">
+      <Filter>Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Movement\FollowerReference.h">
+      <Filter>Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Movement\FollowerRefManager.h">
+      <Filter>Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Movement\MotionMaster.h">
+      <Filter>Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Movement\MovementGenerator.h">
+      <Filter>Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Movement\MovementGeneratorImpl.h">
+      <Filter>Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Movement\Traveller.h">
+      <Filter>Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Movement\MovementGenerators\ConfusedMovementGenerator.h">
+      <Filter>Movement\MovementGenerators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Movement\MovementGenerators\FleeingMovementGenerator.h">
+      <Filter>Movement\MovementGenerators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Movement\MovementGenerators\HomeMovementGenerator.h">
+      <Filter>Movement\MovementGenerators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Movement\MovementGenerators\IdleMovementGenerator.h">
+      <Filter>Movement\MovementGenerators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Movement\MovementGenerators\PointMovementGenerator.h">
+      <Filter>Movement\MovementGenerators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Movement\MovementGenerators\RandomMovementGenerator.h">
+      <Filter>Movement\MovementGenerators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Movement\MovementGenerators\TargetedMovementGenerator.h">
+      <Filter>Movement\MovementGenerators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Movement\MovementGenerators\WaypointMovementGenerator.h">
+      <Filter>Movement\MovementGenerators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Movement\Waypoints\Path.h">
+      <Filter>Movement\Waypoints</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Movement\Waypoints\WaypointManager.h">
+      <Filter>Movement\Waypoints</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Server\WorldSession.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Server\WorldSocket.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Server\WorldSocketMgr.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Server\Protocol\Opcodes.h">
+      <Filter>Server\Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Server\Protocol\WorldLog.h">
+      <Filter>Server\Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Server\Protocol\Handlers\AddonHandler.h">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Server\Protocol\Handlers\NPCHandler.h">
+      <Filter>Server\Protocol\Handlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Pools\PoolHandler.h">
+      <Filter>Pools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\PrecompiledHeaders\ScriptPCH.h">
+      <Filter>PrecompiledHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\PrecompiledHeaders\WinCorePCH.h">
+      <Filter>PrecompiledHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Quests\QuestDef.h">
+      <Filter>Quests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Reputation\ReputationMgr.h">
+      <Filter>Reputation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Skills\SkillDiscovery.h">
+      <Filter>Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Skills\SkillExtraItems.h">
+      <Filter>Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Spells\Spell.h">
+      <Filter>Spells</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Spells\SpellMgr.h">
+      <Filter>Spells</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Spells\Auras\SpellAuraDefines.h">
+      <Filter>Spells\Auras</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Spells\Auras\SpellAuraEffects.h">
+      <Filter>Spells\Auras</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Spells\Auras\SpellAuras.h">
+      <Filter>Spells\Auras</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Tools\PlayerDump.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Tools\Tools.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Weather\Weather.h">
+      <Filter>Weather</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\World\World.h">
+      <Filter>Scripting\World</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Grids\Grid.h">
+      <Filter>Grids</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Grids\GridDefines.h">
+      <Filter>Grids</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Grids\GridLoader.h">
+      <Filter>Grids</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Grids\GridReference.h">
+      <Filter>Grids</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Grids\GridRefManager.h">
+      <Filter>Grids</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Grids\GridStates.h">
+      <Filter>Grids</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Grids\NGrid.h">
+      <Filter>Grids</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Grids\ObjectGridLoader.h">
+      <Filter>Grids</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Grids\Notifiers\GridNotifiers.h">
+      <Filter>Grids\Notifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Grids\Notifiers\GridNotifiersImpl.h">
+      <Filter>Grids\Notifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Grids\Cells\Cell.h">
+      <Filter>Grids\Cells</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Grids\Cells\CellImpl.h">
+      <Filter>Grids\Cells</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Miscellaneous\Formulas.h">
+      <Filter>Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Miscellaneous\Language.h">
+      <Filter>Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\Miscellaneous\SharedDefines.h">
+      <Filter>Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\collision\BoundingIntervalHierarchy.h">
+      <Filter>Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\collision\VMapDefinitions.h">
+      <Filter>Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\collision\VMapTools.h">
+      <Filter>Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\collision\Management\IVMapManager.h">
+      <Filter>Collision\Management</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\collision\Management\VMapFactory.h">
+      <Filter>Collision\Management</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\collision\Management\VMapManager2.h">
+      <Filter>Collision\Management</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\collision\Maps\MapTree.h">
+      <Filter>Collision\Maps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\collision\Maps\TileAssembler.h">
+      <Filter>Collision\Maps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\collision\Models\ModelInstance.h">
+      <Filter>Collision\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\collision\Models\WorldModel.h">
+      <Filter>Collision\Models</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

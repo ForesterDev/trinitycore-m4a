@@ -3673,7 +3673,7 @@ void Spell::SendSpellGo()
     else
         m_targets.setTargetMask(m_targets.getTargetMask() & ~TARGET_FLAG_SOURCE_LOCATION);
 
-    if ((m_spellInfo->Targets & TARGET_FLAG_DEST_LOCATION) && m_targets.HasDst())
+    if (m_targets.HasDst())
         m_targets.setTargetMask(m_targets.getTargetMask() | TARGET_FLAG_DEST_LOCATION);
     else
         m_targets.setTargetMask(m_targets.getTargetMask() & ~TARGET_FLAG_DEST_LOCATION);

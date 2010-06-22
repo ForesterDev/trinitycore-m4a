@@ -5,6 +5,7 @@
 #ifndef SC_PRECOMPILED_H
 #define SC_PRECOMPILED_H
 
+#include <memory>
 #include "ScriptMgr.h"
 #include "Cell.h"
 #include "CellImpl.h"

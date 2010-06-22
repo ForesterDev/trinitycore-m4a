@@ -18,6 +18,10 @@ if(BUILDING_IN_SOURCE)
   message(FATAL_ERROR "This project requires an out of source build. Remove the file 'CMakeCache.txt' found in this directory before continuing, and create a separate build directory and run 'cmake path_to_project [options]' from there.")
 endif(BUILDING_IN_SOURCE)
 
+if(CMAKE_COMPILER_IS_GNUCXX)
+  add_definitions(-std=c++0x)
+endif(CMAKE_COMPILER_IS_GNUCXX)
+
 #
 # Basic packagesearching and setup (further support will be needed, this is a preliminary release!)
 #

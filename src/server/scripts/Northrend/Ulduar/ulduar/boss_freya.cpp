@@ -67,7 +67,8 @@ enum
 
 struct boss_freyaAI : public BossAI
 {
-    boss_freyaAI(Creature* pCreature) : BossAI(pCreature, TYPE_FREYA)
+    boss_freyaAI(Creature *pCreature)
+        : BossAI(pCreature, boss_freya)
     {
     }
 
