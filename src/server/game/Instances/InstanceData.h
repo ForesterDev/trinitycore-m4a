@@ -192,7 +192,7 @@ class InstanceData : public ZoneScript
         void UpdateMinionState(Creature *minion, EncounterState state);
 
         template<class Istream>
-            Istream LoadBossState(Istream data)
+            Istream &LoadBossState(Istream &data)
         {
             uint32 buff;
             uint32 bossId = 0;
@@ -202,7 +202,7 @@ class InstanceData : public ZoneScript
                 if (buff < TO_BE_DECIDED)
                     SetBossState(bossId, (EncounterState)buff);
             }
-            return std::move(data);
+            return data;
         }
 
         std::string GetBossSaveData();
