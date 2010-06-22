@@ -567,6 +567,7 @@ INSERT INTO `command` VALUES
 ('reload areatrigger_teleport',3,'Syntax: .reload areatrigger_teleport\nReload areatrigger_teleport table.'),
 ('reload autobroadcast',3,'Syntax: .reload autobroadcast\nReload autobroadcast table.'),
 ('reload command',3,'Syntax: .reload command\nReload command table.'),
+('reload conditions', 3, 'Reload conditions table.'),
 ('reload config',3,'Syntax: .reload config\r\n\r\nReload config settings (by default stored in trinityd.conf). Not all settings can be change at reload: some new setting values will be ignored until restart, some values will applied with delay or only to new objects/maps, some values will explicitly rejected to change at reload.'),
 ('reload creature_involvedrelation',3,'Syntax: .reload creature_involvedrelation\nReload creature_involvedrelation table.'),
 ('reload creature_linked_respawn',2,'Syntax: .reload creature_linked_respawn\r\nReload creature_linked_respawn table.'),
@@ -624,10 +625,9 @@ INSERT INTO `command` VALUES
 ('reload spell_proc_event',3,'Syntax: .reload spell_proc_event\nReload spell_proc_event table.'),
 ('reload spell_required',3,'Syntax: .reload spell_required\nReload spell_required table.'),
 ('reload spell_scripts',3,'Syntax: .reload spell_scripts\nReload spell_scripts table.'),
-('reload spell_script_target',3,'Syntax: .reload spell_script_target\nReload spell_script_target table.'),
 ('reload spell_target_position',3,'Syntax: .reload spell_target_position\nReload spell_target_position table.'),
 ('reload spell_threats',3,'Syntax: .reload spell_threats\nReload spell_threats table.'),
-('reload creature_template','3','Syntax: .reload creature_template $entry\r\nReload the specified creature\'s template.'),
+('reload creature_template','3','Syntax: .reload creature_template $entry\r\nReload the specified creature''s template.'),
 ('reload trinity_string',3,'Syntax: .reload trinity_string\nReload trinity_string table.'),
 ('reload waypoint_scripts',3,'Syntax: .reload waypoint_scripts\nReload waypoint_scripts table.'),
 ('repairitems',2,'Syntax: .repairitems\r\n\r\nRepair all selected player''s items.'),
@@ -2583,6 +2583,15 @@ CREATE TABLE `gossip_scripts` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `gossip_scripts`
+--
+
+LOCK TABLES `gossip_scripts` WRITE;
+/*!40000 ALTER TABLE `gossip_scripts` DISABLE KEYS */;
+/*!40000 ALTER TABLE `gossip_scripts` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `gossip_menu`
 --
 
@@ -2592,15 +2601,18 @@ DROP TABLE IF EXISTS `gossip_menu`;
 CREATE TABLE `gossip_menu` (
   entry smallint(6) unsigned NOT NULL default '0',
   text_id mediumint(8) unsigned NOT NULL default '0',
-  cond_1 tinyint(3) unsigned NOT NULL default '0',
-  cond_1_val_1 mediumint(8) unsigned NOT NULL default '0',
-  cond_1_val_2 mediumint(8) unsigned NOT NULL default '0',
-  cond_2 tinyint(3) unsigned NOT NULL default '0',
-  cond_2_val_1 mediumint(8) unsigned NOT NULL default '0',
-  cond_2_val_2 mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY (entry, text_id)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `gossip_menu`
+--
+
+LOCK TABLES `gossip_menu` WRITE;
+/*!40000 ALTER TABLE `gossip_menu` DISABLE KEYS */;
+/*!40000 ALTER TABLE `gossip_menu` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `gossip_menu_option`
@@ -2622,15 +2634,6 @@ CREATE TABLE gossip_menu_option (
   box_coded tinyint(3) unsigned NOT NULL default '0',
   box_money int(11) unsigned NOT NULL default '0',
   box_text text,
-  cond_1 tinyint(3) unsigned NOT NULL default '0',
-  cond_1_val_1 mediumint(8) unsigned NOT NULL default '0',
-  cond_1_val_2 mediumint(8) unsigned NOT NULL default '0',
-  cond_2 tinyint(3) unsigned NOT NULL default '0',
-  cond_2_val_1 mediumint(8) unsigned NOT NULL default '0',
-  cond_2_val_2 mediumint(8) unsigned NOT NULL default '0',
-  cond_3 tinyint(3) unsigned NOT NULL default '0',
-  cond_3_val_1 mediumint(8) unsigned NOT NULL default '0',
-  cond_3_val_2 mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY (menu_id, id)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2641,25 +2644,6 @@ CREATE TABLE gossip_menu_option (
 
 LOCK TABLES `gossip_menu_option` WRITE;
 /*!40000 ALTER TABLE `gossip_menu_option` DISABLE KEYS */;
-INSERT INTO `gossip_menu_option` VALUES
-(0,0,0,'GOSSIP_OPTION_QUESTGIVER',2,2,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,1,1,'I want to browse your goods',3,128,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,2,2,'I want to travel fast',4,8192,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,3,3,'Train me!',5,16,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,4,4,'Bring me back to life',6,16384,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,5,4,'Bring me back to life',7,32768,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,6,5,'Make this inn my home',8,65536,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,7,6,'Show me my bank',9,131072,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,8,7,'How do I form a guild?',10,262144,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,9,8,'I want to create a guild crest',11,524288,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,10,9,'I want to join the Battle Ground',12,1048576,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,11,6,'Auction!',13,2097152,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,12,0,'I''d like to stable my pet here',14,4194304,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,13,1,'I want to browse your goods',15,4096,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,14,2,'I wish to unlearn my talents',16,16,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,15,2,'I wish to unlearn my pet''s skills',17,16,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0),
-(0,16,2,'Purchase a Dual Talent Specialization',18,16,0,0,0,0,10000000,NULL,0,0,0,0,0,0,0,0,0),
-(0,17,0,'GOSSIP_OPTION_OUTDOORPVP',19,536870912,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0);
 /*!40000 ALTER TABLE `gossip_menu_option` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4211,7 +4195,7 @@ CREATE TABLE `pool_creature` (
   `pool_entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `chance` float unsigned NOT NULL DEFAULT '0',
   `description` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`pool_entry`,`guid`),
+  PRIMARY KEY (`guid`),
   KEY `idx_guid` (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -4237,7 +4221,7 @@ CREATE TABLE `pool_gameobject` (
   `pool_entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `chance` float unsigned NOT NULL DEFAULT '0',
   `description` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`guid`,`pool_entry`),
+  PRIMARY KEY (`guid`),
   KEY `idx_guid` (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -4263,7 +4247,7 @@ CREATE TABLE `pool_pool` (
   `mother_pool` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `chance` float NOT NULL DEFAULT '0',
   `description` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`pool_id`,`mother_pool`)
+  PRIMARY KEY (`pool_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -5345,6 +5329,7 @@ INSERT INTO `spell_dbc` (`Id`,`Dispel`,`Mechanic`,`Attributes`,`AttributesEx`,`A
 (24900,  0,  0, 400, 1024,  0, 0, 2097152, 0, 0, 1, 0, 0, 101, 0, 0, 0, 0, 21, 1, 0, -1, 0, 0, 6, 0, 0, 1, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 166, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 'Heart of the Wild Cat Effect'),
 (43503,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Quest 11261 reward serverside spell'),
 (39613,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Quest 10967  reward serverside spell'),
+(39616,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Quest 10966  reward serverside spell'),
 (34448, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 77, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  'Serverside spell orb of translocation (gobjid=180911)' ), 
 (34452, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 77, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  'Serverside spell orb of translocation (gobjid=180912)' );
 /*!40000 ALTER TABLE `spell_dbc` ENABLE KEYS */;
@@ -6110,6 +6095,7 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`,`spell_effect`,`type`,`comment
 (-59907,     7, 0, 'Lightwell Charges - Suicide'),
 ( 19263, 67801, 2, 'Deterrence'),
 ( 45524, 55095, 0, 'Chains of Ice - Frost Fever'),
+( 20066,-61840, 0, 'Repentance'),
 -- Quest
 ( 40214, 40216, 2, 'Dragonmaw Illusion'),
 ( 40214, 42016, 2, 'Dragonmaw Illusion'),
@@ -6184,6 +6170,14 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`,`spell_effect`,`type`,`comment
 -- Trial of the Champion
 ( 66680, 66547, 0, 'Confess - Confess'),
 ( 66889,-66865, 0, 'Remove Vengeance'),
+-- Warsong Gulch
+( 54861,-23335, 0, 'Drop Flag on Nitro Boost WSG'),
+( 54861,-23333, 0, 'Drop Flag on Nitro Boost WSG'),
+( 55004,-23335, 0, 'Drop Flag on Nitro Boost WSG'),
+( 55004,-23333, 0, 'Drop Flag on Nitro Boost WSG'),
+-- Eye of Storm
+( 54861,-34976, 0, 'Drop Flag on Nitro Boost EOS'),
+( 55004,-34976, 0, 'Drop Flag on Nitro Boost EOS'),
 -- Strand of the Ancients
 ( 52415, 52418, 0, 'Carrying Seaforium - Add'),
 ( 52410,-52418, 0, 'Carrying Seaforium - Remove'),
@@ -15506,32 +15500,6 @@ AVG_ROW_LENGTH=0;
 
 LOCK TABLES `vehicle_accessory` WRITE;
 /*!40000 ALTER TABLE `vehicle_accessory` DISABLE KEYS */;
-INSERT INTO `vehicle_accessory` (`entry`,`accessory_entry`,`seat_id`,`minion`,`description`) VALUES
-(28782,28768,0,0, 'Acherus Deathcharger'),
-(28312,28319,7,1, 'Wintergrasp Siege Engine'),
-(32627,32629,7,1, 'Wintergrasp Siege Engine'),
-(32930,32933,0,1, 'Kologarn'),
-(32930,32934,1,1, 'Kologarn'),
-(33109,33167,1,1, 'Salvaged Demolisher'),
-(33060,33067,7,1, 'Salvaged Siege Engine'),
-(33113,33114,0,1, 'Flame Leviathan'),
-(33113,33114,1,1, 'Flame Leviathan'),
-(33113,33114,2,1, 'Flame Leviathan'),
-(33113,33114,3,1, 'Flame Leviathan'),
-(33113,33139,7,1, 'Flame Leviathan'),
-(33114,33142,1,1, 'Overload Control Device'),       
-(33114,33143,2,1, 'Leviathan Defense Turret'),       
-(33214,33218,1,1, 'Mechanolift 304-A'),      
-(35637,34705,0,0, 'Marshal Jacob Alerius'' Mount'),
-(35633,34702,0,0, 'Ambrose Boltspark''s Mount'),
-(35768,34701,0,0, 'Colosos'' Mount'),
-(34658,34657,0,0, 'Jaelyne Evensong''s Mount'),
-(35636,34703,0,0, 'Lana Stouthammer''s Mount'),
-(35638,35572,0,0, 'Mokra the Skullcrusher''s Mount'),
-(35635,35569,0,0, 'Eressea Dawnsinger''s Mount'),
-(35640,35571,0,0, 'Runok Wildmane''s Mount'),
-(35641,35570,0,0, 'Zul''tore''s Mount'),
-(35634,35617,0,0, 'Deathstalker Visceri''s Mount');
 /*!40000 ALTER TABLE `vehicle_accessory` ENABLE KEYS */;
 UNLOCK TABLES;
 --
