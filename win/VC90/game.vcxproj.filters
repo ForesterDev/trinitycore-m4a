@@ -2,469 +2,469 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="AI">
-      <UniqueIdentifier>{958ed13d-5034-4735-a9a9-e8e03845a223}</UniqueIdentifier>
+      <UniqueIdentifier>{a7b9e6f5-a290-4c98-8eae-6a4d0652035b}</UniqueIdentifier>
     </Filter>
     <Filter Include="AI\EventAI">
-      <UniqueIdentifier>{0cf51098-9a94-4abe-a462-9f0a7b0805ce}</UniqueIdentifier>
+      <UniqueIdentifier>{0d816653-4d81-4421-9cf4-13ccb790c1b6}</UniqueIdentifier>
     </Filter>
     <Filter Include="AI\ScriptedAI">
-      <UniqueIdentifier>{b0ee3b4a-d87e-4f5a-a185-a5fe68f751cb}</UniqueIdentifier>
+      <UniqueIdentifier>{07fc30be-6de2-4221-9799-1b8691f4dc51}</UniqueIdentifier>
     </Filter>
     <Filter Include="AI\CoreAI">
-      <UniqueIdentifier>{e05b1425-73bf-48d1-b622-d5e53d66fd34}</UniqueIdentifier>
+      <UniqueIdentifier>{de371889-1554-429f-83c8-2ae642102a09}</UniqueIdentifier>
     </Filter>
     <Filter Include="Events">
-      <UniqueIdentifier>{34a8445d-f2d9-4bfa-9188-9642be636109}</UniqueIdentifier>
+      <UniqueIdentifier>{352b3dd2-fdf6-476b-a832-a749d506742a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Groups">
-      <UniqueIdentifier>{1f590215-a88e-40b0-bab8-12259740d9cc}</UniqueIdentifier>
+      <UniqueIdentifier>{37ad9136-b203-4fa1-bf9b-5d9eace3e539}</UniqueIdentifier>
     </Filter>
     <Filter Include="Guilds">
-      <UniqueIdentifier>{f65fe972-aca1-4eaa-b21a-a581e74766b1}</UniqueIdentifier>
+      <UniqueIdentifier>{e66c0304-7f9a-4fb3-8218-876853951383}</UniqueIdentifier>
     </Filter>
     <Filter Include="OutdoorPvP">
-      <UniqueIdentifier>{531b4fab-f7ca-42b6-a2aa-c1b3a6bfead7}</UniqueIdentifier>
+      <UniqueIdentifier>{92bb8740-c786-48c5-8290-c1db45db362f}</UniqueIdentifier>
     </Filter>
     <Filter Include="OutdoorPvP\Zones">
-      <UniqueIdentifier>{966b0c6a-ac7e-445a-8b3c-9145ccd2aef5}</UniqueIdentifier>
+      <UniqueIdentifier>{a31ee8b7-876b-446b-86bd-53ff0d5a240d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting">
-      <UniqueIdentifier>{e2457f6e-7f58-4bd5-96a9-228a7288c0f7}</UniqueIdentifier>
+      <UniqueIdentifier>{8c2cb46b-7845-4fa5-8564-828ad290699c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\System">
-      <UniqueIdentifier>{8a08adc7-741f-47f1-885d-9f29cb7fc0bd}</UniqueIdentifier>
+      <UniqueIdentifier>{d754fe89-4a02-4f15-88b7-14eb448354e4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Custom">
-      <UniqueIdentifier>{77a70ebf-e05e-4864-89e2-23d600d059a0}</UniqueIdentifier>
+      <UniqueIdentifier>{ba1cf94d-c61b-4151-9080-00168397322a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\World">
-      <UniqueIdentifier>{17085e7c-07ea-45ca-abc0-093fe5b21df0}</UniqueIdentifier>
+      <UniqueIdentifier>{2d2362d4-85b3-4ea0-82a9-4377212ea95e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Eastern Kingdoms">
-      <UniqueIdentifier>{54ae4ebb-ac9e-41fa-90be-7c3125f6f7c5}</UniqueIdentifier>
+      <UniqueIdentifier>{6b923014-3878-4795-9586-1e33d50c0919}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Eastern Kingdoms\Alterac Valley">
-      <UniqueIdentifier>{84c7d64e-1e23-4965-bcee-7ba18a1661d7}</UniqueIdentifier>
+      <UniqueIdentifier>{cd786863-27fb-4f69-be90-9f0a3d09abea}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Eastern Kingdoms\Blackrock Depths">
-      <UniqueIdentifier>{193c2d57-2a03-4316-9f56-5e2fea204677}</UniqueIdentifier>
+      <UniqueIdentifier>{f69e76d5-7384-43cc-9aa8-62bfc6e6f673}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Eastern Kingdoms\Blackrock Spire">
-      <UniqueIdentifier>{a2a87185-6e17-4812-8153-98a483eb80a7}</UniqueIdentifier>
+      <UniqueIdentifier>{f977d80c-f467-4e39-a109-b6378b3de4a5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Eastern Kingdoms\Blackwing Lair">
-      <UniqueIdentifier>{94741a5e-c7e8-43d8-bce0-cf0d516f86b2}</UniqueIdentifier>
+      <UniqueIdentifier>{31ff4a0b-1135-4fbb-a8d1-c6b5c9964b65}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Eastern Kingdoms\Deadmines">
-      <UniqueIdentifier>{41740fd1-0b6e-4f8a-bddf-0b74c3c2425e}</UniqueIdentifier>
+      <UniqueIdentifier>{e306912c-fc47-424b-b1a7-5addd5404088}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Eastern Kingdoms\Gnomeregan">
-      <UniqueIdentifier>{c1547376-6cc1-43e0-8f16-9601c3d25c80}</UniqueIdentifier>
+      <UniqueIdentifier>{5ae88921-e4a6-42fb-b6fc-cd145065a252}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Eastern Kingdoms\Karazhan">
-      <UniqueIdentifier>{3a6e2813-eff3-470c-a14b-0006ac1c9f03}</UniqueIdentifier>
+      <UniqueIdentifier>{5e800482-d21c-443f-b14f-d287de395f63}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Eastern Kingdoms\Magister%27s Terrace">
-      <UniqueIdentifier>{a3e3199d-af96-485a-b6f7-d077f29b0138}</UniqueIdentifier>
+      <UniqueIdentifier>{7d33f6d3-6b28-4d6c-a186-04987166062e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Eastern Kingdoms\Molten Core">
-      <UniqueIdentifier>{3e23db2d-871d-4019-966f-5f5fb328893e}</UniqueIdentifier>
+      <UniqueIdentifier>{5884050b-6109-4153-99c6-abc1e9258bea}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Eastern Kingdoms\Scarlet Enclave">
-      <UniqueIdentifier>{34181fb4-5175-4fc3-b720-6212f8717f4e}</UniqueIdentifier>
+      <UniqueIdentifier>{95683696-251a-4886-8c39-23078844daac}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Eastern Kingdoms\Scarlet Monastery">
-      <UniqueIdentifier>{34829613-8d70-452e-b9aa-a3dc16690ad3}</UniqueIdentifier>
+      <UniqueIdentifier>{4956c59f-9f40-44d6-b952-11ba623fc052}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Eastern Kingdoms\Scholomance">
-      <UniqueIdentifier>{ec207bce-7394-4d90-b214-2c120827c584}</UniqueIdentifier>
+      <UniqueIdentifier>{a640688c-0770-49f6-980a-3b3d4dbc0388}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Eastern Kingdoms\Shadowfang Keep">
-      <UniqueIdentifier>{b1806e1d-3b40-403e-bd6b-f87263cf4165}</UniqueIdentifier>
+      <UniqueIdentifier>{9bafce01-c906-41be-9afb-e21d756cb4f1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Eastern Kingdoms\Stratholme">
-      <UniqueIdentifier>{e227d065-5c74-46d5-995e-b2323114fde4}</UniqueIdentifier>
+      <UniqueIdentifier>{010777a3-95d0-43a6-ab9b-1bbcaee3679b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Eastern Kingdoms\Sunken Temple">
-      <UniqueIdentifier>{1f4e38c9-033d-4ca3-8225-e4f18aa97a28}</UniqueIdentifier>
+      <UniqueIdentifier>{7f6c261e-6880-4542-9237-9d0bbff513f9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Eastern Kingdoms\Sunwell Plateau">
-      <UniqueIdentifier>{24811d1b-f78e-4587-80b5-50efc79809be}</UniqueIdentifier>
+      <UniqueIdentifier>{a1f0cda7-7f5a-46f0-8d27-21c307a6ec74}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Eastern Kingdoms\Uldaman">
-      <UniqueIdentifier>{8936f683-d62f-4a56-a8f1-72481831c393}</UniqueIdentifier>
+      <UniqueIdentifier>{deae2f4c-b2f3-40e8-b2a6-d2d29b6ee27b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Eastern Kingdoms\Zul%27Aman">
-      <UniqueIdentifier>{21318bda-76bc-4a9d-bb77-e73c42059856}</UniqueIdentifier>
+      <UniqueIdentifier>{9efc43ce-66e3-4d00-9554-b9a44fc82f10}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Eastern Kingdoms\Zul%27Gurub">
-      <UniqueIdentifier>{b9841fbd-704e-456d-b484-fa1788c22e82}</UniqueIdentifier>
+      <UniqueIdentifier>{43ed182e-ff0b-4f6e-aca4-2f4c296cd776}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Examples">
-      <UniqueIdentifier>{05f26860-09e9-4514-89b9-c4b92c2f7c69}</UniqueIdentifier>
+      <UniqueIdentifier>{c821ccec-6533-4c33-be30-b5eebfe1729f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Kalimdor">
-      <UniqueIdentifier>{60040fb5-f93d-4454-a90e-be6c2ebcb183}</UniqueIdentifier>
+      <UniqueIdentifier>{4c9c1050-a36f-4cce-a17b-a17e75872433}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Kalimdor\Blackfathom Depths">
-      <UniqueIdentifier>{55e62b2a-c4e8-4c58-9d84-eea199bae5bb}</UniqueIdentifier>
+      <UniqueIdentifier>{7faa4c58-49e3-4486-aa03-75d86647fe98}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Kalimdor\Caverns of Time">
-      <UniqueIdentifier>{eaaed5e9-4c2a-454c-999f-2e2b27b71fc2}</UniqueIdentifier>
+      <UniqueIdentifier>{f8c0adff-1a05-4f39-9dbc-75c2781d620b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Kalimdor\Caverns of Time\Battle for Mt. Hyjal">
-      <UniqueIdentifier>{bb3a3482-c68e-4846-b842-2e7a446e5299}</UniqueIdentifier>
+      <UniqueIdentifier>{5d4bb0ca-0eba-449b-a729-8419277b7c2b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Kalimdor\Caverns of Time\Culling of Stratholme">
-      <UniqueIdentifier>{a68b2555-8319-43e7-97ed-1f86533a10bd}</UniqueIdentifier>
+      <UniqueIdentifier>{6a846757-0bb1-453e-a1e0-7c04d1ff483f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Kalimdor\Caverns of Time\Old Hillsbrad">
-      <UniqueIdentifier>{962d9129-23f3-463a-a656-821493c3f34b}</UniqueIdentifier>
+      <UniqueIdentifier>{00b9c83d-1ca5-4364-a604-2456564c9f5c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Kalimdor\Caverns of Time\The Dark Portal">
-      <UniqueIdentifier>{38091e2f-fbb6-4696-a7bd-91ab571ea866}</UniqueIdentifier>
+      <UniqueIdentifier>{54e60d3d-c443-41d8-937a-5fb31305b079}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Kalimdor\Maraudon">
-      <UniqueIdentifier>{417edc62-9a09-4352-8e66-d7c93f428d84}</UniqueIdentifier>
+      <UniqueIdentifier>{0436fb90-95e3-4ffd-96fa-58a13c04e875}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Kalimdor\Onyxia%27s Lair">
-      <UniqueIdentifier>{83fe32d6-d01b-4581-ada1-e22242f3edfa}</UniqueIdentifier>
+      <UniqueIdentifier>{1998efc7-7a07-443a-a472-777d27211887}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Kalimdor\Razorfen Downs">
-      <UniqueIdentifier>{708ca5ea-8366-4c7e-98e5-b657fdbfd64b}</UniqueIdentifier>
+      <UniqueIdentifier>{17680fd9-425e-4fcd-81f9-41e1d39e087a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Kalimdor\Razorfen Kraul">
-      <UniqueIdentifier>{0e5fe5b2-dae2-4bd3-ab8b-13f95a43b71d}</UniqueIdentifier>
+      <UniqueIdentifier>{9ed37e8c-4fe4-4843-a714-48fc9d0a1ef0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Kalimdor\Ruins of Ahn%27Qiraj">
-      <UniqueIdentifier>{cbfb4fa5-23e2-4a4e-bc12-b74fd833f6d6}</UniqueIdentifier>
+      <UniqueIdentifier>{0e57709a-6a58-4223-bc8c-f4d5884fefe0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Kalimdor\Temple of Ahn%27Qiraj">
-      <UniqueIdentifier>{9aed2807-c7e0-4503-9d4b-09e161fd01ef}</UniqueIdentifier>
+      <UniqueIdentifier>{e252ee56-6b0b-4e35-9cdf-dd5e62c09967}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Kalimdor\Wailing Caverns">
-      <UniqueIdentifier>{7894d262-f18f-4642-8e57-4167b7eb087d}</UniqueIdentifier>
+      <UniqueIdentifier>{abdafbf8-fe2b-4c58-a54c-65f6ac6a7a90}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Kalimdor\Zul%27Farrak">
-      <UniqueIdentifier>{1c037326-454e-49bd-baa5-b61b8b5064bd}</UniqueIdentifier>
+      <UniqueIdentifier>{8622b592-a46e-42bf-be03-7c00c110b749}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend">
-      <UniqueIdentifier>{987dd65d-ee1a-46fd-8a84-9233e80c3bdd}</UniqueIdentifier>
+      <UniqueIdentifier>{7684983d-ec45-49ec-b976-020495dda188}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Azjol-Nerub">
-      <UniqueIdentifier>{ad022985-dccc-4462-8e47-627d52f310b5}</UniqueIdentifier>
+      <UniqueIdentifier>{aac9c6fb-28e6-4352-929e-ba2407f198ae}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Azjol-Nerub\Ahn%27kahet">
-      <UniqueIdentifier>{162c4322-8e05-4a3f-8c28-69b6453f01f0}</UniqueIdentifier>
+      <UniqueIdentifier>{40b5b2af-5c95-4753-9482-9501783bfcd8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Azjol-Nerub\Azjol-Nerub">
-      <UniqueIdentifier>{b7484e99-738a-4304-8efb-b0f0d017d0c2}</UniqueIdentifier>
+      <UniqueIdentifier>{b690da8f-4ab4-49cd-bc65-f696ebabaa94}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Drak%27Tharon Keep">
-      <UniqueIdentifier>{9df353cb-8593-4841-886b-fcab50009dc0}</UniqueIdentifier>
+      <UniqueIdentifier>{81bb8589-58d0-4d87-bc23-8074e6948a95}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Icecrown Citadel">
-      <UniqueIdentifier>{1613a4fa-8c7d-4607-bf74-c4f242080af9}</UniqueIdentifier>
+      <UniqueIdentifier>{0b43a1b6-96b8-4396-a28a-dcfcb932aedf}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Icecrown Citadel\Forge of Souls">
-      <UniqueIdentifier>{0507c10d-6204-4186-9297-415c983436c9}</UniqueIdentifier>
+      <UniqueIdentifier>{9534502d-a331-4f53-9009-6f1b36e8bea8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Icecrown Citadel\Halls of Reflection">
-      <UniqueIdentifier>{32e1e3a0-fab7-4d1c-82e5-7c04bb414acc}</UniqueIdentifier>
+      <UniqueIdentifier>{6a003e23-c6bd-43c3-bf32-f5ab13e91f04}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Icecrown Citadel\Pit of Saron">
-      <UniqueIdentifier>{f4642250-d657-4c73-b3e8-51dcf8c85ceb}</UniqueIdentifier>
+      <UniqueIdentifier>{6e2dc303-36dd-4827-93d4-57e7cdc608ee}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Gundrak">
-      <UniqueIdentifier>{417570b4-7880-438b-9f2c-41bffd7f8439}</UniqueIdentifier>
+      <UniqueIdentifier>{5e79cc4c-238d-4ab1-a29d-dac84274d557}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Naxxramas">
-      <UniqueIdentifier>{0632d5eb-0cf9-4c04-bd4d-de6ab5c800fe}</UniqueIdentifier>
+      <UniqueIdentifier>{add3280e-8a8a-446f-a9f2-ba11cf9ad6c5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Obsidian Sanctum">
-      <UniqueIdentifier>{eb8b4c01-f965-41b5-aceb-6fd8dc8bcb35}</UniqueIdentifier>
+      <UniqueIdentifier>{05865218-03d2-4929-92d4-dd96a71dd3d8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Trial of the Champion">
-      <UniqueIdentifier>{c134001c-6339-477d-9b13-845ac6fb206d}</UniqueIdentifier>
+      <UniqueIdentifier>{5eb02c00-4631-411d-bcc1-09650ba7867e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Ulduar">
-      <UniqueIdentifier>{908be1e1-5716-473b-8d5a-cb141a29f45d}</UniqueIdentifier>
+      <UniqueIdentifier>{b5c1186d-607b-4d1a-ad09-7287d890466b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Ulduar\Halls of Stone">
-      <UniqueIdentifier>{397d61b4-10f1-4c52-8d2d-c7c3d4c9ad9d}</UniqueIdentifier>
+      <UniqueIdentifier>{4d34a65e-0cc2-424d-a005-f3506a02f345}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Ulduar\Halls of Lightning">
-      <UniqueIdentifier>{5fce20b4-c0bb-4aad-87c0-87af45665011}</UniqueIdentifier>
+      <UniqueIdentifier>{5f081fc3-e665-4853-90c3-3caf4a34bb55}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Ulduar\Ulduar">
-      <UniqueIdentifier>{f4538ad5-0239-4eac-88b8-a6161d0cf406}</UniqueIdentifier>
+      <UniqueIdentifier>{8356b470-de61-4b19-8b7c-38a80fb0c58c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Utgarde Keep">
-      <UniqueIdentifier>{526b809c-47e7-4338-bac4-3b7c70036a9b}</UniqueIdentifier>
+      <UniqueIdentifier>{ee70b80c-5e21-4ebf-8c34-3bf5e4ca8a2f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Utgarde Keep\Utgarde Keep">
-      <UniqueIdentifier>{6d07f98d-586a-4cda-baf7-9158b10301a8}</UniqueIdentifier>
+      <UniqueIdentifier>{bfdaca30-cb36-483a-975f-3517f6e6742f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Utgarde Keep\Utgarde Pinnacle">
-      <UniqueIdentifier>{68163b03-2319-4262-b9b4-5f57aa55655d}</UniqueIdentifier>
+      <UniqueIdentifier>{66f4962a-7ec5-4c94-a9a3-f423741e0a4f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Vault of Archavon">
-      <UniqueIdentifier>{3b1058e4-cfd6-41a3-ad21-0c57c5853c3a}</UniqueIdentifier>
+      <UniqueIdentifier>{13647af7-1e20-4211-b51d-d04ab36cf8ea}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Violet Hold">
-      <UniqueIdentifier>{a8a0dde1-c9d1-4dfd-b4f5-403aa41a3a44}</UniqueIdentifier>
+      <UniqueIdentifier>{1c075930-1c20-4502-91cf-9b5a84803041}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Nexus">
-      <UniqueIdentifier>{1e876955-55f0-49d2-a1ec-9061d064c8e4}</UniqueIdentifier>
+      <UniqueIdentifier>{5254c03c-5dc1-4d6d-bdab-c20da2a6a5d0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Nexus\Eye of Eternity">
-      <UniqueIdentifier>{e93e941e-627c-4f81-874b-dd7476451c01}</UniqueIdentifier>
+      <UniqueIdentifier>{d89bc5ed-987c-4635-b022-744f9c5da4c7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Nexus\Nexus">
-      <UniqueIdentifier>{fac36061-fc32-4473-8294-4a571f532a2e}</UniqueIdentifier>
+      <UniqueIdentifier>{ae221027-9c08-4b33-b3db-e527cdcd871f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Northrend\Nexus\Oculus">
-      <UniqueIdentifier>{32109533-5597-46b3-9e2e-bfcfb83c08dd}</UniqueIdentifier>
+      <UniqueIdentifier>{75369910-4651-473c-a99c-f60a7d4fda01}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland">
-      <UniqueIdentifier>{d0716e24-d516-449f-993d-095b0bed0dd4}</UniqueIdentifier>
+      <UniqueIdentifier>{a9060910-5fa9-4a30-8792-3027a994d66b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland\Aunchindoun">
-      <UniqueIdentifier>{e6eda268-dd83-4879-95e1-abe0aee1d82e}</UniqueIdentifier>
+      <UniqueIdentifier>{a3f3b80e-38ff-4b63-aa31-7faefa4c2cbd}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland\Aunchindoun\Auchenai Crypts">
-      <UniqueIdentifier>{c744ab55-4278-4bde-9b38-57702fbbfa4d}</UniqueIdentifier>
+      <UniqueIdentifier>{9b2f4f8a-40b1-4af0-a9ee-59740b801725}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland\Aunchindoun\Mana Tombs">
-      <UniqueIdentifier>{610b4e8b-971b-42ac-9c26-92d12dcaddb8}</UniqueIdentifier>
+      <UniqueIdentifier>{61f19b3d-92ab-41c0-b09d-114758e24ae1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland\Aunchindoun\Sethekk Halls">
-      <UniqueIdentifier>{e7c4548f-3d3c-4ddf-8fb1-4209bbee9762}</UniqueIdentifier>
+      <UniqueIdentifier>{7770f755-3694-440d-9181-bd2dac1c1b21}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland\Aunchindoun\Shadow Labyrinth">
-      <UniqueIdentifier>{0902d463-e6b2-47fb-9ef4-a9587578b5df}</UniqueIdentifier>
+      <UniqueIdentifier>{14b4dd8e-1e9a-420e-806c-076a15f69208}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland\Black Temple">
-      <UniqueIdentifier>{be88cd8f-0d5a-4288-9deb-9b76366d3732}</UniqueIdentifier>
+      <UniqueIdentifier>{9fa79693-c964-442c-ab40-49f238fc8c05}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland\Coilfang Resevoir">
-      <UniqueIdentifier>{e7ef0e99-ea1e-44c8-a0fc-12f260c3cc92}</UniqueIdentifier>
+      <UniqueIdentifier>{633911a9-c3a0-40b6-9d47-0ee0aec1f141}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland\Coilfang Resevoir\Serpent Shrine Cavern">
-      <UniqueIdentifier>{7fb3cd06-fa37-4406-8e83-9d1704f96915}</UniqueIdentifier>
+      <UniqueIdentifier>{f860b0a8-1f1a-4bf9-80b4-3c309e5e5d0f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland\Coilfang Resevoir\Steam Vault">
-      <UniqueIdentifier>{2e0f02c5-314a-4444-ad56-56a169349fc7}</UniqueIdentifier>
+      <UniqueIdentifier>{dc9f7368-46ec-4f8b-aa62-3a794f365c09}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland\Coilfang Resevoir\Underbog">
-      <UniqueIdentifier>{de8bd30b-6107-42e7-8c1e-cc57589580c1}</UniqueIdentifier>
+      <UniqueIdentifier>{0ddc1a6c-8c89-4bd0-91e9-47189b74813a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland\Gruul%27s Lair">
-      <UniqueIdentifier>{5a897754-8c01-43de-a9d0-0a9c5924455a}</UniqueIdentifier>
+      <UniqueIdentifier>{8133cd01-51b8-454c-a561-7959e3497318}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland\Hellfire Citadel">
-      <UniqueIdentifier>{026e4a46-bde4-4cc0-bbb7-ea95009a623b}</UniqueIdentifier>
+      <UniqueIdentifier>{90e87a19-6a71-4561-9bf1-5a35c69cfcc5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland\Hellfire Citadel\Blood Furnace">
-      <UniqueIdentifier>{767db181-8e8f-4cef-b38e-9c0940f1853a}</UniqueIdentifier>
+      <UniqueIdentifier>{ee28cdbd-c71d-444b-83a0-4039d59f9cc3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland\Hellfire Citadel\Hellfire Ramparts">
-      <UniqueIdentifier>{c441d149-10a7-4e0d-b19b-7b47d594b5d6}</UniqueIdentifier>
+      <UniqueIdentifier>{0f25ab34-f141-4c10-91c4-61a661080f52}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland\Hellfire Citadel\Magtheridon%27s lair">
-      <UniqueIdentifier>{fc561fc7-ee9b-4612-8de7-49b915fd39ee}</UniqueIdentifier>
+      <UniqueIdentifier>{437238bd-6734-4780-bf16-a81f9cd54d2e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland\Hellfire Citadel\Shattered Halls">
-      <UniqueIdentifier>{3935ecbe-d299-458f-974a-6f46ff977f70}</UniqueIdentifier>
+      <UniqueIdentifier>{45268206-8dff-4321-bf4e-07c28218dee1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland\Tempest Keep">
-      <UniqueIdentifier>{e91e0ffa-ca0f-41c5-b45f-bcad17eeedd6}</UniqueIdentifier>
+      <UniqueIdentifier>{760d3745-75d4-479a-b0e8-223e42c555a8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland\Tempest Keep\Arcatraz">
-      <UniqueIdentifier>{b72c2e9d-d681-4b6a-aac0-84685d4b83a7}</UniqueIdentifier>
+      <UniqueIdentifier>{55f62590-a0f3-491d-a16b-da50c40ed61b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland\Tempest Keep\Botanica">
-      <UniqueIdentifier>{b3b7990b-b815-4ba5-a599-f8db15387256}</UniqueIdentifier>
+      <UniqueIdentifier>{4967bf99-cc98-418d-bd37-edf9e8b6d8ef}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland\Tempest Keep\The Eye">
-      <UniqueIdentifier>{35422a45-e282-4255-8cac-f6a9182a678c}</UniqueIdentifier>
+      <UniqueIdentifier>{417f31c3-4734-4007-8f39-0924e0bd985f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Scripting\Outland\Tempest Keep\The Mechanar">
-      <UniqueIdentifier>{c5028d18-44a0-4a7f-b0ce-824e096c337f}</UniqueIdentifier>
+      <UniqueIdentifier>{949e4a6c-5647-459f-9aeb-bf978bf7945c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Accounts">
-      <UniqueIdentifier>{bae8cb36-4e22-4369-b8a1-14d07f816e89}</UniqueIdentifier>
+      <UniqueIdentifier>{3ffcbbb5-6d89-4d9a-ae6e-3928c19226d0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Achievements">
-      <UniqueIdentifier>{40752e61-2bd1-4403-9fed-df4dd4931323}</UniqueIdentifier>
+      <UniqueIdentifier>{f9e38081-9b08-4c93-a6a4-ec411357c943}</UniqueIdentifier>
     </Filter>
     <Filter Include="Addons">
-      <UniqueIdentifier>{5e1abd5a-927b-4866-b179-a34c0c017ff0}</UniqueIdentifier>
+      <UniqueIdentifier>{2ff853d5-6e20-4fb4-a875-4ca78b68eb4a}</UniqueIdentifier>
     </Filter>
     <Filter Include="AuctionHouse">
-      <UniqueIdentifier>{cb400b40-cdde-412f-b515-1bd5fb6b6dbd}</UniqueIdentifier>
+      <UniqueIdentifier>{964d38ef-4aeb-44d4-86a3-2f4ab29968ba}</UniqueIdentifier>
     </Filter>
     <Filter Include="AuctionHouse\AuctionHouseBot">
-      <UniqueIdentifier>{219cbb76-f9a8-4898-9a60-d06b9cc18cdb}</UniqueIdentifier>
+      <UniqueIdentifier>{0e771b40-8c91-469a-bd91-feb2f9c87c86}</UniqueIdentifier>
     </Filter>
     <Filter Include="BattleGrounds">
-      <UniqueIdentifier>{0da1025d-3d51-4dd3-a269-dc7c9ef71d07}</UniqueIdentifier>
+      <UniqueIdentifier>{a74343f7-67d9-4f59-85a6-9bbe9ce63a1e}</UniqueIdentifier>
     </Filter>
     <Filter Include="BattleGrounds\Zones">
-      <UniqueIdentifier>{412b4bc7-0345-4a47-b256-88fd6d6247ee}</UniqueIdentifier>
+      <UniqueIdentifier>{70fc5928-9830-4deb-b520-8ee96cc944c1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Calendar">
-      <UniqueIdentifier>{71749c48-a84f-4fe0-b089-cb928d5e66bb}</UniqueIdentifier>
+      <UniqueIdentifier>{b833ef99-c648-41b1-b3b4-91b15cbe9473}</UniqueIdentifier>
     </Filter>
     <Filter Include="Chat">
-      <UniqueIdentifier>{2b5f637c-d929-433f-ad37-f6f10215b5b3}</UniqueIdentifier>
+      <UniqueIdentifier>{59d2dcf5-abce-48fb-ad25-23a6685daf52}</UniqueIdentifier>
     </Filter>
     <Filter Include="Chat\Channels">
-      <UniqueIdentifier>{ff2e831a-acee-4332-874f-6077218ae8ec}</UniqueIdentifier>
+      <UniqueIdentifier>{f998b97c-9178-486e-8d70-6db24d622a75}</UniqueIdentifier>
     </Filter>
     <Filter Include="Chat\Commands">
-      <UniqueIdentifier>{87943654-60aa-49fb-b102-00f589fe468a}</UniqueIdentifier>
+      <UniqueIdentifier>{7bf9813d-d398-4e80-91eb-1accbb1ab1dc}</UniqueIdentifier>
     </Filter>
     <Filter Include="Combat">
-      <UniqueIdentifier>{e49c5b81-dff3-48c0-bcd8-bae1fdfb8e92}</UniqueIdentifier>
+      <UniqueIdentifier>{39dd8c18-d0dd-4f4a-9684-c1656bfbf359}</UniqueIdentifier>
     </Filter>
     <Filter Include="Conditions">
-      <UniqueIdentifier>{09ca1a40-79ed-40dc-9d2a-7cc65912e9fc}</UniqueIdentifier>
+      <UniqueIdentifier>{fb7486b3-2a7c-48a1-9d04-a65be4cba0c8}</UniqueIdentifier>
     </Filter>
     <Filter Include="DataStores">
-      <UniqueIdentifier>{b85c7b2e-c026-49f6-9d5e-58582d205ecb}</UniqueIdentifier>
+      <UniqueIdentifier>{a7be65d0-d96c-4367-a208-62d659dec68e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Entities">
-      <UniqueIdentifier>{203c236c-be1b-4e39-b6d2-016fccec9f6d}</UniqueIdentifier>
+      <UniqueIdentifier>{88304e60-451c-4f6a-b77d-ccd9301291b6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Entities\Creature">
-      <UniqueIdentifier>{da4d3546-2890-481d-b166-198f5c11bac5}</UniqueIdentifier>
+      <UniqueIdentifier>{f95f5d17-f736-40ff-a64a-be15c799a533}</UniqueIdentifier>
     </Filter>
     <Filter Include="Entities\DynamicObject">
-      <UniqueIdentifier>{0397016b-d33b-4ef4-af58-384ac7fdd555}</UniqueIdentifier>
+      <UniqueIdentifier>{98fd845c-ff25-4630-875b-5bdcfe4e2b9e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Entities\GameObject">
-      <UniqueIdentifier>{3c40a71c-ed0c-4e84-a854-015d0f37cd8b}</UniqueIdentifier>
+      <UniqueIdentifier>{04a5b381-e72b-451d-aae7-9871fbfe6569}</UniqueIdentifier>
     </Filter>
     <Filter Include="Entities\Item">
-      <UniqueIdentifier>{0d34d198-c2a0-496a-876a-af74a9a03cbc}</UniqueIdentifier>
+      <UniqueIdentifier>{6ffb969b-3485-4965-a8e8-a5353f1e43f1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Entities\Item\Container">
-      <UniqueIdentifier>{87d3a3bd-adbc-4d03-9f2e-8d7323255c1a}</UniqueIdentifier>
+      <UniqueIdentifier>{c1941766-7903-4caf-8563-0fc2fd5d0f3a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Entities\Object">
-      <UniqueIdentifier>{d3b75080-06c6-4804-bfad-6b4438810fe3}</UniqueIdentifier>
+      <UniqueIdentifier>{b363011c-1b8b-4013-a5d8-498c34f0e8c7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Entities\Object\Updates">
-      <UniqueIdentifier>{253f65e1-46b8-454f-898d-82899ed82292}</UniqueIdentifier>
+      <UniqueIdentifier>{0d857cbd-42b4-425e-9c98-978ae78c85a8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Entities\Pet">
-      <UniqueIdentifier>{05a77259-154a-4ff9-aba2-bedbcc0c5589}</UniqueIdentifier>
+      <UniqueIdentifier>{380f6e02-cd0b-4529-b73e-5314223a7ddd}</UniqueIdentifier>
     </Filter>
     <Filter Include="Entities\Player">
-      <UniqueIdentifier>{5d7bcab0-6e1a-4dbd-be72-21c8f2fd748b}</UniqueIdentifier>
+      <UniqueIdentifier>{2a835d33-c3a6-4c51-ab69-c8cf6749ac3e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Entities\Totem">
-      <UniqueIdentifier>{cc478906-71f5-4172-a650-3fa342e19e67}</UniqueIdentifier>
+      <UniqueIdentifier>{75df871f-9bca-4526-b745-f495b9b5d0d2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Entities\Transport">
-      <UniqueIdentifier>{7179a5f8-5782-4773-a3f9-c40a09287735}</UniqueIdentifier>
+      <UniqueIdentifier>{710dd739-3aba-430d-bf77-ea3d8143a84f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Entities\Corpse">
-      <UniqueIdentifier>{ffc9578b-08fd-4e61-919a-c2e28b19e85f}</UniqueIdentifier>
+      <UniqueIdentifier>{50ac2b08-0f91-4fc8-932b-b72dfb9aeb61}</UniqueIdentifier>
     </Filter>
     <Filter Include="Entities\Unit">
-      <UniqueIdentifier>{54cce491-99db-47d0-b6df-56b07cac1987}</UniqueIdentifier>
+      <UniqueIdentifier>{e8238699-9f32-4b66-965f-819c34ffd37a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Entities\Vehicle">
-      <UniqueIdentifier>{23baaa4b-dfe7-4c21-b184-70cafeb4708c}</UniqueIdentifier>
+      <UniqueIdentifier>{67b96302-5797-4901-b49e-09a0fbc98116}</UniqueIdentifier>
     </Filter>
     <Filter Include="Globals">
-      <UniqueIdentifier>{c614c9a5-0edc-4c6d-ad52-d2d03918f8b4}</UniqueIdentifier>
+      <UniqueIdentifier>{73661675-d09a-48ee-a5cf-aad18493c2b7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Instances">
-      <UniqueIdentifier>{08236473-2483-4087-9e9a-ac139b4aa950}</UniqueIdentifier>
+      <UniqueIdentifier>{d97f55c4-5479-4534-9b78-9869dbc2fcc4}</UniqueIdentifier>
     </Filter>
     <Filter Include="DungeonFinding">
-      <UniqueIdentifier>{6d75202c-5347-4fb1-bfd2-cc3cd775132e}</UniqueIdentifier>
+      <UniqueIdentifier>{a31f83ab-3816-427b-b23d-38faaf2dd680}</UniqueIdentifier>
     </Filter>
     <Filter Include="Loot">
-      <UniqueIdentifier>{54f2d333-d862-448c-9247-e9b4aa8676d1}</UniqueIdentifier>
+      <UniqueIdentifier>{379c3414-b881-48e4-ba31-c9a2c596062b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Mails">
-      <UniqueIdentifier>{1483ba28-886a-4ea0-8348-83345cdc8d8d}</UniqueIdentifier>
+      <UniqueIdentifier>{cf35385f-5b8d-42ac-b699-0ace71821d3a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Maps">
-      <UniqueIdentifier>{02f3c0b7-2725-4f85-a169-e4e61b6b01f1}</UniqueIdentifier>
+      <UniqueIdentifier>{334c435f-478b-4157-be3a-ef2ddcc2a865}</UniqueIdentifier>
     </Filter>
     <Filter Include="Movement">
-      <UniqueIdentifier>{071a2dc6-6efc-4be4-bd0e-b624ce318e92}</UniqueIdentifier>
+      <UniqueIdentifier>{15b84b81-f4d2-47a6-9052-443f9a128d55}</UniqueIdentifier>
     </Filter>
     <Filter Include="Movement\MovementGenerators">
-      <UniqueIdentifier>{ad91c9a0-5944-4644-ac69-087b4e21915e}</UniqueIdentifier>
+      <UniqueIdentifier>{baf3087a-adca-4a1d-8a05-9a22e1cfa8ab}</UniqueIdentifier>
     </Filter>
     <Filter Include="Movement\Waypoints">
-      <UniqueIdentifier>{8601a4e1-f098-4f12-8fbe-b4066fdb49a2}</UniqueIdentifier>
+      <UniqueIdentifier>{01ea53e8-650e-40f3-87e5-eefc54f3a0a2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Server">
-      <UniqueIdentifier>{d2ab0b87-1bba-4534-89a7-796431842758}</UniqueIdentifier>
+      <UniqueIdentifier>{395fcba3-b3c5-4f9a-a2f7-5c459a51f070}</UniqueIdentifier>
     </Filter>
     <Filter Include="Server\Protocol">
-      <UniqueIdentifier>{fc9d71cf-cea6-42e2-91cf-db0440f9f78f}</UniqueIdentifier>
+      <UniqueIdentifier>{346976ac-3ad5-46d6-87dc-eeec1da68db0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Server\Protocol\Handlers">
-      <UniqueIdentifier>{9567cce1-3645-421b-b0a6-a3b0949034bf}</UniqueIdentifier>
+      <UniqueIdentifier>{ba2e3d4b-d9c7-43ac-8edb-7d032d2b698b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Pools">
-      <UniqueIdentifier>{671ed034-5332-4558-8222-69d5c233d126}</UniqueIdentifier>
+      <UniqueIdentifier>{83742c31-f18a-4796-996c-45b344f1c56f}</UniqueIdentifier>
     </Filter>
     <Filter Include="PrecompiledHeaders">
-      <UniqueIdentifier>{eadbb52d-a0a2-4661-b24c-e46ebc976292}</UniqueIdentifier>
+      <UniqueIdentifier>{7e2f358e-8b26-4032-be40-9636b0a60dc8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Quests">
-      <UniqueIdentifier>{9040e356-6103-42b6-a64b-d28593bd7c4c}</UniqueIdentifier>
+      <UniqueIdentifier>{d1256742-da8f-4d50-904c-485ca60e2a93}</UniqueIdentifier>
     </Filter>
     <Filter Include="Reputation">
-      <UniqueIdentifier>{a065c2ea-db01-4bb9-a899-4f6a858eaa6f}</UniqueIdentifier>
+      <UniqueIdentifier>{d97704a1-5e9f-4125-87aa-38f543eea89a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Skills">
-      <UniqueIdentifier>{562ad4df-82fd-4118-99ee-712bbaf25796}</UniqueIdentifier>
+      <UniqueIdentifier>{53c38de6-0bf5-468d-beb6-9d43bbad0f40}</UniqueIdentifier>
     </Filter>
     <Filter Include="Spells">
-      <UniqueIdentifier>{5861e799-b4e4-4dbf-99e0-b75638954ef4}</UniqueIdentifier>
+      <UniqueIdentifier>{8bc0b195-e4a5-45da-9175-5dc22b84b16d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Spells\Auras">
-      <UniqueIdentifier>{e5307aaf-8eb0-473c-b292-af5af2520536}</UniqueIdentifier>
+      <UniqueIdentifier>{f27a1a82-e066-4a12-b785-e8e2945d9a6e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Tools">
-      <UniqueIdentifier>{bbe0e38f-df4e-437e-89ce-a21cc5f6ee71}</UniqueIdentifier>
+      <UniqueIdentifier>{c4b58393-cbfc-427a-80c4-73d83c3f1a7a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Weather">
-      <UniqueIdentifier>{4f63e83a-a2c8-428a-b48c-5cdda115dc2c}</UniqueIdentifier>
+      <UniqueIdentifier>{d78094b4-3546-4b15-83f4-0cf285102b62}</UniqueIdentifier>
     </Filter>
     <Filter Include="Grids">
-      <UniqueIdentifier>{794470f5-b815-4a6a-a73a-5e88890ce781}</UniqueIdentifier>
+      <UniqueIdentifier>{48503986-7bad-4515-ae04-37e649ad3ca9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Grids\Notifiers">
-      <UniqueIdentifier>{9e574153-d2e0-4075-8015-7e207eed718e}</UniqueIdentifier>
+      <UniqueIdentifier>{d86adbdb-82df-4109-a768-b45bd2d8550c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Grids\Cells">
-      <UniqueIdentifier>{3471d681-a8a2-4f68-9597-1a8ec4eb19a6}</UniqueIdentifier>
+      <UniqueIdentifier>{73da393c-df7e-401e-b356-37d5a3f9a769}</UniqueIdentifier>
     </Filter>
     <Filter Include="Miscellaneous">
-      <UniqueIdentifier>{67787183-6641-4f02-b59b-610ab8070107}</UniqueIdentifier>
+      <UniqueIdentifier>{a0510323-2b51-4f82-ac73-1411f67089af}</UniqueIdentifier>
     </Filter>
     <Filter Include="Collision">
-      <UniqueIdentifier>{cb3f0c03-cdb8-4c5a-adfe-572552e1afd0}</UniqueIdentifier>
+      <UniqueIdentifier>{cc709d23-69c8-4066-af47-ce795d776185}</UniqueIdentifier>
     </Filter>
     <Filter Include="Collision\Management">
-      <UniqueIdentifier>{98ecc0ff-5208-4b1b-ae5c-d43c043a0744}</UniqueIdentifier>
+      <UniqueIdentifier>{0d649aba-b565-4e66-a8aa-d9546dfa1b06}</UniqueIdentifier>
     </Filter>
     <Filter Include="Collision\Maps">
-      <UniqueIdentifier>{239e749f-4230-4e85-9f7f-93556f73c1b4}</UniqueIdentifier>
+      <UniqueIdentifier>{4900a61d-259f-46ce-a2f7-426584cd291e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Collision\Models">
-      <UniqueIdentifier>{cbc5e520-a681-47c1-b10a-c812ae6ec8e9}</UniqueIdentifier>
+      <UniqueIdentifier>{699b7bd9-0255-4e3c-841b-1de2779e08c9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -2430,6 +2430,9 @@
     <ClCompile Include="..\..\src\server\game\Spells\Spell.cpp">
       <Filter>Spells</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\server\game\Spells\Auras\SpellEffects.cpp">
+      <Filter>Spells</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\server\game\Spells\SpellMgr.cpp">
       <Filter>Spells</Filter>
     </ClCompile>
@@ -2437,9 +2440,6 @@
       <Filter>Spells\Auras</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\server\game\Spells\Auras\SpellAuras.cpp">
-      <Filter>Spells\Auras</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\server\game\Spells\Auras\SpellEffects.cpp">
       <Filter>Spells\Auras</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\server\game\Tools\PlayerDump.cpp">
