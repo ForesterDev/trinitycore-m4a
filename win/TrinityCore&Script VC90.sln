@@ -18,6 +18,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "g3dlite", "..\externals\g3d
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sockets", "..\externals\sockets\win\VC90\sockets.vcxproj", "{9DF7A84E-C644-4720-A79D-C98CB950E34C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libmysql", "..\externals\mysql\win\VC90\libmysql.vcxproj", "{4FBE4FC1-22DE-41A0-9AEB-CFD00EBAC7E5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -52,10 +54,12 @@ Global
 		{A3A04E47-43A2-4C08-90B3-029CEF558594}.Release|x64.Build.0 = Release|x64
 		{563E9905-3657-460C-AE63-0AC39D162E23}.Debug|Win32.ActiveCfg = Debug|Win32
 		{563E9905-3657-460C-AE63-0AC39D162E23}.Debug|Win32.Build.0 = Debug|Win32
-		{563E9905-3657-460C-AE63-0AC39D162E23}.Debug|x64.ActiveCfg = Debug|Win32
+		{563E9905-3657-460C-AE63-0AC39D162E23}.Debug|x64.ActiveCfg = Debug|x64
+		{563E9905-3657-460C-AE63-0AC39D162E23}.Debug|x64.Build.0 = Debug|x64
 		{563E9905-3657-460C-AE63-0AC39D162E23}.Release|Win32.ActiveCfg = Release|Win32
 		{563E9905-3657-460C-AE63-0AC39D162E23}.Release|Win32.Build.0 = Release|Win32
-		{563E9905-3657-460C-AE63-0AC39D162E23}.Release|x64.ActiveCfg = Release|Win32
+		{563E9905-3657-460C-AE63-0AC39D162E23}.Release|x64.ActiveCfg = Release|x64
+		{563E9905-3657-460C-AE63-0AC39D162E23}.Release|x64.Build.0 = Release|x64
 		{803F488E-4C5A-4866-8D5C-1E6C03C007C2}.Debug|Win32.ActiveCfg = Debug|Win32
 		{803F488E-4C5A-4866-8D5C-1E6C03C007C2}.Debug|Win32.Build.0 = Debug|Win32
 		{803F488E-4C5A-4866-8D5C-1E6C03C007C2}.Debug|x64.ActiveCfg = Debug|x64
@@ -96,6 +100,12 @@ Global
 		{9DF7A84E-C644-4720-A79D-C98CB950E34C}.Release|Win32.Build.0 = Release|Win32
 		{9DF7A84E-C644-4720-A79D-C98CB950E34C}.Release|x64.ActiveCfg = Release|x64
 		{9DF7A84E-C644-4720-A79D-C98CB950E34C}.Release|x64.Build.0 = Release|x64
+		{4FBE4FC1-22DE-41A0-9AEB-CFD00EBAC7E5}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4FBE4FC1-22DE-41A0-9AEB-CFD00EBAC7E5}.Debug|Win32.Build.0 = Debug|Win32
+		{4FBE4FC1-22DE-41A0-9AEB-CFD00EBAC7E5}.Debug|x64.ActiveCfg = Debug|Win32
+		{4FBE4FC1-22DE-41A0-9AEB-CFD00EBAC7E5}.Release|Win32.ActiveCfg = Release|Win32
+		{4FBE4FC1-22DE-41A0-9AEB-CFD00EBAC7E5}.Release|Win32.Build.0 = Release|Win32
+		{4FBE4FC1-22DE-41A0-9AEB-CFD00EBAC7E5}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
