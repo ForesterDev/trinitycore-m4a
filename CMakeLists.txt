@@ -43,9 +43,9 @@ include(FindZLIB)
 include(FindBZip2)
 endif(UNIX)
 
-# Select the Release build configuration by default.
+# Select the Release With Debug Information build configuration by default.
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release")
+  set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 endif(NOT CMAKE_BUILD_TYPE)
 
 CONFIGURE_FILE(
