@@ -30,7 +30,10 @@
 void InstanceData::Load(const char *data)
 {
     if (data)
-        LoadBossState(std::istringstream(data));
+    {
+        std::istringstream tmp(data);
+        LoadBossState(tmp);
+    }
 }
 
 void InstanceData::SaveToDB()
