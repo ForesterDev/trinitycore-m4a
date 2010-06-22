@@ -316,7 +316,7 @@ struct instance_ulduar : public ScriptedInstance
         loadStream >> dataHead1 >> dataHead2;
 
         if (dataHead1 == 'U' && dataHead2 == 'U')
-            LoadBossState(std::move(loadStream)) >> colossi;
+            LoadBossState(loadStream) >> colossi;
         OUT_LOAD_INST_DATA_COMPLETE;
     }
 
