@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="vmaplib">
+      <UniqueIdentifier>{f19e8c8b-170a-4eb5-97d4-a1fa297bbb9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vmaplib\Maps">
+      <UniqueIdentifier>{6d0a6b13-aac7-42ac-9bb3-0d0c33754170}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vmaplib\Models">
+      <UniqueIdentifier>{ce59f382-0142-4aab-bfa0-07282a47849f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\VMapAssembler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\server\collision\BoundingIntervalHierarchy.cpp">
+      <Filter>vmaplib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\server\collision\Maps\TileAssembler.cpp">
+      <Filter>vmaplib\Maps</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\server\collision\Models\ModelInstance.cpp">
+      <Filter>vmaplib\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\server\collision\Models\WorldModel.cpp">
+      <Filter>vmaplib\Models</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\server\collision\BoundingIntervalHierarchy.h">
+      <Filter>vmaplib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\server\collision\Maps\TileAssembler.h">
+      <Filter>vmaplib\Maps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\server\collision\Models\ModelInstance.h">
+      <Filter>vmaplib\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\server\collision\Models\WorldModel.h">
+      <Filter>vmaplib\Models</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
