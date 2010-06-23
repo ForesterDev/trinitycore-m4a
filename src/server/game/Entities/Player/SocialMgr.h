@@ -43,7 +43,8 @@ enum SocialFlag
 {
     SOCIAL_FLAG_FRIEND      = 0x01,
     SOCIAL_FLAG_IGNORED     = 0x02,
-    SOCIAL_FLAG_MUTED       = 0x04                          // guessed
+    SOCIAL_FLAG_MUTED       = 0x04,                         // guessed
+    SOCIAL_FLAG_RAF         = 0x08                          // Recruit-A-Friend
 };
 
 struct FriendInfo
@@ -82,13 +83,13 @@ typedef std::map<uint32, PlayerSocial> SocialMap;
 /// Results of friend related commands
 enum FriendsResult
 {
-    FRIEND_DB_ERROR         = 0x00,
+    FRIEND_DB_ERROR         = 0x00,                         // ERR_FRIEND_NOT_FOUND
     FRIEND_LIST_FULL        = 0x01,
     FRIEND_ONLINE           = 0x02,
     FRIEND_OFFLINE          = 0x03,
-    FRIEND_NOT_FOUND        = 0x04,
+    FRIEND_NOT_FOUND        = 0x04,                         // ERR_FRIEND_NOT_FOUND
     FRIEND_REMOVED          = 0x05,
-    FRIEND_ADDED_ONLINE     = 0x06,
+    FRIEND_ADDED_ONLINE     = 0x06,                         // ERR_FRIEND_ADDED_S
     FRIEND_ADDED_OFFLINE    = 0x07,
     FRIEND_ALREADY          = 0x08,
     FRIEND_SELF             = 0x09,
@@ -112,7 +113,7 @@ enum FriendsResult
 };
 
 #define SOCIALMGR_FRIEND_LIMIT  50
-#define SOCIALMGR_IGNORE_LIMIT  25
+#define SOCIALMGR_IGNORE_LIMIT  50
 
 class PlayerSocial
 {
