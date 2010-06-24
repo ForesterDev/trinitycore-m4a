@@ -825,10 +825,7 @@ bool AuthSocket::_HandleRealmList()
     {
         // don't work with realms which not compatible with the client
         if (_expversion & POST_BC_EXP_FLAG) // 2.4.3 and 3.1.3 cliens
-        {
-            if (i->second.gamebuild != _build)
-                continue;
-        }
+            ;
         else if (_expversion & PRE_BC_EXP_FLAG) // 1.12.1 and 1.12.2 clients are compatible with eachother
         {
             if (!AuthHelper::IsPreBCAcceptedClientBuild(i->second.gamebuild))
