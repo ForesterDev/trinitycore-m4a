@@ -5145,6 +5145,62 @@ float Player::GetMeleeCritFromAgility()
     return crit*100.0f;
 }
 
+float Player::GetBaseDodge()
+{
+    uint32 pclass = getClass();
+    float BaseDodge[MAX_CLASSES] = {
+        3.664f,  // Warrior
+        3.494f,  // Paladin
+        -4.087f, // Hunter
+        2.095f,  // Rogue
+        3.417f,  // Priest
+        3.664f,  // DK?
+        2.108f,  // Shaman
+        3.658f,  // Mage
+        2.421f,  // Warlock
+        0.0f,
+        5.609f   // Druid
+    };
+    return BaseDodge[pclass - 1];
+}
+
+float Player::DodgeDiminishingReturn(float dodge)
+{
+    float dimdodge = 0.0f;
+    uint32 pclass = getClass();
+    float k[MAX_CLASSES] = {
+        0.956f, // Warrior
+        0.956f, // Paladin
+        0.988f, // Hunter
+        0.988f, // Rogue
+        0.953f, // Priest
+        0.956f, // DK?
+        0.988f, // Shaman
+        0.953f, // Mage
+        0.953f, // Warlock
+        0.0f,   // ??
+        0.972f  // Druid
+    };
+
+    float Dodge_Cap[MAX_CLASSES] = {
+        88.12f,      // Warrior
+        88.12f,      // Paladin
+        145.56f,     // Hunter
+        145.56f,     // Rogue
+        150.37f,     // Priest
+        88.12f,      // DK?
+        145.56f,     // Shaman
+        150.37f,     // Mage
+        150.37f,     // Warlock
+        0.0f,        // ??
+        116.89f      // Druid
+    };
+
+    if (dodge > 0.0f)
+        dimdodge = (dodge * Dodge_Cap[pclass - 1] / (dodge + (Dodge_Cap[pclass - 1] * k[pclass - 1])));
+    return dimdodge;
+}
+
 float Player::GetDodgeFromAgility()
 {
     // Table for base dodge values
@@ -5187,8 +5243,45 @@ float Player::GetDodgeFromAgility()
     if (dodgeRatio == NULL || pclass > MAX_CLASSES)
         return 0.0f;
 
-    float dodge=dodge_base[pclass-1] + GetStat(STAT_AGILITY) * dodgeRatio->ratio * crit_to_dodge[pclass-1];
-    return dodge*100.0f;
+    float dodge = dodge_base[pclass - 1] + GetStat(STAT_AGILITY) * dodgeRatio->ratio * crit_to_dodge[pclass - 1];
+    return dodge * 100.0f;
+}
+
+float Player::ParryDiminishingReturn(float parry)
+{
+    float dimparry=0.0f;
+    uint32 pclass = getClass();
+    float k[MAX_CLASSES] = {
+        0.956f, // Warrior
+        0.956f, // Paladin
+        0.988f, // Hunter
+        0.988f, // Rogue
+        0.953f, // Priest
+        0.956f, // DK?
+        0.988f, // Shaman
+        0.953f, // Mage
+        0.953f, // Warlock
+        0.0f,   // ??
+        0.972f  // Druid
+    };
+
+    float Parry_Cap[MAX_CLASSES] = {
+        47.00f,  // Warrior
+        47.00f,  // Paladin
+        145.56f, // Hunter
+        145.56f, // Rogue
+        0.0f,    // Priest
+        47.00f,  // DK?
+        145.56f, // Shaman
+        0.0f,    // Mage
+        0.0f,    // Warlock
+        0.0f,    // ??
+        0.0f     // Druid
+    };
+
+    if (parry > 0.0f)
+        dimparry = (parry * Parry_Cap[pclass - 1] / (parry + (Parry_Cap[pclass - 1] * k[pclass - 1])));
+    return dimparry;
 }
 
 float Player::GetSpellCritFromIntellect()

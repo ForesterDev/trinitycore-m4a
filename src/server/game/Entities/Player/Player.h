@@ -1719,7 +1719,10 @@ class Player : public Unit, public GridObject<Player>
         void UpdateDefenseBonusesMod();
         inline void RecalculateRating(CombatRating cr) { ApplyRatingMod(cr, 0, true);}
         float GetMeleeCritFromAgility();
+        float GetBaseDodge();
+        float DodgeDiminishingReturn(float value);
         float GetDodgeFromAgility();
+        float ParryDiminishingReturn(float value);
         float GetSpellCritFromIntellect();
         float OCTRegenHPPerSpirit();
         float OCTRegenMPPerSpirit();
