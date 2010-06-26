@@ -1638,7 +1638,7 @@ void Spell::EffectDummy(uint32 i)
                 // Bloodthirst
                 case 23881:
                 {
-                    m_caster->CastCustomSpell(unitTarget, 23885, &damage, NULL, NULL, true, NULL);
+                    m_caster->CastCustomSpell(unitTarget, 55970, &damage, NULL, NULL, true, NULL);
                     return;
                 }
             }
@@ -2972,6 +2972,10 @@ void Spell::EffectHealPct(uint32 /*i*/)
         // Rune Tap - Party
         if (m_spellInfo->Id == 59754 && unitTarget == m_caster)
             return;
+
+        // Glyph of Bloodthirst
+        if (m_spellInfo->Id == 55969 && caster->HasAura(58369))
+            damage *= 2;
 
         uint32 addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, unitTarget->GetMaxHealth() * damage / 100.0f, HEAL);
         //if (Player *modOwner = m_caster->GetSpellModOwner())
