@@ -144,6 +144,12 @@ class ScriptMgr
         InstanceData* CreateInstanceData(Map *map);
 };
 
+template<class AI_type> inline
+    CreatureAI *get_ai(Creature *c)
+{
+    return new AI_type(c);
+}
+
 //Config file accessors
 //std::string GetConfigValueStr(char const* option);
 //int32 GetConfigValueInt32(char const* option);
