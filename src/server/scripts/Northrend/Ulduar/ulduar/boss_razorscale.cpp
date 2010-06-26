@@ -24,6 +24,7 @@ EndScriptData */
 
 #include "ScriptPCH.h"
 #include "ulduar.h"
+#include "instance_ulduar.hpp"
 
 //not in db
 #define SAY_AGGRO                   -2000000
@@ -319,6 +320,54 @@ struct boss_razorscaleAI : public BossAI
     }
 };
 
+namespace
+{
+    bool expedition_commander_gossip_hello(Player *p, Creature *c)
+    {
+        if (auto i = dynamic_cast<instance_ulduar *>(c->GetInstanceData()))
+        {
+            if (!i->razorscale_state)
+            {
+                p->PlayerTalkClass
+                    ->GetGossipMenu().AddMenuItem(GOSSIP_ICON_CHAT, "We are ready to help!");
+                p->PlayerTalkClass->SendGossipMenu(14317, c->GetGUID());
+            }
+            return true;
+        }
+        else
+            return false;
+    }
+
+    bool expedition_commander_gossip_select(Player *p, Creature *c, uint32, uint32 a)
+    {
+        if (auto i = dynamic_cast<instance_ulduar *>(c->GetInstanceData()))
+        {
+            p->PlayerTalkClass->CloseGossip();
+            if (!i->razorscale_state)
+                if (a == 0)
+                {
+                    c->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    i->razorscale_state = true;
+                    // TODO: events
+                    // Expedition Engineer yells: Give us a moment to prepare to build the turrets.
+                    // <pause two seconds>
+                    // Expedition Commander yells: Be on the lookout! Mole machines will be
+                    //  surfacing soon with those nasty iron dwarves aboard!
+                    // <Razorscale flies nearby and the encounter begins>
+                    if (const auto &guid = i->uiRazorscaleGUID)
+                        if (auto c = i->instance->GetCreature(guid))
+                        {
+                            c->SetHomePosition(587.54f, -174.92f, 442.f, 4.37237f);
+                            c->GetMotionMaster()->MoveTargetedHome();
+                        }
+                }
+            return true;
+        }
+        else
+            return false;
+    }
+}
+
 CreatureAI* GetAI_boss_razorscale(Creature* pCreature)
 {
     return new boss_razorscaleAI (pCreature);
@@ -330,5 +379,10 @@ void AddSC_boss_razorscale()
     newscript = new Script;
     newscript->Name = "boss_razorscale";
     newscript->GetAI = &GetAI_boss_razorscale;
+    newscript->RegisterSelf();
+    newscript = new Script;
+    newscript->Name = "npc_expedition_commander";
+    newscript->pGossipHello = &expedition_commander_gossip_hello;
+    newscript->pGossipSelect = &expedition_commander_gossip_select;
     newscript->RegisterSelf();
 }
