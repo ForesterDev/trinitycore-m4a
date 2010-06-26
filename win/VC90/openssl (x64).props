@@ -3,7 +3,8 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <LibraryPath>$(ProgramFiles)\MySQL\MySQL Server 5.1\lib\debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProgramFiles)\openssl\openssl-1.0.0\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProgramFiles)\openssl\openssl-1.0.0\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup />
   <ItemGroup />
