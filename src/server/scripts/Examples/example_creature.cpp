@@ -247,13 +247,6 @@ struct example_creatureAI : public ScriptedAI
     }
 };
 
-//This is the GetAI method used by all scripts that involve AI
-//It is called every time a new Creature using this script is created
-CreatureAI* GetAI_example_creature(Creature* pCreature)
-{
-    return new example_creatureAI (pCreature);
-}
-
 //This function is called when the player clicks an option on the gossip menu
 bool GossipSelect_example_creature(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
 {
@@ -285,7 +278,9 @@ void AddSC_example_creature()
 
     newscript = new Script;
     newscript->Name = "example_creature";
-    newscript->GetAI = &GetAI_example_creature;
+    // This is the GetAI method used by all scripts that involve AI
+    // It is called every time a new Creature using this script is created
+    newscript->GetAI = &get_ai<example_creatureAI>;
     newscript->pGossipHello = &GossipHello_example_creature;
     newscript->pGossipSelect = &GossipSelect_example_creature;
     newscript->RegisterSelf();
