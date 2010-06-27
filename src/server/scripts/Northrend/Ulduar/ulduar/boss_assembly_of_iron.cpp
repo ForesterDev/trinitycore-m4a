@@ -120,7 +120,7 @@ bool IsEncounterComplete(ScriptedInstance* pInstance, Creature* me)
 
     for (uint8 i = 0; i < 3; ++i)
     {
-        uint64 guid = pInstance->GetData64(DATA_STEELBREAKER+i);
+        uint64 guid = pInstance->GetData64(DATA_STEELBREAKER + i);
         if (!guid)
             return false;
 
@@ -532,58 +532,33 @@ struct boss_stormcaller_brundirAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_steelbreaker(Creature* pCreature)
-{
-    return new boss_steelbreakerAI (pCreature);
-}
-
-CreatureAI* GetAI_boss_runemaster_molgeim(Creature* pCreature)
-{
-    return new boss_runemaster_molgeimAI (pCreature);
-}
-
-CreatureAI* GetAI_boss_stormcaller_brundir(Creature* pCreature)
-{
-    return new boss_stormcaller_brundirAI (pCreature);
-}
-
-CreatureAI* GetAI_mob_lightning_elemental(Creature* pCreature)
-{
-    return new mob_lightning_elementalAI (pCreature);
-}
-
-CreatureAI* GetAI_mob_rune_of_summoning(Creature* pCreature)
-{
-    return new mob_rune_of_summoningAI (pCreature);
-}
-
 void AddSC_boss_assembly_of_iron()
 {
     Script *newscript;
 
     newscript = new Script;
     newscript->Name = "boss_steelbreaker";
-    newscript->GetAI = &GetAI_boss_steelbreaker;
+    newscript->GetAI = &get_ai<boss_steelbreakerAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "boss_runemaster_molgeim";
-    newscript->GetAI = &GetAI_boss_runemaster_molgeim;
+    newscript->GetAI = &get_ai<boss_runemaster_molgeimAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "boss_stormcaller_brundir";
-    newscript->GetAI = &GetAI_boss_stormcaller_brundir;
+    newscript->GetAI = &get_ai<boss_stormcaller_brundirAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_lightning_elemental";
-    newscript->GetAI = &GetAI_mob_lightning_elemental;
+    newscript->GetAI = &get_ai<mob_lightning_elementalAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_rune_of_summoning";
-    newscript->GetAI = &GetAI_mob_rune_of_summoning;
+    newscript->GetAI = &get_ai<mob_rune_of_summoningAI>;
     newscript->RegisterSelf();
 
 }

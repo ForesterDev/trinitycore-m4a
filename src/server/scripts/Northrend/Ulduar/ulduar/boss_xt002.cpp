@@ -131,16 +131,6 @@ enum
     ACHIEV_TIMED_START_EVENT                      = 21027,
 };
 
-//#define GRAVITY_BOMB_DMG_MIN_10                11700
-//#define GRAVITY_BOMB_DMG_MAX_10                12300
-//#define GRAVITY_BOMB_DMG_MIN_25                14625
-//#define GRAVITY_BOMB_DMG_MAX_25                15375
-//#define GRAVITY_BOMB_RADIUS                    12
-
-//#define VOID_ZONE_DMG_10                      5000
-//#define VOID_ZONE_DMG_25                      7500
-//#define VOID_ZONE_RADIUS
-
 
 /************************************************
 -----------------SPAWN LOCATIONS-----------------
@@ -197,7 +187,7 @@ struct boss_xt002_AI : public BossAI
         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE);
 
         //Makes XT-002 to cast a light bomb 10 seconds after aggro.
-        uiSearingLightTimer = TIMER_SEARING_LIGHT/2;
+        uiSearingLightTimer = (TIMER_SEARING_LIGHT / 2);
         uiSpawnLifeSparkTimer = TIMER_SPAWN_LIFE_SPARK;
         uiGravityBombTimer = TIMER_GRAVITY_BOMB;
         uiGravityBombAuraTimer = TIMER_GRAVITY_BOMB_AURA;
@@ -206,7 +196,7 @@ struct boss_xt002_AI : public BossAI
         uiEnrageTimer = TIMER_ENRAGE;
 
         //Tantrum is casted a bit slower the first time.
-        uiTympanicTantrumTimer = urand(TIMER_TYMPANIC_TANTRUM_MIN, TIMER_TYMPANIC_TANTRUM_MAX) * 2;
+        uiTympanicTantrumTimer = (urand(TIMER_TYMPANIC_TANTRUM_MIN, TIMER_TYMPANIC_TANTRUM_MAX) * 2);
 
         searing_light_active = false;
         gravity_bomb_active = false;
@@ -324,17 +314,11 @@ struct boss_xt002_AI : public BossAI
             if (phase == 1)
             {
                 if (HealthBelowPct(75) && heart_exposed == 0)
-                {
                     exposeHeart();
-                }
                 else if (HealthBelowPct(50) && heart_exposed == 1)
-                {
                     exposeHeart();
-                }
                 else if (HealthBelowPct(25) && heart_exposed == 2)
-                {
                     exposeHeart();
-                }
 
                 DoMeleeAttackIfReady();
             }
@@ -387,9 +371,7 @@ struct boss_xt002_AI : public BossAI
                 {
                     DoScriptText(SAY_HEART_CLOSED, me);
                     SetPhaseOne();
-                }
-                else
-                    uiHeartPhaseTimer -= diff;
+                } else uiHeartPhaseTimer -= diff;
             }
         }
         else
@@ -475,15 +457,8 @@ struct boss_xt002_AI : public BossAI
     }
 };
 
-CreatureAI* GetAI_boss_xt002(Creature* pCreature)
-{
-    return new boss_xt002_AI(pCreature);
-}
-
 /*-------------------------------------------------------
- *
  *        XT-002 HEART
- *
  *///----------------------------------------------------
 struct mob_xt002_heartAI : public ScriptedAI
 {
@@ -500,8 +475,7 @@ struct mob_xt002_heartAI : public ScriptedAI
     void JustDied(Unit * /*victim*/)
     {
         if (m_pInstance)
-            if (Creature
-                    *pXT002 = me->GetCreature(*me, m_pInstance->GetData64(data64_xt002)))
+            if (Creature *pXT002 = me->GetCreature(*me, m_pInstance->GetData64(data64_xt002)))
                 if (pXT002->AI())
                     pXT002->AI()->DoAction(ACTION_ENTER_HARD_MODE);
 
@@ -511,8 +485,8 @@ struct mob_xt002_heartAI : public ScriptedAI
 
     void DamageTaken(Unit * /*pDone*/, uint32 &damage)
     {
-        if (Creature
-                *pXT002 = me->GetCreature(*me, m_pInstance->GetData64(data64_xt002)))
+        if (Creature *pXT002 = me->GetCreature(*me, m_pInstance->GetData64(data64_xt002)))
+        {
             if (pXT002->AI())
             {
                 uint32 health = me->GetHealth();
@@ -522,18 +496,12 @@ struct mob_xt002_heartAI : public ScriptedAI
 
                 pXT002->AI()->SetData(DATA_TRANSFERED_HEALTH, me->GetMaxHealth() - health);
             }
+        }
     }
 };
 
-CreatureAI* GetAI_mob_xt002_heart(Creature* pCreature)
-{
-    return new mob_xt002_heartAI(pCreature);
-}
-
 /*-------------------------------------------------------
- *
  *        XS-013 SCRAPBOT
- *
  *///----------------------------------------------------
 struct mob_scrapbotAI : public ScriptedAI
 {
@@ -548,15 +516,13 @@ struct mob_scrapbotAI : public ScriptedAI
     {
         me->SetReactState(REACT_PASSIVE);
 
-        if (Creature
-                *pXT002 = me->GetCreature(*me, m_pInstance->GetData64(data64_xt002)))
+        if (Creature *pXT002 = me->GetCreature(*me, m_pInstance->GetData64(data64_xt002)))
             me->GetMotionMaster()->MoveChase(pXT002);
     }
 
     void UpdateAI(const uint32 /*diff*/)
     {
-        if (Creature
-                *pXT002 = me->GetCreature(*me, m_pInstance->GetData64(data64_xt002)))
+        if (Creature *pXT002 = me->GetCreature(*me, m_pInstance->GetData64(data64_xt002)))
         {
             if (me->GetDistance2d(pXT002) <= 0.5)
             {
@@ -572,24 +538,13 @@ struct mob_scrapbotAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_scrapbot(Creature* pCreature)
-{
-    return new mob_scrapbotAI(pCreature);
-}
-
 /*-------------------------------------------------------
- *
  *        XM-024 PUMMELLER
- *
  *///----------------------------------------------------
 struct mob_pummellerAI : public ScriptedAI
 {
-    mob_pummellerAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_pInstance = pCreature->GetInstanceData();
-    }
+    mob_pummellerAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
-    ScriptedInstance* m_pInstance;
     int32 uiArcingSmashTimer;
     int32 uiTrampleTimer;
     int32 uiUppercutTimer;
@@ -631,15 +586,8 @@ struct mob_pummellerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_pummeller(Creature* pCreature)
-{
-    return new mob_pummellerAI(pCreature);
-}
-
 /*-------------------------------------------------------
- *
  *        XE-321 BOOMBOT
- *
  *///----------------------------------------------------
 struct mob_boombotAI : public ScriptedAI
 {
@@ -654,8 +602,7 @@ struct mob_boombotAI : public ScriptedAI
     {
         me->SetReactState(REACT_PASSIVE);
 
-        if (Creature
-                *pXT002 = me->GetCreature(*me, m_pInstance->GetData64(data64_xt002)))
+        if (Creature *pXT002 = me->GetCreature(*me, m_pInstance->GetData64(data64_xt002)))
             me->GetMotionMaster()->MoveChase(pXT002);
     }
 
@@ -666,8 +613,7 @@ struct mob_boombotAI : public ScriptedAI
 
     void UpdateAI(const uint32 /*diff*/)
     {
-        if (Creature
-                *pXT002 = me->GetCreature(*me, m_pInstance->GetData64(data64_xt002)))
+        if (Creature *pXT002 = me->GetCreature(*me, m_pInstance->GetData64(data64_xt002)))
         {
             if (me->GetDistance2d(pXT002) <= 0.5)
             {
@@ -681,15 +627,8 @@ struct mob_boombotAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_boombot(Creature* pCreature)
-{
-    return new mob_boombotAI(pCreature);
-}
-
 /*-------------------------------------------------------
- *
  *        VOID ZONE
- *
  *///----------------------------------------------------
 struct mob_void_zoneAI : public ScriptedAI
 {
@@ -717,15 +656,8 @@ struct mob_void_zoneAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_void_zone(Creature* pCreature)
-{
-    return new mob_void_zoneAI(pCreature);
-}
-
 /*-------------------------------------------------------
- *
  *        LIFE SPARK
- *
  *///----------------------------------------------------
 struct mob_life_sparkAI : public ScriptedAI
 {
@@ -755,15 +687,9 @@ struct mob_life_sparkAI : public ScriptedAI
                 DoCast(me->getVictim(), SPELL_SHOCK);
                 uiShockTimer = TIMER_SHOCK;
             }
-        }
-        else uiShockTimer -= diff;
+        } else uiShockTimer -= diff;
     }
 };
-
-CreatureAI* GetAI_mob_life_spark(Creature* pCreature)
-{
-    return new mob_life_sparkAI(pCreature);
-}
 
 void AddSC_boss_xt002()
 {
@@ -771,36 +697,36 @@ void AddSC_boss_xt002()
 
     newscript = new Script;
     newscript->Name = "boss_xt002";
-    newscript->GetAI = &GetAI_boss_xt002;
+    newscript->GetAI = &get_ai<boss_xt002_AI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_xt002_heart";
-    newscript->GetAI = &GetAI_mob_xt002_heart;
+    newscript->GetAI = &get_ai<mob_xt002_heartAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_scrapbot";
-    newscript->GetAI = &GetAI_mob_scrapbot;
+    newscript->GetAI = &get_ai<mob_scrapbotAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_pummeller";
-    newscript->GetAI = &GetAI_mob_pummeller;
+    newscript->GetAI = &get_ai<mob_pummellerAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_boombot";
-    newscript->GetAI = &GetAI_mob_boombot;
+    newscript->GetAI = &get_ai<mob_boombotAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_void_zone";
-    newscript->GetAI = &GetAI_mob_void_zone;
+    newscript->GetAI = &get_ai<mob_void_zoneAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_life_spark";
-    newscript->GetAI = &GetAI_mob_life_spark;
+    newscript->GetAI = &get_ai<mob_life_sparkAI>;
     newscript->RegisterSelf();
 }

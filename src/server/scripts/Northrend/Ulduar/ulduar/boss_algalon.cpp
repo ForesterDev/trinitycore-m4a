@@ -257,14 +257,12 @@ struct boss_algalonAI : public ScriptedAI
                             break;
                     }
                 } else uiPhase_timer -= diff;
-
                 return;
             }
 
             if (QuantumStrike_Timer <= diff)
             {
                 DoCast(me->getVictim(), RAID_MODE(SPELL_QUANTUM_STRIKE,H_SPELL_QUANTUM_STRIKE), true);
-
                 QuantumStrike_Timer = urand(4000, 14000);
             } else QuantumStrike_Timer -= diff;
 
@@ -272,28 +270,24 @@ struct boss_algalonAI : public ScriptedAI
             {
                 DoScriptText(RAND(SAY_BIG_BANG_1,SAY_BIG_BANG_2), me);
                 DoCast(me->getVictim(), RAID_MODE(SPELL_BIG_BANG,H_SPELL_BIG_BANG), true);
-
                 BigBang_Timer = 90000;
             } else BigBang_Timer -= diff;
 
             if (Ascend_Timer <= diff)
             {
                 DoCast(me->getVictim(),SPELL_ASCEND, true);
-
                 Ascend_Timer = 480000;
             } else Ascend_Timer -= diff;
 
             if (PhasePunch_Timer <= diff)
             {
                 DoCast(me->getVictim(),SPELL_PHASE_PUNCH, true);
-
                 PhasePunch_Timer = 8000;
             } else PhasePunch_Timer -= diff;
 
             if (CosmicSmash_Timer <= diff)
             {
                 DoCast(SelectUnit(SELECT_TARGET_RANDOM, 0), RAID_MODE(SPELL_COSMIC_SMASH,H_SPELL_COSMIC_SMASH), true);
-
                 CosmicSmash_Timer = urand(30000, 60000);
             } else CosmicSmash_Timer -= diff;
 
@@ -301,7 +295,6 @@ struct boss_algalonAI : public ScriptedAI
             {
                 DoScriptText(SAY_BERSERK, me);
                 DoCast(me->getVictim(),SPELL_BERSERK, true);
-
                 Berserk_Timer = 360000;
             } else Berserk_Timer -= diff;
 
@@ -331,12 +324,7 @@ struct boss_algalonAI : public ScriptedAI
 //Collapsing Star
 struct mob_collapsing_starAI : public ScriptedAI
 {
-    mob_collapsing_starAI(Creature *pCreature) : ScriptedAI(pCreature)
-    {
-        pInstance = pCreature->GetInstanceData();
-    }
-
-    ScriptedInstance* pInstance;
+    mob_collapsing_starAI(Creature *pCreature) : ScriptedAI(pCreature) { }
 
     uint32 BlackHoleExplosion_Timer;
 
@@ -358,27 +346,17 @@ struct mob_collapsing_starAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_algalon(Creature* pCreature)
-{
-    return new boss_algalonAI(pCreature);
-}
-
-CreatureAI* GetAI_mob_collapsing_star(Creature* pCreature)
-{
-    return new mob_collapsing_starAI(pCreature);
-}
-
 void AddSC_boss_Algalon()
 {
     Script *newscript;
 
     newscript = new Script;
     newscript->Name = "boss_algalon";
-    newscript->GetAI = &GetAI_boss_algalon;
+    newscript->GetAI = &get_ai<boss_algalonAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_collapsing_star";
-    newscript->GetAI = &GetAI_mob_collapsing_star;
+    newscript->GetAI = &get_ai<mob_collapsing_starAI>;
     newscript->RegisterSelf();
 }

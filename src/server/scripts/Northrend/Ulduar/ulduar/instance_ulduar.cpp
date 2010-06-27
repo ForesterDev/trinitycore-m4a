@@ -43,7 +43,7 @@ instance_ulduar::instance_ulduar(Map *pMap)
 
 void instance_ulduar::Initialize()
 {
-    colossi = 0;
+    colossi               = 0;
     uiLeviathanGUID       = 0;
     uiIgnisGUID           = 0;
     uiRazorscaleGUID      = 0;
@@ -339,16 +339,11 @@ bool instance_ulduar::SetBossState(uint32 id, EncounterState state)
         return false;
 }
 
-InstanceData* GetInstanceData_instance_ulduar(Map* pMap)
-{
-    return new instance_ulduar(pMap);
-}
-
 void AddSC_instance_ulduar()
 {
     Script *newscript;
     newscript = new Script;
     newscript->Name = "instance_ulduar";
-    newscript->GetInstanceData = &GetInstanceData_instance_ulduar;
+    newscript->GetInstanceData = &get_instance_data<instance_ulduar>;
     newscript->RegisterSelf();
 }

@@ -87,8 +87,6 @@ struct boss_freyaAI : public BossAI
         DoScriptText(SAY_DEATH, me);
         _JustDied();
 
-        // cast is not rewarding the achievement.
-        // DoCast(SPELL_ACHIEVEMENT_CHECK);
         instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_ACHIEVEMENT_CHECK);
     }
 
@@ -111,16 +109,11 @@ struct boss_freyaAI : public BossAI
     }
 };
 
-CreatureAI* GetAI_boss_freya(Creature* pCreature)
-{
-    return new boss_freyaAI(pCreature);
-}
-
 void AddSC_boss_freya()
 {
     Script *newscript;
     newscript = new Script;
     newscript->Name = "boss_freya";
-    newscript->GetAI = &GetAI_boss_freya;
+    newscript->GetAI = &get_ai<boss_freyaAI>;
     newscript->RegisterSelf();
 }
