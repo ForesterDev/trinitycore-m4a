@@ -28,3 +28,4 @@ re:^(.*/)?TODO$ = native
 **.sql = native
 **.sh = native
 **.php = native
+**.dox = native
