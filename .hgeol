@@ -27,3 +27,4 @@ re:^(.*/)?TODO$ = native
 **.cpp = native
 **.sql = native
 **.sh = native
+**.php = native
