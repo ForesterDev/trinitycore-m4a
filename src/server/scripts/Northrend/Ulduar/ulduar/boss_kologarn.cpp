@@ -57,10 +57,7 @@ enum
 
 struct boss_kologarnAI : public BossAI
 {
-    boss_kologarnAI(Creature *pCreature)
-        : BossAI(pCreature, boss_kologarn),
-            vehicle(pCreature->GetVehicleKit()),
-        left(false), right(false)
+    boss_kologarnAI(Creature *pCreature) : BossAI(pCreature, boss_kologarn), vehicle(pCreature->GetVehicleKit()), left(false), right(false)
     {
         assert(vehicle);
         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -153,16 +150,11 @@ struct boss_kologarnAI : public BossAI
     }
 };
 
-CreatureAI* GetAI_boss_kologarn(Creature* pCreature)
-{
-    return new boss_kologarnAI (pCreature);
-}
-
 void AddSC_boss_kologarn()
 {
     Script *newscript;
     newscript = new Script;
     newscript->Name = "boss_kologarn";
-    newscript->GetAI = &GetAI_boss_kologarn;
+    newscript->GetAI = &get_ai<boss_kologarnAI>;
     newscript->RegisterSelf();
 }

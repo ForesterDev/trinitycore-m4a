@@ -91,17 +91,12 @@ struct boss_auriaya_AI : public BossAI
     }
 };
 
-CreatureAI* GetAI_boss_auriaya(Creature* pCreature)
-{
-    return new boss_auriaya_AI (pCreature);
-}
-
 void AddSC_boss_auriaya()
 {
     Script *newscript;
 
     newscript = new Script;
     newscript->Name = "boss_auriaya";
-    newscript->GetAI = &GetAI_boss_auriaya;
+    newscript->GetAI = &get_ai<boss_auriaya_AI>;
     newscript->RegisterSelf();
 }

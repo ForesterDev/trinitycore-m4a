@@ -37,7 +37,6 @@ enum Spells
     SPELL_SYSTEMS_SHUTDOWN                      = 62475,
 
     SPELL_FLAME_CANNON                          = 62395,
-//  SPELL_FLAME_CANNON                          = 64692, trigger the same spell
 
     SPELL_OVERLOAD_CIRCUIT                      = 62399,
     SPELL_SEARING_FLAME                         = 62402,
@@ -46,8 +45,8 @@ enum Spells
     SPELL_ELECTROSHOCK                          = 62522,
     //TOWER BUFF SPELLS
     SPELL_THORIM_S_HAMMER                       = 62912, // Tower of Storms
-    SPELL_MIMIRON_S_INFERNO                       = 62910, // Tower of Flames
-    SPELL_HODIR_S_FURY                            = 62297, // Tower of Frost
+    SPELL_MIMIRON_S_INFERNO                     = 62910, // Tower of Flames
+    SPELL_HODIR_S_FURY                          = 62297, // Tower of Frost
     SPELL_FREYA_S_WARD                          = 62906  // Tower of Nature
 };
 
@@ -101,8 +100,6 @@ enum Yells
 
 enum eAchievementData
 {
-    //ACHIEV_CHAMPION_OF_ULDUAR                   = 10042,
-    //ACHIEV_CONQUEROR_OF_ULDUAR                  = 10352,
     ACHIEV_10_NUKED_FROM_ORBIT                  = 10058,
     ACHIEV_25_NUKED_FROM_ORBIT                  = 10060,
     ACHIEV_10_ORBITAL_BOMBARDMENT               = 10056,
@@ -115,8 +112,6 @@ enum eAchievementData
     ACHIEV_25_SHUTOUT                           = 10055,
     ACHIEV_10_SIEGE_OF_ULDUAR                   = 9999,
     ACHIEV_25_SIEGE_OF_ULDUAR                   = 10003,
-    //ACHIEV_10_THREE_CAR_GARAGE                  = 10046, 10047, 10048,
-    //ACHIEV_25_THREE_CAR_GARAGE                  = 10049, 10050, 10051,
     ACHIEV_10_UNBROKEN                          = 10044,
     ACHIEV_25_UNBROKEN                          = 10045,
 };
@@ -508,76 +503,41 @@ struct npc_colossusAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_flame_leviathan(Creature* pCreature)
-{
-    return new boss_flame_leviathanAI (pCreature);
-}
-
-CreatureAI* GetAI_boss_flame_leviathan_seat(Creature* pCreature)
-{
-    return new boss_flame_leviathan_seatAI (pCreature);
-}
-
-CreatureAI* GetAI_boss_flame_leviathan_defense_turret(Creature* pCreature)
-{
-    return new boss_flame_leviathan_defense_turretAI (pCreature);
-}
-
-CreatureAI* GetAI_boss_flame_leviathan_overload_device(Creature* pCreature)
-{
-    return new boss_flame_leviathan_overload_deviceAI (pCreature);
-}
-
-CreatureAI* GetAI_boss_flame_leviathan_safety_containerAI(Creature* pCreature)
-{
-    return new boss_flame_leviathan_safety_containerAI(pCreature);
-}
-
-CreatureAI* GetAI_spell_pool_of_tar(Creature* pCreature)
-{
-    return new spell_pool_of_tarAI (pCreature);
-}
-
-CreatureAI* GetAI_npc_colossus(Creature* pCreature)
-{
-    return new  npc_colossusAI(pCreature);
-}
-
 void AddSC_boss_flame_leviathan()
 {
     Script *newscript;
     newscript = new Script;
     newscript->Name = "boss_flame_leviathan";
-    newscript->GetAI = &GetAI_boss_flame_leviathan;
+    newscript->GetAI = &get_ai<boss_flame_leviathanAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "boss_flame_leviathan_seat";
-    newscript->GetAI = &GetAI_boss_flame_leviathan_seat;
+    newscript->GetAI = &get_ai<boss_flame_leviathan_seatAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "boss_flame_leviathan_defense_turret";
-    newscript->GetAI = &GetAI_boss_flame_leviathan_defense_turret;
+    newscript->GetAI = &get_ai<boss_flame_leviathan_defense_turretAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "boss_flame_leviathan_overload_device";
-    newscript->GetAI = &GetAI_boss_flame_leviathan_overload_device;
+    newscript->GetAI = &get_ai<boss_flame_leviathan_overload_deviceAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "boss_flame_leviathan_safety_container";
-    newscript->GetAI = &GetAI_boss_flame_leviathan_safety_containerAI;
+    newscript->GetAI = &get_ai<boss_flame_leviathan_safety_containerAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "spell_pool_of_tar";
-    newscript->GetAI = &GetAI_spell_pool_of_tar;
+    newscript->GetAI = &get_ai<spell_pool_of_tarAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "npc_colossus";
-    newscript->GetAI = &GetAI_npc_colossus;
+    newscript->GetAI = &get_ai<npc_colossusAI>;
     newscript->RegisterSelf();
 }

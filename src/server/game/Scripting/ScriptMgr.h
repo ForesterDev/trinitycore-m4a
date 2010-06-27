@@ -150,6 +150,12 @@ template<class AI_type> inline
     return new AI_type(c);
 }
 
+template <class Instance_Script_type> inline
+    InstanceData* get_instance_data(Map *pMap)
+{
+    return new Instance_Script_type(pMap);
+}
+
 //Config file accessors
 //std::string GetConfigValueStr(char const* option);
 //int32 GetConfigValueInt32(char const* option);
