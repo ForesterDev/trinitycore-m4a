@@ -3511,6 +3511,10 @@ void SpellMgr::LoadSpellCustomAttr()
         case 39365: // Thundering Storm
         case 41071: // Raise Dead (HACK)
         case 52124: // Sky Darkener Assault
+        case 63018: // Searing Light (HACK)
+        case 65121: // Searing Light (HACK)
+        case 63024: // Gravity Bomb (HACK)
+        case 64234: // Gravity Bomb (HACK)
             spellInfo->MaxAffectedTargets = 1;
             count++;
             break;

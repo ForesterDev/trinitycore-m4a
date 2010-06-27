@@ -167,10 +167,7 @@ enum
  *///----------------------------------------------------
 struct boss_xt002_AI : public BossAI
 {
-    boss_xt002_AI(Creature *pCreature)
-        : BossAI(pCreature, boss_xt002)
-    {
-    }
+    boss_xt002_AI(Creature *pCreature) : BossAI(pCreature, boss_xt002) { }
 
     uint32 uiSearingLightTimer;
     uint32 uiSpawnLifeSparkTimer;
@@ -476,34 +473,6 @@ struct boss_xt002_AI : public BossAI
         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
         phase = 1;
     }
-
-    // TODO: put in comment and kept for reference. The spell should be fixed properly in spell system, if necessary.
-    ////Have to do this the custom way since the original spell messes up player movement
-    //void gravityBomb()
-    //{
-    //    uint32 maxDamage = RAID_MODE(GRAVITY_BOMB_DMG_MAX_10, GRAVITY_BOMB_DMG_MAX_25);
-    //    uint32 minDamage = RAID_MODE(GRAVITY_BOMB_DMG_MIN_10, GRAVITY_BOMB_DMG_MIN_25);
-    //    uint16 range = GRAVITY_BOMB_RADIUS;
-    //    Map* pMap = me->GetMap();
-    //    if (pMap && pMap->IsDungeon())
-    //    {
-    //        Map::PlayerList const &PlayerList = pMap->GetPlayers();
-    //        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-    //        {
-    //            //If a player is within the range of the spell
-    //            if (i->getSource() && i->getSource()->GetDistance2d(pGravityBombTarget) <= range)
-    //            {
-    //                //Deal damage to the victim
-    //                int32 damage = urand(minDamage, maxDamage);
-    //                i->getSource()->ModifyHealth(-damage);
-    //                me->SendSpellNonMeleeDamageLog(i->getSource(), SPELL_GRAVITY_BOMB_AURA_10, damage, SPELL_SCHOOL_MASK_SHADOW, 0, 0, false, 0);
-
-    //                //Replacing the tractor beam effect
-    //                i->getSource()->JumpTo(pGravityBombTarget, 5);
-    //            }
-    //        }
-    //    }
-    //}
 };
 
 CreatureAI* GetAI_boss_xt002(Creature* pCreature)
@@ -746,26 +715,6 @@ struct mob_void_zoneAI : public ScriptedAI
             uiVoidZoneTimer = TIMER_VOID_ZONE;
         } else uiVoidZoneTimer -= diff;
     }
-
-    // TODO: put in comment and kept for reference. The spell should be fixed properly in spell system, if necessary.
-    //void voidZone()
-    //{
-    //    Map* pMap = me->GetMap();
-    //    if (pMap && pMap->IsDungeon())
-    //    {
-    //        Map::PlayerList const &PlayerList = pMap->GetPlayers();
-    //        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-    //        {
-    //            // If a player is within the range of the spell
-    //            if (i->getSource() && i->getSource()->GetDistance2d(me) <= 16)
-    //            {
-    //                // Deal damage to the victim
-    //                int32 damage = RAID_MODE(VOID_ZONE_DMG_10, VOID_ZONE_DMG_25);
-    //                me->DealDamage(i->getSource(), damage, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW);
-    //            }
-    //        }
-    //    }
-    //}
 };
 
 CreatureAI* GetAI_mob_void_zone(Creature* pCreature)
