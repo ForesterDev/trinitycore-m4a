@@ -51,10 +51,7 @@ enum Mobs
 
 struct boss_razorscaleAI : public BossAI
 {
-    boss_razorscaleAI(Creature *pCreature)
-        : BossAI(pCreature, boss_razorscale)
-    {
-    }
+    boss_razorscaleAI(Creature *pCreature) : BossAI(pCreature, boss_razorscale) { }
 
     uint8 Phase;
 
@@ -82,8 +79,6 @@ struct boss_razorscaleAI : public BossAI
         SummonAddsTimer = 45000;
         WingBuffetTimer = 17000;
         FireballTimer = 18000;
-        //StunTimer = 30000;
-        //CastSpellsTimer = 0;
 
         InitialSpawn = true;
         IsFlying = true;
@@ -124,7 +119,8 @@ struct boss_razorscaleAI : public BossAI
         if (me->getVictim() && !me->getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself())
             me->Kill(me->getVictim());
 
-        if ((me->GetHealth()*100 / me->GetMaxHealth()) < 99 && Phase == 1) // TODO: Only land (exit Phase 1) if brought down with harpoon guns! This is important!
+        // todo: fix phase 1
+        if (/* (me->GetHealth()*100 / me->GetMaxHealth()) < 99 && */ Phase == 1) // TODO: Only land (exit Phase 1) if brought down with harpoon guns! This is important!
         {
             Phase = 2;
             DoScriptText(SAY_PHASE_2_TRANS, me); // Audio: "Move quickly! She won't remain grounded for long!"
@@ -213,7 +209,6 @@ struct boss_razorscaleAI : public BossAI
                     me->SetInFront(pTarget);
                     DoCast(pTarget, SPELL_FIREBALL);
                 }
-
                 FireballTimer = 18000;
             } else FireballTimer -= diff;
 
@@ -224,13 +219,13 @@ struct boss_razorscaleAI : public BossAI
                     me->SetInFront(pTarget);
                     DoCast(pTarget, SPELL_DEVOURINGFLAME);
                 }
-
                 DevouringFlameTimer = 10000;
             } else DevouringFlameTimer -= diff;
 
             if (SummonAddsTimer <= diff)
                 SummonAdds();
-            else SummonAddsTimer -= diff;
+            else
+                SummonAddsTimer -= diff;
         }
     }
 
@@ -299,8 +294,7 @@ namespace
         {
             if (!i->razorscale_state)
             {
-                p->PlayerTalkClass
-                    ->GetGossipMenu().AddMenuItem(GOSSIP_ICON_CHAT, "We are ready to help!");
+                p->PlayerTalkClass->GetGossipMenu().AddMenuItem(GOSSIP_ICON_CHAT, "We are ready to help!");
                 p->PlayerTalkClass->SendGossipMenu(14317, c->GetGUID());
             }
             return true;
