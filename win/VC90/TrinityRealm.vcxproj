@@ -307,6 +307,9 @@
     <ProjectReference Include="..\..\externals\mysql\win\VC90\libmysql.vcxproj">
       <Project>{4fbe4fc1-22de-41a0-9aeb-cfd00ebac7e5}</Project>
     </ProjectReference>
+    <ProjectReference Include="genrevision.vcxproj">
+      <Project>{803f488e-4c5a-4866-8d5c-1e6c03c007c2}</Project>
+    </ProjectReference>
     <ProjectReference Include="shared.vcxproj">
       <Project>{90297c34-f231-4df4-848e-a74bcc0e40ed}</Project>
     </ProjectReference>

@@ -352,6 +352,9 @@ copy ..\..\README.* ..\..\bin\$(Platform)_$(Configuration)
     <ProjectReference Include="game.vcxproj">
       <Project>{1dc6c4da-a028-41f3-877d-d5400c594f88}</Project>
     </ProjectReference>
+    <ProjectReference Include="genrevision.vcxproj">
+      <Project>{803f488e-4c5a-4866-8d5c-1e6c03c007c2}</Project>
+    </ProjectReference>
     <ProjectReference Include="shared.vcxproj">
       <Project>{90297c34-f231-4df4-848e-a74bcc0e40ed}</Project>
     </ProjectReference>
