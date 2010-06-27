@@ -1179,6 +1179,11 @@
     <ClInclude Include="..\..\src\server\collision\Models\ModelInstance.h" />
     <ClInclude Include="..\..\src\server\collision\Models\WorldModel.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="genrevision.vcxproj">
+      <Project>{803f488e-4c5a-4866-8d5c-1e6c03c007c2}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
