@@ -106,6 +106,7 @@ enum Creatures
 enum Actions
 {
     ACTION_ENTER_HARD_MODE                      = 0,
+    ACTION_WAS_HEALED                           = 1,
 };
 
 enum XT002Data
@@ -126,11 +127,20 @@ enum Yells
     SAY_SUMMON                                  = -1603308,
 };
 
-enum
+enum Achievements
 {
     ACHIEV_TIMED_START_EVENT                      = 21027,
+    NERF_GRAVITY_BOMBS_10                         = 2934,
+    NERF_GRAVITY_BOMBS_25                         = 2936,
+    NERF_SCRAPBOTS_10                             = 2933,
+    NERF_SCRAPBOTS_25                             = 2935,
+    NERF_ENGINEERING_10                           = 2931,
+    NERF_ENGINEERING_25                           = 2932,
+    MUST_DECONSTRUCT_FASTER_10                    = 2937,
+    MUST_DECONSTRUCT_FASTER_25                    = 2938,
+    HEARTBREAKER_10                               = 3058,
+    HEARTBREAKER_25                               = 3059
 };
-
 
 /************************************************
 -----------------SPAWN LOCATIONS-----------------
@@ -151,13 +161,17 @@ enum
 #define UL_Y                                    62
 
 /*-------------------------------------------------------
- *
  *        XT-002 DECONSTRUCTOR
- *
  *///----------------------------------------------------
 struct boss_xt002_AI : public BossAI
 {
-    boss_xt002_AI(Creature *pCreature) : BossAI(pCreature, boss_xt002) { }
+    boss_xt002_AI(Creature *pCreature) : BossAI(pCreature, boss_xt002) 
+    {
+        m_pInstance = pCreature->GetInstanceData();
+    }
+
+    ScriptedInstance* m_pInstance;
+    bool healed;
 
     uint32 uiSearingLightTimer;
     uint32 uiSpawnLifeSparkTimer;
@@ -207,6 +221,8 @@ struct boss_xt002_AI : public BossAI
         phase = 1;
         heart_exposed = 0;
 
+        healed = false;
+
         if (instance)
             instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
     }
@@ -239,6 +255,9 @@ struct boss_xt002_AI : public BossAI
                     me->CastSpell(me, RAID_MODE(SPELL_HEARTBREAK_10, SPELL_HEARTBREAK_25), true);
                 }
                 break;
+            case ACTION_WAS_HEALED:
+                healed = true;
+                break;
         }
     }
 
@@ -259,6 +278,12 @@ struct boss_xt002_AI : public BossAI
 
     void JustDied(Unit * /*victim*/)
     {
+        if (hardMode && m_pInstance)
+            m_pInstance->DoCompleteAchievement(RAID_MODE(HEARTBREAKER_10, HEARTBREAKER_25));
+
+        if (!healed)
+            m_pInstance->DoCompleteAchievement(RAID_MODE(NERF_ENGINEERING_10, NERF_ENGINEERING_25));
+
         DoScriptText(SAY_DEATH, me);
         _JustDied();
     }
@@ -530,6 +555,11 @@ struct mob_scrapbotAI : public ScriptedAI
 
                 // Increase health with 1 percent
                 pXT002->ModifyHealth(pXT002->GetMaxHealth() * 0.01);
+
+                if (m_pInstance)
+                    if (Creature *pXT002 = me->GetCreature(*me, m_pInstance->GetData64(data64_xt002)))
+                        if (pXT002->AI())
+                            pXT002->AI()->DoAction(ACTION_WAS_HEALED);
 
                 // Despawns the scrapbot
                 me->ForcedDespawn();
