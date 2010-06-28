@@ -105,10 +105,6 @@ struct boss_twilight_corrupterAI : public ScriptedAI
         DoMeleeAttackIfReady();
     };
 };
-CreatureAI* GetAI_boss_twilight_corrupter(Creature* pCreature)
-{
-    return new boss_twilight_corrupterAI (pCreature);
-}
 
 void AddSC_duskwood()
 {
@@ -116,7 +112,7 @@ void AddSC_duskwood()
 
     newscript = new Script;
     newscript->Name = "boss_twilight_corrupter";
-    newscript->GetAI = &GetAI_boss_twilight_corrupter;
+    newscript->GetAI = &get_ai<boss_twilight_corrupterAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;

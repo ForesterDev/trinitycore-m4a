@@ -56,11 +56,6 @@ struct npc_astor_hadrenAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_astor_hadren(Creature* pCreature)
-{
-    return new npc_astor_hadrenAI(pCreature);
-}
-
 bool GossipHello_npc_astor_hadren(Player* pPlayer, Creature* pCreature)
 {
     if (pPlayer->GetQuestStatus(1886) == QUEST_STATUS_INCOMPLETE)
@@ -170,11 +165,6 @@ bool QuestAccept_npc_deathstalker_erland(Player* pPlayer, Creature* pCreature, Q
     }
 
     return true;
-}
-
-CreatureAI* GetAI_npc_deathstalker_erlandAI(Creature* pCreature)
-{
-    return new npc_deathstalker_erlandAI(pCreature);
 }
 
 /*######
@@ -338,11 +328,6 @@ struct pyrewood_ambushAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_pyrewood_ambush(Creature *pCreature)
-{
-    return new pyrewood_ambushAI (pCreature);
-}
-
 bool QuestAccept_pyrewood_ambush(Player *pPlayer, Creature *pCreature, const Quest *pQuest)
 {
     if (pQuest->GetQuestId() == QUEST_PYREWOOD_AMBUSH && !CAST_AI(pyrewood_ambushAI, pCreature->AI())->QuestInProgress)
@@ -368,18 +353,18 @@ void AddSC_silverpine_forest()
     newscript->Name = "npc_astor_hadren";
     newscript->pGossipHello =  &GossipHello_npc_astor_hadren;
     newscript->pGossipSelect = &GossipSelect_npc_astor_hadren;
-    newscript->GetAI = &GetAI_npc_astor_hadren;
+    newscript->GetAI = &get_ai<npc_astor_hadrenAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "npc_deathstalker_erland";
-    newscript->GetAI = &GetAI_npc_deathstalker_erlandAI;
+    newscript->GetAI = &get_ai<npc_deathstalker_erlandAI>;
     newscript->pQuestAccept = &QuestAccept_npc_deathstalker_erland;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "pyrewood_ambush";
-    newscript->GetAI = &GetAI_pyrewood_ambush;
+    newscript->GetAI = &get_ai<pyrewood_ambushAI>;
     newscript->pQuestAccept = &QuestAccept_pyrewood_ambush;
     newscript->RegisterSelf();
 }

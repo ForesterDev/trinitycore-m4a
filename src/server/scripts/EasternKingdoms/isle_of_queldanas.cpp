@@ -73,10 +73,6 @@ struct npc_converted_sentryAI : public ScriptedAI
         }
     }
 };
-CreatureAI* GetAI_npc_converted_sentry(Creature* pCreature)
-{
-    return new npc_converted_sentryAI (pCreature);
-}
 
 /*######
 ## npc_greengill_slave
@@ -130,22 +126,17 @@ struct npc_greengill_slaveAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_greengill_slaveAI(Creature* pCreature)
-{
-    return new npc_greengill_slaveAI(pCreature);
-}
-
 void AddSC_isle_of_queldanas()
 {
     Script *newscript;
 
     newscript = new Script;
     newscript->Name = "npc_converted_sentry";
-    newscript->GetAI = &GetAI_npc_converted_sentry;
+    newscript->GetAI = &get_ai<npc_converted_sentryAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "npc_greengill_slave";
-    newscript->GetAI = &GetAI_npc_greengill_slaveAI;
+    newscript->GetAI = &get_ai<npc_greengill_slaveAI>;
     newscript->RegisterSelf();
 }

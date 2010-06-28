@@ -429,11 +429,6 @@ struct boss_janalaiAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_janalaiAI(Creature* pCreature)
-{
-    return new boss_janalaiAI(pCreature);
-}
-
 struct mob_janalai_firebombAI : public ScriptedAI
 {
     mob_janalai_firebombAI(Creature *c) : ScriptedAI(c){}
@@ -454,11 +449,6 @@ struct mob_janalai_firebombAI : public ScriptedAI
 
     void UpdateAI(const uint32 /*diff*/) {}
 };
-
-CreatureAI* GetAI_mob_janalai_firebombAI(Creature* pCreature)
-{
-    return new mob_janalai_firebombAI(pCreature);
-}
 
 struct mob_amanishi_hatcherAI : public ScriptedAI
 {
@@ -578,11 +568,6 @@ struct mob_amanishi_hatcherAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_amanishi_hatcherAI(Creature* pCreature)
-{
-    return new mob_amanishi_hatcherAI(pCreature);
-}
-
 struct mob_hatchlingAI : public ScriptedAI
 {
     mob_hatchlingAI(Creature *c) : ScriptedAI(c)
@@ -627,11 +612,6 @@ struct mob_hatchlingAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_hatchlingAI(Creature* pCreature)
-{
-    return new mob_hatchlingAI(pCreature);
-}
-
 struct mob_eggAI : public ScriptedAI
 {
     mob_eggAI(Creature *c) : ScriptedAI(c){}
@@ -651,37 +631,32 @@ struct mob_eggAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_eggAI(Creature* pCreature)
-{
-    return new mob_eggAI(pCreature);
-}
-
 void AddSC_boss_janalai()
 {
     Script *newscript;
     newscript = new Script;
     newscript->Name = "boss_janalai";
-    newscript->GetAI = &GetAI_boss_janalaiAI;
+    newscript->GetAI = &get_ai<boss_janalaiAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_janalai_firebomb";
-    newscript->GetAI = &GetAI_mob_janalai_firebombAI;
+    newscript->GetAI = &get_ai<mob_janalai_firebombAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_janalai_hatcher";
-    newscript->GetAI = &GetAI_mob_amanishi_hatcherAI;
+    newscript->GetAI = &get_ai<mob_amanishi_hatcherAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_janalai_hatchling";
-    newscript->GetAI = &GetAI_mob_hatchlingAI;
+    newscript->GetAI = &get_ai<mob_hatchlingAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_janalai_egg";
-    newscript->GetAI = &GetAI_mob_eggAI;
+    newscript->GetAI = &get_ai<mob_eggAI>;
     newscript->RegisterSelf();
 }
 
