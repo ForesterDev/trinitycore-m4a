@@ -1,0 +1,372 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{90297C34-F231-4DF4-848E-A74BCC0E40ED}</ProjectGuid>
+    <RootNamespace>shared</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="openssl (Win32).props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="openssl (Win32).props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="openssl (x64).props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="openssl (x64).props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectName)__$(Platform)_$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectName)__$(Platform)_$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectName)__$(Platform)_$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectName)__$(Platform)_$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectName)__$(Platform)_$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectName)__$(Platform)_$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectName)__$(Platform)_$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectName)__$(Platform)_$(Configuration)\</IntDir>
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>..\..\src\server\shared\Debugging\;..\..\src\server\;..\..\src\server\shared\Utilities;..\..\src\server\shared\Logging;..\..\src\server\shared;..\..\externals;..\..\externals\sockets;..\..\externals\sockets\include;..\..\externals\openssl;..\..\externals\utf8cpp;..\..\externals\mersennetwister;..\..\externals\mysql;..\..\externals\mysql\include;..\..\src\server\game\Entities\Object;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <PrecompiledHeaderOutputFile>.\shared__$(Platform)_$(Configuration)/shared.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>.\shared__$(Platform)_$(Configuration)\</AssemblerListingLocation>
+      <ObjectFileName>.\shared__$(Platform)_$(Configuration)\</ObjectFileName>
+      <ProgramDataBaseFileName>.\shared__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <CallingConvention>Cdecl</CallingConvention>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+    <Lib>
+      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>..\..\src\server\shared\Debugging\;..\..\src\server\;..\..\src\server\shared\Utilities;..\..\src\server\shared\Logging;..\..\src\server\shared;..\..\externals;..\..\externals\sockets;..\..\externals\sockets\include;..\..\externals\openssl;..\..\externals\utf8cpp;..\..\externals\mersennetwister;..\..\externals\mysql;..\..\externals\mysql\include;..\..\src\server\game\Entities\Object;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <PrecompiledHeaderOutputFile>.\shared__$(Platform)_$(Configuration)/shared.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>.\shared__$(Platform)_$(Configuration)\</AssemblerListingLocation>
+      <ObjectFileName>.\shared__$(Platform)_$(Configuration)\</ObjectFileName>
+      <ProgramDataBaseFileName>.\shared__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <CallingConvention>Cdecl</CallingConvention>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+    <Lib>
+      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\src\server\shared\Debugging\;..\..\src\server\;..\..\src\server\shared\Utilities;..\..\src\server\shared\Logging;..\..\src\server\shared;..\..\externals;..\..\externals\sockets;..\..\externals\sockets\include;..\..\externals\openssl;..\..\externals\utf8cpp;..\..\externals\mersennetwister;..\..\externals\mysql;..\..\externals\mysql\include;..\..\src\server\game\Entities\Object;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;TRINITY_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <PrecompiledHeaderOutputFile>.\shared__$(Platform)_$(Configuration)\shared.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>.\shared__$(Platform)_$(Configuration)\</AssemblerListingLocation>
+      <ObjectFileName>.\shared__$(Platform)_$(Configuration)\</ObjectFileName>
+      <ProgramDataBaseFileName>.\shared__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <CallingConvention>Cdecl</CallingConvention>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+    <Lib>
+      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\src\server\shared\Debugging\;..\..\src\server\;..\..\src\server\shared\Utilities;..\..\src\server\shared\Logging;..\..\src\server\shared;..\..\externals;..\..\externals\sockets;..\..\externals\sockets\include;..\..\externals\openssl;..\..\externals\utf8cpp;..\..\externals\mersennetwister;..\..\externals\mysql;..\..\externals\mysql\include;..\..\src\server\game\Entities\Object;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;TRINITY_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <PrecompiledHeaderOutputFile>.\shared__$(Platform)_$(Configuration)\shared.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>.\shared__$(Platform)_$(Configuration)\</AssemblerListingLocation>
+      <ObjectFileName>.\shared__$(Platform)_$(Configuration)\</ObjectFileName>
+      <ProgramDataBaseFileName>.\shared__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <CallingConvention>Cdecl</CallingConvention>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+    <Lib>
+      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\server\shared\Configuration\Config.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Configuration\dotconfpp\dotconfpp.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Configuration\dotconfpp\mempool.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Cryptography\ARC4.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Cryptography\BigNumber.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Cryptography\HMACSHA1.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Cryptography\MD5.c" />
+    <ClCompile Include="..\..\src\server\shared\Cryptography\SHA1.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Cryptography\Authentication\AuthCrypt.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Database\Database.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Database\Field.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Database\QueryResult.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Database\SqlDelayThread.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Database\SqlOperations.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Database\SQLStorage.cpp" />
+    <ClCompile Include="..\..\src\server\shared\DataStores\DBCFileLoader.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Debugging\MemoryLeaks.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Debugging\WheatyExceptionReport.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Logging\Log.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Policies\ObjectLifeTime.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Threading\DelayExecutor.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Threading\Threading.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Utilities\EventProcessor.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Utilities\ProgressBar.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Utilities\Util.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Common.cpp" />
+    <ClCompile Include="..\..\src\server\shared\Utilities\ServiceWin32.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\server\shared\Configuration\Config.h" />
+    <ClInclude Include="..\..\src\server\shared\Configuration\ConfigEnv.h" />
+    <ClInclude Include="..\..\src\server\shared\Configuration\dotconfpp\dotconfpp.h" />
+    <ClInclude Include="..\..\src\server\shared\Configuration\dotconfpp\mempool.h" />
+    <ClInclude Include="..\..\src\server\shared\Cryptography\ARC4.h" />
+    <ClInclude Include="..\..\src\server\shared\Cryptography\BigNumber.h" />
+    <ClInclude Include="..\..\src\server\shared\Cryptography\HMACSHA1.h" />
+    <ClInclude Include="..\..\src\server\shared\Cryptography\MD5.h" />
+    <ClInclude Include="..\..\src\server\shared\Cryptography\SHA1.h" />
+    <ClInclude Include="..\..\src\server\shared\Cryptography\Authentication\AuthCrypt.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\Database.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\DatabaseEnv.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\DatabaseImpl.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\Field.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\QueryResult.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\SqlDelayThread.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\SqlOperations.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\SQLStorage.h" />
+    <ClInclude Include="..\..\src\server\shared\Database\SQLStorageImpl.h" />
+    <ClInclude Include="..\..\src\server\shared\DataStores\DBCFileLoader.h" />
+    <ClInclude Include="..\..\src\server\shared\DataStores\DBCStore.h" />
+    <ClInclude Include="..\..\src\server\shared\Debugging\Errors.h" />
+    <ClInclude Include="..\..\src\server\shared\Debugging\MemoryLeaks.h" />
+    <ClInclude Include="..\..\src\server\shared\Debugging\WheatyExceptionReport.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\FactoryHolder.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\LinkedList.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\ObjectRegistry.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\TypeContainer.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\TypeContainerFunctions.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\TypeContainerFunctionsPtr.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\TypeContainerVisitor.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\TypeList.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\UnorderedMap.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\CountedReference\Reference.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\CountedReference\ReferenceHolder.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\CountedReference\ReferenceImpl.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\LinkedReference\Reference.h" />
+    <ClInclude Include="..\..\src\server\shared\Dynamic\LinkedReference\RefManager.h" />
+    <ClInclude Include="..\..\src\server\shared\Logging\Log.h" />
+    <ClInclude Include="..\..\src\server\shared\Packets\ByteBuffer.h" />
+    <ClInclude Include="..\..\src\server\shared\Packets\WorldPacket.h" />
+    <ClInclude Include="..\..\src\server\shared\Threading\DelayExecutor.h" />
+    <ClInclude Include="..\..\src\server\shared\Threading\Threading.h" />
+    <ClInclude Include="..\..\src\server\shared\Utilities\EventProcessor.h" />
+    <ClInclude Include="..\..\src\server\shared\Utilities\ProgressBar.h" />
+    <ClInclude Include="..\..\src\server\shared\Utilities\SignalHandler.h" />
+    <ClInclude Include="..\..\src\server\shared\Utilities\Timer.h" />
+    <ClInclude Include="..\..\src\server\shared\Utilities\Util.h" />
+    <ClInclude Include="..\..\src\server\shared\Common.h" />
+    <ClInclude Include="..\..\src\server\shared\CompilerDefs.h" />
+    <ClInclude Include="..\..\src\server\shared\Define.h" />
+    <CustomBuild Include="..\..\src\server\shared\revision.h">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Getting Version...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">cd %(RootDir)%(Directory)
+"$(TargetDir)\..\genrevision__$(Platform)_$(Configuration)\genrevision.exe" "-d" "..\..\.."
+</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)../.hg/branchheads.cache;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">revision.h;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Getting Version...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">cd %(RootDir)%(Directory)
+"$(TargetDir)\..\genrevision__$(Platform)_$(Configuration)\genrevision.exe" "-d" "..\..\.."
+</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)../.hg/branchheads.cache;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">revision.h;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Getting Version...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">cd %(RootDir)%(Directory)
+"$(TargetDir)\..\genrevision__$(Platform)_$(Configuration)\genrevision.exe" "..\..\.."
+</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)../.hg/branchheads.cache;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">revision.h;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Getting Version...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">cd %(RootDir)%(Directory)
+"$(TargetDir)\..\genrevision__$(Platform)_$(Configuration)\genrevision.exe" "..\..\.."
+</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)../.hg/branchheads.cache;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">revision.h;%(Outputs)</Outputs>
+    </CustomBuild>
+    <ClInclude Include="..\..\src\server\shared\Utilities\ServiceWin32.h" />
+    <ClInclude Include="..\..\src\server\shared\SystemConfig.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="genrevision.vcxproj">
+      <Project>{803f488e-4c5a-4866-8d5c-1e6c03c007c2}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
