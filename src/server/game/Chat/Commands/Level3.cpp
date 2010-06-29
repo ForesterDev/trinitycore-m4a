@@ -1797,7 +1797,7 @@ bool ChatHandler::HandleSetSkillCommand(const char *args)
 
     int32 max   = max_p ? atol (max_p) : target->GetPureMaxSkillValue(skill);
 
-    if (level <= 0 || level > max || max <= 0)
+    if (level < 0 || level > max || max < 0)
         return false;
 
     target->SetSkill(skill, target->GetSkillStep(skill), level, max);
@@ -6384,9 +6384,15 @@ bool ChatHandler::HandleGMFlyCommand(const char *args)
 
     WorldPacket data(12);
     if (strncmp(args, "on", 3) == 0)
+    {
         data.SetOpcode(SMSG_MOVE_SET_CAN_FLY);
+        ((Player *)(target))->SetCanFly(true);
+    }
     else if (strncmp(args, "off", 4) == 0)
+    {
         data.SetOpcode(SMSG_MOVE_UNSET_CAN_FLY);
+        ((Player*)(target))->SetCanFly(false);
+    }
     else
     {
         SendSysMessage(LANG_USE_BOL);

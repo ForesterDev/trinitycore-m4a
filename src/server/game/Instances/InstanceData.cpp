@@ -27,6 +27,15 @@
 #include "CreatureAI.h"
 #include "Log.h"
 
+void InstanceData::Load(const char *data)
+{
+    if (data)
+    {
+        std::istringstream tmp(data);
+        LoadBossState(tmp);
+    }
+}
+
 void InstanceData::SaveToDB()
 {
     std::string data = GetSaveData();
@@ -220,22 +229,6 @@ bool InstanceData::SetBossState(uint32 id, EncounterState state)
         return true;
     }
     return false;
-}
-
-std::string InstanceData::LoadBossState(const char * data)
-{
-    if (!data)
-        return NULL;
-    std::istringstream loadStream(data);
-    uint32 buff;
-    uint32 bossId = 0;
-    for (std::vector<BossInfo>::iterator i = bosses.begin(); i != bosses.end(); ++i, ++bossId)
-    {
-        loadStream >> buff;
-        if (buff < TO_BE_DECIDED)
-            SetBossState(bossId, (EncounterState)buff);
-    }
-    return loadStream.str();
 }
 
 std::string InstanceData::GetBossSaveData()

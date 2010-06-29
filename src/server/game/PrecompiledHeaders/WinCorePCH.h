@@ -1,4 +1,5 @@
 //add here most rarely modified headers to speed up debug build compilation
+#include <sstream>
 #include "..\Server\WorldSocket.h"                                    // must be first to make ACE happy with ACE includes in it
 #include "..\..\shared\Common.h"
 

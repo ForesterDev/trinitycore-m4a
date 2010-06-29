@@ -200,7 +200,9 @@ const Position PosDemolisher[5] =
 
 struct boss_flame_leviathanAI : public BossAI
 {
-    boss_flame_leviathanAI(Creature* pCreature) : BossAI(pCreature, TYPE_LEVIATHAN), vehicle(pCreature->GetVehicleKit())
+    boss_flame_leviathanAI(Creature *pCreature)
+        : BossAI(pCreature, boss_leviathan),
+            vehicle(pCreature->GetVehicleKit())
     {
         assert(vehicle);
         pInstance = me->GetInstanceData();
@@ -234,17 +236,24 @@ struct boss_flame_leviathanAI : public BossAI
         me->SetLootMode(LOOT_MODE_HARD_MODE_3);
         me->SetLootMode(LOOT_MODE_HARD_MODE_2);
         me->SetLootMode(LOOT_MODE_HARD_MODE_1);*/
-        if (pInstance)
-            pInstance->SetData(TYPE_LEVIATHAN, NOT_STARTED);
         assert(vehicle);
         me->GetVehicleKit();
-        me->SetReactState(REACT_DEFENSIVE);
+        if (pInstance && 2 <= pInstance->GetData(DATA_COLOSSUS))
+        {
+            me->GetMotionMaster()->MovePoint(0, Center[0]);
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
+        else
+        {
+            me->SetReactState(REACT_DEFENSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
     }
 
     void EnterCombat(Unit* /*who*/)
     {
         _EnterCombat();
-        pInstance->SetData(TYPE_LEVIATHAN, IN_PROGRESS); //_Reset doesnt do this correctly
         me->SetReactState(REACT_AGGRESSIVE);
         events.ScheduleEvent(EVENT_PURSUE, 0);
         events.ScheduleEvent(EVENT_MISSILE, 1500);
@@ -300,7 +309,6 @@ struct boss_flame_leviathanAI : public BossAI
     void JustDied(Unit* /*victim*/)
     {
         _JustDied();
-        pInstance->SetData(TYPE_LEVIATHAN, DONE); //_Reset doesnt do this correctly
         DoScriptText(SAY_DEATH, me);
 
         if (ActiveTowers)
@@ -606,7 +614,8 @@ struct boss_flame_leviathan_overload_deviceAI : public PassiveAI
         {
             me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            pInstance->instance->GetCreature(TYPE_LEVIATHAN)->AI()->DoAction(9);   //should be called if all 3 overload devices are active
+            pInstance->instance->GetCreature(pInstance->GetData64(data64_leviathan))->AI()
+                ->DoAction(9);  // should be called if all 3 overload devices are active
             if (me->GetVehicle())
             {
                 if (Unit* pPlayer = me->GetVehicle()->GetPassenger(SEAT_PLAYER))
@@ -730,7 +739,7 @@ struct npc_colossusAI : public ScriptedAI
         if (me->GetHomePosition().IsInDist(Center,50.f))
         {
             if (pInstance)
-                pInstance->SetData(TYPE_COLOSSUS,pInstance->GetData(TYPE_COLOSSUS)+1);
+                pInstance->SetData(DATA_COLOSSUS, pInstance->GetData(DATA_COLOSSUS) + 1);
         }
     }
 
@@ -946,7 +955,7 @@ struct npc_lorekeeperAI : public ScriptedAI
 bool GossipHello_npc_lorekeeper(Player* pPlayer, Creature* pCreature)
 {
     ScriptedInstance* pInstance = pCreature->GetInstanceData();
-    if (pInstance && pInstance->GetData(TYPE_LEVIATHAN) !=DONE && pPlayer)
+    if (pInstance && pInstance->GetBossState(boss_leviathan) != DONE && pPlayer)
     {
         pPlayer->PrepareGossipMenu(pCreature);
 
@@ -976,7 +985,8 @@ bool GossipSelect_npc_lorekeeper(Player* pPlayer, Creature* pCreature, uint32 /*
         if (pPlayer)
             pPlayer->CLOSE_GOSSIP_MENU();
 
-        if (Creature* pLeviathan = pInstance->instance->GetCreature(pInstance->GetData64(TYPE_LEVIATHAN)))
+        if (Creature *pLeviathan = pInstance
+                    ->instance->GetCreature(pInstance->GetData64(data64_leviathan)))
         {
             CAST_AI(boss_flame_leviathanAI, (pLeviathan->AI()))->DoAction(0); //enable hard mode activating the 4 additional events spawning additional vehicles
             pCreature->SetVisibility(VISIBILITY_OFF);
@@ -1071,44 +1081,9 @@ bool AreaTrigger_at_RX_214_repair_o_matic_station(Player* pPlayer, const AreaTri
     return true;
 }
 
-CreatureAI* GetAI_boss_flame_leviathan(Creature* pCreature)
-{
-    return new boss_flame_leviathanAI (pCreature);
-}
-
-CreatureAI* GetAI_boss_flame_leviathan_seat(Creature* pCreature)
-{
-    return new boss_flame_leviathan_seatAI (pCreature);
-}
-
-CreatureAI* GetAI_boss_flame_leviathan_defense_turret(Creature* pCreature)
-{
-    return new boss_flame_leviathan_defense_turretAI (pCreature);
-}
-
-CreatureAI* GetAI_boss_flame_leviathan_overload_device(Creature* pCreature)
-{
-    return new boss_flame_leviathan_overload_deviceAI (pCreature);
-}
-
-CreatureAI* GetAI_boss_flame_leviathan_safety_container(Creature* pCreature)
-{
-    return new boss_flame_leviathan_safety_containerAI(pCreature);
-}
-
 CreatureAI* GetAI_npc_mechanolift(Creature* pCreature)
 {
     return new npc_mechanoliftAI(pCreature);
-}
-
-CreatureAI* GetAI_spell_pool_of_tar(Creature* pCreature)
-{
-    return new spell_pool_of_tarAI (pCreature);
-}
-
-CreatureAI* GetAI_npc_colossus(Creature* pCreature)
-{
-    return new  npc_colossusAI(pCreature);
 }
 
 CreatureAI* GetAI_npc_thorims_hammer(Creature* pCreature)
@@ -1145,27 +1120,27 @@ void AddSC_boss_flame_leviathan()
     Script *newscript;
     newscript = new Script;
     newscript->Name = "boss_flame_leviathan";
-    newscript->GetAI = &GetAI_boss_flame_leviathan;
+    newscript->GetAI = &get_ai<boss_flame_leviathanAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "boss_flame_leviathan_seat";
-    newscript->GetAI = &GetAI_boss_flame_leviathan_seat;
+    newscript->GetAI = &get_ai<boss_flame_leviathan_seatAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "boss_flame_leviathan_defense_turret";
-    newscript->GetAI = &GetAI_boss_flame_leviathan_defense_turret;
+    newscript->GetAI = &get_ai<boss_flame_leviathan_defense_turretAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "boss_flame_leviathan_overload_device";
-    newscript->GetAI = &GetAI_boss_flame_leviathan_overload_device;
+    newscript->GetAI = &get_ai<boss_flame_leviathan_overload_deviceAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "boss_flame_leviathan_safety_container";
-    newscript->GetAI = &GetAI_boss_flame_leviathan_safety_container;
+    newscript->GetAI = &get_ai<boss_flame_leviathan_safety_containerAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
@@ -1175,12 +1150,12 @@ void AddSC_boss_flame_leviathan()
 
     newscript = new Script;
     newscript->Name = "spell_pool_of_tar";
-    newscript->GetAI = &GetAI_spell_pool_of_tar;
+    newscript->GetAI = &get_ai<spell_pool_of_tarAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "npc_colossus";
-    newscript->GetAI = &GetAI_npc_colossus;
+    newscript->GetAI = &get_ai<npc_colossusAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;

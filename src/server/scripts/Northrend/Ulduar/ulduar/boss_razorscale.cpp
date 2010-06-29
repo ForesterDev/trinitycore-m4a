@@ -24,6 +24,7 @@ EndScriptData */
 
 #include "ScriptPCH.h"
 #include "ulduar.h"
+#include "instance_ulduar.hpp"
 
 //not in db
 #define SAY_AGGRO                   -2000000
@@ -50,7 +51,7 @@ enum Mobs
 
 struct boss_razorscaleAI : public BossAI
 {
-    boss_razorscaleAI(Creature *pCreature) : BossAI(pCreature, TYPE_RAZORSCALE) {}
+    boss_razorscaleAI(Creature *pCreature) : BossAI(pCreature, boss_razorscale) { }
 
     uint8 Phase;
 
@@ -61,8 +62,6 @@ struct boss_razorscaleAI : public BossAI
     uint32 SummonAddsTimer;
     uint32 WingBuffetTimer;
     uint32 FireballTimer;
-    //uint32 StunTimer;
-    //uint32 CastSpellsTimer;
 
     bool InitialSpawn;
     bool IsFlying;
@@ -80,8 +79,6 @@ struct boss_razorscaleAI : public BossAI
         SummonAddsTimer = 45000;
         WingBuffetTimer = 17000;
         FireballTimer = 18000;
-        //StunTimer = 30000;
-        //CastSpellsTimer = 0;
 
         InitialSpawn = true;
         IsFlying = true;
@@ -122,7 +119,8 @@ struct boss_razorscaleAI : public BossAI
         if (me->getVictim() && !me->getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself())
             me->Kill(me->getVictim());
 
-        if ((me->GetHealth()*100 / me->GetMaxHealth()) < 99 && Phase == 1) // TODO: Only land (exit Phase 1) if brought down with harpoon guns! This is important!
+        // todo: fix phase 1
+        if (/* (me->GetHealth()*100 / me->GetMaxHealth()) < 99 && */ Phase == 1) // TODO: Only land (exit Phase 1) if brought down with harpoon guns! This is important!
         {
             Phase = 2;
             DoScriptText(SAY_PHASE_2_TRANS, me); // Audio: "Move quickly! She won't remain grounded for long!"
@@ -134,15 +132,6 @@ struct boss_razorscaleAI : public BossAI
             DoScriptText(SAY_PHASE_3_TRANS, me); // "Razorscale lands permanently!"
             // TODO: Cast Devouring Flame on all harpoon guns simultaneously, briefly after Phase 3 starts (lasts until the harpoon guns are destroyed)
         }
-
-        /*
-        if (Phase == 2 && CastSpellsTimer > 0) // 5 seconds of spell casting, after stun breaks, during Phase 2
-        {
-            if (CastSpellsTimer <= diff)       // 5 seconds are up
-                Phase = 1;                     // Return to phase 1
-            else
-                CastSpellsTimer -= diff;
-        }*/
 
         FlyPhase(Phase, diff);
 
@@ -220,7 +209,6 @@ struct boss_razorscaleAI : public BossAI
                     me->SetInFront(pTarget);
                     DoCast(pTarget, SPELL_FIREBALL);
                 }
-
                 FireballTimer = 18000;
             } else FireballTimer -= diff;
 
@@ -231,13 +219,13 @@ struct boss_razorscaleAI : public BossAI
                     me->SetInFront(pTarget);
                     DoCast(pTarget, SPELL_DEVOURINGFLAME);
                 }
-
                 DevouringFlameTimer = 10000;
             } else DevouringFlameTimer -= diff;
 
             if (SummonAddsTimer <= diff)
                 SummonAdds();
-            else SummonAddsTimer -= diff;
+            else
+                SummonAddsTimer -= diff;
         }
     }
 
@@ -288,44 +276,75 @@ struct boss_razorscaleAI : public BossAI
         else // Ground Phases
         {
             const float CurrentGroundLevel = me->GetBaseMap()->GetHeight(me->GetPositionX(), me->GetPositionY(), MAX_HEIGHT);
-            //if (StunTimer == 30000) // Only fly around if not stunned.
-            //{
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                if (IsFlying && me->GetPositionZ() > CurrentGroundLevel) // Fly towards the ground
-                    me->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), CurrentGroundLevel);
-                    // TODO: Swoop up just before landing
-                else
-                    IsFlying = false; // Landed, no longer flying
-            //}
-
-            //if (!IsFlying &&Phase == 2 && CastSpellsTimer == 0 && StunTimer >= diff) // No longer flying, non-permanent ground phase, and not casting spells
-            //{
-                // TODO: Add stun here. 30 second stun after Razorscale is grounded by harpoon guns
-                //StunTimer -= diff;
-            //}
-            //else if (StunTimer != 30000 && (StunTimer < 0 || Phase == 3)) // Stun is active, and needs to end. Note: Stun breaks instantly if Phase 3 starts
-            //{
-                // TODO: Remove stun here.
-                //DoCast(SPELL_WINGBUFFET);   // "Used in the beginning of the phase."
-                //WingBuffetTimer = urand(7000,14000);
-                //StunTimer = 30000;          // Reinitialize the stun timer
-                //if (Phase == 2)             // Non-permanent ground phase
-                //    CastSpellsTimer = 5000; // Five seconds of casting before returning to Phase 1
-           //}
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            if (IsFlying && me->GetPositionZ() > CurrentGroundLevel) // Fly towards the ground
+                me->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), CurrentGroundLevel);
+                // TODO: Swoop up just before landing
+            else
+                IsFlying = false; // Landed, no longer flying
         }
     }
 };
 
-CreatureAI* GetAI_boss_razorscale(Creature* pCreature)
+namespace
 {
-    return new boss_razorscaleAI (pCreature);
+    bool expedition_commander_gossip_hello(Player *p, Creature *c)
+    {
+        if (auto i = dynamic_cast<instance_ulduar *>(c->GetInstanceData()))
+        {
+            if (!i->razorscale_state)
+            {
+                p->PlayerTalkClass->GetGossipMenu().AddMenuItem(GOSSIP_ICON_CHAT, "We are ready to help!");
+                p->PlayerTalkClass->SendGossipMenu(14317, c->GetGUID());
+            }
+            return true;
+        }
+        else
+            return false;
+    }
+
+    bool expedition_commander_gossip_select(Player *p, Creature *c, uint32, uint32 a)
+    {
+        if (auto i = dynamic_cast<instance_ulduar *>(c->GetInstanceData()))
+        {
+            p->PlayerTalkClass->CloseGossip();
+            if (!i->razorscale_state)
+                if (a == 0)
+                {
+                    c->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    i->razorscale_state = true;
+                    // TODO: events
+                    // Expedition Engineer yells: Give us a moment to prepare to build the turrets.
+                    // <pause two seconds>
+                    // Expedition Commander yells: Be on the lookout! Mole machines will be
+                    //  surfacing soon with those nasty iron dwarves aboard!
+                    // <Razorscale flies nearby and the encounter begins>
+                    if (const auto &guid = i->uiRazorscaleGUID)
+                        if (auto c = i->instance->GetCreature(guid))
+                        {
+                            c->SetHomePosition(587.54f, -174.92f, 442.f, 4.37237f);
+                            c->GetMotionMaster()->MoveTargetedHome();
+                        }
+                }
+            return true;
+        }
+        else
+            return false;
+    }
 }
 
 void AddSC_boss_razorscale()
 {
     Script *newscript;
+
     newscript = new Script;
     newscript->Name = "boss_razorscale";
-    newscript->GetAI = &GetAI_boss_razorscale;
+    newscript->GetAI = &get_ai<boss_razorscaleAI>;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_expedition_commander";
+    newscript->pGossipHello = &expedition_commander_gossip_hello;
+    newscript->pGossipSelect = &expedition_commander_gossip_select;
     newscript->RegisterSelf();
 }

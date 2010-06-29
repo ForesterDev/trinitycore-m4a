@@ -43,9 +43,7 @@ enum Yells
 
 struct boss_thorimAI : public BossAI
 {
-    boss_thorimAI(Creature* pCreature) : BossAI(pCreature, TYPE_THORIM)
-    {
-    }
+    boss_thorimAI(Creature *pCreature) : BossAI(pCreature, boss_thorim) { }
 
     void Reset()
     {
@@ -88,16 +86,11 @@ struct boss_thorimAI : public BossAI
     }
 };
 
-CreatureAI* GetAI_boss_thorim(Creature* pCreature)
-{
-    return new boss_thorimAI(pCreature);
-}
-
 void AddSC_boss_thorim()
 {
     Script *newscript;
     newscript = new Script;
     newscript->Name = "boss_thorim";
-    newscript->GetAI = &GetAI_boss_thorim;
+    newscript->GetAI = &get_ai<boss_thorimAI>;
     newscript->RegisterSelf();
 }
