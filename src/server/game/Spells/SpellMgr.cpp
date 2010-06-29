@@ -290,7 +290,7 @@ int32 GetSpellMaxDuration(SpellEntry const *spellInfo)
     return (du->Duration[2] == -1) ? -1 : abs(du->Duration[2]);
 }
 
-int32 GetDispelChance(Unit* auraCaster, Unit* target, uint32 spellId, bool offensive, bool *result)
+uint32 GetDispelChance(Unit* auraCaster, Unit* target, uint32 spellId, bool offensive, bool *result)
 {
     // we assume that aura dispel chance is 100% on start
     // need formula for level difference based chance
@@ -310,7 +310,9 @@ int32 GetDispelChance(Unit* auraCaster, Unit* target, uint32 spellId, bool offen
     if (result)
         *result = !roll_chance_i(resist_chance);
 
-    return resist_chance;
+    resist_chance = resist_chance < 0 ? 0 : resist_chance;
+    resist_chance = resist_chance > 100 ? 100 : resist_chance;
+    return 100 - resist_chance;
 }
 
 uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell * spell)
@@ -750,20 +752,47 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
     if (spellproto->Attributes & SPELL_ATTR_NEGATIVE_1)
         return false;
 
-    switch(spellId)
+    switch (spellproto->SpellFamilyName)
     {
-        //case 37675:                                         // Chaos Blast removed from mangos
-        case 34700:                                         // Allergic Reaction
-        case 61987:                                         // Avenging Wrath Marker
-        case 61988:                                         // Divine Shield exclude aura
-        case 50524:                                         // Runic Power Feed
-            return false;
-        case 12042:                                         // Arcane Power
-        case 30877:                                         // Tag Murloc
-            return true;
+        case SPELLFAMILY_GENERIC:
+            switch (spellId)
+            {
+                case 34700: // Allergic Reaction
+                case 61987: // Avenging Wrath Marker
+                case 61988: // Divine Shield exclude aura
+                    return false;
+                case 30877: // Tag Murloc
+                    return true;
+                default:
+                    break;
+            }
+            break;
+        case SPELLFAMILY_MAGE:
+            // Amplify Magic, Dampen Magic
+            if (spellproto->SpellFamilyFlags[0] == 0x00002000)
+                return true;
+            break;
+        case SPELLFAMILY_PRIEST:
+            switch (spellId)
+            {
+                case 64844: // Divine Hymn
+                case 64904: // Hymn of Hope
+                case 47585: // Dispersion
+                    return true;
+                default:
+                    break;
+            }
+            break;
+        case SPELLFAMILY_HUNTER:
+            // Aspect of the Viper
+            if (spellId == 34074)
+                return true;
+            break;
+        default:
+            break;
     }
 
-    switch(spellproto->Mechanic)
+    switch (spellproto->Mechanic)
     {
         case MECHANIC_IMMUNE_SHIELD:
             return true;
@@ -1142,7 +1171,7 @@ void SpellMgr::LoadSpellTargetPositions()
                 // additional requirements
                 if (spellInfo->Effect[i]==SPELL_EFFECT_BIND && spellInfo->EffectMiscValue[i])
                 {
-                    uint32 area_id = MapManager::Instance().GetAreaId(st.target_mapId, st.target_X, st.target_Y, st.target_Z);
+                    uint32 area_id = sMapMgr.GetAreaId(st.target_mapId, st.target_X, st.target_Y, st.target_Z);
                     if (area_id != uint32(spellInfo->EffectMiscValue[i]))
                     {
                         sLog.outErrorDb("Spell (Id: %u) listed in `spell_target_position` expected point to zone %u bit point to zone %u.",Spell_ID, spellInfo->EffectMiscValue[i], area_id);

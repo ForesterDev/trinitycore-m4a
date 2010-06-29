@@ -30,7 +30,6 @@
 #include "GameObject.h"
 #include "Corpse.h"
 #include "QuestDef.h"
-#include "Path.h"
 #include "ItemPrototype.h"
 #include "NPCHandler.h"
 #include "DatabaseEnv.h"
@@ -38,7 +37,7 @@
 #include "Map.h"
 #include "ObjectAccessor.h"
 #include "ObjectDefines.h"
-#include "Singleton.h"
+#include "ace/Singleton.h"
 #include "SQLStorage.h"
 #include "Vehicle.h"
 #include "ObjectMgr.h"
@@ -60,8 +59,6 @@ extern SQLStorage sInstanceTemplate;
 class Group;
 class Guild;
 class ArenaTeam;
-class Path;
-class TransportPath;
 class Item;
 
 struct GameTele
@@ -357,11 +354,11 @@ class PlayerDumpReader;
 class ObjectMgr
 {
     friend class PlayerDumpReader;
-
+    friend class ACE_Singleton<ObjectMgr, ACE_Null_Mutex>;
+    ObjectMgr();
+    ~ObjectMgr();
+    
     public:
-        ObjectMgr();
-        ~ObjectMgr();
-
         typedef UNORDERED_MAP<uint32, Item*> ItemMap;
 
         typedef std::set< Group * > GroupSet;
@@ -385,9 +382,7 @@ class ObjectMgr
 
         typedef std::vector<std::string> ScriptNameMap;
 
-        UNORDERED_MAP<uint32, uint32> TransportEventMap;
-
-        Player* GetPlayer(const char* name) const { return ObjectAccessor::Instance().FindPlayerByName(name);}
+        Player* GetPlayer(const char* name) const { return sObjectAccessor.FindPlayerByName(name);}
         Player* GetPlayer(uint64 guid) const { return ObjectAccessor::FindPlayer(guid); }
 
         static GameObjectInfo const *GetGameObjectInfo(uint32 id) { return sGOStorage.LookupEntry<GameObjectInfo>(id); }
@@ -473,7 +468,6 @@ class ObjectMgr
         uint32 GetNearestTaxiNode(float x, float y, float z, uint32 mapid, uint32 team);
         void GetTaxiPath(uint32 source, uint32 destination, uint32 &path, uint32 &cost);
         uint32 GetTaxiMountDisplayId(uint32 id, uint32 team, bool allowed_alt_team = false);
-        void GetTaxiPathNodes(uint32 path, Path &pathnodes, std::vector<uint32>& mapIds);
 
         Quest const* GetQuestTemplate(uint32 quest_id) const
         {
@@ -592,8 +586,6 @@ class ObjectMgr
         void LoadSpellScripts();
         void LoadGossipScripts();
         void LoadWaypointScripts();
-
-        void LoadTransportEvents();
 
         bool LoadTrinityStrings(DatabaseType& db, char const* table, int32 min_value, int32 max_value);
         bool LoadTrinityStrings() { return LoadTrinityStrings(WorldDatabase,"trinity_string",MIN_TRINITY_STRING_ID,MAX_TRINITY_STRING_ID); }
@@ -1091,7 +1083,7 @@ class ObjectMgr
 
 };
 
-#define objmgr Trinity::Singleton<ObjectMgr>::Instance()
+#define objmgr (*ACE_Singleton<ObjectMgr, ACE_Null_Mutex>::instance())
 
 // scripting access functions
  bool LoadTrinityStrings(DatabaseType& db, char const* table,int32 start_value = MAX_CREATURE_AI_TEXT_STRING_ID, int32 end_value = std::numeric_limits<int32>::min());

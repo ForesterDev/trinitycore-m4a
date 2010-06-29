@@ -1,11 +1,12 @@
-<?xml version="1.0" encoding="windows-1251"?>
+<?xml version="1.0" encoding="windows-1250"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="ad"
-	ProjectGUID="{D7552D4F-408F-4F8E-859B-366659150CF4}"
-	RootNamespace="ad"
-	TargetFrameworkVersion="131072"
+	Name="vmap3extractor"
+	ProjectGUID="{502602CC-98EA-4335-B922-C5C1DBF37604}"
+	RootNamespace="vmap3_extractor"
+	Keyword="Win32Proj"
+	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
 		<Platform
@@ -20,9 +21,7 @@
 			OutputDirectory="$(ProjectName)__$(PlatformName)_$(ConfigurationName)"
 			IntermediateDirectory="$(ProjectName)__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="2"
+			CharacterSet="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -38,32 +37,20 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="1"
-				TypeLibraryName="./ad.tlb"
-				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\;..\..\..\..\externals;..\..\..\..\externals\libmpq;..\..\..\..\externals\libmpq\win;..\server\shared"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_CONSOLE"
+				AdditionalIncludeDirectories="..\;..\..\..\..\externals\libmpq;..\..\..\..\externals\libmpq\win"
+				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(IntDir)\ad.pch"
-				AssemblerListingLocation=""
-				ObjectFile="$(IntDir)\"
-				ProgramDataBaseFileName="$(IntDir)\"
-				XMLDocumentationFileName="$(IntDir)\"
-				BrowseInformation="0"
-				BrowseInformationFile=""
+				ObjectFile=".\$(ProjectName)__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\$(ProjectName)__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
-				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -71,8 +58,6 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
-				Culture="1049"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -81,9 +66,7 @@
 				Name="VCLinkerTool"
 				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\$(ProjectName)_d.exe"
 				LinkIncremental="2"
-				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories=""
-				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb"
 				SubSystem="1"
@@ -102,7 +85,6 @@
 			/>
 			<Tool
 				Name="VCBscMakeTool"
-				OutputFile="$(OutDir)\$(ProjectName).bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -119,9 +101,8 @@
 			OutputDirectory="$(ProjectName)__$(PlatformName)_$(ConfigurationName)"
 			IntermediateDirectory="$(ProjectName)__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="2"
+			CharacterSet="1"
+			WholeProgramOptimization="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -137,40 +118,29 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="1"
-				TypeLibraryName="./ad.tlb"
-				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				InlineFunctionExpansion="0"
-				AdditionalIncludeDirectories="..\;..\..\..\..\externals;..\..\..\..\externals\libmpq;..\..\..\..\externals\libmpq\win;..\server\shared"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
+				EnableIntrinsicFunctions="false"
+				WholeProgramOptimization="false"
+				AdditionalIncludeDirectories="..\;..\..\..\..\externals\libmpq;..\..\..\..\externals\libmpq\win"
+				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				EnableEnhancedInstructionSet="1"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=""
-				AssemblerListingLocation=""
-				ObjectFile="$(IntDir)\"
-				ProgramDataBaseFileName="$(IntDir)\vc90.pdb"
-				XMLDocumentationFileName="$(IntDir)\"
-				BrowseInformation="0"
+				ObjectFile=".\$(ProjectName)__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\$(ProjectName)__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
-				SuppressStartupBanner="true"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="1049"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -179,14 +149,13 @@
 				Name="VCLinkerTool"
 				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\$(ProjectName).exe"
 				LinkIncremental="1"
-				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories=""
-				IgnoreDefaultLibraryNames=""
-				GenerateDebugInformation="false"
-				ProgramDatabaseFile=""
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(IntDir)\$(TargetName).pdb"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				LinkTimeCodeGeneration="0"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="1"
@@ -219,10 +188,11 @@
 	<Files>
 		<Filter
 			Name="Source Files"
-			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
+			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\loadlib\adt.cpp"
+				RelativePath="..\adtfile.cpp"
 				>
 			</File>
 			<File
@@ -230,7 +200,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\loadlib\loadlib.cpp"
+				RelativePath="..\model.cpp"
 				>
 			</File>
 			<File
@@ -238,26 +208,67 @@
 				>
 			</File>
 			<File
-				RelativePath="..\System.cpp"
+				RelativePath="..\vmapexport.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\loadlib\wdt.cpp"
+				RelativePath="..\wdtfile.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\wmo.cpp"
 				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\dbcfile.h"
+				RelativePath="..\adtfile.h"
 				>
 			</File>
 			<File
-				RelativePath=".\mpq_libmpq.h"
+				RelativePath="..\dbcfile.h"
 				>
 			</File>
+			<File
+				RelativePath="..\model.h"
+				>
+			</File>
+			<File
+				RelativePath="..\modelheaders.h"
+				>
+			</File>
+			<File
+				RelativePath="..\mpq_libmpq04.h"
+				>
+			</File>
+			<File
+				RelativePath="..\vec3d.h"
+				>
+			</File>
+			<File
+				RelativePath="..\vmapexport.h"
+				>
+			</File>
+			<File
+				RelativePath="..\wdtfile.h"
+				>
+			</File>
+			<File
+				RelativePath="..\wmo.h"
+				>
+			</File>
+			<Filter
+				Name="loadlib"
+				>
+				<File
+					RelativePath="..\loadlib\loadlib.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>
