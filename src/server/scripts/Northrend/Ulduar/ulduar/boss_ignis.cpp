@@ -43,7 +43,7 @@ enum
 
 struct boss_ignis_AI : public BossAI
 {
-    boss_ignis_AI(Creature *pCreature) : BossAI(pCreature, TYPE_IGNIS) {}
+    boss_ignis_AI(Creature *pCreature) : BossAI(pCreature, boss_ignis) { }
 
     uint32 uiFlameJetsTimer;
     uint32 uiScorchTimer;
@@ -122,16 +122,12 @@ struct boss_ignis_AI : public BossAI
     }
 };
 
-CreatureAI* GetAI_boss_ignis(Creature* pCreature)
-{
-    return new boss_ignis_AI (pCreature);
-}
 void AddSC_boss_ignis()
 {
     Script *newscript;
 
     newscript = new Script;
     newscript->Name = "boss_ignis";
-    newscript->GetAI = &GetAI_boss_ignis;
+    newscript->GetAI = &get_ai<boss_ignis_AI>;
     newscript->RegisterSelf();
 }

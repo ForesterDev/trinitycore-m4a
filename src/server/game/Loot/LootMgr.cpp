@@ -1196,7 +1196,7 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, bool rate, uint16
             if (!Referenced)
                 continue;                                     // Error message already printed at loading stage
 
-            for (uint32 loop = 0; loop < i->maxcount; ++loop) // Ref multiplicator
+            for (uint32 loop = 0; loop < i->maxcount * 2; ++loop)   // Ref multiplicator
                 Referenced->Process(loot, store, rate, lootMode, i->group);
         }
         else                                                  // Plain entries (not a reference, not grouped)
