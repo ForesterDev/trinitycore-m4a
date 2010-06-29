@@ -372,7 +372,7 @@ bool AuthSocket::_HandleLogonChallenge()
         pkt << (uint8)WOW_FAIL_BANNED;
         sLog.outBasic("[AuthChallenge] Banned ip %s tries to login!", address.c_str ());
     }
-    else if (_build != 12213)
+    else if (_build != 12213 && _build != 12340)
         pkt << static_cast<uint8>(WOW_FAIL_VERSION_INVALID);
     else
     {
