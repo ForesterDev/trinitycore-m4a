@@ -22,8 +22,6 @@
 #include "DatabaseEnv.h"
 #include "SQLStorage.h"
 #include "SQLStorageImpl.h"
-#include "SingletonImp.h"
-
 #include "Log.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
@@ -47,8 +45,6 @@
 #include "GossipDef.h"
 #include "Vehicle.h"
 #include "AchievementMgr.h"
-
-INSTANTIATE_SINGLETON_1(ObjectMgr);
 
 ScriptMapMap sQuestEndScripts;
 ScriptMapMap sQuestStartScripts;
@@ -1177,14 +1173,14 @@ bool ObjectMgr::SetCreatureLinkedRespawn(uint32 guid, uint32 linkedGuid)
     if (!linkedGuid) // we're removing the linking
     {
         mCreatureLinkedRespawnMap.erase(guid);
-        WorldDatabase.DirectPExecute("DELETE FROM creature_linked_respawn WHERE guid = '%u'",guid);
+        WorldDatabase.PExecute("DELETE FROM creature_linked_respawn WHERE guid = '%u'",guid);
         return true;
     }
 
     if (CheckCreatureLinkedRespawn(guid,linkedGuid)) // we add/change linking
     {
         mCreatureLinkedRespawnMap[guid] = linkedGuid;
-        WorldDatabase.DirectPExecute("REPLACE INTO creature_linked_respawn (guid,linkedGuid) VALUES ('%u','%u')",guid,linkedGuid);
+        WorldDatabase.PExecute("REPLACE INTO creature_linked_respawn (guid,linkedGuid) VALUES ('%u','%u')",guid,linkedGuid);
         return true;
     }
     return false;
@@ -1412,7 +1408,7 @@ uint32 ObjectMgr::AddGOData(uint32 entry, uint32 mapId, float x, float y, float 
     if (!goinfo)
         return 0;
 
-    Map* map = const_cast<Map*>(MapManager::Instance().CreateBaseMap(mapId));
+    Map* map = const_cast<Map*>(sMapMgr.CreateBaseMap(mapId));
     if (!map)
         return 0;
 
@@ -1473,7 +1469,7 @@ bool ObjectMgr::MoveCreData(uint32 guid, uint32 mapId, Position pos)
     AddCreatureToGrid(guid, &data);
 
     // Spawn if necessary (loaded grids only)
-    if (Map* map = const_cast<Map*>(MapManager::Instance().CreateBaseMap(mapId)))
+    if (Map* map = const_cast<Map*>(sMapMgr.CreateBaseMap(mapId)))
     {
         // We use spawn coords to spawn
         if (!map->Instanceable() && map->IsLoaded(data.posX, data.posY))
@@ -1524,7 +1520,7 @@ uint32 ObjectMgr::AddCreData(uint32 entry, uint32 /*team*/, uint32 mapId, float 
     AddCreatureToGrid(guid, &data);
 
     // Spawn if necessary (loaded grids only)
-    if (Map* map = const_cast<Map*>(MapManager::Instance().CreateBaseMap(mapId)))
+    if (Map* map = const_cast<Map*>(sMapMgr.CreateBaseMap(mapId)))
     {
         // We use spawn coords to spawn
         if (!map->Instanceable() && !map->IsRemovalGrid(x, y))
@@ -2260,10 +2256,17 @@ void ObjectMgr::LoadItemPrototypes()
             const_cast<ItemPrototype*>(proto)->Sheath = SHEATHETYPE_NONE;
         }
 
-        if (proto->RandomProperty && !sItemRandomPropertiesStore.LookupEntry(GetItemEnchantMod(proto->RandomProperty)))
+        if (proto->RandomProperty)
         {
-            sLog.outErrorDb("Item (Entry: %u) has unknown (wrong or not listed in `item_enchantment_template`) RandomProperty (%u)",i,proto->RandomProperty);
-            const_cast<ItemPrototype*>(proto)->RandomProperty = 0;
+            // To be implemented later
+            if (proto->RandomProperty == -1)
+                const_cast<ItemPrototype*>(proto)->RandomProperty = 0;
+                
+            else if (!sItemRandomPropertiesStore.LookupEntry(GetItemEnchantMod(proto->RandomProperty)))
+            {
+                sLog.outErrorDb("Item (Entry: %u) has unknown (wrong or not listed in `item_enchantment_template`) RandomProperty (%u)",i,proto->RandomProperty);
+                const_cast<ItemPrototype*>(proto)->RandomProperty = 0;
+            }    
         }
 
         if (proto->RandomSuffix && !sItemRandomSuffixStore.LookupEntry(GetItemEnchantMod(proto->RandomSuffix)))
@@ -4813,26 +4816,9 @@ void ObjectMgr::LoadEventScripts()
     // Load all possible script entries from gameobjects
     for (uint32 i = 1; i < sGOStorage.MaxEntry; ++i)
     {
-        GameObjectInfo const * goInfo = sGOStorage.LookupEntry<GameObjectInfo>(i);
-        if (goInfo)
-        {
-            switch(goInfo->type)
-            {
-                case GAMEOBJECT_TYPE_GOOBER:
-                    if (goInfo->goober.eventId)
-                        evt_scripts.insert(goInfo->goober.eventId);
-                    break;
-                case GAMEOBJECT_TYPE_CHEST:
-                    if (goInfo->chest.eventId)
-                        evt_scripts.insert(goInfo->chest.eventId);
-                    break;
-                case GAMEOBJECT_TYPE_CAMERA:
-                    if (goInfo->camera.eventID)
-                        evt_scripts.insert(goInfo->camera.eventID);
-                default:
-                    break;
-            }
-        }
+        if (GameObjectInfo const * goInfo = sGOStorage.LookupEntry<GameObjectInfo>(i))
+            if (uint32 eventId = goInfo->GetEventScriptId())
+                evt_scripts.insert(eventId);
     }
     // Load all possible script entries from spells
     for (uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
@@ -4848,6 +4834,20 @@ void ObjectMgr::LoadEventScripts()
                         evt_scripts.insert(spell->EffectMiscValue[j]);
                 }
             }
+        }
+    }
+
+    for(size_t path_idx = 0; path_idx < sTaxiPathNodesByPath.size(); ++path_idx)
+    {
+        for(size_t node_idx = 0; node_idx < sTaxiPathNodesByPath[path_idx].size(); ++node_idx)
+        {
+            TaxiPathNodeEntry const& node = sTaxiPathNodesByPath[path_idx][node_idx];
+
+            if (node.arrivalEventID)
+                evt_scripts.insert(node.arrivalEventID);
+
+            if (node.departureEventID)
+                evt_scripts.insert(node.departureEventID);
         }
     }
 
@@ -5482,25 +5482,6 @@ uint32 ObjectMgr::GetTaxiMountDisplayId(uint32 id, uint32 team, bool allowed_alt
     return mount_id;
 }
 
-void ObjectMgr::GetTaxiPathNodes(uint32 path, Path &pathnodes, std::vector<uint32>& mapIds)
-{
-    if (path >= sTaxiPathNodesByPath.size())
-        return;
-
-    TaxiPathNodeList& nodeList = sTaxiPathNodesByPath[path];
-
-    pathnodes.Resize(nodeList.size());
-    mapIds.resize(nodeList.size());
-
-    for (size_t i = 0; i < nodeList.size(); ++i)
-    {
-        pathnodes[i].x = nodeList[i]->x;
-        pathnodes[i].y = nodeList[i]->y;
-        pathnodes[i].z = nodeList[i]->z;
-        mapIds[i] = nodeList[i]->mapid;
-    }
-}
-
 void ObjectMgr::LoadGraveyardZones()
 {
     mGraveYardMap.clear();                                  // need for reload case
@@ -5569,7 +5550,7 @@ void ObjectMgr::LoadGraveyardZones()
 WorldSafeLocsEntry const *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team)
 {
     // search for zone associated closest graveyard
-    uint32 zoneId = MapManager::Instance().GetZoneId(MapId,x,y,z);
+    uint32 zoneId = sMapMgr.GetZoneId(MapId,x,y,z);
 
     // Simulate std. algorithm:
     //   found some graveyard associated to (ghost_zone,ghost_map)
@@ -6630,7 +6611,7 @@ void ObjectMgr::LoadCorpses()
             continue;
         }
 
-        ObjectAccessor::Instance().AddCorpse(corpse);
+        sObjectAccessor.AddCorpse(corpse);
 
         ++count;
     }
@@ -8618,40 +8599,6 @@ GameObjectInfo const *GetGameObjectInfo(uint32 id)
 CreatureInfo const *GetCreatureInfo(uint32 id)
 {
     return objmgr.GetCreatureTemplate(id);
-}
-
-void ObjectMgr::LoadTransportEvents()
-{
-
-    QueryResult_AutoPtr result = WorldDatabase.Query("SELECT entry, waypoint_id, event_id FROM transport_events");
-
-    if (!result)
-    {
-        barGoLink bar1(1);
-        bar1.step();
-        sLog.outString("\n>> Transport events table is empty \n");
-        return;
-    }
-
-    barGoLink bar1(result->GetRowCount());
-
-    do
-    {
-        bar1.step();
-
-        Field *fields = result->Fetch();
-
-        //Load event values
-        uint32 entry = fields[0].GetUInt32();
-        uint32 waypoint_id = fields[1].GetUInt32();
-        uint32 event_id = fields[2].GetUInt32();
-
-        uint32 event_count = (entry*100)+waypoint_id;
-        TransportEventMap[event_count] = event_id;
-    }
-    while (result->NextRow());
-
-    sLog.outString("\n>> Loaded %u transport events \n", result->GetRowCount());
 }
 
 CreatureInfo const* GetCreatureTemplateStore(uint32 entry)

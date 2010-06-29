@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "ScriptedEscortAI.h"
 #include "ScriptPCH.h"
 #include "instance_ulduar.hpp"
 #include "ulduar.h"
@@ -44,7 +45,6 @@ instance_ulduar::instance_ulduar(Map *pMap)
 void instance_ulduar::Initialize()
 {
     colossi               = 0;
-    uiLeviathanGUID       = 0;
     uiIgnisGUID           = 0;
     uiRazorscaleGUID      = 0;
     uiXT002GUID           = 0;
@@ -74,7 +74,7 @@ void instance_ulduar::OnCreatureCreate(Creature *pCreature, bool)
     switch(pCreature->GetEntry())
     {
         case NPC_LEVIATHAN:
-            uiLeviathanGUID = pCreature->GetGUID();
+            uiLeviathanGUID = pCreature->GetGUID();             
             break;
         case NPC_IGNIS:
             uiIgnisGUID = pCreature->GetGUID();
@@ -155,24 +155,26 @@ void instance_ulduar::OnGameObjectCreate(GameObject *pGO, bool add)
             if (flag == 7)
                 flag =0;
             break;
-        case GO_LEVIATHAN_GATE:
-            uiLeviathanGateGUID = pGO->GetGUID();
-            HandleGameObject(NULL, false, pGO);
+        case GO_LEVIATHAN_GATE:                
+            uiLeviathanGateGUID = add ? pGO->GetGUID() : NULL;
+            HandleGameObject(NULL, false, pGO); 
             if (2 <= colossi)
                 pGO->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
-            break;
+            break;             
     }
 }
 
 void instance_ulduar::ProcessEvent(GameObject *pGO, uint32 uiEventId)
 {
     // Flame Leviathan's Tower Event triggers
-    Creature* pFlameLeviathan = instance->GetCreature(NPC_LEVIATHAN);
+   Creature* pFlameLeviathan = instance->GetCreature(uiLeviathanGUID);
+
     if (pFlameLeviathan && pFlameLeviathan->isAlive()) //No leviathan, no event triggering ;)
         switch(uiEventId)
         {
             case EVENT_TOWER_OF_STORM_DESTROYED:
-                pFlameLeviathan->AI()->DoAction(1);
+                    //pGO->GetInstanceData()->SetData(DATA_TOWER_STORMS,DESTROYED);
+                pFlameLeviathan->AI()->DoAction(1);                    
                 break;
             case EVENT_TOWER_OF_FROST_DESTROYED:
                 pFlameLeviathan->AI()->DoAction(2);
@@ -180,7 +182,7 @@ void instance_ulduar::ProcessEvent(GameObject *pGO, uint32 uiEventId)
             case EVENT_TOWER_OF_FLAMES_DESTROYED:
                 pFlameLeviathan->AI()->DoAction(3);
                 break;
-            case EVENT_TOWER_OF_NATURE_DESTROYED:
+            case EVENT_TOWER_OF_LIFE_DESTROYED:
                 pFlameLeviathan->AI()->DoAction(4);
                 break;
         }
@@ -199,12 +201,12 @@ void instance_ulduar::SetData(uint32 DataId, uint32 Value)
                     if (Creature* pBoss = instance->GetCreature(uiLeviathanGUID))
                         pBoss->AI()->DoAction(10);
                     if (GameObject* pGate = instance->GetGameObject(uiLeviathanGateGUID))
-                        pGate->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                        pGate->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);                                                               
                 }
 
                 SaveToDB();
             }
-            break;
+            break;            
         default:
             break;
     }
@@ -303,12 +305,12 @@ bool instance_ulduar::SetBossState(uint32 id, EncounterState state)
         case boss_leviathan:
             if (state == IN_PROGRESS)
             {
-                for (uint8 uiI = 0; uiI < 7; uiI++)
+                for (uint8 uiI = 0; uiI < 7; ++uiI)
                     HandleGameObject(uiLeviathanDoor[uiI],false);
             }
             else
             {
-                for (uint8 uiI = 0; uiI < 7; uiI++)
+                for (uint8 uiI = 0; uiI < 7; ++uiI)
                     HandleGameObject(uiLeviathanDoor[uiI],true);
             }
             break;

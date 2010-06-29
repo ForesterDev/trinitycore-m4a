@@ -20,7 +20,7 @@
 #define TRINITY_POOLHANDLER_H
 
 #include "Define.h"
-#include "Singleton.h"
+#include "ace/Singleton.h"
 #include "Creature.h"
 #include "GameObject.h"
 
@@ -87,12 +87,13 @@ class PoolGroup
         PoolObjectList EqualChanced;
 };
 
-class PoolHandler
+class PoolMgr
 {
-    public:
-        PoolHandler();
-        ~PoolHandler() {};
+    friend class ACE_Singleton<PoolMgr, ACE_Null_Mutex>;
+    PoolMgr();
+    ~PoolMgr() {};
 
+    public:
         void LoadFromDB();
         void Initialize();
 
@@ -134,11 +135,11 @@ class PoolHandler
         SpawnedPoolData mSpawnedData;
 };
 
-#define poolhandler Trinity::Singleton<PoolHandler>::Instance()
+#define poolhandler (*ACE_Singleton<PoolMgr, ACE_Null_Mutex>::instance())
 
 // Method that tell if the creature is part of a pool and return the pool id if yes
 template<>
-inline uint16 PoolHandler::IsPartOfAPool<Creature>(uint32 db_guid) const
+inline uint16 PoolMgr::IsPartOfAPool<Creature>(uint32 db_guid) const
 {
     SearchMap::const_iterator itr = mCreatureSearchMap.find(db_guid);
     if (itr != mCreatureSearchMap.end())
@@ -149,7 +150,7 @@ inline uint16 PoolHandler::IsPartOfAPool<Creature>(uint32 db_guid) const
 
 // Method that tell if the gameobject is part of a pool and return the pool id if yes
 template<>
-inline uint16 PoolHandler::IsPartOfAPool<GameObject>(uint32 db_guid) const
+inline uint16 PoolMgr::IsPartOfAPool<GameObject>(uint32 db_guid) const
 {
     SearchMap::const_iterator itr = mGameobjectSearchMap.find(db_guid);
     if (itr != mGameobjectSearchMap.end())
@@ -160,7 +161,7 @@ inline uint16 PoolHandler::IsPartOfAPool<GameObject>(uint32 db_guid) const
 
 // Method that tell if the pool is part of another pool and return the pool id if yes
 template<>
-inline uint16 PoolHandler::IsPartOfAPool<Pool>(uint32 pool_id) const
+inline uint16 PoolMgr::IsPartOfAPool<Pool>(uint32 pool_id) const
 {
     SearchMap::const_iterator itr = mPoolSearchMap.find(pool_id);
     if (itr != mPoolSearchMap.end())

@@ -2,23 +2,23 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{2ae5177f-2902-466d-9d94-ddc391013202}</UniqueIdentifier>
+      <UniqueIdentifier>{83e61bb5-86f6-4eb1-b388-e7d4c2d6cb5c}</UniqueIdentifier>
       <Extensions>cpp;cxx;cc;C;c</Extensions>
     </Filter>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{15664b92-3fa3-48a3-86dd-0031be25a3dc}</UniqueIdentifier>
+      <UniqueIdentifier>{997b17b8-17f6-424e-b23f-efd702b686ee}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hh</Extensions>
     </Filter>
     <Filter Include="Inline Files">
-      <UniqueIdentifier>{7cbd507b-fb47-41d3-8437-b6619fcb2e77}</UniqueIdentifier>
+      <UniqueIdentifier>{a5f91b70-156c-4ad4-adb4-5e7e5f7c0b0b}</UniqueIdentifier>
       <Extensions>i;inl</Extensions>
     </Filter>
     <Filter Include="Resource Files">
-      <UniqueIdentifier>{59b23946-2803-454f-a016-81207c850008}</UniqueIdentifier>
+      <UniqueIdentifier>{22a5a17f-5311-4020-a3a5-149f40567d0f}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
     <Filter Include="PrecompiledHeaders">
-      <UniqueIdentifier>{381f3b77-d320-4563-9a9c-4df7655e04d8}</UniqueIdentifier>
+      <UniqueIdentifier>{d6c7661e-71ad-4fe8-917d-dd67b68ce323}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

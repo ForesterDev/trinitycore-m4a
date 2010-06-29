@@ -22,7 +22,7 @@
 #include "ObjectMgr.h"
 #include "World.h"
 #include "WorldPacket.h"
-#include "SingletonImp.h"
+
 
 #include "ArenaTeam.h"
 #include "BattleGroundMgr.h"
@@ -48,8 +48,6 @@
 #include "ProgressBar.h"
 #include "SharedDefines.h"
 #include "Formulas.h"
-
-INSTANTIATE_SINGLETON_1(BattleGroundMgr);
 
 /*********************************************************/
 /***            BATTLEGROUND QUEUE SYSTEM              ***/
@@ -1631,8 +1629,11 @@ BattleGround * BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeI
             return 0;
     }
 
+    // set battelground difficulty before initialization
+    bg->SetBracket(bracketEntry);
+
     // generate a new instance id
-    bg->SetInstanceID(MapManager::Instance().GenerateInstanceId()); // set instance id
+    bg->SetInstanceID(sMapMgr.GenerateInstanceId()); // set instance id
     bg->SetClientInstanceID(CreateClientVisibleInstanceId(isRandom ? BATTLEGROUND_RB : bgTypeId, bracketEntry->GetBracketId()));
 
     // reset the new bg (set status to status_wait_queue from status_none)
@@ -1640,7 +1641,6 @@ BattleGround * BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeI
 
     // start the joining of the bg
     bg->SetStatus(STATUS_WAIT_JOIN);
-    bg->SetBracket(bracketEntry);
     bg->SetArenaType(arenaType);
     bg->SetRated(isRated);
     bg->SetRandom(isRandom);
@@ -1895,8 +1895,8 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket *data, const uint6
     uint32 win_arena = plr->GetRandomWinner() ? BG_REWARD_WINNER_ARENA_LAST : BG_REWARD_WINNER_ARENA_FIRST;
     uint32 loos_kills = plr->GetRandomWinner() ? BG_REWARD_LOOSER_HONOR_LAST : BG_REWARD_LOOSER_HONOR_FIRST;
 
-    win_kills = (uint32)Trinity::Honor::hk_honor_at_level(plr->getLevel(), win_kills);
-    loos_kills = (uint32)Trinity::Honor::hk_honor_at_level(plr->getLevel(), loos_kills);
+    win_kills = Trinity::Honor::hk_honor_at_level(plr->getLevel(), win_kills);
+    loos_kills = Trinity::Honor::hk_honor_at_level(plr->getLevel(), loos_kills);
 
     data->Initialize(SMSG_BATTLEFIELD_LIST);
     *data << uint64(guid);                                  // battlemaster guid

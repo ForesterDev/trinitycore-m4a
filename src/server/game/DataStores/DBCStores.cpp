@@ -19,7 +19,7 @@
  */
 
 #include "DBCStores.h"
-#include "SingletonImp.h"
+
 #include "Logging/Log.h"
 #include "ProgressBar.h"
 #include "SharedDefines.h"
@@ -243,7 +243,7 @@ void LoadDBCStores(const std::string& dataPath)
 {
     std::string dbcPath = dataPath+"dbc/";
 
-    const uint32 DBCFilesCount = 87;
+    const uint32 DBCFilesCount = 89;
 
     barGoLink bar(DBCFilesCount);
 
@@ -506,7 +506,7 @@ void LoadDBCStores(const std::string& dataPath)
     // fill data
     for (uint32 i = 1; i < sTaxiPathNodeStore.GetNumRows(); ++i)
         if (TaxiPathNodeEntry const* entry = sTaxiPathNodeStore.LookupEntry(i))
-            sTaxiPathNodesByPath[entry->path][entry->index] = entry;
+            sTaxiPathNodesByPath[entry->path].set(entry->index, entry);
 
     // Initialize global taxinodes mask
     // include existed nodes that have at least single not spell base (scripted) path

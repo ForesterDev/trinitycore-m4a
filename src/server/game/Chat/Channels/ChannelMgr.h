@@ -23,7 +23,7 @@
 #include <memory>
 #include "Common.h"
 #include "Channel.h"
-#include "Singleton.h"
+#include "ace/Singleton.h"
 
 #include <map>
 #include <string>

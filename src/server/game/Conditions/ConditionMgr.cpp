@@ -19,7 +19,7 @@
  */
 
 
-#include "SingletonImp.h"
+
 #include "Player.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
@@ -28,8 +28,6 @@
 #include "ProgressBar.h"
 #include "InstanceData.h"
 #include "ConditionMgr.h"
-
-INSTANTIATE_SINGLETON_1(ConditionMgr);
 
 // Checks if player meets the condition
 // Can have CONDITION_SOURCE_TYPE_NONE && !mReferenceId if called from a special event (ie: eventAI)
@@ -519,7 +517,6 @@ bool ConditionMgr::addToGossipMenus(Condition* cond)
             if ((*itr).second.entry == cond->mSourceGroup && (*itr).second.text_id == cond->mSourceEntry)
             {
                 (*itr).second.conditions.push_back(cond);
-                sLog.outDebug("addToGossipMenus: entry %u textId %u", cond->mSourceGroup, cond->mSourceEntry);
                 return true;
             }
         }
@@ -538,7 +535,6 @@ bool ConditionMgr::addToGossipMenuItems(Condition* cond)
             if ((*itr).second.menu_id == cond->mSourceGroup && (*itr).second.id == cond->mSourceEntry)
             {
                 (*itr).second.conditions.push_back(cond);
-                //sLog.outDebug("addToGossipMenuItems: menuId %u id %u", cond->mSourceGroup, cond->mSourceEntry);
                 return true;
             }
         }
