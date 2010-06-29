@@ -5,7 +5,7 @@
 #include <set>
 #include <cstdlib>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include "direct.h"
 #else
 #include <sys/stat.h>
@@ -14,8 +14,8 @@
 #include "dbcfile.h"
 #include "mpq_libmpq04.h"
 
-#include "loadlib/adt.h"
-#include "loadlib/wdt.h"
+#include "adt.h"
+#include "wdt.h"
 #include <fcntl.h>
 
 #if defined( __GNUC__ )
@@ -88,7 +88,7 @@ static char* const langs[] = {"enGB", "enUS", "deDE", "esES", "frFR", "koKR", "z
 
 void CreateDir( const std::string& Path )
 {
-    #ifdef WIN32
+    #ifdef _WIN32
     _mkdir( Path.c_str());
     #else
     mkdir( Path.c_str(), 0777 );

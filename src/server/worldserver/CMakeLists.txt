@@ -12,14 +12,10 @@
 
 set(worldserver_SRCS
   CommandLine/CliRunnable.cpp
-  CommandLine/CliRunnable.h
   RemoteAccess/RASocket.cpp
-  RemoteAccess/RASocket.h
   WorldThread/WorldRunnable.cpp
-  WorldThread/WorldRunnable.h
   Main.cpp
   Master.cpp
-  Master.h
 )
 
 include_directories(
@@ -125,6 +121,8 @@ add_executable(worldserver ${worldserver_SRCS})
 add_definitions(
   -D_TRINITY_CORE_CONFIG='"${CONF_DIR}/worldserver.conf"'
 )
+
+add_dependencies(worldserver revision.h)
 
 set(worldserver_LINK_FLAGS
   "-pthread ${worldserver_LINK_FLAGS}"

@@ -28,7 +28,7 @@
 #include "QuestDef.h"
 #include "GossipDef.h"
 #include "Player.h"
-#include "PoolHandler.h"
+#include "PoolMgr.h"
 #include "Opcodes.h"
 #include "Log.h"
 #include "LootMgr.h"
@@ -49,7 +49,7 @@
 #include "Vehicle.h"
 #include "SpellAuraEffects.h"
 // apply implementation of the singletons
-#include "SingletonImp.h"
+
 
 TrainerSpell const* TrainerSpellData::Find(uint32 spell_id) const
 {
@@ -185,7 +185,7 @@ void Creature::AddToWorld()
     {
         if (m_zoneScript)
             m_zoneScript->OnCreatureCreate(this, true);
-        ObjectAccessor::Instance().AddObject(this);
+        sObjectAccessor.AddObject(this);
         Unit::AddToWorld();
         SearchFormation();
         AIM_Initialize();
@@ -203,7 +203,7 @@ void Creature::RemoveFromWorld()
         if (m_formation)
             formation_mgr.RemoveCreatureFromGroup(m_formation, this);
         Unit::RemoveFromWorld();
-        ObjectAccessor::Instance().RemoveObject(this);
+        sObjectAccessor.RemoveObject(this);
     }
 }
 
@@ -410,13 +410,7 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data)
     if (isTrigger())
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
-    if (isTotem() || isTrigger()
-        || GetCreatureType() == CREATURE_TYPE_CRITTER)
-        SetReactState(REACT_PASSIVE);
-    /*else if (isCivilian())
-        SetReactState(REACT_DEFENSIVE);*/
-    else
-        SetReactState(REACT_AGGRESSIVE);
+    InitializeReactState();
 
     if (cInfo->flags_extra & CREATURE_FLAG_EXTRA_NO_TAUNT)
     {
@@ -1268,16 +1262,26 @@ bool Creature::LoadFromDB(uint32 guid, Map *map)
         }
     }
 
-    uint32 curhealth = data->curhealth;
-    if (curhealth)
+    uint32 curhealth;
+    
+    if (!m_regenHealth)
     {
-        curhealth = uint32(curhealth*_GetHealthMod(GetCreatureInfo()->rank));
-        if (curhealth < 1)
-            curhealth = 1;
+        curhealth = data->curhealth;
+        if (curhealth)
+        {
+            curhealth = uint32(curhealth*_GetHealthMod(GetCreatureInfo()->rank));
+            if (curhealth < 1)
+                curhealth = 1;
+        }
+        SetPower(POWER_MANA,data->curmana);
+    }
+    else
+    {
+        curhealth = GetMaxHealth();
+        SetPower(POWER_MANA,GetMaxPower(POWER_MANA));
     }
 
     SetHealth(m_deathState == ALIVE ? curhealth : 0);
-    SetPower(POWER_MANA,data->curmana);
 
     // checked at creature_template loading
     m_defaultMovementType = MovementGeneratorType(data->movementType);
@@ -1602,6 +1606,9 @@ void Creature::Respawn(bool force)
         uint16 poolid = GetDBTableGUIDLow() ? poolhandler.IsPartOfAPool<Creature>(GetDBTableGUIDLow()) : 0;
         if (poolid)
             poolhandler.UpdatePool<Creature>(poolid, GetDBTableGUIDLow());
+            
+        //Re-initialize reactstate that could be altered by movementgenerators
+        InitializeReactState();
     }
 
     UpdateObjectVisibility();
@@ -2410,7 +2417,7 @@ time_t Creature::GetLinkedCreatureRespawnTime() const
             if (data->mapid == GetMapId())   // look up on the same map
                 targetMap = GetMap();
             else                            // it shouldn't be instanceable map here
-                targetMap = MapManager::Instance().FindMap(data->mapid);
+                targetMap = sMapMgr.FindMap(data->mapid);
         }
         if (targetMap)
             return objmgr.GetCreatureRespawnTime(targetGuid,targetMap->GetInstanceId());

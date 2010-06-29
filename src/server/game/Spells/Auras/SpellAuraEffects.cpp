@@ -354,7 +354,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //298 unused
     &AuraEffect::HandleNULL,                                      //299 unused
     &AuraEffect::HandleNULL,                                      //300 3 spells (share damage?)
-    &AuraEffect::HandleNULL,                                      //301 5 spells
+    &AuraEffect::HandleNoImmediateEffect,                         //301 SPELL_AURA_SCHOOL_HEAL_ABSORB implemented in Unit::CalcHealAbsorb
     &AuraEffect::HandleNULL,                                      //302 unused
     &AuraEffect::HandleNULL,                                      //303 17 spells
     &AuraEffect::HandleNULL,                                      //304 2 spells (alcohol effect?)
@@ -482,16 +482,32 @@ int32 AuraEffect::CalculateAmount(Unit * caster)
                     // Ice Barrier
                     if (GetSpellProto()->SpellFamilyFlags[1] & 0x1 && GetSpellProto()->SpellFamilyFlags[2] & 0x8)
                     {
-                        // +80.67% from sp bonus
-                        DoneActualBenefit += caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.8067f;
+                        // +80.68% from sp bonus
+                        DoneActualBenefit += caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.8068f;
+                        // Glyph of Ice Barrier: its weird having a SPELLMOD_ALL_EFFECTS here but its blizzards doing :)
+                        // Glyph of Ice Barrier is only applied at the spell damage bonus because it was already applied to the base value in CalculateSpellDamage
+                        if (Player* modOwner = caster->GetSpellModOwner())
+                            modOwner->ApplySpellMod(GetSpellProto()->Id, SPELLMOD_ALL_EFFECTS, DoneActualBenefit);
+                    }
+                    // Fire Ward
+                    else if(GetSpellProto()->SpellFamilyFlags[0] & 0x8 && GetSpellProto()->SpellFamilyFlags[2] & 0x8)
+                    {
+                        // +80.68% from sp bonus
+                        DoneActualBenefit += caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.8068f;
+                    }
+                    // Frost Ward
+                    else if(GetSpellProto()->SpellFamilyFlags[0] & 0x100 && GetSpellProto()->SpellFamilyFlags[2] & 0x8)
+                    {
+                        // +80.68% from sp bonus
+                        DoneActualBenefit += caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.8068f;
                     }
                     break;
                 case SPELLFAMILY_WARLOCK:
                     // Shadow Ward
-                    if (m_spellProto->SpellFamilyFlags[2]& 0x40)
+                    if (m_spellProto->SpellFamilyFlags[2] & 0x40)
                     {
-                        // +30% from sp bonus
-                        DoneActualBenefit += caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.3f;
+                        // +80.68% from sp bonus
+                        DoneActualBenefit += caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.8068f;
                     }
                     break;
                 case SPELLFAMILY_PRIEST:
@@ -3900,6 +3916,9 @@ void AuraEffect::HandleModPossessPet(AuraApplication const * aurApp, uint8 mode,
         if (caster->ToPlayer()->GetPet() != target)
             return;
 
+        if (target->IsVehicle()) //Avoid crash when mind controling vehicles due to an assert in Unit::SetCharmedBy
+            return;
+        
         target->SetCharmedBy(caster, CHARM_TYPE_POSSESS);
     }
     else

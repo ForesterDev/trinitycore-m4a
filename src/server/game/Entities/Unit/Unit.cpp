@@ -435,29 +435,6 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint32 M
         SendMessageToSet(&data, true);
 }*/
 
-void Unit::SendMonsterMoveByPath(Path const& path, uint32 start, uint32 end)
-{
-    uint32 traveltime = uint32(path.GetTotalLength(start, end) * 32);
-
-    uint32 pathSize = end - start;
-
-    WorldPacket data(SMSG_MONSTER_MOVE, (GetPackGUID().size()+1+4+4+4+4+1+4+4+4+pathSize*4*3));
-    data.append(GetPackGUID());
-    data << uint8(0);
-    data << GetPositionX();
-    data << GetPositionY();
-    data << GetPositionZ();
-    data << uint32(getMSTime());
-    data << uint8(0);
-    data << uint32(((GetUnitMovementFlags() & MOVEMENTFLAG_LEVITATING) || isInFlight())? (MOVEFLAG_FLY|MOVEFLAG_WALK) : MOVEFLAG_WALK);
-    data << uint32(traveltime);
-    data << uint32(pathSize);
-    data.append((char*)path.GetNodes(start), pathSize * 4 * 3);
-    SendMessageToSet(&data, true);
-//MONSTER_MOVE_SPLINE_FLY
-    addUnitState(UNIT_STAT_MOVE);
-}
-
 void Unit::SendMonsterMoveTransport(Unit *vehicleOwner)
 {
     WorldPacket data(SMSG_MONSTER_MOVE_TRANSPORT, GetPackGUID().size()+vehicleOwner->GetPackGUID().size());
@@ -1814,7 +1791,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEff
                 if (spellProto->SpellIconID == 2253)
                 {
                     //reduces all damage taken while Stunned
-                    if (unitflag & UNIT_FLAG_STUNNED)
+                    if (pVictim->m_form == FORM_CAT && (unitflag & UNIT_FLAG_STUNNED))
                         RemainingDamage -= RemainingDamage * currentAbsorb / 100;
                     continue;
                 }
@@ -2207,6 +2184,71 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEff
                 pVictim->CastCustomSpell(pVictim, 44413, &new_dmg, NULL, NULL, true);
         }
     }
+}
+
+void Unit::CalcHealAbsorb(Unit *pVictim, const SpellEntry *healSpell, uint32 &healAmount, uint32 &absorb)
+{
+    if (!healAmount)
+        return;
+
+    int32 RemainingHeal = healAmount;
+    // Get unit state (need for some absorb check)
+    uint32 unitflag = pVictim->GetUInt32Value(UNIT_FIELD_FLAGS);
+    // Need remove expired auras after
+    bool existExpired = false;
+
+    // absorb without mana cost
+    AuraEffectList const& vHealAbsorb = pVictim->GetAuraEffectsByType(SPELL_AURA_SCHOOL_HEAL_ABSORB);
+    for (AuraEffectList::const_iterator i = vHealAbsorb.begin(); i != vHealAbsorb.end() && RemainingHeal > 0; ++i)
+    {
+        if (!((*i)->GetMiscValue() & healSpell->SchoolMask))
+            continue;
+
+        SpellEntry const* spellProto = (*i)->GetSpellProto();
+
+        // Max Amount can be absorbed by this aura
+        int32 currentAbsorb = (*i)->GetAmount();
+
+        // Found empty aura (impossible but..)
+        if (currentAbsorb <= 0)
+        {
+            existExpired = true;
+            continue;
+        }
+
+        // currentAbsorb - damage can be absorbed by shield
+        // If need absorb less damage
+        if (RemainingHeal < currentAbsorb)
+            currentAbsorb = RemainingHeal;
+
+        RemainingHeal -= currentAbsorb;
+
+        // Reduce shield amount
+        (*i)->SetAmount((*i)->GetAmount() - currentAbsorb);
+        // Need remove it later
+        if ((*i)->GetAmount() <= 0)
+            existExpired = true;
+    }
+
+    // Remove all expired absorb auras
+    if (existExpired)
+    {
+        for (AuraEffectList::const_iterator i = vHealAbsorb.begin(); i != vHealAbsorb.end();)
+        {
+            AuraEffect *auraEff = *i;
+            ++i;
+            if (auraEff->GetAmount() <= 0)
+            {
+                uint32 removedAuras = pVictim->m_removedAurasCount;
+                auraEff->GetBase()->Remove(AURA_REMOVE_BY_ENEMY_SPELL);
+                if (removedAuras+1 < pVictim->m_removedAurasCount)
+                    i = vHealAbsorb.begin();
+            }
+        }
+    }
+
+    absorb = RemainingHeal > 0 ? (healAmount - RemainingHeal) : healAmount;
+    healAmount = RemainingHeal;
 }
 
 void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool /*extra*/)
@@ -3519,7 +3561,19 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
         if (Aura * foundAura = GetOwnedAura(aura->GetId(), aura->GetCasterGUID(), 0, aura))
         {
             if (aura->GetSpellProto()->StackAmount)
+            {                       
                 aura->ModStackAmount(foundAura->GetStackAmount());
+                                           
+                // Update periodic timers from the previous aura
+                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                {
+                    AuraEffect *existingEff = foundAura->GetEffect(i);
+                    AuraEffect *newEff = aura->GetEffect(i);
+                    if (!existingEff || !newEff) 
+                        continue;
+                    newEff->SetPeriodicTimer(existingEff->GetPeriodicTimer());
+                }
+            }
 
             // Use the new one to replace the old one
             // This is the only place where AURA_REMOVE_BY_STACK should be used
@@ -9627,7 +9681,13 @@ void Unit::SetCharm(Unit* charm, bool apply)
 
 int32 Unit::DealHeal(Unit *pVictim, uint32 addhealth, SpellEntry const *spellProto, bool critical)
 {
-    int32 gain = pVictim->ModifyHealth(int32(addhealth));
+    uint32 absorb = 0;
+    // calculate heal absorb and reduce healing
+    CalcHealAbsorb(pVictim, spellProto, addhealth, absorb);
+    int32 gain = 0;
+    
+    if (addhealth)
+        gain = pVictim->ModifyHealth(int32(addhealth));
 
     Unit* unit = this;
 
@@ -9637,7 +9697,7 @@ int32 Unit::DealHeal(Unit *pVictim, uint32 addhealth, SpellEntry const *spellPro
     if (unit->GetTypeId() == TYPEID_PLAYER)
     {
         // overheal = addhealth - gain
-        unit->SendHealSpellLog(pVictim, spellProto->Id, addhealth, addhealth - gain, critical);
+        unit->SendHealSpellLog(pVictim, spellProto->Id, addhealth, addhealth - gain, absorb, critical);
 
         if (BattleGround *bg = unit->ToPlayer()->GetBattleGround())
             bg->UpdatePlayerScore((Player*)unit, SCORE_HEALING_DONE, gain);
@@ -9842,7 +9902,7 @@ void Unit::UnsummonAllTotems()
     }
 }
 
-void Unit::SendHealSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, uint32 OverHeal, bool critical)
+void Unit::SendHealSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, uint32 OverHeal, uint32 Absorb, bool critical)
 {
     // we guess size
     WorldPacket data(SMSG_SPELLHEALLOG, (8+8+4+4+4+4+1));
@@ -9851,7 +9911,7 @@ void Unit::SendHealSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, uint32
     data << uint32(SpellID);
     data << uint32(Damage);
     data << uint32(OverHeal);
-    data << uint32(0);  // Absorb amount
+    data << uint32(Absorb); // Absorb amount
     data << uint8(critical ? 1 : 0);
     SendMessageToSet(&data, true);
 }
@@ -10390,6 +10450,10 @@ int32 Unit::SpellBaseDamageBonusForVictim(SpellSchoolMask schoolMask, Unit *pVic
 
 bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType) const
 {
+    // Mobs can't crit with spells.
+    if (IS_CREATURE_GUID(GetGUID()))
+        return false;
+    
     // not critting spell
     if ((spellProto->AttributesEx2 & SPELL_ATTR_EX2_CANT_CRIT))
         return false;
@@ -10464,7 +10528,7 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                     }
                 }
                 // Custom crit by class
-                switch(spellProto->SpellFamilyName)
+                switch (spellProto->SpellFamilyName)
                 {
                     case SPELLFAMILY_DRUID:
                         // Starfire
@@ -10477,6 +10541,11 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                            break;
                         }
                     break;
+                    case SPELLFAMILY_ROGUE:
+                        // Shiv-applied poisons can't crit
+                        if (FindCurrentSpellBySpellId(5938))
+                            crit_chance = 0.0f;
+                        break;
                     case SPELLFAMILY_PALADIN:
                         // Flash of light
                         if (spellProto->SpellFamilyFlags[0] & 0x40000000)
@@ -14081,7 +14150,7 @@ void Unit::StopMoving()
 
     // send explicit stop packet
     // rely on vmaps here because for example stormwind is in air
-    //float z = MapManager::Instance().GetBaseMap(GetMapId())->GetHeight(GetPositionX(), GetPositionY(), GetPositionZ(), true);
+    //float z = sMapMgr.GetBaseMap(GetMapId())->GetHeight(GetPositionX(), GetPositionY(), GetPositionZ(), true);
     //if (fabs(GetPositionZ() - z) < 2.0f)
     //    Relocate(GetPositionX(), GetPositionY(), z);
     //Relocate(GetPositionX(), GetPositionY(),GetPositionZ());
@@ -16289,7 +16358,7 @@ void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool cas
 bool Unit::SetPosition(float x, float y, float z, float orientation, bool teleport)
 {
     // prevent crash when a bad coord is sent by the client
-    if (!Trinity::IsValidMapCoord(x,y))
+    if (!Trinity::IsValidMapCoord(x,y,z,orientation))
     {
         sLog.outDebug("Unit::SetPosition(%f, %f, %f) .. bad coordinates!",x,y,z);
         return false;

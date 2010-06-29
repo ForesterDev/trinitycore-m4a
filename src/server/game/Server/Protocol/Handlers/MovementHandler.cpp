@@ -246,7 +246,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     }
 
     // relocate the player to the teleport destination
-    Map * newMap = MapManager::Instance().CreateMap(loc.GetMapId(), GetPlayer(), 0);
+    Map * newMap = sMapMgr.CreateMap(loc.GetMapId(), GetPlayer(), 0);
     // the CanEnter checks are done in TeleporTo but conditions may change
     // while the player is in transit, for example the map may get full
     if (!newMap || !newMap->CanEnter(GetPlayer()))
@@ -488,7 +488,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
                 return;
 
             // elevators also cause the client to send MOVEMENTFLAG_ONTRANSPORT - just unmount if the guid can be found in the transport list
-            for (MapManager::TransportSet::const_iterator iter = MapManager::Instance().m_Transports.begin(); iter != MapManager::Instance().m_Transports.end(); ++iter)
+            for (MapManager::TransportSet::const_iterator iter = sMapMgr.m_Transports.begin(); iter != sMapMgr.m_Transports.end(); ++iter)
             {
                 if ((*iter)->GetGUID() == movementInfo.t_guid)
                 {

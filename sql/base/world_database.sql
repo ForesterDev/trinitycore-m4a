@@ -3095,13 +3095,13 @@ LOCK TABLES `locales_item` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `locales_item_set_name`
+-- Table structure for table `locales_item_set_names`
 --
 
-DROP TABLE IF EXISTS `locales_item_set_name`;
+DROP TABLE IF EXISTS `locales_item_set_names`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `locales_item_set_name` (
+CREATE TABLE `locales_item_set_names` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `name_loc1` varchar(100) NOT NULL DEFAULT '',
   `name_loc2` varchar(100) NOT NULL DEFAULT '',
@@ -3116,12 +3116,12 @@ CREATE TABLE `locales_item_set_name` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `locales_item_set_name`
+-- Dumping data for table `locales_item_set_names`
 --
 
-LOCK TABLES `locales_item_set_name` WRITE;
-/*!40000 ALTER TABLE `locales_item_set_name` DISABLE KEYS */;
-/*!40000 ALTER TABLE `locales_item_set_name` ENABLE KEYS */;
+LOCK TABLES `locales_item_set_names` WRITE;
+/*!40000 ALTER TABLE `locales_item_set_names` DISABLE KEYS */;
+/*!40000 ALTER TABLE `locales_item_set_names` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -14544,29 +14544,6 @@ INSERT INTO `spelldifficulty_dbc` VALUES
 (3193, 35275, 39084, 0, 0), -- SPELL_SUMMON_RAGIN_FLAMES / H_SPELL_SUMMON_RAGIN_FLAMES
 (3194, 35268, 39346, 0, 0); -- SPELL_INFERNO / H_SPELL_INFERNO
 /*!40000 ALTER TABLE `spelldifficulty_dbc` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `transport_events`
---
-
-DROP TABLE IF EXISTS `transport_events`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `transport_events` (
-  `entry` int(11) unsigned NOT NULL DEFAULT '0',
-  `waypoint_id` int(11) unsigned NOT NULL DEFAULT '0',
-  `event_id` int(11) unsigned NOT NULL DEFAULT '0'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `transport_events`
---
-
-LOCK TABLES `transport_events` WRITE;
-/*!40000 ALTER TABLE `transport_events` DISABLE KEYS */;
-/*!40000 ALTER TABLE `transport_events` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

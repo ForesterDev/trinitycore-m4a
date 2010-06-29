@@ -12,14 +12,9 @@
 
 set(authserver_SRCS
   Authentication/AuthCodes.cpp
-  Authentication/AuthCodes.h
   Realms/RealmList.cpp
-  Realms/RealmList.h
   Server/AuthSocket.cpp
-  Server/AuthSocket.h
-  Server/RealmSocket.h
   Server/RealmSocket.cpp
-  Server/RealmAcceptor.h
   Main.cpp
 )
 
@@ -46,6 +41,8 @@ set(authserver_LINK_FLAGS "")
 add_executable(authserver
   ${authserver_SRCS}
 )
+
+add_dependencies(authserver revision.h)
 
 add_definitions(-D_TRINITY_REALM_CONFIG='"${CONF_DIR}/authserver.conf"')
 

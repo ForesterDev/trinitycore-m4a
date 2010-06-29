@@ -128,6 +128,8 @@ struct instance_naxxramas : public InstanceData
     uint64 uiKelthuzadTrigger;
     uint64 uiPortals[4];
 
+    GOState gothikDoorState;
+
     time_t minHorsemenDiedTime;
     time_t maxHorsemenDiedTime;
 
@@ -171,7 +173,10 @@ struct instance_naxxramas : public InstanceData
                     pSapphiron->AI()->DoAction(DATA_SAPPHIRON_BIRTH);
                 return;
             }
-            case GO_GOTHIK_GATE: GothikGateGUID = add ? pGo->GetGUID() : 0; break;
+            case GO_GOTHIK_GATE:
+                GothikGateGUID = add ? pGo->GetGUID() : 0;
+                pGo->SetGoState(gothikDoorState);
+                break;
             case GO_HORSEMEN_CHEST: HorsemenChestGUID = add ? pGo->GetGUID() : 0; break;
             case GO_HORSEMEN_CHEST_HERO: HorsemenChestGUID = add ? pGo->GetGUID() : 0; break;
             case GO_KELTHUZAD_PORTAL01: uiPortals[0] = pGo->GetGUID(); break;
@@ -194,6 +199,7 @@ struct instance_naxxramas : public InstanceData
             case DATA_GOTHIK_GATE:
                 if (GameObject *pGothikGate = instance->GetGameObject(GothikGateGUID))
                     pGothikGate->SetGoState(GOState(value));
+                gothikDoorState = GOState(value);
                 break;
 
             case DATA_HORSEMEN0:
@@ -306,6 +312,21 @@ struct instance_naxxramas : public InstanceData
                 break;
         }
         return false;
+    }
+
+    std::string GetSaveData()
+    {
+        std::ostringstream saveStream;
+        saveStream << GetBossSaveData() << " " << gothikDoorState;
+        return saveStream.str();
+    }
+
+    void Load(const char * data)
+    {
+        std::istringstream loadStream(data);
+        uint32 buff;
+        LoadBossState(loadStream) >> buff;
+        gothikDoorState = GOState(buff);
     }
 };
 

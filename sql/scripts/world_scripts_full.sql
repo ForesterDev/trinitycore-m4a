@@ -36,7 +36,9 @@ INSERT INTO `areatrigger_scripts` (`entry`,`ScriptName`) VALUES
 (1737, 'at_scent_larkorwi'),
 (1738, 'at_scent_larkorwi'),
 (1739, 'at_scent_larkorwi'),
-(1740, 'at_scent_larkorwi');
+(1740, 'at_scent_larkorwi'),
+(5369, 'at_RX_214_repair_o_matic_station'),
+(5423, 'at_RX_214_repair_o_matic_station');
 
 
 /* WORLD BOSS */
@@ -445,6 +447,8 @@ UPDATE `creature_template` SET `ScriptName`='npc_magmoth_crusher' WHERE `entry`=
 UPDATE `creature_template` SET `ScriptName`='npc_valiance_keep_cannoneer' WHERE `entry`=25306;
 UPDATE `creature_template` SET `ScriptName`='npc_warmage_coldarra' WHERE `entry` IN (27173,27904,27906);
 UPDATE `creature_template` SET `ScriptName`='npc_valiance_keep_cannoneer' WHERE `entry`=25306;
+UPDATE `creature_template` SET `ScriptName`= 'npc_seaforium_depth_charge' WHERE `entry`=25401;
+
 
 /* BURNING STEPPES */
 UPDATE `creature_template` SET `ScriptName`='npc_ragged_john' WHERE `entry`=9563;
@@ -583,6 +587,7 @@ UPDATE `creature_template` SET `ScriptName`='npc_inquisitor_hallard' WHERE `entr
 /* DESOLACE */
 UPDATE `creature_template` SET `ScriptName`='npc_aged_dying_ancient_kodo' WHERE `entry` IN (4700,4701,4702,11627);
 UPDATE `gameobject_template` SET `ScriptName`='go_iruxos' WHERE `entry`=176581;
+UPDATE `creature_template` SET `ScriptName`='npc_dalinda' WHERE `entry`=5644;
 
 
 /* DIRE MAUL */
@@ -1427,6 +1432,19 @@ UPDATE `creature_template` SET `ScriptName`='boss_kologarn' WHERE `entry`=32930;
 UPDATE `creature_template` SET `ScriptName`='boss_algalon' WHERE `entry`=32871;
 UPDATE `creature_template` SET `ScriptName`='mob_collapsing_star' WHERE `entry`=32955;
 UPDATE `gameobject_template` SET `ScriptName`='ulduar_teleporter' WHERE `entry`=194569;
+UPDATE `creature_template` SET `ScriptName`= 'npc_thorims_hammer' WHERE `entry`=33365;
+UPDATE `creature_template` SET `ScriptName`= 'npc_mimirons_inferno' WHERE `entry`=33370;
+UPDATE `creature_template` SET `ScriptName`= 'npc_hodirs_fury' WHERE `entry`=33312;
+UPDATE `creature_template` SET `ScriptName`= 'npc_freyas_ward' WHERE `entry`=33367;
+UPDATE `creature_template` SET `ScriptName`= 'npc_lorekeeper' WHERE `entry`=33686;
+UPDATE `creature_template` SET `ScriptName`= 'npc_brann_bronzebeard' WHERE `entry`=33579;
+UPDATE `creature_template` SET `ScriptName`= 'npc_freya_ward_summon' WHERE `entry`=34275;
+UPDATE `creature_template` SET `ScriptName`= 'npc_mechanolift' WHERE `entry`=33214;
+UPDATE `gameobject_template` SET `ScriptName`= 'go_ulduar_tower' WHERE `entry`=194375;
+UPDATE `gameobject_template` SET `ScriptName`= 'go_ulduar_tower' WHERE `entry`=194371;
+UPDATE `gameobject_template` SET `ScriptName`= 'go_ulduar_tower' WHERE `entry`=194370;
+UPDATE `gameobject_template` SET `ScriptName`= 'go_ulduar_tower' WHERE `entry`=194377;
+
 
 /* UN'GORO CRATER */
 UPDATE `creature_template` SET `ScriptName`='npc_ame' WHERE `entry`=9623;
@@ -1503,6 +1521,7 @@ update `creature_template` SET `scriptname`='mob_azure_invader' WHERE `entry`=30
 update `creature_template` SET `scriptname`='mob_azure_spellbreaker' WHERE `entry`=30962;
 update `creature_template` SET `scriptname`='mob_azure_binder' WHERE `entry`=30918;
 update `creature_template` SET `scriptname`='mob_azure_mage_slayer' WHERE `entry`=30963;
+UPDATE `creature_template` SET `scriptname`='mob_azure_saboteur' WHERE `entry`=31079;
 UPDATE `instance_template` SET `script`='instance_violet_hold' WHERE `map`=608;
 
 /* WAILING CAVERNS */

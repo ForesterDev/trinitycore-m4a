@@ -16,14 +16,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "PoolHandler.h"
+#include "PoolMgr.h"
 #include "ObjectMgr.h"
 #include "ProgressBar.h"
 #include "Log.h"
 #include "MapManager.h"
-#include "SingletonImp.h"
-
-INSTANTIATE_SINGLETON_1(PoolHandler);
 
 ////////////////////////////////////////////////////////////
 // template class SpawnedPoolData
@@ -201,7 +198,7 @@ void PoolGroup<Creature>::Despawn1Object(uint32 guid)
     {
         objmgr.RemoveCreatureFromGrid(guid, data);
 
-        if (Creature* pCreature = ObjectAccessor::Instance().GetObjectInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_UNIT), (Creature*)NULL))
+        if (Creature* pCreature = sObjectAccessor.GetObjectInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_UNIT), (Creature*)NULL))
             pCreature->AddObjectToRemoveList();
     }
 }
@@ -214,7 +211,7 @@ void PoolGroup<GameObject>::Despawn1Object(uint32 guid)
     {
         objmgr.RemoveGameobjectFromGrid(guid, data);
 
-        if (GameObject* pGameobject = ObjectAccessor::Instance().GetObjectInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_GAMEOBJECT), (GameObject*)NULL))
+        if (GameObject* pGameobject = sObjectAccessor.GetObjectInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_GAMEOBJECT), (GameObject*)NULL))
             pGameobject->AddObjectToRemoveList();
     }
 }
@@ -297,7 +294,7 @@ void PoolGroup<Creature>::Spawn1Object(PoolObject* obj)
         objmgr.AddCreatureToGrid(obj->guid, data);
 
         // Spawn if necessary (loaded grids only)
-        Map* map = const_cast<Map*>(MapManager::Instance().CreateBaseMap(data->mapid));
+        Map* map = const_cast<Map*>(sMapMgr.CreateBaseMap(data->mapid));
         // We use spawn coords to spawn
         if (!map->Instanceable() && map->IsLoaded(data->posX, data->posY))
         {
@@ -323,7 +320,7 @@ void PoolGroup<GameObject>::Spawn1Object(PoolObject* obj)
         objmgr.AddGameobjectToGrid(obj->guid, data);
         // Spawn if necessary (loaded grids only)
         // this base map checked as non-instanced and then only existed
-        Map* map = const_cast<Map*>(MapManager::Instance().CreateBaseMap(data->mapid));
+        Map* map = const_cast<Map*>(sMapMgr.CreateBaseMap(data->mapid));
         // We use current coords to unspawn, not spawn coords since creature can have changed grid
         if (!map->Instanceable() && map->IsLoaded(data->posX, data->posY))
         {
@@ -355,7 +352,7 @@ template <>
 void PoolGroup<Creature>::ReSpawn1Object(PoolObject* obj)
 {
     if (CreatureData const* data = objmgr.GetCreatureData(obj->guid))
-        if (Creature* pCreature = ObjectAccessor::Instance().GetObjectInWorld(MAKE_NEW_GUID(obj->guid, data->id, HIGHGUID_UNIT), (Creature*)NULL))
+        if (Creature* pCreature = sObjectAccessor.GetObjectInWorld(MAKE_NEW_GUID(obj->guid, data->id, HIGHGUID_UNIT), (Creature*)NULL))
             pCreature->GetMap()->Add(pCreature);
 }
 
@@ -364,7 +361,7 @@ template <>
 void PoolGroup<GameObject>::ReSpawn1Object(PoolObject* obj)
 {
     if (GameObjectData const* data = objmgr.GetGOData(obj->guid))
-        if (GameObject* pGameobject = ObjectAccessor::Instance().GetObjectInWorld(MAKE_NEW_GUID(obj->guid, data->id, HIGHGUID_GAMEOBJECT), (GameObject*)NULL))
+        if (GameObject* pGameobject = sObjectAccessor.GetObjectInWorld(MAKE_NEW_GUID(obj->guid, data->id, HIGHGUID_GAMEOBJECT), (GameObject*)NULL))
             pGameobject->GetMap()->Add(pGameobject);
 }
 
@@ -375,13 +372,13 @@ void PoolGroup<Pool>::ReSpawn1Object(PoolObject* /*obj*/)
 }
 
 ////////////////////////////////////////////////////////////
-// Methods of class PoolHandler
+// Methods of class PoolMgr
 
-PoolHandler::PoolHandler()
+PoolMgr::PoolMgr()
 {
 }
 
-void PoolHandler::LoadFromDB()
+void PoolMgr::LoadFromDB()
 {
     QueryResult_AutoPtr result = WorldDatabase.Query("SELECT MAX(entry) FROM pool_template");
     if (!result)
@@ -657,7 +654,7 @@ void PoolHandler::LoadFromDB()
 }
 
 // The initialize method will spawn all pools not in an event and not in another pool, this is why there is 2 left joins with 2 null checks
-void PoolHandler::Initialize()
+void PoolMgr::Initialize()
 {
     QueryResult_AutoPtr result = WorldDatabase.Query("SELECT DISTINCT pool_template.entry, pool_pool.pool_id, pool_pool.mother_pool FROM pool_template LEFT JOIN game_event_pool ON pool_template.entry=game_event_pool.pool_entry LEFT JOIN pool_pool ON pool_template.entry=pool_pool.pool_id WHERE game_event_pool.pool_entry IS NULL");
     uint32 count=0;
@@ -695,7 +692,7 @@ void PoolHandler::Initialize()
 // Call to spawn a pool, if cache if true the method will spawn only if cached entry is different
 // If it's same, the creature is respawned only (added back to map)
 template<>
-void PoolHandler::SpawnPool<Creature>(uint16 pool_id, uint32 db_guid)
+void PoolMgr::SpawnPool<Creature>(uint16 pool_id, uint32 db_guid)
 {
     if (!mPoolCreatureGroups[pool_id].isEmpty())
         mPoolCreatureGroups[pool_id].SpawnObject(mSpawnedData, mPoolTemplate[pool_id].MaxLimit, db_guid);
@@ -704,7 +701,7 @@ void PoolHandler::SpawnPool<Creature>(uint16 pool_id, uint32 db_guid)
 // Call to spawn a pool, if cache if true the method will spawn only if cached entry is different
 // If it's same, the gameobject is respawned only (added back to map)
 template<>
-void PoolHandler::SpawnPool<GameObject>(uint16 pool_id, uint32 db_guid)
+void PoolMgr::SpawnPool<GameObject>(uint16 pool_id, uint32 db_guid)
 {
     if (!mPoolGameobjectGroups[pool_id].isEmpty())
         mPoolGameobjectGroups[pool_id].SpawnObject(mSpawnedData, mPoolTemplate[pool_id].MaxLimit, db_guid);
@@ -713,13 +710,13 @@ void PoolHandler::SpawnPool<GameObject>(uint16 pool_id, uint32 db_guid)
 // Call to spawn a pool, if cache if true the method will spawn only if cached entry is different
 // If it's same, the pool is respawned only
 template<>
-void PoolHandler::SpawnPool<Pool>(uint16 pool_id, uint32 sub_pool_id)
+void PoolMgr::SpawnPool<Pool>(uint16 pool_id, uint32 sub_pool_id)
 {
     if (!mPoolPoolGroups[pool_id].isEmpty())
         mPoolPoolGroups[pool_id].SpawnObject(mSpawnedData, mPoolTemplate[pool_id].MaxLimit, sub_pool_id);
 }
 
-void PoolHandler::SpawnPool(uint16 pool_id)
+void PoolMgr::SpawnPool(uint16 pool_id)
 {
     SpawnPool<Pool>(pool_id, 0);
     SpawnPool<GameObject>(pool_id, 0);
@@ -727,7 +724,7 @@ void PoolHandler::SpawnPool(uint16 pool_id)
 }
 
 // Call to despawn a pool, all gameobjects/creatures in this pool are removed
-void PoolHandler::DespawnPool(uint16 pool_id)
+void PoolMgr::DespawnPool(uint16 pool_id)
 {
     if (!mPoolCreatureGroups[pool_id].isEmpty())
         mPoolCreatureGroups[pool_id].DespawnObject(mSpawnedData);
@@ -740,7 +737,7 @@ void PoolHandler::DespawnPool(uint16 pool_id)
 }
 
 // Method that check chance integrity of the creatures and gameobjects in this pool
-bool PoolHandler::CheckPool(uint16 pool_id) const
+bool PoolMgr::CheckPool(uint16 pool_id) const
 {
     return pool_id <= max_pool_id &&
         mPoolGameobjectGroups[pool_id].CheckPool() &&
@@ -752,7 +749,7 @@ bool PoolHandler::CheckPool(uint16 pool_id) const
 // Here we cache only the creature/gameobject whose guid is passed as parameter
 // Then the spawn pool call will use this cache to decide
 template<typename T>
-void PoolHandler::UpdatePool(uint16 pool_id, uint32 db_guid_or_pool_id)
+void PoolMgr::UpdatePool(uint16 pool_id, uint32 db_guid_or_pool_id)
 {
     if (uint16 motherpoolid = IsPartOfAPool<Pool>(pool_id))
         SpawnPool<Pool>(motherpoolid, pool_id);
@@ -760,6 +757,6 @@ void PoolHandler::UpdatePool(uint16 pool_id, uint32 db_guid_or_pool_id)
         SpawnPool<T>(pool_id, db_guid_or_pool_id);
 }
 
-template void PoolHandler::UpdatePool<Pool>(uint16 pool_id, uint32 db_guid_or_pool_id);
-template void PoolHandler::UpdatePool<GameObject>(uint16 pool_id, uint32 db_guid_or_pool_id);
-template void PoolHandler::UpdatePool<Creature>(uint16 pool_id, uint32 db_guid_or_pool_id);
+template void PoolMgr::UpdatePool<Pool>(uint16 pool_id, uint32 db_guid_or_pool_id);
+template void PoolMgr::UpdatePool<GameObject>(uint16 pool_id, uint32 db_guid_or_pool_id);
+template void PoolMgr::UpdatePool<Creature>(uint16 pool_id, uint32 db_guid_or_pool_id);

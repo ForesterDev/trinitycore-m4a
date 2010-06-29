@@ -2,49 +2,43 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Configuration">
-      <UniqueIdentifier>{5a9bf8d4-7198-430c-8e3d-a6b264d38e21}</UniqueIdentifier>
+      <UniqueIdentifier>{a6289dc0-ae0d-47f6-96a0-2543d3f40b8b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Configuration\dotconfpp">
-      <UniqueIdentifier>{28cf1fc5-f736-4e7c-bac7-f0600f77b99a}</UniqueIdentifier>
+      <UniqueIdentifier>{87966d01-821f-4c8a-9565-640065beab82}</UniqueIdentifier>
     </Filter>
     <Filter Include="Cryptography">
-      <UniqueIdentifier>{a424dbb8-85f2-4a2c-ab47-b8407391854a}</UniqueIdentifier>
+      <UniqueIdentifier>{a0f82436-2595-48a7-a379-f007c297ab73}</UniqueIdentifier>
     </Filter>
     <Filter Include="Cryptography\Authentication">
-      <UniqueIdentifier>{b992cb5a-7ea9-40ca-a502-913da3f3113f}</UniqueIdentifier>
+      <UniqueIdentifier>{b6fe58bd-744f-4ba0-a763-81146c8ae591}</UniqueIdentifier>
     </Filter>
     <Filter Include="Database">
-      <UniqueIdentifier>{0e091fac-7fd1-4f20-8634-f7256ea9126f}</UniqueIdentifier>
+      <UniqueIdentifier>{e6ce5a61-5a18-4005-b1db-afeccaf5235a}</UniqueIdentifier>
     </Filter>
     <Filter Include="DataStores">
-      <UniqueIdentifier>{cda3012b-0c34-4faf-b842-37ec3ca8fd72}</UniqueIdentifier>
+      <UniqueIdentifier>{871dfce1-5aed-4ad2-8b04-0844c2053873}</UniqueIdentifier>
     </Filter>
     <Filter Include="Debugging">
-      <UniqueIdentifier>{dc837de7-6967-430d-a0fe-89bc211f6350}</UniqueIdentifier>
+      <UniqueIdentifier>{86736e3f-8a78-43d1-81be-1018743fca93}</UniqueIdentifier>
     </Filter>
     <Filter Include="Dynamic">
-      <UniqueIdentifier>{6d8898df-fd74-4312-835e-85eaddcf1f20}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Dynamic\CountedReference">
-      <UniqueIdentifier>{95becc60-7dab-43dd-8a9b-852232adcd43}</UniqueIdentifier>
+      <UniqueIdentifier>{0d758f2a-66ee-43be-a4d9-9d3be6a4a0a9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Dynamic\LinkedReference">
-      <UniqueIdentifier>{b665e541-2fb8-4e52-853e-14924e3a571d}</UniqueIdentifier>
+      <UniqueIdentifier>{b304c0f5-7fee-4ee8-a400-c4cf604a3c5f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Logging">
-      <UniqueIdentifier>{ab299416-dbdd-443c-99c7-e65dc9faa515}</UniqueIdentifier>
+      <UniqueIdentifier>{b6fb967b-4eb7-48ce-ac00-812abb49888d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Packets">
-      <UniqueIdentifier>{ef099ec6-d20a-45ba-a097-6bfba32dd17b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Policies">
-      <UniqueIdentifier>{f66bb515-545e-492e-a6ee-1ad66bed48c2}</UniqueIdentifier>
+      <UniqueIdentifier>{2b2339b4-9f50-4762-a266-b8e680a41f7f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Threading">
-      <UniqueIdentifier>{0a478624-68ed-4a94-a249-da4657147534}</UniqueIdentifier>
+      <UniqueIdentifier>{6aa7fd20-c8d3-4442-b2fd-b101038752d7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Utilities">
-      <UniqueIdentifier>{2d8fb18a-fea1-4d16-aa9d-2c029a8a44c6}</UniqueIdentifier>
+      <UniqueIdentifier>{9f8311b9-74f8-4827-8135-5b792f5ff8f2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -81,6 +75,9 @@
     <ClCompile Include="..\..\src\server\shared\Database\Field.cpp">
       <Filter>Database</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\server\shared\Database\PreparedStatements.cpp">
+      <Filter>Database</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\server\shared\Database\QueryResult.cpp">
       <Filter>Database</Filter>
     </ClCompile>
@@ -104,9 +101,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\server\shared\Logging\Log.cpp">
       <Filter>Logging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\server\shared\Policies\ObjectLifeTime.cpp">
-      <Filter>Policies</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\server\shared\Threading\DelayExecutor.cpp">
       <Filter>Threading</Filter>
@@ -169,6 +163,9 @@
     <ClInclude Include="..\..\src\server\shared\Database\Field.h">
       <Filter>Database</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\server\shared\Database\PreparedStatements.h">
+      <Filter>Database</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\server\shared\Database\QueryResult.h">
       <Filter>Database</Filter>
     </ClInclude>
@@ -225,15 +222,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\server\shared\Dynamic\UnorderedMap.h">
       <Filter>Dynamic</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\server\shared\Dynamic\CountedReference\Reference.h">
-      <Filter>Dynamic\CountedReference</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\server\shared\Dynamic\CountedReference\ReferenceHolder.h">
-      <Filter>Dynamic\CountedReference</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\server\shared\Dynamic\CountedReference\ReferenceImpl.h">
-      <Filter>Dynamic\CountedReference</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\server\shared\Dynamic\LinkedReference\Reference.h">
       <Filter>Dynamic\LinkedReference</Filter>
