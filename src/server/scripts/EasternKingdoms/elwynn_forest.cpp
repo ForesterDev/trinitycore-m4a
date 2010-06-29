@@ -85,10 +85,6 @@ struct npc_henze_faulkAI : public ScriptedAI
     }
 
 };
-CreatureAI* GetAI_npc_henze_faulk(Creature* pCreature)
-{
-    return new npc_henze_faulkAI (pCreature);
-}
 
 void AddSC_elwynn_forest()
 {
@@ -96,6 +92,6 @@ void AddSC_elwynn_forest()
 
     newscript = new Script;
     newscript->Name = "npc_henze_faulk";
-    newscript->GetAI = &GetAI_npc_henze_faulk;
+    newscript->GetAI = &get_ai<npc_henze_faulkAI>;
     newscript->RegisterSelf();
 }

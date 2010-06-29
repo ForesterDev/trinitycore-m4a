@@ -87,16 +87,11 @@ struct npc_blood_knight_stillbladeAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_blood_knight_stillblade(Creature* pCreature)
-{
-    return new npc_blood_knight_stillbladeAI (pCreature);
-}
-
 void AddSC_silvermoon_city()
 {
     Script *newscript;
     newscript = new Script;
     newscript->Name = "npc_blood_knight_stillblade";
-    newscript->GetAI = &GetAI_npc_blood_knight_stillblade;
+    newscript->GetAI = &get_ai<npc_blood_knight_stillbladeAI>;
     newscript->RegisterSelf();
 }

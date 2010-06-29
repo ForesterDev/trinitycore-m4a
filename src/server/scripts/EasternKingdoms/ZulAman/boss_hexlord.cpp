@@ -812,96 +812,52 @@ struct boss_koraggAI : public boss_hexlord_addAI
     }
 };
 
-CreatureAI* GetAI_boss_hex_lord_malacrass(Creature* pCreature)
-{
-    return new boss_hex_lord_malacrassAI (pCreature);
-}
-
-CreatureAI* GetAI_boss_thurg(Creature* pCreature)
-{
-    return new boss_thurgAI (pCreature);
-}
-
-CreatureAI* GetAI_boss_alyson_antille(Creature* pCreature)
-{
-    return new boss_alyson_antilleAI (pCreature);
-}
-
-CreatureAI* GetAI_boss_gazakroth(Creature* pCreature)
-{
-    return new boss_gazakrothAI (pCreature);
-}
-
-CreatureAI* GetAI_boss_lord_raadan(Creature* pCreature)
-{
-    return new boss_lord_raadanAI (pCreature);
-}
-
-CreatureAI* GetAI_boss_darkheart(Creature* pCreature)
-{
-    return new boss_darkheartAI (pCreature);
-}
-
-CreatureAI* GetAI_boss_slither(Creature* pCreature)
-{
-    return new boss_slitherAI (pCreature);
-}
-
-CreatureAI* GetAI_boss_fenstalker(Creature* pCreature)
-{
-    return new boss_fenstalkerAI (pCreature);
-}
-
-CreatureAI* GetAI_boss_koragg(Creature* pCreature)
-{
-    return new boss_koraggAI (pCreature);
-}
 void AddSC_boss_hex_lord_malacrass()
 {
     Script *newscript;
     newscript = new Script;
     newscript->Name = "boss_hexlord_malacrass";
-    newscript->GetAI = &GetAI_boss_hex_lord_malacrass;
+    newscript->GetAI = &get_ai<boss_hex_lord_malacrassAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "boss_thurg";
-    newscript->GetAI = &GetAI_boss_thurg;
+    newscript->GetAI = &get_ai<boss_thurgAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "boss_gazakroth";
-    newscript->GetAI = &GetAI_boss_gazakroth;
+    newscript->GetAI = &get_ai<boss_gazakrothAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "boss_lord_raadan";
-    newscript->GetAI = &GetAI_boss_lord_raadan;
+    newscript->GetAI = &get_ai<boss_lord_raadanAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "boss_darkheart";
-    newscript->GetAI = &GetAI_boss_darkheart;
+    newscript->GetAI = &get_ai<boss_darkheartAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "boss_slither";
-    newscript->GetAI = &GetAI_boss_slither;
+    newscript->GetAI = &get_ai<boss_slitherAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "boss_fenstalker";
-    newscript->GetAI = &GetAI_boss_fenstalker;
+    newscript->GetAI = &get_ai<boss_fenstalkerAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "boss_koragg";
-    newscript->GetAI = &GetAI_boss_koragg;
+    newscript->GetAI = &get_ai<boss_koraggAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "boss_alyson_antille";
-    newscript->GetAI = &GetAI_boss_alyson_antille;
+    newscript->GetAI = &get_ai<boss_alyson_antilleAI>;
     newscript->RegisterSelf();
 }
 

@@ -155,18 +155,13 @@ bool QuestAccept_npc_corporal_keeshan(Player* pPlayer, Creature* pCreature, Ques
     return false;
 }
 
-CreatureAI* GetAI_npc_corporal_keeshan(Creature* pCreature)
-{
-    return new npc_corporal_keeshanAI(pCreature);
-}
-
 void AddSC_redridge_mountains()
 {
     Script* newscript;
 
     newscript = new Script;
     newscript->Name = "npc_corporal_keeshan";
-    newscript->GetAI = &GetAI_npc_corporal_keeshan;
+    newscript->GetAI = &get_ai<npc_corporal_keeshanAI>;
     newscript->pQuestAccept = &QuestAccept_npc_corporal_keeshan;
     newscript->RegisterSelf();
 }

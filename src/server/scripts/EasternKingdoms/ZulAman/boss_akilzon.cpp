@@ -439,29 +439,18 @@ struct mob_soaring_eagleAI : public ScriptedAI
     }
 };
 
-//Soaring Eagle
-CreatureAI* GetAI_mob_soaring_eagle(Creature* pCreature)
-{
-    return new mob_soaring_eagleAI(pCreature);
-}
-
-CreatureAI* GetAI_boss_akilzon(Creature* pCreature)
-{
-    return new boss_akilzonAI(pCreature);
-}
-
 void AddSC_boss_akilzon()
 {
     Script *newscript = NULL;
 
     newscript = new Script;
     newscript->Name = "boss_akilzon";
-    newscript->GetAI = &GetAI_boss_akilzon;
+    newscript->GetAI = &get_ai<boss_akilzonAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_akilzon_eagle";
-    newscript->GetAI = &GetAI_mob_soaring_eagle;
+    newscript->GetAI = &get_ai<mob_soaring_eagleAI>;
     newscript->RegisterSelf();
 }
 

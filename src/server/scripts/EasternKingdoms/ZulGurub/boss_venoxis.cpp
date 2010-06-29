@@ -183,17 +183,12 @@ struct boss_venoxisAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_venoxis(Creature* pCreature)
-{
-    return new boss_venoxisAI (pCreature);
-}
-
 void AddSC_boss_venoxis()
 {
     Script *newscript;
     newscript = new Script;
     newscript->Name = "boss_venoxis";
-    newscript->GetAI = &GetAI_boss_venoxis;
+    newscript->GetAI = &get_ai<boss_venoxisAI>;
     newscript->RegisterSelf();
 }
 

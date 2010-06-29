@@ -135,11 +135,6 @@ bool QuestAccept_npc_00x09hl(Player* pPlayer, Creature* pCreature, const Quest* 
     return true;
 }
 
-CreatureAI* GetAI_npc_00x09hl(Creature* pCreature)
-{
-    return new npc_00x09hlAI(pCreature);
-}
-
 /*######
 ## npc_rinji
 ######*/
@@ -327,24 +322,19 @@ bool QuestAccept_npc_rinji(Player* pPlayer, Creature* pCreature, const Quest* pQ
     return true;
 }
 
-CreatureAI* GetAI_npc_rinji(Creature* pCreature)
-{
-    return new npc_rinjiAI(pCreature);
-}
-
 void AddSC_hinterlands()
 {
     Script* newscript;
 
     newscript = new Script;
     newscript->Name = "npc_00x09hl";
-    newscript->GetAI = &GetAI_npc_00x09hl;
+    newscript->GetAI = &get_ai<npc_00x09hlAI>;
     newscript->pQuestAccept = &QuestAccept_npc_00x09hl;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "npc_rinji";
-    newscript->GetAI = &GetAI_npc_rinji;
+    newscript->GetAI = &get_ai<npc_rinjiAI>;
     newscript->pQuestAccept = &QuestAccept_npc_rinji;
     newscript->RegisterSelf();
 }
