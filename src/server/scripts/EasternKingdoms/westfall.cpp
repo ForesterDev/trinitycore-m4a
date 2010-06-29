@@ -174,11 +174,6 @@ bool QuestAccept_npc_daphne_stilwell(Player* pPlayer, Creature* pCreature, const
     return true;
 }
 
-CreatureAI* GetAI_npc_daphne_stilwell(Creature* pCreature)
-{
-    return new npc_daphne_stilwellAI(pCreature);
-}
-
 /*######
 ## npc_defias_traitor
 ######*/
@@ -240,24 +235,19 @@ bool QuestAccept_npc_defias_traitor(Player* pPlayer, Creature* pCreature, Quest 
     return true;
 }
 
-CreatureAI* GetAI_npc_defias_traitor(Creature* pCreature)
-{
-    return new npc_defias_traitorAI(pCreature);
-}
-
 void AddSC_westfall()
 {
     Script *newscript;
 
     newscript = new Script;
     newscript->Name = "npc_daphne_stilwell";
-    newscript->GetAI = &GetAI_npc_daphne_stilwell;
+    newscript->GetAI = &get_ai<npc_daphne_stilwellAI>;
     newscript->pQuestAccept = &QuestAccept_npc_daphne_stilwell;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "npc_defias_traitor";
-    newscript->GetAI = &GetAI_npc_defias_traitor;
+    newscript->GetAI = &get_ai<npc_defias_traitorAI>;
     newscript->pQuestAccept = &QuestAccept_npc_defias_traitor;
     newscript->RegisterSelf();
 }

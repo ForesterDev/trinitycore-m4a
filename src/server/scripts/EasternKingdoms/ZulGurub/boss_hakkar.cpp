@@ -234,17 +234,12 @@ struct boss_hakkarAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_hakkar(Creature* pCreature)
-{
-    return new boss_hakkarAI (pCreature);
-}
-
 void AddSC_boss_hakkar()
 {
     Script *newscript;
     newscript = new Script;
     newscript->Name = "boss_hakkar";
-    newscript->GetAI = &GetAI_boss_hakkar;
+    newscript->GetAI = &get_ai<boss_hakkarAI>;
     newscript->RegisterSelf();
 }
 

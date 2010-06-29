@@ -49,11 +49,6 @@ struct mobs_ghoul_flayerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mobs_ghoul_flayer(Creature* pCreature)
-{
-    return new mobs_ghoul_flayerAI (pCreature);
-}
-
 /*######
 ## npc_augustus_the_touched
 ######*/
@@ -96,10 +91,6 @@ struct npc_darrowshire_spiritAI : public ScriptedAI
     void EnterCombat(Unit * /*who*/) {}
 
 };
-CreatureAI* GetAI_npc_darrowshire_spirit(Creature* pCreature)
-{
-    return new npc_darrowshire_spiritAI (pCreature);
-}
 
 bool GossipHello_npc_darrowshire_spirit(Player* pPlayer, Creature* pCreature)
 {
@@ -161,7 +152,7 @@ void AddSC_eastern_plaguelands()
 
     newscript = new Script;
     newscript->Name = "mobs_ghoul_flayer";
-    newscript->GetAI = &GetAI_mobs_ghoul_flayer;
+    newscript->GetAI = &get_ai<mobs_ghoul_flayerAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
@@ -172,7 +163,7 @@ void AddSC_eastern_plaguelands()
 
     newscript = new Script;
     newscript->Name = "npc_darrowshire_spirit";
-    newscript->GetAI = &GetAI_npc_darrowshire_spirit;
+    newscript->GetAI = &get_ai<npc_darrowshire_spiritAI>;
     newscript->pGossipHello = &GossipHello_npc_darrowshire_spirit;
     newscript->RegisterSelf();
 

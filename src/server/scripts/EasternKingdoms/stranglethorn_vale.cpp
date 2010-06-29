@@ -102,14 +102,6 @@ struct mob_yennikuAI : public ScriptedAI
         DoMeleeAttackIfReady();
     }
 };
-CreatureAI* GetAI_mob_yenniku(Creature* pCreature)
-{
-    return new mob_yennikuAI (pCreature);
-}
-
-/*######
-##
-######*/
 
 void AddSC_stranglethorn_vale()
 {
@@ -117,6 +109,6 @@ void AddSC_stranglethorn_vale()
 
     newscript = new Script;
     newscript->Name = "mob_yenniku";
-    newscript->GetAI = &GetAI_mob_yenniku;
+    newscript->GetAI = &get_ai<mob_yennikuAI>;
     newscript->RegisterSelf();
 }
