@@ -54,6 +54,9 @@ void instance_ulduar::Initialize()
     uiHodirGUID           = 0;
     uiThorimGUID          = 0;
     uiFreyaGUID           = 0;
+    uiStonebarkGUID       = 0;
+    uiIronbranchGUID      = 0;
+    uiBrightleafGUID      = 0;
     uiVezaxGUID           = 0;
     uiYoggSaronGUID       = 0;
     uiAlgalonGUID         = 0;
@@ -114,6 +117,15 @@ void instance_ulduar::OnCreatureCreate(Creature *pCreature, bool)
             break;
         case NPC_FREYA:
             uiFreyaGUID = pCreature->GetGUID();
+            break;
+        case NPC_STONEBARK:
+            uiStonebarkGUID = pCreature->GetGUID();
+            break;
+        case NPC_IRONBRANCH:
+            uiIronbranchGUID = pCreature->GetGUID();
+            break;
+        case NPC_BRIGHTLEAF:
+            uiBrightleafGUID = pCreature->GetGUID();
             break;
         case NPC_VEZAX:
             uiVezaxGUID = pCreature->GetGUID();
@@ -236,6 +248,12 @@ uint64 instance_ulduar::GetData64(uint32 DataId)
             return uiThorimGUID;
         case data64_freya:
             return uiFreyaGUID;
+        case data64_stonebark:
+            return uiStonebarkGUID;
+        case data64_ironbranch:
+            return uiIronbranchGUID;
+        case data64_brightleaf:
+            return uiBrightleafGUID;
         case data64_vezax:
             return uiVezaxGUID;
         case data64_yoggsaron:
