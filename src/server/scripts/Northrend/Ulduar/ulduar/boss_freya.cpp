@@ -347,7 +347,7 @@ struct boss_freyaAI : public BossAI
     {
         EldersCount = 0;
         // Freya hard mode can be triggered simply by letting the elders alive
-        if(Creature* Brightleaf = Unit::GetCreature(*me, pInstance ? pInstance->GetData64(DATA_BRIGHTLEAF) : 0))
+        if(Creature* Brightleaf = Unit::GetCreature(*me, pInstance ? pInstance->GetData64(data64_brightleaf) : 0))
         {
             if(Brightleaf->isAlive())
             {
@@ -359,7 +359,7 @@ struct boss_freyaAI : public BossAI
             }
         }
 
-        if(Creature* Ironbranch = Unit::GetCreature(*me, pInstance ? pInstance->GetData64(DATA_IRONBRANCH) : 0))
+        if(Creature* Ironbranch = Unit::GetCreature(*me, pInstance ? pInstance->GetData64(data64_ironbranch) : 0))
         {
             if(Ironbranch->isAlive())
             {
@@ -371,7 +371,7 @@ struct boss_freyaAI : public BossAI
             }
         }
 
-        if(Creature* Stonebark = Unit::GetCreature(*me, pInstance ? pInstance->GetData64(DATA_STONEBARK) : 0))
+        if(Creature* Stonebark = Unit::GetCreature(*me, pInstance ? pInstance->GetData64(data64_stonebark) : 0))
         {
             if(Stonebark->isAlive())
             {
@@ -514,7 +514,7 @@ struct boss_freyaAI : public BossAI
                                 for (uint32 i = 0; i < 3; i++)
                                     Elemental[i]->ForcedDespawn(3000);
                                 
-                                if (Creature* Freya = Unit::GetCreature(*me, pInstance ? pInstance->GetData64(DATA_FREYA) : 0))
+                                if (Creature* Freya = Unit::GetCreature(*me, pInstance ? pInstance->GetData64(data64_freya) : 0))
                                     Freya->AI()->DoAction(ACTION_ELEMENTAL);
                             }
                         }
@@ -526,7 +526,7 @@ struct boss_freyaAI : public BossAI
 
     void spawnAdd()
     {
-        if (spawnedAdds >= 0 && <= 2)
+        if (spawnedAdds >= 0 && spawnedAdds <= 2)
             spawnHandler(spawnOrder[spawnedAdds]);
 
         spawnedAdds++;
@@ -901,7 +901,7 @@ struct creature_detonating_lasherAI : public ScriptedAI
     {
         DoCast(me, RAID_MODE(RAID_10_SPELL_DETONATE, RAID_25_SPELL_DETONATE));
 
-        if(Creature* Freya = Unit::GetCreature(*me, m_pInstance ? m_pInstance->GetData64(DATA_FREYA) : 0))
+        if(Creature* Freya = Unit::GetCreature(*me, m_pInstance ? m_pInstance->GetData64(data64_freya) : 0))
             Freya->AI()->DoAction(ACTION_LASHER);
     }
 
@@ -967,7 +967,7 @@ struct creature_ancient_conservatorAI : public ScriptedAI
 
     void JustDied(Unit* victim)
     {
-        if(Creature* Freya = Unit::GetCreature(*me, m_pInstance ? m_pInstance->GetData64(DATA_FREYA) : 0))
+        if(Creature* Freya = Unit::GetCreature(*me, m_pInstance ? m_pInstance->GetData64(data64_freya) : 0))
             Freya->AI()->DoAction(ACTION_ANCIENT);
     }
 
@@ -1038,7 +1038,7 @@ struct creature_storm_lasherAI : public ScriptedAI
 
     void JustDied(Unit* victim)
     {
-        if(Creature* Freya = Unit::GetCreature(*me, m_pInstance ? m_pInstance->GetData64(DATA_FREYA) : 0))
+        if(Creature* Freya = Unit::GetCreature(*me, m_pInstance ? m_pInstance->GetData64(data64_freya) : 0))
             Freya->AI()->DoAction(ACTION_ELEMENTAL_DEAD);
     }
 
@@ -1079,7 +1079,7 @@ struct creature_snaplasherAI : public ScriptedAI
 
     void JustDied(Unit* victim)
     {
-        if(Creature* Freya = Unit::GetCreature(*me, m_pInstance ? m_pInstance->GetData64(DATA_FREYA) : 0))
+        if(Creature* Freya = Unit::GetCreature(*me, m_pInstance ? m_pInstance->GetData64(data64_freya) : 0))
             Freya->AI()->DoAction(ACTION_ELEMENTAL_DEAD);
     }
 
@@ -1109,7 +1109,7 @@ struct creature_ancient_water_spiritAI : public ScriptedAI
 
     void JustDied(Unit* victim)
     {
-        if(Creature* Freya = Unit::GetCreature(*me, m_pInstance ? m_pInstance->GetData64(DATA_FREYA) : 0))
+        if(Creature* Freya = Unit::GetCreature(*me, m_pInstance ? m_pInstance->GetData64(data64_freya) : 0))
             Freya->AI()->DoAction(ACTION_ELEMENTAL_DEAD);
     }
 

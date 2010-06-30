@@ -45,7 +45,7 @@ enum eTypes
     DATA_MOLGEIM                = 21,
     DATA_BRUNDIR                = 22,
     DATA_RUNEMASTER_MOLGEIM     = 23,
-    DATA_STORMCALLER_BRUNDIR    = 24,    
+    DATA_STORMCALLER_BRUNDIR    = 24,
 
     NPC_LEVIATHAN               = 33113,
     NPC_IGNIS                   = 33118,
@@ -60,6 +60,9 @@ enum eTypes
     NPC_HODIR                   = 32845,
     NPC_THORIM                  = 32865,
     NPC_FREYA                   = 32906,
+    NPC_STONEBARK               = 32914,
+    NPC_IRONBRANCH              = 32913,
+    NPC_BRIGHTLEAF              = 32915,
     NPC_VEZAX                   = 33271,
     NPC_YOGGSARON               = 33288,
     NPC_ALGALON                 = 32871,
@@ -85,6 +88,9 @@ enum
     data64_vezax = 11,
     data64_yoggsaron = 12,
     data64_algalon = 13,
+    data64_brightleaf = 15,
+    data64_stonebark = 16,
+    data64_ironbranch = 17,
 };
 
 #endif
