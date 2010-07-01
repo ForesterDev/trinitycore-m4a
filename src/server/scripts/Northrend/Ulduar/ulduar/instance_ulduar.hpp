@@ -21,6 +21,9 @@ struct instance_ulduar
     uint64 uiHodirGUID;
     uint64 uiThorimGUID;
     uint64 uiFreyaGUID;
+    uint64 uiStonebarkGUID;
+    uint64 uiIronbranchGUID;
+    uint64 uiBrightleafGUID;
     uint64 uiVezaxGUID;
     uint64 uiYoggSaronGUID;
     uint64 uiAlgalonGUID;
