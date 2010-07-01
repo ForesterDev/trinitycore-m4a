@@ -797,12 +797,9 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
     recvPacket >> account;
     recvPacket >> unk3;
     recvPacket >> clientSeed;
-    if (BuiltNumberClient == 12340)
-    {
-        recvPacket.read_skip<int32>();
-        recvPacket.read_skip<int32>();
-        recvPacket.read_skip<int32>();
-    }
+    recvPacket.read_skip<int32>();
+    recvPacket.read_skip<int32>();
+    recvPacket.read_skip<int32>();
     recvPacket >> unk4;
     recvPacket.read (digest, 20);
 

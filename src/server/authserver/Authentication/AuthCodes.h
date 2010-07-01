@@ -80,6 +80,7 @@ enum LoginResult
 //3.3.2 build 11403
 //3.3.3a build 11723
 // 3.3.5 build 12213
+// 3.3.5a build 12340
 
 #define POST_BC_ACCEPTED_CLIENT_BUILD {12340, 12213, 11723, 11403, 11159, \
         10571, 10505, 10146, 9947, 8606, 0}
