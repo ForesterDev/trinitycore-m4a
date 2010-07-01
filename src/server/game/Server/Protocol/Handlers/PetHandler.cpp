@@ -384,7 +384,7 @@ void WorldSession::SendPetNameQuery(uint64 petguid, uint32 petnumber)
     {
         WorldPacket data(SMSG_PET_NAME_QUERY_RESPONSE, (4+4+7+1));
         data << uint32(petnumber);
-        data << "Unknown";
+        data << "";
         data << uint32(0);
         data << uint8(0);
         _player->GetSession()->SendPacket(&data);
