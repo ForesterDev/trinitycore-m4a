@@ -110,7 +110,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x04F*/ { "SMSG_LOGOUT_CANCEL_ACK",                       STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x050*/ { "CMSG_NAME_QUERY",                              STATUS_AUTHED,   &WorldSession::HandleNameQueryOpcode           },
     /*0x051*/ { "SMSG_NAME_QUERY_RESPONSE",                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
-    /*0x052*/ { "CMSG_PET_NAME_QUERY",                          STATUS_LOGGEDIN, &WorldSession::HandlePetNameQuery              },
+    /*0x052*/ { "CMSG_PET_NAME_QUERY",                          STATUS_AUTHED,   &WorldSession::HandlePetNameQuery              },
     /*0x053*/ { "SMSG_PET_NAME_QUERY_RESPONSE",                 STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x054*/ { "CMSG_GUILD_QUERY",                             STATUS_AUTHED,   &WorldSession::HandleGuildQueryOpcode          },
     /*0x055*/ { "SMSG_GUILD_QUERY_RESPONSE",                    STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
