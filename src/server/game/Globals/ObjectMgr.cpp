@@ -2378,7 +2378,7 @@ void ObjectMgr::LoadItemSetNameLocales()
 {
     mItemSetNameLocaleMap.clear();                                 // need for reload case
 
-    QueryResult_AutoPtr result = WorldDatabase.Query("SELECT `entry`,`name_loc1`,`name_loc2`,`name_loc3`,`name_loc4`,`name_loc5`,`name_loc6`,`name_loc7`,`name_loc8` FROM `locales_item_set_name`");
+    QueryResult_AutoPtr result = WorldDatabase.Query("SELECT `entry`,`name_loc1`,`name_loc2`,`name_loc3`,`name_loc4`,`name_loc5`,`name_loc6`,`name_loc7`,`name_loc8` FROM `locales_item_set_names`");
 
     if (!result)
         return;
@@ -8266,7 +8266,7 @@ void ObjectMgr::LoadGossipMenuItems()
     QueryResult_AutoPtr result = WorldDatabase.Query(
         "SELECT menu_id, id, option_icon, option_text, option_id, npc_option_npcflag, "
         "action_menu_id, action_poi_id, action_script_id, box_coded, box_money, box_text "
-        "FROM gossip_menu_option");
+        "FROM gossip_menu_option ORDER BY menu_id, id");
 
     if (!result)
     {
