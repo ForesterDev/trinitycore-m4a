@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vmap3_extractor", "vmap3_extractor\VC90\vmap3_extractor.vcxproj", "{502602CC-98EA-4335-B922-C5C1DBF37604}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{69F789A6-BD04-454A-AC8E-A57AAE7FCF77}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libmpq", "..\..\externals\libmpq\win\VC90\libmpq.vcxproj", "{03AB0F44-628E-4855-99A0-C98A1EB52C50}"
 EndProject
@@ -11,20 +11,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "..\..\externals\zli
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "g3dlite", "..\..\externals\g3dlite\win\VC90\g3dlite.vcxproj", "{8072769E-CF10-48BF-B9E1-12752A5DAC6E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mapextractor", "map_extractor\VC90\VC90_mapextractor.vcproj", "{D7552D4F-408F-4F8E-859B-366659150CF4}"
-	ProjectSection(ProjectDependencies) = postProject
-		{03AB0F44-628E-4855-99A0-C98A1EB52C50} = {03AB0F44-628E-4855-99A0-C98A1EB52C50}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mapextractor", "map_extractor\VC90\VC90_mapextractor.vcxproj", "{D7552D4F-408F-4F8E-859B-366659150CF4}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vmap3assembler", "vmap3_assembler\VC90\VC90_vmap3assembler.vcproj", "{572FFF74-480C-4472-8ABF-81733BB4049D}"
-	ProjectSection(ProjectDependencies) = postProject
-		{8072769E-CF10-48BF-B9E1-12752A5DAC6E} = {8072769E-CF10-48BF-B9E1-12752A5DAC6E}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vmap3assembler", "vmap3_assembler\VC90\VC90_vmap3assembler.vcxproj", "{572FFF74-480C-4472-8ABF-81733BB4049D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vmap3extractor", "vmap3_extractor\VC90\VC90_vmap3extractor.vcproj", "{502602CC-98EA-4335-B922-C5C1DBF37604}"
-	ProjectSection(ProjectDependencies) = postProject
-		{03AB0F44-628E-4855-99A0-C98A1EB52C50} = {03AB0F44-628E-4855-99A0-C98A1EB52C50}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vmap3extractor", "vmap3_extractor\VC90\VC90_vmap3extractor.vcxproj", "{502602CC-98EA-4335-B922-C5C1DBF37604}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -6,13 +6,13 @@
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
     <Filter Include="vmaplib">
-      <UniqueIdentifier>{f19e8c8b-170a-4eb5-97d4-a1fa297bbb9e}</UniqueIdentifier>
+      <UniqueIdentifier>{17bf4d37-71f8-4730-815a-ca875557d9f5}</UniqueIdentifier>
     </Filter>
     <Filter Include="vmaplib\Maps">
-      <UniqueIdentifier>{6d0a6b13-aac7-42ac-9bb3-0d0c33754170}</UniqueIdentifier>
+      <UniqueIdentifier>{9369662b-3f32-40d9-aa31-7f8772a8322f}</UniqueIdentifier>
     </Filter>
     <Filter Include="vmaplib\Models">
-      <UniqueIdentifier>{ce59f382-0142-4aab-bfa0-07282a47849f}</UniqueIdentifier>
+      <UniqueIdentifier>{8d3c1449-1256-43c7-a1d2-24cfcc8a88ce}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

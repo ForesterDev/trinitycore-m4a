@@ -11,30 +11,30 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{502602CC-98EA-4335-B922-C5C1DBF37604}</ProjectGuid>
-    <RootNamespace>vmap3_extractor</RootNamespace>
+    <ProjectName>vmap3assembler</ProjectName>
+    <ProjectGuid>{572FFF74-480C-4472-8ABF-81733BB4049D}</ProjectGuid>
+    <RootNamespace>vmap_assembler</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <CharacterSet>Unicode</CharacterSet>
-    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -55,20 +55,24 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\;..\..\..\..\externals\libmpq;..\..\..\..\externals\libmpq\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\..\externals;..\..\..\..\externals\g3dlite;..\..\..\server\collision;..\..\..\server\collision\Management;..\..\..\server\collision\Maps;..\..\..\server\collision\Models;..\..\..\server\shared;..\..\..\server\shared\Debugging;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <PrecompiledHeader>
       </PrecompiledHeader>
+      <ObjectFileName>.\$(ProjectName)__$(Platform)_$(Configuration)\</ObjectFileName>
+      <ProgramDataBaseFileName>.\$(ProjectName)__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <OutputFile>..\..\bin\$(Platform)_$(Configuration)\$(ProjectName)_d.exe</OutputFile>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
@@ -80,30 +84,27 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <Optimization>MaxSpeed</Optimization>
-      <IntrinsicFunctions>false</IntrinsicFunctions>
-      <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>..\;..\..\..\..\externals\libmpq;..\..\..\..\externals\libmpq\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\..\externals;..\..\..\..\externals\g3dlite;..\..\..\server\collision;..\..\..\server\collision\Maps;..\..\..\server\collision\Models;..\..\..\server\shared;..\..\..\server\shared\Debugging;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <PrecompiledHeader>
       </PrecompiledHeader>
+      <ObjectFileName>.\$(ProjectName)__$(Platform)_$(Configuration)\</ObjectFileName>
+      <ProgramDataBaseFileName>.\$(ProjectName)__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
-      <DebugInformationFormat>
-      </DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <OutputFile>..\..\bin\$(Platform)_$(Configuration)\$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <LinkTimeCodeGeneration>
-      </LinkTimeCodeGeneration>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
@@ -111,25 +112,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\adtfile.cpp" />
-    <ClCompile Include="..\dbcfile.cpp" />
-    <ClCompile Include="..\model.cpp" />
-    <ClCompile Include="..\mpq_libmpq.cpp" />
-    <ClCompile Include="..\vmapexport.cpp" />
-    <ClCompile Include="..\wdtfile.cpp" />
-    <ClCompile Include="..\wmo.cpp" />
+    <ClCompile Include="..\VMapAssembler.cpp" />
+    <ClCompile Include="..\..\..\server\collision\BoundingIntervalHierarchy.cpp" />
+    <ClCompile Include="..\..\..\server\collision\Maps\TileAssembler.cpp" />
+    <ClCompile Include="..\..\..\server\collision\Models\ModelInstance.cpp" />
+    <ClCompile Include="..\..\..\server\collision\Models\WorldModel.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\adtfile.h" />
-    <ClInclude Include="..\dbcfile.h" />
-    <ClInclude Include="..\model.h" />
-    <ClInclude Include="..\modelheaders.h" />
-    <ClInclude Include="..\mpq_libmpq04.h" />
-    <ClInclude Include="..\vec3d.h" />
-    <ClInclude Include="..\vmapexport.h" />
-    <ClInclude Include="..\wdtfile.h" />
-    <ClInclude Include="..\wmo.h" />
-    <ClInclude Include="..\loadlib\loadlib.h" />
+    <ClInclude Include="..\..\..\server\collision\BoundingIntervalHierarchy.h" />
+    <ClInclude Include="..\..\..\server\collision\Maps\TileAssembler.h" />
+    <ClInclude Include="..\..\..\server\collision\Models\ModelInstance.h" />
+    <ClInclude Include="..\..\..\server\collision\Models\WorldModel.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\externals\g3dlite\win\VC90\g3dlite.vcxproj">
+      <Project>{8072769e-cf10-48bf-b9e1-12752a5dac6e}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
