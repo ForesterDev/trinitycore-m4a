@@ -269,7 +269,7 @@ struct npc_reanimated_frost_wormAI : public ScriptedAI
     {
         if ((spell->Id == SPELL_SEEDS_OF_NATURES_WRATH) &&
             (hitter->GetTypeId() == TYPEID_PLAYER) &&
-            (CAST_PLR(hitter)->IsActiveQuest(QUEST_THE_HUNT_IS_ON)))
+            (CAST_PLR(hitter)->IsActiveQuest(QUEST_THAT_WHICH_CREATES_CAN_ALSO_DESTROY)))
         {
             me->UpdateEntry(NPC_WEAKENED_REANIMATED_FROST_WYRM);
         }
@@ -284,7 +284,7 @@ struct npc_turgid_the_vileAI : public ScriptedAI
     {
         if ((spell->Id == SPELL_SEEDS_OF_NATURES_WRATH) &&
             (hitter->GetTypeId() == TYPEID_PLAYER) &&
-            (CAST_PLR(hitter)->IsActiveQuest(QUEST_THE_HUNT_IS_ON)))
+            (CAST_PLR(hitter)->IsActiveQuest(QUEST_THAT_WHICH_CREATES_CAN_ALSO_DESTROY)))
         {
             me->UpdateEntry(NPC_WEAKENED_TURGID_THE_VILE);
         }
@@ -299,7 +299,7 @@ struct npc_overseer_deathgazeAI : public ScriptedAI
     {
         if ((spell->Id == SPELL_SEEDS_OF_NATURES_WRATH) &&
             (hitter->GetTypeId() == TYPEID_PLAYER) &&
-            (CAST_PLR(hitter)->IsActiveQuest(QUEST_THE_HUNT_IS_ON)))
+            (CAST_PLR(hitter)->IsActiveQuest(QUEST_THAT_WHICH_CREATES_CAN_ALSO_DESTROY)))
         {
             me->UpdateEntry(NPC_WEAKENED_OVERSEER_DEATHGAZE);
         }
