@@ -2,22 +2,22 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{dab6a3a0-30ad-4de0-8904-60fdec686832}</UniqueIdentifier>
+      <UniqueIdentifier>{8d16c80d-5f10-4f7e-89aa-00c942ce6148}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{bd3fae1f-b4ad-40fc-b573-9c5ea34f8366}</UniqueIdentifier>
+      <UniqueIdentifier>{de76cbac-3195-4b8d-b62d-9406aa06a66c}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\loadlib\adt.cpp">
+    <ClCompile Include="..\adt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\dbcfile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\loadlib\loadlib.cpp">
+    <ClCompile Include="..\loadlib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\mpq_libmpq.cpp">
@@ -26,15 +26,21 @@
     <ClCompile Include="..\System.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\loadlib\wdt.cpp">
+    <ClCompile Include="..\wdt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\adt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="dbcfile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="mpq_libmpq.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wdt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

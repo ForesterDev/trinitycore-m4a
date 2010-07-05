@@ -10,7 +10,7 @@
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
     <Filter Include="Header Files\loadlib">
-      <UniqueIdentifier>{86d552e9-3dd4-4792-8849-7aa9bc4fa9f2}</UniqueIdentifier>
+      <UniqueIdentifier>{f37c7fb4-d24b-4ccf-9e57-e387c886b30f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

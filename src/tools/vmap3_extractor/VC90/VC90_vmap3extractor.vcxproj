@@ -11,22 +11,20 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>ad</ProjectName>
-    <ProjectGuid>{D7552D4F-408F-4F8E-859B-366659150CF4}</ProjectGuid>
-    <RootNamespace>ad</RootNamespace>
+    <ProjectName>vmap3extractor</ProjectName>
+    <ProjectGuid>{502602CC-98EA-4335-B922-C5C1DBF37604}</ProjectGuid>
+    <RootNamespace>vmap3_extractor</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -54,48 +52,24 @@
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Midl>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MkTypLibCompatible>true</MkTypLibCompatible>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <TargetEnvironment>Win32</TargetEnvironment>
-      <TypeLibraryName>./ad.tlb</TypeLibraryName>
-      <HeaderFileName>
-      </HeaderFileName>
-    </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\;..\..\..\..\externals;..\..\..\..\externals\libmpq;..\..\..\..\externals\libmpq\win;..\server\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\;..\..\..\..\externals\libmpq;..\..\..\..\externals\libmpq\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <PrecompiledHeaderOutputFile>$(IntDir)ad.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>
-      </AssemblerListingLocation>
-      <ObjectFileName>$(IntDir)</ObjectFileName>
-      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
-      <XMLDocumentationFileName>$(IntDir)</XMLDocumentationFileName>
-      <BrowseInformation>
-      </BrowseInformation>
-      <BrowseInformationFile>
-      </BrowseInformationFile>
+      <ObjectFileName>.\$(ProjectName)__$(Platform)_$(Configuration)\</ObjectFileName>
+      <ProgramDataBaseFileName>.\$(ProjectName)__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0419</Culture>
-    </ResourceCompile>
     <Link>
       <OutputFile>..\..\bin\$(Platform)_$(Configuration)\$(ProjectName)_d.exe</OutputFile>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
@@ -104,58 +78,35 @@
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
-    <Bscmake>
-      <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
-    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Midl>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MkTypLibCompatible>true</MkTypLibCompatible>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <TargetEnvironment>Win32</TargetEnvironment>
-      <TypeLibraryName>./ad.tlb</TypeLibraryName>
-      <HeaderFileName>
-      </HeaderFileName>
-    </Midl>
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\;..\..\..\..\externals;..\..\..\..\externals\libmpq;..\..\..\..\externals\libmpq\win;..\server\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>..\;..\..\..\..\externals\libmpq;..\..\..\..\externals\libmpq\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <PrecompiledHeaderOutputFile>
-      </PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>
-      </AssemblerListingLocation>
-      <ObjectFileName>$(IntDir)</ObjectFileName>
-      <ProgramDataBaseFileName>$(IntDir)vc90.pdb</ProgramDataBaseFileName>
-      <XMLDocumentationFileName>$(IntDir)</XMLDocumentationFileName>
-      <BrowseInformation>
-      </BrowseInformation>
+      <ObjectFileName>.\$(ProjectName)__$(Platform)_$(Configuration)\</ObjectFileName>
+      <ProgramDataBaseFileName>.\$(ProjectName)__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0419</Culture>
-    </ResourceCompile>
     <Link>
       <OutputFile>..\..\bin\$(Platform)_$(Configuration)\$(ProjectName).exe</OutputFile>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
-      <ProgramDatabaseFile>
-      </ProgramDatabaseFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <LinkTimeCodeGeneration>
+      </LinkTimeCodeGeneration>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
@@ -163,16 +114,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\loadlib\adt.cpp" />
+    <ClCompile Include="..\adtfile.cpp" />
     <ClCompile Include="..\dbcfile.cpp" />
-    <ClCompile Include="..\loadlib\loadlib.cpp" />
+    <ClCompile Include="..\model.cpp" />
     <ClCompile Include="..\mpq_libmpq.cpp" />
-    <ClCompile Include="..\System.cpp" />
-    <ClCompile Include="..\loadlib\wdt.cpp" />
+    <ClCompile Include="..\vmapexport.cpp" />
+    <ClCompile Include="..\wdtfile.cpp" />
+    <ClCompile Include="..\wmo.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="dbcfile.h" />
-    <ClInclude Include="mpq_libmpq.h" />
+    <ClInclude Include="..\adtfile.h" />
+    <ClInclude Include="..\dbcfile.h" />
+    <ClInclude Include="..\model.h" />
+    <ClInclude Include="..\modelheaders.h" />
+    <ClInclude Include="..\mpq_libmpq04.h" />
+    <ClInclude Include="..\vec3d.h" />
+    <ClInclude Include="..\vmapexport.h" />
+    <ClInclude Include="..\wdtfile.h" />
+    <ClInclude Include="..\wmo.h" />
+    <ClInclude Include="..\loadlib\loadlib.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\externals\libmpq\win\VC90\libmpq.vcxproj">
+      <Project>{03ab0f44-628e-4855-99a0-c98a1eb52c50}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
