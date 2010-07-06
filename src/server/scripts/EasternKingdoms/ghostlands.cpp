@@ -217,11 +217,6 @@ bool QuestAccept_npc_ranger_lilatha(Player* pPlayer, Creature* pCreature, Quest 
     return true;
 }
 
-CreatureAI* GetAI_npc_ranger_lilathaAI(Creature* pCreature)
-{
-    return new npc_ranger_lilathaAI(pCreature);
-}
-
 void AddSC_ghostlands()
 {
     Script *newscript;
@@ -246,7 +241,7 @@ void AddSC_ghostlands()
 
     newscript = new Script;
     newscript->Name = "npc_ranger_lilatha";
-    newscript->GetAI = &GetAI_npc_ranger_lilathaAI;
+    newscript->GetAI = &get_ai<npc_ranger_lilathaAI>;
     newscript->pQuestAccept = &QuestAccept_npc_ranger_lilatha;
     newscript->RegisterSelf();
 }

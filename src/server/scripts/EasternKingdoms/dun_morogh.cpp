@@ -88,10 +88,6 @@ struct npc_narm_faulkAI : public ScriptedAI
     }
 
 };
-CreatureAI* GetAI_npc_narm_faulk(Creature* pCreature)
-{
-    return new npc_narm_faulkAI (pCreature);
-}
 
 void AddSC_dun_morogh()
 {
@@ -99,6 +95,6 @@ void AddSC_dun_morogh()
 
     newscript = new Script;
     newscript->Name = "npc_narm_faulk";
-    newscript->GetAI = &GetAI_npc_narm_faulk;
+    newscript->GetAI = &get_ai<npc_narm_faulkAI>;
     newscript->RegisterSelf();
 }

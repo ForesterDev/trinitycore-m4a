@@ -18,6 +18,7 @@
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
+#include "gamePCH.h"
 #include <ace/Message_Block.h>
 #include <ace/OS_NS_string.h>
 #include <ace/OS_NS_unistd.h>
@@ -797,6 +798,9 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
     recvPacket >> account;
     recvPacket >> unk3;
     recvPacket >> clientSeed;
+    recvPacket.read_skip<int32>();
+    recvPacket.read_skip<int32>();
+    recvPacket.read_skip<int32>();
     recvPacket >> unk4;
     recvPacket.read (digest, 20);
 

@@ -1,0 +1,2332 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Custom">
+      <UniqueIdentifier>{c68bbef3-8af1-4338-a6e5-0229e161e6b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EasternKingdoms">
+      <UniqueIdentifier>{eb567be2-6be3-4aeb-ac27-292a553b947b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EasternKingdoms\AlteracValley">
+      <UniqueIdentifier>{0c9f5d90-79a4-4022-9635-ea99aedd7347}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EasternKingdoms\BlackrockDepths">
+      <UniqueIdentifier>{e580678a-48f6-43a6-bff8-e6831ec6f2fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EasternKingdoms\BlackrockSpire">
+      <UniqueIdentifier>{523fcf28-104d-4122-a029-60b86c7965e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EasternKingdoms\BlackwingLair">
+      <UniqueIdentifier>{8b29a84d-d2e3-46f6-bdfa-231e2027b6b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EasternKingdoms\Deadmines">
+      <UniqueIdentifier>{daa8de03-9971-41b0-b2e1-915eb5a18afa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EasternKingdoms\Gnomeregan">
+      <UniqueIdentifier>{b9c5b867-2ec9-4162-9aa0-146168abdf3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EasternKingdoms\Karazhan">
+      <UniqueIdentifier>{e7e4cf32-8af0-4925-a925-5b6e47b1bf22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EasternKingdoms\MagistersTerrace">
+      <UniqueIdentifier>{28e709dc-5117-4b9e-b08d-a020a13d8f7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EasternKingdoms\MoltenCore">
+      <UniqueIdentifier>{658ba82f-7c30-4f1a-aba5-824f00f4254a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EasternKingdoms\ScarletEnclave">
+      <UniqueIdentifier>{beb5e432-e525-40b4-acaa-f722dd4f43f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EasternKingdoms\ScarletMonastery">
+      <UniqueIdentifier>{0bbb6737-9b7e-4c18-b8cc-db4c44407f3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EasternKingdoms\Scholomance">
+      <UniqueIdentifier>{1ce0d35d-c921-483c-a29e-e2de51480d15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EasternKingdoms\ShadowfangKeep">
+      <UniqueIdentifier>{13aa377f-755b-46c6-a721-7fb9853f02f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EasternKingdoms\Stratholme">
+      <UniqueIdentifier>{81ac90c7-e161-44bf-99c8-e13f9f87d6bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EasternKingdoms\SunkenTemple">
+      <UniqueIdentifier>{21668bcb-6f9c-4fd0-bc44-193070bee19a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EasternKingdoms\SunwellPlateau">
+      <UniqueIdentifier>{c0a7f964-6670-4ed7-84c4-aa40d38fcf3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EasternKingdoms\Uldaman">
+      <UniqueIdentifier>{a0533f8e-fabe-4594-a7a5-eb5dce736d81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EasternKingdoms\ZulAman">
+      <UniqueIdentifier>{7d484cc3-bd3d-408e-ad2b-a3fda3c04357}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EasternKingdoms\ZulGurub">
+      <UniqueIdentifier>{acb06936-aa72-4119-8984-21aef97143ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Examples">
+      <UniqueIdentifier>{edd91bd9-68e6-4eaa-9df3-6e35f9f03307}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Kalimdor">
+      <UniqueIdentifier>{b948aa2e-d8e5-4502-8480-ab83cd202f5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend">
+      <UniqueIdentifier>{b76430c9-7e74-4972-9ffe-a1f558a8b262}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland">
+      <UniqueIdentifier>{0b6d7e0d-96d6-40c9-b704-9595973a6ede}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\World">
+      <UniqueIdentifier>{7eed7746-b9fe-4b73-b3a0-6a81c3bcbd8d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Kalimdor\BlackfathomDeeps">
+      <UniqueIdentifier>{d9668675-69fd-4d2e-ab8c-f0ac117e9494}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Kalimdor\CavernsOfTime">
+      <UniqueIdentifier>{09e98df9-aab5-4710-b290-9466d174b28d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Kalimdor\Maraudon">
+      <UniqueIdentifier>{59cd9a0b-ff70-4a75-b364-7b5ccfe20414}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Kalimdor\OnyxiasLair">
+      <UniqueIdentifier>{4b76bceb-7265-46a0-ab60-cb384043ff68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Kalimdor\RazorfenDowns">
+      <UniqueIdentifier>{00f2e132-445b-4c1a-831f-9c4ed31495c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Kalimdor\RazorfenKraul">
+      <UniqueIdentifier>{c299412f-76a7-4c8b-88f4-5930a695943d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Kalimdor\RuinsOfAhnQiraj">
+      <UniqueIdentifier>{4e73d7cc-6824-42f3-9d62-d0eb3176cf3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Kalimdor\TempleOfAhnQiraj">
+      <UniqueIdentifier>{b9e694d0-5246-4197-bc78-1ae72be680dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Kalimdor\WailingCaverns">
+      <UniqueIdentifier>{f52afdba-d1b4-4a7c-83c2-9b776f3fbc91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Kalimdor\ZulFarrak">
+      <UniqueIdentifier>{17412467-40e2-45d3-adfb-a65b3ddb8806}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Kalimdor\CavernsOfTime\BattleForMountHyjal">
+      <UniqueIdentifier>{3ee58ad3-12a2-4de3-b46f-bb6a2659bc4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Kalimdor\CavernsOfTime\CullingOfStratholme">
+      <UniqueIdentifier>{4c562920-e52f-4be4-841d-fd2a03b8c69c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Kalimdor\CavernsOfTime\DarkPortal">
+      <UniqueIdentifier>{413f2f96-999d-41ba-8c71-b8f9a0bfd193}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Kalimdor\CavernsOfTime\EscapeFromDurnholdeKeep">
+      <UniqueIdentifier>{6e9a178d-b7d5-41fd-b686-ea7d225b631f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\AzjolNerub">
+      <UniqueIdentifier>{c53db83c-191f-492e-8c53-6d849ff344b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\CrusadersColiseum">
+      <UniqueIdentifier>{38d65f0c-0198-4059-bde7-ba04f3ab4f28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\DraktharonKeep">
+      <UniqueIdentifier>{70532b43-6d88-441f-9008-b0a3520dd4f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\FrozenHalls">
+      <UniqueIdentifier>{bc710bd1-8530-43fd-a962-9b3df4c893aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\Gundrak">
+      <UniqueIdentifier>{40e0c38d-af4f-4efe-b882-ec1bf4c958cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\Naxxramas">
+      <UniqueIdentifier>{98ce57f3-2e7e-4723-b52b-6364b7cf2c06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\Nexus">
+      <UniqueIdentifier>{ba98d112-c9d9-4bd2-a679-00b2ba577ec3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\ObsidianSanctum">
+      <UniqueIdentifier>{73597949-48c7-4e79-b83f-d14ca0161f2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\Ulduar">
+      <UniqueIdentifier>{7518e6a5-2b82-47f2-a659-dfc22eadd9db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\UtgardeKeep">
+      <UniqueIdentifier>{fed52792-7a75-4d14-8318-c17b8224b653}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\VaultOfArchavon">
+      <UniqueIdentifier>{7e0936e4-4931-419d-bd7d-85b89f214131}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\VioletHold">
+      <UniqueIdentifier>{4fd0f512-908f-472b-b937-e7936e6a0a6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\AzjolNerub\ahnkahet">
+      <UniqueIdentifier>{de3b06a6-10a0-45d7-8432-918f49efb9e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\AzjolNerub\AzjolNerub">
+      <UniqueIdentifier>{95717e2f-7162-4eca-bc32-112e7c22d39a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\CrusadersColiseum\TrialOfTheChampion">
+      <UniqueIdentifier>{e3156f20-b468-4668-a29a-91b7b11dc4f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\FrozenHalls\ForgeOfSouls">
+      <UniqueIdentifier>{1bf0976c-8265-4f43-a1b0-e83b4f0407b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\FrozenHalls\HallsOfReflection">
+      <UniqueIdentifier>{fade845b-c6aa-46a1-a706-68fe56dd94a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\FrozenHalls\PitOfSaron">
+      <UniqueIdentifier>{48e93a53-7e5e-4ac8-a238-aec49a0ac6bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\UtgardeKeep\UtgardeKeep">
+      <UniqueIdentifier>{bcf7cb41-9e61-4947-8a4d-aed353d8183d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\UtgardeKeep\UtgardePinnacle">
+      <UniqueIdentifier>{28fafbfe-860d-48ab-9350-1c511fc3ebe0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\Ulduar\HallsOfLightning">
+      <UniqueIdentifier>{9c2a4c89-3de2-4ca4-8e06-e40d9dc220b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\Ulduar\HallsOfStone">
+      <UniqueIdentifier>{e59271c8-f497-4eea-b7b9-d15fa5a3db00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\Ulduar\ulduar">
+      <UniqueIdentifier>{ba28a0e0-f859-450d-afb0-f2a92d36e5fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\Nexus\EyeOfEternity">
+      <UniqueIdentifier>{636da4dd-e884-429f-858a-cfc145537fa8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\Nexus\Nexus">
+      <UniqueIdentifier>{a2b83d96-0e84-40e5-b818-42dbde006dfe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Northrend\Nexus\Oculus">
+      <UniqueIdentifier>{4c52c49a-d37c-41b9-814c-5329f47050f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland\Auchindoun">
+      <UniqueIdentifier>{28f92d2e-8fb3-47e9-ae15-c169fe308b55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland\BlackTemple">
+      <UniqueIdentifier>{320a12e7-9472-4a8d-a77b-21271e99a223}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland\CoilfangReservoir">
+      <UniqueIdentifier>{23aea8f7-c65c-4a68-8ff6-d0d5309ee12c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland\GruulsLair">
+      <UniqueIdentifier>{105833df-1ff7-4b78-9772-13549764e149}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland\HellfireCitadel">
+      <UniqueIdentifier>{93f0a548-f851-4916-b1cf-992f6057cb0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland\TempestKeep">
+      <UniqueIdentifier>{b05e4625-89af-402b-96e0-e4d9cea3a9d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland\Auchindoun\AuchenaiCrypts">
+      <UniqueIdentifier>{235b92e6-898e-4464-860a-ce2f1c8b4760}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland\Auchindoun\ManaTombs">
+      <UniqueIdentifier>{d0f17370-3cd0-467a-8aa9-f845badb3ea4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland\Auchindoun\SethekkHalls">
+      <UniqueIdentifier>{ac897365-8cb9-4690-b884-b5ca20b73329}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland\Auchindoun\ShadowLabyrinth">
+      <UniqueIdentifier>{a34bd2ef-8a7a-4f29-8da9-2e09e40f4b96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland\CoilfangReservoir\SerpentShrine">
+      <UniqueIdentifier>{397d271e-298c-4d10-8f28-3bd1f6586af4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland\CoilfangReservoir\SteamVault">
+      <UniqueIdentifier>{dac043e9-76de-4329-bdeb-0aa94bb566a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland\CoilfangReservoir\underbog">
+      <UniqueIdentifier>{4c004083-e665-4767-8d4b-aed236d1a5e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland\HellfireCitadel\BloodFurnace">
+      <UniqueIdentifier>{47d2e339-6125-41a1-a06e-1464c21dc2af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland\HellfireCitadel\HellfireRamparts">
+      <UniqueIdentifier>{75bbbdad-2edd-45bb-8acb-ab6b75c0acfa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland\HellfireCitadel\MagtheridonsLair">
+      <UniqueIdentifier>{bd52fdc8-611f-4deb-88e5-57ef2e12e69b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland\HellfireCitadel\ShatteredHalls">
+      <UniqueIdentifier>{6687f9c4-25ba-41be-af89-d0bc166e380b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland\TempestKeep\arcatraz">
+      <UniqueIdentifier>{e4a2d053-2da1-412d-aedb-5b39dae58859}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland\TempestKeep\botanica">
+      <UniqueIdentifier>{924b91b5-ec5b-46e4-ac03-25af741892a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland\TempestKeep\Eye">
+      <UniqueIdentifier>{2d1a00c8-e19f-46ad-86d5-f155e2627ae1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Outland\TempestKeep\Mechanar">
+      <UniqueIdentifier>{540279c1-d0d1-4969-9e12-e20ea209014a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\..">
+      <UniqueIdentifier>{841195e9-cfc4-4313-a24d-152b59896efd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\..\game">
+      <UniqueIdentifier>{6ddddcc1-f214-42ed-9267-7f84affd9455}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\..\game\PrecompiledHeaders">
+      <UniqueIdentifier>{ef428407-848f-4be2-91a8-0680e84fcdfd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Custom">
+      <UniqueIdentifier>{f447399c-1b29-4ad1-84f3-8edeccd0099f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\EasternKingdoms">
+      <UniqueIdentifier>{30628463-d9f7-44eb-9a69-f610494d4b0a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\EasternKingdoms\BlackrockDepths">
+      <UniqueIdentifier>{6407f4c5-4ca5-455e-ae7b-0f2ff95cd355}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\EasternKingdoms\BlackrockSpire">
+      <UniqueIdentifier>{57fc004e-9ef9-4aed-8f1f-a618be0af1f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\EasternKingdoms\BlackwingLair">
+      <UniqueIdentifier>{741f4528-daeb-4899-8464-55cdb05c81de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\EasternKingdoms\Deadmines">
+      <UniqueIdentifier>{313bc436-8e4d-402a-be30-9fa7affd9a70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\EasternKingdoms\Gnomeregan">
+      <UniqueIdentifier>{19fc519a-36d9-424a-8730-0ce7be5db7f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\EasternKingdoms\Karazhan">
+      <UniqueIdentifier>{bafcc6cf-4498-45db-b37f-4d3de5ffcdbd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\EasternKingdoms\MagistersTerrace">
+      <UniqueIdentifier>{26e03b49-ac3a-45e3-93ca-9086b54b67ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\EasternKingdoms\MoltenCore">
+      <UniqueIdentifier>{1acb9575-215d-4ef7-abef-4f0bf25c5d54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\EasternKingdoms\ScarletEnclave">
+      <UniqueIdentifier>{c7d26daf-26f8-4aab-a169-60e08d314442}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\EasternKingdoms\ScarletMonastery">
+      <UniqueIdentifier>{da3e708b-a351-4f45-93c3-51e19dd13101}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\EasternKingdoms\Scholomance">
+      <UniqueIdentifier>{4b08e5d0-c995-42d4-93c0-1c51a0b38786}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\EasternKingdoms\ShadowfangKeep">
+      <UniqueIdentifier>{303fdbe1-4863-4f3c-a7e6-0c2a601609cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\EasternKingdoms\Stratholme">
+      <UniqueIdentifier>{c46077ee-a16b-48c3-9ccd-62edd40d3cbe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\EasternKingdoms\SunkenTemple">
+      <UniqueIdentifier>{a9d20a71-f3ae-4e1e-b57b-4ae08c3d271c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\EasternKingdoms\SunwellPlateau">
+      <UniqueIdentifier>{01693c80-8146-49b1-90db-d224f8e42850}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\EasternKingdoms\Uldaman">
+      <UniqueIdentifier>{7ff3cca7-28c6-4227-bf9e-d2c2da5a0c54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\EasternKingdoms\ZulAman">
+      <UniqueIdentifier>{ba359c3e-0150-43cd-9566-b3679f99282b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\EasternKingdoms\ZulGurub">
+      <UniqueIdentifier>{f5049254-10fd-4a1f-b7e7-2cb7c6739046}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\EasternKingdoms\AlteracValley">
+      <UniqueIdentifier>{0dfe40a5-45d5-46fa-b544-984a16900381}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Examples">
+      <UniqueIdentifier>{4f722394-c21d-4608-9a6d-999c4466069d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Kalimdor">
+      <UniqueIdentifier>{361ee8a9-45b5-4397-b405-8f373f42621a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend">
+      <UniqueIdentifier>{616e0691-6659-4296-8825-49266d5462fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland">
+      <UniqueIdentifier>{345a0a5b-b89a-47ea-b989-a8753175bcfc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\World">
+      <UniqueIdentifier>{78d9e47a-d3f9-47d3-861a-5b003ac71588}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Kalimdor\BlackfathomDeeps">
+      <UniqueIdentifier>{0996a1eb-d05a-41f0-b029-485306a76d31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Kalimdor\CavernsOfTime">
+      <UniqueIdentifier>{01a5d979-4f07-4bbc-9cbb-ad7c113e4dd5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Kalimdor\Maraudon">
+      <UniqueIdentifier>{fde482c8-3a8f-4d1a-af63-a1deeeb0842a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Kalimdor\OnyxiasLair">
+      <UniqueIdentifier>{e005312c-826e-494a-b6c3-8084e4051895}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Kalimdor\RazorfenDowns">
+      <UniqueIdentifier>{4ce19739-a7f0-4f6b-afee-955136e17eac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Kalimdor\RazorfenKraul">
+      <UniqueIdentifier>{55a9ba24-4253-4374-bd5b-a3385a51d956}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Kalimdor\RuinsOfAhnQiraj">
+      <UniqueIdentifier>{3efb26ee-b80b-4ea2-aafd-313d15d885d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Kalimdor\TempleOfAhnQiraj">
+      <UniqueIdentifier>{95510426-1dbf-42a1-a3db-0f9cf1c5d5b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Kalimdor\WailingCaverns">
+      <UniqueIdentifier>{62ea0c95-a38e-4dbc-929a-88db5a07e3b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Kalimdor\ZulFarrak">
+      <UniqueIdentifier>{21c93108-c67e-404f-ad23-64d1a438db80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Kalimdor\CavernsOfTime\BattleForMountHyjal">
+      <UniqueIdentifier>{f36091f1-c3d7-4b14-b589-787341773332}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Kalimdor\CavernsOfTime\CullingOfStratholme">
+      <UniqueIdentifier>{f4510347-6bba-4cb2-b55d-2db4e3b137cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Kalimdor\CavernsOfTime\DarkPortal">
+      <UniqueIdentifier>{9ddc1215-2a88-4f48-8dbc-b5fd3e1574e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Kalimdor\CavernsOfTime\EscapeFromDurnholdeKeep">
+      <UniqueIdentifier>{c689f715-edc9-4dfa-89ca-11838ec89a77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland\Auchindoun">
+      <UniqueIdentifier>{16048f90-263c-42c3-ac47-27164f2bf09c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland\BlackTemple">
+      <UniqueIdentifier>{545d8d96-fe84-4a18-8ce3-01ed2200a855}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland\CoilfangReservoir">
+      <UniqueIdentifier>{76638912-0754-4783-ad1a-fff291b5e66b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland\GruulsLair">
+      <UniqueIdentifier>{df7ec7a5-ae77-4e91-91ec-a02367678532}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland\HellfireCitadel">
+      <UniqueIdentifier>{7ef75193-bbd0-40ac-8d28-b3758d84a0ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland\Auchindoun\AuchenaiCrypts">
+      <UniqueIdentifier>{c78d0701-da9f-44ac-9d3f-fd354c3b8417}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland\Auchindoun\ManaTombs">
+      <UniqueIdentifier>{301965c1-d039-4eaf-9fa8-1c47a87ba46b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland\Auchindoun\SethekkHalls">
+      <UniqueIdentifier>{0d01aef1-6ec0-4f4d-8627-110dfafe36b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland\Auchindoun\ShadowLabyrinth">
+      <UniqueIdentifier>{57d24cdb-a8da-49ec-9398-e56a80e78262}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland\CoilfangReservoir\SerpentShrine">
+      <UniqueIdentifier>{6b42461a-4b0c-4354-9aa8-27961df8de15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland\CoilfangReservoir\SteamVault">
+      <UniqueIdentifier>{0bd5e7bf-f028-419c-808d-ea3f6dc6f5f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland\CoilfangReservoir\underbog">
+      <UniqueIdentifier>{dc577798-eb32-4528-af77-8a83a34f8f0f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland\HellfireCitadel\BloodFurnace">
+      <UniqueIdentifier>{00fbe312-52b4-43e3-8e17-5f1e485a4ce6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland\HellfireCitadel\HellfireRamparts">
+      <UniqueIdentifier>{a92a8c55-f62b-4cda-8036-ff2cf1e8cc1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland\HellfireCitadel\MagtheridonsLair">
+      <UniqueIdentifier>{5c11d4d5-ab85-4e4d-b6e5-06d4ebbe6111}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland\HellfireCitadel\ShatteredHalls">
+      <UniqueIdentifier>{4500715b-9c0f-4566-a06c-38ca897db3a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland\TempestKeep">
+      <UniqueIdentifier>{8d656c53-3b00-4050-8b41-d3eee3a7b7a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland\TempestKeep\arcatraz">
+      <UniqueIdentifier>{722c0340-7e4f-4f9f-a45c-194c4e95e640}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland\TempestKeep\botanica">
+      <UniqueIdentifier>{32c6f1bb-4bae-4a0c-879e-85cbdf62dc5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland\TempestKeep\Eye">
+      <UniqueIdentifier>{fe564241-893d-4011-878a-29c7a0433ebf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Outland\TempestKeep\Mechanar">
+      <UniqueIdentifier>{664fa0b1-5e4f-4749-bc0a-e007e218d425}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\AzjolNerub">
+      <UniqueIdentifier>{efc8e73c-19b7-492a-bff8-83fd795d4401}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\CrusadersColiseum">
+      <UniqueIdentifier>{16176259-8d8b-4505-95cc-7a03a1e797b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\DraktharonKeep">
+      <UniqueIdentifier>{b14a5e18-564b-4eb5-b0ab-415103bba73b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\FrozenHalls">
+      <UniqueIdentifier>{8f405fa1-7727-4428-9fb3-04f154a721b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\Gundrak">
+      <UniqueIdentifier>{1636b326-93ce-4ca1-9a82-0b6032f43aee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\Naxxramas">
+      <UniqueIdentifier>{e2717c16-b204-467a-b6b1-3e33267da33d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\Nexus">
+      <UniqueIdentifier>{79d2a1c3-9858-4d25-a6c5-a6aff22424a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\ObsidianSanctum">
+      <UniqueIdentifier>{746b4677-c90d-41ba-a907-11e392ab2546}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\Ulduar">
+      <UniqueIdentifier>{fec91c9f-1dc0-430e-8153-66743885291e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\UtgardeKeep">
+      <UniqueIdentifier>{16dc812e-67be-4f8b-9ebc-48cc3da2b34a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\VaultOfArchavon">
+      <UniqueIdentifier>{1742f725-708d-4c55-8dc5-d5f4c3a02911}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\VioletHold">
+      <UniqueIdentifier>{7ba24f71-51c9-4494-843f-62993ed2f637}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\AzjolNerub\ahnkahet">
+      <UniqueIdentifier>{8f667384-be71-4ab8-a534-91ca4268a61f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\AzjolNerub\AzjolNerub">
+      <UniqueIdentifier>{8d94404c-e50e-4c04-9254-ea9bee69f48b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\CrusadersColiseum\TrialOfTheChampion">
+      <UniqueIdentifier>{ea789668-52bc-41a3-bc15-1103adae6fff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\FrozenHalls\ForgeOfSouls">
+      <UniqueIdentifier>{2a541709-9251-4b61-8078-e56878d4d0c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\FrozenHalls\HallsOfReflection">
+      <UniqueIdentifier>{372fd347-b30c-47e4-b53d-fdb2c2a20bd8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\FrozenHalls\PitOfSaron">
+      <UniqueIdentifier>{2aa23c2b-3e98-4bf4-aff8-29c49a485069}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\UtgardeKeep\UtgardeKeep">
+      <UniqueIdentifier>{2eea5971-6f40-4324-9480-a63a4762aaea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\UtgardeKeep\UtgardePinnacle">
+      <UniqueIdentifier>{52a71277-078d-4eac-b485-7ed4eb3c8d9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\Ulduar\HallsOfLightning">
+      <UniqueIdentifier>{f619d7f7-db23-4516-846a-7be6d08d333b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\Ulduar\HallsOfStone">
+      <UniqueIdentifier>{44c1799d-6e8a-4f7a-b520-709cdc0c923a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\Ulduar\ulduar">
+      <UniqueIdentifier>{31ad9fd5-f2a3-4c12-ae5f-94fc8cf4cf75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\Nexus\EyeOfEternity">
+      <UniqueIdentifier>{ef7682d1-d503-4614-abeb-43c2c314c32d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\Nexus\Nexus">
+      <UniqueIdentifier>{6e1ea881-6bdb-4f71-97df-2b28c2c45cec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Northrend\Nexus\Oculus">
+      <UniqueIdentifier>{287ab421-ee7e-4079-a969-2b6923e5aa29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\..\game\AI">
+      <UniqueIdentifier>{f99e6de9-6c38-453f-9d1e-1df251e93a4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\..\game\AI\ScriptedAI">
+      <UniqueIdentifier>{7a86b864-c76d-4cb4-8c79-aea5d3294987}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\..">
+      <UniqueIdentifier>{4a2354f5-16d2-46ec-9800-bd3b035a321f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\..\game">
+      <UniqueIdentifier>{1b77638c-43f7-4de0-8790-214bd5d8a5d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\..\game\AI">
+      <UniqueIdentifier>{165efc87-e8d6-4c83-81ab-b2c816973784}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\..\game\AI\ScriptedAI">
+      <UniqueIdentifier>{2ecfacf5-f8b2-4e84-9a58-9c5d582363bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\..\game\PrecompiledHeaders">
+      <UniqueIdentifier>{f22e8893-88d1-4ccd-a2eb-a557b7538d03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\..\game\Scripting">
+      <UniqueIdentifier>{bdce69c0-9b02-4064-93d0-a3be7bb2d0f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\..\game\Scripting">
+      <UniqueIdentifier>{382269f0-5524-4938-a180-a29cd6354561}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+    <None Include="CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Custom\custom_example.cpp">
+      <Filter>Source Files\Custom</Filter>
+    </ClCompile>
+    <ClCompile Include="Custom\custom_gossip_codebox.cpp">
+      <Filter>Source Files\Custom</Filter>
+    </ClCompile>
+    <ClCompile Include="Custom\npc_acherus_taxi.cpp">
+      <Filter>Source Files\Custom</Filter>
+    </ClCompile>
+    <ClCompile Include="Custom\npc_wyrmresttempel_taxi.cpp">
+      <Filter>Source Files\Custom</Filter>
+    </ClCompile>
+    <ClCompile Include="Custom\on_events.cpp">
+      <Filter>Source Files\Custom</Filter>
+    </ClCompile>
+    <ClCompile Include="Custom\test.cpp">
+      <Filter>Source Files\Custom</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\alterac_mountains.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\arathi_highlands.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\blasted_lands.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\boss_kruul.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\burning_steppes.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\dun_morogh.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\duskwood.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\eastern_plaguelands.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\elwynn_forest.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\eversong_woods.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ghostlands.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\hinterlands.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ironforge.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\isle_of_queldanas.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\loch_modan.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\redridge_mountains.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\searing_gorge.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\silvermoon_city.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\silverpine_forest.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\stormwind_city.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\stranglethorn_vale.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\tirisfal_glades.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\undercity.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\western_plaguelands.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\westfall.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\wetlands.cpp">
+      <Filter>Source Files\EasternKingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\AlteracValley\alterac_valley.cpp">
+      <Filter>Source Files\EasternKingdoms\AlteracValley</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\AlteracValley\boss_balinda.cpp">
+      <Filter>Source Files\EasternKingdoms\AlteracValley</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\AlteracValley\boss_drekthar.cpp">
+      <Filter>Source Files\EasternKingdoms\AlteracValley</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\AlteracValley\boss_galvangar.cpp">
+      <Filter>Source Files\EasternKingdoms\AlteracValley</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\AlteracValley\boss_vanndar.cpp">
+      <Filter>Source Files\EasternKingdoms\AlteracValley</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockDepths\blackrock_depths.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockDepths</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockDepths\boss_ambassador_flamelash.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockDepths</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockDepths\boss_anubshiah.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockDepths</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockDepths\boss_emperor_dagran_thaurissan.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockDepths</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockDepths\boss_general_angerforge.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockDepths</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockDepths\boss_gorosh_the_dervish.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockDepths</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockDepths\boss_grizzle.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockDepths</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockDepths\boss_high_interrogator_gerstahn.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockDepths</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockDepths\boss_magmus.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockDepths</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockDepths\boss_moira_bronzebeard.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockDepths</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockDepths\boss_tomb_of_seven.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockDepths</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockDepths\instance_blackrock_depths.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockDepths</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockSpire\blackrock_spire.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockSpire</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockSpire\boss_drakkisath.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockSpire</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockSpire\boss_gyth.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockSpire</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockSpire\boss_halycon.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockSpire</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockSpire\boss_highlord_omokk.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockSpire</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockSpire\boss_mother_smolderweb.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockSpire</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockSpire\boss_overlord_wyrmthalak.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockSpire</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockSpire\boss_pyroguard_emberseer.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockSpire</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockSpire\boss_quartermaster_zigris.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockSpire</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockSpire\boss_rend_blackhand.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockSpire</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockSpire\boss_shadow_hunter_voshgajin.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockSpire</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockSpire\boss_the_beast.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockSpire</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockSpire\boss_warmaster_voone.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockSpire</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackrockSpire\instance_blackrock_spire.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackrockSpire</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackwingLair\boss_broodlord_lashlayer.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackwingLair</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackwingLair\boss_chromaggus.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackwingLair</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackwingLair\boss_ebonroc.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackwingLair</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackwingLair\boss_firemaw.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackwingLair</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackwingLair\boss_flamegor.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackwingLair</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackwingLair\boss_nefarian.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackwingLair</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackwingLair\boss_razorgore.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackwingLair</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackwingLair\boss_vaelastrasz.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackwingLair</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackwingLair\boss_victor_nefarius.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackwingLair</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\BlackwingLair\instance_blackwing_lair.cpp">
+      <Filter>Source Files\EasternKingdoms\BlackwingLair</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Deadmines\boss_mr_smite.cpp">
+      <Filter>Source Files\EasternKingdoms\Deadmines</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Deadmines\deadmines.cpp">
+      <Filter>Source Files\EasternKingdoms\Deadmines</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Deadmines\instance_deadmines.cpp">
+      <Filter>Source Files\EasternKingdoms\Deadmines</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Gnomeregan\gnomeregan.cpp">
+      <Filter>Source Files\EasternKingdoms\Gnomeregan</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Gnomeregan\instance_gnomeregan.cpp">
+      <Filter>Source Files\EasternKingdoms\Gnomeregan</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Karazhan\boss_curator.cpp">
+      <Filter>Source Files\EasternKingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Karazhan\boss_maiden_of_virtue.cpp">
+      <Filter>Source Files\EasternKingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Karazhan\boss_midnight.cpp">
+      <Filter>Source Files\EasternKingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Karazhan\boss_moroes.cpp">
+      <Filter>Source Files\EasternKingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Karazhan\boss_netherspite.cpp">
+      <Filter>Source Files\EasternKingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Karazhan\boss_nightbane.cpp">
+      <Filter>Source Files\EasternKingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Karazhan\boss_prince_malchezaar.cpp">
+      <Filter>Source Files\EasternKingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Karazhan\boss_shade_of_aran.cpp">
+      <Filter>Source Files\EasternKingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Karazhan\boss_terestian_illhoof.cpp">
+      <Filter>Source Files\EasternKingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Karazhan\bosses_opera.cpp">
+      <Filter>Source Files\EasternKingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Karazhan\instance_karazhan.cpp">
+      <Filter>Source Files\EasternKingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Karazhan\karazhan.cpp">
+      <Filter>Source Files\EasternKingdoms\Karazhan</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\MagistersTerrace\boss_felblood_kaelthas.cpp">
+      <Filter>Source Files\EasternKingdoms\MagistersTerrace</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\MagistersTerrace\boss_priestess_delrissa.cpp">
+      <Filter>Source Files\EasternKingdoms\MagistersTerrace</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\MagistersTerrace\boss_selin_fireheart.cpp">
+      <Filter>Source Files\EasternKingdoms\MagistersTerrace</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\MagistersTerrace\boss_vexallus.cpp">
+      <Filter>Source Files\EasternKingdoms\MagistersTerrace</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\MagistersTerrace\instance_magisters_terrace.cpp">
+      <Filter>Source Files\EasternKingdoms\MagistersTerrace</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\MagistersTerrace\magisters_terrace.cpp">
+      <Filter>Source Files\EasternKingdoms\MagistersTerrace</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\MoltenCore\boss_baron_geddon.cpp">
+      <Filter>Source Files\EasternKingdoms\MoltenCore</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\MoltenCore\boss_garr.cpp">
+      <Filter>Source Files\EasternKingdoms\MoltenCore</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\MoltenCore\boss_gehennas.cpp">
+      <Filter>Source Files\EasternKingdoms\MoltenCore</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\MoltenCore\boss_golemagg.cpp">
+      <Filter>Source Files\EasternKingdoms\MoltenCore</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\MoltenCore\boss_lucifron.cpp">
+      <Filter>Source Files\EasternKingdoms\MoltenCore</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\MoltenCore\boss_magmadar.cpp">
+      <Filter>Source Files\EasternKingdoms\MoltenCore</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\MoltenCore\boss_majordomo_executus.cpp">
+      <Filter>Source Files\EasternKingdoms\MoltenCore</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\MoltenCore\boss_ragnaros.cpp">
+      <Filter>Source Files\EasternKingdoms\MoltenCore</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\MoltenCore\boss_shazzrah.cpp">
+      <Filter>Source Files\EasternKingdoms\MoltenCore</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\MoltenCore\boss_sulfuron_harbinger.cpp">
+      <Filter>Source Files\EasternKingdoms\MoltenCore</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\MoltenCore\instance_molten_core.cpp">
+      <Filter>Source Files\EasternKingdoms\MoltenCore</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\MoltenCore\molten_core.cpp">
+      <Filter>Source Files\EasternKingdoms\MoltenCore</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulGurub\boss_arlokk.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulGurub</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulGurub\boss_gahzranka.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulGurub</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulGurub\boss_grilek.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulGurub</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulGurub\boss_hakkar.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulGurub</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulGurub\boss_hazzarah.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulGurub</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulGurub\boss_jeklik.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulGurub</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulGurub\boss_jindo.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulGurub</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulGurub\boss_mandokir.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulGurub</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulGurub\boss_marli.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulGurub</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulGurub\boss_renataki.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulGurub</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulGurub\boss_thekal.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulGurub</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulGurub\boss_venoxis.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulGurub</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulGurub\boss_wushoolay.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulGurub</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulGurub\instance_zulgurub.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulGurub</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulAman\boss_akilzon.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulAman</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulAman\boss_halazzi.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulAman</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulAman\boss_hexlord.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulAman</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulAman\boss_janalai.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulAman</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulAman\boss_nalorakk.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulAman</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulAman\boss_zuljin.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulAman</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulAman\instance_zulaman.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulAman</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ZulAman\zulaman.cpp">
+      <Filter>Source Files\EasternKingdoms\ZulAman</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Uldaman\boss_archaedas.cpp">
+      <Filter>Source Files\EasternKingdoms\Uldaman</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Uldaman\boss_ironaya.cpp">
+      <Filter>Source Files\EasternKingdoms\Uldaman</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Uldaman\instance_uldaman.cpp">
+      <Filter>Source Files\EasternKingdoms\Uldaman</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Uldaman\uldaman.cpp">
+      <Filter>Source Files\EasternKingdoms\Uldaman</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\SunwellPlateau\boss_brutallus.cpp">
+      <Filter>Source Files\EasternKingdoms\SunwellPlateau</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\SunwellPlateau\boss_eredar_twins.cpp">
+      <Filter>Source Files\EasternKingdoms\SunwellPlateau</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\SunwellPlateau\boss_felmyst.cpp">
+      <Filter>Source Files\EasternKingdoms\SunwellPlateau</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\SunwellPlateau\boss_kalecgos.cpp">
+      <Filter>Source Files\EasternKingdoms\SunwellPlateau</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\SunwellPlateau\boss_kiljaeden.cpp">
+      <Filter>Source Files\EasternKingdoms\SunwellPlateau</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\SunwellPlateau\boss_muru.cpp">
+      <Filter>Source Files\EasternKingdoms\SunwellPlateau</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\SunwellPlateau\instance_sunwell_plateau.cpp">
+      <Filter>Source Files\EasternKingdoms\SunwellPlateau</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\SunwellPlateau\sunwell_plateau.cpp">
+      <Filter>Source Files\EasternKingdoms\SunwellPlateau</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\SunkenTemple\instance_sunken_temple.cpp">
+      <Filter>Source Files\EasternKingdoms\SunkenTemple</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\SunkenTemple\sunken_temple.cpp">
+      <Filter>Source Files\EasternKingdoms\SunkenTemple</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Stratholme\boss_baron_rivendare.cpp">
+      <Filter>Source Files\EasternKingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Stratholme\boss_baroness_anastari.cpp">
+      <Filter>Source Files\EasternKingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Stratholme\boss_cannon_master_willey.cpp">
+      <Filter>Source Files\EasternKingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Stratholme\boss_dathrohan_balnazzar.cpp">
+      <Filter>Source Files\EasternKingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Stratholme\boss_magistrate_barthilas.cpp">
+      <Filter>Source Files\EasternKingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Stratholme\boss_maleki_the_pallid.cpp">
+      <Filter>Source Files\EasternKingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Stratholme\boss_nerubenkan.cpp">
+      <Filter>Source Files\EasternKingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Stratholme\boss_order_of_silver_hand.cpp">
+      <Filter>Source Files\EasternKingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Stratholme\boss_postmaster_malown.cpp">
+      <Filter>Source Files\EasternKingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Stratholme\boss_ramstein_the_gorger.cpp">
+      <Filter>Source Files\EasternKingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Stratholme\boss_timmy_the_cruel.cpp">
+      <Filter>Source Files\EasternKingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Stratholme\instance_stratholme.cpp">
+      <Filter>Source Files\EasternKingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Stratholme\stratholme.cpp">
+      <Filter>Source Files\EasternKingdoms\Stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ShadowfangKeep\instance_shadowfang_keep.cpp">
+      <Filter>Source Files\EasternKingdoms\ShadowfangKeep</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ShadowfangKeep\shadowfang_keep.cpp">
+      <Filter>Source Files\EasternKingdoms\ShadowfangKeep</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Scholomance\boss_darkmaster_gandling.cpp">
+      <Filter>Source Files\EasternKingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Scholomance\boss_death_knight_darkreaver.cpp">
+      <Filter>Source Files\EasternKingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Scholomance\boss_doctor_theolen_krastinov.cpp">
+      <Filter>Source Files\EasternKingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Scholomance\boss_illucia_barov.cpp">
+      <Filter>Source Files\EasternKingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Scholomance\boss_instructor_malicia.cpp">
+      <Filter>Source Files\EasternKingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Scholomance\boss_jandice_barov.cpp">
+      <Filter>Source Files\EasternKingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Scholomance\boss_kormok.cpp">
+      <Filter>Source Files\EasternKingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Scholomance\boss_lord_alexei_barov.cpp">
+      <Filter>Source Files\EasternKingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Scholomance\boss_lorekeeper_polkelt.cpp">
+      <Filter>Source Files\EasternKingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Scholomance\boss_ras_frostwhisper.cpp">
+      <Filter>Source Files\EasternKingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Scholomance\boss_the_ravenian.cpp">
+      <Filter>Source Files\EasternKingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Scholomance\boss_vectus.cpp">
+      <Filter>Source Files\EasternKingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\Scholomance\instance_scholomance.cpp">
+      <Filter>Source Files\EasternKingdoms\Scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ScarletMonastery\boss_arcanist_doan.cpp">
+      <Filter>Source Files\EasternKingdoms\ScarletMonastery</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ScarletMonastery\boss_azshir_the_sleepless.cpp">
+      <Filter>Source Files\EasternKingdoms\ScarletMonastery</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ScarletMonastery\boss_bloodmage_thalnos.cpp">
+      <Filter>Source Files\EasternKingdoms\ScarletMonastery</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ScarletMonastery\boss_headless_horseman.cpp">
+      <Filter>Source Files\EasternKingdoms\ScarletMonastery</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ScarletMonastery\boss_herod.cpp">
+      <Filter>Source Files\EasternKingdoms\ScarletMonastery</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ScarletMonastery\boss_high_inquisitor_fairbanks.cpp">
+      <Filter>Source Files\EasternKingdoms\ScarletMonastery</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ScarletMonastery\boss_houndmaster_loksey.cpp">
+      <Filter>Source Files\EasternKingdoms\ScarletMonastery</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ScarletMonastery\boss_interrogator_vishas.cpp">
+      <Filter>Source Files\EasternKingdoms\ScarletMonastery</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ScarletMonastery\boss_mograine_and_whitemane.cpp">
+      <Filter>Source Files\EasternKingdoms\ScarletMonastery</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ScarletMonastery\boss_scorn.cpp">
+      <Filter>Source Files\EasternKingdoms\ScarletMonastery</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ScarletMonastery\instance_scarlet_monastery.cpp">
+      <Filter>Source Files\EasternKingdoms\ScarletMonastery</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ScarletEnclave\chapter1.cpp">
+      <Filter>Source Files\EasternKingdoms\ScarletEnclave</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ScarletEnclave\chapter2.cpp">
+      <Filter>Source Files\EasternKingdoms\ScarletEnclave</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ScarletEnclave\chapter5.cpp">
+      <Filter>Source Files\EasternKingdoms\ScarletEnclave</Filter>
+    </ClCompile>
+    <ClCompile Include="EasternKingdoms\ScarletEnclave\the_scarlet_enclave.cpp">
+      <Filter>Source Files\EasternKingdoms\ScarletEnclave</Filter>
+    </ClCompile>
+    <ClCompile Include="Examples\example_creature.cpp">
+      <Filter>Source Files\Examples</Filter>
+    </ClCompile>
+    <ClCompile Include="Examples\example_escort.cpp">
+      <Filter>Source Files\Examples</Filter>
+    </ClCompile>
+    <ClCompile Include="Examples\example_gossip_codebox.cpp">
+      <Filter>Source Files\Examples</Filter>
+    </ClCompile>
+    <ClCompile Include="Examples\example_misc.cpp">
+      <Filter>Source Files\Examples</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\ashenvale.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\azshara.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\azuremyst_isle.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\bloodmyst_isle.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\boss_azuregos.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\darkshore.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\desolace.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\durotar.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\dustwallow_marsh.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\felwood.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\feralas.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\moonglade.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\mulgore.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\orgrimmar.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\silithus.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\stonetalon_mountains.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\tanaris.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\teldrassil.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\the_barrens.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\thousand_needles.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\thunder_bluff.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\ungoro_crater.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\winterspring.cpp">
+      <Filter>Source Files\Kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\BlackfathomDeeps\blackfathom_deeps.cpp">
+      <Filter>Source Files\Kalimdor\BlackfathomDeeps</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\BlackfathomDeeps\boss_aku_mai.cpp">
+      <Filter>Source Files\Kalimdor\BlackfathomDeeps</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\BlackfathomDeeps\boss_gelihast.cpp">
+      <Filter>Source Files\Kalimdor\BlackfathomDeeps</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\BlackfathomDeeps\boss_kelris.cpp">
+      <Filter>Source Files\Kalimdor\BlackfathomDeeps</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\BlackfathomDeeps\instance_blackfathom_deeps.cpp">
+      <Filter>Source Files\Kalimdor\BlackfathomDeeps</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\BattleForMountHyjal\boss_anetheron.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\BattleForMountHyjal</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\BattleForMountHyjal\boss_archimonde.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\BattleForMountHyjal</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\BattleForMountHyjal\boss_azgalor.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\BattleForMountHyjal</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\BattleForMountHyjal\boss_kazrogal.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\BattleForMountHyjal</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\BattleForMountHyjal\boss_rage_winterchill.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\BattleForMountHyjal</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\BattleForMountHyjal\hyjal.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\BattleForMountHyjal</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\BattleForMountHyjal\hyjal_trash.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\BattleForMountHyjal</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\BattleForMountHyjal\hyjalAI.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\BattleForMountHyjal</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\BattleForMountHyjal\instance_hyjal.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\BattleForMountHyjal</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\CullingOfStratholme\boss_epoch.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\CullingOfStratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\CullingOfStratholme\boss_infinite.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\CullingOfStratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\CullingOfStratholme\boss_mal_ganis.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\CullingOfStratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\CullingOfStratholme\boss_meathook.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\CullingOfStratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\CullingOfStratholme\boss_salramm.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\CullingOfStratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\CullingOfStratholme\culling_of_stratholme.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\CullingOfStratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\CullingOfStratholme\instance_culling_of_stratholme.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\CullingOfStratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\DarkPortal\boss_aeonus.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\DarkPortal</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\DarkPortal\boss_chrono_lord_deja.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\DarkPortal</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\DarkPortal\boss_temporus.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\DarkPortal</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\DarkPortal\dark_portal.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\DarkPortal</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\DarkPortal\instance_dark_portal.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\DarkPortal</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\EscapeFromDurnholdeKeep\boss_captain_skarloc.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\EscapeFromDurnholdeKeep</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\EscapeFromDurnholdeKeep\boss_epoch_hunter.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\EscapeFromDurnholdeKeep</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\EscapeFromDurnholdeKeep\boss_leutenant_drake.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\EscapeFromDurnholdeKeep</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\EscapeFromDurnholdeKeep\instance_old_hillsbrad.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\EscapeFromDurnholdeKeep</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\CavernsOfTime\EscapeFromDurnholdeKeep\old_hillsbrad.cpp">
+      <Filter>Source Files\Kalimdor\CavernsOfTime\EscapeFromDurnholdeKeep</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\Maraudon\boss_celebras_the_cursed.cpp">
+      <Filter>Source Files\Kalimdor\Maraudon</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\Maraudon\boss_landslide.cpp">
+      <Filter>Source Files\Kalimdor\Maraudon</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\Maraudon\boss_noxxion.cpp">
+      <Filter>Source Files\Kalimdor\Maraudon</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\Maraudon\boss_princess_theradras.cpp">
+      <Filter>Source Files\Kalimdor\Maraudon</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\ZulFarrak\instance_zulfarrak.cpp">
+      <Filter>Source Files\Kalimdor\ZulFarrak</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\ZulFarrak\zulfarrak.cpp">
+      <Filter>Source Files\Kalimdor\ZulFarrak</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\WailingCaverns\instance_wailing_caverns.cpp">
+      <Filter>Source Files\Kalimdor\WailingCaverns</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\WailingCaverns\wailing_caverns.cpp">
+      <Filter>Source Files\Kalimdor\WailingCaverns</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\TempleOfAhnQiraj\boss_bug_trio.cpp">
+      <Filter>Source Files\Kalimdor\TempleOfAhnQiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\TempleOfAhnQiraj\boss_cthun.cpp">
+      <Filter>Source Files\Kalimdor\TempleOfAhnQiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\TempleOfAhnQiraj\boss_fankriss.cpp">
+      <Filter>Source Files\Kalimdor\TempleOfAhnQiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\TempleOfAhnQiraj\boss_huhuran.cpp">
+      <Filter>Source Files\Kalimdor\TempleOfAhnQiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\TempleOfAhnQiraj\boss_ouro.cpp">
+      <Filter>Source Files\Kalimdor\TempleOfAhnQiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\TempleOfAhnQiraj\boss_sartura.cpp">
+      <Filter>Source Files\Kalimdor\TempleOfAhnQiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\TempleOfAhnQiraj\boss_skeram.cpp">
+      <Filter>Source Files\Kalimdor\TempleOfAhnQiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\TempleOfAhnQiraj\boss_twinemperors.cpp">
+      <Filter>Source Files\Kalimdor\TempleOfAhnQiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\TempleOfAhnQiraj\boss_viscidus.cpp">
+      <Filter>Source Files\Kalimdor\TempleOfAhnQiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\TempleOfAhnQiraj\instance_temple_of_ahnqiraj.cpp">
+      <Filter>Source Files\Kalimdor\TempleOfAhnQiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\TempleOfAhnQiraj\mob_anubisath_sentinel.cpp">
+      <Filter>Source Files\Kalimdor\TempleOfAhnQiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\RuinsOfAhnQiraj\boss_ayamiss.cpp">
+      <Filter>Source Files\Kalimdor\RuinsOfAhnQiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\RuinsOfAhnQiraj\boss_buru.cpp">
+      <Filter>Source Files\Kalimdor\RuinsOfAhnQiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\RuinsOfAhnQiraj\boss_kurinnaxx.cpp">
+      <Filter>Source Files\Kalimdor\RuinsOfAhnQiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\RuinsOfAhnQiraj\boss_moam.cpp">
+      <Filter>Source Files\Kalimdor\RuinsOfAhnQiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\RuinsOfAhnQiraj\boss_ossirian.cpp">
+      <Filter>Source Files\Kalimdor\RuinsOfAhnQiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\RuinsOfAhnQiraj\boss_rajaxx.cpp">
+      <Filter>Source Files\Kalimdor\RuinsOfAhnQiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\RuinsOfAhnQiraj\instance_ruins_of_ahnqiraj.cpp">
+      <Filter>Source Files\Kalimdor\RuinsOfAhnQiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\RazorfenKraul\instance_razorfen_kraul.cpp">
+      <Filter>Source Files\Kalimdor\RazorfenKraul</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\RazorfenKraul\razorfen_kraul.cpp">
+      <Filter>Source Files\Kalimdor\RazorfenKraul</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\RazorfenDowns\boss_amnennar_the_coldbringer.cpp">
+      <Filter>Source Files\Kalimdor\RazorfenDowns</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\RazorfenDowns\instance_razorfen_downs.cpp">
+      <Filter>Source Files\Kalimdor\RazorfenDowns</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\RazorfenDowns\razorfen_downs.cpp">
+      <Filter>Source Files\Kalimdor\RazorfenDowns</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\OnyxiasLair\boss_onyxia.cpp">
+      <Filter>Source Files\Kalimdor\OnyxiasLair</Filter>
+    </ClCompile>
+    <ClCompile Include="Kalimdor\OnyxiasLair\instance_onyxias_lair.cpp">
+      <Filter>Source Files\Kalimdor\OnyxiasLair</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\borean_tundra.cpp">
+      <Filter>Source Files\Northrend</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\crystalsong_forest.cpp">
+      <Filter>Source Files\Northrend</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\dalaran.cpp">
+      <Filter>Source Files\Northrend</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\dragonblight.cpp">
+      <Filter>Source Files\Northrend</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\grizzly_hills.cpp">
+      <Filter>Source Files\Northrend</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\howling_fjord.cpp">
+      <Filter>Source Files\Northrend</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\icecrown.cpp">
+      <Filter>Source Files\Northrend</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\sholazar_basin.cpp">
+      <Filter>Source Files\Northrend</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\storm_peaks.cpp">
+      <Filter>Source Files\Northrend</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\zuldrak.cpp">
+      <Filter>Source Files\Northrend</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\AzjolNerub\ahnkahet\boss_amanitar.cpp">
+      <Filter>Source Files\Northrend\AzjolNerub\ahnkahet</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\AzjolNerub\ahnkahet\boss_elder_nadox.cpp">
+      <Filter>Source Files\Northrend\AzjolNerub\ahnkahet</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\AzjolNerub\ahnkahet\boss_herald_volazj.cpp">
+      <Filter>Source Files\Northrend\AzjolNerub\ahnkahet</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\AzjolNerub\ahnkahet\boss_jedoga_shadowseeker.cpp">
+      <Filter>Source Files\Northrend\AzjolNerub\ahnkahet</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\AzjolNerub\ahnkahet\boss_prince_taldaram.cpp">
+      <Filter>Source Files\Northrend\AzjolNerub\ahnkahet</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\AzjolNerub\ahnkahet\instance_ahnkahet.cpp">
+      <Filter>Source Files\Northrend\AzjolNerub\ahnkahet</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\AzjolNerub\AzjolNerub\boss_anubarak.cpp">
+      <Filter>Source Files\Northrend\AzjolNerub\AzjolNerub</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\AzjolNerub\AzjolNerub\boss_hadronox.cpp">
+      <Filter>Source Files\Northrend\AzjolNerub\AzjolNerub</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\AzjolNerub\AzjolNerub\boss_krikthir_the_gatewatcher.cpp">
+      <Filter>Source Files\Northrend\AzjolNerub\AzjolNerub</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\AzjolNerub\AzjolNerub\instance_azjol_nerub.cpp">
+      <Filter>Source Files\Northrend\AzjolNerub\AzjolNerub</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\CrusadersColiseum\TrialOfTheChampion\boss_argent_challenge.cpp">
+      <Filter>Source Files\Northrend\CrusadersColiseum\TrialOfTheChampion</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\CrusadersColiseum\TrialOfTheChampion\boss_black_knight.cpp">
+      <Filter>Source Files\Northrend\CrusadersColiseum\TrialOfTheChampion</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\CrusadersColiseum\TrialOfTheChampion\boss_grand_champions.cpp">
+      <Filter>Source Files\Northrend\CrusadersColiseum\TrialOfTheChampion</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\CrusadersColiseum\TrialOfTheChampion\instance_trial_of_the_champion.cpp">
+      <Filter>Source Files\Northrend\CrusadersColiseum\TrialOfTheChampion</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\CrusadersColiseum\TrialOfTheChampion\trial_of_the_champion.cpp">
+      <Filter>Source Files\Northrend\CrusadersColiseum\TrialOfTheChampion</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\DraktharonKeep\boss_dred.cpp">
+      <Filter>Source Files\Northrend\DraktharonKeep</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\DraktharonKeep\boss_novos.cpp">
+      <Filter>Source Files\Northrend\DraktharonKeep</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\DraktharonKeep\boss_tharon_ja.cpp">
+      <Filter>Source Files\Northrend\DraktharonKeep</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\DraktharonKeep\boss_trollgore.cpp">
+      <Filter>Source Files\Northrend\DraktharonKeep</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\DraktharonKeep\instance_drak_tharon_keep.cpp">
+      <Filter>Source Files\Northrend\DraktharonKeep</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\FrozenHalls\ForgeOfSouls\boss_bronjahm.cpp">
+      <Filter>Source Files\Northrend\FrozenHalls\ForgeOfSouls</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\FrozenHalls\ForgeOfSouls\boss_devourer_of_souls.cpp">
+      <Filter>Source Files\Northrend\FrozenHalls\ForgeOfSouls</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\FrozenHalls\ForgeOfSouls\forge_of_souls.cpp">
+      <Filter>Source Files\Northrend\FrozenHalls\ForgeOfSouls</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\FrozenHalls\ForgeOfSouls\instance_forge_of_souls.cpp">
+      <Filter>Source Files\Northrend\FrozenHalls\ForgeOfSouls</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\FrozenHalls\HallsOfReflection\boss_falric.cpp">
+      <Filter>Source Files\Northrend\FrozenHalls\HallsOfReflection</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\FrozenHalls\HallsOfReflection\boss_marwyn.cpp">
+      <Filter>Source Files\Northrend\FrozenHalls\HallsOfReflection</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\FrozenHalls\HallsOfReflection\halls_of_reflection.cpp">
+      <Filter>Source Files\Northrend\FrozenHalls\HallsOfReflection</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\FrozenHalls\HallsOfReflection\instance_halls_of_reflection.cpp">
+      <Filter>Source Files\Northrend\FrozenHalls\HallsOfReflection</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\FrozenHalls\PitOfSaron\boss_forgemaster_garfrost.cpp">
+      <Filter>Source Files\Northrend\FrozenHalls\PitOfSaron</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\FrozenHalls\PitOfSaron\boss_krickandick.cpp">
+      <Filter>Source Files\Northrend\FrozenHalls\PitOfSaron</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\FrozenHalls\PitOfSaron\boss_scourgelord_tyrannus.cpp">
+      <Filter>Source Files\Northrend\FrozenHalls\PitOfSaron</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\FrozenHalls\PitOfSaron\instance_pit_of_saron.cpp">
+      <Filter>Source Files\Northrend\FrozenHalls\PitOfSaron</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\FrozenHalls\PitOfSaron\pit_of_saron.cpp">
+      <Filter>Source Files\Northrend\FrozenHalls\PitOfSaron</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Gundrak\boss_drakkari_colossus.cpp">
+      <Filter>Source Files\Northrend\Gundrak</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Gundrak\boss_eck.cpp">
+      <Filter>Source Files\Northrend\Gundrak</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Gundrak\boss_gal_darah.cpp">
+      <Filter>Source Files\Northrend\Gundrak</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Gundrak\boss_moorabi.cpp">
+      <Filter>Source Files\Northrend\Gundrak</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Gundrak\boss_slad_ran.cpp">
+      <Filter>Source Files\Northrend\Gundrak</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Gundrak\instance_gundrak.cpp">
+      <Filter>Source Files\Northrend\Gundrak</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Naxxramas\boss_anubrekhan.cpp">
+      <Filter>Source Files\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Naxxramas\boss_faerlina.cpp">
+      <Filter>Source Files\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Naxxramas\boss_four_horsemen.cpp">
+      <Filter>Source Files\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Naxxramas\boss_gluth.cpp">
+      <Filter>Source Files\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Naxxramas\boss_gothik.cpp">
+      <Filter>Source Files\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Naxxramas\boss_grobbulus.cpp">
+      <Filter>Source Files\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Naxxramas\boss_heigan.cpp">
+      <Filter>Source Files\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Naxxramas\boss_kelthuzad.cpp">
+      <Filter>Source Files\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Naxxramas\boss_loatheb.cpp">
+      <Filter>Source Files\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Naxxramas\boss_maexxna.cpp">
+      <Filter>Source Files\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Naxxramas\boss_noth.cpp">
+      <Filter>Source Files\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Naxxramas\boss_patchwerk.cpp">
+      <Filter>Source Files\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Naxxramas\boss_razuvious.cpp">
+      <Filter>Source Files\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Naxxramas\boss_sapphiron.cpp">
+      <Filter>Source Files\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Naxxramas\boss_thaddius.cpp">
+      <Filter>Source Files\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Naxxramas\instance_naxxramas.cpp">
+      <Filter>Source Files\Northrend\Naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\VioletHold\boss_cyanigosa.cpp">
+      <Filter>Source Files\Northrend\VioletHold</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\VioletHold\boss_erekem.cpp">
+      <Filter>Source Files\Northrend\VioletHold</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\VioletHold\boss_ichoron.cpp">
+      <Filter>Source Files\Northrend\VioletHold</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\VioletHold\boss_lavanthor.cpp">
+      <Filter>Source Files\Northrend\VioletHold</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\VioletHold\boss_moragg.cpp">
+      <Filter>Source Files\Northrend\VioletHold</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\VioletHold\boss_xevozz.cpp">
+      <Filter>Source Files\Northrend\VioletHold</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\VioletHold\boss_zuramat.cpp">
+      <Filter>Source Files\Northrend\VioletHold</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\VioletHold\instance_violet_hold.cpp">
+      <Filter>Source Files\Northrend\VioletHold</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\VioletHold\violet_hold.cpp">
+      <Filter>Source Files\Northrend\VioletHold</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\VaultOfArchavon\boss_archavon.cpp">
+      <Filter>Source Files\Northrend\VaultOfArchavon</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\VaultOfArchavon\boss_emalon.cpp">
+      <Filter>Source Files\Northrend\VaultOfArchavon</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\VaultOfArchavon\boss_koralon.cpp">
+      <Filter>Source Files\Northrend\VaultOfArchavon</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\VaultOfArchavon\boss_toravon.cpp">
+      <Filter>Source Files\Northrend\VaultOfArchavon</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\VaultOfArchavon\instance_vault_of_archavon.cpp">
+      <Filter>Source Files\Northrend\VaultOfArchavon</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\UtgardeKeep\UtgardeKeep\boss_ingvar_the_plunderer.cpp">
+      <Filter>Source Files\Northrend\UtgardeKeep\UtgardeKeep</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\UtgardeKeep\UtgardeKeep\boss_keleseth.cpp">
+      <Filter>Source Files\Northrend\UtgardeKeep\UtgardeKeep</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\UtgardeKeep\UtgardeKeep\boss_skarvald_dalronn.cpp">
+      <Filter>Source Files\Northrend\UtgardeKeep\UtgardeKeep</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\UtgardeKeep\UtgardeKeep\instance_utgarde_keep.cpp">
+      <Filter>Source Files\Northrend\UtgardeKeep\UtgardeKeep</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\UtgardeKeep\UtgardeKeep\utgarde_keep.cpp">
+      <Filter>Source Files\Northrend\UtgardeKeep\UtgardeKeep</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\UtgardeKeep\UtgardePinnacle\boss_palehoof.cpp">
+      <Filter>Source Files\Northrend\UtgardeKeep\UtgardePinnacle</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\UtgardeKeep\UtgardePinnacle\boss_skadi.cpp">
+      <Filter>Source Files\Northrend\UtgardeKeep\UtgardePinnacle</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\UtgardeKeep\UtgardePinnacle\boss_svala.cpp">
+      <Filter>Source Files\Northrend\UtgardeKeep\UtgardePinnacle</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\UtgardeKeep\UtgardePinnacle\boss_ymiron.cpp">
+      <Filter>Source Files\Northrend\UtgardeKeep\UtgardePinnacle</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\UtgardeKeep\UtgardePinnacle\instance_pinnacle.cpp">
+      <Filter>Source Files\Northrend\UtgardeKeep\UtgardePinnacle</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\HallsOfLightning\boss_bjarngrim.cpp">
+      <Filter>Source Files\Northrend\Ulduar\HallsOfLightning</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\HallsOfLightning\boss_ionar.cpp">
+      <Filter>Source Files\Northrend\Ulduar\HallsOfLightning</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\HallsOfLightning\boss_loken.cpp">
+      <Filter>Source Files\Northrend\Ulduar\HallsOfLightning</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\HallsOfLightning\boss_volkhan.cpp">
+      <Filter>Source Files\Northrend\Ulduar\HallsOfLightning</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\HallsOfLightning\instance_halls_of_lightning.cpp">
+      <Filter>Source Files\Northrend\Ulduar\HallsOfLightning</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\HallsOfStone\boss_krystallus.cpp">
+      <Filter>Source Files\Northrend\Ulduar\HallsOfStone</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\HallsOfStone\boss_maiden_of_grief.cpp">
+      <Filter>Source Files\Northrend\Ulduar\HallsOfStone</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\HallsOfStone\boss_sjonnir.cpp">
+      <Filter>Source Files\Northrend\Ulduar\HallsOfStone</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\HallsOfStone\halls_of_stone.cpp">
+      <Filter>Source Files\Northrend\Ulduar\HallsOfStone</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\HallsOfStone\instance_halls_of_stone.cpp">
+      <Filter>Source Files\Northrend\Ulduar\HallsOfStone</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\ulduar\boss_algalon.cpp">
+      <Filter>Source Files\Northrend\Ulduar\ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\ulduar\boss_assembly_of_iron.cpp">
+      <Filter>Source Files\Northrend\Ulduar\ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\ulduar\boss_auriaya.cpp">
+      <Filter>Source Files\Northrend\Ulduar\ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\ulduar\boss_flame_leviathan.cpp">
+      <Filter>Source Files\Northrend\Ulduar\ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\ulduar\boss_freya.cpp">
+      <Filter>Source Files\Northrend\Ulduar\ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\ulduar\boss_general_vezax.cpp">
+      <Filter>Source Files\Northrend\Ulduar\ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\ulduar\boss_hodir.cpp">
+      <Filter>Source Files\Northrend\Ulduar\ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\ulduar\boss_ignis.cpp">
+      <Filter>Source Files\Northrend\Ulduar\ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\ulduar\boss_kologarn.cpp">
+      <Filter>Source Files\Northrend\Ulduar\ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\ulduar\boss_mimiron.cpp">
+      <Filter>Source Files\Northrend\Ulduar\ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\ulduar\boss_razorscale.cpp">
+      <Filter>Source Files\Northrend\Ulduar\ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\ulduar\boss_thorim.cpp">
+      <Filter>Source Files\Northrend\Ulduar\ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\ulduar\boss_xt002.cpp">
+      <Filter>Source Files\Northrend\Ulduar\ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\ulduar\boss_yoggsaron.cpp">
+      <Filter>Source Files\Northrend\Ulduar\ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\ulduar\instance_ulduar.cpp">
+      <Filter>Source Files\Northrend\Ulduar\ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Ulduar\ulduar\ulduar_teleporter.cpp">
+      <Filter>Source Files\Northrend\Ulduar\ulduar</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\ObsidianSanctum\boss_sartharion.cpp">
+      <Filter>Source Files\Northrend\ObsidianSanctum</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\ObsidianSanctum\instance_obsidian_sanctum.cpp">
+      <Filter>Source Files\Northrend\ObsidianSanctum</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Nexus\EyeOfEternity\boss_malygos.cpp">
+      <Filter>Source Files\Northrend\Nexus\EyeOfEternity</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Nexus\EyeOfEternity\instance_eye_of_eternity.cpp">
+      <Filter>Source Files\Northrend\Nexus\EyeOfEternity</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Nexus\Oculus\boss_drakos.cpp">
+      <Filter>Source Files\Northrend\Nexus\Oculus</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Nexus\Oculus\boss_eregos.cpp">
+      <Filter>Source Files\Northrend\Nexus\Oculus</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Nexus\Oculus\boss_urom.cpp">
+      <Filter>Source Files\Northrend\Nexus\Oculus</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Nexus\Oculus\boss_varos.cpp">
+      <Filter>Source Files\Northrend\Nexus\Oculus</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Nexus\Oculus\instance_oculus.cpp">
+      <Filter>Source Files\Northrend\Nexus\Oculus</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Nexus\Oculus\oculus.cpp">
+      <Filter>Source Files\Northrend\Nexus\Oculus</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Nexus\Nexus\boss_anomalus.cpp">
+      <Filter>Source Files\Northrend\Nexus\Nexus</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Nexus\Nexus\boss_keristrasza.cpp">
+      <Filter>Source Files\Northrend\Nexus\Nexus</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Nexus\Nexus\boss_magus_telestra.cpp">
+      <Filter>Source Files\Northrend\Nexus\Nexus</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Nexus\Nexus\boss_ormorok.cpp">
+      <Filter>Source Files\Northrend\Nexus\Nexus</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Nexus\Nexus\commander_kolurg.cpp">
+      <Filter>Source Files\Northrend\Nexus\Nexus</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Nexus\Nexus\commander_stoutbeard.cpp">
+      <Filter>Source Files\Northrend\Nexus\Nexus</Filter>
+    </ClCompile>
+    <ClCompile Include="Northrend\Nexus\Nexus\instance_nexus.cpp">
+      <Filter>Source Files\Northrend\Nexus\Nexus</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\blades_edge_mountains.cpp">
+      <Filter>Source Files\Outland</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\boss_doomlord_kazzak.cpp">
+      <Filter>Source Files\Outland</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\boss_doomwalker.cpp">
+      <Filter>Source Files\Outland</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\hellfire_peninsula.cpp">
+      <Filter>Source Files\Outland</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\nagrand.cpp">
+      <Filter>Source Files\Outland</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\netherstorm.cpp">
+      <Filter>Source Files\Outland</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\shadowmoon_valley.cpp">
+      <Filter>Source Files\Outland</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\shattrath_city.cpp">
+      <Filter>Source Files\Outland</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\terokkar_forest.cpp">
+      <Filter>Source Files\Outland</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\zangarmarsh.cpp">
+      <Filter>Source Files\Outland</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\Auchindoun\AuchenaiCrypts\boss_exarch_maladaar.cpp">
+      <Filter>Source Files\Outland\Auchindoun\AuchenaiCrypts</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\Auchindoun\AuchenaiCrypts\boss_shirrak_the_dead_watcher.cpp">
+      <Filter>Source Files\Outland\Auchindoun\AuchenaiCrypts</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\Auchindoun\ManaTombs\boss_nexusprince_shaffar.cpp">
+      <Filter>Source Files\Outland\Auchindoun\ManaTombs</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\Auchindoun\ManaTombs\boss_pandemonius.cpp">
+      <Filter>Source Files\Outland\Auchindoun\ManaTombs</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\Auchindoun\ShadowLabyrinth\boss_ambassador_hellmaw.cpp">
+      <Filter>Source Files\Outland\Auchindoun\ShadowLabyrinth</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\Auchindoun\ShadowLabyrinth\boss_blackheart_the_inciter.cpp">
+      <Filter>Source Files\Outland\Auchindoun\ShadowLabyrinth</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\Auchindoun\ShadowLabyrinth\boss_grandmaster_vorpil.cpp">
+      <Filter>Source Files\Outland\Auchindoun\ShadowLabyrinth</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\Auchindoun\ShadowLabyrinth\boss_murmur.cpp">
+      <Filter>Source Files\Outland\Auchindoun\ShadowLabyrinth</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\Auchindoun\ShadowLabyrinth\instance_shadow_labyrinth.cpp">
+      <Filter>Source Files\Outland\Auchindoun\ShadowLabyrinth</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\Auchindoun\SethekkHalls\boss_darkweaver_syth.cpp">
+      <Filter>Source Files\Outland\Auchindoun\SethekkHalls</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\Auchindoun\SethekkHalls\boss_tailonking_ikiss.cpp">
+      <Filter>Source Files\Outland\Auchindoun\SethekkHalls</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\Auchindoun\SethekkHalls\instance_sethekk_halls.cpp">
+      <Filter>Source Files\Outland\Auchindoun\SethekkHalls</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\BlackTemple\black_temple.cpp">
+      <Filter>Source Files\Outland\BlackTemple</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\BlackTemple\boss_bloodboil.cpp">
+      <Filter>Source Files\Outland\BlackTemple</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\BlackTemple\boss_illidan.cpp">
+      <Filter>Source Files\Outland\BlackTemple</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\BlackTemple\boss_mother_shahraz.cpp">
+      <Filter>Source Files\Outland\BlackTemple</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\BlackTemple\boss_reliquary_of_souls.cpp">
+      <Filter>Source Files\Outland\BlackTemple</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\BlackTemple\boss_shade_of_akama.cpp">
+      <Filter>Source Files\Outland\BlackTemple</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\BlackTemple\boss_supremus.cpp">
+      <Filter>Source Files\Outland\BlackTemple</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\BlackTemple\boss_teron_gorefiend.cpp">
+      <Filter>Source Files\Outland\BlackTemple</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\BlackTemple\boss_warlord_najentus.cpp">
+      <Filter>Source Files\Outland\BlackTemple</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\BlackTemple\illidari_council.cpp">
+      <Filter>Source Files\Outland\BlackTemple</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\BlackTemple\instance_black_temple.cpp">
+      <Filter>Source Files\Outland\BlackTemple</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\CoilfangReservoir\underbog\boss_hungarfen.cpp">
+      <Filter>Source Files\Outland\CoilfangReservoir\underbog</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\CoilfangReservoir\underbog\boss_the_black_stalker.cpp">
+      <Filter>Source Files\Outland\CoilfangReservoir\underbog</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\CoilfangReservoir\SteamVault\boss_hydromancer_thespia.cpp">
+      <Filter>Source Files\Outland\CoilfangReservoir\SteamVault</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\CoilfangReservoir\SteamVault\boss_mekgineer_steamrigger.cpp">
+      <Filter>Source Files\Outland\CoilfangReservoir\SteamVault</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\CoilfangReservoir\SteamVault\boss_warlord_kalithresh.cpp">
+      <Filter>Source Files\Outland\CoilfangReservoir\SteamVault</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\CoilfangReservoir\SteamVault\instance_steam_vault.cpp">
+      <Filter>Source Files\Outland\CoilfangReservoir\SteamVault</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\CoilfangReservoir\SerpentShrine\boss_fathomlord_karathress.cpp">
+      <Filter>Source Files\Outland\CoilfangReservoir\SerpentShrine</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\CoilfangReservoir\SerpentShrine\boss_hydross_the_unstable.cpp">
+      <Filter>Source Files\Outland\CoilfangReservoir\SerpentShrine</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\CoilfangReservoir\SerpentShrine\boss_lady_vashj.cpp">
+      <Filter>Source Files\Outland\CoilfangReservoir\SerpentShrine</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\CoilfangReservoir\SerpentShrine\boss_leotheras_the_blind.cpp">
+      <Filter>Source Files\Outland\CoilfangReservoir\SerpentShrine</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\CoilfangReservoir\SerpentShrine\boss_lurker_below.cpp">
+      <Filter>Source Files\Outland\CoilfangReservoir\SerpentShrine</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\CoilfangReservoir\SerpentShrine\boss_morogrim_tidewalker.cpp">
+      <Filter>Source Files\Outland\CoilfangReservoir\SerpentShrine</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\CoilfangReservoir\SerpentShrine\instance_serpent_shrine.cpp">
+      <Filter>Source Files\Outland\CoilfangReservoir\SerpentShrine</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\GruulsLair\boss_gruul.cpp">
+      <Filter>Source Files\Outland\GruulsLair</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\GruulsLair\boss_high_king_maulgar.cpp">
+      <Filter>Source Files\Outland\GruulsLair</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\GruulsLair\instance_gruuls_lair.cpp">
+      <Filter>Source Files\Outland\GruulsLair</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\HellfireCitadel\BloodFurnace\boss_broggok.cpp">
+      <Filter>Source Files\Outland\HellfireCitadel\BloodFurnace</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\HellfireCitadel\BloodFurnace\boss_kelidan_the_breaker.cpp">
+      <Filter>Source Files\Outland\HellfireCitadel\BloodFurnace</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\HellfireCitadel\BloodFurnace\boss_the_maker.cpp">
+      <Filter>Source Files\Outland\HellfireCitadel\BloodFurnace</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\HellfireCitadel\BloodFurnace\instance_blood_furnace.cpp">
+      <Filter>Source Files\Outland\HellfireCitadel\BloodFurnace</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\HellfireCitadel\HellfireRamparts\boss_omor_the_unscarred.cpp">
+      <Filter>Source Files\Outland\HellfireCitadel\HellfireRamparts</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\HellfireCitadel\HellfireRamparts\boss_vazruden_the_herald.cpp">
+      <Filter>Source Files\Outland\HellfireCitadel\HellfireRamparts</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\HellfireCitadel\HellfireRamparts\boss_watchkeeper_gargolmar.cpp">
+      <Filter>Source Files\Outland\HellfireCitadel\HellfireRamparts</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\HellfireCitadel\HellfireRamparts\instance_hellfire_ramparts.cpp">
+      <Filter>Source Files\Outland\HellfireCitadel\HellfireRamparts</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\HellfireCitadel\MagtheridonsLair\boss_magtheridon.cpp">
+      <Filter>Source Files\Outland\HellfireCitadel\MagtheridonsLair</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\HellfireCitadel\MagtheridonsLair\instance_magtheridons_lair.cpp">
+      <Filter>Source Files\Outland\HellfireCitadel\MagtheridonsLair</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\HellfireCitadel\ShatteredHalls\boss_nethekurse.cpp">
+      <Filter>Source Files\Outland\HellfireCitadel\ShatteredHalls</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\HellfireCitadel\ShatteredHalls\boss_warbringer_omrogg.cpp">
+      <Filter>Source Files\Outland\HellfireCitadel\ShatteredHalls</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\HellfireCitadel\ShatteredHalls\boss_warchief_kargath_bladefist.cpp">
+      <Filter>Source Files\Outland\HellfireCitadel\ShatteredHalls</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\HellfireCitadel\ShatteredHalls\instance_shattered_halls.cpp">
+      <Filter>Source Files\Outland\HellfireCitadel\ShatteredHalls</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\TempestKeep\arcatraz\arcatraz.cpp">
+      <Filter>Source Files\Outland\TempestKeep\arcatraz</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\TempestKeep\arcatraz\boss_harbinger_skyriss.cpp">
+      <Filter>Source Files\Outland\TempestKeep\arcatraz</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\TempestKeep\arcatraz\instance_arcatraz.cpp">
+      <Filter>Source Files\Outland\TempestKeep\arcatraz</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\TempestKeep\botanica\boss_high_botanist_freywinn.cpp">
+      <Filter>Source Files\Outland\TempestKeep\botanica</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\TempestKeep\botanica\boss_laj.cpp">
+      <Filter>Source Files\Outland\TempestKeep\botanica</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\TempestKeep\botanica\boss_warp_splinter.cpp">
+      <Filter>Source Files\Outland\TempestKeep\botanica</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\TempestKeep\Eye\boss_alar.cpp">
+      <Filter>Source Files\Outland\TempestKeep\Eye</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\TempestKeep\Eye\boss_astromancer.cpp">
+      <Filter>Source Files\Outland\TempestKeep\Eye</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\TempestKeep\Eye\boss_kaelthas.cpp">
+      <Filter>Source Files\Outland\TempestKeep\Eye</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\TempestKeep\Eye\boss_void_reaver.cpp">
+      <Filter>Source Files\Outland\TempestKeep\Eye</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\TempestKeep\Eye\instance_the_eye.cpp">
+      <Filter>Source Files\Outland\TempestKeep\Eye</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\TempestKeep\Eye\the_eye.cpp">
+      <Filter>Source Files\Outland\TempestKeep\Eye</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\TempestKeep\Mechanar\boss_gatewatcher_gyrokill.cpp">
+      <Filter>Source Files\Outland\TempestKeep\Mechanar</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\TempestKeep\Mechanar\boss_gatewatcher_ironhand.cpp">
+      <Filter>Source Files\Outland\TempestKeep\Mechanar</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\TempestKeep\Mechanar\boss_nethermancer_sepethrea.cpp">
+      <Filter>Source Files\Outland\TempestKeep\Mechanar</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\TempestKeep\Mechanar\boss_pathaleon_the_calculator.cpp">
+      <Filter>Source Files\Outland\TempestKeep\Mechanar</Filter>
+    </ClCompile>
+    <ClCompile Include="Outland\TempestKeep\Mechanar\instance_mechanar.cpp">
+      <Filter>Source Files\Outland\TempestKeep\Mechanar</Filter>
+    </ClCompile>
+    <ClCompile Include="World\areatrigger_scripts.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\boss_emeriss.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\boss_lethon.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\boss_taerar.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\boss_ysondre.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\go_scripts.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\guards.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\item_scripts.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\mob_generic_creature.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\npc_innkeeper.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\npc_professions.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\npc_taxi.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\npcs_special.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\PrecompiledHeaders\ScriptPCH.cpp">
+      <Filter>Source Files\..\game\PrecompiledHeaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\AI\ScriptedAI\ScriptedCreature.cpp">
+      <Filter>Source Files\..\game\AI\ScriptedAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\AI\ScriptedAI\ScriptedEscortAI.cpp">
+      <Filter>Source Files\..\game\AI\ScriptedAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\AI\ScriptedAI\ScriptedFollowerAI.cpp">
+      <Filter>Source Files\..\game\AI\ScriptedAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\AI\ScriptedAI\ScriptedGuardAI.cpp">
+      <Filter>Source Files\..\game\AI\ScriptedAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\AI\ScriptedAI\ScriptedSimpleAI.cpp">
+      <Filter>Source Files\..\game\AI\ScriptedAI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\Scripting\ScriptLoader.cpp">
+      <Filter>Source Files\..\game\Scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\Scripting\ScriptMgr.cpp">
+      <Filter>Source Files\..\game\Scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\game\Scripting\ScriptSystem.cpp">
+      <Filter>Source Files\..\game\Scripting</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="EasternKingdoms\BlackrockDepths\blackrock_depths.h">
+      <Filter>Header Files\EasternKingdoms\BlackrockDepths</Filter>
+    </ClInclude>
+    <ClInclude Include="EasternKingdoms\BlackrockSpire\blackrock_spire.h">
+      <Filter>Header Files\EasternKingdoms\BlackrockSpire</Filter>
+    </ClInclude>
+    <ClInclude Include="EasternKingdoms\Deadmines\deadmines.h">
+      <Filter>Header Files\EasternKingdoms\Deadmines</Filter>
+    </ClInclude>
+    <ClInclude Include="EasternKingdoms\Gnomeregan\gnomeregan.h">
+      <Filter>Header Files\EasternKingdoms\Gnomeregan</Filter>
+    </ClInclude>
+    <ClInclude Include="EasternKingdoms\Karazhan\karazhan.h">
+      <Filter>Header Files\EasternKingdoms\Karazhan</Filter>
+    </ClInclude>
+    <ClInclude Include="EasternKingdoms\MagistersTerrace\magisters_terrace.h">
+      <Filter>Header Files\EasternKingdoms\MagistersTerrace</Filter>
+    </ClInclude>
+    <ClInclude Include="EasternKingdoms\MoltenCore\molten_core.h">
+      <Filter>Header Files\EasternKingdoms\MoltenCore</Filter>
+    </ClInclude>
+    <ClInclude Include="EasternKingdoms\ScarletMonastery\scarlet_monastery.h">
+      <Filter>Header Files\EasternKingdoms\ScarletMonastery</Filter>
+    </ClInclude>
+    <ClInclude Include="EasternKingdoms\Scholomance\scholomance.h">
+      <Filter>Header Files\EasternKingdoms\Scholomance</Filter>
+    </ClInclude>
+    <ClInclude Include="EasternKingdoms\ShadowfangKeep\shadowfang_keep.h">
+      <Filter>Header Files\EasternKingdoms\ShadowfangKeep</Filter>
+    </ClInclude>
+    <ClInclude Include="EasternKingdoms\Stratholme\stratholme.h">
+      <Filter>Header Files\EasternKingdoms\Stratholme</Filter>
+    </ClInclude>
+    <ClInclude Include="EasternKingdoms\SunkenTemple\sunken_temple.h">
+      <Filter>Header Files\EasternKingdoms\SunkenTemple</Filter>
+    </ClInclude>
+    <ClInclude Include="EasternKingdoms\SunwellPlateau\sunwell_plateau.h">
+      <Filter>Header Files\EasternKingdoms\SunwellPlateau</Filter>
+    </ClInclude>
+    <ClInclude Include="EasternKingdoms\ZulAman\zulaman.h">
+      <Filter>Header Files\EasternKingdoms\ZulAman</Filter>
+    </ClInclude>
+    <ClInclude Include="EasternKingdoms\ZulGurub\zulgurub.h">
+      <Filter>Header Files\EasternKingdoms\ZulGurub</Filter>
+    </ClInclude>
+    <ClInclude Include="Kalimdor\BlackfathomDeeps\blackfathom_deeps.h">
+      <Filter>Header Files\Kalimdor\BlackfathomDeeps</Filter>
+    </ClInclude>
+    <ClInclude Include="Kalimdor\CavernsOfTime\BattleForMountHyjal\hyjal.h">
+      <Filter>Header Files\Kalimdor\CavernsOfTime\BattleForMountHyjal</Filter>
+    </ClInclude>
+    <ClInclude Include="Kalimdor\CavernsOfTime\BattleForMountHyjal\hyjal_trash.h">
+      <Filter>Header Files\Kalimdor\CavernsOfTime\BattleForMountHyjal</Filter>
+    </ClInclude>
+    <ClInclude Include="Kalimdor\CavernsOfTime\BattleForMountHyjal\hyjalAI.h">
+      <Filter>Header Files\Kalimdor\CavernsOfTime\BattleForMountHyjal</Filter>
+    </ClInclude>
+    <ClInclude Include="Kalimdor\CavernsOfTime\CullingOfStratholme\culling_of_stratholme.h">
+      <Filter>Header Files\Kalimdor\CavernsOfTime\CullingOfStratholme</Filter>
+    </ClInclude>
+    <ClInclude Include="Kalimdor\CavernsOfTime\DarkPortal\dark_portal.h">
+      <Filter>Header Files\Kalimdor\CavernsOfTime\DarkPortal</Filter>
+    </ClInclude>
+    <ClInclude Include="Kalimdor\CavernsOfTime\EscapeFromDurnholdeKeep\old_hillsbrad.h">
+      <Filter>Header Files\Kalimdor\CavernsOfTime\EscapeFromDurnholdeKeep</Filter>
+    </ClInclude>
+    <ClInclude Include="Kalimdor\WailingCaverns\wailing_caverns.h">
+      <Filter>Header Files\Kalimdor\WailingCaverns</Filter>
+    </ClInclude>
+    <ClInclude Include="Kalimdor\TempleOfAhnQiraj\temple_of_ahnqiraj.h">
+      <Filter>Header Files\Kalimdor\TempleOfAhnQiraj</Filter>
+    </ClInclude>
+    <ClInclude Include="Kalimdor\RuinsOfAhnQiraj\ruins_of_ahnqiraj.h">
+      <Filter>Header Files\Kalimdor\RuinsOfAhnQiraj</Filter>
+    </ClInclude>
+    <ClInclude Include="Kalimdor\RazorfenKraul\razorfen_kraul.h">
+      <Filter>Header Files\Kalimdor\RazorfenKraul</Filter>
+    </ClInclude>
+    <ClInclude Include="Kalimdor\RazorfenDowns\razorfen_downs.h">
+      <Filter>Header Files\Kalimdor\RazorfenDowns</Filter>
+    </ClInclude>
+    <ClInclude Include="Kalimdor\OnyxiasLair\onyxias_lair.h">
+      <Filter>Header Files\Kalimdor\OnyxiasLair</Filter>
+    </ClInclude>
+    <ClInclude Include="Outland\Auchindoun\SethekkHalls\sethekk_halls.h">
+      <Filter>Header Files\Outland\Auchindoun\SethekkHalls</Filter>
+    </ClInclude>
+    <ClInclude Include="Outland\Auchindoun\ShadowLabyrinth\shadow_labyrinth.h">
+      <Filter>Header Files\Outland\Auchindoun\ShadowLabyrinth</Filter>
+    </ClInclude>
+    <ClInclude Include="Outland\BlackTemple\black_temple.h">
+      <Filter>Header Files\Outland\BlackTemple</Filter>
+    </ClInclude>
+    <ClInclude Include="Outland\CoilfangReservoir\SerpentShrine\serpent_shrine.h">
+      <Filter>Header Files\Outland\CoilfangReservoir\SerpentShrine</Filter>
+    </ClInclude>
+    <ClInclude Include="Outland\CoilfangReservoir\SteamVault\steam_vault.h">
+      <Filter>Header Files\Outland\CoilfangReservoir\SteamVault</Filter>
+    </ClInclude>
+    <ClInclude Include="Outland\GruulsLair\gruuls_lair.h">
+      <Filter>Header Files\Outland\GruulsLair</Filter>
+    </ClInclude>
+    <ClInclude Include="Outland\HellfireCitadel\BloodFurnace\blood_furnace.h">
+      <Filter>Header Files\Outland\HellfireCitadel\BloodFurnace</Filter>
+    </ClInclude>
+    <ClInclude Include="Outland\HellfireCitadel\HellfireRamparts\hellfire_ramparts.h">
+      <Filter>Header Files\Outland\HellfireCitadel\HellfireRamparts</Filter>
+    </ClInclude>
+    <ClInclude Include="Outland\HellfireCitadel\MagtheridonsLair\magtheridons_lair.h">
+      <Filter>Header Files\Outland\HellfireCitadel\MagtheridonsLair</Filter>
+    </ClInclude>
+    <ClInclude Include="Outland\HellfireCitadel\ShatteredHalls\shattered_halls.h">
+      <Filter>Header Files\Outland\HellfireCitadel\ShatteredHalls</Filter>
+    </ClInclude>
+    <ClInclude Include="Outland\TempestKeep\arcatraz\arcatraz.h">
+      <Filter>Header Files\Outland\TempestKeep\arcatraz</Filter>
+    </ClInclude>
+    <ClInclude Include="Outland\TempestKeep\Eye\the_eye.h">
+      <Filter>Header Files\Outland\TempestKeep\Eye</Filter>
+    </ClInclude>
+    <ClInclude Include="Outland\TempestKeep\Mechanar\mechanar.h">
+      <Filter>Header Files\Outland\TempestKeep\Mechanar</Filter>
+    </ClInclude>
+    <ClInclude Include="Northrend\AzjolNerub\ahnkahet\ahnkahet.h">
+      <Filter>Header Files\Northrend\AzjolNerub\ahnkahet</Filter>
+    </ClInclude>
+    <ClInclude Include="Northrend\AzjolNerub\AzjolNerub\azjol_nerub.h">
+      <Filter>Header Files\Northrend\AzjolNerub\AzjolNerub</Filter>
+    </ClInclude>
+    <ClInclude Include="Northrend\CrusadersColiseum\TrialOfTheChampion\trial_of_the_champion.h">
+      <Filter>Header Files\Northrend\CrusadersColiseum\TrialOfTheChampion</Filter>
+    </ClInclude>
+    <ClInclude Include="Northrend\DraktharonKeep\drak_tharon_keep.h">
+      <Filter>Header Files\Northrend\DraktharonKeep</Filter>
+    </ClInclude>
+    <ClInclude Include="Northrend\FrozenHalls\ForgeOfSouls\forge_of_souls.h">
+      <Filter>Header Files\Northrend\FrozenHalls\ForgeOfSouls</Filter>
+    </ClInclude>
+    <ClInclude Include="Northrend\FrozenHalls\HallsOfReflection\halls_of_reflection.h">
+      <Filter>Header Files\Northrend\FrozenHalls\HallsOfReflection</Filter>
+    </ClInclude>
+    <ClInclude Include="Northrend\FrozenHalls\PitOfSaron\pit_of_saron.h">
+      <Filter>Header Files\Northrend\FrozenHalls\PitOfSaron</Filter>
+    </ClInclude>
+    <ClInclude Include="Northrend\Gundrak\gundrak.h">
+      <Filter>Header Files\Northrend\Gundrak</Filter>
+    </ClInclude>
+    <ClInclude Include="Northrend\Naxxramas\naxxramas.h">
+      <Filter>Header Files\Northrend\Naxxramas</Filter>
+    </ClInclude>
+    <ClInclude Include="Northrend\VioletHold\violet_hold.h">
+      <Filter>Header Files\Northrend\VioletHold</Filter>
+    </ClInclude>
+    <ClInclude Include="Northrend\VaultOfArchavon\vault_of_archavon.h">
+      <Filter>Header Files\Northrend\VaultOfArchavon</Filter>
+    </ClInclude>
+    <ClInclude Include="Northrend\UtgardeKeep\UtgardePinnacle\utgarde_pinnacle.h">
+      <Filter>Header Files\Northrend\UtgardeKeep\UtgardePinnacle</Filter>
+    </ClInclude>
+    <ClInclude Include="Northrend\UtgardeKeep\UtgardeKeep\utgarde_keep.h">
+      <Filter>Header Files\Northrend\UtgardeKeep\UtgardeKeep</Filter>
+    </ClInclude>
+    <ClInclude Include="Northrend\Ulduar\HallsOfLightning\halls_of_lightning.h">
+      <Filter>Header Files\Northrend\Ulduar\HallsOfLightning</Filter>
+    </ClInclude>
+    <ClInclude Include="Northrend\Ulduar\HallsOfStone\halls_of_stone.h">
+      <Filter>Header Files\Northrend\Ulduar\HallsOfStone</Filter>
+    </ClInclude>
+    <ClInclude Include="Northrend\Ulduar\ulduar\instance_ulduar.hpp">
+      <Filter>Header Files\Northrend\Ulduar\ulduar</Filter>
+    </ClInclude>
+    <ClInclude Include="Northrend\Ulduar\ulduar\ulduar.h">
+      <Filter>Header Files\Northrend\Ulduar\ulduar</Filter>
+    </ClInclude>
+    <ClInclude Include="Northrend\ObsidianSanctum\obsidian_sanctum.h">
+      <Filter>Header Files\Northrend\ObsidianSanctum</Filter>
+    </ClInclude>
+    <ClInclude Include="Northrend\Nexus\EyeOfEternity\eye_of_eternity.h">
+      <Filter>Header Files\Northrend\Nexus\EyeOfEternity</Filter>
+    </ClInclude>
+    <ClInclude Include="Northrend\Nexus\Oculus\oculus.h">
+      <Filter>Header Files\Northrend\Nexus\Oculus</Filter>
+    </ClInclude>
+    <ClInclude Include="Northrend\Nexus\Nexus\nexus.h">
+      <Filter>Header Files\Northrend\Nexus\Nexus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\AI\ScriptedAI\ScriptedCreature.h">
+      <Filter>Header Files\..\game\AI\ScriptedAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\AI\ScriptedAI\ScriptedEscortAI.h">
+      <Filter>Header Files\..\game\AI\ScriptedAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\AI\ScriptedAI\ScriptedFollowerAI.h">
+      <Filter>Header Files\..\game\AI\ScriptedAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\AI\ScriptedAI\ScriptedGuardAI.h">
+      <Filter>Header Files\..\game\AI\ScriptedAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\AI\ScriptedAI\ScriptedSimpleAI.h">
+      <Filter>Header Files\..\game\AI\ScriptedAI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\PrecompiledHeaders\ScriptPCH.h">
+      <Filter>Header Files\..\game\PrecompiledHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\Scripting\ScriptLoader.h">
+      <Filter>Header Files\..\game\Scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\Scripting\ScriptMgr.h">
+      <Filter>Header Files\..\game\Scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game\Scripting\ScriptSystem.h">
+      <Filter>Header Files\..\game\Scripting</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

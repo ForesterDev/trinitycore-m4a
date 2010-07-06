@@ -377,27 +377,17 @@ struct boss_spiritlynxAI : public ScriptedAI
 
 };
 
-CreatureAI* GetAI_boss_halazziAI(Creature* pCreature)
-{
-    return new boss_halazziAI (pCreature);
-}
-
-CreatureAI* GetAI_boss_spiritlynxAI(Creature* pCreature)
-{
-    return new boss_spiritlynxAI (pCreature);
-}
-
 void AddSC_boss_halazzi()
 {
     Script *newscript;
     newscript = new Script;
     newscript->Name = "boss_halazzi";
-    newscript->GetAI = &GetAI_boss_halazziAI;
+    newscript->GetAI = &get_ai<boss_halazziAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_halazzi_lynx";
-    newscript->GetAI = &GetAI_boss_spiritlynxAI;
+    newscript->GetAI = &get_ai<boss_spiritlynxAI>;
     newscript->RegisterSelf();
 }
 

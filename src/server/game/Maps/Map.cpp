@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "MapManager.h"
 #include "Player.h"
 #include "Vehicle.h"
@@ -2366,13 +2367,6 @@ void InstanceMap::InitVisibilityDistance()
 */
 bool InstanceMap::CanEnter(Player *player)
 {
-    if (player->GetMapRef().getTarget() == this)
-    {
-        sLog.outError("InstanceMap::CanEnter - player %s(%u) already in map %d,%d,%d!", player->GetName(), player->GetGUIDLow(), GetId(), GetInstanceId(), GetSpawnMode());
-        assert(false);
-        return false;
-    }
-
     // allow GM's to enter
     if (player->isGameMaster())
         return Map::CanEnter(player);

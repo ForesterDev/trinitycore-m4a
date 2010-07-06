@@ -437,17 +437,12 @@ struct boss_nalorakkAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_nalorakk(Creature* pCreature)
-{
-    return new boss_nalorakkAI (pCreature);
-}
-
 void AddSC_boss_nalorakk()
 {
     Script *newscript;
     newscript = new Script;
     newscript->Name = "boss_nalorakk";
-    newscript->GetAI = &GetAI_boss_nalorakk;
+    newscript->GetAI = &get_ai<boss_nalorakkAI>;
     newscript->RegisterSelf();
 }
 
