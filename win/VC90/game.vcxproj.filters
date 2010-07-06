@@ -199,18 +199,6 @@
     <Filter Include="Miscellaneous">
       <UniqueIdentifier>{56d8e371-fffc-49a6-9b4c-b7b0e821cd9b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Collision">
-      <UniqueIdentifier>{f3704f5f-ead8-4806-bb44-04079e98fd87}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Collision\Management">
-      <UniqueIdentifier>{d3b51e2b-bc04-4fb3-bae7-a84184a23065}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Collision\Maps">
-      <UniqueIdentifier>{24dcc779-9ccc-4abb-89e0-349b31ad82ae}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Collision\Models">
-      <UniqueIdentifier>{f57043f6-ad1a-4505-ba12-15d699de4732}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\server\game\AI\CreatureAI.cpp">
@@ -707,27 +695,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\server\game\Grids\Notifiers\GridNotifiers.cpp">
       <Filter>Grids\Notifiers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\server\collision\BoundingIntervalHierarchy.cpp">
-      <Filter>Collision</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\server\collision\Management\VMapFactory.cpp">
-      <Filter>Collision\Management</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\server\collision\Management\VMapManager2.cpp">
-      <Filter>Collision\Management</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\server\collision\Maps\MapTree.cpp">
-      <Filter>Collision\Maps</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\server\collision\Maps\TileAssembler.cpp">
-      <Filter>Collision\Maps</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\server\collision\Models\ModelInstance.cpp">
-      <Filter>Collision\Models</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\server\collision\Models\WorldModel.cpp">
-      <Filter>Collision\Models</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1234,36 +1201,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\server\game\Miscellaneous\SharedDefines.h">
       <Filter>Miscellaneous</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\server\collision\BoundingIntervalHierarchy.h">
-      <Filter>Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\server\collision\VMapDefinitions.h">
-      <Filter>Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\server\collision\VMapTools.h">
-      <Filter>Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\server\collision\Management\IVMapManager.h">
-      <Filter>Collision\Management</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\server\collision\Management\VMapFactory.h">
-      <Filter>Collision\Management</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\server\collision\Management\VMapManager2.h">
-      <Filter>Collision\Management</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\server\collision\Maps\MapTree.h">
-      <Filter>Collision\Maps</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\server\collision\Maps\TileAssembler.h">
-      <Filter>Collision\Maps</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\server\collision\Models\ModelInstance.h">
-      <Filter>Collision\Models</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\server\collision\Models\WorldModel.h">
-      <Filter>Collision\Models</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

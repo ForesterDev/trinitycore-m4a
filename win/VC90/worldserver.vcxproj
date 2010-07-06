@@ -363,6 +363,9 @@ copy ..\..\README.* ..\..\bin\$(Platform)_$(Configuration)</Command>
     <ProjectReference Include="..\..\externals\zlib\win\VC90\zlib.vcxproj">
       <Project>{8f1dea42-6a5b-4b62-839d-c141a7bfacf2}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\server\collision\collision.vcxproj">
+      <Project>{c11df087-cfa1-4ab8-bd01-9e0591c2fc5e}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\server\scripts\scripts.vcxproj">
       <Project>{e001577d-1350-4c1a-ab41-49ebec5f9044}</Project>
     </ProjectReference>
