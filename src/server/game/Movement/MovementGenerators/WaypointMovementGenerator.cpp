@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 //Basic headers
+#include "gamePCH.h"
 #include "WaypointMovementGenerator.h"
 #include "DestinationHolderImp.h"
 //Extended headers

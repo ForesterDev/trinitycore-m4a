@@ -20,6 +20,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "authserver", "VC90\authserv
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "worldserver", "VC90\worldserver.vcxproj", "{A3A04E47-43A2-4C08-90B3-029CEF558594}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "scripts", "..\src\server\scripts\scripts.vcxproj", "{E001577D-1350-4C1A-AB41-49EBEC5F9044}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -108,6 +110,14 @@ Global
 		{A3A04E47-43A2-4C08-90B3-029CEF558594}.Release|Win32.Build.0 = Release|Win32
 		{A3A04E47-43A2-4C08-90B3-029CEF558594}.Release|x64.ActiveCfg = Release|x64
 		{A3A04E47-43A2-4C08-90B3-029CEF558594}.Release|x64.Build.0 = Release|x64
+		{E001577D-1350-4C1A-AB41-49EBEC5F9044}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E001577D-1350-4C1A-AB41-49EBEC5F9044}.Debug|Win32.Build.0 = Debug|Win32
+		{E001577D-1350-4C1A-AB41-49EBEC5F9044}.Debug|x64.ActiveCfg = Debug|x64
+		{E001577D-1350-4C1A-AB41-49EBEC5F9044}.Debug|x64.Build.0 = Debug|x64
+		{E001577D-1350-4C1A-AB41-49EBEC5F9044}.Release|Win32.ActiveCfg = Release|Win32
+		{E001577D-1350-4C1A-AB41-49EBEC5F9044}.Release|Win32.Build.0 = Release|Win32
+		{E001577D-1350-4C1A-AB41-49EBEC5F9044}.Release|x64.ActiveCfg = Release|x64
+		{E001577D-1350-4C1A-AB41-49EBEC5F9044}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
