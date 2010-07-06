@@ -474,13 +474,6 @@
     <ClCompile Include="..\..\src\server\game\Grids\GridStates.cpp" />
     <ClCompile Include="..\..\src\server\game\Grids\ObjectGridLoader.cpp" />
     <ClCompile Include="..\..\src\server\game\Grids\Notifiers\GridNotifiers.cpp" />
-    <ClCompile Include="..\..\src\server\collision\BoundingIntervalHierarchy.cpp" />
-    <ClCompile Include="..\..\src\server\collision\Management\VMapFactory.cpp" />
-    <ClCompile Include="..\..\src\server\collision\Management\VMapManager2.cpp" />
-    <ClCompile Include="..\..\src\server\collision\Maps\MapTree.cpp" />
-    <ClCompile Include="..\..\src\server\collision\Maps\TileAssembler.cpp" />
-    <ClCompile Include="..\..\src\server\collision\Models\ModelInstance.cpp" />
-    <ClCompile Include="..\..\src\server\collision\Models\WorldModel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\server\game\AI\CreatureAI.h" />
@@ -696,16 +689,6 @@
     <ClInclude Include="..\..\src\server\game\Miscellaneous\Formulas.h" />
     <ClInclude Include="..\..\src\server\game\Miscellaneous\Language.h" />
     <ClInclude Include="..\..\src\server\game\Miscellaneous\SharedDefines.h" />
-    <ClInclude Include="..\..\src\server\collision\BoundingIntervalHierarchy.h" />
-    <ClInclude Include="..\..\src\server\collision\VMapDefinitions.h" />
-    <ClInclude Include="..\..\src\server\collision\VMapTools.h" />
-    <ClInclude Include="..\..\src\server\collision\Management\IVMapManager.h" />
-    <ClInclude Include="..\..\src\server\collision\Management\VMapFactory.h" />
-    <ClInclude Include="..\..\src\server\collision\Management\VMapManager2.h" />
-    <ClInclude Include="..\..\src\server\collision\Maps\MapTree.h" />
-    <ClInclude Include="..\..\src\server\collision\Maps\TileAssembler.h" />
-    <ClInclude Include="..\..\src\server\collision\Models\ModelInstance.h" />
-    <ClInclude Include="..\..\src\server\collision\Models\WorldModel.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="genrevision.vcxproj">
