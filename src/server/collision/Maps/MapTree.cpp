@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "MapTree.h"
 #include "ModelInstance.h"
 #include "VMapManager2.h"

@@ -22,6 +22,7 @@
     \ingroup u2w
 */
 
+#include "gamePCH.h"
 #include "Opcodes.h"
 #include "WorldSession.h"
 

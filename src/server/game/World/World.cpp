@@ -22,6 +22,7 @@
     \ingroup world
 */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "ConfigEnv.h"
