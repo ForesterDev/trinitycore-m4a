@@ -32,6 +32,11 @@ class DynamicObject : public WorldObject, public GridObject<DynamicObject>
     public:
         explicit DynamicObject();
 
+        ~DynamicObject()
+        {
+            assert(!m_aura);
+        }
+
         void AddToWorld();
         void RemoveFromWorld();
 
