@@ -42,6 +42,16 @@ DynamicObject::DynamicObject() : WorldObject()
     m_duration = 0;
 }
 
+DynamicObject::~DynamicObject()
+{
+    if (m_aura)
+    {
+        if (!m_aura->IsRemoved())
+            m_aura->_Remove(AURA_REMOVE_BY_DEFAULT);
+        delete m_aura;
+    }
+}
+
 void DynamicObject::AddToWorld()
 {
     ///- Register the dynamicObject for guid lookup
