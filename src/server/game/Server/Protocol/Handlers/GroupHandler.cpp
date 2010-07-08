@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "Opcodes.h"
@@ -56,6 +57,23 @@ void WorldSession::SendPartyResult(PartyOperation operation, const std::string& 
     data << uint32(0);                                      // LFD cooldown related (used with ERR_PARTY_LFG_BOOT_COOLDOWN_S and ERR_PARTY_LFG_BOOT_NOT_ELIGIBLE_S)
 
     SendPacket(&data);
+}
+
+namespace
+{
+    template<bool res>
+        WorldPacket make_group_invite_msg(const char *name)
+    {
+        WorldPacket data(SMSG_GROUP_INVITE, 10);                // guess size
+        data << uint8(res); // invited/already in group flag
+        data << name;   // max len 48
+        data << uint32(0);                                      // unk
+        data << uint8(0);                                       // count
+        //for (int i = 0; i < count; ++i)
+        //    data << uint32(0);
+        data << uint32(0);                                      // unk
+        return std::move(data);
+    }
 }
 
 void WorldSession::HandleGroupInviteOpcode(WorldPacket & recv_data)
@@ -120,6 +138,8 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket & recv_data)
     if (group2 || player->GetGroupInvite())
     {
         SendPartyResult(PARTY_OP_INVITE, membername, ERR_ALREADY_IN_GROUP_S);
+        auto msg = make_group_invite_msg<false>(GetPlayer()->GetName());
+        player->GetSession()->SendPacket(&msg);
         return;
     }
 
@@ -167,14 +187,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket & recv_data)
     }
 
     // ok, we do it
-    WorldPacket data(SMSG_GROUP_INVITE, 10);                // guess size
-    data << uint8(1);                                       // invited/already in group flag
-    data << GetPlayer()->GetName();                         // max len 48
-    data << uint32(0);                                      // unk
-    data << uint8(0);                                       // count
-    //for (int i = 0; i < count; ++i)
-    //    data << uint32(0);
-    data << uint32(0);                                      // unk
+    WorldPacket data = make_group_invite_msg<true>(GetPlayer()->GetName());
     player->GetSession()->SendPacket(&data);
 
     SendLfgUpdatePlayer(LFG_UPDATETYPE_REMOVED_FROM_QUEUE);

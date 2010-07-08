@@ -372,6 +372,8 @@ bool AuthSocket::_HandleLogonChallenge()
         pkt << (uint8)WOW_FAIL_BANNED;
         sLog.outBasic("[AuthChallenge] Banned ip %s tries to login!", address.c_str ());
     }
+    else if (_build != 12340)
+        pkt << static_cast<uint8>(WOW_FAIL_VERSION_INVALID);
     else
     {
         ///- Get the account details from the account table
@@ -823,10 +825,7 @@ bool AuthSocket::_HandleRealmList()
     {
         // don't work with realms which not compatible with the client
         if (_expversion & POST_BC_EXP_FLAG) // 2.4.3 and 3.1.3 cliens
-        {
-            if (i->second.gamebuild != _build)
-                continue;
-        }
+            ;
         else if (_expversion & PRE_BC_EXP_FLAG) // 1.12.1 and 1.12.2 clients are compatible with eachother
         {
             if (!AuthHelper::IsPreBCAcceptedClientBuild(i->second.gamebuild))

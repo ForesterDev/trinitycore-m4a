@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "Language.h"
 #include "DatabaseEnv.h"
@@ -355,7 +356,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket & /*recv_data*/)
     if (uint64 lguid = GetPlayer()->GetLootGUID())
         DoLootRelease(lguid);
 
-    uint8 reason = 0;
+    uint32 reason = 0;
 
     if (GetPlayer()->isInCombat())
         reason = 1;
@@ -366,9 +367,9 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket & /*recv_data*/)
 
     if (reason)
     {
-        WorldPacket data(SMSG_LOGOUT_RESPONSE, 1+4);
-        data << uint8(reason);
-        data << uint32(0);
+        WorldPacket data(SMSG_LOGOUT_RESPONSE, 4 + 1);
+        data << reason;
+        data << uint8(0);
         SendPacket(&data);
         LogoutRequest(0);
         return;
@@ -378,9 +379,9 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket & /*recv_data*/)
     if (GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || GetPlayer()->isInFlight() ||
         GetSecurity() >= sWorld.getConfig(CONFIG_INSTANT_LOGOUT))
     {
-        WorldPacket data(SMSG_LOGOUT_RESPONSE, 1+4);
-        data << uint8(0);
-        data << uint32(16777216);
+        WorldPacket data(SMSG_LOGOUT_RESPONSE, 4 + 1);
+        data << uint32(0);
+        data << uint8(1);
         SendPacket(&data);
         LogoutPlayer(true);
         return;
@@ -398,9 +399,9 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket & /*recv_data*/)
         GetPlayer()->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
     }
 
-    WorldPacket data(SMSG_LOGOUT_RESPONSE, 1+4);
-    data << uint8(0);
+    WorldPacket data(SMSG_LOGOUT_RESPONSE, 4 + 1);
     data << uint32(0);
+    data << uint8(0);
     SendPacket(&data);
     LogoutRequest(time(NULL));
 }
@@ -1214,8 +1215,6 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     recv_data >> guid;
     DEBUG_LOG("Inspected guid is " UI64FMTD, guid);
 
-    _player->SetSelection(guid);
-
     Player *plr = objmgr.GetPlayer(guid);
     if (!plr)                                                // wrong player
         return;
@@ -1255,7 +1254,7 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
 
     WorldPacket data(MSG_INSPECT_HONOR_STATS, 8+1+4*4);
     data << uint64(player->GetGUID());
-    data << uint8(player->GetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY));
+    data << uint8(0);
     data << uint32(player->GetUInt32Value(PLAYER_FIELD_KILLS));
     data << uint32(player->GetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION));
     data << uint32(player->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION));

@@ -18,6 +18,7 @@
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
+#include "gamePCH.h"
 #include <ace/Message_Block.h>
 #include <ace/OS_NS_string.h>
 #include <ace/OS_NS_unistd.h>
@@ -720,7 +721,8 @@ int WorldSocket::ProcessIncoming (WorldPacket* new_pct)
                 return HandleAuthSession (*new_pct);
             case CMSG_KEEP_ALIVE:
                 DEBUG_LOG ("CMSG_KEEP_ALIVE ,size: %d", new_pct->size());
-
+                if (m_Session)
+                    m_Session->ResetTimeOutTime();
                 return 0;
             default:
             {
@@ -797,6 +799,9 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
     recvPacket >> account;
     recvPacket >> unk3;
     recvPacket >> clientSeed;
+    recvPacket.read_skip<int32>();
+    recvPacket.read_skip<int32>();
+    recvPacket.read_skip<int32>();
     recvPacket >> unk4;
     recvPacket.read (digest, 20);
 
