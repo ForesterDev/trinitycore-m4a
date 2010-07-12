@@ -135,9 +135,15 @@
     <ClInclude Include="..\loadlib\loadlib.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\externals\bzip2\win\VC90\bzip2.vcxproj">
+      <Project>{ce773400-763e-4b71-b5e2-c9b60a752eb1}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\externals\libmpq\win\VC90\libmpq.vcxproj">
       <Project>{03ab0f44-628e-4855-99a0-c98a1eb52c50}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\externals\zlib\win\VC90\zlib.vcxproj">
+      <Project>{8f1dea42-6a5b-4b62-839d-c141a7bfacf2}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
