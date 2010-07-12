@@ -23,6 +23,14 @@
 #include "ArenaTeam.h"
 #include "World.h"
 
+namespace
+{
+    enum
+    {
+        low_rating_threshold = 1300
+    };
+}
+
 void ArenaTeamMember::ModifyPersonalRating(Player* plr, int32 mod, uint32 slot)
 {
     if (int32(personal_rating) + mod < 0)
@@ -155,8 +163,8 @@ bool ArenaTeam::AddMember(const uint64& PlayerGuid)
         if (sWorld.getConfig(CONFIG_ARENA_SEASON_ID) < 6)
             newmember.personal_rating = 1500;
         else
-            if (GetRating() >= 1000)
-                newmember.personal_rating = 1000;
+            if (GetRating() >= low_rating_threshold)
+                newmember.personal_rating = low_rating_threshold;
     }
 
     m_members.push_back(newmember);
@@ -566,8 +574,8 @@ float ArenaTeam::GetChanceAgainst(uint32 own_rating, uint32 enemy_rating)
     // ELO system
 
     if (sWorld.getConfig(CONFIG_ARENA_SEASON_ID) >= 6)
-        if (enemy_rating < 1000)
-            enemy_rating = 1000;
+        if (enemy_rating < low_rating_threshold)
+            enemy_rating = low_rating_threshold;
     return 1.0f/(1.0f+exp(log(10.0f)*(float)((float)enemy_rating - (float)own_rating)/400.0f));
 }
 
@@ -595,7 +603,7 @@ int32 ArenaTeam::WonAgainst(uint32 againstRating)
     // called when the team has won
     // 'chance' calculation - to beat the opponent
     float chance = GetChanceAgainst(m_stats.rating, againstRating);
-    float K = (m_stats.rating < 1000) ? 48.0f : 32.0f;
+    float K = m_stats.rating < low_rating_threshold ? 48.0f : 32.0f;
     // calculate the rating modification (ELO system with k=32 or k=48 if rating<1000)
     int32 mod = (int32)floor(K* (1.0f - chance));
 
@@ -613,7 +621,7 @@ int32 ArenaTeam::LostAgainst(uint32 againstRating)
     // called when the team has lost
     //'chance' calculation - to loose to the opponent
     float chance = GetChanceAgainst(m_stats.rating, againstRating);
-    if (m_stats.rating < 1000)
+    if (m_stats.rating < low_rating_threshold)
     {
         FinishGame(0);
         return 0;
@@ -637,7 +645,7 @@ void ArenaTeam::MemberLost(Player * plr, uint32 againstRating)
         {
             // update personal rating
             float chance = GetChanceAgainst(itr->personal_rating, againstRating);
-            float K = (itr->personal_rating < 1000) ? 48.0f : 32.0f;
+            float K = itr->personal_rating < low_rating_threshold ? 48.0f : 32.0f;
             // calculate the rating modification (ELO system with k=32 or k=48 if rating<1000)
             int32 mod = (int32)ceil(K * (0.0f - chance));
             itr->ModifyPersonalRating(plr, mod, GetSlot());
@@ -661,7 +669,7 @@ void ArenaTeam::OfflineMemberLost(uint64 guid, uint32 againstRating)
         {
             // update personal rating
             float chance = GetChanceAgainst(itr->personal_rating, againstRating);
-            float K = (itr->personal_rating < 1000) ? 48.0f : 32.0f;
+            float K = itr->personal_rating < low_rating_threshold ? 48.0f : 32.0f;
             // calculate the rating modification (ELO system with k=32 or k=48 if rating<1000)
             int32 mod = (int32)ceil(K * (0.0f - chance));
             if (int32(itr->personal_rating) + mod < 0)
@@ -685,7 +693,7 @@ void ArenaTeam::MemberWon(Player * plr, uint32 againstRating)
         {
             // update personal rating
             float chance = GetChanceAgainst(itr->personal_rating, againstRating);
-            float K = (itr->personal_rating < 1000) ? 48.0f : 32.0f;
+            float K = itr->personal_rating < low_rating_threshold ? 48.0f : 32.0f;
             // calculate the rating modification (ELO system with k=32 or k=48 if rating<1000)
             int32 mod = (int32)floor(K* (1.0f - chance));
             itr->ModifyPersonalRating(plr, mod, GetSlot());
