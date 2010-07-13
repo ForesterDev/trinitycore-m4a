@@ -119,7 +119,7 @@ bool IsEncounterComplete(ScriptedInstance* pInstance, Creature* me)
 
     for (uint8 i = 0; i < 3; ++i)
     {
-        uint64 guid = pInstance->GetData64(DATA_STEELBREAKER+i);
+        uint64 guid = pInstance->GetData64(DATA_STEELBREAKER + i);
         if (!guid)
             return false;
 
@@ -147,7 +147,7 @@ struct boss_steelbreakerAI : public ScriptedAI
         phase = 0;
         me->RemoveAllAuras();
         if (pInstance)
-            pInstance->SetData(TYPE_ASSEMBLY, NOT_STARTED);
+            pInstance->SetBossState(boss_assembly, NOT_STARTED);
     }
 
     EventMap events;
@@ -194,7 +194,7 @@ struct boss_steelbreakerAI : public ScriptedAI
     {
         DoScriptText(RAND(SAY_STEELBREAKER_DEATH_1,SAY_STEELBREAKER_DEATH_2), me);
         if (IsEncounterComplete(pInstance, me) && pInstance)
-            pInstance->SetData(TYPE_ASSEMBLY, DONE);
+            pInstance->SetBossState(boss_assembly, DONE);
     }
 
     void KilledUnit(Unit * /*who*/)
@@ -257,7 +257,7 @@ struct boss_runemaster_molgeimAI : public ScriptedAI
     void Reset()
     {
         if (pInstance)
-            pInstance->SetData(TYPE_ASSEMBLY, NOT_STARTED);
+            pInstance->SetBossState(boss_assembly, NOT_STARTED);
         events.Reset();
         me->RemoveAllAuras();
         phase = 0;
@@ -307,7 +307,7 @@ struct boss_runemaster_molgeimAI : public ScriptedAI
     {
         DoScriptText(RAND(SAY_MOLGEIM_DEATH_1,SAY_MOLGEIM_DEATH_2), me);
         if (IsEncounterComplete(pInstance, me) && pInstance)
-            pInstance->SetData(TYPE_ASSEMBLY, DONE);
+            pInstance->SetBossState(boss_assembly, DONE);
     }
 
     void KilledUnit(Unit * /*who*/)
@@ -424,7 +424,7 @@ struct boss_stormcaller_brundirAI : public ScriptedAI
     void Reset()
     {
         if (pInstance)
-            pInstance->SetData(TYPE_ASSEMBLY, NOT_STARTED);
+            pInstance->SetBossState(boss_assembly, NOT_STARTED);
         me->RemoveAllAuras();
         events.Reset();
         phase = 0;
@@ -477,7 +477,7 @@ struct boss_stormcaller_brundirAI : public ScriptedAI
     {
         DoScriptText(RAND(SAY_BRUNDIR_DEATH_1,SAY_BRUNDIR_DEATH_2), me);
         if (IsEncounterComplete(pInstance, me) && pInstance)
-            pInstance->SetData(TYPE_ASSEMBLY, DONE);
+            pInstance->SetBossState(boss_assembly, DONE);
     }
 
     void KilledUnit(Unit * /*who*/)
@@ -531,58 +531,33 @@ struct boss_stormcaller_brundirAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_steelbreaker(Creature* pCreature)
-{
-    return new boss_steelbreakerAI (pCreature);
-}
-
-CreatureAI* GetAI_boss_runemaster_molgeim(Creature* pCreature)
-{
-    return new boss_runemaster_molgeimAI (pCreature);
-}
-
-CreatureAI* GetAI_boss_stormcaller_brundir(Creature* pCreature)
-{
-    return new boss_stormcaller_brundirAI (pCreature);
-}
-
-CreatureAI* GetAI_mob_lightning_elemental(Creature* pCreature)
-{
-    return new mob_lightning_elementalAI (pCreature);
-}
-
-CreatureAI* GetAI_mob_rune_of_summoning(Creature* pCreature)
-{
-    return new mob_rune_of_summoningAI (pCreature);
-}
-
 void AddSC_boss_assembly_of_iron()
 {
     Script *newscript;
 
     newscript = new Script;
     newscript->Name = "boss_steelbreaker";
-    newscript->GetAI = &GetAI_boss_steelbreaker;
+    newscript->GetAI = &get_ai<boss_steelbreakerAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "boss_runemaster_molgeim";
-    newscript->GetAI = &GetAI_boss_runemaster_molgeim;
+    newscript->GetAI = &get_ai<boss_runemaster_molgeimAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "boss_stormcaller_brundir";
-    newscript->GetAI = &GetAI_boss_stormcaller_brundir;
+    newscript->GetAI = &get_ai<boss_stormcaller_brundirAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_lightning_elemental";
-    newscript->GetAI = &GetAI_mob_lightning_elemental;
+    newscript->GetAI = &get_ai<mob_lightning_elementalAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_rune_of_summoning";
-    newscript->GetAI = &GetAI_mob_rune_of_summoning;
+    newscript->GetAI = &get_ai<mob_rune_of_summoningAI>;
     newscript->RegisterSelf();
 
 }

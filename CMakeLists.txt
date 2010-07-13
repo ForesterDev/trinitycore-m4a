@@ -36,6 +36,10 @@ if( BUILDING_IN_SOURCE )
   ")
 endif()
 
+if(CMAKE_COMPILER_IS_GNUCXX)
+  add_definitions(-std=c++0x)
+endif(CMAKE_COMPILER_IS_GNUCXX)
+
 #
 # Basic packagesearching and setup (further support will be needed, this is a preliminary release!)
 #
@@ -63,9 +67,9 @@ if( UNIX )
   include(FindBZip2)
 endif()
 
-# Select the Release build configuration by default.
+# Select the Release With Debug Information build configuration by default.
 if( NOT CMAKE_BUILD_TYPE )
-  set(CMAKE_BUILD_TYPE "Release")
+  set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 endif()
 
 if( UNIX )

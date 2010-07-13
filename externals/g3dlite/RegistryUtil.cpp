@@ -257,7 +257,8 @@ bool RegistryUtil::writeString(const std::string& key, const std::string& value,
 
 
 // static helpers
-static HKEY getRootKeyFromString(const char* str, size_t length) {
+static HKEY getRootKeyFromString(const char *str, size_t length)
+{
     debugAssert(str);
 
     if (str) {

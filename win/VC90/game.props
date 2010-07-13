@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <SourceDir>$(MSBuildThisFileDirectory)..\..\src\server\game</SourceDir>
+  </PropertyGroup>
+  <PropertyGroup>
+    <IncludePath>$(SourceDir)\..\collision;$(SourceDir)\..\collision\Management;$(SourceDir)\Account;$(SourceDir)\Achievements;$(SourceDir)\Addons;$(SourceDir)\AI;$(SourceDir)\AI\CoreAI;$(SourceDir)\AI\EventAI;$(SourceDir)\AI\ScriptedAI;$(SourceDir)\AuctionHouse;$(SourceDir)\BattleGrounds;$(SourceDir)\Calendar;$(SourceDir)\Chat;$(SourceDir)\Conditions;$(SourceDir)\Combat;$(SourceDir)\DataStores;$(SourceDir)\DungeonFinding;$(SourceDir)\Entities\Corpse;$(SourceDir)\Entities\Creature;$(SourceDir)\Entities\DynamicObject;$(SourceDir)\Entities\Item;$(SourceDir)\Entities\Item\Container;$(SourceDir)\Entities\GameObject;$(SourceDir)\Entities\Object;$(SourceDir)\Entities\Object\Updates;$(SourceDir)\Entities\Pet;$(SourceDir)\Entities\Player;$(SourceDir)\Entities\Unit;$(SourceDir)\Entities\Vehicle;$(SourceDir)\Events;$(SourceDir)\Globals;$(SourceDir)\Grids;$(SourceDir)\Grids\Cells;$(SourceDir)\Grids\Notifiers;$(SourceDir)\Groups;$(SourceDir)\Guilds;$(SourceDir)\Instances;$(SourceDir)\LookingForGroup;$(SourceDir)\Loot;$(SourceDir)\Mails;$(SourceDir)\Miscellaneous;$(SourceDir)\Maps;$(SourceDir)\Movement;$(SourceDir)\Movement\Waypoints;$(SourceDir)\Opcodes;$(SourceDir)\OutdoorPvP;$(SourceDir)\Pools;$(SourceDir)\PrecompiledHeaders;$(SourceDir)\Quests;$(SourceDir)\Reputation;$(SourceDir)\Scripting;$(SourceDir)\Server;$(SourceDir)\Server\Protocol;$(SourceDir)\Server\Protocol\Handlers;$(SourceDir)\Skills;$(SourceDir)\Spells;$(SourceDir)\Spells\Auras;$(SourceDir)\Tools;$(SourceDir)\Weather;$(SourceDir)\World;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup />
+  <ItemGroup>
+    <BuildMacro Include="SourceDir">
+      <Value>$(SourceDir)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

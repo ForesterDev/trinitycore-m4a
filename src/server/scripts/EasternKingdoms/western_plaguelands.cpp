@@ -203,10 +203,6 @@ struct npc_the_scourge_cauldronAI : public ScriptedAI
         }
     }
 };
-CreatureAI* GetAI_npc_the_scourge_cauldron(Creature* pCreature)
-{
-    return new npc_the_scourge_cauldronAI (pCreature);
-}
 
 /*######
 ##    npcs_andorhal_tower
@@ -230,11 +226,6 @@ struct npc_andorhal_towerAI : public Scripted_NoMovementAI
             CAST_PLR(pWho)->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
     }
 };
-
-CreatureAI* GetAI_npc_andorhal_tower(Creature* pCreature)
-{
-    return new npc_andorhal_towerAI (pCreature);
-}
 
 /*######
 ##  npc_anchorite_truuen
@@ -346,11 +337,6 @@ struct npc_anchorite_truuenAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_anchorite_truuen(Creature* pCreature)
-{
-    return new npc_anchorite_truuenAI(pCreature);
-}
-
 bool QuestAccept_npc_anchorite_truuen(Player* pPlayer, Creature* pCreature, Quest const *quest)
 {
     npc_escortAI* pEscortAI = CAST_AI(npc_anchorite_truuenAI, pCreature->AI());
@@ -382,17 +368,17 @@ void AddSC_western_plaguelands()
 
     newscript = new Script;
     newscript->Name = "npc_the_scourge_cauldron";
-    newscript->GetAI = &GetAI_npc_the_scourge_cauldron;
+    newscript->GetAI = &get_ai<npc_the_scourge_cauldronAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "npc_andorhal_tower";
-    newscript->GetAI = &GetAI_npc_andorhal_tower;
+    newscript->GetAI = &get_ai<npc_andorhal_towerAI>;
     newscript->RegisterSelf();
     
     newscript = new Script;
     newscript->Name = "npc_anchorite_truuen";
-    newscript->GetAI = &GetAI_npc_anchorite_truuen;
+    newscript->GetAI = &get_ai<npc_anchorite_truuenAI>;
     newscript->pQuestAccept =  &QuestAccept_npc_anchorite_truuen;
     newscript->RegisterSelf();
 }
