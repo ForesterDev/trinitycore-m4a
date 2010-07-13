@@ -333,8 +333,10 @@ void SpellCastTargets::write (WorldPacket * data)
 }
 
 Spell::Spell(Unit* Caster, SpellEntry const *info, bool triggered, uint64 originalCasterGUID, Spell** triggeringContainer, bool skipCheck)
-: m_spellInfo(spellmgr.GetSpellForDifficultyFromSpell(info, Caster)), m_spellValue(new SpellValue(m_spellInfo))
-, m_caster(Caster)
+    : m_spellInfo(spellmgr.GetSpellForDifficultyFromSpell(info, Caster)),
+        m_spellValue(new SpellValue(m_spellInfo)),
+        m_caster(Caster),
+        use_count()
 {
     m_customAttr = spellmgr.GetSpellCustomAttr(m_spellInfo->Id);
     m_skipCheck = skipCheck;
@@ -456,6 +458,7 @@ Spell::Spell(Unit* Caster, SpellEntry const *info, bool triggered, uint64 origin
 
 Spell::~Spell()
 {
+    assert(!use_count);
     if (m_referencedFromCurrentSpell && m_selfContainer && *m_selfContainer == this)
     {
         // Clean the reference to avoid later crash.
@@ -2593,6 +2596,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
 
 void Spell::prepare(SpellCastTargets const* targets, AuraEffect const * triggeredByAura)
 {
+    Use use(*this);
     if (m_CastItem)
         m_castItemGUID = m_CastItem->GetGUID();
     else
