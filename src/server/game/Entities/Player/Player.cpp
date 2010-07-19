@@ -19975,7 +19975,6 @@ void Player::UpdateHomebindTime(uint32 time)
         if (time >= m_HomebindTimer)
         {
             // teleport to nearest graveyard
-            SetPhaseMask(1,true);
             RepopAtGraveyard();
         }
         else
@@ -19991,7 +19990,6 @@ void Player::UpdateHomebindTime(uint32 time)
         data << uint32(1);
         GetSession()->SendPacket(&data);
         sLog.outDebug("PLAYER: Player '%s' (GUID: %u) will be teleported to homebind in 60 seconds", GetName(),GetGUIDLow());
-        SetPhaseMask(2,true);
     }
 }
 
