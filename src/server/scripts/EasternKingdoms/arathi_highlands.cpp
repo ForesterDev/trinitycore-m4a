@@ -117,18 +117,13 @@ bool QuestAccept_npc_professor_phizzlethorpe(Player* pPlayer, Creature* pCreatur
     return true;
 }
 
-CreatureAI* GetAI_npc_professor_phizzlethorpeAI(Creature* pCreature)
-{
-    return new npc_professor_phizzlethorpeAI(pCreature);
-}
-
 void AddSC_arathi_highlands()
 {
     Script * newscript;
 
     newscript = new Script;
     newscript->Name = "npc_professor_phizzlethorpe";
-    newscript->GetAI = &GetAI_npc_professor_phizzlethorpeAI;
+    newscript->GetAI = &get_ai<npc_professor_phizzlethorpeAI>;
     newscript->pQuestAccept = &QuestAccept_npc_professor_phizzlethorpe;
     newscript->RegisterSelf();
 }

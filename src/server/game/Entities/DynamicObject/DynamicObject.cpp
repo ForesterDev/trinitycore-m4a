@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "UpdateMask.h"
 #include "Opcodes.h"
@@ -39,6 +40,16 @@ DynamicObject::DynamicObject() : WorldObject()
 
     m_aura = 0;
     m_duration = 0;
+}
+
+DynamicObject::~DynamicObject()
+{
+    if (m_aura)
+    {
+        if (!m_aura->IsRemoved())
+            m_aura->_Remove(AURA_REMOVE_BY_DEFAULT);
+        delete m_aura;
+    }
 }
 
 void DynamicObject::AddToWorld()

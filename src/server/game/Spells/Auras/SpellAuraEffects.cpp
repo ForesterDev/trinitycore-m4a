@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
@@ -201,7 +202,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNoImmediateEffect,                         //144 SPELL_AURA_SAFE_FALL                         implemented in WorldSession::HandleMovementOpcodes
     &AuraEffect::HandleAuraModPetTalentsPoints,                   //145 SPELL_AURA_MOD_PET_TALENT_POINTS
     &AuraEffect::HandleNoImmediateEffect,                         //146 SPELL_AURA_ALLOW_TAME_PET_TYPE
-    &AuraEffect::HandleModStateImmunityMask,                      //147 SPELL_AURA_MECHANIC_IMMUNITY_MASK
+    &AuraEffect::HandleAddCreatureImmunity,                       //147 SPELL_AURA_ADD_CREATURE_IMMUNITY
     &AuraEffect::HandleAuraRetainComboPoints,                     //148 SPELL_AURA_RETAIN_COMBO_POINTS
     &AuraEffect::HandleNoImmediateEffect,                         //149 SPELL_AURA_REDUCE_PUSHBACK
     &AuraEffect::HandleShieldBlockValue,                          //150 SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT
@@ -2446,6 +2447,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit * target, bool apply) const
             break;
         case FORM_SHADOW:
             spellId = 49868;
+            spellId2 = 71167;
             break;
         case FORM_GHOSTWOLF:
             spellId = 67116;
@@ -3649,9 +3651,15 @@ void AuraEffect::HandleAuraAllowFlight(AuraApplication const * aurApp, uint8 mod
         // allow fly
         WorldPacket data;
         if (apply)
+        {
+            ((Player*)target)->SetCanFly(true);
             data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
+        }
         else
+        {
             data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
+            ((Player*)target)->SetCanFly(false);
+        }
         data.append(target->GetPackGUID());
         data << uint32(0);                                      // unk
         plr->SendDirectMessage(&data);
@@ -4060,9 +4068,15 @@ void AuraEffect::HandleAuraModIncreaseFlightSpeed(AuraApplication const * aurApp
             {
                 WorldPacket data;
                 if (apply)
+                {
+                    ((Player*)target)->SetCanFly(true);
                     data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
+                }
                 else
+                {
                     data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
+                    ((Player*)target)->SetCanFly(false);
+                }
                 data.append(plr->GetPackGUID());
                 data << uint32(0);                                      // unknown
                 plr->SendDirectMessage(&data);
@@ -4126,50 +4140,50 @@ void AuraEffect::HandleAuraModUseNormalSpeed(AuraApplication const * aurApp, uin
 /***                     IMMUNITY                      ***/
 /*********************************************************/
 
-void AuraEffect::HandleModStateImmunityMask(AuraApplication const * aurApp, uint8 mode, bool apply) const
+namespace
+{
+    template<class Ty,
+            std::size_t Size>
+        std::pair<Ty *, Ty *> make_range(Ty (&array)[Size])
+    {
+        return std::make_pair(std::begin(array), std::end(array));
+    }
+}
+
+void AuraEffect::HandleAddCreatureImmunity(AuraApplication const * aurApp, uint8 mode, bool apply) const
 {
     if (!(mode & AURA_EFFECT_HANDLE_REAL))
         return;
 
     Unit * target = aurApp->GetTarget();
 
-    std::list <AuraType> immunity_list;
-    if (GetMiscValue() & (1<<10))
-        immunity_list.push_back(SPELL_AURA_MOD_STUN);
-    if (GetMiscValue() & (1<<7))
-        immunity_list.push_back(SPELL_AURA_MOD_DISARM);
-    if (GetMiscValue() & (1<<1))
-        immunity_list.push_back(SPELL_AURA_TRANSFORM);
-
-    // These flag can be recognized wrong:
-    if (GetMiscValue() & (1<<6))
-        immunity_list.push_back(SPELL_AURA_MOD_DECREASE_SPEED);
-    if (GetMiscValue() & (1<<0))
-        immunity_list.push_back(SPELL_AURA_MOD_ROOT);
-    if (GetMiscValue() & (1<<2))
-        immunity_list.push_back(SPELL_AURA_MOD_CONFUSE);
-    if (GetMiscValue() & (1<<9))
-        immunity_list.push_back(SPELL_AURA_MOD_FEAR);
-
-    // Patch 3.0.3 Bladestorm now breaks all snares and roots on the warrior when activated.
-    // however not all mechanic specified in immunity
-    if (apply && GetId() == 46924)
+    std::pair<const Mechanics *, const Mechanics *> immunity_list;
+    switch (GetMiscValue())
     {
-        target->RemoveAurasByType(SPELL_AURA_MOD_ROOT);
-        target->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
-    }
-
-    if (apply && GetSpellProto()->AttributesEx & SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)
-    {
-        for (std::list <AuraType>::iterator iter = immunity_list.begin(); iter != immunity_list.end(); ++iter)
+    case 1733:
         {
-            target->RemoveAurasByType(*iter);
+            static const Mechanics l[] = {
+                        MECHANIC_STUN,
+                        MECHANIC_SNARE,
+                        MECHANIC_ROOT,
+                        MECHANIC_DISORIENTED,
+                        MECHANIC_FEAR
+                    };
+            immunity_list = make_range(l);
         }
+        break;
     }
-    for (std::list <AuraType>::iterator iter = immunity_list.begin(); iter != immunity_list.end(); ++iter)
+
+    auto id = GetId();
+    uint32 mask = 0x0;
+    while (immunity_list.first != immunity_list.second)
     {
-        target->ApplySpellImmune(GetId(),IMMUNITY_STATE,*iter, apply);
+        auto m = *immunity_list.first++;
+        target->ApplySpellImmune(id, IMMUNITY_MECHANIC, m, apply);
+        mask |= uint32(0x1) << m;
     }
+    if (apply && GetSpellProto()->AttributesEx & SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)
+        target->RemoveAurasWithMechanic(mask, AURA_REMOVE_BY_DEFAULT, id);
 }
 
 void AuraEffect::HandleModMechanicImmunity(AuraApplication const * aurApp, uint8 mode, bool apply) const

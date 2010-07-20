@@ -33,7 +33,8 @@ enum Yells
 
 struct boss_hodirAI : public BossAI
 {
-    boss_hodirAI(Creature *pCreature) : BossAI(pCreature, TYPE_HODIR)
+    boss_hodirAI(Creature *pCreature)
+        : BossAI(pCreature, boss_hodir)
     {
     }
 
@@ -72,17 +73,12 @@ struct boss_hodirAI : public BossAI
     }
 };
 
-CreatureAI* GetAI_boss_hodir(Creature* pCreature)
-{
-    return new boss_hodirAI(pCreature);
-}
-
 void AddSC_boss_hodir()
 {
     Script *newscript;
     newscript = new Script;
     newscript->Name = "boss_hodir";
-    newscript->GetAI = &GetAI_boss_hodir;
+    newscript->GetAI = &get_ai<boss_hodirAI>;
     newscript->RegisterSelf();
 
 }

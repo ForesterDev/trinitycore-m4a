@@ -80,11 +80,6 @@ struct npc_prospector_anvilwardAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_prospector_anvilward(Creature* pCreature)
-{
-    return new npc_prospector_anvilwardAI(pCreature);
-}
-
 bool GossipHello_npc_prospector_anvilward(Player* pPlayer, Creature* pCreature)
 {
     if (pPlayer->GetQuestStatus(QUEST_THE_DWARVEN_SPY) == QUEST_STATUS_INCOMPLETE)
@@ -470,16 +465,6 @@ void npc_secondTrialAI::Activate(uint64 summonerguid)
       summonerGuid = summonerguid;
 }
 
-CreatureAI* GetAI_master_kelerun_bloodmourn(Creature* pCreature)
-{
-    return new master_kelerun_bloodmournAI (pCreature);
-}
-
-CreatureAI* GetAI_npc_secondTrial(Creature* pCreature)
-{
-    return new npc_secondTrialAI (pCreature);
-}
-
 /*######
 ## go_second_trial
 ######*/
@@ -563,11 +548,6 @@ bool QuestAccept_npc_apprentice_mirveda(Player* pPlayer, Creature* pCreature, Qu
         CAST_AI(npc_apprentice_mirvedaAI, pCreature->AI())->PlayerGUID = pPlayer->GetGUID();
     }
     return true;
-}
-
-CreatureAI* GetAI_npc_apprentice_mirvedaAI(Creature* pCreature)
-{
-    return new npc_apprentice_mirvedaAI (pCreature);
 }
 
 /*######
@@ -667,32 +647,27 @@ struct npc_infused_crystalAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_infused_crystalAI(Creature* pCreature)
-{
-    return new npc_infused_crystalAI (pCreature);
-}
-
 void AddSC_eversong_woods()
 {
     Script *newscript;
 
     newscript = new Script;
     newscript->Name = "npc_prospector_anvilward";
-    newscript->GetAI = &GetAI_npc_prospector_anvilward;
+    newscript->GetAI = &get_ai<npc_prospector_anvilwardAI>;
     newscript->pGossipHello =  &GossipHello_npc_prospector_anvilward;
     newscript->pGossipSelect = &GossipSelect_npc_prospector_anvilward;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "npc_second_trial_controller";
-    newscript->GetAI = &GetAI_master_kelerun_bloodmourn;
+    newscript->GetAI = &get_ai<master_kelerun_bloodmournAI>;
     newscript->pGossipHello = &GossipHello_master_kelerun_bloodmourn;
     newscript->pQuestAccept = &QuestAccept_master_kelerun_bloodmourn;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "npc_second_trial_paladin";
-    newscript->GetAI = &GetAI_npc_secondTrial;
+    newscript->GetAI = &get_ai<npc_secondTrialAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
@@ -702,12 +677,12 @@ void AddSC_eversong_woods()
 
     newscript = new Script;
     newscript->Name = "npc_apprentice_mirveda";
-    newscript->GetAI = &GetAI_npc_apprentice_mirvedaAI;
+    newscript->GetAI = &get_ai<npc_apprentice_mirvedaAI>;
     newscript->pQuestAccept = &QuestAccept_npc_apprentice_mirveda;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "npc_infused_crystal";
-    newscript->GetAI = &GetAI_npc_infused_crystalAI;
+    newscript->GetAI = &get_ai<npc_infused_crystalAI>;
     newscript->RegisterSelf();
 }
