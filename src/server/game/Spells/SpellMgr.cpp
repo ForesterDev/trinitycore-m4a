@@ -84,8 +84,9 @@ SpellMgr::SpellMgr()
             case SPELL_EFFECT_APPLY_AREA_AURA_OWNER:
             case SPELL_EFFECT_APPLY_AREA_AURA_RAID:
             case SPELL_EFFECT_CHARGE:
+            case SPELL_EFFECT_CHARGE_DEST:
             case SPELL_EFFECT_JUMP:
-            case SPELL_EFFECT_JUMP2:
+            case SPELL_EFFECT_JUMP_DEST:
             case SPELL_EFFECT_LEAP_BACK:
                 EffectTargetType[i] = SPELL_REQUIRE_CASTER;
                 break;
@@ -839,16 +840,16 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
                 case SPELL_AURA_MOD_HEALING_PCT:
                 case SPELL_AURA_MOD_HEALING_DONE:
                 case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
-                    if (spellproto->CalculateSimpleValue(effIndex) < 0)
+                    if (SpellMgr::CalculateSpellEffectAmount(spellproto, effIndex) < 0)
                         return false;
                     break;
                 case SPELL_AURA_MOD_DAMAGE_TAKEN:           // dependent from bas point sign (positive -> negative)
-                    if (spellproto->CalculateSimpleValue(effIndex) > 0)
+                    if (SpellMgr::CalculateSpellEffectAmount(spellproto, effIndex) > 0)
                         return false;
                     break;
                 case SPELL_AURA_MOD_CRIT_PCT:
                 case SPELL_AURA_MOD_SPELL_CRIT_CHANCE:
-                    if (spellproto->CalculateSimpleValue(effIndex) > 0)
+                    if (SpellMgr::CalculateSpellEffectAmount(spellproto, effIndex) > 0)
                         return true;                        // some expected positive spells have SPELL_ATTR_EX_NEGATIVE
                     break;
                 case SPELL_AURA_ADD_TARGET_TRIGGER:
@@ -891,6 +892,7 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
                 case SPELL_AURA_PERIODIC_LEECH:
                 case SPELL_AURA_MOD_STALKED:
                 case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
+                case SPELL_AURA_PREVENT_RESSURECTION:
                     return false;
                 case SPELL_AURA_PERIODIC_DAMAGE:            // used in positive spells also.
                     // part of negative spell if casted at self (prevent cancel)
@@ -926,7 +928,7 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
                     switch(spellproto->EffectMiscValue[effIndex])
                     {
                         case SPELLMOD_COST:                 // dependent from bas point sign (negative -> positive)
-                            if (spellproto->CalculateSimpleValue(effIndex) > 0)
+                            if (SpellMgr::CalculateSpellEffectAmount(spellproto, effIndex) > 0)
                             {
                                 if (!deep)
                                 {
@@ -1811,6 +1813,80 @@ bool SpellMgr::IsSkillBonusSpell(uint32 spellId) const
     return false;
 }
 
+bool SpellMgr::IsSkillTypeSpell(uint32 spellId, SkillType type) const
+{
+    SkillLineAbilityMapBounds bounds = GetSkillLineAbilityMapBounds(spellId);
+
+    for (SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
+        if (_spell_idx->second->skillId == uint32(type))
+            return true;
+
+    return false;
+}
+
+// basepoints provided here have to be valid basepoints (use SpellMgr::CalculateSpellEffectBaseAmount)
+int32 SpellMgr::CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 effIndex, Unit const * caster, int32 const * effBasePoints, Unit const * target)
+{
+    float basePointsPerLevel = spellEntry->EffectRealPointsPerLevel[effIndex];
+    int32 basePoints = effBasePoints ? *effBasePoints : spellEntry->EffectBasePoints[effIndex];
+    int32 randomPoints = int32(spellEntry->EffectDieSides[effIndex]);
+
+    // base amount modification based on spell lvl vs caster lvl
+    if (caster)
+    {
+        int32 level = int32(caster->getLevel());
+        if (level > int32(spellEntry->maxLevel) && spellEntry->maxLevel > 0)
+            level = int32(spellEntry->maxLevel);
+        else if (level < int32(spellEntry->baseLevel))
+            level = int32(spellEntry->baseLevel);
+        level -= int32(spellEntry->spellLevel);
+        basePoints += int32(level * basePointsPerLevel);
+    }
+
+    // roll in a range <1;EffectDieSides> as of patch 3.3.3
+    switch(randomPoints)
+    {
+        case 0:                                             // not used
+        case 1: basePoints += 1; break;                     // range 1..1
+        default:
+            // range can have positive (1..rand) and negative (rand..1) values, so order its for irand
+            int32 randvalue = (randomPoints >= 1)
+                ? irand(1, randomPoints)
+                : irand(randomPoints, 1);
+
+            basePoints += randvalue;
+            break;
+    }
+
+    int32 value = basePoints;
+
+    // random damage
+    if (caster)
+    {
+        // bonus amount from combo points
+        if  (caster->m_movedPlayer)
+            if (uint8 comboPoints = caster->m_movedPlayer->GetComboPoints())
+                if (float comboDamage = spellEntry->EffectPointsPerComboPoint[effIndex])
+                    value += int32(comboDamage * comboPoints);
+
+        value = caster->ApplyEffectModifiers(spellEntry, effIndex, value);
+
+        // amount multiplication based on caster's level
+        if (!basePointsPerLevel && (spellEntry->Attributes & SPELL_ATTR_LEVEL_DAMAGE_CALCULATION && spellEntry->spellLevel) &&
+                spellEntry->Effect[effIndex] != SPELL_EFFECT_WEAPON_PERCENT_DAMAGE &&
+                spellEntry->Effect[effIndex] != SPELL_EFFECT_KNOCK_BACK &&
+                spellEntry->EffectApplyAuraName[effIndex] != SPELL_AURA_MOD_SPEED_ALWAYS &&
+                spellEntry->EffectApplyAuraName[effIndex] != SPELL_AURA_MOD_SPEED_NOT_STACK &&
+                spellEntry->EffectApplyAuraName[effIndex] != SPELL_AURA_MOD_INCREASE_SPEED &&
+                spellEntry->EffectApplyAuraName[effIndex] != SPELL_AURA_MOD_DECREASE_SPEED)
+                //there are many more: slow speed, -healing pct
+            value = int32(value*0.25f*exp(caster->getLevel()*(70-spellEntry->spellLevel)/1000.0f));
+            //value = int32(value * (int32)getLevel() / (int32)(spellProto->spellLevel ? spellProto->spellLevel : 1));
+    }
+
+    return value;
+}
+
 SpellEntry const* SpellMgr::SelectAuraRankForPlayerLevel(SpellEntry const* spellInfo, uint32 playerLevel) const
 {
     // ignore passive spells
@@ -1873,7 +1949,7 @@ void SpellMgr::LoadSpellLearnSkills()
             {
                 SpellLearnSkillNode dbc_node;
                 dbc_node.skill = entry->EffectMiscValue[i];
-                dbc_node.step  = entry->CalculateSimpleValue(i);
+                dbc_node.step  = SpellMgr::CalculateSpellEffectAmount(entry, i);
                 if (dbc_node.skill != SKILL_RIDING)
                     dbc_node.value = 1;
                 else
@@ -2060,7 +2136,7 @@ void SpellMgr::LoadSpellPetAuras()
                 continue;
             }
 
-            PetAura pa(pet, aura, spellInfo->EffectImplicitTargetA[eff] == TARGET_UNIT_PET, spellInfo->CalculateSimpleValue(eff));
+            PetAura pa(pet, aura, spellInfo->EffectImplicitTargetA[eff] == TARGET_UNIT_PET, SpellMgr::CalculateSpellEffectAmount(spellInfo, eff));
             mSpellPetAuraMap[(spell<<8) + eff] = pa;
         }
 
@@ -3054,6 +3130,7 @@ bool SpellMgr::CanAurasStack(SpellEntry const *spellInfo_1, SpellEntry const *sp
             {
                 // DOT or HOT from different casters will stack
                 case SPELL_AURA_PERIODIC_DAMAGE:
+                case SPELL_AURA_PERIODIC_DUMMY:
                 case SPELL_AURA_PERIODIC_HEAL:
                 case SPELL_AURA_PERIODIC_TRIGGER_SPELL:
                 case SPELL_AURA_PERIODIC_ENERGIZE:
@@ -3386,8 +3463,9 @@ void SpellMgr::LoadSpellCustomAttr()
                     count++;
                     break;
                 case SPELL_EFFECT_CHARGE:
+                case SPELL_EFFECT_CHARGE_DEST:
                 case SPELL_EFFECT_JUMP:
-                case SPELL_EFFECT_JUMP2:
+                case SPELL_EFFECT_JUMP_DEST:
                 case SPELL_EFFECT_LEAP_BACK:
                     if (!spellInfo->speed && !spellInfo->SpellFamilyName)
                         spellInfo->speed = SPEED_CHARGE;
@@ -3545,6 +3623,12 @@ void SpellMgr::LoadSpellCustomAttr()
         case 65121: // Searing Light (HACK)
         case 63024: // Gravity Bomb (HACK)
         case 64234: // Gravity Bomb (HACK)
+        case 42442: // Vengeance Landing Cannonfire
+        case 45863: // Cosmetic - Incinerate to Random Target
+        case 25425: // Shoot
+        case 45761: // Shoot
+        case 42611: // Shoot
+        case 62374: // Pursued
             spellInfo->MaxAffectedTargets = 1;
             count++;
             break;
@@ -3566,6 +3650,8 @@ void SpellMgr::LoadSpellCustomAttr()
         case 54172: // Divine Storm (heal)
         case 29213: // Curse of the Plaguebringer - Noth
         case 28542: // Life Drain - Sapphiron
+        case 66588: // Flaming Spear
+        case 54171: // Divine Storm
             spellInfo->MaxAffectedTargets = 3;
             count++;
             break;
@@ -3625,6 +3711,15 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 28200:    // Ascendance (Talisman of Ascendance trinket)
             spellInfo->procCharges = 6;
+            count++;
+            break;
+        case 47201:    // Everlasting Affliction
+        case 47202:
+        case 47203:
+        case 47204:
+        case 47205:
+            // add corruption to affected spells
+            spellInfo->EffectSpellClassMask[1][0] |= 2;
             count++;
             break;
         case 51852:    // The Eye of Acherus (no spawn in phase 2 in db)
@@ -3690,10 +3785,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->rangeIndex = 13;
             count++;
             break;
-        case 62374:     // Pursued
-            spellInfo->MaxAffectedTargets = 1;
-            count++;
-            break;
         case 48743: // Death Pact
             spellInfo->AttributesEx &= ~SPELL_ATTR_EX_CANT_TARGET_SELF;
             count++;
@@ -3713,30 +3804,6 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 25771: // Forbearance - wrong mechanic immunity in DBC since 3.0.x
             spellInfo->EffectMiscValue[0] = MECHANIC_IMMUNE_SHIELD;
-            count++;
-            break;
-        case 42442:     // Vengeance Landing Cannonfire
-            spellInfo->MaxAffectedTargets = 1;
-            count++;
-            break;
-        case 45863:     // Cosmetic - Incinerate to Random Target
-            spellInfo->MaxAffectedTargets = 1;
-            count++;
-            break;
-        case 25425:     // Shoot
-            spellInfo->MaxAffectedTargets = 1;
-            count++;
-            break;
-        case 45761:     // Shoot
-            spellInfo->MaxAffectedTargets = 1;
-            count++;
-            break;
-        case 42611:     // Shoot
-            spellInfo->MaxAffectedTargets = 1;
-            count++;
-            break;
-        case 66588:     // Flaming Spear
-            spellInfo->MaxAffectedTargets = 3;
             count++;
             break;
         case 53651:
@@ -3843,17 +3910,6 @@ void SpellMgr::LoadEnchantCustomAttr()
 
     sLog.outString();
     sLog.outString(">> Loaded %u custom enchant attributes", count);
-}
-
-bool SpellMgr::IsSkillTypeSpell(uint32 spellId, SkillType type) const
-{
-    SkillLineAbilityMapBounds bounds = GetSkillLineAbilityMapBounds(spellId);
-
-    for (SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
-        if (_spell_idx->second->skillId == uint32(type))
-            return true;
-
-    return false;
 }
 
 void SpellMgr::LoadSpellLinked()

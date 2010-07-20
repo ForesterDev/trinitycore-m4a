@@ -642,10 +642,10 @@
     <ClCompile Include="..\..\src\server\game\Pools\PoolMgr.cpp">
       <Filter>Pools</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\server\game\PrecompiledHeaders\ScriptPCH.cpp">
+    <ClCompile Include="..\..\src\server\game\PrecompiledHeaders\gamePCH.cpp">
       <Filter>PrecompiledHeaders</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\server\game\PrecompiledHeaders\gamePCH.cpp">
+    <ClCompile Include="..\..\src\server\game\PrecompiledHeaders\ScriptPCH.cpp">
       <Filter>PrecompiledHeaders</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\server\game\Quests\QuestDef.cpp">
@@ -663,7 +663,7 @@
     <ClCompile Include="..\..\src\server\game\Spells\Spell.cpp">
       <Filter>Spells</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\server\game\Spells\Auras\SpellEffects.cpp">
+    <ClCompile Include="..\..\src\server\game\Spells\SpellEffects.cpp">
       <Filter>Spells</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\server\game\Spells\SpellMgr.cpp">
@@ -1112,10 +1112,10 @@
     <ClInclude Include="..\..\src\server\game\Pools\PoolMgr.h">
       <Filter>Pools</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\server\game\PrecompiledHeaders\ScriptPCH.h">
+    <ClInclude Include="..\..\src\server\game\PrecompiledHeaders\gamePCH.h">
       <Filter>PrecompiledHeaders</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\server\game\PrecompiledHeaders\gamePCH.h">
+    <ClInclude Include="..\..\src\server\game\PrecompiledHeaders\ScriptPCH.h">
       <Filter>PrecompiledHeaders</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\server\game\Quests\QuestDef.h">

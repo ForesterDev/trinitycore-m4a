@@ -442,12 +442,6 @@
     <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\TradeHandler.cpp" />
     <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\VoiceChatHandler.cpp" />
     <ClCompile Include="..\..\src\server\game\Pools\PoolMgr.cpp" />
-    <ClCompile Include="..\..\src\server\game\PrecompiledHeaders\ScriptPCH.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\src\server\game\PrecompiledHeaders\gamePCH.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">gamePCH.h</PrecompiledHeaderFile>
@@ -458,12 +452,18 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">gamePCH.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="..\..\src\server\game\PrecompiledHeaders\ScriptPCH.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\src\server\game\Quests\QuestDef.cpp" />
     <ClCompile Include="..\..\src\server\game\Reputation\ReputationMgr.cpp" />
     <ClCompile Include="..\..\src\server\game\Skills\SkillDiscovery.cpp" />
     <ClCompile Include="..\..\src\server\game\Skills\SkillExtraItems.cpp" />
     <ClCompile Include="..\..\src\server\game\Spells\Spell.cpp" />
-    <ClCompile Include="..\..\src\server\game\Spells\Auras\SpellEffects.cpp" />
+    <ClCompile Include="..\..\src\server\game\Spells\SpellEffects.cpp" />
     <ClCompile Include="..\..\src\server\game\Spells\SpellMgr.cpp" />
     <ClCompile Include="..\..\src\server\game\Spells\Auras\SpellAuraEffects.cpp" />
     <ClCompile Include="..\..\src\server\game\Spells\Auras\SpellAuras.cpp" />
@@ -654,13 +654,13 @@
     <ClInclude Include="..\..\src\server\game\Server\Protocol\Handlers\AddonHandler.h" />
     <ClInclude Include="..\..\src\server\game\Server\Protocol\Handlers\NPCHandler.h" />
     <ClInclude Include="..\..\src\server\game\Pools\PoolMgr.h" />
+    <ClInclude Include="..\..\src\server\game\PrecompiledHeaders\gamePCH.h" />
     <ClInclude Include="..\..\src\server\game\PrecompiledHeaders\ScriptPCH.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="..\..\src\server\game\PrecompiledHeaders\gamePCH.h" />
     <ClInclude Include="..\..\src\server\game\Quests\QuestDef.h" />
     <ClInclude Include="..\..\src\server\game\Reputation\ReputationMgr.h" />
     <ClInclude Include="..\..\src\server\game\Skills\SkillDiscovery.h" />
