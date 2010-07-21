@@ -2352,6 +2352,8 @@ class Player : public Unit, public GridObject<Player>
         //bool isActiveObject() const { return true; }
         bool canSeeSpellClickOn(Creature const* creature) const;
 
+        uint32 GetAverageItemLevel();
+
         uint32 GetChampioningFaction() const { return m_ChampioningFaction; }
         void SetChampioningFaction(uint32 faction) { m_ChampioningFaction = faction; }
         Spell * m_spellModTakingSpell;
