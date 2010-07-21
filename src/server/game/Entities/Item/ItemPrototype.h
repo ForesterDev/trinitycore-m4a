@@ -650,6 +650,35 @@ struct ItemPrototype
         return 0;
     }
 
+    uint32 CalculateItemLevelForVehicleScaling() const
+    {
+        int32 baseItemLevel = ItemLevel;
+        switch (Quality)
+        {
+        case ITEM_QUALITY_POOR:
+        case ITEM_QUALITY_NORMAL:
+        case ITEM_QUALITY_ARTIFACT:
+        case ITEM_QUALITY_HEIRLOOM:
+            baseItemLevel -= 39; // MIGHT NOT BE BLIZZLIKE
+            break;
+        case ITEM_QUALITY_UNCOMMON:
+            baseItemLevel -= 26; // MIGHT NOT BE BLIZZLIKE
+            break;
+        case ITEM_QUALITY_RARE:
+            baseItemLevel -= 13; // MIGHT NOT BE BLIZZLIKE
+            break;
+        case ITEM_QUALITY_EPIC:
+        case ITEM_QUALITY_LEGENDARY:
+        default:
+            break;
+        }
+
+        if (baseItemLevel < 0)
+            baseItemLevel = 0;
+
+        return (uint32)baseItemLevel;
+    }
+
     bool IsPotion() const { return Class == ITEM_CLASS_CONSUMABLE && SubClass == ITEM_SUBCLASS_POTION; }
     bool IsWeaponVellum() const { return Class == ITEM_CLASS_TRADE_GOODS && SubClass == ITEM_SUBCLASS_WEAPON_ENCHANTMENT; }
     bool IsArmorVellum() const { return Class == ITEM_CLASS_TRADE_GOODS && SubClass == ITEM_SUBCLASS_ARMOR_ENCHANTMENT; }
