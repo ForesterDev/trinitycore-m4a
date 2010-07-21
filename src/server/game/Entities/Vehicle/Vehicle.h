@@ -82,6 +82,7 @@ class Vehicle
         Unit *me;
         VehicleEntry const *m_vehicleInfo;
         uint32 m_usableSeatNum;
+        uint32 bonusHP;
 
         void InstallAccessory(uint32 entry, int8 seatId, bool minion = true);
 };
