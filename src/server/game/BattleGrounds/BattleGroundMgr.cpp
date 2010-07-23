@@ -1307,7 +1307,9 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
 {
     uint8 type = (bg->isArena() ? 1 : 0);
                                                             // last check on 3.0.3
-    data->Initialize(MSG_PVP_LOG_DATA, (1+1+4+40*bg->GetPlayerScoresSize()));
+    data->Initialize(MSG_PVP_LOG_DATA, 1 + ((4 + 4 + 4) * 2 + (96) * 2) + 1 + (1)
+            + 4 + (8 + 4 + std::max(1, 4 + 4 + 4) + 4 + 4 + 4
+                + (4) * BattleGroundScore::max_stats) * bg->GetPlayerScoresSize());
     *data << uint8(type);                                   // type (battleground=0/arena=1)
 
     if (type)                                                // arena
@@ -1367,83 +1369,11 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
         }
         *data << (int32)itr->second->DamageDone;             // damage done
         *data << (int32)itr->second->HealingDone;            // healing done
-        switch(bg->GetTypeID(true))                              // battleground specific things
-        {
-            case BATTLEGROUND_RB:
-                switch(bg->GetMapId())
-                {
-                    case 489:
-                        *data << (uint32)0x00000002;        // count of next fields
-                        *data << (uint32)((BattleGroundWGScore*)itr->second)->FlagCaptures;         // flag captures
-                        *data << (uint32)((BattleGroundWGScore*)itr->second)->FlagReturns;          // flag returns
-                        break;
-                    case 566:
-                        *data << (uint32)0x00000001;        // count of next fields
-                        *data << (uint32)((BattleGroundEYScore*)itr->second)->FlagCaptures;         // flag captures
-                        break;
-                    case 529:
-                        *data << (uint32)0x00000002;        // count of next fields
-                        *data << (uint32)((BattleGroundABScore*)itr->second)->BasesAssaulted;       // bases asssulted
-                        *data << (uint32)((BattleGroundABScore*)itr->second)->BasesDefended;        // bases defended
-                        break;
-                    case 30:
-                        *data << (uint32)0x00000005;        // count of next fields
-                        *data << (uint32)((BattleGroundAVScore*)itr->second)->GraveyardsAssaulted;  // GraveyardsAssaulted
-                        *data << (uint32)((BattleGroundAVScore*)itr->second)->GraveyardsDefended;   // GraveyardsDefended
-                        *data << (uint32)((BattleGroundAVScore*)itr->second)->TowersAssaulted;      // TowersAssaulted
-                        *data << (uint32)((BattleGroundAVScore*)itr->second)->TowersDefended;       // TowersDefended
-                        *data << (uint32)((BattleGroundAVScore*)itr->second)->MinesCaptured;        // MinesCaptured
-                        break;
-                    case 607:
-                        *data << uint32(2);
-                        *data << uint32(((BattleGroundSAScore*)itr->second)->demolishers_destroyed);
-                        *data << uint32(((BattleGroundSAScore*)itr->second)->gates_destroyed);
-                        break;
-                    default:
-                        *data << (int32)0;                  // 0
-                        break;
-                }
-            case BATTLEGROUND_AV:
-                *data << (uint32)0x00000005;                // count of next fields
-                *data << (uint32)((BattleGroundAVScore*)itr->second)->GraveyardsAssaulted;  // GraveyardsAssaulted
-                *data << (uint32)((BattleGroundAVScore*)itr->second)->GraveyardsDefended;   // GraveyardsDefended
-                *data << (uint32)((BattleGroundAVScore*)itr->second)->TowersAssaulted;      // TowersAssaulted
-                *data << (uint32)((BattleGroundAVScore*)itr->second)->TowersDefended;       // TowersDefended
-                *data << (uint32)((BattleGroundAVScore*)itr->second)->MinesCaptured;        // MinesCaptured
-                break;
-            case BATTLEGROUND_WS:
-                *data << (uint32)0x00000002;                // count of next fields
-                *data << (uint32)((BattleGroundWGScore*)itr->second)->FlagCaptures;         // flag captures
-                *data << (uint32)((BattleGroundWGScore*)itr->second)->FlagReturns;          // flag returns
-                break;
-            case BATTLEGROUND_AB:
-                *data << (uint32)0x00000002;                // count of next fields
-                *data << (uint32)((BattleGroundABScore*)itr->second)->BasesAssaulted;       // bases asssulted
-                *data << (uint32)((BattleGroundABScore*)itr->second)->BasesDefended;        // bases defended
-                break;
-            case BATTLEGROUND_EY:
-                *data << (uint32)0x00000001;                // count of next fields
-                *data << (uint32)((BattleGroundEYScore*)itr->second)->FlagCaptures;         // flag captures
-                break;
-            case BATTLEGROUND_NA:
-            case BATTLEGROUND_BE:
-            case BATTLEGROUND_AA:
-            case BATTLEGROUND_RL:
-            case BATTLEGROUND_SA:
-                *data << uint32(2);
-                *data << uint32(((BattleGroundSAScore*)itr->second)->demolishers_destroyed);
-                *data << uint32(((BattleGroundSAScore*)itr->second)->gates_destroyed);
-                break;
-            case BATTLEGROUND_DS:                           // wotlk
-            case BATTLEGROUND_RV:                           // wotlk
-            case BATTLEGROUND_IC:                           // wotlk
-                *data << (int32)0;                          // 0
-                break;
-            default:
-                sLog.outDebug("Unhandled MSG_PVP_LOG_DATA for BG id %u", bg->GetTypeID());
-                *data << (int32)0;
-                break;
-        }
+        auto stat_data = itr->second->stat_data();
+        auto count = static_cast<uint32>(stat_data.first);
+        *data << count;
+        for (auto it = stat_data.second.begin(); count; --count)
+            *data << std::move(*it++);
     }
 }
 

@@ -20,6 +20,10 @@
 #ifndef __BATTLEGROUNDAA_H
 #define __BATTLEGROUNDAA_H
 
+#include <memory>
+#include <array>
+#include "BattleGround.h"
+
 class BattleGround;
 
 class BattleGroundAAScore : public BattleGroundScore
@@ -27,6 +31,14 @@ class BattleGroundAAScore : public BattleGroundScore
     public:
         BattleGroundAAScore() {};
         virtual ~BattleGroundAAScore() {};
+
+        std::pair<std::size_t, Stat_data_type> stat_data() const
+        {
+            std::array<int32, max_stats> d;
+            auto first = d.begin(), it = first;
+            return std::make_pair(it - first, std::move(d));
+        }
+
         //TODO fix me
 };
 

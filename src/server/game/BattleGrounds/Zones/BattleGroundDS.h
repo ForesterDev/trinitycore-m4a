@@ -18,6 +18,10 @@
 #ifndef __BATTLEGROUNDDS_H
 #define __BATTLEGROUNDDS_H
 
+#include <memory>
+#include <array>
+#include "BattleGround.h"
+
 class BattleGround;
 
 enum BattleGroundDSObjectTypes
@@ -53,6 +57,14 @@ class BattleGroundDSScore : public BattleGroundScore
     public:
         BattleGroundDSScore() {};
         virtual ~BattleGroundDSScore() {};
+
+        std::pair<std::size_t, Stat_data_type> stat_data() const
+        {
+            std::array<int32, max_stats> d;
+            auto first = d.begin(), it = first;
+            return std::make_pair(it - first, std::move(d));
+        }
+
         //TODO fix me
 };
 
