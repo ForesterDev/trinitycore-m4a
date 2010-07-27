@@ -52,9 +52,10 @@ enum SpellCategories
 
 enum SpellDisableTypes
 {
-    SPELL_DISABLE_PLAYER = 1,
-    SPELL_DISABLE_CREATURE = 2,
-    SPELL_DISABLE_PET = 4
+    SPELL_DISABLE_PLAYER            = 0x1,
+    SPELL_DISABLE_CREATURE          = 0x2,
+    SPELL_DISABLE_PET               = 0x4,
+    SPELL_DISABLE_DEPRECATED_SPELL  = 0x8
 };
 
 enum SpellEffectTargetTypes
@@ -408,6 +409,14 @@ inline bool IsAreaAuraEffect(uint32 effect)
     return false;
 }
 
+inline bool HasAreaAuraEffect(SpellEntry const *spellInfo)
+{
+    for (uint8 i=0;i<MAX_SPELL_EFFECTS;++i)
+        if (IsAreaAuraEffect(spellInfo->Effect[i]))
+            return true;
+    return false;
+}
+
 inline bool IsUnitOwnedAuraEffect(uint32 effect)
 {
     return (IsAreaAuraEffect(effect) || effect == SPELL_EFFECT_APPLY_AURA);
@@ -484,7 +493,7 @@ inline uint32 GetAllSpellMechanicMask(SpellEntry const* spellInfo)
     if (spellInfo->Mechanic)
         mask |= 1<<spellInfo->Mechanic;
     for (int i=0; i< 3; ++i)
-        if (spellInfo->EffectMechanic[i])
+        if (spellInfo->Effect[i] && spellInfo->EffectMechanic[i])
             mask |= 1<<spellInfo->EffectMechanic[i];
     return mask;
 }
@@ -1213,7 +1222,7 @@ class SpellMgr
         bool IsSkillBonusSpell(uint32 spellId) const;
         bool IsSkillTypeSpell(uint32 spellId, SkillType type) const;
         static int32 CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 effIndex, Unit const * caster = NULL, int32 const * basePoints = NULL, Unit const * target = NULL);
-        static int32 CalculateSpellEffectBaseAmount(int32 value) {return value-1;};
+        static int32 CalculateSpellEffectBaseAmount(int32 value, SpellEntry const * spellEntry, uint8 effIndex);
 
         // Spell correctess for client using
         static bool IsSpellValid(SpellEntry const * spellInfo, Player* pl = NULL, bool msg = true);

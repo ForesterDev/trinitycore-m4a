@@ -361,6 +361,7 @@
     <ClCompile Include="..\..\src\server\game\Combat\HostileRefManager.cpp" />
     <ClCompile Include="..\..\src\server\game\Combat\ThreatManager.cpp" />
     <ClCompile Include="..\..\src\server\game\Conditions\ConditionMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\Conditions\DisableMgr.cpp" />
     <ClCompile Include="..\..\src\server\game\DataStores\DBCStores.cpp" />
     <ClCompile Include="..\..\src\server\game\Entities\Creature\Creature.cpp" />
     <ClCompile Include="..\..\src\server\game\Entities\Creature\CreatureGroups.cpp" />
@@ -419,6 +420,7 @@
     <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\BattleGroundHandler.cpp" />
     <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\CalendarHandler.cpp" />
     <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\ChannelHandler.cpp" />
+    <ClCompile Include="..\..\src\server\game\Tools\CharacterDatabaseCleaner.cpp" />
     <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\CharacterHandler.cpp" />
     <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\ChatHandler.cpp" />
     <ClCompile Include="..\..\src\server\game\Server\Protocol\Handlers\CombatHandler.cpp" />
@@ -584,6 +586,7 @@
     <ClInclude Include="..\..\src\server\game\Combat\ThreatManager.h" />
     <ClInclude Include="..\..\src\server\game\Combat\UnitEvents.h" />
     <ClInclude Include="..\..\src\server\game\Conditions\ConditionMgr.h" />
+    <ClInclude Include="..\..\src\server\game\Conditions\DisableMgr.h" />
     <ClInclude Include="..\..\src\server\game\DataStores\DBCEnums.h" />
     <ClInclude Include="..\..\src\server\game\DataStores\DBCfmt.h" />
     <ClInclude Include="..\..\src\server\game\DataStores\DBCStores.h" />
@@ -652,6 +655,7 @@
     <ClInclude Include="..\..\src\server\game\Server\Protocol\Opcodes.h" />
     <ClInclude Include="..\..\src\server\game\Server\Protocol\WorldLog.h" />
     <ClInclude Include="..\..\src\server\game\Server\Protocol\Handlers\AddonHandler.h" />
+    <ClInclude Include="..\..\src\server\game\Tools\CharacterDatabaseCleaner.h" />
     <ClInclude Include="..\..\src\server\game\Server\Protocol\Handlers\NPCHandler.h" />
     <ClInclude Include="..\..\src\server\game\Pools\PoolMgr.h" />
     <ClInclude Include="..\..\src\server\game\PrecompiledHeaders\gamePCH.h" />

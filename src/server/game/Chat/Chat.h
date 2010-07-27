@@ -76,6 +76,7 @@ class ChatHandler
         static ChatCommand* getCommandTable();
 
         bool isValidChatMessage(const char* msg);
+        bool HasSentErrorMessage() { return sentErrorMessage;}
         void SendGlobalSysMessage(const char *str);
     protected:
         explicit ChatHandler() : m_session(NULL) {}      // for CLI subclass
@@ -133,7 +134,11 @@ class ChatHandler
         bool HandleCastTargetCommand(const char *args);
 
         bool HandleCharacterCustomizeCommand(const char * args);
-        bool HandleCharacterDeleteCommand(const char* args);
+        bool HandleCharacterDeletedDeleteCommand(const char* args);
+        bool HandleCharacterDeletedListCommand(const char* args);
+        bool HandleCharacterDeletedRestoreCommand(const char* args);
+        bool HandleCharacterDeletedOldCommand(const char* args);
+        bool HandleCharacterEraseCommand(const char* args);
         bool HandleCharacterLevelCommand(const char* args);
         bool HandleCharacterRenameCommand(const char * args);
         bool HandleCharacterReputationCommand(const char* args);
@@ -234,9 +239,6 @@ class ChatHandler
         bool HandleInstanceUnbindCommand(const char* args);
         bool HandleInstanceStatsCommand(const char* args);
         bool HandleInstanceSaveDataCommand(const char * args);
-        bool HandleInstanceOpenCommand(const char * args);
-        bool HandleInstanceCloseCommand(const char * args);
-        bool HandleInstanceOpenCloseCommand(const char * args, bool open);
 
         bool HandleLearnCommand(const char* args);
         bool HandleLearnAllCommand(const char* args);
@@ -428,7 +430,7 @@ class ChatHandler
         bool HandleReloadSpellTargetPositionCommand(const char* args);
         bool HandleReloadSpellThreatsCommand(const char* args);
         bool HandleReloadSpellPetAurasCommand(const char* args);
-        bool HandleReloadSpellDisabledCommand(const char* args);
+        bool HandleReloadDisablesCommand(const char* args);
         bool HandleReloadSpellGroupStackRulesCommand(const char* args);
         bool HandleReloadAuctionsCommand(const char* args);
         bool HandleReloadWpScriptsCommand(const char* args);
@@ -623,6 +625,22 @@ class ChatHandler
         void HandleCharacterLevel(Player* player, uint64 player_guid, uint32 oldlevel, uint32 newlevel);
         void HandleLearnSkillRecipesHelper(Player* player,uint32 skill_id);
 
+        // Stores informations about a deleted character
+        struct DeletedInfo
+        {
+            uint32      lowguid;                            ///< the low GUID from the character
+            std::string name;                               ///< the character name
+            uint32      accountId;                          ///< the account id
+            std::string accountName;                        ///< the account name
+            time_t      deleteDate;                         ///< the date at which the character has been deleted
+        };
+
+        typedef std::list<DeletedInfo> DeletedInfoList;
+        bool GetDeletedCharacterInfoList(DeletedInfoList& foundList, std::string searchString = "");
+        std::string GenerateDeletedCharacterGUIDsWhereStr(DeletedInfoList::const_iterator& itr, DeletedInfoList::const_iterator const& itr_end);
+        void HandleCharacterDeletedListHelper(DeletedInfoList const& foundList);
+        void HandleCharacterDeletedRestoreHelper(DeletedInfo const& delInfo);
+
         void SetSentErrorMessage(bool val){ sentErrorMessage = val;};
     private:
         WorldSession * m_session;                           // != NULL for chat command call and NULL for CLI command
@@ -635,8 +653,8 @@ class ChatHandler
 class CliHandler : public ChatHandler
 {
     public:
-        typedef void Print(char const*);
-        explicit CliHandler(Print* zprint) : m_print(zprint) {}
+        typedef void Print(void*, char const*);
+        explicit CliHandler(void* callbackArg, Print* zprint) : m_callbackArg(callbackArg), m_print(zprint) {}
 
         // overwrite functions
         const char *GetTrinityString(int32 entry) const;
@@ -648,6 +666,7 @@ class CliHandler : public ChatHandler
         int GetSessionDbLocaleIndex() const;
 
     private:
+        void* m_callbackArg;
         Print* m_print;
 };
 

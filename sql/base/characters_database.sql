@@ -392,6 +392,9 @@ CREATE TABLE `characters` (
   `ammoId` int(10) UNSIGNED NOT NULL default '0',
   `knownTitles` longtext,
   `actionBars` tinyint(3) UNSIGNED NOT NULL default '0',
+  `deleteInfos_Account` int(11) UNSIGNED default NULL,
+  `deleteInfos_Name` varchar(12) default NULL,
+  `deleteDate` bigint(20) default NULL,
   PRIMARY KEY  (`guid`),
   KEY `idx_account` (`account`),
   KEY `idx_online` (`online`),
@@ -1973,7 +1976,8 @@ LOCK TABLES `worldstates` WRITE;
 INSERT INTO `worldstates` (`entry`,`value`, `comment`) VALUES 
 (20001, 0, 'NextArenaPointDistributionTime'),
 (20002, 0, 'NextWeeklyQuestResetTime'),
-(20003, 0, 'NextBGRandomDailyResetTime');
+(20003, 0, 'NextBGRandomDailyResetTime'),
+(20004, 0, 'cleaning_flags');
 /*!40000 ALTER TABLE `worldstates` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

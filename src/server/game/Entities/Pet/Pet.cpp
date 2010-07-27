@@ -746,16 +746,9 @@ void Pet::GivePetLevel(uint8 level)
 
 bool Pet::CreateBaseAtCreature(Creature* creature)
 {
-    if (!creature)
-    {
-        sLog.outError("CRITICAL: NULL pointer parsed into CreateBaseAtCreature()");
-        return false;
-    }
-    uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_PET);
+    assert(creature);
 
-    sLog.outDebug("Create pet");
-    uint32 pet_number = objmgr.GeneratePetNumber();
-    if (!Create(guid, creature->GetMap(), creature->GetPhaseMask(), creature->GetEntry(), pet_number))
+    if (!CreateBaseAtTamed(creature->GetCreatureInfo(), creature->GetMap(), creature->GetPhaseMask()))
         return false;
 
     Relocate(creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation());
@@ -775,27 +768,51 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     }
 
     SetDisplayId(creature->GetDisplayId());
-    SetNativeDisplayId(creature->GetNativeDisplayId());
-    SetMaxPower(POWER_HAPPINESS, GetCreatePowers(POWER_HAPPINESS));
-    SetPower(POWER_HAPPINESS, 166500);
-    setPowerType(POWER_FOCUS);
-    SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, 0);
-    SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
-    SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, objmgr.GetXPForLevel(creature->getLevel())*PET_XP_FACTOR);
-    SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
 
     if (CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->family))
         SetName(cFamily->Name[sWorld.GetDefaultDbcLocale()]);
     else
         SetName(creature->GetNameForLocaleIdx(objmgr.GetDBCLocaleIndex()));
 
+    return true;
+}
+
+bool Pet::CreateBaseAtCreatureInfo(CreatureInfo const* cinfo, Unit * owner)
+{
+    if (!CreateBaseAtTamed(cinfo, owner->GetMap(), owner->GetPhaseMask()))
+        return false;
+
+    if (CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->family))
+        SetName(cFamily->Name[sWorld.GetDefaultDbcLocale()]);
+
+    Relocate(owner->GetPositionX(), owner->GetPositionY(), owner->GetPositionZ(), owner->GetOrientation());
+
+    return true;
+}
+
+bool Pet::CreateBaseAtTamed(CreatureInfo const * cinfo, Map * map, uint32 phaseMask)
+{
+    sLog.outDebug("Pet::CreateBaseForTamed");
+    uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_PET);
+    uint32 pet_number = objmgr.GeneratePetNumber();
+    if (!Create(guid, map, phaseMask, cinfo->Entry, pet_number))
+        return false;
+
+    SetMaxPower(POWER_HAPPINESS, GetCreatePowers(POWER_HAPPINESS));
+    SetPower(POWER_HAPPINESS, 166500);
+    setPowerType(POWER_FOCUS);
+    SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, 0);
+    SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
+    SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, objmgr.GetXPForLevel(getLevel()+1)*PET_XP_FACTOR);
+    SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
+
     if (cinfo->type == CREATURE_TYPE_BEAST)
     {
         SetUInt32Value(UNIT_FIELD_BYTES_0, 0x02020100);
         SetSheath(SHEATH_STATE_MELEE);
         SetByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED | UNIT_CAN_BE_ABANDONED);
-        SetUInt32Value(UNIT_MOD_CAST_SPEED, creature->GetUInt32Value(UNIT_MOD_CAST_SPEED));
     }
+
     return true;
 }
 
@@ -834,7 +851,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
     SetAttackTime(OFF_ATTACK, BASE_ATTACK_TIME);
     SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
 
-    SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0);
+    SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
 
     //scale
     CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->family);
@@ -1984,7 +2001,13 @@ void Pet::SynchronizeLevelWithOwner()
             {
                 GivePetLevel(owner->getLevel());
                 SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, objmgr.GetXPForLevel(owner->getLevel())/5);
-                SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP)-1);
+                SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
+            }
+            if (getLevel() < owner->getLevel()-5)
+            {
+                GivePetLevel(owner->getLevel()-5);
+                SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, objmgr.GetXPForLevel(owner->getLevel()-5)/5);
+                SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
             }
             break;
         default:

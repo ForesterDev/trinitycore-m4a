@@ -63,6 +63,7 @@ set(game_STAT_SRCS
   Combat/HostileRefManager.cpp
   Combat/ThreatManager.cpp
   Conditions/ConditionMgr.cpp
+  Conditions/DisableMgr.cpp
   DataStores/DBCStores.cpp
   DungeonFinding/LFGMgr.cpp
   Entities/Corpse/Corpse.cpp
@@ -171,6 +172,7 @@ set(game_STAT_SRCS
   Spells/SpellEffects.cpp
   Spells/Spell.cpp
   Spells/SpellMgr.cpp
+  Tools/CharacterDatabaseCleaner.cpp
   Tools/PlayerDump.cpp
   Tools/Tools.cpp
   Weather/Weather.cpp

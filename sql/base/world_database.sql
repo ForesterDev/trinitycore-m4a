@@ -38,8 +38,7 @@ CREATE TABLE `access_requirement` (
   `heroic_quest_done` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `heroic_quest_failed_text` text,
   `comment` text,
-  `status` tinyint(3) unsigned DEFAULT '15' COMMENT 'instance status (open/close)',
-  PRIMARY KEY (`id`)
+   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Access Requirements';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -244,7 +243,6 @@ CREATE TABLE `battleground_template` (
   `AllianceStartO` float NOT NULL,
   `HordeStartLoc` mediumint(8) unsigned NOT NULL,
   `HordeStartO` float NOT NULL,
-  `Disable` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -255,20 +253,20 @@ CREATE TABLE `battleground_template` (
 
 LOCK TABLES `battleground_template` WRITE;
 /*!40000 ALTER TABLE `battleground_template` DISABLE KEYS */;
-INSERT INTO `battleground_template` (`id`,`MinPlayersPerTeam`,`MaxPlayersPerTeam`,`MinLvl`,`MaxLvl`,`AllianceStartLoc`,`AllianceStartO`,`HordeStartLoc`,`HordeStartO`, `Disable`) VALUES
-(1,20,40,51,80,611,2.72532,610,2.27452,0),
-(2,5,10,10,80,769,3.14159,770,3.14159,0),
-(3,8,15,20,80,890,3.40156,889,0.263892,0),
-(4,0,2,10,80,929,0,936,3.14159,0),
-(5,0,2,10,80,939,0,940,3.14159,0),
-(6,0,2,10,80,0,0,0,0,0),
-(7,8,15,61,80,1103,3.40156,1104,0.263892,0),
-(8,0,2,10,80,1258,0,1259,3.14159,0),
-(9,7,15,71,80,1367,0,1368,0,0),
-(10,5,5,10,80,1362,0,1363,0,1),
-(11,5,5,10,80,1364,0,1365,0,1),
-(30,20,40,71,80,1485,0,1486,0,0),
-(32,10,10,0,80,0,0,0,0,0);
+INSERT INTO `battleground_template` (`id`,`MinPlayersPerTeam`,`MaxPlayersPerTeam`,`MinLvl`,`MaxLvl`,`AllianceStartLoc`,`AllianceStartO`,`HordeStartLoc`,`HordeStartO`) VALUES
+(1,20,40,51,80,611,2.72532,610,2.27452),
+(2,5,10,10,80,769,3.14159,770,3.14159),
+(3,8,15,20,80,890,3.40156,889,0.263892),
+(4,0,2,10,80,929,0,936,3.14159),
+(5,0,2,10,80,939,0,940,3.14159),
+(6,0,2,10,80,0,0,0,0),
+(7,8,15,61,80,1103,3.40156,1104,0.263892),
+(8,0,2,10,80,1258,0,1259,3.14159),
+(9,7,15,71,80,1367,0,1368,0),
+(10,5,5,10,80,1362,0,1363,0),
+(11,5,5,10,80,1364,0,1365,0),
+(30,20,40,71,80,1485,0,1486,0),
+(32,10,10,0,80,0,0,0,0);
 /*!40000 ALTER TABLE `battleground_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -352,7 +350,11 @@ INSERT INTO `command` VALUES
 ('cast self',3,'Syntax: .cast self #spellid [triggered]\r\nCast #spellid by target at target itself. If ''trigered'' or part provided then spell casted with triggered flag.'),
 ('cast target',3,'Syntax: .cast target #spellid [triggered]\r\n  Selected target will cast #spellid to his victim. If ''trigered'' or part provided then spell casted with triggered flag.'),
 ('character customize',2,'Syntax: .character customize [$name]\r\n\r\nMark selected in game or by $name in command character for customize at next login.'),
-('character delete',4,'Syntax: .character delete $name\r\n\r\nDelete character $name.'),
+('character erase',4,'Syntax: .character erase $name\r\n\r\nDelete character $name. Character finally deleted in case any deleting options.'),
+('character deleted delete', 4, 'Syntax: .character deleted delete #guid|$name\r\n\r\nCompletely deletes the selected characters.\r\nIf $name is supplied, only characters with that string in their name will be deleted, if #guid is supplied, only the character with that GUID will be deleted.'),
+('character deleted list', 3, 'Syntax: .character deleted list [#guid|$name]\r\n\r\nShows a list with all deleted characters.\r\nIf $name is supplied, only characters with that string in their name will be selected, if #guid is supplied, only the character with that GUID will be selected.'),
+('character deleted old', 4, 'Syntax: .character deleted old [#keepDays]\r\n\r\nCompletely deletes all characters with deleted time longer #keepDays. If #keepDays not provided the  used value from mangosd.conf option ''CharDelete.KeepDays''. If referenced config option disabled (use 0 value) then command can''t be used without #keepDays.'),
+('character deleted restore', 3, 'Syntax: .character deleted restore #guid|$name [$newname] [#new account]\r\n\r\nRestores deleted characters.\r\nIf $name is supplied, only characters with that string in their name will be restored, if $guid is supplied, only the character with that GUID will be restored.\r\nIf $newname is set, the character will be restored with that name instead of the original one. If #newaccount is set, the character will be restored to specific account character list. This works only with one character!'),
 ('character level',3,'Syntax: .character level [$playername] [#level]\r\n\r\nSet the level of character with $playername (or the selected if not name provided) by #numberoflevels Or +1 if no #numberoflevels provided). If #numberoflevels is omitted, the level will be increase by 1. If #numberoflevels is 0, the same level will be restarted. If no character is selected and name not provided, increase your level. Command can be used for offline character. All stats and dependent values recalculated. At level decrease talents can be reset if need. Also at level decrease equipped items with greater level requirement can be lost.'),
 ('character rename',2,'Syntax: .character rename [$name]\r\n\r\nMark selected in game or by $name in command character for rename at next login.'),
 ('character reputation',2,'Syntax: .character reputation [$player_name]\r\n\r\nShow reputation information for selected player or player find by $player_name.'),
@@ -434,8 +436,6 @@ INSERT INTO `command` VALUES
 ('instance savedata',3,'Syntax: .instance savedata\r\n  Save the InstanceData for the current player''s map to the DB.'),
 ('instance stats',3,'Syntax: .instance stats\r\n  Shows statistics about instances.'),
 ('instance unbind',3,'Syntax: .instance unbind all\r\n  All of the selected player''s binds will be cleared.'),
-('instance open', 3, 'Syntax: .instance open mapid [normal|heroic|10normal|10heroic|25normal|25heroic]'),
-('instance close', 3, 'Syntax: .instance close mapid [normal|heroic|10normal|10heroic|25normal|25heroic]'),
 ('itemmove',2,'Syntax: .itemmove #sourceslotid #destinationslotid\r\n\r\nMove an item from slots #sourceslotid to #destinationslotid in your inventory\r\n\r\nNot yet implemented'),
 ('kick',2,'Syntax: .kick [$charactername] [$reason]\r\n\r\nKick the given character name from the world with or without reason. If no character name is provided then the selected player (except for yourself) will be kicked. If no reason is provided, default is \"No Reason\".'),
 ('learn',3,'Syntax: .learn #spell [all]\r\n\r\nSelected character learn a spell of id #spell. If ''all'' provided then all ranks learned.'),
@@ -574,6 +574,7 @@ INSERT INTO `command` VALUES
 ('reload creature_loot_template',3,'Syntax: .reload creature_loot_template\nReload creature_loot_template table.'),
 ('reload creature_onkill_reputation','3','Syntax: .reload creature_onkill_reputation\r\nReload creature_onkill_reputation table.'),
 ('reload creature_questrelation',3,'Syntax: .reload creature_questrelation\nReload creature_questrelation table.'),
+('reload disables',3,'Syntax: .reload disables\r\nReload disables table.'),
 ('reload disenchant_loot_template',3,'Syntax: .reload disenchant_loot_template\nReload disenchant_loot_template table.'),
 ('reload event_scripts',3,'Syntax: .reload event_scripts\nReload event_scripts table.'),
 ('reload fishing_loot_template',3,'Syntax: .reload fishing_loot_template\nReload fishing_loot_template table.'),
@@ -615,7 +616,6 @@ INSERT INTO `command` VALUES
 ('reload skinning_loot_template',3,'Syntax: .reload skinning_loot_template\nReload skinning_loot_template table.'),
 ('reload spell_area',3,'Syntax: .reload spell_area\nReload spell_area table.'),
 ('reload spell_bonus_data',3,'Syntax: .reload spell_bonus_data\nReload spell_bonus_data table.'),
-('reload spell_disabled',3,'Syntax: .reload spell_disabled\nReload spell_disabled table.'),
 ('reload spell_group',3,'Syntax: .reload spell_group\nReload spell_group table.'),
 ('reload spell_group_stack_rules',3,'Syntax: .reload spell_group\nReload spell_group_stack_rules table.'),
 ('reload spell_learn_spell',3,'Syntax: .reload spell_learn_spell\nReload spell_learn_spell table.'),
@@ -1780,6 +1780,31 @@ CREATE TABLE `db_script_string` (
 LOCK TABLES `db_script_string` WRITE;
 /*!40000 ALTER TABLE `db_script_string` DISABLE KEYS */;
 /*!40000 ALTER TABLE `db_script_string` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `disables`
+--
+
+DROP TABLE IF EXISTS `disables`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `disables` (
+  `sourceType` int(10) unsigned NOT NULL,
+  `entry` int(10) unsigned NOT NULL,
+  `flags` tinyint(3) unsigned NOT NULL default '0',
+  `comment` varchar(255) character set utf8 NOT NULL default '',
+  PRIMARY KEY  (`sourceType`,`entry`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `disables`
+--
+
+LOCK TABLES `disables` WRITE;
+/*!40000 ALTER TABLE `disables` DISABLE KEYS */;
+/*!40000 ALTER TABLE `disables` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -3863,7 +3888,7 @@ CREATE TABLE `pet_name_generation` (
 
 LOCK TABLES `pet_name_generation` WRITE;
 /*!40000 ALTER TABLE `pet_name_generation` DISABLE KEYS */;
-INSERT INTO `pet_name_generation` VALUES (1,'Aba',416,0),(2,'Az',416,0),(3,'Bel',416,0),(4,'Biz',416,0),(5,'Cho',416,0),(6,'Dag',416,0),(7,'Gak',416,0),(8,'Gar',416,0),(9,'Gel',416,0),(10,'Gho',416,0),(11,'Gob',416,0),(12,'Gra',416,0),(13,'Jak',416,0),(14,'Jub',416,0),(15,'Kar',416,0),(16,'Kup',416,0),(17,'Laz',416,0),(18,'Nal',416,0),(19,'Nok',416,0),(20,'Pag',416,0),(21,'Pig',416,0),(22,'Pip',416,0),(23,'Piz',416,0),(24,'Quz',416,0),(25,'Rui',416,0),(26,'Rul',416,0),(27,'Rup',416,0),(28,'Tar',416,0),(29,'Vol',416,0),(30,'Yaz',416,0),(31,'Zep',416,0),(32,'Zig',416,0),(33,'Zil',416,0),(34,'Zor',416,0),(35,'bis',416,1),(36,'fip',416,1),(37,'gup',416,1),(38,'ham',416,1),(39,'jub',416,1),(40,'kin',416,1),(41,'kol',416,1),(42,'lop',416,1),(43,'loz',416,1),(44,'mat',416,1),(45,'mir',416,1),(46,'nam',416,1),(47,'nar',416,1),(48,'nik',416,1),(49,'nip',416,1),(50,'pad',416,1),(51,'pep',416,1),(52,'pit',416,1),(53,'qua',416,1),(54,'rai',416,1),(55,'rin',416,1),(56,'rot',416,1),(57,'tai',416,1),(58,'tal',416,1),(59,'tik',416,1),(60,'tip',416,1),(61,'tog',416,1),(62,'tuk',416,1),(63,'uri',416,1),(64,'yal',416,1),(65,'yap',416,1),(66,'Bhee',417,0),(67,'Bruu',417,0),(68,'Czaa',417,0),(69,'Droo',417,0),(70,'Flaa',417,0),(71,'Fzuu',417,0),(72,'Ghaa',417,0),(73,'Gree',417,0),(74,'Gzaa',417,0),(75,'Haa',417,0),(76,'Haad',417,0),(77,'Haag',417,0),(78,'Haap',417,0),(79,'Jhaa',417,0),(80,'Jhuu',417,0),(81,'Khaa',417,0),(82,'Khii',417,0),(83,'Khuu',417,0),(84,'Kree',417,0),(85,'Luu',417,0),(86,'Maa',417,0),(87,'Nhee',417,0),(88,'Phuu',417,0),(89,'Pryy',417,0),(90,'Rhuu',417,0),(91,'Shaa',417,0),(92,'Sloo',417,0),(93,'Sruu',417,0),(94,'Thoo',417,0),(95,'Traa',417,0),(96,'Wraa',417,0),(97,'Zhaa',417,0),(98,'dhon',417,1),(99,'dhum',417,1),(100,'dhun',417,1),(101,'dom',417,1),(102,'don',417,1),(103,'drom',417,1),(104,'dym',417,1),(105,'fenn',417,1),(106,'fum',417,1),(107,'fun',417,1),(108,'ghon',417,1),(109,'ghun',417,1),(110,'grom',417,1),(111,'grym',417,1),(112,'hom',417,1),(113,'hon',417,1),(114,'hun',417,1),(115,'jhom',417,1),(116,'kun',417,1),(117,'lum',417,1),(118,'mmon',417,1),(119,'mon',417,1),(120,'myn',417,1),(121,'nam',417,1),(122,'nem',417,1),(123,'nhym',417,1),(124,'nom',417,1),(125,'num',417,1),(126,'phom',417,1),(127,'roon',417,1),(128,'rym',417,1),(129,'shon',417,1),(130,'thun',417,1),(131,'tom',417,1),(132,'zhem',417,1),(133,'zhum',417,1),(134,'zun',417,1),(135,'Bar',1860,0),(136,'Bel',1860,0),(137,'Char',1860,0),(138,'Grak\'',1860,0),(139,'Graz\'',1860,0),(140,'Grim',1860,0),(141,'Hath',1860,0),(142,'Hel',1860,0),(143,'Hok',1860,0),(144,'Huk',1860,0),(145,'Jhaz',1860,0),(146,'Jhom',1860,0),(147,'Juk\'',1860,0),(148,'Kal\'',1860,0),(149,'Klath',1860,0),(150,'Kon',1860,0),(151,'Krag',1860,0),(152,'Krak',1860,0),(153,'Mak',1860,0),(154,'Mezz',1860,0),(155,'Orm',1860,0),(156,'Phan',1860,0),(157,'Sar',1860,0),(158,'Tang',1860,0),(159,'Than',1860,0),(160,'Thog',1860,0),(161,'Thok',1860,0),(162,'Thul',1860,0),(163,'Zag\'',1860,0),(164,'Zang',1860,0),(165,'Zhar\'',1860,0),(166,'kath',1860,1),(167,'doc',1860,1),(168,'dok',1860,1),(169,'gak',1860,1),(170,'garth',1860,1),(171,'gore',1860,1),(172,'gorg',1860,1),(173,'grave',1860,1),(174,'gron',1860,1),(175,'juk',1860,1),(176,'krast',1860,1),(177,'kresh',1860,1),(178,'krit',1860,1),(179,'los',1860,1),(180,'mon',1860,1),(181,'mos',1860,1),(182,'moth',1860,1),(183,'nagma',1860,1),(184,'nak',1860,1),(185,'nar',1860,1),(186,'nos',1860,1),(187,'nuz',1860,1),(188,'phog',1860,1),(189,'rath',1860,1),(190,'tast',1860,1),(191,'taz',1860,1),(192,'thak',1860,1),(193,'thang',1860,1),(194,'thyk',1860,1),(195,'vhug',1860,1),(196,'zazt',1860,1),(197,'Ael',1863,0),(198,'Aez',1863,0),(199,'Ang',1863,0),(200,'Ban',1863,0),(201,'Bet',1863,0),(202,'Bro',1863,0),(203,'Bry',1863,0),(204,'Cat',1863,0),(205,'Dir',1863,0),(206,'Dis',1863,0),(207,'Dom',1863,0),(208,'Drus',1863,0),(209,'Fie',1863,0),(210,'Fier',1863,0),(211,'Gly',1863,0),(212,'Hel',1863,0),(213,'Hes',1863,0),(214,'Kal',1863,0),(215,'Lyn',1863,0),(216,'Mir',1863,0),(217,'Nim',1863,0),(218,'Sar',1863,0),(219,'Sel',1863,0),(220,'Vil',1863,0),(221,'Zah',1863,0),(222,'aith',1863,1),(223,'anda',1863,1),(224,'antia',1863,1),(225,'evere',1863,1),(226,'lia',1863,1),(227,'lissa',1863,1),(228,'neri',1863,1),(229,'neth',1863,1),(230,'nia',1863,1),(231,'nlissa',1863,1),(232,'nora',1863,1),(233,'nva',1863,1),(234,'nys',1863,1),(235,'ola',1863,1),(236,'ona',1863,1),(237,'ora',1863,1),(238,'rah',1863,1),(239,'riana',1863,1),(240,'riel',1863,1),(241,'rona',1863,1),(242,'tai',1863,1),(243,'tevere',1863,1),(244,'thea',1863,1),(245,'vina',1863,1),(246,'wena',1863,1),(247,'wyn',1863,1),(248,'xia',1863,1),(249,'yla',1863,1),(250,'yssa',1863,1),(251,'Flaa',17252,0),(252,'Haa',17252,0),(253,'Jhuu',17252,0),(254,'Shaa',17252,0),(255,'Thoo',17252,0),(256,'dhun',17252,1),(257,'ghun',17252,1),(258,'roon',17252,1),(259,'thun',17252,1),(260,'tom',17252,1),(261,'Stone',26125,0),(262,'Stone',26125,0),(263,'Eye',26125,0),(264,'Dirt',26125,0),(265,'Blight',26125,0),(266,'Bat',26125,0),(267,'Rat',26125,0),(268,'Corpse',26125,0),(269,'Grave',26125,0),(270,'Carrion',26125,0),(271,'Skull',26125,0),(272,'Bone',26125,0),(273,'Crypt',26125,0),(274,'Rib',26125,0),(275,'Brain',26125,0),(276,'Tomb',26125,0),(277,'Rot',26125,0),(278,'Gravel',26125,0),(279,'Plague',26125,0),(280,'Casket',26125,0),(281,'Limb',26125,0),(282,'Worm',26125,0),(283,'Earth',26125,0),(284,'Spine',26125,0),(285,'Pebble',26125,0),(286,'Root',26125,0),(287,'Marrow',26125,0),(288,'Hammer',26125,0),(289,'ravager',26125,1),(290,'muncher',26125,1),(291,'cruncher',26125,1),(292,'masher',26125,1),(293,'leaper',26125,1),(294,'grinder',26125,1),(295,'stalker',26125,1),(296,'gobbler',26125,1),(297,'feeder',26125,1),(298,'basher',26125,1),(299,'chewer',26125,1),(300,'ripper',26125,1),(301,'slicer',26125,1),(302,'gnaw',26125,1),(303,'flayer',26125,1),(304,'rumbler',26125,1),(305,'chomp',26125,1),(306,'breaker',26125,1),(307,'keeper',26125,1),(308,'rawler',26125,1),(309,'stealer',26125,1),(310,'thief',26125,1),(311,'catcher',26125,1),(312,'drinker',26125,1),(313,'slicer',26125,1);
+INSERT INTO `pet_name_generation` VALUES (1,'Aba',416,0),(2,'Az',416,0),(3,'Bel',416,0),(4,'Biz',416,0),(5,'Cho',416,0),(6,'Dag',416,0),(7,'Gak',416,0),(8,'Gar',416,0),(9,'Gel',416,0),(10,'Gho',416,0),(11,'Gob',416,0),(12,'Gra',416,0),(13,'Jak',416,0),(14,'Jub',416,0),(15,'Kar',416,0),(16,'Kup',416,0),(17,'Laz',416,0),(18,'Nal',416,0),(19,'Nok',416,0),(20,'Pag',416,0),(21,'Pig',416,0),(22,'Pip',416,0),(23,'Piz',416,0),(24,'Quz',416,0),(25,'Rui',416,0),(26,'Rul',416,0),(27,'Rup',416,0),(28,'Tar',416,0),(29,'Vol',416,0),(30,'Yaz',416,0),(31,'Zep',416,0),(32,'Zig',416,0),(33,'Zil',416,0),(34,'Zor',416,0),(35,'bis',416,1),(36,'fip',416,1),(37,'gup',416,1),(38,'ham',416,1),(39,'jub',416,1),(40,'kin',416,1),(41,'kol',416,1),(42,'lop',416,1),(43,'loz',416,1),(44,'mat',416,1),(45,'mir',416,1),(46,'nam',416,1),(47,'nar',416,1),(48,'nik',416,1),(49,'nip',416,1),(50,'pad',416,1),(51,'pep',416,1),(52,'pit',416,1),(53,'qua',416,1),(54,'rai',416,1),(55,'rin',416,1),(56,'rot',416,1),(57,'tai',416,1),(58,'tal',416,1),(59,'tik',416,1),(60,'tip',416,1),(61,'tog',416,1),(62,'tuk',416,1),(63,'uri',416,1),(64,'yal',416,1),(65,'yap',416,1),(66,'Bhee',417,0),(67,'Bruu',417,0),(68,'Czaa',417,0),(69,'Droo',417,0),(70,'Flaa',417,0),(71,'Fzuu',417,0),(72,'Ghaa',417,0),(73,'Gree',417,0),(74,'Gzaa',417,0),(75,'Haa',417,0),(76,'Haad',417,0),(77,'Haag',417,0),(78,'Haap',417,0),(79,'Jhaa',417,0),(80,'Jhuu',417,0),(81,'Khaa',417,0),(82,'Khii',417,0),(83,'Khuu',417,0),(84,'Kree',417,0),(85,'Luu',417,0),(86,'Maa',417,0),(87,'Nhee',417,0),(88,'Phuu',417,0),(89,'Pryy',417,0),(90,'Rhuu',417,0),(91,'Shaa',417,0),(92,'Sloo',417,0),(93,'Sruu',417,0),(94,'Thoo',417,0),(95,'Traa',417,0),(96,'Wraa',417,0),(97,'Zhaa',417,0),(98,'dhon',417,1),(99,'dhum',417,1),(100,'dhun',417,1),(101,'dom',417,1),(102,'don',417,1),(103,'drom',417,1),(104,'dym',417,1),(105,'fenn',417,1),(106,'fum',417,1),(107,'fun',417,1),(108,'ghon',417,1),(109,'ghun',417,1),(110,'grom',417,1),(111,'grym',417,1),(112,'hom',417,1),(113,'hon',417,1),(114,'hun',417,1),(115,'jhom',417,1),(116,'kun',417,1),(117,'lum',417,1),(118,'mmon',417,1),(119,'mon',417,1),(120,'myn',417,1),(121,'nam',417,1),(122,'nem',417,1),(123,'nhym',417,1),(124,'nom',417,1),(125,'num',417,1),(126,'phom',417,1),(127,'roon',417,1),(128,'rym',417,1),(129,'shon',417,1),(130,'thun',417,1),(131,'tom',417,1),(132,'zhem',417,1),(133,'zhum',417,1),(134,'zun',417,1),(135,'Bar',1860,0),(136,'Bel',1860,0),(137,'Char',1860,0),(138,'Grak''',1860,0),(139,'Graz''',1860,0),(140,'Grim',1860,0),(141,'Hath',1860,0),(142,'Hel',1860,0),(143,'Hok',1860,0),(144,'Huk',1860,0),(145,'Jhaz',1860,0),(146,'Jhom',1860,0),(147,'Juk''',1860,0),(148,'Kal''',1860,0),(149,'Klath',1860,0),(150,'Kon',1860,0),(151,'Krag',1860,0),(152,'Krak',1860,0),(153,'Mak',1860,0),(154,'Mezz',1860,0),(155,'Orm',1860,0),(156,'Phan',1860,0),(157,'Sar',1860,0),(158,'Tang',1860,0),(159,'Than',1860,0),(160,'Thog',1860,0),(161,'Thok',1860,0),(162,'Thul',1860,0),(163,'Zag''',1860,0),(164,'Zang',1860,0),(165,'Zhar''',1860,0),(166,'kath',1860,1),(167,'doc',1860,1),(168,'dok',1860,1),(169,'gak',1860,1),(170,'garth',1860,1),(171,'gore',1860,1),(172,'gorg',1860,1),(173,'grave',1860,1),(174,'gron',1860,1),(175,'juk',1860,1),(176,'krast',1860,1),(177,'kresh',1860,1),(178,'krit',1860,1),(179,'los',1860,1),(180,'mon',1860,1),(181,'mos',1860,1),(182,'moth',1860,1),(183,'nagma',1860,1),(184,'nak',1860,1),(185,'nar',1860,1),(186,'nos',1860,1),(187,'nuz',1860,1),(188,'phog',1860,1),(189,'rath',1860,1),(190,'tast',1860,1),(191,'taz',1860,1),(192,'thak',1860,1),(193,'thang',1860,1),(194,'thyk',1860,1),(195,'vhug',1860,1),(196,'zazt',1860,1),(197,'Ael',1863,0),(198,'Aez',1863,0),(199,'Ang',1863,0),(200,'Ban',1863,0),(201,'Bet',1863,0),(202,'Bro',1863,0),(203,'Bry',1863,0),(204,'Cat',1863,0),(205,'Dir',1863,0),(206,'Dis',1863,0),(207,'Dom',1863,0),(208,'Drus',1863,0),(209,'Fie',1863,0),(210,'Fier',1863,0),(211,'Gly',1863,0),(212,'Hel',1863,0),(213,'Hes',1863,0),(214,'Kal',1863,0),(215,'Lyn',1863,0),(216,'Mir',1863,0),(217,'Nim',1863,0),(218,'Sar',1863,0),(219,'Sel',1863,0),(220,'Vil',1863,0),(221,'Zah',1863,0),(222,'aith',1863,1),(223,'anda',1863,1),(224,'antia',1863,1),(225,'evere',1863,1),(226,'lia',1863,1),(227,'lissa',1863,1),(228,'neri',1863,1),(229,'neth',1863,1),(230,'nia',1863,1),(231,'nlissa',1863,1),(232,'nora',1863,1),(233,'nva',1863,1),(234,'nys',1863,1),(235,'ola',1863,1),(236,'ona',1863,1),(237,'ora',1863,1),(238,'rah',1863,1),(239,'riana',1863,1),(240,'riel',1863,1),(241,'rona',1863,1),(242,'tai',1863,1),(243,'tevere',1863,1),(244,'thea',1863,1),(245,'vina',1863,1),(246,'wena',1863,1),(247,'wyn',1863,1),(248,'xia',1863,1),(249,'yla',1863,1),(250,'yssa',1863,1),(251,'Flaa',17252,0),(252,'Haa',17252,0),(253,'Jhuu',17252,0),(254,'Shaa',17252,0),(255,'Thoo',17252,0),(256,'dhun',17252,1),(257,'ghun',17252,1),(258,'roon',17252,1),(259,'thun',17252,1),(260,'tom',17252,1),(261,'Stone',26125,0),(262,'Stone',26125,0),(263,'Eye',26125,0),(264,'Dirt',26125,0),(265,'Blight',26125,0),(266,'Bat',26125,0),(267,'Rat',26125,0),(268,'Corpse',26125,0),(269,'Grave',26125,0),(270,'Carrion',26125,0),(271,'Skull',26125,0),(272,'Bone',26125,0),(273,'Crypt',26125,0),(274,'Rib',26125,0),(275,'Brain',26125,0),(276,'Tomb',26125,0),(277,'Rot',26125,0),(278,'Gravel',26125,0),(279,'Plague',26125,0),(280,'Casket',26125,0),(281,'Limb',26125,0),(282,'Worm',26125,0),(283,'Earth',26125,0),(284,'Spine',26125,0),(285,'Pebble',26125,0),(286,'Root',26125,0),(287,'Marrow',26125,0),(288,'Hammer',26125,0),(289,'ravager',26125,1),(290,'muncher',26125,1),(291,'cruncher',26125,1),(292,'masher',26125,1),(293,'leaper',26125,1),(294,'grinder',26125,1),(295,'stalker',26125,1),(296,'gobbler',26125,1),(297,'feeder',26125,1),(298,'basher',26125,1),(299,'chewer',26125,1),(300,'ripper',26125,1),(301,'slicer',26125,1),(302,'gnaw',26125,1),(303,'flayer',26125,1),(304,'rumbler',26125,1),(305,'chomp',26125,1),(306,'breaker',26125,1),(307,'keeper',26125,1),(308,'rawler',26125,1),(309,'stealer',26125,1),(310,'thief',26125,1),(311,'catcher',26125,1),(312,'drinker',26125,1),(313,'slicer',26125,1);
 /*!40000 ALTER TABLE `pet_name_generation` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3993,6 +4018,7 @@ CREATE TABLE `playercreateinfo` (
   `position_x` float NOT NULL DEFAULT '0',
   `position_y` float NOT NULL DEFAULT '0',
   `position_z` float NOT NULL DEFAULT '0',
+  `orientation` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`race`,`class`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -4003,7 +4029,9 @@ CREATE TABLE `playercreateinfo` (
 
 LOCK TABLES `playercreateinfo` WRITE;
 /*!40000 ALTER TABLE `playercreateinfo` DISABLE KEYS */;
-INSERT INTO `playercreateinfo` VALUES (1,1,0,12,-8949.95,-132.493,83.5312),(1,2,0,12,-8949.95,-132.493,83.5312),(1,4,0,12,-8949.95,-132.493,83.5312),(1,5,0,12,-8949.95,-132.493,83.5312),(1,8,0,12,-8949.95,-132.493,83.5312),(1,9,0,12,-8949.95,-132.493,83.5312),(2,1,1,14,-618.518,-4251.67,38.718),(2,3,1,14,-618.518,-4251.67,38.718),(2,4,1,14,-618.518,-4251.67,38.718),(2,7,1,14,-618.518,-4251.67,38.718),(2,9,1,14,-618.518,-4251.67,38.718),(3,1,0,1,-6240.32,331.033,382.758),(3,2,0,1,-6240.32,331.033,382.758),(3,3,0,1,-6240.32,331.033,382.758),(3,4,0,1,-6240.32,331.033,382.758),(3,5,0,1,-6240.32,331.033,382.758),(4,1,1,141,10311.3,832.463,1326.41),(4,3,1,141,10311.3,832.463,1326.41),(4,4,1,141,10311.3,832.463,1326.41),(4,5,1,141,10311.3,832.463,1326.41),(4,11,1,141,10311.3,832.463,1326.41),(5,1,0,85,1676.71,1678.31,121.67),(5,4,0,85,1676.71,1678.31,121.67),(5,5,0,85,1676.71,1678.31,121.67),(5,8,0,85,1676.71,1678.31,121.67),(5,9,0,85,1676.71,1678.31,121.67),(6,1,1,215,-2917.58,-257.98,52.9968),(6,3,1,215,-2917.58,-257.98,52.9968),(6,7,1,215,-2917.58,-257.98,52.9968),(6,11,1,215,-2917.58,-257.98,52.9968),(7,1,0,1,-6240.32,331.033,382.758),(7,9,0,1,-6240,331,383),(7,8,0,1,-6240,331,383),(7,4,0,1,-6240,331,383),(8,1,1,14,-618.518,-4251.67,38.718),(8,3,1,14,-618.518,-4251.67,38.718),(8,4,1,14,-618.518,-4251.67,38.718),(8,5,1,14,-618.518,-4251.67,38.718),(8,7,1,14,-618.518,-4251.67,38.718),(8,8,1,14,-618.518,-4251.67,38.718),(10,2,530,3431,10349.6,-6357.29,33.4026),(10,3,530,3431,10349.6,-6357.29,33.4026),(10,4,530,3431,10349.6,-6357.29,33.4026),(10,5,530,3431,10349.6,-6357.29,33.4026),(10,8,530,3431,10349.6,-6357.29,33.4026),(10,9,530,3431,10349.6,-6357.29,33.4026),(11,1,530,3526,-3961.64,-13931.2,100.615),(11,2,530,3526,-3961.64,-13931.2,100.615),(11,3,530,3526,-3961.64,-13931.2,100.615),(11,5,530,3526,-3961.64,-13931.2,100.615),(11,7,530,3526,-3961.64,-13931.2,100.615),(11,8,530,3526,-3961.64,-13931.2,100.615),(1,6,609,4298,2355.84,-5664.77,426.028),(2,6,609,4298,2358.44,-5666.9,426.023),(3,6,609,4298,2358.44,-5666.9,426.023),(4,6,609,4298,2356.21,-5662.21,426.026),(5,6,609,4298,2356.21,-5662.21,426.026),(6,6,609,4298,2358.17,-5663.21,426.027),(7,6,609,4298,2355.05,-5661.7,426.026),(8,6,609,4298,2355.05,-5661.7,426.026),(10,6,609,4298,2355.84,-5664.77,426.028),(11,6,609,4298,2358.17,-5663.21,426.027);
+INSERT INTO `playercreateinfo` VALUES 
+(1,1,0,12,-8949.95,-132.493,83.5312,0),(1,2,0,12,-8949.95,-132.493,83.5312,0),(1,4,0,12,-8949.95,-132.493,83.5312,0),(1,5,0,12,-8949.95,-132.493,83.5312,0),(1,8,0,12,-8949.95,-132.493,83.5312,0),(1,9,0,12,-8949.95,-132.493,83.5312,0),(2,1,1,14,-618.518,-4251.67,38.718,0),(2,3,1,14,-618.518,-4251.67,38.718,0),(2,4,1,14,-618.518,-4251.67,38.718,0),(2,7,1,14,-618.518,-4251.67,38.718,0),(2,9,1,14,-618.518,-4251.67,38.718,0),(3,1,0,1,-6240.32,331.033,382.758,6.17716),(3,2,0,1,-6240.32,331.033,382.758,6.17716),(3,3,0,1,-6240.32,331.033,382.758,6.17716),(3,4,0,1,-6240.32,331.033,382.758,6.17716),(3,5,0,1,-6240.32,331.033,382.758,6.17716),(4,1,1,141,10311.3,832.463,1326.41,5.69632),(4,3,1,141,10311.3,832.463,1326.41,5.69632),(4,4,1,141,10311.3,832.463,1326.41,5.69632),(4,5,1,141,10311.3,832.463,1326.41,5.69632),(4,11,1,141,10311.3,832.463,1326.41,5.69632),(5,1,0,85,1676.71,1678.31,121.67,2.70526),(5,4,0,85,1676.71,1678.31,121.67,2.70526),(5,5,0,85,1676.71,1678.31,121.67,2.70526),(5,8,0,85,1676.71,1678.31,121.67,2.70526),(5,9,0,85,1676.71,1678.31,121.67,2.70526),(6,1,1,215,-2917.58,-257.98,52.9968,0),(6,3,1,215,-2917.58,-257.98,52.9968,0),(6,7,1,215,-2917.58,-257.98,52.9968,0),(6,11,1,215,-2917.58,-257.98,52.9968,0),(7,1,0,1,-6240.32,331.033,382.758,0),(7,9,0,1,-6240,331,383,0),(7,8,0,1,-6240,331,383,0),(7,4,0,1,-6240,331,383,0),(8,1,1,14,-618.518,-4251.67,38.718,0),(8,3,1,14,-618.518,-4251.67,38.718,0),(8,4,1,14,-618.518,-4251.67,38.718,0),(8,5,1,14,-618.518,-4251.67,38.718,0),(8,7,1,14,-618.518,-4251.67,38.718,0),(8,8,1,14,-618.518,-4251.67,38.718,0),(10,2,530,3431,10349.6,-6357.29,33.4026,5.31605),(10,3,530,3431,10349.6,-6357.29,33.4026,5.31605),(10,4,530,3431,10349.6,-6357.29,33.4026,5.31605),(10,5,530,3431,10349.6,-6357.29,33.4026,5.31605),(10,8,530,3431,10349.6,-6357.29,33.4026,5.31605),(10,9,530,3431,10349.6,-6357.29,33.4026,5.31605),(11,1,530,3526,-3961.64,-13931.2,100.615,2.08364),(11,2,530,3526,-3961.64,-13931.2,100.615,2.08364),(11,3,530,3526,-3961.64,-13931.2,100.615,2.08364),(11,5,530,3526,-3961.64,-13931.2,100.615,2.08364),(11,7,530,3526,-3961.64,-13931.2,100.615,2.08364),(11,8,530,3526,-3961.64,-13931.2,100.615,2.08364),(1,6,609,4298,2355.84,-5664.77,426.028,3.65997),(2,6,609,4298,2358.44,-5666.9,426.023,3.65997),(3,6,609,4298,2358.44,-5666.9,426.023,3.65997),(4,6,609,4298,2356.21,-5662.21,426.026,3.65997),(5,6,609,4298,2356.21,-5662.21,426.026,3.65997),(6,6,609,4298,2358.17,-5663.21,426.027,3.65997),(7,6,609,4298,2355.05,-5661.7,426.026,3.65997),(8,6,609,4298,2355.05,-5661.7,426.026,3.65997),(10,6,609,4298,2355.84,-5664.77,426.028,3.65997),(11,6,609,4298,2358.17,-5663.21,426.027,3.65997);
+
 /*!40000 ALTER TABLE `playercreateinfo` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -5345,32 +5373,9 @@ INSERT INTO `spell_dbc` (`Id`,`Dispel`,`Mechanic`,`Attributes`,`AttributesEx`,`A
 (40145,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Quest 11000 RewSpellCast serverside spell'),
 (45767,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Quest 11670 RewSpellCast serverside spell'),
 (71098,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Quest 24451 RewSpellCast serverside spell'),
-(70878,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, -1, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Creature 40160 creature_addon serverside spell');
+(70878,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, -1, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Creature 40160 creature_addon serverside spell'),
+(38406,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, -1, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Quest 10721 RewSpellCast serverside spell');
 /*!40000 ALTER TABLE `spell_dbc` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `spell_disabled`
---
-
-DROP TABLE IF EXISTS `spell_disabled`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `spell_disabled` (
-  `entry` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Spell entry',
-  `disable_mask` int(8) unsigned NOT NULL DEFAULT '0',
-  `comment` varchar(64) NOT NULL DEFAULT '',
-  PRIMARY KEY (`entry`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Disabled Spell System';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `spell_disabled`
---
-
-LOCK TABLES `spell_disabled` WRITE;
-/*!40000 ALTER TABLE `spell_disabled` DISABLE KEYS */;
-/*!40000 ALTER TABLE `spell_disabled` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -15255,6 +15260,17 @@ INSERT INTO `trinity_string` (`entry`,`content_default`,`content_loc1`,`content_
 (1013, '-[%16s][%12s][%15s][%5d][%9d][%3d][%4d]', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (1014, 'No online players.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (1015, '============================== Characters Online =============================', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(1016, '| GUID       | Name                 | Account                      | Delete Date         |', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(1017, '| %10u | %20s | %15s (%10u) | %19s |', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(1018, '==========================================================================================', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(1019, 'No characters found.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(1020, 'Restoring the following characters:', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(1021, 'Deleting the following characters:', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(1022, 'ERROR: You can only assign a new name if you have only selected a single character!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(1023, 'Character ''%s'' (GUID: %u Account %u) can''t be restored: account not exist!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(1024, 'Character ''%s'' (GUID: %u Account %u) can''t be restored: account character list full!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(1025, 'Character ''%s'' (GUID: %u Account %u) can''t be restored: new name already used!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(1026, 'GUID: %u Name: %s Account: %s (%u) Date: %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (1100, 'Account %s (Id: %u) have up to %u expansion allowed now.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (1101, 'Message of the day changed to:\r\n%s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (1102, 'Message sent to %s: %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),

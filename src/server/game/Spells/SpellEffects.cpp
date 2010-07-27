@@ -95,7 +95,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectUnused,                                   // 26 SPELL_EFFECT_DEFENSE                  one spell: Defense
     &Spell::EffectPersistentAA,                             // 27 SPELL_EFFECT_PERSISTENT_AREA_AURA
     &Spell::EffectSummonType,                               // 28 SPELL_EFFECT_SUMMON
-    &Spell::EffectLeapForward,                              // 29 SPELL_EFFECT_LEAP
+    &Spell::EffectLeap,                                     // 29 SPELL_EFFECT_LEAP
     &Spell::EffectEnergize,                                 // 30 SPELL_EFFECT_ENERGIZE
     &Spell::EffectWeaponDmg,                                // 31 SPELL_EFFECT_WEAPON_PERCENT_DAMAGE
     &Spell::EffectTriggerMissileSpell,                      // 32 SPELL_EFFECT_TRIGGER_MISSILE
@@ -214,12 +214,12 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectPlayerPull,                               //145 SPELL_EFFECT_145                      Black Hole Effect
     &Spell::EffectActivateRune,                             //146 SPELL_EFFECT_ACTIVATE_RUNE
     &Spell::EffectQuestFail,                                //147 SPELL_EFFECT_QUEST_FAIL               quest fail
-    &Spell::EffectUnused,                                   //148 SPELL_EFFECT_148                      unused
+    &Spell::EffectUnused,                                   //148 SPELL_EFFECT_148   1 spell - 43509
     &Spell::EffectChargeDest,                               //149 SPELL_EFFECT_CHARGE_DEST
     &Spell::EffectQuestStart,                               //150 SPELL_EFFECT_QUEST_START
     &Spell::EffectTriggerRitualOfSummoning,                 //151 SPELL_EFFECT_TRIGGER_SPELL_2
     &Spell::EffectNULL,                                     //152 SPELL_EFFECT_152                      summon Refer-a-Friend
-    &Spell::EffectNULL,                                     //153 SPELL_EFFECT_CREATE_PET               misc value is creature entry
+    &Spell::EffectCreateTamedPet,                           //153 SPELL_EFFECT_CREATE_TAMED_PET         misc value is creature entry
     &Spell::EffectDiscoverTaxi,                             //154 SPELL_EFFECT_DISCOVER_TAXI 
     &Spell::EffectTitanGrip,                                //155 SPELL_EFFECT_TITAN_GRIP Allows you to equip two-handed axes, maces and swords in one hand, but you attack $49152s1% slower than normal.
     &Spell::EffectEnchantItemPrismatic,                     //156 SPELL_EFFECT_ENCHANT_ITEM_PRISMATIC
@@ -522,7 +522,7 @@ void Spell::SpellDamageSchoolDmg(uint32 effect_idx)
                         damage += pdamage * aura->GetTotalTicks() * pct_dir / 100;
 
                         uint32 pct_dot = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, (effect_idx + 2)) / 3;
-                        m_currentBasePoints[1] = SpellMgr::CalculateSpellEffectBaseAmount(pdamage * aura->GetTotalTicks() * pct_dot / 100);
+                        m_currentBasePoints[1] = SpellMgr::CalculateSpellEffectBaseAmount(pdamage * aura->GetTotalTicks() * pct_dot / 100, m_spellInfo, 1);
 
                         apply_direct_bonus = false;
                         // Glyph of Conflagrate
@@ -1110,13 +1110,6 @@ void Spell::EffectDummy(uint32 i)
                 case 26074:                                 // Holiday Cheer
                     // implemented at client side
                     return;
-                case 28006:                                 // Arcane Cloaking
-                {
-                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
-                        // Naxxramas Entry Flag Effect DND
-                        m_caster->CastSpell(unitTarget, 29294, true);
-                    return;
-                }
                 // Polarity Shift
                 case 28089:
                     if (unitTarget)
@@ -2215,7 +2208,7 @@ void Spell::EffectDummy(uint32 i)
 
         targets.setUnitTarget(unitTarget);
         Spell* spell = new Spell(m_caster, spellInfo, triggered, m_originalCasterGUID, NULL, true);
-        if (bp) spell->m_currentBasePoints[0] = SpellMgr::CalculateSpellEffectBaseAmount(bp);
+        if (bp) spell->m_currentBasePoints[0] = SpellMgr::CalculateSpellEffectBaseAmount(bp, spellInfo, 0);
         spell->prepare(&targets);
     }
 
@@ -3769,6 +3762,11 @@ void Spell::EffectSummonType(uint32 i)
                         && properties->Slot >= SUMMON_SLOT_TOTEM
                         && properties->Slot < MAX_TOTEM_SLOT)
                     {
+                        // set display id depending on race
+                        uint32 displayId = m_originalCaster->GetModelForTotem(PlayerTotemType(properties->Id));
+                        summon->SetNativeDisplayId(displayId);
+                        summon->SetDisplayId(displayId);
+
                         //summon->SendUpdateToPlayerm_originalCaster->ToPlayer();
                         WorldPacket data(SMSG_TOTEM_CREATED, 1+8+4+4);
                         data << uint8(properties->Slot-1);
@@ -7006,7 +7004,7 @@ void Spell::EffectBlock(uint32 /*i*/)
         unitTarget->ToPlayer()->SetCanBlock(true);
 }
 
-void Spell::EffectLeapForward(uint32 i)
+void Spell::EffectLeap(uint32 i)
 {
     if (unitTarget->isInFlight())
         return;
@@ -7014,47 +7012,7 @@ void Spell::EffectLeapForward(uint32 i)
     if (!m_targets.HasDst())
         return;
 
-    uint32 mapid = m_caster->GetMapId();
-    float dist = m_caster->GetSpellRadiusForTarget(unitTarget, sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
-    if (Player* modOwner = m_originalCaster->GetSpellModOwner())
-        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, dist);
-
-    float x,y,z;
-    float destx,desty,destz,ground,floor;
-    float orientation = unitTarget->GetOrientation(), step = dist/10.0f;
-
-    unitTarget->GetPosition(x,y,z);
-    destx = x + dist * cos(orientation);
-    desty = y + dist * sin(orientation);
-    ground = unitTarget->GetMap()->GetHeight(destx,desty,MAX_HEIGHT,true);
-    floor = unitTarget->GetMap()->GetHeight(destx,desty,z, true);
-    destz = fabs(ground - z) <= fabs(floor - z) ? ground : floor;
-
-    bool col = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(mapid,x,y,z+0.5f,destx,desty,destz+0.5f,destx,desty,destz,-0.5f);
-
-    if (col) // We had a collision!
-    {
-        destx -= 0.6 * cos(orientation);
-        desty -= 0.6 * sin(orientation);
-        dist = sqrt((x-destx)*(x-destx) + (y-desty)*(y-desty));
-        step = dist/10.0f;
-    }
-
-    int j = 0;
-    for (j; j < 10; j++)
-    {
-        if (fabs(z - destz) > 6)
-        {
-            destx -= step * cos(orientation);
-            desty -= step * sin(orientation);
-            ground = unitTarget->GetMap()->GetHeight(destx,desty,MAX_HEIGHT,true);
-            floor = unitTarget->GetMap()->GetHeight(destx,desty,z, true);
-            destz = fabs(ground - z) <= fabs(floor - z) ? ground:floor;
-        } else break;
-    }
-
-    if (j < 10)
-        unitTarget->NearTeleportTo(destx, desty, destz + 0.07531, orientation, unitTarget == m_caster);
+    unitTarget->NearTeleportTo(m_targets.m_dstPos.GetPositionX(), m_targets.m_dstPos.GetPositionY(), m_targets.m_dstPos.GetPositionZ(), m_targets.m_dstPos.GetOrientation(), unitTarget == m_caster);
 }
 
 void Spell::EffectReputation(uint32 i)
@@ -7093,7 +7051,7 @@ void Spell::EffectQuestComplete(uint32 i)
         uint16 log_slot = pPlayer->FindQuestSlot(quest_id);
         if (log_slot < MAX_QUEST_LOG_SIZE)
             pPlayer->AreaExploredOrEventHappens(quest_id);
-        else
+        else if (!pPlayer->GetQuestRewardStatus(quest_id))   // never rewarded before
             pPlayer->CompleteQuest(quest_id);   // quest not in log - for internal use
     }
 }
@@ -7856,6 +7814,31 @@ void Spell::EffectActivateRune(uint32  eff_idx)
             if (plr->GetRuneCooldown(i) && (plr->GetCurrentRune(i) == RUNE_FROST ||  plr->GetCurrentRune(i) == RUNE_DEATH))
                 plr->SetRuneCooldown(i, 0);
         }
+    }
+}
+
+void Spell::EffectCreateTamedPet(uint32 i)
+{
+    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->GetPetGUID() || unitTarget->getClass() != CLASS_HUNTER)
+        return;
+
+    uint32 creatureEntry = m_spellInfo->EffectMiscValue[i];
+    Pet * pet = unitTarget->CreateTamedPetFrom(creatureEntry, m_spellInfo->Id);
+    if (!pet)
+        return;
+
+    // add to world
+    pet->GetMap()->Add(pet->ToCreature());
+
+    // unitTarget has pet now
+    unitTarget->SetMinion(pet, true);
+
+    pet->InitTalentForLevel();
+
+    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+    {
+        pet->SavePetToDB(PET_SAVE_AS_CURRENT);
+        unitTarget->ToPlayer()->PetSpellInitialize();
     }
 }
 

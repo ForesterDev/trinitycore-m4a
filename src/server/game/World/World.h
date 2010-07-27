@@ -84,7 +84,8 @@ enum WorldTimers
     WUPDATE_CLEANDB     = 7,
     WUPDATE_AUTOBROADCAST = 8,
     WUPDATE_MAILBOXQUEUE = 9,
-    WUPDATE_COUNT       = 10
+    WUPDATE_DELETECHARS = 10,
+    WUPDATE_COUNT       = 11
 };
 
 /// Configuration elements
@@ -281,6 +282,10 @@ enum WorldConfigs
     CONFIG_BG_XP_FOR_KILL,
     CONFIG_RANDOM_BG_RESET_HOUR,
     CONFIG_VMAP_INDOOR_CHECK,
+    CONFIG_CHARDELETE_KEEP_DAYS,
+    CONFIG_CHARDELETE_METHOD,
+    CONFIG_CHARDELETE_MIN_LEVEL,
+    CONFIG_CLEAN_CHARACTER_DB,
     CONFIG_VALUE_COUNT
 };
 
@@ -459,19 +464,23 @@ enum WorldStates
 /// Storage class for commands issued for delayed execution
 struct CliCommandHolder
 {
-    typedef void Print(const char*);
-
+    typedef void Print(void*, const char*);
+    typedef void CommandFinished(void*, bool success);
+      
+    void* m_callbackArg;
     char *m_command;
     Print* m_print;
 
-    CliCommandHolder(const char *command, Print* zprint)
-        : m_print(zprint)
+    CommandFinished* m_commandFinished;
+
+    CliCommandHolder(void* callbackArg, const char *command, Print* zprint, CommandFinished* commandFinished)
+        : m_callbackArg(callbackArg), m_print(zprint), m_commandFinished(commandFinished)
     {
         size_t len = strlen(command)+1;
         m_command = new char[len];
         memcpy(m_command, command, len);
     }
-
+    
     ~CliCommandHolder() { delete[] m_command; }
 };
 
@@ -637,8 +646,6 @@ class World
         uint32 DecreaseScheduledScriptCount(size_t count) { return (uint32)(m_scheduledScripts -= count); }
         bool IsScriptScheduled() const { return m_scheduledScripts > 0; }
 
-        bool IsAllowedMap(uint32 mapid) { return m_forbiddenMapIds.count(mapid) == 0 ;}
-
         // for max speed access
         static float GetMaxVisibleDistanceOnContinents()    { return m_MaxVisibleDistanceOnContinents; }
         static float GetMaxVisibleDistanceInInstances()     { return m_MaxVisibleDistanceInInstances;  }
@@ -666,7 +673,7 @@ class World
         inline uint16 GetMvAnticheatIgnoreAfterTeleport()   {return m_MvAnticheatIgnoreAfterTeleport;}
 
         void ProcessCliCommands();
-        void QueueCliCommand(CliCommandHolder::Print* zprintf, char const* input) { cliCmdQueue.add(new CliCommandHolder(input, zprintf)); }
+        void QueueCliCommand(CliCommandHolder* commandHolder) { cliCmdQueue.add(commandHolder); }
 
         void UpdateResultQueue();
         void InitResultQueue();
@@ -751,7 +758,6 @@ class World
         bool m_allowMovement;
         std::string m_motd;
         std::string m_dataPath;
-        std::set<uint32> m_forbiddenMapIds;
 
         // for max speed access
         static float m_MaxVisibleDistanceOnContinents;

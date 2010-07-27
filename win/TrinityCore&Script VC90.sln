@@ -24,6 +24,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "scripts", "..\src\server\sc
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "collision", "..\src\server\collision\collision.vcxproj", "{C11DF087-CFA1-4AB8-BD01-9E0591C2FC5E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gsoap", "..\externals\gsoap\VC90\gsoap.vcxproj", "{014331FB-7472-4465-9844-EEED2A79FE97}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -128,6 +130,14 @@ Global
 		{C11DF087-CFA1-4AB8-BD01-9E0591C2FC5E}.Release|Win32.Build.0 = Release|Win32
 		{C11DF087-CFA1-4AB8-BD01-9E0591C2FC5E}.Release|x64.ActiveCfg = Release|x64
 		{C11DF087-CFA1-4AB8-BD01-9E0591C2FC5E}.Release|x64.Build.0 = Release|x64
+		{014331FB-7472-4465-9844-EEED2A79FE97}.Debug|Win32.ActiveCfg = Debug|Win32
+		{014331FB-7472-4465-9844-EEED2A79FE97}.Debug|Win32.Build.0 = Debug|Win32
+		{014331FB-7472-4465-9844-EEED2A79FE97}.Debug|x64.ActiveCfg = Debug|x64
+		{014331FB-7472-4465-9844-EEED2A79FE97}.Debug|x64.Build.0 = Debug|x64
+		{014331FB-7472-4465-9844-EEED2A79FE97}.Release|Win32.ActiveCfg = Release|Win32
+		{014331FB-7472-4465-9844-EEED2A79FE97}.Release|Win32.Build.0 = Release|Win32
+		{014331FB-7472-4465-9844-EEED2A79FE97}.Release|x64.ActiveCfg = Release|x64
+		{014331FB-7472-4465-9844-EEED2A79FE97}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

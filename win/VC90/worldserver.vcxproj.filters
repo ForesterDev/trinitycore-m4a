@@ -4,6 +4,9 @@
     <Filter Include="doc">
       <UniqueIdentifier>{5a37e471-85b0-4e08-83b1-1105791f1866}</UniqueIdentifier>
     </Filter>
+    <Filter Include="TCSoap">
+      <UniqueIdentifier>{aad1867b-2a36-43d5-b7d9-e39759d7fe6b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\COPYING">
@@ -20,6 +23,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\server\worldserver\TCSoap\TCSoap.cpp">
+      <Filter>TCSoap</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\server\worldserver\CommandLine\CliRunnable.cpp" />
     <ClCompile Include="..\..\src\server\worldserver\Main.cpp" />
     <ClCompile Include="..\..\src\server\worldserver\Master.cpp" />
@@ -28,6 +34,9 @@
     <ClCompile Include="..\..\src\server\worldserver\WorldThread\WorldRunnable.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\server\worldserver\TCSoap\TCSoap.h">
+      <Filter>TCSoap</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\server\worldserver\CommandLine\CliRunnable.h" />
     <ClInclude Include="..\..\src\server\worldserver\Master.h" />
     <ClInclude Include="..\..\src\server\worldserver\RemoteAccess\RASocket.h" />
