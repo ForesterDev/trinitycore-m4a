@@ -127,11 +127,6 @@ bool QuestAccept_npc_bartleby(Player* pPlayer, Creature* pCreature, Quest const*
     return true;
 }
 
-CreatureAI* GetAI_npc_bartleby(Creature* pCreature)
-{
-    return new npc_bartlebyAI(pCreature);
-}
-
 /*######
 ## npc_dashel_stonefist
 ######*/
@@ -190,11 +185,6 @@ bool QuestAccept_npc_dashel_stonefist(Player* pPlayer, Creature* pCreature, Ques
         CAST_AI(npc_dashel_stonefistAI, pCreature->AI())->AttackStart(pPlayer);
     }
     return true;
-}
-
-CreatureAI* GetAI_npc_dashel_stonefist(Creature* pCreature)
-{
-    return new npc_dashel_stonefistAI(pCreature);
 }
 
 /*######
@@ -404,11 +394,6 @@ struct npc_lord_gregor_lescovarAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_lord_gregor_lescovar(Creature* pCreature)
-{
-    return new npc_lord_gregor_lescovarAI(pCreature);
-}
-
 /*######
 ## npc_marzon_silent_blade
 ######*/
@@ -477,11 +462,6 @@ struct npc_marzon_silent_bladeAI : public ScriptedAI
         DoMeleeAttackIfReady();
     }
 };
-
-CreatureAI* GetAI_npc_marzon_silent_blade(Creature* pCreature)
-{
-    return new npc_marzon_silent_bladeAI(pCreature);
-}
 
 /*######
 ## npc_tyrion_spybot
@@ -620,11 +600,6 @@ struct npc_tyrion_spybotAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_tyrion_spybot(Creature* pCreature)
-{
-    return new npc_tyrion_spybotAI(pCreature);
-}
-
 /*######
 ## npc_tyrion
 ######*/
@@ -660,13 +635,13 @@ void AddSC_stormwind_city()
 
     newscript = new Script;
     newscript->Name = "npc_bartleby";
-    newscript->GetAI = &GetAI_npc_bartleby;
+    newscript->GetAI = &get_ai<npc_bartlebyAI>;
     newscript->pQuestAccept = &QuestAccept_npc_bartleby;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "npc_dashel_stonefist";
-    newscript->GetAI = &GetAI_npc_dashel_stonefist;
+    newscript->GetAI = &get_ai<npc_dashel_stonefistAI>;
     newscript->pQuestAccept = &QuestAccept_npc_dashel_stonefist;
     newscript->RegisterSelf();
 
@@ -683,16 +658,16 @@ void AddSC_stormwind_city()
 
     newscript = new Script;
     newscript->Name = "npc_tyrion_spybot";
-    newscript->GetAI = &GetAI_npc_tyrion_spybot;
+    newscript->GetAI = &get_ai<npc_tyrion_spybotAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "npc_lord_gregor_lescovar";
-    newscript->GetAI = &GetAI_npc_lord_gregor_lescovar;
+    newscript->GetAI = &get_ai<npc_lord_gregor_lescovarAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "npc_marzon_silent_blade";
-    newscript->GetAI = &GetAI_npc_marzon_silent_blade;
+    newscript->GetAI = &get_ai<npc_marzon_silent_bladeAI>;
     newscript->RegisterSelf();
 }

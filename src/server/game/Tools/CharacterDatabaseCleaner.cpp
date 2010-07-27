@@ -19,6 +19,7 @@
 USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "CharacterDatabaseCleaner.h"
 #include "World.h"

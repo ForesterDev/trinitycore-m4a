@@ -521,38 +521,23 @@ struct mob_zealot_zathAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_thekal(Creature* pCreature)
-{
-    return new boss_thekalAI (pCreature);
-}
-
-CreatureAI* GetAI_mob_zealot_lorkhan(Creature* pCreature)
-{
-    return new mob_zealot_lorkhanAI (pCreature);
-}
-
-CreatureAI* GetAI_mob_zealot_zath(Creature* pCreature)
-{
-    return new mob_zealot_zathAI (pCreature);
-}
-
 void AddSC_boss_thekal()
 {
     Script *newscript;
 
     newscript = new Script;
     newscript->Name = "boss_thekal";
-    newscript->GetAI = &GetAI_boss_thekal;
+    newscript->GetAI = &get_ai<boss_thekalAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_zealot_lorkhan";
-    newscript->GetAI = &GetAI_mob_zealot_lorkhan;
+    newscript->GetAI = &get_ai<mob_zealot_lorkhanAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_zealot_zath";
-    newscript->GetAI = &GetAI_mob_zealot_zath;
+    newscript->GetAI = &get_ai<mob_zealot_zathAI>;
     newscript->RegisterSelf();
 }
 
