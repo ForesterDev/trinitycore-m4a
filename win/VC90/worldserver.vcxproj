@@ -356,6 +356,9 @@ copy ..\..\README.* ..\..\bin\$(Platform)_$(Configuration)</Command>
     <ProjectReference Include="..\..\externals\g3dlite\win\VC90\g3dlite.vcxproj">
       <Project>{8072769e-cf10-48bf-b9e1-12752a5dac6e}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\externals\gsoap\VC90\gsoap.vcxproj">
+      <Project>{014331fb-7472-4465-9844-eeed2a79fe97}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\externals\mysql\win\VC90\libmysql.vcxproj">
       <Project>{4fbe4fc1-22de-41a0-9aeb-cfd00ebac7e5}</Project>
     </ProjectReference>
