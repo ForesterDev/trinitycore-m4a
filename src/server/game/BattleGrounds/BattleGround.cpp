@@ -1053,6 +1053,7 @@ void BattleGround::StartBattleGround()
 
 void BattleGround::AddPlayer(Player *plr)
 {
+    assert(m_Players.size() < max_battleground_players);
     // remove afk from player
     if (plr->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK))
         plr->ToggleAFK();

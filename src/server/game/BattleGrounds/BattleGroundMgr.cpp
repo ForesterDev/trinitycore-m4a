@@ -1307,10 +1307,12 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket *data, BattleGro
 void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
 {
     uint8 type = (bg->isArena() ? 1 : 0);
+    auto score_count = bg->GetPlayerScoresSize();
+    assert(score_count <= max_battleground_players);
                                                             // last check on 3.0.3
     data->Initialize(MSG_PVP_LOG_DATA, 1 + ((4 + 4 + 4) * 2 + (96) * 2) + 1 + (1)
             + 4 + (8 + 4 + std::max(1, 4 + 4 + 4) + 4 + 4 + 4
-                + (4) * BattleGroundScore::max_stats) * bg->GetPlayerScoresSize());
+                + (4) * BattleGroundScore::max_stats) * score_count);
     *data << uint8(type);                                   // type (battleground=0/arena=1)
 
     if (type)                                                // arena
@@ -1347,9 +1349,10 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
         *data << uint8(bg->GetWinner());                    // who win
     }
 
-    *data << (int32)(bg->GetPlayerScoresSize());
+    *data << score_count;
 
-    for (BattleGround::BattleGroundScoreMap::const_iterator itr = bg->GetPlayerScoresBegin(); itr != bg->GetPlayerScoresEnd(); ++itr)
+    for (BattleGround::BattleGroundScoreMap::const_iterator
+            itr = bg->GetPlayerScoresBegin(); score_count; ++itr, --score_count)
     {
         *data << (uint64)itr->first;
         *data << (int32)itr->second->KillingBlows;
