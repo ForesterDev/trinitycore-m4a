@@ -319,11 +319,14 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     {
         // not have spell in spellbook or spell passive and not casted by client
         if (!mover->ToPlayer()->HasActiveSpell (spellId) || IsPassiveSpell(spellId))
-        {
-            //cheater? kick? ban?
-            recvPacket.rpos(recvPacket.wpos());                 // prevent spam at ignore packet
-            return;
-        }
+            if (spellId == 68398)
+                ;
+            else
+            {
+                //cheater? kick? ban?
+                recvPacket.rpos(recvPacket.wpos());                 // prevent spam at ignore packet
+                return;
+            }
     }
     else
     {

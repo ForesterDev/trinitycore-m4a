@@ -2283,9 +2283,6 @@
     <ClInclude Include="Northrend\Ulduar\HallsOfStone\halls_of_stone.h">
       <Filter>Header Files\Northrend\Ulduar\HallsOfStone</Filter>
     </ClInclude>
-    <ClInclude Include="Northrend\Ulduar\ulduar\instance_ulduar.hpp">
-      <Filter>Header Files\Northrend\Ulduar\ulduar</Filter>
-    </ClInclude>
     <ClInclude Include="Northrend\Ulduar\ulduar\ulduar.h">
       <Filter>Header Files\Northrend\Ulduar\ulduar</Filter>
     </ClInclude>
