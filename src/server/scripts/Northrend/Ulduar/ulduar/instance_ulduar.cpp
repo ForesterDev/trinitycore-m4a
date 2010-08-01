@@ -59,6 +59,7 @@ struct instance_ulduar : public InstanceData
 {
     instance_ulduar(Map *pMap)
         : InstanceData(pMap),
+            pLeviathanDoor(),
             HodirRareChest(),
             MimironElevator()
     {
