@@ -59,7 +59,8 @@ struct instance_ulduar : public InstanceData
 {
     instance_ulduar(Map *pMap)
         : InstanceData(pMap),
-            HodirRareChest()
+            HodirRareChest(),
+            MimironElevator()
     {
         SetBossNumber(MAX_BOSS_NUMBER);
         LoadDoorData(doorData);
