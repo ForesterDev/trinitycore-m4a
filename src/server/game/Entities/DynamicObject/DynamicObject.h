@@ -59,5 +59,8 @@ class DynamicObject : public WorldObject, public GridObject<DynamicObject>
     protected:
         int32 m_duration; // for non-aura dynobjects
         Aura * m_aura;
+
+private:
+    void destroy();
 };
 #endif

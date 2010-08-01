@@ -44,12 +44,7 @@ DynamicObject::DynamicObject() : WorldObject()
 
 DynamicObject::~DynamicObject()
 {
-    if (m_aura)
-    {
-        if (!m_aura->IsRemoved())
-            m_aura->_Remove(AURA_REMOVE_BY_DEFAULT);
-        delete m_aura;
-    }
+    destroy();
 }
 
 void DynamicObject::AddToWorld()
@@ -158,15 +153,7 @@ void DynamicObject::Update(uint32 p_time)
 
 void DynamicObject::Delete()
 {
-    if (m_aura)
-    {
-        // dynObj may be removed in Aura::Remove - we cannot delete there
-        // so recheck aura here
-        if (!m_aura->IsRemoved())
-            m_aura->_Remove(AURA_REMOVE_BY_DEFAULT);
-        delete m_aura;
-        m_aura = NULL;
-    }
+    destroy();
     SendObjectDeSpawnAnim(GetGUID());
     RemoveFromWorld();
     AddObjectToRemoveList();
@@ -197,4 +184,17 @@ bool DynamicObject::isVisibleForInState(Player const* u, bool inVisibleList) con
 {
     return IsInWorld() && u->IsInWorld()
         && (IsWithinDistInMap(u->m_seer,World::GetMaxVisibleDistanceForObject()+(inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false));
+}
+
+void DynamicObject::destroy()
+{
+    if (m_aura)
+    {
+        // dynObj may be removed in Aura::Remove - we cannot delete there
+        // so recheck aura here
+        if (!m_aura->IsRemoved())
+            m_aura->_Remove(AURA_REMOVE_BY_DEFAULT);
+        delete m_aura;
+        m_aura = NULL;
+    }
 }
