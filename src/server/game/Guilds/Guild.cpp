@@ -31,7 +31,7 @@
 #include "Util.h"
 #include "Language.h"
 #include "World.h"
-#include "ConfigEnv.h"
+#include "Config.h"
 
 Guild::Guild()
 {
@@ -44,6 +44,7 @@ Guild::Guild()
     m_BorderStyle = 0;
     m_BorderColor = 0;
     m_BackgroundColor = 0;
+    m_accountsNumber = 0;
 
     m_CreatedDate = time(0);
 
@@ -137,6 +138,7 @@ bool Guild::AddMember(uint64 plGuid, uint32 plRank)
 
     if (pl)
     {
+        newmember.accountId = pl->GetSession()->GetAccountId();
         newmember.Name   = pl->GetName();
         newmember.ZoneId = pl->GetZoneId();
         newmember.Level  = pl->getLevel();
@@ -144,15 +146,16 @@ bool Guild::AddMember(uint64 plGuid, uint32 plRank)
     }
     else
     {
-        QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT name,zone,level,class FROM characters WHERE guid = '%u'", GUID_LOPART(plGuid));
+        QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT name,zone,level,class,account FROM characters WHERE guid = '%u'", GUID_LOPART(plGuid));
         if (!result)
             return false;                                   // player doesn't exist
 
-        Field *fields    = result->Fetch();
-        newmember.Name   = fields[0].GetCppString();
-        newmember.ZoneId = fields[1].GetUInt32();
-        newmember.Level  = fields[2].GetUInt8();
-        newmember.Class  = fields[3].GetUInt8();
+        Field *fields       = result->Fetch();
+        newmember.Name      = fields[0].GetCppString();
+        newmember.ZoneId    = fields[1].GetUInt32();
+        newmember.Level     = fields[2].GetUInt8();
+        newmember.Class     = fields[3].GetUInt8();
+        newmember.accountId = fields[4].GetInt32();
 
         if (newmember.Level < 1 || newmember.Level > STRONG_MAX_LEVEL ||
             newmember.Class < CLASS_WARRIOR || newmember.Class >= MAX_CLASSES)
@@ -186,6 +189,9 @@ bool Guild::AddMember(uint64 plGuid, uint32 plRank)
         pl->SetRank(newmember.RankId);
         pl->SetGuildIdInvited(0);
     }
+
+    UpdateAccountsNumber();
+
     return true;
 }
 
@@ -341,6 +347,8 @@ bool Guild::LoadMembersFromDB(QueryResult_AutoPtr guildMembersResult)
     if (!guildMembersResult)
         return false;
 
+    UpdateAccountsNumber();
+
     do
     {
         Field *fields = guildMembersResult->Fetch();
@@ -383,6 +391,7 @@ bool Guild::LoadMembersFromDB(QueryResult_AutoPtr guildMembersResult)
         newmember.Class                 = fields[21].GetUInt8();
         newmember.ZoneId                = fields[22].GetUInt32();
         newmember.LogoutTime            = fields[23].GetUInt64();
+        newmember.accountId             = fields[24].GetInt32();
 
         //this code will remove unexisting character guids from guild
         if (newmember.Level < 1 || newmember.Level > STRONG_MAX_LEVEL) // can be at broken `data` field
@@ -493,6 +502,9 @@ void Guild::DelMember(uint64 guid, bool isDisbanding)
     }
 
     CharacterDatabase.PExecute("DELETE FROM guild_member WHERE guid = '%u'", GUID_LOPART(guid));
+
+    if (!isDisbanding)
+        UpdateAccountsNumber();
 }
 
 void Guild::ChangeRank(uint64 guid, uint32 newRank)
@@ -800,6 +812,20 @@ void Guild::UpdateLogoutTime(uint64 guid)
         return;
 
     itr->second.LogoutTime = time(NULL);
+}
+
+/**
+ * Updates the number of accounts that are in the guild
+ * A player may have many characters in the guild, but with the same account
+ */
+void Guild::UpdateAccountsNumber()
+{
+    // We use a set to be sure each element will be unique
+    std::set<uint32> accountsIdSet;
+    for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
+        accountsIdSet.insert(itr->second.accountId);
+
+    m_accountsNumber = accountsIdSet.size();
 }
 
 // *************************************************
@@ -1115,18 +1141,18 @@ void Guild::LoadGuildBankFromDB()
     } while (result->NextRow());
 
     // data needs to be at first place for Item::LoadFromDB
-    //                                        0     1      2       3          4
-    result = CharacterDatabase.PQuery("SELECT data, text, TabId, SlotId, item_guid, item_entry FROM guild_bank_item JOIN item_instance ON item_guid = guid WHERE guildid='%u' ORDER BY TabId", m_Id);
+    //                                                  0                1      2         3        4      5             6                 7           8           9    10     11      12         13          14
+    result = CharacterDatabase.PQuery("SELECT creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, playedTime, text, TabId, SlotId, item_guid, item_entry FROM guild_bank_item JOIN item_instance ON item_guid = guid WHERE guildid='%u' ORDER BY TabId", m_Id);
     if (!result)
         return;
 
     do
     {
         Field *fields = result->Fetch();
-        uint8 TabId = fields[2].GetUInt8();
-        uint8 SlotId = fields[3].GetUInt8();
-        uint32 ItemGuid = fields[4].GetUInt32();
-        uint32 ItemEntry = fields[5].GetUInt32();
+        uint8 TabId = fields[11].GetUInt8();
+        uint8 SlotId = fields[12].GetUInt8();
+        uint32 ItemGuid = fields[13].GetUInt32();
+        uint32 ItemEntry = fields[14].GetUInt32();
 
         if (TabId >= m_PurchasedTabs || TabId >= GUILD_BANK_MAX_TABS)
         {
@@ -1149,7 +1175,7 @@ void Guild::LoadGuildBankFromDB()
         }
 
         Item *pItem = NewItemOrBag(proto);
-        if (!pItem->LoadFromDB(ItemGuid, 0, result))
+        if (!pItem->LoadFromDB(ItemGuid, 0, result, ItemEntry))
         {
             CharacterDatabase.PExecute("DELETE FROM guild_bank_item WHERE guildid='%u' AND TabId='%u' AND SlotId='%u'", m_Id, uint32(TabId), uint32(SlotId));
             sLog.outError("Item GUID %u not found in item_instance, deleting from Guild Bank!", ItemGuid);
@@ -1725,7 +1751,7 @@ uint8 Guild::_CanStoreItem_InSpecificSlot(uint8 tab, uint8 slot, GuildItemPosCou
 
 uint8 Guild::_CanStoreItem_InTab(uint8 tab, GuildItemPosCountVec &dest, uint32& count, bool merge, Item* pSrcItem, uint8 skip_slot) const
 {
-    assert(pSrcItem);
+    ASSERT(pSrcItem);
     for (uint32 j = 0; j < GUILD_BANK_MAX_SLOTS; ++j)
     {
         // skip specific slot already processed in first called _CanStoreItem_InSpecificSlot

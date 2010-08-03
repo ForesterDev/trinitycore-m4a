@@ -46,7 +46,7 @@
 #include "SkillDiscovery.h"
 #include "SkillExtraItems.h"
 #include "SystemConfig.h"
-#include "ConfigEnv.h"
+#include "Config.h"
 #include "Util.h"
 #include "ItemEnchantmentMgr.h"
 #include "BattleGroundMgr.h"
@@ -58,6 +58,7 @@
 #include "DBCEnums.h"
 #include "ConditionMgr.h"
 #include "DisableMgr.h"
+#include "Transport.h"
 
 bool ChatHandler::HandleAHBotOptionsCommand(const char *args)
 {
@@ -1150,6 +1151,22 @@ bool ChatHandler::HandleReloadReservedNameCommand(const char*)
     sLog.outString("Loading ReservedNames... (`reserved_name`)");
     objmgr.LoadReservedPlayersNames();
     SendGlobalGMSysMessage("DB table `reserved_name` (player reserved names) reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadReputationRewardRateCommand(const char*)
+{
+    sLog.outString( "Re-Loading `reputation_reward_rate` Table!" );
+    objmgr.LoadReputationRewardRate();
+    SendGlobalSysMessage("DB table `reputation_reward_rate` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadReputationSpilloverTemplateCommand(const char*)
+{
+    sLog.outString( "Re-Loading `reputation_spillover_template` Table!" );
+    objmgr.LoadReputationSpilloverTemplate();
+    SendGlobalSysMessage("DB table `reputation_spillover_template` reloaded.");
     return true;
 }
 
@@ -4785,6 +4802,10 @@ bool ChatHandler::HandleNpcPlayEmoteCommand(const char *args)
         SetSentErrorMessage(true);
         return false;
     }
+
+    if (target->GetTransport())
+        if (target->GetGUIDTransport())
+            WorldDatabase.PQuery("UPDATE creature_transport SET emote=%u WHERE transport_entry=%u AND guid=%u", emote, target->GetTransport()->GetEntry(), target->GetGUIDTransport());
 
     target->SetUInt32Value(UNIT_NPC_EMOTESTATE,emote);
 

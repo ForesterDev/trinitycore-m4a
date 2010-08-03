@@ -27,7 +27,7 @@
 
 typedef std::list<uint32> SimpleFactionsList;
 
-SimpleFactionsList const* GetFactionTeamList(uint32 faction, bool &isTeamMember);
+SimpleFactionsList const* GetFactionTeamList(uint32 faction);
 char* GetPetName(uint32 petfamily, uint32 dbclang);
 uint32 GetTalentSpellCost(uint32 spellId);
 TalentSpellPos const* GetTalentSpellPos(uint32 spellId);
@@ -58,6 +58,7 @@ void Map2ZoneCoordinates(float &x, float &y, uint32 zone);
 
 typedef std::map<uint32/*pair32(map,diff)*/,MapDifficulty> MapDifficultyMap;
 MapDifficulty const* GetMapDifficultyData(uint32 mapId, Difficulty difficulty);
+MapDifficulty const* GetDownscaledMapDifficultyData(uint32 mapId, Difficulty &difficulty);
 
 uint32 const* /*[3]*/ GetTalentTabPages(uint8 cls);
 

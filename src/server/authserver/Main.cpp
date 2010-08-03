@@ -26,7 +26,7 @@
 #include "Database/DatabaseEnv.h"
 #include "Database/PreparedStatements.h"
 
-#include "Configuration/ConfigEnv.h"
+#include "Configuration/Config.h"
 #include "Log.h"
 #include "SystemConfig.h"
 #include "Util.h"
@@ -165,7 +165,8 @@ extern int main(int argc, char **argv)
 
     if (!sConfig.SetSource(cfg_file))
     {
-        sLog.outError("Could not find configuration file %s.", cfg_file);
+        sLog.outError("Invalid or missing configuration file : %s", cfg_file);
+        sLog.outError("Verify that the file exists and has \'[authserver]\' written in the top of the file!");
         return 1;
     }
     sLog.Initialize();
@@ -280,7 +281,7 @@ extern int main(int argc, char **argv)
             if (SetPriorityClass(hProcess,HIGH_PRIORITY_CLASS))
                 sLog.outString("TrinityRealm process priority class set to HIGH");
             else
-                sLog.outError("ERROR: Can't set realmd process priority class.");
+                sLog.outError("Can't set realmd process priority class.");
             sLog.outString();
         }
     }

@@ -146,14 +146,14 @@ SpellMgr::SpellMgr()
             case TARGET_UNIT_AREA_ALLY_SRC:
             case TARGET_UNIT_AREA_ENTRY_SRC:
             case TARGET_UNIT_AREA_PARTY_SRC:
-            case TARGET_OBJECT_AREA_SRC:
+            case TARGET_GAMEOBJECT_AREA_SRC:
                 SpellTargetType[i] = TARGET_TYPE_AREA_SRC;
                 break;
             case TARGET_UNIT_AREA_ENEMY_DST:
             case TARGET_UNIT_AREA_ALLY_DST:
             case TARGET_UNIT_AREA_ENTRY_DST:
             case TARGET_UNIT_AREA_PARTY_DST:
-            case TARGET_OBJECT_AREA_DST:
+            case TARGET_GAMEOBJECT_AREA_DST:
                 SpellTargetType[i] = TARGET_TYPE_AREA_DST;
                 break;
             case TARGET_UNIT_CONE_ENEMY:
@@ -2914,6 +2914,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // Hunter's mark
             if ((spellproto->SpellFamilyFlags[0] & 0x400) && spellproto->SpellIconID == 538)
                 return DIMINISHING_LIMITONLY;
+            // Scatter Shot
+            if ((spellproto->SpellFamilyFlags[0] & 0x40000) && spellproto->SpellIconID == 132)
+                return DIMINISHING_NONE;
             break;
         }
         default:
@@ -3198,20 +3201,40 @@ bool SpellMgr::CanAurasStack(SpellEntry const *spellInfo_1, SpellEntry const *sp
     return false;
 }
 
-bool IsDispelableBySpell(SpellEntry const * dispelSpell, uint32 spellId, bool def)
+bool CanSpellDispelAura(SpellEntry const * dispelSpell, SpellEntry const * aura)
 {
-    if (!dispelSpell) return false;
-    SpellEntry const *spellproto = sSpellStore.LookupEntry(spellId);
-    if (!spellproto) return false;
-
-    // Cyclone etc..
-    if (spellproto->AttributesEx & SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE)
+    // These auras (like ressurection sickness) can't be dispelled
+    if (aura->Attributes & SPELL_ATTR_NEGATIVE_1)
         return false;
 
+    // These spells (like Mass Dispel) can dispell all auras
     if (dispelSpell->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)
         return true;
 
-    return def;
+    // These auras (like Divine Shield) can't be dispelled
+    if (aura->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)
+        return false;
+
+    // These auras (Cyclone for example) are not dispelable
+    if (aura->AttributesEx & SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE)
+        return false;
+
+    return true;
+}
+
+bool CanSpellPierceImmuneAura(SpellEntry const * pierceSpell, SpellEntry const * aura)
+{
+    // these spells pierce all avalible spells (Resurrection Sickness for example)
+    if (pierceSpell->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)
+        return true;
+
+    // these spells (Cyclone for example) can pierce all...
+    if ((pierceSpell->AttributesEx & SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE)
+        // ...but not these (Divine shield for example)
+        && !(aura && aura->AttributesEx & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
+        return true;
+
+    return false;
 }
 
 void SpellMgr::LoadSpellEnchantProcData()
@@ -3814,18 +3837,13 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectMiscValue[0] = MECHANIC_IMMUNE_SHIELD;
             count++;
             break;
-        case 53651:
-            spellInfo->AttributesEx3 |= SPELL_ATTR_EX3_NO_INITIAL_AGGRO;
+        case 64321: // Potent Pheromones
+            // spell should dispel area aura, but doesn't have the attribute
+            // may be db data bug, or blizz may keep reapplying area auras every update with checking immunity
+            // that will be clear if we get more spells with problem like this
+            spellInfo->AttributesEx |= SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY;
             count++;
             break;
-        case 61306:     // Kirin Tor Commendation Badge
-        case 61308:     // Wyrmrest Commendation Badge
-        case 61311:     // Argent Crusade Commendation Badge
-        case 61312:     // Ebon Blade Commendadtion Badge
-        case 69757:     // Sons of Hodir Commendation Badge
-            spellInfo->EffectBasePoints[0] = 519;           // Some suggest a global multiplier is used for rep gain
-            count++;                                        // but basepoints * 1,3 hard coded in the tooltip says
-            break;                                          // otherwise.
         default:
             break;
         }

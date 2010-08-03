@@ -25,7 +25,7 @@
 #include "gamePCH.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
-#include "ConfigEnv.h"
+#include "Config.h"
 #include "SystemConfig.h"
 #include "Log.h"
 #include "Opcodes.h"
@@ -1395,8 +1395,14 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Creature templates...");
     objmgr.LoadCreatureTemplates();
 
+    sLog.outString("Loading Reputation Reward Rates...");
+    objmgr.LoadReputationRewardRate();
+
     sLog.outString("Loading Creature Reputation OnKill Data...");
     objmgr.LoadReputationOnKill();
+
+    sLog.outString( "Loading Reputation Spillover Data..." );
+    objmgr.LoadReputationSpilloverTemplate();
 
     sLog.outString("Loading Points Of Interest Data...");
     objmgr.LoadPointsOfInterest();
@@ -1629,8 +1635,14 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading CreatureEventAI Scripts...");
     CreatureEAI_Mgr.LoadCreatureEventAI_Scripts();
 
+    sLog.outString("Loading spell script names...");
+    objmgr.LoadSpellScriptNames();
+
     sLog.outString("Initializing Scripts...");
     sScriptMgr.ScriptsInit();
+
+    sLog.outString("Validating spell scripts...");
+    objmgr.ValidateSpellScripts();
 
     ///- Initialize game time and timers
     sLog.outDebug("DEBUG:: Initialize game time and timers");
@@ -1705,7 +1717,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Starting Outdoor PvP System");
     sOutdoorPvPMgr.InitOutdoorPvP();
 
-    //Not sure if this can be moved up in the sequence (with static data loading) as it uses MapManager
+    sLog.outString("Loading Transport NPCs...");
+    sMapMgr.LoadTransportNPCs();
+
     sLog.outString("Loading Transports...");
     sMapMgr.LoadTransports();
 

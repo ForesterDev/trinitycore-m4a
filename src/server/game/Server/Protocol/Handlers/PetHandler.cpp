@@ -213,7 +213,7 @@ void WorldSession::HandlePetActionHelper(Unit *pet, uint64 guid1, uint16 spellid
                         _player->StopCastingCharm();
                     else if (pet->GetOwnerGUID() == GetPlayer()->GetGUID())
                     {
-                        assert(pet->GetTypeId() == TYPEID_UNIT);
+                        ASSERT(pet->GetTypeId() == TYPEID_UNIT);
                         if (pet->isPet())
                         {
                             if (((Pet*)pet)->getPetType() == HUNTER_PET)
@@ -380,7 +380,7 @@ void WorldSession::HandlePetNameQuery(WorldPacket & recv_data)
 
 void WorldSession::SendPetNameQuery(uint64 petguid, uint32 petnumber)
 {
-    auto pet = ObjectAccessor::GetPet(petguid);
+    auto pet = ObjectAccessor::FindPet(petguid);
     if (!pet)
     {
         WorldPacket data(SMSG_PET_NAME_QUERY_RESPONSE, 4 + 1 + 4 + 1);
@@ -558,7 +558,7 @@ void WorldSession::HandlePetRename(WorldPacket & recv_data)
     recv_data >> name;
     recv_data >> isdeclined;
 
-    Pet* pet = ObjectAccessor::GetPet(petguid);
+    Pet* pet = ObjectAccessor::FindPet(petguid);
                                                             // check it!
     if (!pet || !pet->isPet() || ((Pet*)pet)->getPetType()!= HUNTER_PET ||
         !pet->HasByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED) ||

@@ -191,19 +191,17 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save,
     if (!entry)
     {
         sLog.outError("CreateInstance: no entry for map %d", GetId());
-        assert(false);
+        ASSERT(false);
     }
     const InstanceTemplate * iTemplate = objmgr.GetInstanceTemplate(GetId());
     if (!iTemplate)
     {
         sLog.outError("CreateInstance: no instance template for map %d", GetId());
-        assert(false);
+        ASSERT(false);
     }
 
     // some instances only have one difficulty
-    MapDifficulty const* mapDiff = GetMapDifficultyData(GetId(),difficulty);
-    if (!mapDiff)
-        difficulty = DUNGEON_DIFFICULTY_NORMAL;
+    MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(GetId(),difficulty);
 
     sLog.outDebug("MapInstanced::CreateInstance: %s map instance %d for %d created with difficulty %s", save?"":"new ", InstanceId, GetId(), difficulty?"heroic":"normal");
 
@@ -264,6 +262,6 @@ bool MapInstanced::DestroyInstance(InstancedMaps::iterator &itr)
 
 bool MapInstanced::CanEnter(Player * /*player*/)
 {
-    //assert(false);
+    //ASSERT(false);
     return true;
 }

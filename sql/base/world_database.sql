@@ -25,20 +25,18 @@ DROP TABLE IF EXISTS `access_requirement`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `access_requirement` (
-  `id` bigint(20) unsigned NOT NULL COMMENT 'Identifier',
+  `mapId` mediumint(8) unsigned NOT NULL,
+  `difficulty` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `level_min` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `heroic_level_min` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `level_max` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `item` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `item2` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `heroic_key` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `heroic_key2` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `quest_done` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `quest_done_A` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `quest_done_H` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `completed_achievement` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `quest_failed_text` text,
-  `heroic_quest_done` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `heroic_quest_failed_text` text,
   `comment` text,
-   PRIMARY KEY (`id`)
+  PRIMARY KEY (`mapId`,`difficulty`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Access Requirements';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -243,6 +241,7 @@ CREATE TABLE `battleground_template` (
   `AllianceStartO` float NOT NULL,
   `HordeStartLoc` mediumint(8) unsigned NOT NULL,
   `HordeStartO` float NOT NULL,
+  `Comment` char(32) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1713,6 +1712,36 @@ CREATE TABLE `creature_template_addon` (
 LOCK TABLES `creature_template_addon` WRITE;
 /*!40000 ALTER TABLE `creature_template_addon` DISABLE KEYS */;
 /*!40000 ALTER TABLE `creature_template_addon` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `creature_transport`
+--
+
+DROP TABLE IF EXISTS `creature_transport`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE IF NOT EXISTS `creature_transport` (
+  `guid` int(16) NOT NULL AUTO_INCREMENT COMMENT 'GUID of NPC on transport - not the same as creature.guid',
+  `transport_entry` int(8) NOT NULL COMMENT 'Transport entry',
+  `npc_entry` int(8) NOT NULL COMMENT 'NPC entry',
+  `TransOffsetX` float NOT NULL DEFAULT '0',
+  `TransOffsetY` float NOT NULL DEFAULT '0',
+  `TransOffsetZ` float NOT NULL DEFAULT '0',
+  `TransOffsetO` float NOT NULL DEFAULT '0',
+  `emote` int(16) NOT NULL,
+  PRIMARY KEY (`transport_entry`,`guid`),
+  UNIQUE KEY `entry` (`transport_entry`,`guid`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `creature_transport`
+--
+
+LOCK TABLES `creature_transport` WRITE;
+/*!40000 ALTER TABLE `creature_transport` DISABLE KEYS */;
+/*!40000 ALTER TABLE `creature_transport` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -4661,6 +4690,58 @@ LOCK TABLES `reference_loot_template` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `reputation_reward_rate`
+--
+
+DROP TABLE IF EXISTS `reputation_reward_rate`;
+CREATE TABLE `reputation_reward_rate` (
+  `faction` mediumint(8) unsigned NOT NULL default '0',
+  `quest_rate` float NOT NULL default '1',
+  `creature_rate` float NOT NULL default '1',
+  `spell_rate` float NOT NULL default '1',
+  PRIMARY KEY  (`faction`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `reputation_reward_rate`
+--
+
+LOCK TABLES `reputation_reward_rate` WRITE;
+/*!40000 ALTER TABLE `reputation_reward_rate` DISABLE KEYS */;
+/*!40000 ALTER TABLE `reputation_reward_rate` ENABLE KEYS */;
+UNLOCK TABLES;
+--
+-- Table structure for table `reputation_spillover_template`
+--
+
+DROP TABLE IF EXISTS `reputation_spillover_template`;
+CREATE TABLE `reputation_spillover_template` (
+  `faction` smallint(6) unsigned NOT NULL default '0' COMMENT 'faction entry',
+  `faction1` smallint(6) unsigned NOT NULL default '0' COMMENT 'faction to give spillover for',
+  `rate_1` float NOT NULL default '0' COMMENT 'the given rep points * rate',
+  `rank_1` tinyint(3) unsigned NOT NULL default '0' COMMENT 'max rank, above this will not give any spillover',
+  `faction2` smallint(6) unsigned NOT NULL default '0',
+  `rate_2` float NOT NULL default '0',
+  `rank_2` tinyint(3) unsigned NOT NULL default '0',
+  `faction3` smallint(6) unsigned NOT NULL default '0',
+  `rate_3` float NOT NULL default '0',
+  `rank_3` tinyint(3) unsigned NOT NULL default '0',
+  `faction4` smallint(6) unsigned NOT NULL default '0',
+  `rate_4` float NOT NULL default '0',
+  `rank_4` tinyint(3) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`faction`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Reputation spillover reputation gain';
+
+--
+-- Dumping data for table `reputation_spillover_template`
+--
+
+LOCK TABLES `reputation_spillover_template` WRITE;
+/*!40000 ALTER TABLE `reputation_spillover_template` DISABLE KEYS */;
+/*!40000 ALTER TABLE `reputation_spillover_template` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `reserved_name`
 --
 
@@ -4953,7 +5034,7 @@ INSERT INTO `spell_bonus_data` (`entry`,`direct_bonus`,`dot_bonus`,`ap_bonus`,`a
 (42231, 0.12898, -1, -1, -1, 'Druid - Hurricane Triggered'),
 (5570, -1, 0.2, -1, -1, 'Druid - Insect Swarm'),
 (33745, -1, -1, -1, 0.01, 'Druid - Lacerate($AP*0.05 / number of ticks)'),
-(33778, 0.516, 0, 0, 0, 'Druid - Lifebloom final heal'),
+(33778, 0.589714, 0, 0, 0, 'Druid - Lifebloom final heal'),
 (33763, 0, 0.09518, 0, 0, 'Druid - Lifebloom HoT(rank 1)'),
 (48450, 0, 0.09518, 0, 0, 'Druid - Lifebloom HoT(rank 2)'),
 (48451, 0, 0.09518, 0, 0, 'Druid - Lifebloom HoT(rank 3)'),
@@ -5067,7 +5148,7 @@ INSERT INTO `spell_bonus_data` (`entry`,`direct_bonus`,`dot_bonus`,`ap_bonus`,`a
 (23455, 0.3035, -1, -1, -1, 'Priest - Holy Nova Heal Rank 1'),
 (8129, 0, 0, 0, 0, 'Priest - Mana Burn'),
 (8092, 0.428, -1, -1, -1, 'Priest - Mind Blast'),
-(15407, 0.257, -1, -1, -1, 'Priest - Mind Flay'),
+(58381, 0.257, -1, -1, -1, 'Priest - Mind Flay'),
 (49821, 0.2861, -1, -1, -1, 'Priest - Mind Sear Trigger Rank 1'),
 (47750, 0.5362, -1, -1, -1, 'Priest - Penance Heal (Rank 1)'),
 (52983, 0.5362, -1, -1, -1, 'Priest - Penance Heal (Rank 2)'),
@@ -5715,7 +5796,7 @@ INSERT INTO `spell_group` (`id`, `spell_id`) VALUES
 -- Bleed Damage Increase Debuff
 (1030,33878), -- Mangle (Bear)
 (1031,33876), -- Mangle (Cat)
-(1032,46854), -- Trauma
+(1032,46856), -- Trauma
 -- Spell Critical Strike Chance Buff
 (1034,24907), -- moonkng aura
 (1035,51466), -- elemental oath
@@ -7339,6 +7420,7 @@ DROP TABLE IF EXISTS `spell_scripts`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `spell_scripts` (
   `id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `effIndex` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `delay` int(10) unsigned NOT NULL DEFAULT '0',
   `command` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `datalong` mediumint(8) unsigned NOT NULL DEFAULT '0',
@@ -14569,6 +14651,20 @@ INSERT INTO `spelldifficulty_dbc` VALUES
 UNLOCK TABLES;
 
 --
+-- Table structure for table `spell_script_names`
+--
+
+DROP TABLE IF EXISTS `spell_script_names`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `spell_script_names` (
+  `spell_id` mediumint(8) NOT NULL,
+  `ScriptName` char(64) NOT NULL,
+  UNIQUE (`spell_id`, `ScriptName`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `transports`
 --
 
@@ -14623,7 +14719,7 @@ LOCK TABLES `trinity_string` WRITE;
 INSERT INTO `trinity_string` (`entry`,`content_default`,`content_loc1`,`content_loc2`,`content_loc3`,`content_loc4`,`content_loc5`,`content_loc6`,`content_loc7`,`content_loc8`) VALUES
 (1, 'You should select a character or a creature.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (2, 'You should select a creature.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(3, '|cffff0000[System Message]: %s|r', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(3, '[SERVER] %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (4, '|cffff0000[Event Message]: %s|r', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (5, 'There is no help for that command', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (6, 'There is no such command', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
@@ -15391,6 +15487,7 @@ INSERT INTO `trinity_string` (`entry`,`content_default`,`content_loc1`,`content_
 (5025, 'Type: %u', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (5026, 'DisplayID: %u', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (5027, 'Name: %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(5028, 'Lootid: %u', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (6604, 'You cannot say, yell or emote until you become level %d.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (6605, 'You cannot whisper until you become level %d.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (6606, 'You cannot write to channels until you become level %d.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),

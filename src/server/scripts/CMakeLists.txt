@@ -8,34 +8,37 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-file(GLOB_RECURSE scripts_easternkingdoms EasternKingdoms/*.cpp)
-file(GLOB_RECURSE scripts_kalimdor Kalimdor/*.cpp)
-file(GLOB_RECURSE scripts_northrend Northrend/*.cpp)
-file(GLOB_RECURSE scripts_outland Outland/*.cpp)
-file(GLOB_RECURSE scripts_world World/*.cpp)
-file(GLOB_RECURSE scripts_examples Examples/*.cpp)
+file(GLOB_RECURSE scripts_easternkingdoms EasternKingdoms/*.cpp EasternKingdoms/*.h)
+file(GLOB_RECURSE scripts_kalimdor Kalimdor/*.cpp Kalimdor/*.h)
+file(GLOB_RECURSE scripts_northrend Northrend/*.cpp Northrend/*.h)
+file(GLOB_RECURSE scripts_outland Outland/*.cpp Outland/*.h)
+file(GLOB_RECURSE scripts_world World/*.cpp World/*.h)
+file(GLOB_RECURSE scripts_spells Spells/*.cpp Spells/*.h)
+file(GLOB_RECURSE scripts_examples Examples/*.cpp Examples/*.h)
 
 # Enable precompiled headers when using the GCC compiler.
-if(DO_PCH)
+if(PCH)
   include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
   )
 endif()
 
 set(scripts_STAT_SRCS
-  ../game/AI/ScriptedAI/ScriptedEscortAI.cpp
-  ../game/AI/ScriptedAI/ScriptedCreature.cpp
-  ../game/AI/ScriptedAI/ScriptedFollowerAI.cpp
-  ../game/AI/ScriptedAI/ScriptedGuardAI.cpp
-  ../game/AI/ScriptedAI/ScriptedSimpleAI.cpp
-  Custom/on_events.cpp
   ${scripts_easternkingdoms}
   ${scripts_kalimdor}
   ${scripts_northrend}
   ${scripts_outland}
   ${scripts_world}
+  ${scripts_spells}
   ${scripts_examples}
+  Custom/on_events.cpp
+  ../game/AI/ScriptedAI/ScriptedEscortAI.cpp
+  ../game/AI/ScriptedAI/ScriptedCreature.cpp
+  ../game/AI/ScriptedAI/ScriptedFollowerAI.cpp
+  ../game/AI/ScriptedAI/ScriptedGuardAI.cpp
+  ../game/AI/ScriptedAI/ScriptedSimpleAI.cpp
 )
+
 message("-- Added Scriptengine to SCRIPTS lib")
 
 include_directories(
@@ -133,7 +136,7 @@ endif()
 add_library(scripts STATIC ${scripts_STAT_SRCS})
 
 # Generate precompiled header
-if(DO_PCH)
+if(PCH)
   if(CMAKE_COMPILER_IS_GNUCXX)
     add_precompiled_header(scripts ${CMAKE_SOURCE_DIR}/src/server/game/PrecompiledHeaders/ScriptPCH.h)
   elseif(MSVC)

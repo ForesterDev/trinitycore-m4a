@@ -90,7 +90,7 @@ WorldObject::~WorldObject()
         if (GetTypeId() == TYPEID_CORPSE)
         {
             sLog.outCrash("Object::~Object Corpse guid="UI64FMTD", type=%d, entry=%u deleted but still in map!!", GetGUID(), ((Corpse*)this)->GetType(), GetEntry());
-            assert(false);
+            ASSERT(false);
         }
         ResetMap();
     }
@@ -103,14 +103,14 @@ Object::~Object()
         sLog.outCrash("Object::~Object - guid="UI64FMTD", typeid=%d, entry=%u deleted but still in world!!", GetGUID(), GetTypeId(), GetEntry());
         if (isType(TYPEMASK_ITEM))
             sLog.outCrash("Item slot %u", ((Item*)this)->GetSlot());
-        assert(false);
+        ASSERT(false);
         RemoveFromWorld();
     }
 
     if (m_objectUpdated)
     {
         sLog.outCrash("Object::~Object - guid="UI64FMTD", typeid=%d, entry=%u deleted but still in update list!!", GetGUID(), GetTypeId(), GetEntry());
-        assert(false);
+        ASSERT(false);
         sObjectAccessor.RemoveUpdateObject(this);
     }
 
@@ -744,7 +744,7 @@ void Object::BuildFieldsUpdate(Player *pl, UpdateDataMapType &data_map) const
     if (iter == data_map.end())
     {
         std::pair<UpdateDataMapType::iterator, bool> p = data_map.insert(UpdateDataMapType::value_type(pl, UpdateData()));
-        assert(p.second);
+        ASSERT(p.second);
         iter = p.first;
     }
 
@@ -768,6 +768,24 @@ bool Object::LoadValues(const char* data)
     }
 
     return true;
+}
+
+void Object::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 count)
+{
+    if (!data)
+        return;
+
+    Tokens tokens = StrSplit(data, " ");
+
+    if (tokens.size() != count)
+        return;
+
+    Tokens::iterator iter;
+    uint32 index;
+    for (iter = tokens.begin(), index = 0; index < count; ++iter, ++index)
+    {
+        m_uint32Values[startOffset + index] = atol((*iter).c_str());
+    }
 }
 
 void Object::_SetUpdateBits(UpdateMask *updateMask, Player* /*target*/) const
@@ -1114,7 +1132,7 @@ bool Object::PrintIndexError(uint32 index, bool set) const
 {
     sLog.outError("Attempt %s non-existed value field: %u (count: %u) for object typeid: %u type mask: %u",(set ? "set value to" : "get value from"),index,m_valuesCount,GetTypeId(),m_objectType);
 
-    // assert must fail after function call
+    // ASSERT must fail after function call
     return false;
 }
 
@@ -1134,6 +1152,7 @@ WorldObject::WorldObject()
     , m_name("")
     , m_notifyflags(0), m_executed_notifies(0)
 {
+    m_transport = NULL;
 }
 
 void WorldObject::SetWorldObject(bool on)
@@ -1218,6 +1237,22 @@ float WorldObject::GetDistanceZ(const WorldObject* obj) const
 
 bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D) const
 {
+    float sizefactor = GetObjectSize() + obj->GetObjectSize();
+    float maxdist = dist2compare + sizefactor;
+
+    if (m_transport && obj->GetTransport() &&  obj->GetTransport()->GetGUIDLow() == m_transport->GetGUIDLow())
+    {
+        float dtx = m_movementInfo.t_x - obj->m_movementInfo.t_x;
+        float dty = m_movementInfo.t_y - obj->m_movementInfo.t_y;
+        float disttsq = dtx * dtx + dty * dty;
+        if (is3D)
+        {
+            float dtz = m_movementInfo.t_z - obj->m_movementInfo.t_z;
+            disttsq += dtz * dtz;
+        }
+        return disttsq < (maxdist * maxdist);
+    }
+
     float dx = GetPositionX() - obj->GetPositionX();
     float dy = GetPositionY() - obj->GetPositionY();
     float distsq = dx*dx + dy*dy;
@@ -1226,8 +1261,6 @@ bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool
         float dz = GetPositionZ() - obj->GetPositionZ();
         distsq += dz*dz;
     }
-    float sizefactor = GetObjectSize() + obj->GetObjectSize();
-    float maxdist = dist2compare + sizefactor;
 
     return distsq < maxdist * maxdist;
 }
@@ -1666,7 +1699,7 @@ void WorldObject::SetMap(Map * map)
     if (m_currMap)
     {
         sLog.outCrash("WorldObject::SetMap: obj %u new map %u %u, old map %u %u", (uint32)GetTypeId(), map->GetId(), map->GetInstanceId(), m_currMap->GetId(), m_currMap->GetInstanceId());
-        assert(false);
+        ASSERT(false);
     }
     m_currMap = map;
     m_mapId = map->GetId();
@@ -1695,7 +1728,7 @@ Map const* WorldObject::GetBaseMap() const
 
 void WorldObject::AddObjectToRemoveList()
 {
-    assert(m_uint32Values);
+    ASSERT(m_uint32Values);
 
     Map* map = FindMap();
     if (!map)
@@ -1836,7 +1869,7 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
     pet->Relocate(x, y, z, ang);
     if (!pet->IsPositionValid())
     {
-        sLog.outError("ERROR: Pet (guidlow %d, entry %d) not summoned. Suggested coordinates isn't valid (X: %f Y: %f)",pet->GetGUIDLow(),pet->GetEntry(),pet->GetPositionX(),pet->GetPositionY());
+        sLog.outError("Pet (guidlow %d, entry %d) not summoned. Suggested coordinates isn't valid (X: %f Y: %f)",pet->GetGUIDLow(),pet->GetEntry(),pet->GetPositionX(),pet->GetPositionY());
         delete pet;
         return NULL;
     }

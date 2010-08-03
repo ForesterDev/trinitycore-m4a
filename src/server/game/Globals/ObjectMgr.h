@@ -90,6 +90,8 @@ struct ScriptInfo
 
 typedef std::multimap<uint32, ScriptInfo> ScriptMap;
 typedef std::map<uint32, ScriptMap > ScriptMapMap;
+typedef std::multimap<uint32, uint32> SpellScriptsMap;
+typedef std::pair<SpellScriptsMap::iterator, SpellScriptsMap::iterator> SpellScriptsBounds;
 extern ScriptMapMap sQuestEndScripts;
 extern ScriptMapMap sQuestStartScripts;
 extern ScriptMapMap sSpellScripts;
@@ -118,7 +120,6 @@ typedef std::pair<SpellClickInfoMap::const_iterator,SpellClickInfoMap::const_ite
 
 struct AreaTrigger
 {
-    uint32 access_id;
     uint32 target_mapId;
     float  target_X;
     float  target_Y;
@@ -196,6 +197,14 @@ struct MailLevelReward
 typedef std::list<MailLevelReward> MailLevelRewardList;
 typedef UNORDERED_MAP<uint8,MailLevelRewardList> MailLevelRewardMap;
 
+// We assume the rate is in general the same for all three types below, but chose to keep three for scalability and customization
+struct RepRewardRate
+{
+    float quest_rate;                                       // We allow rate = 0.0 in database. For this case, it means that
+    float creature_rate;                                    // no reputation are given at all for this faction/rate type.
+    float spell_rate;
+};
+
 struct ReputationOnKillEntry
 {
     uint32 repfaction1;
@@ -207,6 +216,13 @@ struct ReputationOnKillEntry
     uint32 reputation_max_cap2;
     int32 repvalue2;
     bool team_dependent;
+};
+
+struct RepSpilloverTemplate
+{
+    uint32 faction[MAX_SPILLOVER_FACTIONS];
+    float faction_rate[MAX_SPILLOVER_FACTIONS];
+    uint32 faction_rank[MAX_SPILLOVER_FACTIONS];
 };
 
 struct PointOfInterest
@@ -375,7 +391,10 @@ class ObjectMgr
 
         typedef UNORDERED_MAP<uint32, AccessRequirement> AccessRequirementMap;
 
+        typedef UNORDERED_MAP<uint32, RepRewardRate > RepRewardRateMap;
         typedef UNORDERED_MAP<uint32, ReputationOnKillEntry> RepOnKillMap;
+        typedef UNORDERED_MAP<uint32, RepSpilloverTemplate> RepSpilloverTemplateMap;
+
         typedef UNORDERED_MAP<uint32, PointOfInterest> PointOfInterestMap;
 
         typedef UNORDERED_MAP<uint32, WeatherZoneChances> WeatherZoneMap;
@@ -509,9 +528,9 @@ class ObjectMgr
             return NULL;
         }
 
-        AccessRequirement const* GetAccessRequirement(uint32 requirement) const
+        AccessRequirement const* GetAccessRequirement(uint32 mapid, Difficulty difficulty) const
         {
-            AccessRequirementMap::const_iterator itr = mAccessRequirements.find(requirement);
+            AccessRequirementMap::const_iterator itr = mAccessRequirements.find(MAKE_PAIR32(mapid,difficulty));
             if (itr != mAccessRequirements.end())
                 return &itr->second;
             return NULL;
@@ -521,12 +540,31 @@ class ObjectMgr
         AreaTrigger const* GetMapEntranceTrigger(uint32 Map) const;
 
         uint32 GetAreaTriggerScriptId(uint32 trigger_id);
+        SpellScriptsBounds GetSpellScriptsBounds(uint32 spell_id);
+
+        RepRewardRate const* GetRepRewardRate(uint32 factionId) const
+        {
+            RepRewardRateMap::const_iterator itr = m_RepRewardRateMap.find(factionId);
+            if (itr != m_RepRewardRateMap.end())
+                return &itr->second;
+
+            return NULL;
+        }
 
         ReputationOnKillEntry const* GetReputationOnKilEntry(uint32 id) const
         {
             RepOnKillMap::const_iterator itr = mRepOnKill.find(id);
             if (itr != mRepOnKill.end())
                 return &itr->second;
+            return NULL;
+        }
+
+        RepSpilloverTemplate const* GetRepSpilloverTemplate(uint32 factionId) const
+        {
+            RepSpilloverTemplateMap::const_iterator itr = m_RepSpilloverTemplateMap.find(factionId);
+            if (itr != m_RepSpilloverTemplateMap.end())
+                return &itr->second;
+
             return NULL;
         }
 
@@ -587,6 +625,9 @@ class ObjectMgr
         void LoadGossipScripts();
         void LoadWaypointScripts();
 
+        void LoadSpellScriptNames();
+        void ValidateSpellScripts();
+
         bool LoadTrinityStrings(DatabaseType& db, char const* table, int32 min_value, int32 max_value);
         bool LoadTrinityStrings() { return LoadTrinityStrings(WorldDatabase,"trinity_string",MIN_TRINITY_STRING_ID,MAX_TRINITY_STRING_ID); }
         void LoadDbScriptStrings();
@@ -637,7 +678,10 @@ class ObjectMgr
         void LoadCorpses();
         void LoadFishingBaseSkillLevel();
 
+        void LoadReputationRewardRate();
         void LoadReputationOnKill();
+        void LoadReputationSpilloverTemplate();
+
         void LoadPointsOfInterest();
         void LoadQuestPOI();
 
@@ -980,7 +1024,9 @@ class ObjectMgr
         AreaTriggerScriptMap  mAreaTriggerScripts;
         AccessRequirementMap  mAccessRequirements;
 
+        RepRewardRateMap    m_RepRewardRateMap;
         RepOnKillMap        mRepOnKill;
+        RepSpilloverTemplateMap m_RepSpilloverTemplateMap;
 
         GossipMenusMap      m_mGossipMenusMap;
         GossipMenuItemsMap  m_mGossipMenuItemsMap;
@@ -1001,6 +1047,8 @@ class ObjectMgr
         ScriptNameMap       m_scriptNames;
 
         SpellClickInfoMap   mSpellClickInfoMap;
+
+        SpellScriptsMap     mSpellScripts;
 
         ItemRequiredTargetMap m_ItemRequiredTarget;
 

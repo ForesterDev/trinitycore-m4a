@@ -1541,7 +1541,8 @@ bool Creature::FallGround()
 
     float x, y, z;
     GetPosition(x, y, z);
-    float ground_Z = GetMap()->GetHeight(x, y, z);
+    // use larger distance for vmap height search than in most other cases
+    float ground_Z = GetMap()->GetHeight(x, y, z, true, MAX_FALL_DISTANCE);
     if (fabs(ground_Z - z) < 0.1f)
         return false;
 
@@ -1645,6 +1646,9 @@ bool Creature::IsImmunedToSpell(SpellEntry const* spellInfo)
 bool Creature::IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index) const
 {
     if (GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->EffectMechanic[index] - 1)))
+        return true;
+
+    if (GetCreatureInfo()->type == CREATURE_TYPE_MECHANICAL && spellInfo->Effect[index] == SPELL_EFFECT_HEAL)
         return true;
 
     return Unit::IsImmunedToSpellEffect(spellInfo, index);
@@ -1956,7 +1960,7 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
 // friendlies and other mobs they shouldn't attack
 bool Creature::_IsTargetAcceptable(const Unit *target) const
 {
-    assert(target);
+    ASSERT(target);
 
     // if the target cannot be attacked, the target is not acceptable
     if (IsFriendlyTo(target)

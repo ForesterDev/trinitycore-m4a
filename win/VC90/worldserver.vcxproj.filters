@@ -2,10 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="doc">
-      <UniqueIdentifier>{5a37e471-85b0-4e08-83b1-1105791f1866}</UniqueIdentifier>
+      <UniqueIdentifier>{7084fa89-1154-4be2-937d-1b16c2814682}</UniqueIdentifier>
     </Filter>
     <Filter Include="TCSoap">
-      <UniqueIdentifier>{aad1867b-2a36-43d5-b7d9-e39759d7fe6b}</UniqueIdentifier>
+      <UniqueIdentifier>{a01e0726-8dce-4a6e-9896-598b53c5e602}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -30,7 +30,6 @@
     <ClCompile Include="..\..\src\server\worldserver\Main.cpp" />
     <ClCompile Include="..\..\src\server\worldserver\Master.cpp" />
     <ClCompile Include="..\..\src\server\worldserver\RemoteAccess\RASocket.cpp" />
-    <ClCompile Include="..\..\src\server\shared\Debugging\WheatyExceptionReport.cpp" />
     <ClCompile Include="..\..\src\server\worldserver\WorldThread\WorldRunnable.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -41,7 +40,6 @@
     <ClInclude Include="..\..\src\server\worldserver\Master.h" />
     <ClInclude Include="..\..\src\server\worldserver\RemoteAccess\RASocket.h" />
     <ClInclude Include="..\..\src\server\worldserver\resource.h" />
-    <ClInclude Include="..\..\src\server\shared\Debugging\WheatyExceptionReport.h" />
     <ClInclude Include="..\..\src\server\worldserver\WorldThread\WorldRunnable.h" />
   </ItemGroup>
   <ItemGroup>

@@ -1,9 +1,11 @@
-##########################################
-# Trinity Core realmd configuration file #
-##########################################
+###############################################
+# Trinity Core Auth Server configuration file #
+###############################################
+[authserver]
+
 # Note to devs, line breaks should be at column 80
 ###############################################################################
-# REALMD SETTINGS
+# AUTH SERVER SETTINGS
 #
 #    LoginDatabaseInfo
 #        Database connection settings for the realm server.

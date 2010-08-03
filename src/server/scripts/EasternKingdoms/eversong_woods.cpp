@@ -435,19 +435,8 @@ void npc_secondTrialAI::JustDied(Unit* Killer)
         // last kill quest complete for group
         if (me->GetEntry() == CHAMPION_SUNSTRIKER)
         {
-            if (Group *pGroup = CAST_PLR(Killer)->GetGroup())
-            {
-                for (GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
-                {
-                    Player *pGroupGuy = itr->getSource();
-
-                    // for any leave or dead (with not released body) group member at appropriate distance
-                    if (pGroupGuy && pGroupGuy->IsAtGroupRewardDistance(me) && !pGroupGuy->GetCorpse() && pGroupGuy->GetQuestStatus(QUEST_SECOND_TRIAL) == QUEST_STATUS_INCOMPLETE)
-                        pGroupGuy->CompleteQuest(QUEST_SECOND_TRIAL);
-                }
-            }
-            else if (CAST_PLR(Killer)->GetQuestStatus(QUEST_SECOND_TRIAL) == QUEST_STATUS_INCOMPLETE)
-                CAST_PLR(Killer)->CompleteQuest(QUEST_SECOND_TRIAL);
+            if (Killer->GetTypeId() == TYPEID_PLAYER)
+                Killer->ToPlayer()->GroupEventHappens(QUEST_SECOND_TRIAL,Killer);
         }
     }
 }
@@ -520,14 +509,14 @@ struct npc_apprentice_mirvedaAI : public ScriptedAI
     void JustDied(Unit* /*killer*/)
     {
         if (PlayerGUID)
-            if (Player* pPlayer = Unit::GetPlayer(PlayerGUID))
+            if (Player* pPlayer = Unit::GetPlayer(*me, PlayerGUID))
                 CAST_PLR(pPlayer)->FailQuest(QUEST_UNEXPECTED_RESULT);
     }
 
     void UpdateAI(const uint32 /*diff*/)
     {
         if (KillCount >= 3 && PlayerGUID)
-            if (Player* pPlayer = Unit::GetPlayer(PlayerGUID))
+            if (Player* pPlayer = Unit::GetPlayer(*me, PlayerGUID))
                 CAST_PLR(pPlayer)->CompleteQuest(QUEST_UNEXPECTED_RESULT);
 
         if (Summon)
@@ -616,7 +605,7 @@ struct npc_infused_crystalAI : public Scripted_NoMovementAI
     void JustDied(Unit* /*killer*/)
     {
         if (PlayerGUID && !Completed)
-            if (Player* pPlayer = Unit::GetPlayer(PlayerGUID))
+            if (Player* pPlayer = Unit::GetPlayer(*me, PlayerGUID))
                 CAST_PLR(pPlayer)->FailQuest(QUEST_POWERING_OUR_DEFENSES);
     }
 
@@ -627,7 +616,7 @@ struct npc_infused_crystalAI : public Scripted_NoMovementAI
             DoScriptText(EMOTE, me);
             Completed = true;
             if (PlayerGUID)
-                if (Player* pPlayer = Unit::GetPlayer(PlayerGUID))
+                if (Player* pPlayer = Unit::GetPlayer(*me, PlayerGUID))
                     CAST_PLR(pPlayer)->CompleteQuest(QUEST_POWERING_OUR_DEFENSES);
 
             me->DealDamage(me,me->GetHealth(),NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);

@@ -297,6 +297,7 @@ struct boss_sartharionAI : public ScriptedAI
                     {
                         pTenebron->Respawn();
                         pTenebron->GetMotionMaster()->MoveTargetedHome();
+                        pTenebron->SetLootRecipient(NULL);
                     }
                 }
             }
@@ -314,6 +315,7 @@ struct boss_sartharionAI : public ScriptedAI
                     {
                         pShadron->Respawn();
                         pShadron->GetMotionMaster()->MoveTargetedHome();
+                        pShadron->SetLootRecipient(NULL);
                     }
                 }
             }
@@ -331,6 +333,7 @@ struct boss_sartharionAI : public ScriptedAI
                     {
                         pVesperon->Respawn();
                         pVesperon->GetMotionMaster()->MoveTargetedHome();
+                        pVesperon->SetLootRecipient(NULL);
                     }
                 }
             }
@@ -1281,12 +1284,12 @@ struct mob_acolyte_of_shadronAI : public ScriptedAI
             //if not solo figth, buff main boss, else place debuff on mini-boss. both spells TARGET_SCRIPT
             if (pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
             {
-                if(pTarget = ((Creature*)Unit::GetUnit((*me), pInstance->GetData64(DATA_SARTHARION))))
+                if(pTarget = (Unit::GetCreature((*me), pInstance->GetData64(DATA_SARTHARION))))
                     pTarget->AddAura(SPELL_GIFT_OF_TWILIGTH_SAR, pTarget);
             }
             else
             {
-                if(pTarget = ((Creature*)Unit::GetUnit((*me), pInstance->GetData64(DATA_SHADRON))))
+                if(pTarget = (Unit::GetCreature((*me), pInstance->GetData64(DATA_SHADRON))))
                     pTarget->AddAura(SPELL_GIFT_OF_TWILIGTH_SHA, pTarget);
             }
          }
@@ -1300,7 +1303,7 @@ struct mob_acolyte_of_shadronAI : public ScriptedAI
             Creature* Shadron = pInstance->instance->GetCreature(pInstance->GetData64(DATA_SHADRON));
             if(Shadron)
             {
-                ((mob_shadronAI*)Shadron->AI())->m_bHasPortalOpen = false;
+                (CAST_AI(mob_shadronAI,Shadron->AI()))->m_bHasPortalOpen = false;
             }
 
             Creature* pDebuffTarget = NULL;
@@ -1391,7 +1394,7 @@ struct mob_acolyte_of_vesperonAI : public ScriptedAI
         {
             Creature* pVesperon = pInstance->instance->GetCreature(pInstance->GetData64(DATA_VESPERON));
             if (pVesperon)
-                ((mob_vesperonAI*)pVesperon->AI())->m_bHasPortalOpen = false;
+                (CAST_AI(mob_vesperonAI,pVesperon->AI()))->m_bHasPortalOpen = false;
 
             if (pVesperon && pVesperon->isAlive() && pVesperon->HasAura(SPELL_TWILIGHT_TORMENT_VESP))
                 pVesperon->RemoveAurasDueToSpell(SPELL_TWILIGHT_TORMENT_VESP);
@@ -1494,7 +1497,7 @@ struct mob_twilight_eggsAI : public Scripted_NoMovementAI
         {
             Creature* Tenebron = pInstance->instance->GetCreature(pInstance->GetData64(DATA_TENEBRON));
             if(Tenebron)
-                ((mob_tenebronAI*)Tenebron->AI())->m_bHasPortalOpen = false;
+                (CAST_AI(mob_tenebronAI,Tenebron->AI()))->m_bHasPortalOpen = false;
             SpawnWhelps();
         }
         else

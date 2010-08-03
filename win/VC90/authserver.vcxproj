@@ -297,7 +297,6 @@
     <ClCompile Include="..\..\src\server\authserver\Main.cpp" />
     <ClCompile Include="..\..\src\server\authserver\Realms\RealmList.cpp" />
     <ClCompile Include="..\..\src\server\authserver\Server\RealmSocket.cpp" />
-    <ClCompile Include="..\..\src\server\shared\Debugging\WheatyExceptionReport.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\server\authserver\Authentication\AuthCodes.h" />
@@ -305,7 +304,6 @@
     <ClInclude Include="..\..\src\server\authserver\Server\RealmAcceptor.h" />
     <ClInclude Include="..\..\src\server\authserver\Realms\RealmList.h" />
     <ClInclude Include="..\..\src\server\authserver\Server\RealmSocket.h" />
-    <ClInclude Include="..\..\src\server\shared\Debugging\WheatyExceptionReport.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\src\server\authserver\authserver.rc" />

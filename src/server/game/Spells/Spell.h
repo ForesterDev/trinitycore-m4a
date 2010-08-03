@@ -24,12 +24,15 @@
 #include <memory>
 #include "GridDefines.h"
 #include "SharedDefines.h"
+#include "ObjectMgr.h"
 
 class Unit;
 class Player;
 class GameObject;
 class DynamicObject;
 class Aura;
+struct SpellEntry;
+class SpellScript;
 
 // These flags represent the inner states of the targeting system
 enum SpellInternalTargetFlags
@@ -263,12 +266,14 @@ enum SpellTargets
     SPELL_TARGETS_ENTRY,
     SPELL_TARGETS_CHAINHEAL,
     SPELL_TARGETS_ANY,
+    SPELL_TARGETS_GO
 };
 
 class Spell
 {
     friend struct Trinity::SpellNotifierCreatureAndPlayer;
     friend void Unit::SetCurrentCastedSpell(Spell * pSpell);
+    friend class SpellScript;
     public:
 
         void EffectNULL(uint32);
@@ -507,6 +512,7 @@ class Spell
 
         Unit* GetCaster() const { return m_caster; }
         Unit* GetOriginalCaster() const { return m_originalCaster; }
+        SpellEntry const * GetSpellInfo() const { return m_spellInfo; }
         int32 GetPowerCost() const { return m_powerCost; }
 
         void UpdatePointers();                              // must be used at call Spell code after time delay (non triggered spell cast/update spell call/etc)
@@ -641,6 +647,7 @@ class Spell
         void DoAllEffectOnTarget(ItemTargetInfo *target);
         bool UpdateChanneledTargetList();
         void SearchAreaTarget(std::list<Unit*> &unitList, float radius, SpellNotifyPushType type, SpellTargets TargetType, uint32 entry = 0);
+        void SearchGOAreaTarget(std::list<GameObject*> &gobjectList, float radius, SpellNotifyPushType type, SpellTargets TargetType, uint32 entry = 0);
         void SearchChainTarget(std::list<Unit*> &unitList, float radius, uint32 unMaxTargets, SpellTargets TargetType);
         WorldObject* SearchNearbyTarget(float range, SpellTargets TargetType);
         bool IsValidSingleTargetEffect(Unit const* target, Targets type) const;
@@ -650,6 +657,10 @@ class Spell
         void SpellDamageSchoolDmg(uint32 i);
         void SpellDamageWeaponDmg(uint32 i);
         void SpellDamageHeal(uint32 i);
+
+        // Scripting system
+        void LoadScripts();
+        std::list<SpellScript *> m_loadedScripts;
 
         // effect helpers
         void GetSummonPosition(uint32 i, Position &pos, float radius = 0.0f, uint32 count = 0);
@@ -788,7 +799,7 @@ namespace Trinity
             : i_source(source), i_data(&data), i_radius(radius), i_push_type(type)
             , i_TargetType(TargetType), i_pos(pos), i_entry(entry)
         {
-            assert(i_source);
+            ASSERT(i_source);
         }
 
         template<class T> inline void Visit(GridRefManager<T>  &m)
@@ -843,11 +854,11 @@ namespace Trinity
                             i_data->push_back(target);
                         break;
                     case PUSH_IN_FRONT:
-                        if (i_source->isInFront(target, i_radius, M_PI/3))
+                        if (i_source->isInFront(target, i_radius, M_PI/2))
                             i_data->push_back(target);
                         break;
                     case PUSH_IN_BACK:
-                        if (i_source->isInBack(target, i_radius, M_PI/3))
+                        if (i_source->isInBack(target, i_radius, M_PI/2))
                             i_data->push_back(target);
                         break;
                     case PUSH_IN_LINE:

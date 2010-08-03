@@ -43,7 +43,7 @@
 #include <map>
 #include "GlobalEvents.h"
 #include "OutdoorPvPMgr.h"
-
+#include "Transport.h"
 #include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand
 #include "CreatureGroups.h"
 
@@ -1005,6 +1005,29 @@ bool ChatHandler::HandleNpcAddCommand(const char* args)
     float z = chr->GetPositionZ();
     float o = chr->GetOrientation();
     Map *map = chr->GetMap();
+
+    if (chr->GetTransport())
+    {
+        uint32 tguid = chr->GetTransport()->AddNPCPassenger(0, id, chr->GetTransOffsetX(), chr->GetTransOffsetY(), chr->GetTransOffsetZ(), chr->GetTransOffsetO());
+        if (tguid > 0)
+        {
+            WorldDatabase.PQuery("INSERT INTO creature_transport (guid, npc_entry, transport_entry,  TransOffsetX, TransOffsetY, TransOffsetZ, TransOffsetO) values (%u, %u, %f, %f, %f, %f, %u)", tguid, id, chr->GetTransport()->GetEntry(), chr->GetTransOffsetX(), chr->GetTransOffsetY(), chr->GetTransOffsetZ(), chr->GetTransOffsetO());
+
+            TransportCreatureProto *transportCreatureProto = new TransportCreatureProto;
+            transportCreatureProto->guid = tguid;
+            transportCreatureProto->npc_entry = id;
+            uint32 transportEntry = chr->GetTransport()->GetEntry();
+            transportCreatureProto->TransOffsetX = chr->GetTransOffsetX();
+            transportCreatureProto->TransOffsetY = chr->GetTransOffsetY();
+            transportCreatureProto->TransOffsetZ = chr->GetTransOffsetZ();
+            transportCreatureProto->TransOffsetO = chr->GetTransOffsetO();
+            transportCreatureProto->emote = 0;
+
+            sMapMgr.m_TransportNPCMap[transportEntry].insert(transportCreatureProto);
+            sMapMgr.m_TransportNPCs.insert(transportCreatureProto);
+        }
+        return true;
+    }
 
     Creature* pCreature = new Creature;
     if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), map, chr->GetPhaseMaskForSpawn(), id, 0, (uint32)teamval, x, y, z, o))
@@ -2131,6 +2154,7 @@ bool ChatHandler::HandleGOInfoCommand(const char* args)
     uint32 type = 0;
     uint32 displayid = 0;
     std::string name;
+    uint32 lootId = 0;
 
     if (!*args)
     {
@@ -2148,9 +2172,14 @@ bool ChatHandler::HandleGOInfoCommand(const char* args)
     type = goinfo->type;
     displayid = goinfo->displayId;
     name = goinfo->name;
+    if (type == GAMEOBJECT_TYPE_CHEST)
+        lootId = goinfo->chest.lootId;
+    else if (type == GAMEOBJECT_TYPE_FISHINGHOLE)
+        lootId = goinfo->fishinghole.lootId;
 
     PSendSysMessage(LANG_GOINFO_ENTRY, entry);
     PSendSysMessage(LANG_GOINFO_TYPE, type);
+    PSendSysMessage(LANG_GOINFO_LOOTID, lootId);
     PSendSysMessage(LANG_GOINFO_DISPLAYID, displayid);
     PSendSysMessage(LANG_GOINFO_NAME, name.c_str());
 
@@ -3942,7 +3971,7 @@ bool ChatHandler::HandleCreatePetCommand(const char* /*args*/)
 
     if (!pet->InitStatsForLevel(creatureTarget->getLevel()))
     {
-        sLog.outError("ERROR: InitStatsForLevel() in EffectTameCreature failed! Pet deleted.");
+        sLog.outError("InitStatsForLevel() in EffectTameCreature failed! Pet deleted.");
         PSendSysMessage("Error 2");
         delete pet;
         return false;

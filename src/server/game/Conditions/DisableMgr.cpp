@@ -186,7 +186,7 @@ void DisableMgr::CheckQuestDisables()
 
 bool DisableMgr::IsDisabledFor(DisableType type, uint32 entry, Unit const* pUnit)
 {
-    assert(type < MAX_DISABLE_TYPES);
+    ASSERT(type < MAX_DISABLE_TYPES);
     if (m_DisableMap[type].empty())
         return false;
 
@@ -219,8 +219,6 @@ bool DisableMgr::IsDisabledFor(DisableType type, uint32 entry, Unit const* pUnit
                 return true;
         }
         case DISABLE_TYPE_MAP:
-            if (!pUnit)
-                return true;
             if (Player const* pPlayer = pUnit->ToPlayer())
             {
                 MapEntry const* mapEntry = sMapStore.LookupEntry(entry);

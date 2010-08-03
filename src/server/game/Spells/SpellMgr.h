@@ -330,7 +330,8 @@ inline bool IsNonCombatSpell(SpellEntry const *spellInfo)
 bool IsPositiveSpell(uint32 spellId);
 bool IsPositiveEffect(uint32 spellId, uint32 effIndex);
 bool IsPositiveTarget(uint32 targetA, uint32 targetB);
-bool IsDispelableBySpell(SpellEntry const * dispelSpell, uint32 spellId, bool def = false);
+bool CanSpellDispelAura(SpellEntry const * dispelSpell, SpellEntry const * aura);
+bool CanSpellPierceImmuneAura(SpellEntry const * pierceSpell, SpellEntry const * aura);
 
 bool IsSingleTargetSpell(SpellEntry const *spellInfo);
 bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellInfo2);
@@ -395,6 +396,16 @@ inline bool IsAreaOfEffectSpell(SpellEntry const *spellInfo)
     if (IsAreaEffectTarget[spellInfo->EffectImplicitTargetA[2]] || IsAreaEffectTarget[spellInfo->EffectImplicitTargetB[2]])
         return true;
     return false;
+}
+
+inline bool IsFarUnitTargetEffect(uint32 effect)
+{
+    return (effect == SPELL_EFFECT_SUMMON_PLAYER);
+}
+
+inline bool IsFarDestTargetEffect(uint32 effect)
+{
+    return (effect == SPELL_EFFECT_TELEPORT_UNITS);
 }
 
 inline bool IsAreaAuraEffect(uint32 effect)

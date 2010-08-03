@@ -591,7 +591,7 @@ void Group::SendLootAllPassed(uint32 NumberOfPlayers, const Roll &r)
 // notify group members which player is the allowed looter for the given creature
 void Group::SendLooter(Creature *pCreature, Player *pLooter)
 {
-    assert(pCreature);
+    ASSERT(pCreature);
 
     WorldPacket data(SMSG_LOOT_LIST, (8+8));
     data << uint64(pCreature->GetGUID());
@@ -1770,9 +1770,7 @@ InstanceGroupBind* Group::GetBoundInstance(Map* aMap)
     Difficulty difficulty = GetDifficulty(aMap->IsRaid());
 
     // some instances only have one difficulty
-    MapDifficulty const* mapDiff = GetMapDifficultyData(aMap->GetId(),difficulty);
-    if (!mapDiff)
-        return NULL;
+    MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(aMap->GetId(),difficulty);
 
     BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(aMap->GetId());
     if (itr != m_boundInstances[difficulty].end())
@@ -1789,9 +1787,7 @@ InstanceGroupBind* Group::GetBoundInstance(MapEntry const* mapEntry)
     Difficulty difficulty = GetDifficulty(mapEntry->IsRaid());
     
     // some instances only have one difficulty
-    MapDifficulty const* mapDiff = GetMapDifficultyData(mapEntry->MapID,difficulty);
-    if (!mapDiff)
-        difficulty = DUNGEON_DIFFICULTY_NORMAL;
+    MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(mapEntry->MapID,difficulty);
     
     BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapEntry->MapID);
     if (itr != m_boundInstances[difficulty].end())

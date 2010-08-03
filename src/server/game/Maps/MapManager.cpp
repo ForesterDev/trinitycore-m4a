@@ -29,7 +29,7 @@
 #include "MapInstanced.h"
 #include "InstanceData.h"
 #include "DestinationHolderImp.h"
-#include "ConfigEnv.h"
+#include "Config.h"
 #include "World.h"
 #include "CellImpl.h"
 #include "Corpse.h"
@@ -52,6 +52,9 @@ MapManager::~MapManager()
 
     for (TransportSet::iterator i = m_Transports.begin(); i != m_Transports.end(); ++i)
          delete *i;
+
+    for (TransportNPCSet::iterator i = m_TransportNPCs.begin(); i != m_TransportNPCs.end(); ++i)
+        delete *i;
 
     Map::DeleteStateMachine();
 }
@@ -126,7 +129,7 @@ Map* MapManager::_createBaseMap(uint32 id)
         i_maps[id] = m;
     }
 
-    assert(m != NULL);
+    ASSERT(m != NULL);
     return m;
 }
 
@@ -166,18 +169,19 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
     if (!instance)
         return false;
 
+    Difficulty targetDifficulty = player->GetDifficulty(entry->IsRaid());
     //The player has a heroic mode and tries to enter into instance which has no a heroic mode
-    MapDifficulty const* mapDiff = GetMapDifficultyData(entry->MapID,player->GetDifficulty(entry->IsRaid()));
+    MapDifficulty const* mapDiff = GetMapDifficultyData(entry->MapID, targetDifficulty);
     if (!mapDiff)
     {
-        bool isNormalTargetMap = entry->IsRaid()
-        ? (player->GetRaidDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL)
-        : (player->GetDungeonDifficulty() == DUNGEON_DIFFICULTY_NORMAL);
-        
-        // Send aborted message
-        // FIX ME: what about absent normal/heroic mode with specific players limit...
-        player->SendTransferAborted(mapid, TRANSFER_ABORT_DIFFICULTY, isNormalTargetMap ? DUNGEON_DIFFICULTY_NORMAL : DUNGEON_DIFFICULTY_HEROIC);
-        return false;
+        // Send aborted message for dungeons
+        if (entry->IsNonRaidDungeon())
+        {
+            player->SendTransferAborted(mapid, TRANSFER_ABORT_DIFFICULTY, player->GetDungeonDifficulty());
+            return false;
+        }
+        else    // attempt to downscale
+            mapDiff = GetDownscaledMapDifficultyData(entry->MapID, targetDifficulty);
     }
 
     //Bypass checks for GMs
@@ -250,7 +254,7 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
     }
 
     //Other requirements
-    return player->Satisfy(objmgr.GetAccessRequirement(instance->access_id), mapid, true);
+    return player->Satisfy(objmgr.GetAccessRequirement(mapid, targetDifficulty), mapid, true);
 }
 
 void MapManager::RemoveBonesFromMap(uint32 mapid, uint64 guid, float x, float y)
@@ -272,15 +276,13 @@ void MapManager::Update(uint32 diff)
     MapMapType::iterator iter = i_maps.begin();
     for (; iter != i_maps.end(); ++iter)
     {
-     if (m_updater.activated())
+        if (m_updater.activated())
             m_updater.schedule_update(*iter->second, i_timer.GetCurrent());
-     else
-        {
-         iter->second->Update(i_timer.GetCurrent());
-     }
+        else
+            iter->second->Update(i_timer.GetCurrent());
     }
     if (m_updater.activated())
-     m_updater.wait();
+        m_updater.wait();
 
     for (iter = i_maps.begin(); iter != i_maps.end(); ++iter)
         iter->second->DelayedUpdate(i_timer.GetCurrent());

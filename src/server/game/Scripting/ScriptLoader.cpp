@@ -16,7 +16,7 @@
 
 #include "ScriptPCH.h"
 
-#ifdef DO_SCRIPTS
+#ifdef SCRIPTS
 //custom
 
 //examples
@@ -520,11 +520,25 @@ void AddSC_terokkar_forest();
 void AddSC_zangarmarsh();
 void AddSC_onevents();
 
+// spells
+void AddSC_deathknight_spell_scripts();
+void AddSC_druid_spell_scripts();
+void AddSC_generic_spell_scripts();
+void AddSC_hunter_spell_scripts();
+void AddSC_mage_spell_scripts();
+void AddSC_paladin_spell_scripts();
+void AddSC_priest_spell_scripts();
+void AddSC_rogue_spell_scripts();
+void AddSC_shaman_spell_scripts();
+void AddSC_warlock_spell_scripts();
+void AddSC_warrior_spell_scripts();
+void AddSC_example_spell_scripts();
+
 #endif
 
 void AddScripts()
 {
-#ifdef DO_SCRIPTS
+#ifdef SCRIPTS
 
     //custom
 
@@ -1029,5 +1043,18 @@ void AddScripts()
     AddSC_zangarmarsh();
     AddSC_onevents();
 
+    // spells
+    AddSC_deathknight_spell_scripts();
+    AddSC_druid_spell_scripts();
+    AddSC_generic_spell_scripts();
+    AddSC_hunter_spell_scripts();
+    AddSC_mage_spell_scripts();
+    AddSC_paladin_spell_scripts();
+    AddSC_priest_spell_scripts();
+    AddSC_rogue_spell_scripts();
+    AddSC_shaman_spell_scripts();
+    AddSC_warlock_spell_scripts();
+    AddSC_warrior_spell_scripts();
+    AddSC_example_spell_scripts();
 #endif
 }

@@ -192,9 +192,9 @@ typedef std::list<std::string> StoreProblemList;
 
 static bool LoadDBC_assert_print(uint32 fsize,uint32 rsize, const std::string& filename)
 {
-    sLog.outError("ERROR: Size of '%s' setted by format string (%u) not equal size of C++ structure (%u).",filename.c_str(),fsize,rsize);
+    sLog.outError("Size of '%s' setted by format string (%u) not equal size of C++ structure (%u).",filename.c_str(),fsize,rsize);
 
-    // assert must fail after function call
+    // ASSERT must fail after function call
     return false;
 }
 
@@ -202,7 +202,7 @@ template<class T>
 inline void LoadDBC(uint32& availableDbcLocales,barGoLink& bar, StoreProblemList& errlist, DBCStorage<T>& storage, const std::string& dbc_path, const std::string& filename, const std::string * custom_entries = NULL, const std::string * idname = NULL)
 {
     // compatibility format and C++ structure sizes
-    assert(DBCFileLoader::GetFormatRecordSize(storage.GetFormat()) == sizeof(T) || LoadDBC_assert_print(DBCFileLoader::GetFormatRecordSize(storage.GetFormat()),sizeof(T),filename));
+    ASSERT(DBCFileLoader::GetFormatRecordSize(storage.GetFormat()) == sizeof(T) || LoadDBC_assert_print(DBCFileLoader::GetFormatRecordSize(storage.GetFormat()),sizeof(T),filename));
 
     std::string dbc_filename = dbc_path + filename;
     SqlDbc * sql = NULL;
@@ -353,7 +353,7 @@ void LoadDBCStores(const std::string& dataPath)
     // fill data
     for (uint32 i = 1; i < sMapDifficultyStore.GetNumRows(); ++i)
         if (MapDifficultyEntry const* entry = sMapDifficultyStore.LookupEntry(i))
-            sMapDifficultyMap[MAKE_PAIR32(entry->MapId,entry->Difficulty)] = MapDifficulty(entry->resetTime,entry->maxPlayers);
+            sMapDifficultyMap[MAKE_PAIR32(entry->MapId,entry->Difficulty)] = MapDifficulty(entry->resetTime,entry->maxPlayers,strlen(entry->areaTriggerText)>0);
     sMapDifficultyStore.Clear();
 
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sMovieStore,               dbcPath,"Movie.dbc");
@@ -362,7 +362,7 @@ void LoadDBCStores(const std::string& dataPath)
     for (uint32 i = 0; i < sPvPDifficultyStore.GetNumRows(); ++i)
         if (PvPDifficultyEntry const* entry = sPvPDifficultyStore.LookupEntry(i))
             if (entry->bracketId > MAX_BATTLEGROUND_BRACKETS)
-                assert(false && "Need update MAX_BATTLEGROUND_BRACKETS by DBC data");
+                ASSERT(false && "Need update MAX_BATTLEGROUND_BRACKETS by DBC data");
 
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sQuestXPStore,             dbcPath,"QuestXP.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sQuestFactionRewardStore,  dbcPath,"QuestFactionReward.dbc");
@@ -608,24 +608,12 @@ void LoadDBCStores(const std::string& dataPath)
     sLog.outString(">> Initialized %d data stores", DBCFilesCount);
 }
 
-SimpleFactionsList const* GetFactionTeamList(uint32 faction, bool &isTeamMember)
+SimpleFactionsList const* GetFactionTeamList(uint32 faction)
 {
-    for (FactionTeamMap::const_iterator itr = sFactionTeamMap.begin(); itr != sFactionTeamMap.end(); ++itr)
-    {
-        if (itr->first == faction)
-        {
-            isTeamMember = false;
-            return &itr->second;
-        }
-        for (SimpleFactionsList::const_iterator itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
-        {
-            if ((*itr2) == faction)
-            {
-                isTeamMember = true;
-                return &itr->second;
-            }
-        }
-    }
+    FactionTeamMap::const_iterator itr = sFactionTeamMap.find(faction);
+    if (itr != sFactionTeamMap.end())
+        return &itr->second;
+
     return NULL;
 }
 
@@ -793,6 +781,30 @@ MapDifficulty const* GetMapDifficultyData(uint32 mapId, Difficulty difficulty)
 {
     MapDifficultyMap::const_iterator itr = sMapDifficultyMap.find(MAKE_PAIR32(mapId,difficulty));
     return itr != sMapDifficultyMap.end() ? &itr->second : NULL;
+}
+
+MapDifficulty const* GetDownscaledMapDifficultyData(uint32 mapId, Difficulty &difficulty)
+{
+    uint32 tmpDiff = difficulty;
+    MapDifficulty const* mapDiff = GetMapDifficultyData(mapId, Difficulty(tmpDiff));
+    if (!mapDiff)
+    {
+        if (tmpDiff > RAID_DIFFICULTY_25MAN_NORMAL) // heroic, downscale to normal
+            tmpDiff -= 2;
+        else
+            tmpDiff -= 1;   // any non-normal mode for raids like tbc (only one mode)
+
+        // pull new data
+        mapDiff = GetMapDifficultyData(mapId, Difficulty(tmpDiff)); // we are 10 normal or 25 normal
+        if (!mapDiff)
+        {
+            tmpDiff -= 1;
+            mapDiff = GetMapDifficultyData(mapId, Difficulty(tmpDiff)); // 10 normal
+        }
+    }
+
+    difficulty = Difficulty(tmpDiff);
+    return mapDiff;
 }
 
 PvPDifficultyEntry const* GetBattlegroundBracketByLevel(uint32 mapid, uint32 level)

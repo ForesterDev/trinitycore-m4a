@@ -147,7 +147,8 @@ copy ..\..\externals\mysql\bin\$(Platform)_$(Configuration)\*.dll ..\..\bin\$(Pl
 copy ..\..\externals\lib\$(Platform)_$(Configuration)\ssleay32.dll ..\..\bin\$(Platform)_$(Configuration)
 copy ..\..\externals\lib\$(Platform)_$(Configuration)\libeay32.dll ..\..\bin\$(Platform)_$(Configuration)
 copy ..\..\src\server\worldserver\worldserver.conf.dist ..\..\bin\$(Platform)_$(Configuration)
-copy ..\..\README.* ..\..\bin\$(Platform)_$(Configuration)</Command>
+copy ..\..\README.* ..\..\bin\$(Platform)_$(Configuration)
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -203,7 +204,8 @@ copy ..\..\externals\mysql\bin\$(Platform)_$(Configuration)\*.dll ..\..\bin\$(Pl
 copy ..\..\externals\lib\$(Platform)_$(Configuration)\ssleay32.dll ..\..\bin\$(Platform)_$(Configuration)
 copy ..\..\externals\lib\$(Platform)_$(Configuration)\libeay32.dll ..\..\bin\$(Platform)_$(Configuration)
 copy ..\..\src\server\worldserver\worldserver.conf.dist ..\..\bin\$(Platform)_$(Configuration)
-copy ..\..\README.* ..\..\bin\$(Platform)_$(Configuration)</Command>
+copy ..\..\README.* ..\..\bin\$(Platform)_$(Configuration)
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -261,7 +263,8 @@ copy ..\..\externals\mysql\bin\$(Platform)_$(Configuration)\*.dll ..\..\bin\$(Pl
 copy ..\..\externals\lib\$(Platform)_$(Configuration)\ssleay32.dll ..\..\bin\$(Platform)_$(Configuration)
 copy ..\..\externals\lib\$(Platform)_$(Configuration)\libeay32.dll ..\..\bin\$(Platform)_$(Configuration)
 copy ..\..\src\server\worldserver\worldserver.conf.dist ..\..\bin\$(Platform)_$(Configuration)
-copy ..\..\README.* ..\..\bin\$(Platform)_$(Configuration)</Command>
+copy ..\..\README.* ..\..\bin\$(Platform)_$(Configuration)
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -319,7 +322,8 @@ copy ..\..\externals\mysql\bin\$(Platform)_$(Configuration)\*.dll ..\..\bin\$(Pl
 copy ..\..\externals\lib\$(Platform)_$(Configuration)\ssleay32.dll ..\..\bin\$(Platform)_$(Configuration)
 copy ..\..\externals\lib\$(Platform)_$(Configuration)\libeay32.dll ..\..\bin\$(Platform)_$(Configuration)
 copy ..\..\src\server\worldserver\worldserver.conf.dist ..\..\bin\$(Platform)_$(Configuration)
-copy ..\..\README.* ..\..\bin\$(Platform)_$(Configuration)</Command>
+copy ..\..\README.* ..\..\bin\$(Platform)_$(Configuration)
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -334,7 +338,6 @@ copy ..\..\README.* ..\..\bin\$(Platform)_$(Configuration)</Command>
     <ClCompile Include="..\..\src\server\worldserver\Main.cpp" />
     <ClCompile Include="..\..\src\server\worldserver\Master.cpp" />
     <ClCompile Include="..\..\src\server\worldserver\RemoteAccess\RASocket.cpp" />
-    <ClCompile Include="..\..\src\server\shared\Debugging\WheatyExceptionReport.cpp" />
     <ClCompile Include="..\..\src\server\worldserver\WorldThread\WorldRunnable.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -343,7 +346,6 @@ copy ..\..\README.* ..\..\bin\$(Platform)_$(Configuration)</Command>
     <ClInclude Include="..\..\src\server\worldserver\Master.h" />
     <ClInclude Include="..\..\src\server\worldserver\RemoteAccess\RASocket.h" />
     <ClInclude Include="..\..\src\server\worldserver\resource.h" />
-    <ClInclude Include="..\..\src\server\shared\Debugging\WheatyExceptionReport.h" />
     <ClInclude Include="..\..\src\server\worldserver\WorldThread\WorldRunnable.h" />
   </ItemGroup>
   <ItemGroup>
@@ -371,15 +373,15 @@ copy ..\..\README.* ..\..\bin\$(Platform)_$(Configuration)</Command>
     <ProjectReference Include="..\..\src\server\collision\collision.vcxproj">
       <Project>{c11df087-cfa1-4ab8-bd01-9e0591c2fc5e}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\server\scripts\scripts.vcxproj">
-      <Project>{e001577d-1350-4c1a-ab41-49ebec5f9044}</Project>
-    </ProjectReference>
     <ProjectReference Include="game.vcxproj">
       <Project>{1dc6c4da-a028-41f3-877d-d5400c594f88}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="genrevision.vcxproj">
       <Project>{803f488e-4c5a-4866-8d5c-1e6c03c007c2}</Project>
+    </ProjectReference>
+    <ProjectReference Include="scripts.vcxproj">
+      <Project>{e8068d77-ab0b-4e1a-9d5e-a89205d925c2}</Project>
     </ProjectReference>
     <ProjectReference Include="shared.vcxproj">
       <Project>{90297c34-f231-4df4-848e-a74bcc0e40ed}</Project>

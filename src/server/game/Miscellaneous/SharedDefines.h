@@ -24,6 +24,17 @@
 #include "Define.h"
 #include <cassert>
 
+enum SpellEffIndex
+{
+    EFFECT_0 = 0,
+    EFFECT_1 = 1,
+    EFFECT_2 = 2,
+};
+
+// used in script definitions
+#define EFFECT_FIRST_FOUND 254
+#define EFFECT_ALL 255
+
 // loot modes for creatures and gameobjects, bitmask!
 enum LootModes
 {
@@ -130,6 +141,8 @@ enum ReputationRank
 
 #define MIN_REPUTATION_RANK (REP_HATED)
 #define MAX_REPUTATION_RANK 8
+
+#define MAX_SPILLOVER_FACTIONS 4
 
 enum MoneyConstants
 {
@@ -742,7 +755,7 @@ enum SpellEffects
     SPELL_EFFECT_LEAP_BACK                 = 138,
     SPELL_EFFECT_CLEAR_QUEST               = 139,
     SPELL_EFFECT_FORCE_CAST                = 140,
-    SPELL_EFFECT_141                       = 141,
+    SPELL_EFFECT_FORCE_CAST_WITH_VALUE     = 141,
     SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE  = 142,
     SPELL_EFFECT_APPLY_AREA_AURA_OWNER     = 143,
     SPELL_EFFECT_KNOCK_BACK_DEST           = 144,
@@ -1135,8 +1148,8 @@ enum Targets
     TARGET_DEST_CASTER_BACK            = 48,
     TARGET_DEST_CASTER_RIGHT           = 49,
     TARGET_DEST_CASTER_LEFT            = 50,
-    TARGET_OBJECT_AREA_SRC             = 51,
-    TARGET_OBJECT_AREA_DST             = 52,
+    TARGET_GAMEOBJECT_AREA_SRC         = 51, // If used with SPELL_EFFECT_ACTIVATE_OBJECT, appliccable GO entries should be specified in conditions table
+    TARGET_GAMEOBJECT_AREA_DST         = 52, // If used with SPELL_EFFECT_ACTIVATE_OBJECT, appliccable GO entries should be specified in conditions table
     TARGET_DST_TARGET_ENEMY            = 53, // set unit coordinates as dest, only 16 target B imlemented
     TARGET_UNIT_CONE_ENEMY_UNKNOWN     = 54, // 180 degree, or different angle
     TARGET_DEST_CASTER_FRONT_LEAP      = 55, // for a leap spell
@@ -1177,7 +1190,7 @@ enum Targets
     TARGET_UNIT_MINIPET                = 90,
     TARGET_DEST_DEST_RANDOM_DIR_DIST   = 91,
     TARGET_UNIT_UNK_92                 = 92,
-    TARGET_CORPSE_AREA_ENEMY_PLAYER_SRC= 93,
+    TARGET_CORPSE_AREA_ENEMY_PLAYER_SRC= 93, // TODO
     TARGET_UNIT_VEHICLE                = 94,
     TARGET_UNIT_DRIVER                 = 95,
     TARGET_UNIT_PASSENGER_0            = 96,
@@ -1190,6 +1203,9 @@ enum Targets
     TARGET_UNIT_PASSENGER_7            = 103,
     TARGET_UNIT_AREA_PATH              = 104,
     TARGET_UNIT_UNK_105                = 105, // 1 spell
+    TARGET_DEST_CHANNEL_TARGET         = 106, // TODO
+    TARGET_UNK_AREA_UNK_DST_107        = 107, // not enough info - only generic spells avalible
+    TARGET_GAMEOBJECT_AREA_PATH        = 108, // TODO
     TARGET_DEST_UNK_110                = 110, // some kind of traj?
 };
 

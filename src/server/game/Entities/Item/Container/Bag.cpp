@@ -88,7 +88,7 @@ bool Bag::Create(uint32 guidlow, uint32 itemid, Player const* owner)
 
     SetUInt32Value(ITEM_FIELD_MAXDURABILITY, itemProto->MaxDurability);
     SetUInt32Value(ITEM_FIELD_DURABILITY, itemProto->MaxDurability);
-    SetUInt32Value(ITEM_FIELD_FLAGS, itemProto->Flags);
+    SetUInt32Value(ITEM_FIELD_FLAGS, itemProto->Flags & 0xFFFFFFF7);    // TEMP HACK, DONT REMOVE - Shauren
     SetUInt32Value(ITEM_FIELD_STACK_COUNT, 1);
 
     // Setting the number of Slots the Container has
@@ -109,11 +109,13 @@ void Bag::SaveToDB()
     Item::SaveToDB();
 }
 
-bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult_AutoPtr result)
+bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult_AutoPtr result, uint32 entry)
 {
-    if (!Item::LoadFromDB(guid, owner_guid, result))
+    if (!Item::LoadFromDB(guid, owner_guid, result, entry))
         return false;
 
+    ItemPrototype const* itemProto = GetProto(); // checked in Item::LoadFromDB
+    SetUInt32Value(CONTAINER_FIELD_NUM_SLOTS, itemProto->ContainerSlots);
     // cleanup bag content related item value fields (its will be filled correctly from `character_inventory`)
     for (uint8 i = 0; i < MAX_BAG_SIZE; ++i)
     {
@@ -146,7 +148,7 @@ uint32 Bag::GetFreeSlots() const
 
 void Bag::RemoveItem(uint8 slot, bool /*update*/)
 {
-    assert(slot < MAX_BAG_SIZE);
+    ASSERT(slot < MAX_BAG_SIZE);
 
     if (m_bagslot[slot])
         m_bagslot[slot]->SetContainer(NULL);
@@ -157,7 +159,7 @@ void Bag::RemoveItem(uint8 slot, bool /*update*/)
 
 void Bag::StoreItem(uint8 slot, Item *pItem, bool /*update*/)
 {
-    assert(slot < MAX_BAG_SIZE);
+    ASSERT(slot < MAX_BAG_SIZE);
 
     if (pItem && pItem->GetGUID() != this->GetGUID())
     {

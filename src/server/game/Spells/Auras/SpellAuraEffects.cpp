@@ -879,7 +879,7 @@ void AuraEffect::CalculateSpellMod()
             {
                 m_spellmod = new SpellModifier(GetBase());
                 m_spellmod->op = SpellModOp(GetMiscValue());
-                assert(m_spellmod->op < MAX_SPELLMOD);
+                ASSERT(m_spellmod->op < MAX_SPELLMOD);
 
                 m_spellmod->type = SpellModType(GetAuraType());    // SpellModType value == spell aura types
                 m_spellmod->spellId = GetId();
@@ -918,7 +918,7 @@ void AuraEffect::ChangeAmount(int32 newAmount, bool mark)
 void AuraEffect::HandleEffect(AuraApplication const * aurApp, uint8 mode, bool apply)
 {
     // check if call is correct
-    assert(!mode
+    ASSERT(!mode
         || mode == AURA_EFFECT_HANDLE_REAL
         || mode == AURA_EFFECT_HANDLE_SEND_FOR_CLIENT
         || mode == AURA_EFFECT_HANDLE_CHANGE_AMOUNT
@@ -934,7 +934,7 @@ void AuraEffect::HandleEffect(AuraApplication const * aurApp, uint8 mode, bool a
 void AuraEffect::HandleEffect(Unit * target, uint8 mode, bool apply)
 {
     AuraApplication const * aurApp = GetBase()->GetApplicationOfTarget(target->GetGUID());
-    assert(aurApp);
+    ASSERT(aurApp);
     HandleEffect(aurApp, mode, apply);
 }
 
@@ -1001,7 +1001,7 @@ void AuraEffect::Update(uint32 diff, Unit * caster)
 {
     if (m_isPeriodic && (GetBase()->GetDuration() >=0 || GetBase()->IsPassive() || GetBase()->IsPermanent()))
     {
-        if (m_periodicTimer > diff)
+        if (m_periodicTimer > int32(diff))
             m_periodicTimer -= diff;
         else // tick also at m_periodicTimer == 0 to prevent lost last tick in case max m_duration == (max m_periodicTimer)*N
         {
@@ -1170,7 +1170,7 @@ void AuraEffect::UpdatePeriodic(Unit * caster)
 
 bool AuraEffect::IsPeriodicTickCrit(Unit * target, Unit const * caster) const
 {
-    assert(caster);
+    ASSERT(caster);
     Unit::AuraEffectList const& mPeriodicCritAuras= caster->GetAuraEffectsByType(SPELL_AURA_ABILITY_PERIODIC_CRIT);
     for (Unit::AuraEffectList::const_iterator itr = mPeriodicCritAuras.begin(); itr != mPeriodicCritAuras.end(); ++itr)
     {
@@ -4290,7 +4290,7 @@ void AuraEffect::HandleAuraModSchoolImmunity(AuraApplication const * aurApp, uin
         {
             SpellEntry const *spell = iter->second->GetBase()->GetSpellProto();
             if ((GetSpellSchoolMask(spell) & school_mask)//Check for school mask
-                && IsDispelableBySpell(GetSpellProto(),spell->Id, true)
+                && CanSpellDispelAura(GetSpellProto(),spell)
                 && !iter->second->IsPositive()          //Don't remove positive spells
                 && spell->Id != GetId())               //Don't remove self
             {
@@ -5743,21 +5743,19 @@ void AuraEffect::HandleAuraDummy(AuraApplication const * aurApp, uint8 mode, boo
                     // Lifebloom
                     if (GetSpellProto()->SpellFamilyFlags[1] & 0x10)
                     {
-                        if (!apply)
+                        // Final heal only on dispelled or duration end
+                        if (aurApp->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE && aurApp->GetRemoveMode() != AURA_REMOVE_BY_ENEMY_SPELL)
+                            return;
+
+                        // final heal
+                        int32 stack = GetBase()->GetStackAmount();
+                        target->CastCustomSpell(target, 33778, &m_amount, &stack, NULL, true, NULL, this, GetCasterGUID());
+
+                        // restore mana
+                        if (caster)
                         {
-                            // Final heal only on dispelled or duration end
-                            if (aurApp->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE && aurApp->GetRemoveMode() != AURA_REMOVE_BY_ENEMY_SPELL)
-                                return;
-
-                            // final heal
-                            target->CastCustomSpell(target,33778,&m_amount,NULL,NULL,true,NULL,this,GetCasterGUID());
-
-                            // restore mana
-                            if (caster)
-                            {
-                                int32 returnmana = (GetSpellProto()->ManaCostPercentage * caster->GetCreateMana() / 100) * GetBase()->GetStackAmount() / 2;
-                                caster->CastCustomSpell(caster, 64372, &returnmana, NULL, NULL, true, NULL, this, GetCasterGUID());
-                            }
+                            int32 returnmana = (GetSpellProto()->ManaCostPercentage * caster->GetCreateMana() / 100) * stack / 2;
+                            caster->CastCustomSpell(caster, 64372, &returnmana, NULL, NULL, true, NULL, this, GetCasterGUID());
                         }
                     }
                     break;

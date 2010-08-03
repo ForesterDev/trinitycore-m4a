@@ -97,7 +97,7 @@ static bool procPrepared = InitTriggerAuraData();
 Unit::Unit()
 : WorldObject(), i_motionMaster(this), m_ThreatManager(this), m_HostileRefManager(this)
 , IsAIEnabled(false), NeedChangeAI(false)
-, i_AI(NULL), i_disabledAI(NULL), m_removedAurasCount(0), m_vehicle(NULL), m_transport(NULL)
+, i_AI(NULL), i_disabledAI(NULL), m_removedAurasCount(0), m_vehicle(NULL)
 , m_ControlledByPlayer(false), m_procDeep(0), m_unitTypeMask(UNIT_MASK_NONE), m_vehicleKit(NULL)
 , m_movedPlayer(NULL)
 {
@@ -207,13 +207,13 @@ Unit::~Unit()
     delete m_charmInfo;
     delete m_vehicleKit;
 
-    assert(!m_attacking);
-    assert(m_attackers.empty());
-    assert(m_sharedVision.empty());
-    assert(m_Controlled.empty());
-    assert(m_appliedAuras.empty());
-    assert(m_ownedAuras.empty());
-    assert(m_removedAuras.empty());
+    ASSERT(!m_attacking);
+    ASSERT(m_attackers.empty());
+    ASSERT(m_sharedVision.empty());
+    ASSERT(m_Controlled.empty());
+    ASSERT(m_appliedAuras.empty());
+    ASSERT(m_ownedAuras.empty());
+    ASSERT(m_removedAuras.empty());
 }
 
 void Unit::Update(uint32 p_time)
@@ -237,7 +237,7 @@ void Unit::Update(uint32 p_time)
 
     // If this is set during update SetCantProc(false) call is missing somewhere in the code
     // Having this would prevent spells from being proced, so let's crash
-    assert(!m_procDeep);
+    ASSERT(!m_procDeep);
 
     if (CanHaveThreatList() && getThreatManager().isNeedUpdateToClient(p_time))
         SendThreatListUpdate();
@@ -813,10 +813,10 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         // last damage from duel opponent
         if (duel_hasEnded)
         {
-            assert(pVictim->GetTypeId() == TYPEID_PLAYER);
+            ASSERT(pVictim->GetTypeId() == TYPEID_PLAYER);
             Player *he = (Player*)pVictim;
 
-            assert(he->duel);
+            ASSERT(he->duel);
 
             he->SetHealth(1);
 
@@ -1586,7 +1586,7 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage, SpellEnt
             // item dependent spell - check curent weapons
             for (int i = 0; i < MAX_ATTACK; ++i)
             {
-                Item *weapon = ToPlayer()->GetWeaponForAttack(WeaponAttackType(i));
+                Item *weapon = ToPlayer()->GetWeaponForAttack(WeaponAttackType(i), true);
 
                 if (weapon && weapon->IsFitToSpellRequirements((*itr)->GetSpellProto()))
                 {
@@ -3363,7 +3363,7 @@ void Unit::_UpdateAutoRepeatSpell()
 
 void Unit::SetCurrentCastedSpell(Spell * pSpell)
 {
-    assert(pSpell);                                         // NULL may be never passed here, use InterruptSpell or InterruptNonMeleeSpells
+    ASSERT(pSpell);                                         // NULL may be never passed here, use InterruptSpell or InterruptNonMeleeSpells
 
     CurrentSpellTypes CSpellType = pSpell->GetCurrentContainer();
 
@@ -3436,7 +3436,7 @@ void Unit::SetCurrentCastedSpell(Spell * pSpell)
 
 void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed, bool withInstant)
 {
-    assert(spellType < CURRENT_MAX_SPELL);
+    ASSERT(spellType < CURRENT_MAX_SPELL);
 
     //sLog.outDebug("Interrupt spell for unit %u.", GetEntry());
     Spell *spell = m_currentSpells[spellType];
@@ -3578,7 +3578,7 @@ void Unit::DeMorph()
 
 void Unit::_AddAura(UnitAura * aura, Unit * caster)
 {
-    assert(!m_cleanupDone);
+    ASSERT(!m_cleanupDone);
     m_ownedAuras.insert(AuraMap::value_type(aura->GetId(), aura));
 
     // passive and Incanter's Absorption and auras with different type can stack with themselves any number of times
@@ -3617,23 +3617,17 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
         // register single target aura
         caster->GetSingleCastAuras().push_back(aura);
         // remove other single target auras
-        for (;;)
+        Unit::AuraList& scAuras = caster->GetSingleCastAuras();
+        for (Unit::AuraList::iterator itr = scAuras.begin(); itr != scAuras.end();)
         {
-            bool restart = false;
-            Unit::AuraList& scAuras = caster->GetSingleCastAuras();
-            for (Unit::AuraList::iterator itr = scAuras.begin(); itr != scAuras.end(); ++itr)
+            if ((*itr) != aura &&
+                IsSingleTargetSpells((*itr)->GetSpellProto(), aura->GetSpellProto()))
             {
-                if ((*itr) != aura &&
-                    IsSingleTargetSpells((*itr)->GetSpellProto(), aura->GetSpellProto()))
-                {
-                    (*itr)->Remove();
-                    restart = true;
-                    break;
-                }
+                (*itr)->Remove();
+                itr = scAuras.begin();
             }
-
-            if (!restart)
-                break;
+            else
+                ++itr;
         }
     }
 }
@@ -3643,9 +3637,9 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
 AuraApplication * Unit::_CreateAuraApplication(Aura * aura, uint8 effMask)
 {
     // can't apply aura on unit which is going to be deleted - to not create a memory leak
-    assert(!m_cleanupDone);
+    ASSERT(!m_cleanupDone);
     // aura musn't be removed
-    assert(!aura->IsRemoved());
+    ASSERT(!aura->IsRemoved());
 
     SpellEntry const* aurSpellInfo = aura->GetSpellProto();
     uint32 aurId = aurSpellInfo->Id;
@@ -3675,10 +3669,10 @@ AuraApplication * Unit::_CreateAuraApplication(Aura * aura, uint8 effMask)
 
 void Unit::_ApplyAuraEffect(Aura * aura, uint8 effIndex)
 {
-    assert(aura);
-    assert(aura->HasEffect(effIndex));
+    ASSERT(aura);
+    ASSERT(aura->HasEffect(effIndex));
     AuraApplication * aurApp = aura->GetApplicationOfTarget(GetGUID());
-    assert(aurApp);
+    ASSERT(aurApp);
     if (!aurApp->GetEffectMask())
         _ApplyAura(aurApp, 1<<effIndex);
     else
@@ -3726,15 +3720,15 @@ void Unit::_ApplyAura(AuraApplication * aurApp, uint8 effMask)
 void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMode)
 {
     AuraApplication * aurApp = i->second;
-    assert(aurApp);
-    assert(!aurApp->GetRemoveMode());
-    assert(aurApp->GetTarget() == this);
+    ASSERT(aurApp);
+    ASSERT(!aurApp->GetRemoveMode());
+    ASSERT(aurApp->GetTarget() == this);
     aurApp->SetRemoveMode(removeMode);
     Aura * aura = aurApp->GetBase();
     sLog.outDebug("Aura %u now is remove mode %d", aura->GetId(), removeMode);
 
     // dead loop is killing the server probably
-    assert(m_removedAurasCount < 0xFFFFFFFF);
+    ASSERT(m_removedAurasCount < 0xFFFFFFFF);
 
     ++m_removedAurasCount;
 
@@ -3780,7 +3774,7 @@ void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMo
     }
 
     // all effect mustn't be applied
-    assert(!aurApp->GetEffectMask());
+    ASSERT(!aurApp->GetEffectMask());
 
     // Remove totem at next update if totem looses its aura
     if (aurApp->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE && GetTypeId() == TYPEID_UNIT && this->ToCreature()->isTotem()&& this->ToTotem()->GetSummonerGUID() == aura->GetCasterGUID())
@@ -3803,7 +3797,7 @@ void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMo
 void Unit::_UnapplyAura(AuraApplication * aurApp, AuraRemoveMode removeMode)
 {
     // aura can be removed from unit only if it's applied on it, shouldn't happen
-    assert(aurApp->GetBase()->GetApplicationOfTarget(GetGUID()) == aurApp);
+    ASSERT(aurApp->GetBase()->GetApplicationOfTarget(GetGUID()) == aurApp);
     uint32 spellId = aurApp->GetBase()->GetId();
     for (AuraApplicationMap::iterator iter = m_appliedAuras.lower_bound(spellId); iter != m_appliedAuras.upper_bound(spellId);)
     {
@@ -3815,7 +3809,7 @@ void Unit::_UnapplyAura(AuraApplication * aurApp, AuraRemoveMode removeMode)
         else
             ++iter;
     }
-    assert(false);
+    ASSERT(false);
 }
 
 void Unit::_RemoveNoStackAuraApplicationsDueToAura(Aura * aura)
@@ -3939,7 +3933,7 @@ void Unit::_HandleAuraEffect(AuraEffect * aurEff, bool apply)
 void Unit::RemoveOwnedAura(AuraMap::iterator &i, AuraRemoveMode removeMode)
 {
     Aura * aura = i->second;
-    assert(!aura->IsRemoved());
+    ASSERT(!aura->IsRemoved());
 
     // if unit currently update aura list then make safe update iterator shift to next
     if (m_auraUpdateIterator == i)
@@ -3974,7 +3968,7 @@ void Unit::RemoveOwnedAura(Aura * aura, AuraRemoveMode removeMode)
     if (aura->IsRemoved())
         return;
 
-    assert(aura->GetOwner() == this);
+    ASSERT(aura->GetOwner() == this);
 
     uint32 spellId = aura->GetId();
     for (AuraMap::iterator itr = m_ownedAuras.lower_bound(spellId); itr != m_ownedAuras.upper_bound(spellId); ++itr)
@@ -3983,7 +3977,7 @@ void Unit::RemoveOwnedAura(Aura * aura, AuraRemoveMode removeMode)
             RemoveOwnedAura(itr, removeMode);
             return;
         }
-    assert(false);
+    ASSERT(false);
 }
 
 Aura * Unit::GetOwnedAura(uint32 spellId, uint64 caster, uint8 reqEffMask, Aura * except) const
@@ -4025,7 +4019,7 @@ void Unit::RemoveAura(uint32 spellId, uint64 caster, uint8 reqEffMask, AuraRemov
 
 void Unit::RemoveAura(AuraApplication * aurApp, AuraRemoveMode mode)
 {
-    assert(aurApp->GetBase()->GetApplicationOfTarget(GetGUID()) == aurApp);
+    ASSERT(aurApp->GetBase()->GetApplicationOfTarget(GetGUID()) == aurApp);
     // no need to remove
     if (aurApp->GetRemoveMode() || aurApp->GetBase()->IsRemoved())
         return;
@@ -4049,7 +4043,7 @@ void Unit::RemoveAura(Aura * aura, AuraRemoveMode mode)
     if (AuraApplication * aurApp = aura->GetApplicationOfTarget(GetGUID()))
         RemoveAura(aurApp, mode);
     else
-        assert(false);
+        ASSERT(false);
 }
 
 void Unit::RemoveAurasDueToSpell(uint32 spellId, uint64 caster, uint8 reqEffMask, AuraRemoveMode removeMode)
@@ -4267,7 +4261,7 @@ void Unit::RemoveNotOwnSingleTargetAuras(uint32 newPhase)
         AuraApplication const * aurApp = iter->second;
         Aura const * aura = aurApp->GetBase();
 
-        if (aura->GetCasterGUID() !=GetGUID() && IsSingleTargetSpell(aura->GetSpellProto()))
+        if (aura->GetCasterGUID() != GetGUID() && IsSingleTargetSpell(aura->GetSpellProto()))
         {
             if (!newPhase)
                 RemoveAura(iter);
@@ -4289,14 +4283,13 @@ void Unit::RemoveNotOwnSingleTargetAuras(uint32 newPhase)
     for (AuraList::iterator iter = scAuras.begin(); iter != scAuras.end();)
     {
         Aura * aura = *iter;
-        ++iter;
         if (aura->GetUnitOwner() != this && !aura->GetUnitOwner()->InSamePhase(newPhase))
         {
-            uint32 removedAuras = m_removedAurasCount;
             aura->Remove();
-            if (m_removedAurasCount > removedAuras + 1)
-                iter = scAuras.begin();
+            iter = scAuras.begin();
         }
+        else
+            ++iter;
     }
 }
 
@@ -4413,14 +4406,18 @@ void Unit::RemoveAreaAurasDueToLeaveWorld()
 
 void Unit::RemoveAllAuras()
 {
-    AuraApplicationMap::iterator aurAppIter;
-    for (aurAppIter = m_appliedAuras.begin(); aurAppIter != m_appliedAuras.end();)
-        _UnapplyAura(aurAppIter, AURA_REMOVE_BY_DEFAULT);
-    
-    AuraMap::iterator aurIter;
-    for (aurIter = m_ownedAuras.begin(); aurIter != m_ownedAuras.end();)
-        RemoveOwnedAura(aurIter);
-
+    // this may be a dead loop if some events on aura remove will continiously apply aura on remove
+    // we want to have all auras removed, so use your brain when linking events
+    while (!m_appliedAuras.empty() || !m_ownedAuras.empty())
+    {
+        AuraApplicationMap::iterator aurAppIter;
+        for (aurAppIter = m_appliedAuras.begin(); aurAppIter != m_appliedAuras.end();)
+            _UnapplyAura(aurAppIter, AURA_REMOVE_BY_DEFAULT);
+        
+        AuraMap::iterator aurIter;
+        for (aurIter = m_ownedAuras.begin(); aurIter != m_ownedAuras.end();)
+            RemoveOwnedAura(aurIter);
+    }
 }
 
 void Unit::RemoveArenaAuras(bool onleave)
@@ -4626,13 +4623,13 @@ bool Unit::HasAuraTypeWithValue(AuraType auratype, int32 value) const
     return false;
 }
 
-bool Unit::HasNegativeAuraWithInterruptFlag(uint32 flag)
+bool Unit::HasNegativeAuraWithInterruptFlag(uint32 flag, uint64 guid)
 {
     if (!(m_interruptMask & flag))
         return false;
     for (AuraApplicationList::iterator iter = m_interruptableAuras.begin(); iter != m_interruptableAuras.end(); ++iter)
     {
-        if (!(*iter)->IsPositive() && (*iter)->GetBase()->GetSpellProto()->AuraInterruptFlags & flag)
+        if (!(*iter)->IsPositive() && (*iter)->GetBase()->GetSpellProto()->AuraInterruptFlags & flag && (!guid || (*iter)->GetBase()->GetCasterGUID() == guid))
             return true;
     }
     return false;
@@ -5945,7 +5942,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     }
 
                     triggered_spell_id = 12654;
-                    basepoints0 += GetRemainingDotDamage(GetGUID(), triggered_spell_id);
+                    basepoints0 += pVictim->GetRemainingDotDamage(GetGUID(), triggered_spell_id);
                     break;
                 }
                 // Glyph of Ice Block
@@ -6628,8 +6625,14 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 if (!procSpell)
                     return false;
 
-                // mana cost save
-                basepoints0 = CalculatePowerCost(procSpell, this, SpellSchoolMask(procSpell->SchoolMask)) * 4/10;
+                // Explosive Shot
+                if (procSpell->SpellFamilyFlags[2] & 0x200)
+                {
+                    if (AuraEffect const* pEff = pVictim->GetAuraEffect(SPELL_AURA_PERIODIC_DUMMY, SPELLFAMILY_HUNTER, 0x0, 0x80000000, 0x0, GetGUID()))
+                        basepoints0 = CalculatePowerCost(pEff->GetSpellProto(), this, SpellSchoolMask(pEff->GetSpellProto()->SchoolMask)) * 4/10/3;
+                }
+                else
+                    basepoints0 = CalculatePowerCost(procSpell, this, SpellSchoolMask(procSpell->SchoolMask)) * 4/10;
                 if (basepoints0 <= 0)
                     return false;
 
@@ -6776,7 +6779,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 basepoints0 = triggerAmount*damage/400;
                 triggered_spell_id = 61840;
                 // Add remaining ticks to damage done
-                basepoints0 += GetRemainingDotDamage(GetGUID(), triggered_spell_id);
+                basepoints0 += pVictim->GetRemainingDotDamage(GetGUID(), triggered_spell_id);
                 break;
             }
             // Sheath of Light
@@ -8173,7 +8176,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                         return false;
 
                     basepoints0 = int32(damage * triggerAmount / 100 / (GetSpellMaxDuration(TriggerPS) / TriggerPS->EffectAmplitude[0]));
-                    basepoints0 += GetRemainingDotDamage(GetGUID(), trigger_spell_id);
+                    basepoints0 += pVictim->GetRemainingDotDamage(GetGUID(), trigger_spell_id);
                     break;
                 }
                 break;
@@ -9398,13 +9401,11 @@ bool Unit::HasAuraState(AuraState flag, SpellEntry const *spellProto, Unit const
     return HasFlag(UNIT_FIELD_AURASTATE, 1<<(flag-1));
 }
 
-Unit *Unit::GetOwner(bool inWorld) const
+Unit *Unit::GetOwner() const
 {
     if (uint64 ownerid = GetOwnerGUID())
     {
-        if (inWorld)
-            return ObjectAccessor::GetUnit(*this, ownerid);
-        return ObjectAccessor::GetUnitInOrOutOfWorld(*this, ownerid);
+        return ObjectAccessor::GetUnit(*this, ownerid);
     }
     return NULL;
 }
@@ -9598,14 +9599,14 @@ void Unit::SetMinion(Minion *minion, bool apply)
                     if (GetGUID() == (*itr)->GetCharmerGUID())
                         continue;
 
-                    //assert((*itr)->GetOwnerGUID() == GetGUID());
+                    //ASSERT((*itr)->GetOwnerGUID() == GetGUID());
                     if ((*itr)->GetOwnerGUID() != GetGUID())
                     {
                         OutDebugInfo();
                         (*itr)->OutDebugInfo();
-                        assert(false);
+                        ASSERT(false);
                     }
-                    assert((*itr)->GetTypeId() == TYPEID_UNIT);
+                    ASSERT((*itr)->GetTypeId() == TYPEID_UNIT);
 
                     if (!(*itr)->HasUnitTypeMask(UNIT_MASK_CONTROLABLE_GUARDIAN))
                         continue;
@@ -11076,7 +11077,7 @@ bool Unit::IsImmunedToDamage(SpellEntry const* spellInfo)
         //If m_immuneToSchool type contain this school type, IMMUNE damage.
         SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
         for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
-            if (itr->type & shoolMask &&!IsDispelableBySpell(spellInfo, itr->spellId))
+            if (itr->type & shoolMask && !CanSpellPierceImmuneAura(spellInfo, sSpellStore.LookupEntry(itr->spellId)))
                 return true;
     }
 
@@ -11134,7 +11135,7 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo)
         for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
             if ((itr->type & GetSpellSchoolMask(spellInfo))
                 && !(IsPositiveSpell(itr->spellId) && IsPositiveSpell(spellInfo->Id))
-                && !IsDispelableBySpell(spellInfo, itr->spellId))
+                && !CanSpellPierceImmuneAura(spellInfo, sSpellStore.LookupEntry(itr->spellId)))
                 return true;
     }
 
@@ -11761,7 +11762,7 @@ bool Unit::isTargetableForAttack() const
 
 bool Unit::canAttack(Unit const* target, bool force) const
 {
-    assert(target);
+    ASSERT(target);
 
     if (force)
     {
@@ -12360,7 +12361,7 @@ void Unit::DeleteThreatList()
 
 void Unit::TauntApply(Unit* taunter)
 {
-    assert(GetTypeId() == TYPEID_UNIT);
+    ASSERT(GetTypeId() == TYPEID_UNIT);
 
     if (!taunter || (taunter->GetTypeId() == TYPEID_PLAYER && taunter->ToPlayer()->isGameMaster()))
         return;
@@ -12386,7 +12387,7 @@ void Unit::TauntApply(Unit* taunter)
 
 void Unit::TauntFadeOut(Unit *taunter)
 {
-    assert(GetTypeId() == TYPEID_UNIT);
+    ASSERT(GetTypeId() == TYPEID_UNIT);
 
     if (!taunter || (taunter->GetTypeId() == TYPEID_PLAYER && taunter->ToPlayer()->isGameMaster()))
         return;
@@ -12847,9 +12848,9 @@ Unit* Unit::GetUnit(WorldObject& object, uint64 guid)
     return ObjectAccessor::GetUnit(object,guid);
 }
 
-Player* Unit::GetPlayer(uint64 guid)
+Player* Unit::GetPlayer(WorldObject& object, uint64 guid)
 {
-    return ObjectAccessor::FindPlayer(guid);
+    return ObjectAccessor::GetPlayer(object,guid);
 }
 
 Creature* Unit::GetCreature(WorldObject& object, uint64 guid)
@@ -13283,7 +13284,7 @@ void Unit::AddToWorld()
 void Unit::RemoveFromWorld()
 {
     // cleanup
-    assert(GetGUID());
+    ASSERT(GetGUID());
 
     if (IsInWorld())
     {
@@ -13306,7 +13307,7 @@ void Unit::RemoveFromWorld()
         if (GetCharmerGUID())
         {
             sLog.outCrash("Unit %u has charmer guid when removed from world", GetEntry());
-            assert(false);
+            ASSERT(false);
         }
 
         if (Unit *owner = GetOwner())
@@ -13314,7 +13315,7 @@ void Unit::RemoveFromWorld()
             if (owner->m_Controlled.find(this) != owner->m_Controlled.end())
             {
                 sLog.outCrash("Unit %u is in controlled list of %u when removed from world", GetEntry(), owner->GetEntry());
-                assert(false);
+                ASSERT(false);
             }
         }
 
@@ -13327,7 +13328,7 @@ void Unit::CleanupsBeforeDelete(bool finalCleanup)
     if (IsInWorld())
         RemoveFromWorld();
 
-    assert(GetGUID());
+    ASSERT(GetGUID());
 
     //A unit may be in removelist and not in world, but it is still in grid
     //and may have some references during delete
@@ -13854,15 +13855,6 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
                 // If not trigger by default and spellProcEvent == NULL - skip
                 if (!isTriggerAura[aurEff->GetAuraType()] && triggerData.spellProcEvent == NULL)
                     continue;
-                uint32 triggered_spell_id = aurEff->GetSpellProto()->EffectTriggerSpell[i];
-                                // check for positive auras that proc with charge drop
-                bool positive = (!triggered_spell_id && IsPositiveSpell(aurEff->GetId()) && aurEff->GetBase()->GetCharges()) ||
-                                // check for positive auras that triggers unknown spells (Blessing Recovery, etc...)
-                                (!sSpellStore.LookupEntry(triggered_spell_id) && IsPositiveSpell(aurEff->GetId())) ||
-                                // final check for positive triggered spell
-                                IsPositiveSpell(triggered_spell_id);
-                if (!damage && (procExtra & PROC_EX_ABSORB) && isVictim && positive)
-                    continue;
                 // Some spells must always trigger
                 if (!triggered || isAlwaysTriggeredAura[aurEff->GetAuraType()])
                     triggerData.effMask |= 1<<i;
@@ -13914,7 +13906,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
                 continue;
 
             AuraEffect *triggeredByAura = i->aura->GetEffect(effIndex);
-            assert(triggeredByAura);
+            ASSERT(triggeredByAura);
 
             switch(triggeredByAura->GetAuraType())
             {
@@ -14485,7 +14477,7 @@ float Unit::GetAPMultiplier(WeaponAttackType attType, bool normalized)
     if (!normalized || GetTypeId() != TYPEID_PLAYER)
         return float(GetAttackTime(attType))/1000.0f;
 
-    Item *Weapon = this->ToPlayer()->GetWeaponForAttack(attType);
+    Item *Weapon = this->ToPlayer()->GetWeaponForAttack(attType, true);
     if (!Weapon)
         return 2.4;                                         // fist attack
 
@@ -15269,8 +15261,8 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type)
     if (GetTypeId() == TYPEID_PLAYER)
         Unmount();
 
-    assert(type != CHARM_TYPE_POSSESS || charmer->GetTypeId() == TYPEID_PLAYER);
-    assert((type == CHARM_TYPE_VEHICLE) == IsVehicle());
+    ASSERT(type != CHARM_TYPE_POSSESS || charmer->GetTypeId() == TYPEID_PLAYER);
+    ASSERT((type == CHARM_TYPE_VEHICLE) == IsVehicle());
 
     sLog.outDebug("SetCharmedBy: charmer %u (GUID %u), charmed %u (GUID %u), type %u.", charmer->GetEntry(), charmer->GetGUIDLow(), GetEntry(), GetGUIDLow(), uint32(type));
 
@@ -15406,7 +15398,7 @@ void Unit::RemoveCharmedBy(Unit *charmer)
     {
 //        sLog.outCrash("Unit::RemoveCharmedBy: this: " UI64FMTD " true charmer: " UI64FMTD " false charmer: " UI64FMTD,
 //            GetGUID(), GetCharmerGUID(), charmer->GetGUID());
-//        assert(false);
+//        ASSERT(false);
         return;
     }
 
@@ -15459,8 +15451,8 @@ void Unit::RemoveCharmedBy(Unit *charmer)
     if (!charmer)
         return;
 
-    assert(type != CHARM_TYPE_POSSESS || charmer->GetTypeId() == TYPEID_PLAYER);
-    assert(type != CHARM_TYPE_VEHICLE || GetTypeId() == TYPEID_UNIT && IsVehicle());
+    ASSERT(type != CHARM_TYPE_POSSESS || charmer->GetTypeId() == TYPEID_PLAYER);
+    ASSERT(type != CHARM_TYPE_VEHICLE || GetTypeId() == TYPEID_UNIT && IsVehicle());
 
     charmer->SetCharm(this, false);
 
@@ -16268,7 +16260,7 @@ void Unit::EnterVehicle(Vehicle *vehicle, int8 seatId)
           bg->EventPlayerDroppedFlag(this->ToPlayer());
     }
 
-    assert(!m_vehicle);
+    ASSERT(!m_vehicle);
     m_vehicle = vehicle;
     if (!m_vehicle->AddPassenger(this, seatId))
     {
@@ -16304,7 +16296,7 @@ void Unit::ChangeSeat(int8 seatId, bool next)
 
     m_vehicle->RemovePassenger(this);
     if (!m_vehicle->AddPassenger(this, seatId))
-        assert(false);
+        ASSERT(false);
 }
 
 void Unit::ExitVehicle()
@@ -16634,6 +16626,8 @@ void Unit::OutDebugInfo() const
     sLog.outString("GUID "UI64FMTD", entry %u, type %u, name %s", GetGUID(), GetEntry(), (uint32)GetTypeId(), GetName());
     sLog.outString("OwnerGUID "UI64FMTD", MinionGUID "UI64FMTD", CharmerGUID "UI64FMTD", CharmedGUID "UI64FMTD, GetOwnerGUID(), GetMinionGUID(), GetCharmerGUID(), GetCharmGUID());
     sLog.outString("In world %u, unit type mask %u", (uint32)(IsInWorld() ? 1 : 0), m_unitTypeMask);
+    if (IsInWorld())
+        sLog.outString("Mapid %u", GetMapId());
 
     sLog.outStringInLine("Summon Slot: ");
     for (uint32 i = 0; i < MAX_SUMMON_SLOT; ++i)

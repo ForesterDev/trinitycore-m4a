@@ -1,6 +1,8 @@
-##########################################
-# Trinity Core worldd configuration file #
-##########################################
+################################################
+# Trinity Core World Server configuration file #
+################################################
+[worldserver]
+
 # Note to devs, line breaks should be at column 80
 ###############################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -344,6 +346,7 @@ CleanCharacterDB = 0
 #         and load it using the loadpdump command
 #        Default: 0 - don't include dumping chars to log
 #                 1 - include dumping chars to log
+#
 #    CharLogDump.Separate
 #        Write character dump to separate file
 #        Default: 0 - don't write dump to separate file

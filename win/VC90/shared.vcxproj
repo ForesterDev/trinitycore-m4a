@@ -267,8 +267,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\server\shared\Configuration\Config.cpp" />
-    <ClCompile Include="..\..\src\server\shared\Configuration\dotconfpp\dotconfpp.cpp" />
-    <ClCompile Include="..\..\src\server\shared\Configuration\dotconfpp\mempool.cpp" />
     <ClCompile Include="..\..\src\server\shared\Cryptography\ARC4.cpp" />
     <ClCompile Include="..\..\src\server\shared\Cryptography\BigNumber.cpp" />
     <ClCompile Include="..\..\src\server\shared\Cryptography\HMACSHA1.cpp" />
@@ -296,9 +294,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\server\shared\Configuration\Config.h" />
-    <ClInclude Include="..\..\src\server\shared\Configuration\ConfigEnv.h" />
-    <ClInclude Include="..\..\src\server\shared\Configuration\dotconfpp\dotconfpp.h" />
-    <ClInclude Include="..\..\src\server\shared\Configuration\dotconfpp\mempool.h" />
     <ClInclude Include="..\..\src\server\shared\Cryptography\ARC4.h" />
     <ClInclude Include="..\..\src\server\shared\Cryptography\BigNumber.h" />
     <ClInclude Include="..\..\src\server\shared\Cryptography\HMACSHA1.h" />
