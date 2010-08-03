@@ -96,7 +96,6 @@
       <TypeLibraryName>.\TrinityRealm__$(Platform)_$(Configuration)\TrinityRealm.tlb</TypeLibraryName>
     </Midl>
     <ClCompile>
-      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <AdditionalIncludeDirectories>..\..\externals;..\..\src\server\shared;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Database;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Policies;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\authserver;..\..\src\server\authserver\Authentication;..\..\src\server\authserver\Realms;..\..\src\server\authserver\Server;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -146,7 +145,6 @@
       <TypeLibraryName>.\TrinityRealm__$(Platform)_$(Configuration)\TrinityRealm.tlb</TypeLibraryName>
     </Midl>
     <ClCompile>
-      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <AdditionalIncludeDirectories>..\..\externals;..\..\src\server\shared;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Database;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Policies;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\authserver;..\..\src\server\authserver\Authentication;..\..\src\server\authserver\Realms;..\..\src\server\authserver\Server;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -194,7 +192,6 @@
       <TypeLibraryName>.\TrinityRealm__$(Platform)_$(Configuration)\TrinityRealm.tlb</TypeLibraryName>
     </Midl>
     <ClCompile>
-      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\externals;..\..\src\server\shared;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Database;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Policies;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\authserver;..\..\src\server\authserver\Authentication;..\..\src\server\authserver\Realms;..\..\src\server\authserver\Server;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -246,7 +243,6 @@
       <TypeLibraryName>.\TrinityRealm__$(Platform)_$(Configuration)\TrinityRealm.tlb</TypeLibraryName>
     </Midl>
     <ClCompile>
-      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\externals;..\..\src\server\shared;..\..\src\server\shared\Cryptography;..\..\src\server\shared\Database;..\..\src\server\shared\Logging;..\..\src\server\shared\Packets;..\..\src\server\shared\Policies;..\..\src\server\shared\Threading;..\..\src\server\shared\Utilities;..\..\src\server\authserver;..\..\src\server\authserver\Authentication;..\..\src\server\authserver\Realms;..\..\src\server\authserver\Server;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>

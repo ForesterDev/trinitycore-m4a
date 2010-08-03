@@ -105,7 +105,6 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <ClCompile>
-      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <AdditionalIncludeDirectories>..\..\;..\..\include;..\..\libmysql;..\..\regex;..\..\sql;..\..\strings;..\..\..\zlib;..\..\dbug;..\..\extlib\yassl\taocrypt\mySTL;..\..\extlib\yassl\taocrypt\include;..\..\extlib\yassl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -163,7 +162,6 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <ClCompile>
-      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <AdditionalIncludeDirectories>..\..\;..\..\include;..\..\libmysql;..\..\regex;..\..\sql;..\..\strings;..\..\..\zlib;..\..\dbug;..\..\extlib\yassl\taocrypt\mySTL;..\..\extlib\yassl\taocrypt\include;..\..\extlib\yassl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -222,7 +220,6 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <ClCompile>
-      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <AdditionalIncludeDirectories>..\..\;..\..\include;..\..\libmysql;..\..\regex;..\..\sql;..\..\strings;..\..\..\zlib;..\..\dbug;..\..\extlib\yassl\taocrypt\mySTL;..\..\extlib\yassl\taocrypt\include;..\..\extlib\yassl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -280,7 +277,6 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <ClCompile>
-      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <AdditionalIncludeDirectories>..\..\;..\..\include;..\..\libmysql;..\..\regex;..\..\sql;..\..\strings;..\..\..\zlib;..\..\dbug;..\..\extlib\yassl\taocrypt\mySTL;..\..\extlib\yassl\taocrypt\include;..\..\extlib\yassl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
