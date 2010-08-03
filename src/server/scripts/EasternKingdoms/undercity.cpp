@@ -114,10 +114,6 @@ struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI
         DoMeleeAttackIfReady();
     }
 };
-CreatureAI* GetAI_npc_lady_sylvanas_windrunner(Creature* pCreature)
-{
-    return new npc_lady_sylvanas_windrunnerAI (pCreature);
-}
 
 bool ChooseReward_npc_lady_sylvanas_windrunner(Player* /*pPlayer*/, Creature* pCreature, const Quest *_Quest, uint32 /*slot*/)
 {
@@ -179,10 +175,6 @@ struct npc_highborne_lamenterAI : public ScriptedAI
         }
     }
 };
-CreatureAI* GetAI_npc_highborne_lamenter(Creature* pCreature)
-{
-    return new npc_highborne_lamenterAI (pCreature);
-}
 
 /*######
 ## npc_parqual_fintallas
@@ -227,23 +219,19 @@ bool GossipSelect_npc_parqual_fintallas(Player* pPlayer, Creature* pCreature, ui
     return true;
 }
 
-/*######
-## AddSC
-######*/
-
 void AddSC_undercity()
 {
     Script *newscript;
 
     newscript = new Script;
     newscript->Name = "npc_lady_sylvanas_windrunner";
-    newscript->GetAI = &GetAI_npc_lady_sylvanas_windrunner;
+    newscript->GetAI = &get_ai<npc_lady_sylvanas_windrunnerAI>;
     newscript->pChooseReward = &ChooseReward_npc_lady_sylvanas_windrunner;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "npc_highborne_lamenter";
-    newscript->GetAI = &GetAI_npc_highborne_lamenter;
+    newscript->GetAI = &get_ai<npc_highborne_lamenterAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;

@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "DBCStores.h"
 #include "WorldPacket.h"
@@ -318,11 +319,14 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     {
         // not have spell in spellbook or spell passive and not casted by client
         if (!mover->ToPlayer()->HasActiveSpell (spellId) || IsPassiveSpell(spellId))
-        {
-            //cheater? kick? ban?
-            recvPacket.rpos(recvPacket.wpos());                 // prevent spam at ignore packet
-            return;
-        }
+            if (spellId == 68398)
+                ;
+            else
+            {
+                //cheater? kick? ban?
+                recvPacket.rpos(recvPacket.wpos());                 // prevent spam at ignore packet
+                return;
+            }
     }
     else
     {

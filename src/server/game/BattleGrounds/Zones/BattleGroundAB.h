@@ -20,6 +20,10 @@
 #ifndef __BATTLEGROUNDAB_H
 #define __BATTLEGROUNDAB_H
 
+#include <memory>
+#include <array>
+#include "BattleGround.h"
+
 class BattleGround;
 
 enum BG_AB_WorldStates
@@ -231,6 +235,16 @@ class BattleGroundABScore : public BattleGroundScore
     public:
         BattleGroundABScore(): BasesAssaulted(0), BasesDefended(0) {};
         virtual ~BattleGroundABScore() {};
+
+        std::pair<std::size_t, Stat_data_type> stat_data() const
+        {
+            std::array<int32, max_stats> d;
+            auto first = d.begin(), it = first;
+            *it++ = BasesAssaulted;
+            *it++ = BasesDefended;
+            return std::make_pair(it - first, std::move(d));
+        }
+
         uint32 BasesAssaulted;
         uint32 BasesDefended;
 };

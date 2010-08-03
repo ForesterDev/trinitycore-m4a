@@ -258,11 +258,6 @@ struct boss_arlokkAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_arlokk(Creature* pCreature)
-{
-    return new boss_arlokkAI (pCreature);
-}
-
 void AddSC_boss_arlokk()
 {
     Script *newscript;
@@ -274,7 +269,7 @@ void AddSC_boss_arlokk()
 
     newscript = new Script;
     newscript->Name = "boss_arlokk";
-    newscript->GetAI = &GetAI_boss_arlokk;
+    newscript->GetAI = &get_ai<boss_arlokkAI>;
     newscript->RegisterSelf();
 }
 

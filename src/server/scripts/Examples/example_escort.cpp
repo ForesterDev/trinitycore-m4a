@@ -169,11 +169,6 @@ struct example_escortAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_example_escort(Creature* pCreature)
-{
-    return new example_escortAI(pCreature);
-}
-
 bool GossipHello_example_escort(Player* pPlayer, Creature* pCreature)
 {
     pPlayer->TalkedToCreature(pCreature->GetEntry(), pCreature->GetGUID());
@@ -224,7 +219,7 @@ void AddSC_example_escort()
     Script *newscript;
     newscript = new Script;
     newscript->Name = "example_escort";
-    newscript->GetAI = &GetAI_example_escort;
+    newscript->GetAI = &get_ai<example_escortAI>;
     newscript->pGossipHello = &GossipHello_example_escort;
     newscript->pGossipSelect = &GossipSelect_example_escort;
     newscript->RegisterSelf();

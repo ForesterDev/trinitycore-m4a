@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -379,15 +380,15 @@ void WorldSession::HandlePetNameQuery(WorldPacket & recv_data)
 
 void WorldSession::SendPetNameQuery(uint64 petguid, uint32 petnumber)
 {
-    Creature* pet = ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, petguid);
+    auto pet = ObjectAccessor::FindPet(petguid);
     if (!pet)
     {
-        WorldPacket data(SMSG_PET_NAME_QUERY_RESPONSE, (4+4+7+1));
+        WorldPacket data(SMSG_PET_NAME_QUERY_RESPONSE, 4 + 1 + 4 + 1);
         data << uint32(petnumber);
-        data << "Unknown";
+        data << "";
         data << uint32(0);
         data << uint8(0);
-        _player->GetSession()->SendPacket(&data);
+        SendPacket(&data);
         return;
     }
 
@@ -398,16 +399,16 @@ void WorldSession::SendPetNameQuery(uint64 petguid, uint32 petnumber)
     data << name.c_str();
     data << uint32(pet->GetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP));
 
-    if (pet->isPet() && ((Pet*)pet)->GetDeclinedNames())
+    if (pet->GetDeclinedNames())
     {
         data << uint8(1);
         for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-            data << ((Pet*)pet)->GetDeclinedNames()->name[i];
+            data << pet->GetDeclinedNames()->name[i];
     }
     else
         data << uint8(0);
 
-    _player->GetSession()->SendPacket(&data);
+    SendPacket(&data);
 }
 
 bool WorldSession::CheckStableMaster(uint64 guid)

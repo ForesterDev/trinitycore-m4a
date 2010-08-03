@@ -24,3 +24,5 @@ externals/lib/*/
 syntax: regexp
 
 ^src/shared/server/shared/revision\.h
+glob:**.sdf
+glob:**.opensdf

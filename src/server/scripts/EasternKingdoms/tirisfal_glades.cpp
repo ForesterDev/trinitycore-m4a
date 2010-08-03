@@ -129,10 +129,6 @@ struct npc_calvin_montagueAI : public ScriptedAI
         DoMeleeAttackIfReady();
     }
 };
-CreatureAI* GetAI_npc_calvin_montague(Creature* pCreature)
-{
-    return new npc_calvin_montagueAI (pCreature);
-}
 
 bool QuestAccept_npc_calvin_montague(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
 {
@@ -194,7 +190,7 @@ void AddSC_tirisfal_glades()
 
     newscript = new Script;
     newscript->Name = "npc_calvin_montague";
-    newscript->GetAI = &GetAI_npc_calvin_montague;
+    newscript->GetAI = &get_ai<npc_calvin_montagueAI>;
     newscript->pQuestAccept = &QuestAccept_npc_calvin_montague;
     newscript->RegisterSelf();
 

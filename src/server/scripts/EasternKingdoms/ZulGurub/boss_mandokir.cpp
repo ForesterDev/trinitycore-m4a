@@ -308,28 +308,18 @@ struct mob_ohganAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_mandokir(Creature* pCreature)
-{
-    return new boss_mandokirAI (pCreature);
-}
-
-CreatureAI* GetAI_mob_ohgan(Creature* pCreature)
-{
-    return new mob_ohganAI (pCreature);
-}
-
 void AddSC_boss_mandokir()
 {
     Script *newscript;
 
     newscript = new Script;
     newscript->Name = "boss_mandokir";
-    newscript->GetAI = &GetAI_boss_mandokir;
+    newscript->GetAI = &get_ai<boss_mandokirAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_ohgan";
-    newscript->GetAI = &GetAI_mob_ohgan;
+    newscript->GetAI = &get_ai<mob_ohganAI>;
     newscript->RegisterSelf();
 }
 
