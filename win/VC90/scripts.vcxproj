@@ -113,7 +113,6 @@
       <ProgramDataBaseFileName>.\$(ProjectName)__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CallingConvention>Cdecl</CallingConvention>
       <CompileAs>Default</CompileAs>
       <ForcedIncludeFiles>%(ForcedIncludeFiles)</ForcedIncludeFiles>
@@ -160,7 +159,6 @@
       <ProgramDataBaseFileName>.\$(ProjectName)__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CallingConvention>Cdecl</CallingConvention>
       <CompileAs>Default</CompileAs>
       <ForcedIncludeFiles>%(ForcedIncludeFiles)</ForcedIncludeFiles>
@@ -197,7 +195,6 @@
       <ProgramDataBaseFileName>.\$(ProjectName)__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CallingConvention>Cdecl</CallingConvention>
       <CompileAs>Default</CompileAs>
       <ForcedIncludeFiles>%(ForcedIncludeFiles)</ForcedIncludeFiles>
@@ -237,7 +234,6 @@
       <ProgramDataBaseFileName>.\$(ProjectName)__$(Platform)_$(Configuration)\</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CallingConvention>Cdecl</CallingConvention>
       <CompileAs>Default</CompileAs>
       <ForcedIncludeFiles>%(ForcedIncludeFiles)</ForcedIncludeFiles>
