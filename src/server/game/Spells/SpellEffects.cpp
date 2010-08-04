@@ -6067,8 +6067,9 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                         Aura * aura = (*i).second->GetBase();
                         if (aura->GetCasterGUID() != m_caster->GetGUID())
                             continue;
+                        auto proto = aura->GetSpellProto();
                         // Search only Serpent Sting, Viper Sting, Scorpid Sting auras
-                        flag96 familyFlag = aura->GetSpellProto()->SpellFamilyFlags;
+                        flag96 familyFlag = proto->SpellFamilyFlags;
                         if (!(familyFlag[1] & 0x00000080 || familyFlag[0] & 0x0000C000))
                             continue;
                         if (AuraEffect const * aurEff = aura->GetEffect(0))
@@ -6078,7 +6079,9 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                             {
                                 int32 TickCount = aurEff->GetTotalTicks();
                                 spellId = 53353; // 53353 Chimera Shot - Serpent
-                                basePoint = aurEff->GetAmount() * TickCount * 40 / 100;
+                                basePoint =
+                                    (m_caster->SpellDamageBonus(unitTarget, proto, aurEff->GetAmount(), DOT)
+                                        * TickCount * 40 + 50) / 100;
                             }
                             // Viper Sting - Instantly restores mana to you equal to 60% of the total amount drained by your Viper Sting.
                             else if (familyFlag[1] & 0x00000080)

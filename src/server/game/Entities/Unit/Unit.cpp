@@ -10332,15 +10332,31 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         {
             coeff = bonus->dot_damage;
             if (bonus->ap_dot_bonus > 0)
-                DoneTotal += bonus->ap_dot_bonus * stack * ApCoeffMod * GetTotalAttackPowerValue(
-                (IsRangedWeaponSpell(spellProto) && spellProto->DmgClass !=SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK);
+            {
+                auto type = IsRangedWeaponSpell(spellProto)
+                        && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE ? RANGED_ATTACK
+                        : BASE_ATTACK;
+                auto ap = GetTotalAttackPowerValue(type);
+                if (type == RANGED_ATTACK)
+                    ap += pVictim
+                            ->GetTotalAuraModifier(SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS);
+                DoneTotal += bonus->ap_dot_bonus * stack * ApCoeffMod * ap;
+            }
         }
         else
         {
             coeff = bonus->direct_damage;
             if (bonus->ap_bonus > 0)
-                DoneTotal += bonus->ap_bonus * stack * ApCoeffMod * GetTotalAttackPowerValue(
-                (IsRangedWeaponSpell(spellProto) && spellProto->DmgClass !=SPELL_DAMAGE_CLASS_MELEE)? RANGED_ATTACK : BASE_ATTACK);
+            {
+                auto type = IsRangedWeaponSpell(spellProto)
+                        && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE ? RANGED_ATTACK
+                        : BASE_ATTACK;
+                auto ap = GetTotalAttackPowerValue(type);
+                if (type == RANGED_ATTACK)
+                    ap += pVictim
+                            ->GetTotalAuraModifier(SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS);
+                DoneTotal += bonus->ap_bonus * stack * ApCoeffMod * ap;
+            }
         }
     }
     // Default calculation
