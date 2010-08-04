@@ -18,7 +18,6 @@ src/tools/vmap3_extractor/VC90/*/
 externals/lib/*/
 *.ncb
 *.suo
-*.*-*
 
 # use regexp syntax.
 syntax: regexp
