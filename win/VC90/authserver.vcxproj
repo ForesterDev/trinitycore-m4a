@@ -301,8 +301,8 @@
     <ResourceCompile Include="..\..\src\server\authserver\authserver.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\externals\ace\win\VC90\ace.vcxproj">
-      <Project>{bd537c9a-feca-1bad-6757-8a6348ea12c8}</Project>
+    <ProjectReference Include="..\..\externals\ace\ACE_vc9.vcxproj">
+      <Project>{bd537c9a-feca-1bad-6757-8a63633e2c4c}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\externals\mysql\win\VC90\libmysql.vcxproj">
       <Project>{4fbe4fc1-22de-41a0-9aeb-cfd00ebac7e5}</Project>
