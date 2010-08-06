@@ -55,7 +55,6 @@ enum Mobs
     MOB_MECHANOLIFT                             = 33214,
     MOB_LIQUID                                  = 33189,
     MOB_CONTAINER                               = 33218,
-    MOB_COLOSSUS                                = 33240,
 };
 
 #define ACTION_VEHICLE_RESPAWN                    1
@@ -135,12 +134,6 @@ const Position PosDemolisher[5] =
 {-798.01,-227.24,429.84,1.446}
 };
 
-const Position PosColossus[2] =
-{
-{367.031, 12.784,409.886,3.263},
-{368.768,-46.847,409.886,3.036}
-};
-
 struct boss_flame_leviathanAI : public BossAI
 {
     boss_flame_leviathanAI(Creature *pCreature) : BossAI(pCreature, BOSS_LEVIATHAN), vehicle(me->GetVehicleKit())
@@ -153,11 +146,6 @@ struct boss_flame_leviathanAI : public BossAI
         
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
         me->SetReactState(REACT_PASSIVE);
-        
-        // Summon Ulduar Colossus
-        if (me->isAlive())
-            for(uint32 i = 0; i < 2; ++i)
-                DoSummon(MOB_COLOSSUS, PosColossus[i], 7000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
 	}
 
     ScriptedInstance* pInstance;
