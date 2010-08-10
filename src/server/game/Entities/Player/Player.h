@@ -982,6 +982,11 @@ class Player : public Unit, public GridObject<Player>
         explicit Player (WorldSession *session);
         ~Player ();
 
+        WMO_id wmo_id() const
+        {
+            return wmo_id_;
+        }
+
         //movement anticheat
         uint32 m_anti_lastmovetime;     //last movement time
         float  m_anti_MovedLen;         //Length of traveled way
@@ -2670,6 +2675,7 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_timeSyncTimer;
         uint32 m_timeSyncClient;
         uint32 m_timeSyncServer;
+        WMO_id wmo_id_;
 };
 
 void AddItemsSetItem(Player*player,Item *item);

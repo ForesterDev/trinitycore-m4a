@@ -385,7 +385,11 @@ void TradeData::SetAccepted(bool state, bool crosssend /*= false*/)
 
 UpdateMask Player::updateVisualBits;
 
-Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputationMgr(this)
+Player::Player(WorldSession *session)
+    : Unit(),
+        m_achievementMgr(this),
+        m_reputationMgr(this),
+        wmo_id_()
 {
     m_speakTime = 0;
     m_speakCount = 0;
@@ -6473,6 +6477,12 @@ void Player::CheckAreaExploreAndOutdoor()
     if (isInFlight())
         return;
 
+    auto new_wmo_id = GetBaseMap()->wmo_id(*this);
+    if (wmo_id_ != new_wmo_id)
+    {
+        wmo_id_ = new_wmo_id;
+        GetMap()->player_zone_changed(*this);
+    }
     if (!m_AreaID)
         m_AreaID = GetAreaId();
     if (m_AreaID != GetAreaId())

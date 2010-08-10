@@ -57,14 +57,48 @@ enum eGameObjects
 
 struct instance_ulduar : public InstanceData
 {
+    struct Prison_handler
+    {
+        explicit Prison_handler(instance_ulduar *i)
+            : i(i)
+        {
+        }
+
+        void operator()(Player &p)
+        {
+            if (p.wmo_id() == 47478 /* The Prison of Yogg-Saron */)
+                if (p.isAlive())
+                    i->start_yoggsaron();
+        }
+
+        instance_ulduar *i;
+    };
+
     instance_ulduar(Map *pMap)
         : InstanceData(pMap),
             pLeviathanDoor(),
             HodirRareChest(),
-            MimironElevator()
+            MimironElevator(),
+            sara(nullptr)
     {
         SetBossNumber(MAX_BOSS_NUMBER);
         LoadDoorData(doorData);
+    }
+
+    void reset_yoggsaron()
+    {
+        sara->SetVisibility(VISIBILITY_ON);
+        set_player_zone_changed_handler(Prison_handler(this));
+    }
+
+    void start_yoggsaron()
+    {
+        set_player_zone_changed_handler(nullptr);
+    }
+
+    void destroy_yoggsaron()
+    {
+        set_player_zone_changed_handler(nullptr);
     }
 
     uint64 uiLeviathan;
@@ -106,6 +140,7 @@ struct instance_ulduar : public InstanceData
         
     GameObject* pLeviathanDoor, *KologarnChest, *HodirChest, *HodirRareChest, *pRunicDoor, *pStoneDoor, *pThorimLever,
         *MimironTram, *MimironElevator;
+    Creature *sara;
 
     void OnGameObjectCreate(GameObject* pGo, bool add)
     {
@@ -212,6 +247,18 @@ struct instance_ulduar : public InstanceData
                     pCreature->SetVisibility(VISIBILITY_ON);
             }
             return;
+            case 33134 /* Sara */:
+                if (add)
+                {
+                    sara = pCreature;
+                    reset_yoggsaron();
+                }
+                else
+                {
+                    destroy_yoggsaron();
+                    sara = nullptr;
+                }
+                return;
         }
 
         // Hodir: Alliance npcs are spawned by default
