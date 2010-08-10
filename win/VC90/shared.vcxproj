@@ -318,7 +318,9 @@
     <ClInclude Include="..\..\src\server\shared\Dynamic\UnorderedMap.h" />
     <ClInclude Include="..\..\src\server\shared\Dynamic\LinkedReference\Reference.h" />
     <ClInclude Include="..\..\src\server\shared\Dynamic\LinkedReference\RefManager.h" />
+    <ClInclude Include="..\..\src\server\shared\gnuc.hpp" />
     <ClInclude Include="..\..\src\server\shared\Logging\Log.h" />
+    <ClInclude Include="..\..\src\server\shared\nullptr.hpp" />
     <ClInclude Include="..\..\src\server\shared\Packets\ByteBuffer.h" />
     <ClInclude Include="..\..\src\server\shared\Packets\WorldPacket.h" />
     <ClInclude Include="..\..\src\server\shared\Threading\DelayExecutor.h" />

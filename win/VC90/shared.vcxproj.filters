@@ -246,6 +246,8 @@
     <ClInclude Include="..\..\src\server\shared\Define.h" />
     <ClInclude Include="..\..\src\server\shared\Utilities\ServiceWin32.h" />
     <ClInclude Include="..\..\src\server\shared\SystemConfig.h" />
+    <ClInclude Include="..\..\src\server\shared\gnuc.hpp" />
+    <ClInclude Include="..\..\src\server\shared\nullptr.hpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\src\server\shared\revision.h" />
