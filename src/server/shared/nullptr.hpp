@@ -1,7 +1,9 @@
 #pragma once
 
+// requires GCC
 #ifdef __GNUC__
-#if __GNUC_MINOR__ < 6
+// requires GCC version older than 4.6
+#if __GNUC__ < 4 || __GNUC__ == 4 && __GNUC_MINOR__ < 6
 
 #include <cstddef>
 #include <type_traits>
@@ -40,5 +42,5 @@ namespace std
 
 #define nullptr ::std::nullptr_t()
 
-#endif  // __GNUC_MINOR__ < 6
+#endif  // __GNUC__ < 4 || __GNUC__ == 4 && __GNUC_MINOR__ < 6
 #endif  // __GNUC__
