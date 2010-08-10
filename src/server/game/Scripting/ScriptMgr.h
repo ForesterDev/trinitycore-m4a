@@ -153,6 +153,18 @@ class ScriptMgr
         void CreateSpellScripts(uint32 spell_id, std::vector<std::pair<SpellScript *, SpellScriptsMap::iterator> > & script_vector);
 };
 
+template<class AI_type> inline
+    CreatureAI *get_ai(Creature *c)
+{
+    return new AI_type(c);
+}
+
+template <class Instance_Script_type> inline
+    InstanceData* get_instance_data(Map *pMap)
+{
+    return new Instance_Script_type(pMap);
+}
+
 //Generic scripting text function
 void DoScriptText(int32 textEntry, WorldObject* pSource, Unit *pTarget = NULL);
 

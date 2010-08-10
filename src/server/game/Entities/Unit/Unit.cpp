@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "CreatureAIImpl.h"
 #include "Log.h"
@@ -3613,15 +3614,6 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
             if (aura->GetSpellProto()->StackAmount)
             {
                 aura->ModStackAmount(foundAura->GetStackAmount());
-            }
-            // Update periodic timers from the previous aura
-            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-            {
-                AuraEffect *existingEff = foundAura->GetEffect(i);
-                AuraEffect *newEff = aura->GetEffect(i);
-                if (!existingEff || !newEff) 
-                    continue;
-                newEff->SetPeriodicTimer(existingEff->GetPeriodicTimer());
             }
 
             // Use the new one to replace the old one
@@ -7541,21 +7533,24 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             // Unholy Blight
             if (dummySpell->Id == 49194)
             {
-                basepoints0 = triggerAmount * damage / 100;
-                // Glyph of Unholy Blight
-                if (AuraEffect *glyph=GetAuraEffect(63332,0))
-                    basepoints0 += basepoints0 * glyph->GetAmount() / 100;
-                // Find replaced aura to use it's remaining amount
-                AuraEffectList const& DoTAuras = target->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
-                for (Unit::AuraEffectList::const_iterator i = DoTAuras.begin(); i != DoTAuras.end(); ++i)
+                if (auto triggered = sSpellStore.LookupEntry(50536))
                 {
-                     if ((*i)->GetCasterGUID() != GetGUID() || (*i)->GetId() != 50536)
-                         continue;
-                     basepoints0 += ((*i)->GetAmount() * ((*i)->GetTotalTicks() - ((*i)->GetTickNumber()))) / (*i)->GetTotalTicks();
-                     break;
+                    basepoints0 = triggerAmount * damage / 100;
+                    // Glyph of Unholy Blight
+                    if (AuraEffect *glyph=GetAuraEffect(63332,0))
+                        basepoints0 += basepoints0 * glyph->GetAmount() / 100;
+                    // Find replaced aura to use it's remaining amount
+                    AuraEffectList const& DoTAuras = target->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+                    for (Unit::AuraEffectList::const_iterator i = DoTAuras.begin(); i != DoTAuras.end(); ++i)
+                    {
+                         if ((*i)->GetCasterGUID() != GetGUID() || (*i)->GetId() != 50536)
+                             continue;
+                         basepoints0 += ((*i)->GetAmount() * ((*i)->GetTotalTicks() - ((*i)->GetTickNumber()))) / (*i)->GetTotalTicks();
+                         break;
+                    }
+                    basepoints0 /= GetSpellDuration(triggered) / triggered->EffectAmplitude[0];
+                    triggered_spell_id = 50536;
                 }
-
-                triggered_spell_id = 50536;
                 break;
             }
             // Vendetta
@@ -10410,15 +10405,31 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         {
             coeff = bonus->dot_damage;
             if (bonus->ap_dot_bonus > 0)
-                DoneTotal += bonus->ap_dot_bonus * stack * ApCoeffMod * GetTotalAttackPowerValue(
-                (IsRangedWeaponSpell(spellProto) && spellProto->DmgClass !=SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK);
+            {
+                auto type = IsRangedWeaponSpell(spellProto)
+                        && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE ? RANGED_ATTACK
+                        : BASE_ATTACK;
+                auto ap = GetTotalAttackPowerValue(type);
+                if (type == RANGED_ATTACK)
+                    ap += pVictim
+                            ->GetTotalAuraModifier(SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS);
+                DoneTotal += bonus->ap_dot_bonus * stack * ApCoeffMod * ap;
+            }
         }
         else
         {
             coeff = bonus->direct_damage;
             if (bonus->ap_bonus > 0)
-                DoneTotal += bonus->ap_bonus * stack * ApCoeffMod * GetTotalAttackPowerValue(
-                (IsRangedWeaponSpell(spellProto) && spellProto->DmgClass !=SPELL_DAMAGE_CLASS_MELEE)? RANGED_ATTACK : BASE_ATTACK);
+            {
+                auto type = IsRangedWeaponSpell(spellProto)
+                        && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE ? RANGED_ATTACK
+                        : BASE_ATTACK;
+                auto ap = GetTotalAttackPowerValue(type);
+                if (type == RANGED_ATTACK)
+                    ap += pVictim
+                            ->GetTotalAuraModifier(SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS);
+                DoneTotal += bonus->ap_bonus * stack * ApCoeffMod * ap;
+            }
         }
     }
     // Default calculation
@@ -14163,7 +14174,6 @@ Player* Unit::GetSpellModOwner() const
 {
     if (GetTypeId() == TYPEID_PLAYER)
         return (Player*)this;
-    if (this->ToCreature()->isPet() || this->ToCreature()->isTotem())
     {
         Unit* owner = GetOwner();
         if (owner && owner->GetTypeId() == TYPEID_PLAYER)

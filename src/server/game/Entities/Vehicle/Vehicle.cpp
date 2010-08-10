@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "Log.h"
 #include "ObjectMgr.h"
@@ -301,8 +302,36 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId)
     if (me->GetTypeId() == TYPEID_UNIT
         && unit->GetTypeId() == TYPEID_PLAYER
         && seat->first == 0 && seat->second.seatInfo->m_flags & 0x800) // not right
+    {
         if (!me->SetCharmedBy(unit, CHARM_TYPE_VEHICLE))
             ASSERT(false);
+
+        if (Player *plr = ((Player *)unit))
+        {
+            uint32 averageItemLevel = plr->GetAverageItemLevel();
+            bonusHP = 0;
+
+            switch(me->GetEntry())
+            {
+                // need the ulduar vehicle entry ids
+                case 33062: // salvaged chopper
+                    bonusHP = averageItemLevel * 2285;
+                    break;
+                case 33109: // salvaged demolisher
+                    bonusHP = averageItemLevel * 2887;
+                    break;
+                case 33060: // salvaged siege engine
+                    bonusHP = averageItemLevel * 4963;
+                    break;
+                default:
+                    bonusHP = 0;
+                    break;
+            }
+
+            me->SetMaxHealth(me->GetMaxHealth() + bonusHP);
+            me->SetHealth(me->GetHealth() + bonusHP);
+        }
+    }
 
     if (me->IsInWorld())
     {
@@ -359,7 +388,15 @@ void Vehicle::RemovePassenger(Unit *unit)
     if (me->GetTypeId() == TYPEID_UNIT
         && unit->GetTypeId() == TYPEID_PLAYER
         && seat->first == 0 && seat->second.seatInfo->m_flags & 0x800)
+    {
         me->RemoveCharmedBy(unit);
+
+        if (Player *plr = ((Player *)unit))
+        {
+            me->SetMaxHealth(me->GetMaxHealth() - bonusHP);
+            me->SetHealth(me->GetHealth() - bonusHP);
+        }
+    }
 
     if (me->GetTypeId() == TYPEID_UNIT && me->ToCreature()->IsAIEnabled)
         me->ToCreature()->AI()->PassengerBoarded(unit, seat->first, false);

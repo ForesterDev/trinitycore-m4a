@@ -123,11 +123,6 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_tapoke_slim_jahn(Creature* pCreature)
-{
-    return new npc_tapoke_slim_jahnAI(pCreature);
-}
-
 /*######
 ## npc_mikhail
 ######*/
@@ -160,7 +155,7 @@ void AddSC_wetlands()
 
     newscript = new Script;
     newscript->Name = "npc_tapoke_slim_jahn";
-    newscript->GetAI = &GetAI_npc_tapoke_slim_jahn;
+    newscript->GetAI = &get_ai<npc_tapoke_slim_jahnAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;

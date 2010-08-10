@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "Language.h"
 #include "DatabaseEnv.h"
@@ -384,7 +385,11 @@ void TradeData::SetAccepted(bool state, bool crosssend /*= false*/)
 
 UpdateMask Player::updateVisualBits;
 
-Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputationMgr(this)
+Player::Player(WorldSession *session)
+    : Unit(),
+        m_achievementMgr(this),
+        m_reputationMgr(this),
+        wmo_id_()
 {
     m_speakTime = 0;
     m_speakCount = 0;
@@ -512,6 +517,17 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     m_rest_bonus=0;
     rest_type=REST_TYPE_NO;
     ////////////////////Rest System/////////////////////
+
+    ///////////////////Anticheat////////////////////////
+    m_anti_lastmovetime = 0;   //last movement time
+    m_anti_NextLenCheck = 0;
+    m_anti_MovedLen = 0.0f;
+    m_anti_BeginFallZ = INVALID_HEIGHT;
+    m_anti_lastalarmtime = 0;    //last time when alarm generated
+    m_anti_alarmcount = 0;       //alarm counter
+    m_anti_TeleTime = 0;
+    m_CanFly = false;
+    ///////////////////Anticheat////////////////////////
 
     m_mailsLoaded = false;
     m_mailsUpdated = false;
@@ -5302,6 +5318,62 @@ float Player::GetMeleeCritFromAgility()
     return crit*100.0f;
 }
 
+float Player::GetBaseDodge()
+{
+    uint32 pclass = getClass();
+    float BaseDodge[MAX_CLASSES] = {
+        3.664f,  // Warrior
+        3.494f,  // Paladin
+        -4.087f, // Hunter
+        2.095f,  // Rogue
+        3.417f,  // Priest
+        3.664f,  // DK?
+        2.108f,  // Shaman
+        3.658f,  // Mage
+        2.421f,  // Warlock
+        0.0f,
+        5.609f   // Druid
+    };
+    return BaseDodge[pclass - 1];
+}
+
+float Player::DodgeDiminishingReturn(float dodge)
+{
+    float dimdodge = 0.0f;
+    uint32 pclass = getClass();
+    float k[MAX_CLASSES] = {
+        0.956f, // Warrior
+        0.956f, // Paladin
+        0.988f, // Hunter
+        0.988f, // Rogue
+        0.953f, // Priest
+        0.956f, // DK?
+        0.988f, // Shaman
+        0.953f, // Mage
+        0.953f, // Warlock
+        0.0f,   // ??
+        0.972f  // Druid
+    };
+
+    float Dodge_Cap[MAX_CLASSES] = {
+        88.12f,      // Warrior
+        88.12f,      // Paladin
+        145.56f,     // Hunter
+        145.56f,     // Rogue
+        150.37f,     // Priest
+        88.12f,      // DK?
+        145.56f,     // Shaman
+        150.37f,     // Mage
+        150.37f,     // Warlock
+        0.0f,        // ??
+        116.89f      // Druid
+    };
+
+    if (dodge > 0.0f)
+        dimdodge = (dodge * Dodge_Cap[pclass - 1] / (dodge + (Dodge_Cap[pclass - 1] * k[pclass - 1])));
+    return dimdodge;
+}
+
 float Player::GetDodgeFromAgility()
 {
     // Table for base dodge values
@@ -5344,8 +5416,45 @@ float Player::GetDodgeFromAgility()
     if (dodgeRatio == NULL || pclass > MAX_CLASSES)
         return 0.0f;
 
-    float dodge=dodge_base[pclass-1] + GetStat(STAT_AGILITY) * dodgeRatio->ratio * crit_to_dodge[pclass-1];
-    return dodge*100.0f;
+    float dodge = dodge_base[pclass - 1] + GetStat(STAT_AGILITY) * dodgeRatio->ratio * crit_to_dodge[pclass - 1];
+    return dodge * 100.0f;
+}
+
+float Player::ParryDiminishingReturn(float parry)
+{
+    float dimparry=0.0f;
+    uint32 pclass = getClass();
+    float k[MAX_CLASSES] = {
+        0.956f, // Warrior
+        0.956f, // Paladin
+        0.988f, // Hunter
+        0.988f, // Rogue
+        0.953f, // Priest
+        0.956f, // DK?
+        0.988f, // Shaman
+        0.953f, // Mage
+        0.953f, // Warlock
+        0.0f,   // ??
+        0.972f  // Druid
+    };
+
+    float Parry_Cap[MAX_CLASSES] = {
+        47.00f,  // Warrior
+        47.00f,  // Paladin
+        145.56f, // Hunter
+        145.56f, // Rogue
+        0.0f,    // Priest
+        47.00f,  // DK?
+        145.56f, // Shaman
+        0.0f,    // Mage
+        0.0f,    // Warlock
+        0.0f,    // ??
+        0.0f     // Druid
+    };
+
+    if (parry > 0.0f)
+        dimparry = (parry * Parry_Cap[pclass - 1] / (parry + (Parry_Cap[pclass - 1] * k[pclass - 1])));
+    return dimparry;
 }
 
 float Player::GetSpellCritFromIntellect()
@@ -6362,6 +6471,12 @@ void Player::CheckAreaExploreAndOutdoor()
     if (isInFlight())
         return;
 
+    auto new_wmo_id = GetBaseMap()->wmo_id(*this);
+    if (wmo_id_ != new_wmo_id)
+    {
+        wmo_id_ = new_wmo_id;
+        GetMap()->player_zone_changed(*this);
+    }
     if (!m_AreaID)
         m_AreaID = GetAreaId();
     if (m_AreaID != GetAreaId())
@@ -18644,7 +18759,7 @@ void Player::Whisper(const std::string& text, uint32 language,uint64 receiver)
             GetName(), rPlayer->GetName(), text.c_str());
 
     // when player you are whispering to is dnd, he cannot receive your message, unless you are in gm mode
-    if (!rPlayer->isDND() || isGameMaster())
+    if (language == LANG_ADDON || !rPlayer->isDND() || isGameMaster())
     {
         WorldPacket data(SMSG_MESSAGECHAT, 200);
         BuildPlayerChat(&data, CHAT_MSG_WHISPER, text, language);
@@ -18664,19 +18779,22 @@ void Player::Whisper(const std::string& text, uint32 language,uint64 receiver)
         ChatHandler(this).PSendSysMessage(LANG_PLAYER_DND, rPlayer->GetName(), rPlayer->dndMsg.c_str());
     }
 
-    if (!isAcceptWhispers() && !isGameMaster() && !rPlayer->isGameMaster())
+    if (language != LANG_ADDON)
     {
-        SetAcceptWhispers(true);
-        ChatHandler(this).SendSysMessage(LANG_COMMAND_WHISPERON);
+        if (!isAcceptWhispers() && !isGameMaster() && !rPlayer->isGameMaster())
+        {
+            SetAcceptWhispers(true);
+            ChatHandler(this).SendSysMessage(LANG_COMMAND_WHISPERON);
+        }
+
+        // announce to player that player he is whispering to is afk
+        if (rPlayer->isAFK())
+            ChatHandler(this).PSendSysMessage(LANG_PLAYER_AFK, rPlayer->GetName(), rPlayer->afkMsg.c_str());
+
+        // if player whisper someone, auto turn of dnd to be able to receive an answer
+        if (isDND() && !rPlayer->isGameMaster())
+            ToggleDND();
     }
-
-    // announce to player that player he is whispering to is afk
-    if (rPlayer->isAFK())
-        ChatHandler(this).PSendSysMessage(LANG_PLAYER_AFK, rPlayer->GetName(), rPlayer->afkMsg.c_str());
-
-    // if player whisper someone, auto turn of dnd to be able to receive an answer
-    if (isDND() && !rPlayer->isGameMaster())
-        ToggleDND();
 }
 
 void Player::PetSpellInitialize()
@@ -19871,7 +19989,6 @@ void Player::UpdateHomebindTime(uint32 time)
         if (time >= m_HomebindTimer)
         {
             // teleport to nearest graveyard
-            SetPhaseMask(1,true);
             RepopAtGraveyard();
         }
         else
@@ -19887,7 +20004,6 @@ void Player::UpdateHomebindTime(uint32 time)
         data << uint32(1);
         GetSession()->SendPacket(&data);
         sLog.outDebug("PLAYER: Player '%s' (GUID: %u) will be teleported to homebind in 60 seconds", GetName(),GetGUIDLow());
-        SetPhaseMask(2,true);
     }
 }
 
@@ -20903,6 +21019,13 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
 void Player::SendInitialPacketsAfterAddToMap()
 {
+    if (getRace() == RACE_DRAENEI && getClass() == CLASS_DRUID)
+    {
+        WorldPacket msg(SMSG_LEARNED_SPELL, 4);
+        msg << GetLanguageDescByID(LANG_COMMON)->spell_id;
+        m_session->SendPacket(&msg);
+    }
+
     // update zone
     uint32 newzone, newarea;
     GetZoneAndAreaId(newzone,newarea);
@@ -22839,7 +22962,10 @@ uint8 Player::CanEquipUniqueItem(ItemPrototype const* itemProto, uint8 except_sl
 void Player::HandleFall(MovementInfo const& movementInfo)
 {
     // calculate total z distance of the fall
-    float z_diff = m_lastFallZ - movementInfo.pos.GetPositionZ();
+    float z_diff
+        = (m_lastFallZ >= m_anti_BeginFallZ ? m_lastFallZ : m_anti_BeginFallZ)
+            - movementInfo.pos.GetPositionZ();
+    m_anti_BeginFallZ = INVALID_HEIGHT;
     //sLog.outDebug("zDiff = %f", z_diff);
 
     //Players with low fall distance, Feather Fall or physical immunity (charges used) are ignored
@@ -24031,4 +24157,22 @@ void Player::_LoadRandomBGStatus(QueryResult_AutoPtr result)
 
     if (result)
         m_IsBGRandomWinner = true;
+}
+
+uint32 Player::GetAverageItemLevel()
+{
+    uint32 sum = 0;
+    uint32 count = 0;
+    for (int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
+    {
+        if (i == EQUIPMENT_SLOT_TABARD || i == EQUIPMENT_SLOT_RANGED || i == EQUIPMENT_SLOT_OFFHAND
+            || i == EQUIPMENT_SLOT_CHEST) // actually shirt
+            continue;
+
+        if (m_items[i] && m_items[i]->GetProto())
+            sum += m_items[i]->GetProto()->CalculateItemLevelForVehicleScaling();
+        count++;
+    }
+
+    return (uint32)((((double)sum) / count) + 0.5);
 }

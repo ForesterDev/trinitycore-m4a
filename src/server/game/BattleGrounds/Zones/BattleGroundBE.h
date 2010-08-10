@@ -20,6 +20,10 @@
 #ifndef __BATTLEGROUNDBE_H
 #define __BATTLEGROUNDBE_H
 
+#include <memory>
+#include <array>
+#include "BattleGround.h"
+
 class BattleGround;
 
 enum BattleGroundBEObjectTypes
@@ -48,6 +52,13 @@ class BattleGroundBEScore : public BattleGroundScore
     public:
         BattleGroundBEScore() {};
         virtual ~BattleGroundBEScore() {};
+
+        std::pair<std::size_t, Stat_data_type> stat_data() const
+        {
+            std::array<int32, max_stats> d;
+            auto first = d.begin(), it = first;
+            return std::make_pair(it - first, std::move(d));
+        }
 };
 
 class BattleGroundBE : public BattleGround

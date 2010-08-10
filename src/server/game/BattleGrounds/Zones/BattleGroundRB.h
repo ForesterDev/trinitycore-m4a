@@ -21,6 +21,10 @@
 #ifndef __BATTLEGROUNDRB_H
 #define __BATTLEGROUNDRB_H
 
+#include <memory>
+#include <array>
+#include "BattleGround.h"
+
 class BattleGround;
 
 class BattleGroundRBScore : public BattleGroundScore
@@ -28,6 +32,13 @@ class BattleGroundRBScore : public BattleGroundScore
     public:
         BattleGroundRBScore() {};
         virtual ~BattleGroundRBScore() {};
+
+        std::pair<std::size_t, Stat_data_type> stat_data() const
+        {
+            std::array<int32, max_stats> d;
+            auto first = d.begin(), it = first;
+            return std::make_pair(it - first, std::move(d));
+        }
 };
 
 class BattleGroundRB : public BattleGround

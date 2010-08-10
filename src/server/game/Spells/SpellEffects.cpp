@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -1573,7 +1574,7 @@ void Spell::EffectDummy(uint32 i)
                 // Bloodthirst
                 case 23881:
                 {
-                    m_caster->CastCustomSpell(unitTarget, 23885, &damage, NULL, NULL, true, NULL);
+                    m_caster->CastCustomSpell(unitTarget, 55970, &damage, NULL, NULL, true, NULL);
                     return;
                 }
             }
@@ -2741,6 +2742,10 @@ void Spell::EffectHealPct(uint32 /*i*/)
         if (m_spellInfo->Id == 59754 && unitTarget == m_caster)
             return;
 
+        // Glyph of Bloodthirst
+        if (m_spellInfo->Id == 55969 && caster->HasAura(58369))
+            damage *= 2;
+
         uint32 addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, unitTarget->GetMaxHealth() * damage / 100.0f, HEAL);
         //if (Player *modOwner = m_caster->GetSpellModOwner())
         //    modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DAMAGE, addhealth, this);
@@ -3606,6 +3611,12 @@ void Spell::EffectDispel(uint32 i)
     // Create dispel mask by dispel type
     uint32 dispel_type = m_spellInfo->EffectMiscValue[i];
     uint32 dispelMask  = GetDispellMask(DispelType(dispel_type));
+    auto disease_mask = GetDispellMask(DISPEL_DISEASE);
+    if (dispelMask & disease_mask)
+        if (!unitTarget->HasAura(50536 /* Unholy Blight */))
+            ;
+        else
+            dispelMask &= ~disease_mask;
     Unit::AuraMap const& auras = unitTarget->GetOwnedAuras();
     for (Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
     {
@@ -5981,8 +5992,9 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                         Aura * aura = (*i).second->GetBase();
                         if (aura->GetCasterGUID() != m_caster->GetGUID())
                             continue;
+                        auto proto = aura->GetSpellProto();
                         // Search only Serpent Sting, Viper Sting, Scorpid Sting auras
-                        flag96 familyFlag = aura->GetSpellProto()->SpellFamilyFlags;
+                        flag96 familyFlag = proto->SpellFamilyFlags;
                         if (!(familyFlag[1] & 0x00000080 || familyFlag[0] & 0x0000C000))
                             continue;
                         if (AuraEffect const * aurEff = aura->GetEffect(0))
@@ -5992,7 +6004,9 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                             {
                                 int32 TickCount = aurEff->GetTotalTicks();
                                 spellId = 53353; // 53353 Chimera Shot - Serpent
-                                basePoint = aurEff->GetAmount() * TickCount * 40 / 100;
+                                basePoint =
+                                    (m_caster->SpellDamageBonus(unitTarget, proto, aurEff->GetAmount(), DOT)
+                                        * TickCount * 40 + 50) / 100;
                             }
                             // Viper Sting - Instantly restores mana to you equal to 60% of the total amount drained by your Viper Sting.
                             else if (familyFlag[1] & 0x00000080)
@@ -6023,7 +6037,7 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                         break;
                     }
                     if (spellId)
-                        m_caster->CastCustomSpell(unitTarget, spellId, &basePoint, 0, 0, false);
+                        m_caster->CastCustomSpell(unitTarget, spellId, &basePoint, 0, 0, true);
                     return;
                 }
                 // Master's Call

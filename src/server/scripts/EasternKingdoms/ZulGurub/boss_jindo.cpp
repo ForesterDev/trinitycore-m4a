@@ -228,38 +228,23 @@ struct mob_shade_of_jindoAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_jindo(Creature* pCreature)
-{
-    return new boss_jindoAI (pCreature);
-}
-
-CreatureAI* GetAI_mob_healing_ward(Creature* pCreature)
-{
-    return new mob_healing_wardAI (pCreature);
-}
-
-CreatureAI* GetAI_mob_shade_of_jindo(Creature* pCreature)
-{
-    return new mob_shade_of_jindoAI (pCreature);
-}
-
 void AddSC_boss_jindo()
 {
     Script *newscript;
 
     newscript = new Script;
     newscript->Name = "boss_jindo";
-    newscript->GetAI = &GetAI_boss_jindo;
+    newscript->GetAI = &get_ai<boss_jindoAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_healing_ward";
-    newscript->GetAI = &GetAI_mob_healing_ward;
+    newscript->GetAI = &get_ai<mob_healing_wardAI>;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "mob_shade_of_jindo";
-    newscript->GetAI = &GetAI_mob_shade_of_jindo;
+    newscript->GetAI = &get_ai<mob_shade_of_jindoAI>;
     newscript->RegisterSelf();
 }
 
