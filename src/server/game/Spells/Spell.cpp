@@ -84,7 +84,6 @@ SpellCastTargets::SpellCastTargets() : m_elevation(0), m_speed(0)
     m_dstPos.Relocate(0,0,0,0);
     m_strTarget = "";
     m_targetMask = 0;
-    m_intTargetFlags = 0;
 }
 
 SpellCastTargets::~SpellCastTargets()
@@ -98,13 +97,13 @@ void SpellCastTargets::setUnitTarget(Unit *target)
 
     m_unitTarget = target;
     m_unitTargetGUID = target->GetGUID();
-    m_intTargetFlags |= FLAG_INT_UNIT;
+    m_targetMask |= TARGET_FLAG_UNIT;
 }
 
 void SpellCastTargets::setSrc(float x, float y, float z)
 {
     m_srcPos.Relocate(x, y, z);
-    m_intTargetFlags |= FLAG_INT_SRC_LOC;
+    m_targetMask |= TARGET_FLAG_SOURCE_LOCATION;
 }
 
 void SpellCastTargets::setSrc(Position *pos)
@@ -112,14 +111,14 @@ void SpellCastTargets::setSrc(Position *pos)
     if (pos)
     {
         m_srcPos.Relocate(pos);
-        m_intTargetFlags |= FLAG_INT_SRC_LOC;
+        m_targetMask |= TARGET_FLAG_SOURCE_LOCATION;
     }
 }
 
 void SpellCastTargets::setDst(float x, float y, float z, float orientation, uint32 mapId)
 {
     m_dstPos.Relocate(x, y, z, orientation);
-    m_intTargetFlags |= FLAG_INT_DST_LOC;
+    m_targetMask |= TARGET_FLAG_DEST_LOCATION;
     if (mapId != MAPID_INVALID)
         m_dstPos.m_mapId = mapId;
 }
@@ -129,7 +128,7 @@ void SpellCastTargets::setDst(Position *pos)
     if (pos)
     {
         m_dstPos.Relocate(pos);
-        m_intTargetFlags |= FLAG_INT_DST_LOC;
+        m_targetMask |= TARGET_FLAG_DEST_LOCATION;
     }
 }
 
@@ -137,7 +136,7 @@ void SpellCastTargets::setGOTarget(GameObject *target)
 {
     m_GOTarget = target;
     m_GOTargetGUID = target->GetGUID();
-    m_intTargetFlags |= FLAG_INT_OBJECT;
+    m_targetMask |= TARGET_FLAG_OBJECT;
 }
 
 void SpellCastTargets::setItemTarget(Item* item)
@@ -193,89 +192,90 @@ bool SpellCastTargets::read (WorldPacket * data, Unit *caster)
     if (data->rpos() + 4 > data->size())
         return false;
 
-    //data->hexlike();
-
+    uint8 clientCastFlags;
+    *data >> clientCastFlags;
     *data >> m_targetMask;
     //sLog.outDebug("Spell read, target mask = %u", m_targetMask);
 
     if (m_targetMask == TARGET_FLAG_SELF)
         return true;
 
-    // TARGET_FLAG_UNK2 is used for non-combat pets, maybe other?
-    if (m_targetMask & (TARGET_FLAG_UNIT | TARGET_FLAG_UNK2))
+    if (m_targetMask & (TARGET_FLAG_UNIT | TARGET_FLAG_UNK17))
     {
         if (!data->readPackGUID(m_unitTargetGUID))
             return false;
-        if (m_targetMask & TARGET_FLAG_UNIT)
-            m_intTargetFlags |= FLAG_INT_UNIT;
     }
 
-    if (m_targetMask & (TARGET_FLAG_OBJECT))
+    if(m_targetMask & (TARGET_FLAG_OBJECT))
     {
         if (!data->readPackGUID(m_GOTargetGUID))
             return false;
-        m_intTargetFlags |= FLAG_INT_OBJECT;
     }
 
-    if ((m_targetMask & (TARGET_FLAG_ITEM | TARGET_FLAG_TRADE_ITEM)) && caster->GetTypeId() == TYPEID_PLAYER)
+    if(m_targetMask & (TARGET_FLAG_ITEM | TARGET_FLAG_TRADE_ITEM))
+    {
+        if (caster->GetTypeId() != TYPEID_PLAYER)
+            return false;
         if (!data->readPackGUID(m_itemTargetGUID))
             return false;
+    }
 
-    if (m_targetMask & (TARGET_FLAG_CORPSE | TARGET_FLAG_PVP_CORPSE))
+    if(m_targetMask & (TARGET_FLAG_CORPSE | TARGET_FLAG_PVP_CORPSE))
+    {
         if (!data->readPackGUID(m_CorpseTargetGUID))
             return false;
+    }
 
     if (m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
     {
-        if (data->rpos() + 1 + 4 + 4 + 4 > data->size())
+        uint64 relativePositionObjGUID;
+        if (!data->readPackGUID(relativePositionObjGUID))
             return false;
-
-        if (!data->readPackGUID(m_unitTargetGUID))
-            return false;
-
-        *data >> m_srcPos.m_positionX >> m_srcPos.m_positionY >> m_srcPos.m_positionZ;
+        *data >> m_srcPos.PositionXYZStream();
         if (!m_srcPos.IsPositionValid())
             return false;
-         m_intTargetFlags |= FLAG_INT_SRC_LOC;
     }
     else
         m_srcPos.Relocate(caster);
 
     if (m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
-        if (data->rpos() + 1 + 4 + 4 + 4 > data->size())
+        uint64 relativePositionObjGUID;
+        if (!data->readPackGUID(relativePositionObjGUID))
             return false;
-
-        if (!data->readPackGUID(m_unitTargetGUID))
-            return false;
-
-        *data >> m_dstPos.m_positionX >> m_dstPos.m_positionY >> m_dstPos.m_positionZ;
+        *data >> m_dstPos.PositionXYZStream();
         if (!m_dstPos.IsPositionValid())
             return false;
-
-        m_intTargetFlags |= FLAG_INT_DST_LOC;
-
-        if (m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
-        {
-            if (data->rpos() + 4 + 4 <= data->size())
-            {
-                *data >> m_elevation >> m_speed;
-                // TODO: should also read
-                m_srcPos.m_orientation = caster->GetOrientation();
-                //*data >> uint16 >> uint8 >> uint32 >> uint32;
-                //*data >> float >> float >> float >> float...
-            }
-        }
     }
     else
         m_dstPos.Relocate(caster);
 
-    if (m_targetMask & TARGET_FLAG_STRING)
+    if(m_targetMask & TARGET_FLAG_STRING)
     {
         if (data->rpos() + 1 > data->size())
             return false;
-
         *data >> m_strTarget;
+    }
+
+    // some spell cast packet including more data (for projectiles?)
+    if (clientCastFlags & 0x02)
+    {
+        // not sure about these two
+        *data >> m_elevation;
+        *data >> m_speed;
+        uint8 hasMovementInfo;
+        *data >> hasMovementInfo; // bool
+        if (hasMovementInfo)
+        {
+            data->read_skip<uint32>(); // MSG_MOVE_STOP - hardcoded in client
+            uint64 guid = 0;               // guid - unused
+            if (!data->readPackGUID(guid))
+                return false;
+
+            data->rpos(data->wpos()); // prevent spam at ignore packet
+            //MovementInfo movementInfo;
+            //ReadMovementInfo(*data, &movementInfo);
+        }
     }
 
     // find real units/GOs
@@ -288,7 +288,7 @@ void SpellCastTargets::write (WorldPacket * data)
     *data << uint32(m_targetMask);
     //sLog.outDebug("Spell write, target mask = %u", m_targetMask);
 
-    if (m_targetMask & (TARGET_FLAG_UNIT | TARGET_FLAG_PVP_CORPSE | TARGET_FLAG_OBJECT | TARGET_FLAG_CORPSE | TARGET_FLAG_UNK2))
+    if (m_targetMask & (TARGET_FLAG_UNIT | TARGET_FLAG_PVP_CORPSE | TARGET_FLAG_OBJECT | TARGET_FLAG_CORPSE | TARGET_FLAG_UNK17))
     {
         if (m_targetMask & TARGET_FLAG_UNIT)
         {
@@ -299,20 +299,20 @@ void SpellCastTargets::write (WorldPacket * data)
         }
         else if (m_targetMask & TARGET_FLAG_OBJECT)
         {
-            if (m_GOTarget)
+            if(m_GOTarget)
                 data->append(m_GOTarget->GetPackGUID());
             else
                 *data << uint8(0);
         }
-        else if (m_targetMask & (TARGET_FLAG_CORPSE | TARGET_FLAG_PVP_CORPSE))
+        else if (m_targetMask & ( TARGET_FLAG_CORPSE | TARGET_FLAG_PVP_CORPSE))
             data->appendPackGUID(m_CorpseTargetGUID);
         else
             *data << uint8(0);
     }
 
-    if (m_targetMask & (TARGET_FLAG_ITEM | TARGET_FLAG_TRADE_ITEM))
+    if (m_targetMask & ( TARGET_FLAG_ITEM | TARGET_FLAG_TRADE_ITEM))
     {
-        if (m_itemTarget)
+        if(m_itemTarget)
             data->append(m_itemTarget->GetPackGUID());
         else
             *data << uint8(0);
@@ -320,14 +320,14 @@ void SpellCastTargets::write (WorldPacket * data)
 
     if (m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
     {
-        *data << uint8(0); // It seems the client doesn't like unit target GUID being sent here, we must send 0
-        *data << m_srcPos.m_positionX << m_srcPos.m_positionY << m_srcPos.m_positionZ;
+        *data << uint8(0); // relative position guid here - transport for example
+        *data << m_srcPos.PositionXYZStream();
     }
 
     if (m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
-        *data << uint8(0); // It seems the client doesn't like unit target GUID being sent here, we must send 0
-        *data << m_dstPos.m_positionX << m_dstPos.m_positionY << m_dstPos.m_positionZ;
+        *data << uint8(0); // relative position guid here - transport for example
+        *data << m_dstPos.PositionXYZStream();
     }
 
     if (m_targetMask & TARGET_FLAG_STRING)
@@ -561,8 +561,13 @@ void Spell::SelectSpellTargets()
                     switch(m_spellInfo->Id)
                     {
                         case 20577:                         // Cannibalize
+                        case 54044:                         // Carrion Feeder
                         {
-                            WorldObject* result = FindCorpseUsing<Trinity::CannibalizeObjectCheck> ();
+                            WorldObject* result = NULL;
+                            if (m_spellInfo->Id == 20577)
+                                result = FindCorpseUsing<Trinity::CannibalizeObjectCheck>();
+                            else
+                                result = FindCorpseUsing<Trinity::CarrionFeederObjectCheck>();
 
                             if (result)
                             {
@@ -1445,9 +1450,13 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
 
                 duration = m_originalCaster->ModSpellDuration(aurSpellInfo, unit, duration, positive);
 
-                //mod duration of channeled aura by spell haste
+                // Haste modifies duration of channeled spells
                 if (IsChanneledSpell(m_spellInfo))
                     m_originalCaster->ModSpellCastTime(aurSpellInfo, duration, this);
+
+                // and duration of auras affected by SPELL_AURA_PERIODIC_HASTE
+                if (m_originalCaster->HasAuraTypeWithAffectMask(SPELL_AURA_PERIODIC_HASTE, aurSpellInfo))
+                    duration *= m_originalCaster->GetFloatValue(UNIT_MOD_CAST_SPEED);
 
                 if (duration != m_spellAura->GetMaxDuration())
                 {
@@ -3263,7 +3272,7 @@ uint64 Spell::handle_delayed(uint64 t_offset)
         m_immediateHandled = true;
     }
 
-    bool single_missile = (m_targets.getIntTargetFlags() & FLAG_INT_DST_LOC);
+    bool single_missile = (m_targets.HasDst());
 
     // now recheck units targeting correctness (need before any effects apply to prevent adding immunity at first effect not allow apply second spell effect and similar cases)
     for (std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
@@ -3751,19 +3760,6 @@ void Spell::SendSpellStart()
     data << uint32(castFlags);                              // cast flags
     data << uint32(m_timer);                                // delay?
 
-    // Preliminary setting of the target mask for the SMSG_SPELL_START packet. This will be
-    // adjusted again later in SendSpellGo() based on the real targets obtained in SelectSpellTargets()
-    if (m_spellInfo->Targets & TARGET_FLAG_SOURCE_LOCATION)
-        m_targets.setTargetMask(m_targets.getTargetMask() | TARGET_FLAG_SOURCE_LOCATION);
-
-    if (m_spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
-        m_targets.setTargetMask(m_targets.getTargetMask() | TARGET_FLAG_DEST_LOCATION);
-
-    if (m_targets.getTargetMask() & (TARGET_FLAG_SOURCE_LOCATION | TARGET_FLAG_DEST_LOCATION))
-        m_targets.setTargetMask(m_targets.getTargetMask() & ~TARGET_FLAG_UNIT);
-    else if (m_targets.getIntTargetFlags() & FLAG_INT_UNIT)
-        m_targets.setTargetMask(m_targets.getTargetMask() | TARGET_FLAG_UNIT);
-
     m_targets.write(&data);
 
     if (castFlags & CAST_FLAG_POWER_LEFT_SELF)
@@ -3831,21 +3827,14 @@ void Spell::SendSpellGo()
     data << uint32(castFlags);                              // cast flags
     data << uint32(getMSTime());                            // timestamp
 
-    if ((m_spellInfo->Targets & TARGET_FLAG_SOURCE_LOCATION) && m_targets.HasSrc())
-        m_targets.setTargetMask(m_targets.getTargetMask() | TARGET_FLAG_SOURCE_LOCATION);
-    else
-        m_targets.setTargetMask(m_targets.getTargetMask() & ~TARGET_FLAG_SOURCE_LOCATION);
-
-    if (m_targets.HasDst())
-        m_targets.setTargetMask(m_targets.getTargetMask() | TARGET_FLAG_DEST_LOCATION);
-    else
-        m_targets.setTargetMask(m_targets.getTargetMask() & ~TARGET_FLAG_DEST_LOCATION);
-
+    /*
+    // statement below seems to be wrong - i've seen spells with both unit and dest target
     // Can't have TARGET_FLAG_UNIT when *_LOCATION is present - it breaks missile visuals
     if (m_targets.getTargetMask() & (TARGET_FLAG_SOURCE_LOCATION | TARGET_FLAG_DEST_LOCATION))
         m_targets.setTargetMask(m_targets.getTargetMask() & ~TARGET_FLAG_UNIT);
     else if (m_targets.getIntTargetFlags() & FLAG_INT_UNIT)
         m_targets.setTargetMask(m_targets.getTargetMask() | TARGET_FLAG_UNIT);
+    */
 
     WriteSpellGoTargets(&data);
 
@@ -4505,7 +4494,7 @@ void Spell::TakeReagents()
         return;
 
     // do not take reagents for these item casts
-    if (m_CastItem && m_CastItem->GetProto()->Flags & ITEM_FLAGS_TRIGGERED_CAST)
+    if (m_CastItem && m_CastItem->GetProto()->Flags & ITEM_PROTO_FLAG_TRIGGERED_CAST)
         return;
 
     Player* p_caster = (Player*)m_caster;
@@ -4720,7 +4709,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     Unit *target = m_targets.getUnitTarget();
 
     // In pure self-cast spells, the client won't send any unit target
-    if (!target && (m_targets.getTargetMask() == TARGET_FLAG_SELF || m_targets.getTargetMask() & TARGET_FLAG_CASTER)) // TARGET_FLAG_SELF == 0, remember!
+    if (!target && (m_targets.getTargetMask() == TARGET_FLAG_SELF || m_targets.getTargetMask() & TARGET_FLAG_UNIT_CASTER)) // TARGET_FLAG_SELF == 0, remember!
         target = m_caster;
 
     if (target)
@@ -5271,12 +5260,25 @@ SpellCastResult Spell::CheckCast(bool strict)
                     m_spellInfo->EffectImplicitTargetA[i] != TARGET_GAMEOBJECT_ITEM)
                     break;
 
+                uint32 spellId = m_spellInfo->Id;
                 if (m_caster->GetTypeId() != TYPEID_PLAYER  // only players can open locks, gather etc.
                     // we need a go target in case of TARGET_GAMEOBJECT
-                    || m_spellInfo->EffectImplicitTargetA[i] == TARGET_GAMEOBJECT && !m_targets.getGOTarget()
-                    // we need a go target, or an openable item target in case of TARGET_GAMEOBJECT_ITEM
-                    || m_spellInfo->EffectImplicitTargetA[i] == TARGET_GAMEOBJECT_ITEM && !m_targets.getGOTarget() &&
-                    (!m_targets.getItemTarget() || !m_targets.getItemTarget()->GetProto()->LockID || m_targets.getItemTarget()->GetOwner() != m_caster))
+                    || m_spellInfo->EffectImplicitTargetA[i] == TARGET_GAMEOBJECT && !m_targets.getGOTarget())
+                    return SPELL_FAILED_BAD_TARGETS;
+
+                Item *pTempItem = NULL;
+                if (m_targets.getTargetMask() & TARGET_FLAG_TRADE_ITEM)
+                {
+                    if (TradeData* pTrade = m_caster->ToPlayer()->GetTradeData())
+                        pTempItem = pTrade->GetTraderData()->GetItem(TradeSlots(m_targets.getItemTargetGUID()));
+                }
+                else if (m_targets.getTargetMask() & TARGET_FLAG_ITEM)
+                    pTempItem = m_caster->ToPlayer()->GetItemByGuid(m_targets.getItemTargetGUID());
+
+                // we need a go target, or an openable item target in case of TARGET_GAMEOBJECT_ITEM
+                if (m_spellInfo->EffectImplicitTargetA[i] == TARGET_GAMEOBJECT_ITEM &&
+                    !m_targets.getGOTarget() &&
+                    (!pTempItem || !pTempItem->GetProto()->LockID || !pTempItem->IsLocked()))
                     return SPELL_FAILED_BAD_TARGETS;
 
                 if (m_spellInfo->Id != 1842 || m_targets.getGOTarget() && 
@@ -5624,7 +5626,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
         TradeSlots slot = TradeSlots(m_targets.getItemTargetGUID());
         if (slot != TRADE_SLOT_NONTRADED)
-            return SPELL_FAILED_ITEM_NOT_READY;
+            return SPELL_FAILED_BAD_TARGETS;
 
         if (!m_IsTriggeredSpell)
             if (my_trade->GetSpell())
@@ -6034,7 +6036,7 @@ SpellCastResult Spell::CheckItems()
     }
 
     // do not take reagents for these item casts
-    if (!(m_CastItem && m_CastItem->GetProto()->Flags & ITEM_FLAGS_TRIGGERED_CAST))
+    if (!(m_CastItem && m_CastItem->GetProto()->Flags & ITEM_PROTO_FLAG_TRIGGERED_CAST))
     {
         // check reagents (ignore triggered spells with reagents processed by original spell) and special reagent ignore case.
         if (!m_IsTriggeredSpell && !p_caster->CanNoReagentCast(m_spellInfo))
@@ -6146,7 +6148,7 @@ SpellCastResult Spell::CheckItems()
                     if (m_targets.getItemTarget()->GetOwner() != m_caster)
                         return SPELL_FAILED_NOT_TRADEABLE;
                     // do not allow to enchant vellum from scroll made by vellum-prevent exploit
-                    if (m_CastItem && m_CastItem->GetProto()->Flags & ITEM_FLAGS_TRIGGERED_CAST)
+                    if (m_CastItem && m_CastItem->GetProto()->Flags & ITEM_PROTO_FLAG_TRIGGERED_CAST)
                         return SPELL_FAILED_TOTEM_CATEGORY;
                     ItemPosCountVec dest;
                     uint8 msg = p_caster->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, m_spellInfo->EffectItemType[i], 1);
@@ -6229,7 +6231,7 @@ SpellCastResult Spell::CheckItems()
                 if (!m_targets.getItemTarget())
                     return SPELL_FAILED_CANT_BE_PROSPECTED;
                 //ensure item is a prospectable ore
-                if (!(m_targets.getItemTarget()->GetProto()->BagFamily & BAG_FAMILY_MASK_MINING_SUPP) || m_targets.getItemTarget()->GetProto()->Class != ITEM_CLASS_TRADE_GOODS)
+                if (!(m_targets.getItemTarget()->GetProto()->Flags & ITEM_PROTO_FLAG_PROSPECTABLE))
                     return SPELL_FAILED_CANT_BE_PROSPECTED;
                 //prevent prospecting in trade slot
                 if (m_targets.getItemTarget()->GetOwnerGUID() != m_caster->GetGUID())
@@ -6252,7 +6254,7 @@ SpellCastResult Spell::CheckItems()
                 if (!m_targets.getItemTarget())
                     return SPELL_FAILED_CANT_BE_MILLED;
                 //ensure item is a millable herb
-                if (!(m_targets.getItemTarget()->GetProto()->BagFamily & BAG_FAMILY_MASK_HERBS) || m_targets.getItemTarget()->GetProto()->Class != ITEM_CLASS_TRADE_GOODS)
+                if (!(m_targets.getItemTarget()->GetProto()->Flags & ITEM_PROTO_FLAG_MILLABLE))
                     return SPELL_FAILED_CANT_BE_MILLED;
                 //prevent milling in trade slot
                 if (m_targets.getItemTarget()->GetOwnerGUID() != m_caster->GetGUID())

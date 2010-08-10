@@ -23,7 +23,6 @@ file(GLOB_RECURSE sources_AuctionHouse AuctionHouse/*.cpp AuctionHouse/*.h)
 file(GLOB_RECURSE sources_BattleGrounds BattleGrounds/*.cpp BattleGrounds/*.h)
 file(GLOB_RECURSE sources_Calendar Calendar/*.cpp Calendar/*.h)
 file(GLOB_RECURSE sources_Chat Chat/*.cpp Chat/*.h)
-file(GLOB_RECURSE sources_CMakeLists.txt CMakeLists.txt/*.cpp CMakeLists.txt/*.h)
 file(GLOB_RECURSE sources_Combat Combat/*.cpp Combat/*.h)
 file(GLOB_RECURSE sources_Conditions Conditions/*.cpp Conditions/*.h)
 file(GLOB_RECURSE sources_DataStores DataStores/*.cpp DataStores/*.h)
@@ -51,6 +50,7 @@ file(GLOB_RECURSE sources_Spells Spells/*.cpp Spells/*.h)
 file(GLOB_RECURSE sources_Tools Tools/*.cpp Tools/*.h)
 file(GLOB_RECURSE sources_Weather Weather/*.cpp Weather/*.h)
 file(GLOB_RECURSE sources_World World/*.cpp World/*.h)
+file(GLOB_RECURSE sources_PrecompiledHeaders PrecompiledHeaders/*.cpp PrecompiledHeaders/*.h)
 
 # Create game-libary
 set(game_STAT_SRCS
@@ -62,7 +62,6 @@ set(game_STAT_SRCS
   ${sources_BattleGrounds}
   ${sources_Calendar}
   ${sources_Chat}
-  ${sources_CMakeLists.txt}
   ${sources_Combat}
   ${sources_Conditions}
   ${sources_DataStores}
@@ -91,6 +90,13 @@ set(game_STAT_SRCS
   ${sources_Weather}
   ${sources_World}
 )
+
+if( MSVC )
+  set(game_STAT_SRCS
+    ${game_STAT_SRCS}
+    ${sources_PrecompiledHeaders}
+  )
+endif()
 
 include_directories(
   ${CMAKE_BINARY_DIR}
@@ -195,4 +201,3 @@ if(PCH)
     add_native_precompiled_header(game ${CMAKE_SOURCE_DIR}/src/server/game/PrecompiledHeaders/gamePCH)
   endif()
 endif()
-

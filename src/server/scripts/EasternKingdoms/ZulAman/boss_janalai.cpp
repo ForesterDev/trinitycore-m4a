@@ -179,7 +179,7 @@ struct boss_janalaiAI : public ScriptedAI
 //        DoZoneInCombat();
     }
 
-    void DamageDeal(Unit *pTarget, uint32 &damage)
+    void DamageDealt(Unit *pTarget, uint32 &damage)
     {
         if (isFlameBreathing)
         {
@@ -471,7 +471,7 @@ struct mob_amanishi_hatcherAI : public ScriptedAI
 
     void Reset()
     {
-        me->AddUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
+        me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
         side =(me->GetPositionY() < 1150);
         waypoint = 0;
         isHatching = false;

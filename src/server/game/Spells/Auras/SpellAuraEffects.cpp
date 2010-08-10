@@ -623,6 +623,13 @@ int32 AuraEffect::CalculateAmount(Unit * caster)
                         amount += int32(amount * SpellMgr::CalculateSpellEffectAmount(m_spellProto, 2, caster) / 100.0f);
                 }
             }
+            // Unholy Blight damage over time effect
+            else if (GetId() == 50536)
+            {
+                m_canBeRecalculated = false;
+                // we're getting total damage on aura apply, change it to be damage per tick
+                amount = (float)amount / GetTotalTicks();
+            }
             break;
         case SPELL_AURA_PERIODIC_ENERGIZE:
             if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_GENERIC)
@@ -674,6 +681,14 @@ int32 AuraEffect::CalculateAmount(Unit * caster)
                     }
                     amount = -value;
                 }
+            }
+            // Hand of Salvation
+            else if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_PALADIN && GetSpellProto()->SpellFamilyFlags[0] & 0x00000100)
+            {
+                //Glyph of Salvation
+                if (caster->GetGUID() == GetBase()->GetUnitOwner()->GetGUID())
+                    if (AuraEffect const * aurEff = caster->GetAuraEffect(63225, 0))
+                        amount = -aurEff->GetAmount();
             }
             break;
         case SPELL_AURA_MOD_THREAT:
@@ -771,30 +786,20 @@ void AuraEffect::CalculatePeriodic(Unit * caster, bool create)
     Player* modOwner = caster ? caster->GetSpellModOwner() : NULL;
 
     // Apply casting time mods
-    if (modOwner && m_amplitude)
+    if (m_amplitude)
     {
         // Apply periodic time mod
-        modOwner->ApplySpellMod(GetId(), SPELLMOD_ACTIVATION_TIME, m_amplitude);
+        if (modOwner)
+            modOwner->ApplySpellMod(GetId(), SPELLMOD_ACTIVATION_TIME, m_amplitude);
 
-        // For channeled spells
-        if (IsChanneledSpell(m_spellProto)) {
-            modOwner->ModSpellCastTime(m_spellProto, m_amplitude);
-        }
-        // For spells that can benefit from haste
-        else if (modOwner->HasAuraType(SPELL_AURA_PERIODIC_HASTE)) 
+        if (caster)
         {
-            const Unit::AuraEffectList &effList = modOwner->GetAuraEffectsByType(SPELL_AURA_PERIODIC_HASTE);
-            for (Unit::AuraEffectList::const_iterator itr = effList.begin(), end = effList.end(); itr != end; ++itr)
-            {
-                if ((*itr)->IsAffectedOnSpell(m_spellProto))
-                {
-                    float hasteMod = modOwner->GetFloatValue(UNIT_MOD_CAST_SPEED);
-                    m_amplitude *= hasteMod;
-                    GetBase()->SetMaxDuration(GetBase()->GetMaxDuration() * hasteMod);
-                    GetBase()->SetDuration(GetBase()->GetDuration() * hasteMod);
-                    break;
-                }
-            }
+            // Haste modifies periodic time of channeled spells
+            if (IsChanneledSpell(m_spellProto))
+                caster->ModSpellCastTime(m_spellProto, m_amplitude);
+            // and periodic time of auras affected by SPELL_AURA_PERIODIC_HASTE
+            if (caster->HasAuraTypeWithAffectMask(SPELL_AURA_PERIODIC_HASTE, m_spellProto))
+                m_amplitude *= caster->GetFloatValue(UNIT_MOD_CAST_SPEED);
         }
     }
 
@@ -2238,7 +2243,7 @@ void AuraEffect::TriggerSpell(Unit * target, Unit * caster) const
                     case 53303:
                     case 53304:
                         // We are standing at the moment
-                        if (GetAmount() != -1)
+                        if (GetAmount() > 0)
                             return;
 
                         triggerSpellId = 64418 + auraId - 53302;
@@ -4206,8 +4211,17 @@ void AuraEffect::HandleModMechanicImmunity(AuraApplication const * aurApp, uint8
             break;
         case 54508: // Demonic Empowerment
             mechanic = (1 << MECHANIC_SNARE) | (1 << MECHANIC_ROOT);
-            target->ApplySpellImmune(GetId(), IMMUNITY_STATE, SPELL_AURA_MOD_ROOT, apply);
-            target->ApplySpellImmune(GetId(), IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, apply);
+            target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_SNARE, apply);
+            target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_ROOT, apply);
+            target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_STUN, apply);
+            break;
+        case 34471: // The Beast Within
+        case 19574: // Bestial Wrath
+            mechanic = (1 << MECHANIC_SNARE) | (1 << MECHANIC_ROOT) | (1 << MECHANIC_FEAR) | (1 << MECHANIC_STUN);
+            target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_SNARE, apply);
+            target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_ROOT, apply);
+            target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_FEAR, apply);
+            target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_STUN, apply);
             break;
         default:
             if (GetMiscValue() < 1)

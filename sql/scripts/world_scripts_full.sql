@@ -7,7 +7,7 @@ UPDATE `creature_template` SET `ScriptName`='';
 UPDATE `gameobject_template` SET `ScriptName`='';
 
 /* AREA TRIGGERS */
-DELETE FROM `areatrigger_scripts` WHERE `entry` IN (5284,5285,5286,5287,4871,4872,4873,5108,5332,5338,5334,5340);
+DELETE FROM `areatrigger_scripts` WHERE `entry` IN (5284,5285,5286,5287,4871,4872,4873,5108,5332,5338,5334,5340,5369,5423);
 DELETE FROM `areatrigger_scripts` WHERE `entry` BETWEEN 1726 AND 1740;
 INSERT INTO `areatrigger_scripts` (`entry`,`ScriptName`) VALUES 
 (5284, 'at_aldurthar_gate'),
@@ -1193,6 +1193,7 @@ UPDATE `creature_template` SET `ScriptName`='npc_thorim' WHERE `entry`=29445;
 UPDATE `creature_template` SET `ScriptName`='npc_goblin_prisoner' WHERE `entry`=29466;
 UPDATE `gameobject_template` SET ScriptName='go_rusty_cage' WHERE `entry`=191544;
 UPDATE `creature_template` SET `ScriptName`='npc_injured_goblin' WHERE `entry`=29434;
+UPDATE `creature_template` SET `ScriptName`= 'npc_roxi_ramrocket' WHERE `entry` = 31247;
 
 /* STORMWIND CITY */
 UPDATE `creature_template` SET `ScriptName`='npc_archmage_malin' WHERE `entry`=2708;
@@ -1643,30 +1644,6 @@ INSERT INTO areatrigger_scripts VALUES
    (3066,'at_ravenholdt');
    
 -- moved from world_spell_full.sql to here
-update creature_template set AIName='TurretAI',scriptname='' where entry=33139;
-update creature_template set ScriptName='boss_kologarn' where entry=32930;
-update creature_template set scriptname="boss_flame_leviathan_safety_container" where entry=33218;
-
-DELETE FROM spell_script_names WHERE spell_id=19958 AND ScriptName='spell_mage_cold_snap';
-DELETE FROM spell_script_names WHERE spell_id=32826 AND ScriptName='spell_mage_polymorph_visual';
-DELETE FROM spell_script_names WHERE spell_id=31687 AND ScriptName='spell_mage_summon_water_elemental';
-DELETE FROM spell_script_names WHERE spell_id=-47540 AND ScriptName='spell_pri_penance';
-DELETE FROM spell_script_names WHERE spell_id=31231 AND ScriptName='spell_rog_cheat_death';
-DELETE FROM spell_script_names WHERE spell_id=51662 AND ScriptName='spell_rog_hunger_for_blood';
-DELETE FROM spell_script_names WHERE spell_id=14185 AND ScriptName='spell_rog_preparation';
-DELETE FROM spell_script_names WHERE spell_id=5938 AND ScriptName='spell_rog_shiv';
-DELETE FROM spell_script_names WHERE spell_id=53271 AND ScriptName='spell_hun_masters_call';
-DELETE FROM spell_script_names WHERE spell_id=53478 AND ScriptName='spell_hun_last_stand_pet';
-DELETE FROM spell_script_names WHERE spell_id=23989 AND ScriptName='spell_hun_readiness';
-INSERT INTO spell_script_names (spell_id, ScriptName) VALUES 
-(11958,'spell_mage_cold_snap'),
-(32826,'spell_mage_polymorph_visual'),
-(31687,'spell_mage_summon_water_elemental'),
-(-47540, 'spell_pri_penance'),
-(31231,'spell_rog_cheat_death'),
-(51662,'spell_rog_hunger_for_blood'),
-(14185,'spell_rog_preparation'),
-(5938,'spell_rog_shiv'),
-(53271,'spell_hun_masters_call'),
-(53478,'spell_hun_last_stand_pet'),
-(23989,'spell_hun_readiness');
+update creature_template set `AIName`='TurretAI',`ScriptName`='' WHERE `entry`=33139;
+update creature_template set `ScriptName`= 'boss_kologarn' WHERE `entry`=32930;
+update creature_template set `scriptname`= 'boss_flame_leviathan_safety_container' WHERE `entry`=33218;

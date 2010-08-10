@@ -165,19 +165,8 @@ template <class Instance_Script_type> inline
     return new Instance_Script_type(pMap);
 }
 
-//Config file accessors
-//std::string GetConfigValueStr(char const* option);
-//int32 GetConfigValueInt32(char const* option);
-//float GetConfigValueFloat(char const* option);
-
 //Generic scripting text function
 void DoScriptText(int32 textEntry, WorldObject* pSource, Unit *pTarget = NULL);
-
-#if COMPILER == COMPILER_GNU
-#define FUNC_PTR(name,callconvention,returntype,parameters)    typedef returntype(*name)parameters __attribute__ ((callconvention));
-#else
-#define FUNC_PTR(name, callconvention, returntype, parameters)    typedef returntype(callconvention *name)parameters;
-#endif
 
 #define sScriptMgr (*ACE_Singleton<ScriptMgr, ACE_Null_Mutex>::instance())
 #endif

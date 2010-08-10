@@ -377,7 +377,7 @@ class ObjectMgr
     public:
         typedef UNORDERED_MAP<uint32, Item*> ItemMap;
 
-        typedef std::set< Group * > GroupSet;
+        typedef std::set<Group *> GroupSet;
 
         typedef UNORDERED_MAP<uint32, Guild *> GuildMap;
 
@@ -410,7 +410,7 @@ class ObjectMgr
         void LoadGameobjectInfo();
         void AddGameobjectInfo(GameObjectInfo *goinfo);
 
-        Group * GetGroupByGUID(const uint64 &guid) const;
+        Group * GetGroupByGUID(uint32 guid) const;
         void AddGroup(Group* group) { mGroupSet.insert(group); }
         void RemoveGroup(Group* group) { mGroupSet.erase(group); }
 

@@ -201,7 +201,7 @@ ObjectMgr::~ObjectMgr()
 
     // free group and guild objects
     for (GroupSet::iterator itr = mGroupSet.begin(); itr != mGroupSet.end(); ++itr)
-        delete (*itr);
+        delete *itr;
 
     for (GuildMap::iterator itr = mGuildMap.begin(); itr != mGuildMap.end(); ++itr)
         delete itr->second;
@@ -216,10 +216,10 @@ ObjectMgr::~ObjectMgr()
         itr->second.Clear();
 }
 
-Group * ObjectMgr::GetGroupByGUID(const uint64 &guid) const
+Group * ObjectMgr::GetGroupByGUID(uint32 guid) const
 {
     for (GroupSet::const_iterator itr = mGroupSet.begin(); itr != mGroupSet.end(); ++itr)
-        if ((*itr)->GetGUID() == guid)
+        if ((*itr)->GetLowGUID() == guid)
             return *itr;
 
     return NULL;
@@ -3526,7 +3526,6 @@ void ObjectMgr::LoadGroups()
 {
     Group *group = NULL;
     Field *fields = NULL;
-    uint64 groupGuid = 0;
     uint32 count = 0;
 
     // Consistency cleaning before load to avoid having to do some checks later
@@ -3560,8 +3559,7 @@ void ObjectMgr::LoadGroups()
         fields = result->Fetch();
         ++count;
         group = new Group;
-        groupGuid = MAKE_NEW_GUID(fields[15].GetUInt32(),0,HIGHGUID_GROUP);
-        group->LoadGroupFromDB(groupGuid, result, false);
+        group->LoadGroupFromDB(fields[15].GetUInt32(), result, false);
         // group load will never be false (we have run consistency sql's before loading)
         AddGroup(group);
     }while (result->NextRow());
@@ -3592,8 +3590,7 @@ void ObjectMgr::LoadGroups()
         if (groupLowGuid != fields[0].GetUInt32())
         {
             groupLowGuid = fields[0].GetUInt32();
-            groupGuid = MAKE_NEW_GUID(groupLowGuid, 0, HIGHGUID_GROUP);
-            group = GetGroupByGUID(groupGuid);
+            group = GetGroupByGUID(groupLowGuid);
             // group will never be NULL (we have run consistency sql's before loading)
         }
         group->LoadMemberFromDB(fields[1].GetUInt32(), fields[2].GetUInt8(), fields[3].GetUInt8());
@@ -3626,8 +3623,7 @@ void ObjectMgr::LoadGroups()
     {
         bar3.step();
         fields = result->Fetch();
-        groupGuid = MAKE_NEW_GUID(fields[0].GetUInt32(), 0, HIGHGUID_GROUP);
-        group = GetGroupByGUID(groupGuid);
+        group = GetGroupByGUID(fields[0].GetUInt32());
         // group will never be NULL (we have run consistency sql's before loading)
 
         MapEntry const* mapEntry = sMapStore.LookupEntry(fields[1].GetUInt32());

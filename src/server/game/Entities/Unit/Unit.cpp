@@ -186,6 +186,7 @@ Unit::Unit()
         m_reactiveTimer[i] = 0;
 
     m_cleanupDone = false;
+    m_duringRemoveFromWorld = false;
 }
 
 Unit::~Unit()
@@ -207,6 +208,7 @@ Unit::~Unit()
     delete m_charmInfo;
     delete m_vehicleKit;
 
+    ASSERT(!m_duringRemoveFromWorld);
     ASSERT(!m_attacking);
     ASSERT(m_attackers.empty());
     ASSERT(m_sharedVision.empty());
@@ -325,7 +327,7 @@ void Unit::SendMonsterStop(bool on_death)
     if (on_death == true)
     {
         data << uint8(0);
-        data << uint32((GetUnitMovementFlags() & MOVEMENTFLAG_LEVITATING) ? MOVEFLAG_FLY : MOVEFLAG_WALK);
+        data << uint32((GetUnitMovementFlags() & MOVEMENTFLAG_LEVITATING) ? SPLINEFLAG_FLYING : SPLINEFLAG_WALKING);
         data << uint32(0);                                      // Time in between points
         data << uint32(1);                                      // 1 single waypoint
         data << GetPositionX() << GetPositionY() << GetPositionZ();
@@ -348,7 +350,7 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint32 T
     data << getMSTime();
 
     data << uint8(0);
-    data << uint32((GetUnitMovementFlags() & MOVEMENTFLAG_LEVITATING) ? MOVEFLAG_FLY : MOVEFLAG_WALK);
+    data << uint32((GetUnitMovementFlags() & MOVEMENTFLAG_LEVITATING) ? SPLINEFLAG_FLYING : SPLINEFLAG_WALKING);
     data << Time;                                           // Time in between points
     data << uint32(1);                                      // 1 single waypoint
     data << NewPosX << NewPosY << NewPosZ;                  // the single waypoint Point B
@@ -373,7 +375,7 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint32 M
     data << uint8(0);
     data << MoveFlags;
 
-    if (MoveFlags & MOVEFLAG_JUMP)
+    if (MoveFlags & SPLINEFLAG_TRAJECTORY)
     {
         data << time;
         data << speedZ;
@@ -451,7 +453,7 @@ void Unit::SendMonsterMoveTransport(Unit *vehicleOwner)
     data << uint32(getMSTime());
     data << uint8(4);
     data << GetTransOffsetO();
-    data << uint32(MOVEFLAG_ENTER_TRANSPORT);
+    data << uint32(SPLINEFLAG_TRANSPORT);
     data << uint32(0);// move time
     data << uint32(0);//GetTransOffsetX();
     data << uint32(0);//GetTransOffsetY();
@@ -567,6 +569,9 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
 {
     if (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->ToCreature()->IsAIEnabled)
         pVictim->ToCreature()->AI()->DamageTaken(this, damage);
+
+    if (GetTypeId() == TYPEID_UNIT && this->ToCreature()->IsAIEnabled)
+        this->ToCreature()->AI()->DamageDealt(pVictim, damage);
 
     if (damagetype != NODAMAGE)
     {
@@ -969,7 +974,7 @@ void Unit::CastSpell(GameObject *go, uint32 spellId, bool triggered, Item *castI
         return;
     }
 
-    if (!(spellInfo->Targets & (TARGET_FLAG_OBJECT | TARGET_FLAG_OBJECT_UNK)))
+    if (!(spellInfo->Targets & (TARGET_FLAG_OBJECT | TARGET_FLAG_OBJECT_CASTER)))
     {
         sLog.outError("CastSpell: spell id %i by caster: %s %u) is not gameobject spell", spellId,(GetTypeId() == TYPEID_PLAYER ? "player (GUID:" : "creature (Entry:"),(GetTypeId() == TYPEID_PLAYER ? GetGUIDLow() : GetEntry()));
         return;
@@ -1939,6 +1944,25 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEff
                             RemainingDamage -= absorbed;
                         }
                         continue;
+                    case 52284: // Will of the Necropolis
+                    case 52285:
+                    case 52286:
+                    {
+                        int32 remainingHp = (int32)pVictim->GetHealth() - RemainingDamage;
+
+                        // min pct of hp is stored in effect 0 of talent spell
+                        uint32 rank = spellmgr.GetSpellRank(spellProto->Id);
+                        SpellEntry const * talentProto = sSpellStore.LookupEntry(spellmgr.GetSpellWithRank(49189, rank));
+
+                        int32 minHp = (float)pVictim->GetMaxHealth() * (float)SpellMgr::CalculateSpellEffectAmount(talentProto, 0, (*i)->GetCaster())  / 100.0f;
+                        // Damage that would take you below [effect0] health or taken while you are at [effect0]
+                        if (remainingHp < minHp)
+                        {
+                            uint32 absorbed = uint32(currentAbsorb * RemainingDamage * 0.01f);
+                            RemainingDamage -= absorbed;
+                        }
+                        continue;
+                    }
                     case 48707: // Anti-Magic Shell (on self)
                     {
                         // damage absorbed by Anti-Magic Shell energizes the DK with additional runic power.
@@ -3605,6 +3629,7 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
     aura->SetIsSingleTarget(caster && IsSingleTargetSpell(aura->GetSpellProto()));
     if (aura->IsSingleTarget())
     {
+        ASSERT((IsInWorld() && !IsDuringRemoveFromWorld()) || (aura->GetCasterGUID() == GetGUID()));
         // register single target aura
         caster->GetSingleCastAuras().push_back(aura);
         // remove other single target auras
@@ -4186,10 +4211,10 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID, Unit 
                 newAura = Aura::TryCreate(aura->GetSpellProto(), effMask, stealer, NULL, &baseDamage[0], NULL, aura->GetCasterGUID());
                 if (!newAura)
                     return;
-                newAura->SetLoadedState(dur, dur, stealCharge ? 1 : aura->GetCharges(), aura->GetStackAmount(), recalculateMask, &damage[0]);
                 // strange but intended behaviour: Stolen single target auras won't be treated as single targeted
                 if (newAura->IsSingleTarget())
                     newAura->UnregisterSingleTarget();
+                newAura->SetLoadedState(dur, dur, stealCharge ? 1 : aura->GetCharges(), aura->GetStackAmount(), recalculateMask, &damage[0]);
                 newAura->ApplyForTargets();
             }
             return;
@@ -4356,43 +4381,35 @@ void Unit::RemoveAurasWithMechanic(uint32 mechanic_mask, AuraRemoveMode removemo
 
 void Unit::RemoveAreaAurasDueToLeaveWorld()
 {
-    bool cleanRun;
-    do
+    // make sure that all area auras not applied on self are removed - prevent access to deleted pointer later
+    for (AuraMap::iterator iter = m_ownedAuras.begin(); iter != m_ownedAuras.end();)
     {
-        cleanRun = true;
-        // make sure that all area auras not applied on self are removed - prevent access to deleted pointer later
-        for (AuraMap::iterator iter = m_ownedAuras.begin(); iter != m_ownedAuras.end();)
+        Aura * aura = iter->second;
+        ++iter;
+        Aura::ApplicationMap const & appMap = aura->GetApplicationMap();
+        for (Aura::ApplicationMap::const_iterator itr = appMap.begin(); itr!= appMap.end();)
         {
-            Aura * aura = iter->second;
-            ++iter;
-            Aura::ApplicationMap const & appMap = aura->GetApplicationMap();
-            for (Aura::ApplicationMap::const_iterator itr = appMap.begin(); itr!= appMap.end();)
-            {
-                AuraApplication * aurApp = itr->second;
-                ++itr;
-                Unit * target = aurApp->GetTarget();
-                if (target == this)
-                    continue;
-                target->RemoveAura(aurApp);
-                cleanRun = false;
-                // things linked on aura remove may apply new area aura - so start from the beginning
-                iter = m_ownedAuras.begin();
-            }
-        }
-
-        // remove area auras owned by others
-        for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
-        {
-            if (iter->second->GetBase()->GetOwner() != this)
-            {
-                RemoveAura(iter);
-                cleanRun = false;
-            }
-            else
-                ++iter;
+            AuraApplication * aurApp = itr->second;
+            ++itr;
+            Unit * target = aurApp->GetTarget();
+            if (target == this)
+                continue;
+            target->RemoveAura(aurApp);
+            // things linked on aura remove may apply new area aura - so start from the beginning
+            iter = m_ownedAuras.begin();
         }
     }
-    while (!cleanRun);
+
+    // remove area auras owned by others
+    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
+    {
+        if (iter->second->GetBase()->GetOwner() != this)
+        {
+            RemoveAura(iter);
+        }
+        else
+            ++iter;
+    }
 }
 
 void Unit::RemoveAllAuras()
@@ -4601,6 +4618,15 @@ bool Unit::HasAuraTypeWithMiscvalue(AuraType auratype, int32 miscvalue) const
     AuraEffectList const& mTotalAuraList = GetAuraEffectsByType(auratype);
     for (AuraEffectList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
         if (miscvalue == (*i)->GetMiscValue())
+            return true;
+    return false;
+}
+
+bool Unit::HasAuraTypeWithAffectMask(AuraType auratype, SpellEntry const * affectedSpell) const
+{
+    AuraEffectList const& mTotalAuraList = GetAuraEffectsByType(auratype);
+    for (AuraEffectList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
+        if ((*i)->IsAffectedOnSpell(affectedSpell))
             return true;
     return false;
 }
@@ -4844,6 +4870,60 @@ int32 Unit::GetMaxNegativeAuraModifierByMiscValue(AuraType auratype, int32 misc_
     for (AuraEffectList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
     {
         if ((*i)->GetMiscValue() == misc_value && (*i)->GetAmount() < modifier)
+            modifier = (*i)->GetAmount();
+    }
+
+    return modifier;
+}
+
+int32 Unit::GetTotalAuraModifierByAffectMask(AuraType auratype, SpellEntry const * affectedSpell) const
+{
+    int32 modifier = 0;
+
+    AuraEffectList const& mTotalAuraList = GetAuraEffectsByType(auratype);
+    for (AuraEffectList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
+    {
+        if ((*i)->IsAffectedOnSpell(affectedSpell))
+            modifier += (*i)->GetAmount();
+    }
+    return modifier;
+}
+
+float Unit::GetTotalAuraMultiplierByAffectMask(AuraType auratype, SpellEntry const * affectedSpell) const
+{
+    float multiplier = 1.0f;
+
+    AuraEffectList const& mTotalAuraList = GetAuraEffectsByType(auratype);
+    for (AuraEffectList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
+    {
+        if ((*i)->IsAffectedOnSpell(affectedSpell))
+            multiplier *= (100.0f + (*i)->GetAmount())/100.0f;
+    }
+    return multiplier;
+}
+
+int32 Unit::GetMaxPositiveAuraModifierByAffectMask(AuraType auratype, SpellEntry const * affectedSpell) const
+{
+    int32 modifier = 0;
+
+    AuraEffectList const& mTotalAuraList = GetAuraEffectsByType(auratype);
+    for (AuraEffectList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
+    {
+        if ((*i)->IsAffectedOnSpell(affectedSpell) && (*i)->GetAmount() > modifier)
+            modifier = (*i)->GetAmount();
+    }
+
+    return modifier;
+}
+
+int32 Unit::GetMaxNegativeAuraModifierByAffectMask(AuraType auratype, SpellEntry const * affectedSpell) const
+{
+    int32 modifier = 0;
+
+    AuraEffectList const& mTotalAuraList = GetAuraEffectsByType(auratype);
+    for (AuraEffectList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
+    {
+        if ((*i)->IsAffectedOnSpell(affectedSpell) && (*i)->GetAmount() < modifier)
             modifier = (*i)->GetAmount();
     }
 
@@ -7632,22 +7712,24 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             }
             break;
         }
-         case SPELLFAMILY_PET:
+        case SPELLFAMILY_PET:
         {
-            // improved cower
-            if (dummySpell->SpellIconID == 958 && procSpell->SpellIconID == 958)
+            switch (dummySpell->SpellIconID)
             {
-                triggered_spell_id = dummySpell->Id == 53180 ? 54200 : 54201;
-                target = this;
-                break;
-            }
-            // guard dog
-            if (dummySpell->SpellIconID == 201 && procSpell->SpellIconID == 201)
-            {
-                triggered_spell_id = 54445;
-                target = this;
-                pVictim->AddThreat(this,procSpell->EffectBasePoints[0]*triggerAmount/100.0f);
-                break;
+                // Guard Dog
+                case 201:
+                {
+                    triggered_spell_id = 54445;
+                    target = this;
+                    float addThreat = SpellMgr::CalculateSpellEffectAmount(procSpell, 0, this) * triggerAmount / 100.f;
+                    pVictim->AddThreat(this, addThreat);
+                    break;
+                }
+                // Silverback
+                case 1582:
+                    triggered_spell_id = dummySpell->Id == 62765 ? 62801 : 62800;
+                    target = this;
+                    break;
             }
             break;
         }
@@ -9667,9 +9749,9 @@ void Unit::SetCharm(Unit* charm, bool apply)
         if (!charm->AddUInt64Value(UNIT_FIELD_CHARMEDBY, GetGUID()))
             sLog.outCrash("Unit %u is being charmed, but it already has a charmer %u", charm->GetEntry(), charm->GetCharmerGUID());
 
-        if (charm->HasUnitMovementFlag(MOVEMENTFLAG_WALK_MODE))
+        if (charm->HasUnitMovementFlag(MOVEMENTFLAG_WALKING))
         {
-            charm->RemoveUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
+            charm->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
             charm->SendMovementFlagUpdate();
         }
 
@@ -12116,9 +12198,12 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
     if (slow)
     {
         speed *=(100.0f + slow)/100.0f;
-        float min_speed = (float)GetMaxPositiveAuraModifier(SPELL_AURA_MOD_MINIMUM_SPEED) / 100.0f;
-        if (speed < min_speed)
-            speed = min_speed;
+        if (float minSpeedMod = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_MINIMUM_SPEED))
+        {
+            float min_speed = minSpeedMod / 100.0f;
+            if (speed < min_speed)
+                speed = min_speed;
+        }
     }
     SetSpeed(mtype, speed, forced);
 }
@@ -13295,6 +13380,7 @@ void Unit::RemoveFromWorld()
 
     if (IsInWorld())
     {
+        m_duringRemoveFromWorld = true;
         if (IsVehicle())
             GetVehicleKit()->Uninstall();
 
@@ -13327,6 +13413,7 @@ void Unit::RemoveFromWorld()
         }
 
         WorldObject::RemoveFromWorld();
+        m_duringRemoveFromWorld = false;
     }
 }
 
@@ -16336,10 +16423,7 @@ void Unit::ExitVehicle()
     SetControlled(false, UNIT_STAT_ROOT);
 
     RemoveUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT);
-    m_movementInfo.t_x = 0;
-    m_movementInfo.t_y = 0;
-    m_movementInfo.t_z = 0;
-    m_movementInfo.t_o = 0;
+    m_movementInfo.t_pos.Relocate(0, 0, 0, 0);
     m_movementInfo.t_time = 0;
     m_movementInfo.t_seat = 0;
 
@@ -16371,17 +16455,17 @@ void Unit::BuildMovementPacket(ByteBuffer *data) const
             break;
         case TYPEID_PLAYER:
             // remove unknown, unused etc flags for now
-            const_cast<Unit*>(this)->RemoveUnitMovementFlag(MOVEMENTFLAG_SPLINE2);
+            const_cast<Unit*>(this)->RemoveUnitMovementFlag(MOVEMENTFLAG_SPLINE_ENABLED);
             if (isInFlight())
             {
                 WPAssert(const_cast<Unit*>(this)->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE);
-                const_cast<Unit*>(this)->AddUnitMovementFlag(MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_SPLINE2);
+                const_cast<Unit*>(this)->AddUnitMovementFlag(MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_SPLINE_ENABLED);
             }
             break;
     }
 
     *data << uint32(GetUnitMovementFlags()); // movement flags
-    *data << uint16(m_movementInfo.unk1);    // 2.3.0
+    *data << uint16(m_movementInfo.flags2);    // 2.3.0
     *data << uint32(getMSTime());            // time
     *data << GetPositionX();
     *data << GetPositionY();
@@ -16410,8 +16494,8 @@ void Unit::BuildMovementPacket(ByteBuffer *data) const
 
     // 0x02200000
     if ((GetUnitMovementFlags() & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING))
-        || (m_movementInfo.unk1 & 0x20))
-        *data << (float)m_movementInfo.s_pitch;
+        || (m_movementInfo.flags2 & MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING))
+        *data << (float)m_movementInfo.pitch;
 
     *data << (uint32)m_movementInfo.fallTime;
 
@@ -16425,8 +16509,8 @@ void Unit::BuildMovementPacket(ByteBuffer *data) const
     }
 
     // 0x04000000
-    if (GetUnitMovementFlags() & MOVEMENTFLAG_SPLINE)
-        *data << (float)m_movementInfo.u_unk1;
+    if (GetUnitMovementFlags() & MOVEMENTFLAG_SPLINE_ELEVATION)
+        *data << (float)m_movementInfo.splineElevation;
 
     /*if (GetTypeId() == TYPEID_PLAYER)
     {
@@ -16435,30 +16519,17 @@ void Unit::BuildMovementPacket(ByteBuffer *data) const
     }*/
 }
 
-void Unit::OutMovementInfo() const
-{
-    sLog.outString("MovementInfo for %u: Flag %u, Unk1 %u, Time %u, Pos %f %f %f %f, Fall %u", GetEntry(), m_movementInfo.flags, (uint32)m_movementInfo.unk1, m_movementInfo.time, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation(), m_movementInfo.fallTime);
-    if (m_movementInfo.flags & MOVEMENTFLAG_ONTRANSPORT)
-        sLog.outString("Transport: GUID " UI64FMTD ", Pos %f %f %f %f, Time %u, Seat %d", m_movementInfo.t_guid, m_movementInfo.t_x, m_movementInfo.t_y, m_movementInfo.t_z, m_movementInfo.t_o, m_movementInfo.t_time, (int32)m_movementInfo.t_seat);
-    if ((m_movementInfo.flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || (m_movementInfo.unk1 & 0x20))
-        sLog.outString("Pitch: %f", m_movementInfo.s_pitch);
-    if (m_movementInfo.flags & MOVEMENTFLAG_JUMPING)
-        sLog.outString("Jump: speedz %f, sin %f, cos %f, speedxy %f", m_movementInfo.j_zspeed, m_movementInfo.j_sinAngle, m_movementInfo.j_cosAngle, m_movementInfo.j_xyspeed);
-    if (m_movementInfo.flags & MOVEMENTFLAG_SPLINE)
-        sLog.outString("Spline: %f", m_movementInfo.u_unk1);
-}
-
 void Unit::SetFlying(bool apply)
 {
     if (apply)
     {
         SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0x02);
-        AddUnitMovementFlag(MOVEMENTFLAG_FLY_MODE | MOVEMENTFLAG_FLYING);
+        AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING);
     }
     else
     {
         RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, 0x02);
-        RemoveUnitMovementFlag(MOVEMENTFLAG_FLY_MODE | MOVEMENTFLAG_FLYING);
+        RemoveUnitMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING);
     }
 }
 

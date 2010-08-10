@@ -181,7 +181,6 @@ DROP TABLE IF EXISTS `areatrigger_teleport`;
 CREATE TABLE `areatrigger_teleport` (
   `id` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Identifier',
   `name` text,
-  `access_id` bigint(20) unsigned NOT NULL DEFAULT '0',
   `target_map` smallint(5) unsigned NOT NULL DEFAULT '0',
   `target_position_x` float NOT NULL DEFAULT '0',
   `target_position_y` float NOT NULL DEFAULT '0',
@@ -241,6 +240,7 @@ CREATE TABLE `battleground_template` (
   `AllianceStartO` float NOT NULL,
   `HordeStartLoc` mediumint(8) unsigned NOT NULL,
   `HordeStartO` float NOT NULL,
+  `Weight` tinyint(2) unsigned NOT NULL DEFAULT 1,
   `Comment` char(32) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -252,20 +252,20 @@ CREATE TABLE `battleground_template` (
 
 LOCK TABLES `battleground_template` WRITE;
 /*!40000 ALTER TABLE `battleground_template` DISABLE KEYS */;
-INSERT INTO `battleground_template` (`id`,`MinPlayersPerTeam`,`MaxPlayersPerTeam`,`MinLvl`,`MaxLvl`,`AllianceStartLoc`,`AllianceStartO`,`HordeStartLoc`,`HordeStartO`) VALUES
-(1,20,40,51,80,611,2.72532,610,2.27452),
-(2,5,10,10,80,769,3.14159,770,3.14159),
-(3,8,15,20,80,890,3.40156,889,0.263892),
-(4,0,2,10,80,929,0,936,3.14159),
-(5,0,2,10,80,939,0,940,3.14159),
-(6,0,2,10,80,0,0,0,0),
-(7,8,15,61,80,1103,3.40156,1104,0.263892),
-(8,0,2,10,80,1258,0,1259,3.14159),
-(9,7,15,71,80,1367,0,1368,0),
-(10,5,5,10,80,1362,0,1363,0),
-(11,5,5,10,80,1364,0,1365,0),
-(30,20,40,71,80,1485,0,1486,0),
-(32,10,10,0,80,0,0,0,0);
+INSERT INTO `battleground_template` (`id`,`MinPlayersPerTeam`,`MaxPlayersPerTeam`,`MinLvl`,`MaxLvl`,`AllianceStartLoc`,`AllianceStartO`,`HordeStartLoc`,`HordeStartO`, `Weight`) VALUES
+(1,20,40,51,80,611,2.72532,610,2.27452,1),
+(2,5,10,10,80,769,3.14159,770,3.14159,1),
+(3,8,15,20,80,890,3.40156,889,0.263892,1),
+(4,0,2,10,80,929,0,936,3.14159,1),
+(5,0,2,10,80,939,0,940,3.14159,1),
+(6,0,2,10,80,0,0,0,0,1),
+(7,8,15,61,80,1103,3.40156,1104,0.263892,1),
+(8,0,2,10,80,1258,0,1259,3.14159,1),
+(9,7,15,71,80,1367,0,1368,0,1),
+(10,5,5,10,80,1362,0,1363,0,1),
+(11,5,5,10,80,1364,0,1365,0,1),
+(30,20,40,71,80,1485,0,1486,0,1),
+(32,10,10,0,80,0,0,0,0,1);
 /*!40000 ALTER TABLE `battleground_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4523,7 +4523,7 @@ CREATE TABLE `quest_template` (
   `SpecialFlags` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `CharTitleId` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `PlayersSlain` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `BonusTalents` tinyint(3) unsigned unsigned NULL DEFAULT '0',
+  `BonusTalents` tinyint(3) unsigned NULL DEFAULT '0',
   `RewardArenaPoints` smallint(5) unsigned NOT NULL DEFAULT '0',
   `PrevQuestId` mediumint(9) NOT NULL DEFAULT '0',
   `NextQuestId` mediumint(9) NOT NULL DEFAULT '0',
@@ -5181,7 +5181,7 @@ INSERT INTO `spell_bonus_data` (`entry`,`direct_bonus`,`dot_bonus`,`ap_bonus`,`a
 (27187, -1, -1, -1, 0.03, 'Rogue - Deadly Poison Rank 7($AP*0.12 / number of ticks)'),
 (57969, -1, -1, -1, 0.03, 'Rogue - Deadly Poison Rank 8($AP*0.12 / number of ticks)'),
 (57970, -1, -1, -1, 0.03, 'Rogue - Deadly Poison Rank 9($AP*0.12 / number of ticks)'),
-(703, -1, -1, -1, 0.02, 'Rogue - Garrote'),
+(703, -1, -1, -1, 0.07, 'Rogue - Garrote'),
 (1776, -1, -1, 0.21, -1, 'Rogue - Gouge'),
 (8680, -1, -1, 0.1, -1, 'Rogue - Instant Poison Rank 1'),
 (8685, -1, -1, 0.1, -1, 'Rogue - Instant Poison Rank 2'),
@@ -5205,6 +5205,7 @@ INSERT INTO `spell_bonus_data` (`entry`,`direct_bonus`,`dot_bonus`,`ap_bonus`,`a
 (379, 0, 0, 0, 0, 'Shaman - Earth Shield Triggered'),
 (8042, 0.3858, -1, -1, -1, 'Shaman - Earth Shock'),
 (8050, 0.2142, 0.1, -1, -1, 'Shaman - Flame Shock'),
+(10444, 0, 0, 0, 0, 'Shaman - Flametongue Trigger'),
 (8026, 0.1, -1, -1, -1, 'Shaman - Flametongue Weapon Proc Rank 1'),
 (58788, 0.1, -1, -1, -1, 'Shaman - Flametongue Weapon Proc Rank 10'),
 (8028, 0.1, -1, -1, -1, 'Shaman - Flametongue Weapon Proc Rank 2'),
@@ -6414,7 +6415,7 @@ INSERT INTO `spell_proc_event` (`entry`,`SchoolMask`,`SpellFamilyName`,`SpellFam
 ( 12298, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000070,   0,   0,   0), -- Shield Specialization (Rank 1)
 ( 12311, 0x00,   4, 0x00000800, 0x00000001, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Gag Order (Rank 1)
 ( 12319, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000002,   0,   0,   0), -- Flurry (Rank 1)
-( 12322, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   2,   0,   0), -- Unbridled Wrath (Rank 1)
+( 12322, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   3,   0,   0), -- Unbridled Wrath (Rank 1)
 ( 12487, 0x00,   3, 0x00000080, 0x00000000, 0x00000000, 0x00050000, 0x00000000,   0,   0,   0), -- Improved Blizzard (Rank 2)
 ( 12488, 0x00,   3, 0x00000080, 0x00000000, 0x00000000, 0x00050000, 0x00000000,   0,   0,   0), -- Improved Blizzard (Rank 3)
 ( 12598, 0x00,   3, 0x00004000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Improved Counterspell (Rank 2)
@@ -6447,10 +6448,10 @@ INSERT INTO `spell_proc_event` (`entry`,`SchoolMask`,`SpellFamilyName`,`SpellFam
 ( 12972, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000002,   0,   0,   0), -- Flurry (Rank 3)
 ( 12973, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000002,   0,   0,   0), -- Flurry (Rank 4)
 ( 12974, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000002,   0,   0,   0), -- Flurry (Rank 5)
-( 12999, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   4,   0,   0), -- Unbridled Wrath (Rank 2)
-( 13000, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   6,   0,   0), -- Unbridled Wrath (Rank 3)
-( 13001, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   8,   0,   0), -- Unbridled Wrath (Rank 4)
-( 13002, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,  10,   0,   0), -- Unbridled Wrath (Rank 5)
+( 12999, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   6,   0,   0), -- Unbridled Wrath (Rank 2)
+( 13000, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   9,   0,   0), -- Unbridled Wrath (Rank 3)
+( 13001, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,  12,   0,   0), -- Unbridled Wrath (Rank 4)
+( 13002, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,  15,   0,   0), -- Unbridled Wrath (Rank 5)
 ( 13163, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000010,   0,   0,   0), -- Aspect of the Monkey
 ( 13754, 0x00,   8, 0x00000010, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Improved Kick (Rank 1)
 ( 13867, 0x00,   8, 0x00000010, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Improved Kick (Rank 2)
@@ -6975,10 +6976,11 @@ INSERT INTO `spell_proc_event` (`entry`,`SchoolMask`,`SpellFamilyName`,`SpellFam
 ( 48988, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000002,   0,   0,   0), -- Bloody Vengeance (Rank 1)
 ( 49018, 0x00,  15, 0x01400000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Sudden Doom (Rank 1)
 ( 49194, 0x00,  15, 0x00002000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Unholy Blight
-( 49027, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   3,  20), -- Bloodworms rank 1 
-( 49542, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   6,  20), -- Bloodworms rank 2 
-( 49543, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   9,  20), -- Bloodworms rank 3
+( 49027, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   3,  20), -- Bloodworms (Rank 1)
+( 49542, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   6,  20), -- Bloodworms (Rank 2) 
+( 49543, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   9,  20), -- Bloodworms (Rank 3)
 ( 49208, 0x00,  15, 0x00400000, 0x00010000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Reaping (Rank 1)
+( 49219, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000004, 0x00000000,   0,   0,   0), -- Blood-Caked Blade (Rank 1)
 ( 49222, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   3), -- Bone Shield
 ( 49280, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   3), -- Lightning Shield (Rank 10)
 ( 49281, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   3), -- Lightning Shield (Rank 11)
@@ -6989,6 +6991,8 @@ INSERT INTO `spell_proc_event` (`entry`,`SchoolMask`,`SpellFamilyName`,`SpellFam
 ( 49529, 0x00,  15, 0x01400000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Sudden Doom (Rank 2)
 ( 49530, 0x00,  15, 0x01400000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Sudden Doom (Rank 3)
 ( 49622, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,  60), -- Bonus Mana Regen
+( 49627, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000004, 0x00000000,   0,   0,   0), -- Blood-Caked Blade (Rank 2)
+( 49628, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000004, 0x00000000,   0,   0,   0), -- Blood-Caked Blade (Rank 3)
 ( 50781, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000002,   0,   0,   6), -- Fate Rune of Primal Energy
 ( 50880, 0x00,  15, 0x00000000, 0x04000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Icy Talons
 ( 50884, 0x00,  15, 0x00000000, 0x04000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Icy Talons
@@ -7005,6 +7009,11 @@ INSERT INTO `spell_proc_event` (`entry`,`SchoolMask`,`SpellFamilyName`,`SpellFam
 ( 51352, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,  10), -- Venture Company Beatdown!
 ( 51359, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,  10), -- Venture Company Beatdown
 ( 51414, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,  45), -- Venomous Breath Aura
+( 51459, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000004, 0x00000000,   0,   0,   0), -- Necrosis (Rank 1)
+( 51462, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000004, 0x00000000,   0,   0,   0), -- Necrosis (Rank 2)
+( 51463, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000004, 0x00000000,   0,   0,   0), -- Necrosis (Rank 3)
+( 51464, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000004, 0x00000000,   0,   0,   0), -- Necrosis (Rank 4)
+( 51465, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000004, 0x00000000,   0,   0,   0), -- Necrosis (Rank 5)
 ( 51474, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00010000,   0,   0,   0), -- Astral Shift (Rank 1)
 ( 51478, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00010000,   0,   0,   0), -- Astral Shift (Rank 2)
 ( 51479, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00010000,   0,   0,   0), -- Astral Shift (Rank 3)
@@ -7298,6 +7307,10 @@ INSERT INTO `spell_proc_event` (`entry`,`SchoolMask`,`SpellFamilyName`,`SpellFam
 ( 27044, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000040, 0x00000000,   0,   0,   0), -- Aspect of the Hawk
 ( 61846, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000040, 0x00000000,   0,   0,   0), -- Aspect of the Dragonhawk
 ( 61847, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000040, 0x00000000,   0,   0,   0), -- Aspect of the Dragonhawk
+( 53178, 0x00,   9, 0x00000000, 0x10000000, 0x00000000, 0x00000000, 0x00000000,   0, 100,   0), -- Guard Dog (Rank 1)
+( 53179, 0x00,   9, 0x00000000, 0x10000000, 0x00000000, 0x00000000, 0x00000000,   0, 100,   0), -- Guard Dog (Rank 2)
+( 62764, 0x00,   9, 0x00000000, 0x10000000, 0x00000000, 0x00000000, 0x00000000,   0, 100,   0), -- Silverback (Rank 1)
+( 62765, 0x00,   9, 0x00000000, 0x10000000, 0x00000000, 0x00000000, 0x00000000,   0, 100,   0), -- Silverback (Rank 2)
 ( 49223, 0x00,  15, 0x00000011, 0x08020000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Dirge
 ( 49599, 0x00,  15, 0x00000011, 0x08020000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Dirge
 ( 49188, 0x00,  15, 0x00000000, 0x00020000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Rime
@@ -7313,9 +7326,9 @@ INSERT INTO `spell_proc_event` (`entry`,`SchoolMask`,`SpellFamilyName`,`SpellFam
 ( 49654, 0x00,  15, 0x00000000, 0x00000000, 0x00000002, 0x00000000, 0x00000000,   0,   0,   1), -- Wandering Plague
 ( 49655, 0x00,  15, 0x00000000, 0x00000000, 0x00000002, 0x00000000, 0x00000000,   0,   0,   1), -- Wandering Plague
 ( 58620, 0x00,  15, 0x00000004, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Glyph of Chains of Ice
-( 56342, 0x00,   9, 0x00000018, 0x08000000, 0x00024000, 0x00000000, 0x00000000,   0,   0,   0), -- Lock and Load
-( 56343, 0x00,   9, 0x00000018, 0x08000000, 0x00024000, 0x00000000, 0x00000000,   0,   0,   0), -- Lock and Load
-( 56344, 0x00,   9, 0x00000018, 0x08000000, 0x00024000, 0x00000000, 0x00000000,   0,   0,   0), -- Lock and Load
+( 56342, 0x00,   9, 0x00000018, 0x08000000, 0x00024000, 0x00000000, 0x00000000,   0,   0,  22), -- Lock and Load
+( 56343, 0x00,   9, 0x00000018, 0x08000000, 0x00024000, 0x00000000, 0x00000000,   0,   0,  22), -- Lock and Load
+( 56344, 0x00,   9, 0x00000018, 0x08000000, 0x00024000, 0x00000000, 0x00000000,   0,   0,  22), -- Lock and Load
 ( 48539, 0x00,   7, 0x00000010, 0x04000000, 0x00000000, 0x00040000, 0x00000000,   0,   0,   0), -- Revitalize
 ( 48544, 0x00,   7, 0x00000010, 0x04000000, 0x00000000, 0x00040000, 0x00000000,   0,   0,   0), -- Revitalize
 ( 48545, 0x00,   7, 0x00000010, 0x04000000, 0x00000000, 0x00040000, 0x00000000,   0,   0,   0), -- Revitalize
@@ -13931,6 +13944,8 @@ INSERT INTO spell_ranks (`first_spell_id`, `spell_id`, `rank`) VALUES
  -- Penance
 (47757, 47757, 1),
 (47757, 52986, 2),
+(47757, 52987, 3),
+(47757, 52988, 4),
  -- Savage Rend
 (50498, 50498, 1),
 (50498, 53578, 2),
@@ -14665,6 +14680,44 @@ CREATE TABLE `spell_script_names` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `spell_script_names`
+--
+
+LOCK TABLES `spell_script_names` WRITE;
+/*!40000 ALTER TABLE `spell_script_names` DISABLE KEYS */;
+INSERT INTO `spell_script_names` (`spell_id`,`ScriptName`) VALUES
+-- warrior
+( 12975,'spell_warr_last_stand'),
+( 21977,'spell_warr_warriors_wrath'),
+-- paladin
+( 20425, 'spell_pal_judgement_of_command'),
+(-20473, 'spell_pal_holy_shock'),
+( 37877, 'spell_pal_blessing_of_faith'),
+-- hunter
+( 23989, 'spell_hun_readiness'),
+( 53271, 'spell_hun_masters_call'),
+( 53478, 'spell_hun_last_stand_pet'),
+( 55709, 'spell_hun_pet_heart_of_the_phoenix'),
+( 54044, 'spell_hun_pet_carrion_feeder'),
+-- rogue
+(  5938, 'spell_rog_shiv'),
+( 14185, 'spell_rog_preparation'),
+( 31231, 'spell_rog_cheat_death'),
+( 51662, 'spell_rog_hunger_for_blood'),
+-- priest
+(-47540, 'spell_pri_penance'),
+-- death knight
+-- shaman
+-- mage
+( 11958, 'spell_mage_cold_snap'),
+( 31687, 'spell_mage_summon_water_elemental'),
+( 32826, 'spell_mage_polymorph_visual');
+-- warlock
+-- druid
+/*!40000 ALTER TABLE `spell_script_names` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `transports`
 --
 
@@ -15397,6 +15450,7 @@ INSERT INTO `trinity_string` (`entry`,`content_default`,`content_loc1`,`content_
 (1127, 'Talents of %s''s pet reset.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (1128, '%d - |cffffffff|Htaxinode:%u|h[%s %s]|h|r (Map:%u X:%f Y:%f Z:%f)', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (1129, '%d - %s %s (Map:%u X:%f Y:%f Z:%f)', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(1130, 'Can''t dump deleted characters, aborting.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (1200, 'You try to view cinemitic %u but it doesn''t exist.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (1201, 'You try to view movie %u but it doesn''t exist.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (1300, 'Alliance', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),

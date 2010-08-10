@@ -512,7 +512,7 @@ struct boss_stormcaller_brundirAI : public ScriptedAI
         if(pInstance)
             pInstance->SetBossState(BOSS_ASSEMBLY, NOT_STARTED);
         me->RemoveAllAuras();
-        me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING | MOVEMENTFLAG_WALK_MODE);
+        me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING | MOVEMENTFLAG_WALKING);
         events.Reset();
         phase = 0;
         

@@ -141,7 +141,7 @@ bool ForcedDespawnDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 
 Creature::Creature() :
 Unit(),
-lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGroupGUID(0),
+lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGroupLowGUID(0),
 m_lootMoney(0), m_lootRecipient(0),
 m_deathTimer(0), m_respawnTime(0), m_respawnDelay(300), m_corpseDelay(60), m_respawnradius(0.0f),
 m_defaultMovementType(IDLE_MOTION_TYPE), m_DBTableGuid(0), m_equipmentId(0), m_AlreadyCallAssistance(false),
@@ -421,7 +421,7 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data)
 
     // TODO: In fact monster move flags should be set - not movement flags.
     if (cInfo->InhabitType & INHABIT_AIR)
-        AddUnitMovementFlag(MOVEMENTFLAG_FLY_MODE | MOVEMENTFLAG_FLYING);
+        AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING);
 
     if (cInfo->InhabitType & INHABIT_WATER)
         AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
@@ -473,18 +473,18 @@ void Creature::Update(uint32 diff)
             if (m_isDeadByDefault)
                 break;
 
-            if (m_groupLootTimer && lootingGroupGUID)
+            if (m_groupLootTimer && lootingGroupLowGUID)
             {
                 // for delayed spells
                 m_Events.Update(diff);
 
                 if (m_groupLootTimer <= diff)
                 {
-                    Group* group = objmgr.GetGroupByGUID(lootingGroupGUID);
+                    Group* group = objmgr.GetGroupByGUID(lootingGroupLowGUID);
                     if (group)
                         group->EndRoll(&loot);
                     m_groupLootTimer = 0;
-                    lootingGroupGUID = 0;
+                    lootingGroupLowGUID = 0;
                 }
                 else m_groupLootTimer -= diff;
             }
@@ -785,7 +785,7 @@ bool Creature::Create(uint32 guidlow, Map *map, uint32 phaseMask, uint32 Entry, 
         if (GetCreatureInfo()->InhabitType & INHABIT_AIR)
         {
             if (GetDefaultMovementType() == IDLE_MOTION_TYPE)
-                AddUnitMovementFlag(MOVEMENTFLAG_FLY_MODE);
+                AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY);
             else
                 SetFlying(true);
         }
@@ -1516,9 +1516,9 @@ void Creature::setDeathState(DeathState s)
         SetLootRecipient(NULL);
         ResetPlayerDamageReq();
         CreatureInfo const *cinfo = GetCreatureInfo();
-        AddUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
+        AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
         if (GetCreatureInfo()->InhabitType & INHABIT_AIR)
-            AddUnitMovementFlag(MOVEMENTFLAG_FLY_MODE | MOVEMENTFLAG_FLYING);
+            AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING);
         if (GetCreatureInfo()->InhabitType & INHABIT_WATER)
             AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
         SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
