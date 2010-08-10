@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <memory>
 #include <utility>
+#include <functional>
 #include <array>
 #include <sstream>
 #include "WorldSocket.h"                                    // must be first to make ACE happy with ACE includes in it
