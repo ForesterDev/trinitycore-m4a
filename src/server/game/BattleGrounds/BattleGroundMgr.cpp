@@ -1308,7 +1308,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
 {
     uint8 type = (bg->isArena() ? 1 : 0);
     auto score_count = bg->GetPlayerScoresSize();
-    assert(score_count <= max_battleground_players);
+    ASSERT(score_count <= max_battleground_players);
                                                             // last check on 3.0.3
     data->Initialize(MSG_PVP_LOG_DATA, 1 + ((4 + 4 + 4) * 2 + (96) * 2) + 1 + (1)
             + 4 + (8 + 4 + std::max(1, 4 + 4 + 4) + 4 + 4 + 4

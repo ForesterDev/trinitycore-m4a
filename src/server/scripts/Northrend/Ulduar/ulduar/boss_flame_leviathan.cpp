@@ -138,7 +138,7 @@ struct boss_flame_leviathanAI : public BossAI
 {
     boss_flame_leviathanAI(Creature *pCreature) : BossAI(pCreature, BOSS_LEVIATHAN), vehicle(me->GetVehicleKit())
     {
-        assert(vehicle);
+        ASSERT(vehicle);
         pInstance = pCreature->GetInstanceData();
         ColossusCount = 0;
         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
@@ -340,7 +340,7 @@ struct boss_flame_leviathan_seatAI : public PassiveAI
 {
     boss_flame_leviathan_seatAI(Creature *c) : PassiveAI(c), vehicle(c->GetVehicleKit())
     {
-        assert(vehicle);
+        ASSERT(vehicle);
 #ifdef BOSS_DEBUG
         me->SetReactState(REACT_AGGRESSIVE);
 #endif

@@ -147,7 +147,7 @@ struct boss_xt002_AI : public BossAI
 {
     boss_xt002_AI(Creature *pCreature) : BossAI(pCreature, BOSS_XT002), vehicle(me->GetVehicleKit())
     {
-        assert(vehicle);
+        ASSERT(vehicle);
         pInstance = pCreature->GetInstanceData();
         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
         me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
