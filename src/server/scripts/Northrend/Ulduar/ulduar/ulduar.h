@@ -38,7 +38,7 @@ enum Encounter
     MAX_BOSS_NUMBER
 };
 
-enum Data64
+enum
 {
     DATA_LEVIATHAN,
     DATA_NORGANNON,
@@ -72,7 +72,7 @@ enum Data64
     DATA_YS_HODIR,
 };
 
-enum Data
+enum
 {
     DATA_LEVIATHAN_DOOR,
     DATA_RUNIC_DOOR,

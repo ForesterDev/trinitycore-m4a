@@ -55,42 +55,44 @@ EndScriptData */
 #define SPELL_LIGHTNING_TENDRILS_SELF_VISUAL  61883
 #define SPELL_STORMSHIELD                     64187
 
-enum eEnums
+namespace
 {
-    EVENT_ENRAGE,
-    // Steelbreaker
-    EVENT_FUSION_PUNCH,
-    EVENT_STATIC_DISRUPTION,
-    EVENT_OVERWHELMING_POWER,
-    // Molgeim
-    EVENT_RUNE_OF_POWER,
-    EVENT_SHIELD_OF_RUNES,
-    EVENT_RUNE_OF_DEATH,
-    EVENT_RUNE_OF_SUMMONING,
-    EVENT_LIGHTNING_BLAST,
-    // Brundir
-    EVENT_CHAIN_LIGHTNING,
-    EVENT_OVERLOAD,
-    EVENT_LIGHTNING_WHIRL,
-    EVENT_LIGHTNING_TENDRILS,
-    EVENT_FLIGHT,
-    EVENT_ENDFLIGHT,
-    EVENT_GROUND,
-    EVENT_LAND,
-    EVENT_MOVE_POS,
-    //rune of power
-    EVENT_AURA,
+    enum eEnums
+    {
+        EVENT_ENRAGE,
+        // Steelbreaker
+        EVENT_FUSION_PUNCH,
+        EVENT_STATIC_DISRUPTION,
+        EVENT_OVERWHELMING_POWER,
+        // Molgeim
+        EVENT_RUNE_OF_POWER,
+        EVENT_SHIELD_OF_RUNES,
+        EVENT_RUNE_OF_DEATH,
+        EVENT_RUNE_OF_SUMMONING,
+        EVENT_LIGHTNING_BLAST,
+        // Brundir
+        EVENT_CHAIN_LIGHTNING,
+        EVENT_OVERLOAD,
+        EVENT_LIGHTNING_WHIRL,
+        EVENT_LIGHTNING_TENDRILS,
+        EVENT_FLIGHT,
+        EVENT_ENDFLIGHT,
+        EVENT_GROUND,
+        EVENT_LAND,
+        EVENT_MOVE_POS,
+        //rune of power
+        EVENT_AURA,
 
-    MAX_EVENT
+        MAX_EVENT
 
-};
+    };
 
-enum Actions
-{
-    ACTION_STEELBREAKER                         = 0,
-    ACTION_MOLGEIM                              = 1,
-    ACTION_BRUNDIR                              = 2,
-};
+    enum Actions
+    {
+        ACTION_STEELBREAKER                         = 0,
+        ACTION_MOLGEIM                              = 1,
+        ACTION_BRUNDIR                              = 2,
+    };
 
 // Achievements
 #define ACHIEVEMENT_ON_YOUR_SIDE              RAID_MODE(2945, 2946) // TODO
@@ -104,34 +106,35 @@ enum Actions
 
 #define EMOTE_OVERLOAD    "Stormcaller Brundir begins to Overload!"
 
-enum Yells
-{
-    SAY_STEELBREAKER_AGGRO                      = -1603020,
-    SAY_STEELBREAKER_SLAY_1                     = -1603021,
-    SAY_STEELBREAKER_SLAY_2                     = -1603022,
-    SAY_STEELBREAKER_POWER                      = -1603023,
-    SAY_STEELBREAKER_DEATH_1                    = -1603024,
-    SAY_STEELBREAKER_DEATH_2                    = -1603025,
-    SAY_STEELBREAKER_BERSERK                    = -1603026,
+    enum Yells
+    {
+        SAY_STEELBREAKER_AGGRO                      = -1603020,
+        SAY_STEELBREAKER_SLAY_1                     = -1603021,
+        SAY_STEELBREAKER_SLAY_2                     = -1603022,
+        SAY_STEELBREAKER_POWER                      = -1603023,
+        SAY_STEELBREAKER_DEATH_1                    = -1603024,
+        SAY_STEELBREAKER_DEATH_2                    = -1603025,
+        SAY_STEELBREAKER_BERSERK                    = -1603026,
 
-    SAY_MOLGEIM_AGGRO                           = -1603030,
-    SAY_MOLGEIM_SLAY_1                          = -1603031,
-    SAY_MOLGEIM_SLAY_2                          = -1603032,
-    SAY_MOLGEIM_RUNE_DEATH                      = -1603033,
-    SAY_MOLGEIM_SUMMON                          = -1603034,
-    SAY_MOLGEIM_DEATH_1                         = -1603035,
-    SAY_MOLGEIM_DEATH_2                         = -1603036,
-    SAY_MOLGEIM_BERSERK                         = -1603037,
+        SAY_MOLGEIM_AGGRO                           = -1603030,
+        SAY_MOLGEIM_SLAY_1                          = -1603031,
+        SAY_MOLGEIM_SLAY_2                          = -1603032,
+        SAY_MOLGEIM_RUNE_DEATH                      = -1603033,
+        SAY_MOLGEIM_SUMMON                          = -1603034,
+        SAY_MOLGEIM_DEATH_1                         = -1603035,
+        SAY_MOLGEIM_DEATH_2                         = -1603036,
+        SAY_MOLGEIM_BERSERK                         = -1603037,
 
-    SAY_BRUNDIR_AGGRO                           = -1603040,
-    SAY_BRUNDIR_SLAY_1                          = -1603041,
-    SAY_BRUNDIR_SLAY_2                          = -1603042,
-    SAY_BRUNDIR_SPECIAL                         = -1603043,
-    SAY_BRUNDIR_FLIGHT                          = -1603044,
-    SAY_BRUNDIR_DEATH_1                         = -1603045,
-    SAY_BRUNDIR_DEATH_2                         = -1603046,
-    SAY_BRUNDIR_BERSERK                         = -1603047,
-};
+        SAY_BRUNDIR_AGGRO                           = -1603040,
+        SAY_BRUNDIR_SLAY_1                          = -1603041,
+        SAY_BRUNDIR_SLAY_2                          = -1603042,
+        SAY_BRUNDIR_SPECIAL                         = -1603043,
+        SAY_BRUNDIR_FLIGHT                          = -1603044,
+        SAY_BRUNDIR_DEATH_1                         = -1603045,
+        SAY_BRUNDIR_DEATH_2                         = -1603046,
+        SAY_BRUNDIR_BERSERK                         = -1603047,
+    };
+}
 
 bool IsEncounterComplete(ScriptedInstance* pInstance, Creature* me)
 {
