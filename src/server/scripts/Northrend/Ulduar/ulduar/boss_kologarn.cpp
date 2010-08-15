@@ -109,7 +109,7 @@ struct boss_kologarnAI : public BossAI
     boss_kologarnAI(Creature *pCreature) : BossAI(pCreature, BOSS_KOLOGARN), vehicle(me->GetVehicleKit()),
         left(false), right(false)
     {
-        assert(vehicle);
+        ASSERT(vehicle);
         pInstance = pCreature->GetInstanceData();
         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
