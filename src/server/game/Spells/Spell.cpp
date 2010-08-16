@@ -1243,11 +1243,26 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
 
         caster->DealSpellDamage(&damageInfo, true);
 
-        // Haunt
-        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->SpellFamilyFlags[1] & 0x40000 && m_spellAura && m_spellAura->GetEffect(1))
+        switch (m_spellInfo->SpellFamilyName)
         {
-            AuraEffect * aurEff = m_spellAura->GetEffect(1);
-            aurEff->SetAmount(aurEff->GetAmount() * damageInfo.damage / 100);
+        case SPELLFAMILY_WARLOCK:
+            // Haunt
+            if (m_spellInfo->SpellFamilyFlags[1] & 0x40000 && m_spellAura
+                    && m_spellAura->GetEffect(1))
+            {
+                AuraEffect * aurEff = m_spellAura->GetEffect(1);
+                aurEff->SetAmount(aurEff->GetAmount() * damageInfo.damage / 100);
+            }
+            break;
+        case SPELLFAMILY_DEATHKNIGHT:
+            // Scourge Strike
+            if (m_spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_DK_SCOURGE_STRIKE)
+            {
+                int32 bp = (damageInfo.damage * CalculateDamage(2, nullptr)
+                        * unitTarget->GetDiseasesByCaster(m_caster->GetGUID())) / 100;
+                m_caster->CastCustomSpell(unitTarget, 70890, &bp, NULL, NULL, true);
+            }
+            break;
         }
     }
     // Passive spell hits/misses or active spells only misses (only triggers)
