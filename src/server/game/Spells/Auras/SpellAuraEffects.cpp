@@ -4199,7 +4199,8 @@ void AuraEffect::HandleAddCreatureImmunity(AuraApplication const * aurApp, uint8
                         MECHANIC_FEAR,
                         MECHANIC_KNOCKOUT,
                         MECHANIC_BANISH,
-                        MECHANIC_POLYMORPH
+                        MECHANIC_POLYMORPH,
+                        MECHANIC_HORROR
                     };
             immunity_list = make_range(l);
         }
