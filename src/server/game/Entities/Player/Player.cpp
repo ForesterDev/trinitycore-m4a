@@ -20154,10 +20154,14 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
 
 void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time)
 {
-    SpellCooldown sc;
-    sc.end = end_time;
-    sc.itemid = itemid;
-    m_spellCooldowns[spellid] = sc;
+    auto old = m_spellCooldowns.find(spellid);
+    if (old == m_spellCooldowns.end() || old->second.end < end_time)
+    {
+        SpellCooldown sc;
+        sc.end = end_time;
+        sc.itemid = itemid;
+        m_spellCooldowns[spellid] = sc;
+    }
 }
 
 void Player::SendCooldownEvent(SpellEntry const *spellInfo, uint32 itemId, Spell* spell)
