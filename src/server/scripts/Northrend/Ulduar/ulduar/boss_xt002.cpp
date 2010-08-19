@@ -65,7 +65,7 @@ enum Timers
     TIMER_SPAWN_LIFE_SPARK                      = 9000,
     TIMER_GRAVITY_BOMB                          = 20000,
     TIMER_SPAWN_GRAVITY_BOMB                    = 9000,
-    TIMER_HEART_PHASE                           = 33000,
+    TIMER_HEART_PHASE                           = 35000,
     TIMER_ENRAGE                                = 600000,
 
     TIMER_VOID_ZONE                             = 2000,
@@ -115,10 +115,10 @@ enum Yells
 #define EMOTE_HEART       "XT-002 Deconstructor's heart is exposed and leaking energy."
 #define EMOTE_REPAIR      "XT-002 Deconstructor consumes a scrap bot to repair himself!"
 
-#define ACHIEVEMENT_DECONSTRUCT_FASTER        RAID_MODE(2937, 2938)
-#define ACHIEVEMENT_HEARTBREAKER              RAID_MODE(3058, 3059)
-#define ACHIEVEMENT_NERF_ENG                  RAID_MODE(2931, 2932)
-#define MAX_ENCOUNTER_TIME                    205 * 1000
+#define ACHIEVEMENT_DECONSTRUCT_FASTER          RAID_MODE(2937, 2938)
+#define ACHIEVEMENT_HEARTBREAKER                RAID_MODE(3058, 3059)
+#define ACHIEVEMENT_NERF_ENG                    RAID_MODE(2931, 2932)
+#define MAX_ENCOUNTER_TIME                      205 * 1000
 
 /************************************************
 -----------------SPAWN LOCATIONS-----------------
@@ -147,10 +147,9 @@ struct boss_xt002_AI : public BossAI
 {
     boss_xt002_AI(Creature *pCreature) : BossAI(pCreature, BOSS_XT002), vehicle(me->GetVehicleKit())
     {
-        ASSERT(vehicle);
         pInstance = pCreature->GetInstanceData();
         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-        me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
+        me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);  // Death Grip
     }
 
     ScriptedInstance *pInstance;
@@ -447,11 +446,9 @@ struct boss_xt002_AI : public BossAI
         me->AttackStop();
 
         //Summon the heart npc
-        Creature* Heart = me->SummonCreature(NPC_XT002_HEART, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 4, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, TIMER_HEART_PHASE);
+        Creature* Heart = me->SummonCreature(NPC_XT002_HEART, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, TIMER_HEART_PHASE);
         if (Heart)
-        {
             Heart->EnterVehicle(me, 0);
-        }
 
         // Start "end of phase 2 timer"
         uiHeartPhaseTimer = TIMER_HEART_PHASE;
@@ -499,13 +496,13 @@ struct mob_xt002_heartAI : public ScriptedAI
     {
         m_pInstance = pCreature->GetInstanceData();
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_STUNNED);
-        me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
     }
 
     ScriptedInstance* m_pInstance;
     uint32 uiExposeTimer;
+    uint32 uiEndExposedTimer;
     bool Exposed;
+    bool EndExposed;
 
     void JustDied(Unit *victim)
     {
@@ -523,17 +520,33 @@ struct mob_xt002_heartAI : public ScriptedAI
         {
             if (uiExposeTimer <= diff)
             {
-                DoCast(me, SPELL_EXPOSED_HEART);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                me->ChangeSeat(1);
+                DoCast(me, SPELL_EXPOSED_HEART, true);
                 Exposed = true;
             }
             else uiExposeTimer -= diff;
+        }
+        
+        if (!EndExposed)
+        {
+            if (uiEndExposedTimer <= diff)
+            {
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                me->RemoveAllAuras();
+                me->ChangeSeat(0);
+                EndExposed = true;
+            }
+            else uiEndExposedTimer -= diff;
         }
     }
     
     void Reset()
     {
         uiExposeTimer = 3000;
+        uiEndExposedTimer = 33000;
         Exposed = false;
+        EndExposed = false;
     }
 
     void DamageTaken(Unit *pDone, uint32 &damage)

@@ -822,6 +822,8 @@
     <ClInclude Include="..\..\src\server\scripts\Northrend\CrusadersColiseum\TrialOfTheChampion\trial_of_the_champion.h" />
     <ClInclude Include="..\..\src\server\scripts\Northrend\Ulduar\HallsOfStone\halls_of_stone.h" />
     <ClInclude Include="..\..\src\server\scripts\Northrend\Ulduar\HallsOfLightning\halls_of_lightning.h" />
+    <ClInclude Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\boss_yoggsaron.hpp" />
+    <ClInclude Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\instance_ulduar.hpp" />
     <ClInclude Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\ulduar.h" />
     <ClInclude Include="..\..\src\server\scripts\Northrend\UtgardeKeep\UtgardeKeep\utgarde_keep.h" />
     <ClInclude Include="..\..\src\server\scripts\Northrend\UtgardeKeep\UtgardePinnacle\utgarde_pinnacle.h" />

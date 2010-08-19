@@ -2010,5 +2010,11 @@
     <ClInclude Include="..\..\src\server\game\AI\ScriptedAI\ScriptedFollowerAI.h" />
     <ClInclude Include="..\..\src\server\game\AI\ScriptedAI\ScriptedGuardAI.h" />
     <ClInclude Include="..\..\src\server\game\AI\ScriptedAI\ScriptedSimpleAI.h" />
+    <ClInclude Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\boss_yoggsaron.hpp">
+      <Filter>Northrend\Ulduar\Ulduar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\scripts\Northrend\Ulduar\ulduar\instance_ulduar.hpp">
+      <Filter>Northrend\Ulduar\Ulduar</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
