@@ -766,15 +766,7 @@ void Spell::SpellDamageSchoolDmg(uint32 effect_idx)
         }
 
         if (m_originalCaster && damage > 0 && apply_direct_bonus)
-            if (m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_MELEE)
-                damage = m_originalCaster->SpellDamageBonus(unitTarget, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
-            else
-            {
-                uint32 eff_damage = damage;
-                m_originalCaster
-                    ->MeleeDamageBonus(unitTarget, &eff_damage, m_attackType, m_spellInfo);
-                damage = eff_damage;
-            }
+            damage = m_originalCaster->SpellDamageBonus(unitTarget, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
 
         m_damage += damage;
     }
