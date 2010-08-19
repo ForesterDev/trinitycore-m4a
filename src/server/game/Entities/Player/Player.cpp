@@ -20167,6 +20167,7 @@ void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time)
 void Player::SendCooldownEvent(SpellEntry const *spellInfo, uint32 itemId, Spell* spell)
 {
     // start cooldowns at server side, if any
+    RemoveSpellCooldown(spellInfo->Id);
     RemoveSpellCategoryCooldown(spellInfo->Id);
     AddSpellAndCategoryCooldowns(spellInfo,itemId,spell);
 
