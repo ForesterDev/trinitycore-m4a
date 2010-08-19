@@ -90,6 +90,25 @@ namespace
         NPC_IMAGE_OF_HODIR                          = 33213,
     
         NPC_SANITY_WELL                             = 33991,
+    
+        NPC_GUARDIAN_OF_YOGGSARON                   = 33136,
+        NPC_CRUSHER_TENTACLE                        = 33966,
+        NPC_CORRUPTOR_TENTACLE                      = 33985,
+        NPC_CONSTRICTOR_TENTACLE                    = 33983,
+        NPC_DESCEND_INTO_MADNESS                    = 34072,
+
+        NPC_LAUGHING_SKULL                          = 33990,
+        NPC_INFLUENCE_TENTACLE                      = 33943,
+        NPC_IMMORTAL_GUARDIAN                       = 33988,
+
+        NPC_YOGG_SARON_BRAIN                        = 33890,
+        NPC_SUIT_OF_ARMOR                           = 33433,
+        NPC_AZURE_CONSORT                           = 33717,
+        NPC_EMERALD_CONSORT                         = 33719,
+        NPC_OBSIDIAN_CONSORT                        = 33720,
+        NPC_RUBY_CONSORT                            = 33716,
+        NPC_DEATHSWORN_ZEALOT                       = 33567,
+        NPC_OMINOUS_CLOUD                           = 33292
     };
 }
 
@@ -469,11 +488,12 @@ void Yoggsaron_AI::UpdateAI(uint32 diff)
         switch (event_)
         {
         case event_sara_prefight:
+            events.RepeatEvent(sara_prefight_interval);
             if (auto sara = ulduar().sara())
                 DoScriptText(RAND(SAY_SARA_PREFIGHT_1, SAY_SARA_PREFIGHT_2), sara);
-            events.RepeatEvent(sara_prefight_interval);
             break;
         case event_apply_sanity:
+            events.PopEvent();
             {
                 auto &players = ulduar().instance->GetPlayers();
                 for (auto it = players.begin(), last = players.end(); it != last; )
@@ -481,17 +501,17 @@ void Yoggsaron_AI::UpdateAI(uint32 diff)
                         if (auto a = p->AddAura(spell_sanity, p))
                             a->ModStackAmount(100 - 1);
             }
-            events.PopEvent();
             break;
         case event_close_door:
+            events.PopEvent();
             if (auto door = ulduar().yoggsaron_door())
             {
                 door->setActive(true);
                 door->SetGoState(GO_STATE_READY);
             }
-            events.PopEvent();
             break;
         case event_turn_outside_players:
+            events.PopEvent();
             {
                 auto &players = ulduar().instance->GetPlayers();
                 for (auto it = players.begin(), last = players.end(); it != last; )
@@ -504,7 +524,6 @@ void Yoggsaron_AI::UpdateAI(uint32 diff)
                             me->CastSpell(p, 63120 /* Insane */, true);
                         }
             }
-            events.PopEvent();
             break;
         default:
             ASSERT(false);
@@ -579,13 +598,14 @@ void Yoggsaron_AI::set_phase(Phases new_phase)
 
 void Yoggsaron_AI::stopped()
 {
-    if (auto door = ulduar().yoggsaron_door())
+    auto &in = ulduar();
+    if (auto door = in.yoggsaron_door())
     {
         door->SetGoState(GO_STATE_ACTIVE);
         door->setActive(false);
     }
     {
-        auto &players = ulduar().instance->GetPlayers();
+        auto &players = in.instance->GetPlayers();
         for (auto it = players.begin(), last = players.end(); it != last; )
             if (auto p = it++->getSource())
                 p->RemoveAura(spell_sanity);

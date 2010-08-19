@@ -142,7 +142,7 @@ struct boss_flame_leviathanAI : public BossAI
         pInstance = pCreature->GetInstanceData();
         ColossusCount = 0;
         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-        me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
+        me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);  // Death Grip
         
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
         me->SetReactState(REACT_PASSIVE);
@@ -559,14 +559,11 @@ struct mob_colossusAI : public ScriptedAI
     {
         uiGroundSlamTimer = 12000;
     }
-    
+
     void JustDied(Unit *victim)
     {
-        if (Creature* pLeviathan = Unit::GetCreature(*me, m_pInstance->GetData64(DATA_LEVIATHAN)))
-            if (pLeviathan->AI())
-                pLeviathan->AI()->DoAction(INCREASE_COLOSSUS_COUNT);
     }
-
+    
     void UpdateAI(const uint32 diff)
     {
         if (!UpdateVictim())
@@ -576,7 +573,8 @@ struct mob_colossusAI : public ScriptedAI
         {
             DoCast(me->getVictim(), SPELL_GROUND_SLAM);
             uiGroundSlamTimer = 12000;
-        } else uiGroundSlamTimer -= diff;
+        }
+        else uiGroundSlamTimer -= diff;
 
         DoMeleeAttackIfReady();
     }

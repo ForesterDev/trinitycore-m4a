@@ -143,8 +143,7 @@ private:
     uint64 uiMimironYS;
     uint64 uiHodirYS;
         
-    GameObject* pLeviathanDoor, *KologarnChest, *HodirChest, *HodirRareChest, *pRunicDoor, *pStoneDoor, *pThorimLever,
-        *MimironTram, *MimironElevator;
+    GameObject* pLeviathanDoor, *HodirRareChest, *pRunicDoor, *pStoneDoor, *pThorimLever, *MimironTram, *MimironElevator;
     Creature *sara_;
     Creature *yoggsaron_;
     Ominous_clouds ominous_clouds_;

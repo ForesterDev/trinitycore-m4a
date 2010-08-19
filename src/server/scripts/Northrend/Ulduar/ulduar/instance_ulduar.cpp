@@ -43,11 +43,7 @@ const DoorData doorData[] =
 enum eGameObjects
 {
     GO_Leviathan_DOOR       = 194630,
-    GO_Kologarn_CHEST_HERO  = 195047,
-    GO_Kologarn_CHEST       = 195046,
     GO_Kologarn_BRIDGE      = 194232,
-    GO_Hodir_CHEST_HERO     = 194308,
-    GO_Hodir_CHEST          = 194307,
     GO_Hodir_Rare_CHEST     = 194200,
     GO_Runic_DOOR           = 194557,
     GO_Stone_DOOR           = 194558,
@@ -82,11 +78,7 @@ void instance_ulduar::OnGameObjectCreate(GameObject *pGo, bool add)
         case 194773 /* Doodad_UL_Ulduar_doors01 */:
             yoggsaron_door_ = add ? pGo : nullptr;
             break;
-        case GO_Kologarn_CHEST_HERO: KologarnChest = add ? pGo : NULL; break;
-        case GO_Kologarn_CHEST: KologarnChest = add ? pGo : NULL; break;
         case GO_Kologarn_BRIDGE: uiKologarnBridge = pGo->GetGUID(); HandleGameObject(NULL, true, pGo); break;
-        case GO_Hodir_CHEST_HERO: HodirChest = add ? pGo : NULL; break;
-        case GO_Hodir_CHEST: HodirChest = add ? pGo : NULL; break;
         case GO_Hodir_Rare_CHEST: HodirRareChest = add ? pGo : NULL; break;
         case GO_Runic_DOOR: pRunicDoor = add ? pGo : NULL; break;
         case GO_Stone_DOOR: pStoneDoor = add ? pGo : NULL; break;
@@ -358,14 +350,9 @@ bool instance_ulduar::SetBossState(uint32 id, EncounterState state)
     {
         case BOSS_KOLOGARN:
             if (state == DONE)
-            {
                 HandleGameObject(uiKologarnBridge, false);
-                KologarnChest->SetRespawnTime(KologarnChest->GetRespawnDelay());
-            }
             break;
         case BOSS_HODIR:
-            if (state == DONE)
-                HodirChest->SetRespawnTime(HodirChest->GetRespawnDelay());
             CheckKeepersState();
             break;
         case BOSS_THORIM:
