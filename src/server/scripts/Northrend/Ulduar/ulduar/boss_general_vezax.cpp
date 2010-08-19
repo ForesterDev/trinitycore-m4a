@@ -73,7 +73,8 @@ enum Events
 
 enum Actions
 {
-    ACTION_VAPOR_DEAD                           = 0
+    ACTION_VAPOR_DEAD                           = 0,
+    ACTION_ANIMUS_DEAD
 };
 
 // Saronite Vapors
@@ -220,6 +221,7 @@ struct boss_general_vezaxAI : public BossAI
                         me->AddLootMode(LOOT_MODE_HARD_MODE_1);
                         DespawnCreatures(MOB_SARONITE_VAPORS, 100);
                         events.CancelEvent(EVENT_SARONITE_VAPORS);
+                        events.CancelEvent(EVENT_SEARING_FLAMES);
                     }
                     if (VaporsCount == 8)
                         events.CancelEvent(EVENT_SARONITE_VAPORS);
@@ -242,6 +244,8 @@ struct boss_general_vezaxAI : public BossAI
             case ACTION_VAPOR_DEAD:
                 HardMode = false;
                 break;
+            case ACTION_ANIMUS_DEAD:
+                events.ScheduleEvent(EVENT_SEARING_FLAMES, 10000);
         }
     }
     
@@ -315,7 +319,10 @@ struct mob_saronite_animusAI : public ScriptedAI
     void JustDied(Unit * killer)
     {
         if (Creature* Vezax = me->GetCreature(*me, pInstance->GetData64(DATA_VEZAX)))
+        {
             Vezax->RemoveAurasDueToSpell(SPELL_SARONITE_BARRIER);
+            Vezax->AI()->DoAction(ACTION_ANIMUS_DEAD);
+        }
     }
 
     void EnterCombat(Unit* pWho){}
