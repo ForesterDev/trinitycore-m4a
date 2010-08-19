@@ -10396,8 +10396,11 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     float TakenTotalMod = (sumNegativeMod+maxPositiveMod+100.0f)/100.0f;
 
     // Taken/Done fixed damage bonus auras
-    int32 DoneAdvertisedBenefit  = SpellBaseDamageBonus(GetSpellSchoolMask(spellProto));
-    int32 TakenAdvertisedBenefit = SpellBaseDamageBonusForVictim(GetSpellSchoolMask(spellProto), pVictim);
+    int32 DoneAdvertisedBenefit = spellProto->DmgClass == SPELL_DAMAGE_CLASS_MAGIC
+            ? SpellBaseDamageBonus(GetSpellSchoolMask(spellProto)) : 0;
+    int32 TakenAdvertisedBenefit = spellProto->DmgClass == SPELL_DAMAGE_CLASS_MAGIC
+            ? SpellBaseDamageBonusForVictim(GetSpellSchoolMask(spellProto), pVictim)
+            : 0;
     // Pets just add their bonus damage to their spell damage
     // note that their spell damage is just gain of their own auras
     if (HasUnitTypeMask(UNIT_MASK_GUARDIAN))
