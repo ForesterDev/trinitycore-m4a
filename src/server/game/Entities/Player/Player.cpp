@@ -20168,7 +20168,7 @@ void Player::SendCooldownEvent(SpellEntry const *spellInfo, uint32 itemId, Spell
 {
     // start cooldowns at server side, if any
     RemoveSpellCooldown(spellInfo->Id);
-    RemoveSpellCategoryCooldown(spellInfo->Id);
+    RemoveSpellCategoryCooldown(spellInfo->Category);
     AddSpellAndCategoryCooldowns(spellInfo,itemId,spell);
 
     // Send activate cooldown timer (possible 0) at client side
