@@ -23,6 +23,7 @@
 */
 
 #include "gamePCH.h"
+#include <iomanip>
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "Config.h"
@@ -2390,27 +2391,20 @@ void World::ShutdownMsg(bool show, Player* player)
     if (m_ShutdownMask & SHUTDOWN_MASK_IDLE)
         return;
 
-    ///- Display a message every 12 hours, hours, 5 minutes, minute, 5 seconds and finally seconds
-    if (show ||
-        (m_ShutdownTimer < 10) ||
-                                                            // < 30 sec; every 5 sec
-        (m_ShutdownTimer<30        && (m_ShutdownTimer % 5) == 0) ||
-                                                            // < 5 min ; every 1 min
-        (m_ShutdownTimer<5*MINUTE  && (m_ShutdownTimer % MINUTE) == 0) ||
-                                                            // < 30 min ; every 5 min
-        (m_ShutdownTimer<30*MINUTE && (m_ShutdownTimer % (5*MINUTE)) == 0) ||
-                                                            // < 12 h ; every 1 h
-        (m_ShutdownTimer<12*HOUR   && (m_ShutdownTimer % HOUR) == 0) ||
-                                                            // > 12 h ; every 12 h
-        (m_ShutdownTimer>12*HOUR   && (m_ShutdownTimer % (12*HOUR)) == 0))
-    {
-        std::string str = secsToTimeString(m_ShutdownTimer);
+    ///- Display a message every minute or 15 seconds
+    auto &t = m_ShutdownTimer;
+    if (!(t < 60 * 5 && t % 15 == 0))
+        if (!(t % 60 == 0))
+            if (!show)
+                return;
+    std::ostringstream ss;
+    ss << t / 60 << ':' << std::setfill('0') << std::setw(2) << t % 60;
+    std::string str = ss.str();
 
-        ServerMessageType msgid = (m_ShutdownMask & SHUTDOWN_MASK_RESTART) ? SERVER_MSG_RESTART_TIME : SERVER_MSG_SHUTDOWN_TIME;
+    ServerMessageType msgid = (m_ShutdownMask & SHUTDOWN_MASK_RESTART) ? SERVER_MSG_RESTART_TIME : SERVER_MSG_SHUTDOWN_TIME;
 
-        SendServerMessage(msgid,str.c_str(),player);
-        DEBUG_LOG("Server is %s in %s",(m_ShutdownMask & SHUTDOWN_MASK_RESTART ? "restart" : "shuttingdown"),str.c_str());
-    }
+    SendServerMessage(msgid,str.c_str(),player);
+    DEBUG_LOG("Server is %s in %s",(m_ShutdownMask & SHUTDOWN_MASK_RESTART ? "restart" : "shuttingdown"),str.c_str());
 }
 
 /// Cancel a planned server shutdown
