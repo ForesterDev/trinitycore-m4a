@@ -10058,7 +10058,8 @@ void Unit::EnergizeBySpell(Unit *pVictim, uint32 SpellID, uint32 Damage, Powers 
 
 uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack)
 {
-    if (!spellProto || !pVictim || damagetype == DIRECT_DAMAGE)
+    if (!spellProto || !pVictim || damagetype == DIRECT_DAMAGE
+            || spellProto->AttributesEx4 & SPELL_ATTR_EX4_FIXED_DAMAGE)
         return pdamage;
 
     // For totems get damage bonus from owner
