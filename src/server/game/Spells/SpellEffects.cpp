@@ -4764,6 +4764,7 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                         {
                             if (NewPet->LoadPetFromDB(plr, 0, plr->GetLastPetNumber(), true))
                             {
+                                NewPet->setDeathState(ALIVE);
                                 NewPet->SetHealth(NewPet->GetMaxHealth());
                                 NewPet->SetPower(NewPet->getPowerType(),NewPet->GetMaxPower(NewPet->getPowerType()));
 
