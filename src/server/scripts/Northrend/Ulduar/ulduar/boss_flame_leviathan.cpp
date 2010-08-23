@@ -559,11 +559,14 @@ struct mob_colossusAI : public ScriptedAI
     {
         uiGroundSlamTimer = 12000;
     }
-
+    
     void JustDied(Unit *victim)
     {
+        if (Creature* pLeviathan = Unit::GetCreature(*me, m_pInstance->GetData64(DATA_LEVIATHAN)))
+            if (pLeviathan->AI())
+                pLeviathan->AI()->DoAction(INCREASE_COLOSSUS_COUNT);
     }
-    
+
     void UpdateAI(const uint32 diff)
     {
         if (!UpdateVictim())
