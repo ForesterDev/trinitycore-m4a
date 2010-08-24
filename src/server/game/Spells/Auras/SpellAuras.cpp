@@ -1094,6 +1094,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         if (target->HasAura(61988) && !target->HasAura(25771))
                             target->RemoveAura(61988);
                         break;
+                    case 63120 /* Insane */:
+                        if (caster)
+                            caster->Kill(target);
+                        break;
                     case 72368: // Shared Suffering
                     case 72369:
                         if (caster)
