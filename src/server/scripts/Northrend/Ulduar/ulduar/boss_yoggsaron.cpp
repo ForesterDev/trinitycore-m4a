@@ -36,6 +36,9 @@ namespace
         event_apply_sanity,
         event_close_door,
         event_turn_outside_players,
+        event_berserk,
+        event_extinguish_all_life,
+        event_summon_guardian,
     };
 
     enum
@@ -46,6 +49,11 @@ namespace
     void xinstance()
     {
         throw std::runtime_error("AI owner missing instance_ulduar");
+    }
+
+    const char *berserk_text()
+    {
+        return "%s goes berserk, extinguishing all life!";
     }
 }
 
@@ -473,12 +481,24 @@ void AddSC_boss_yogg_saron()
 }
 
 Yoggsaron_AI::Yoggsaron_AI(Creature *c)
-    : BossAI(c, BOSS_YOGGSARON)
+    : BossAI(c, BOSS_YOGGSARON),
+        voice(new Creature)
 {
     if (dynamic_cast<instance_ulduar *>(instance))
+    {
         me->SetReactState(REACT_PASSIVE);
+        if (voice->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), me->GetMap(), 0x0,
+                        33280 /* Voice of Yogg-Saron */, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f))
+            ;
+        else
+            voice = nullptr;
+    }
     else
         xinstance();
+}
+
+Yoggsaron_AI::~Yoggsaron_AI()
+{
 }
 
 void Yoggsaron_AI::UpdateAI(uint32 diff)
@@ -519,11 +539,29 @@ void Yoggsaron_AI::UpdateAI(uint32 diff)
                         if (p->wmo_id() == 47478 /* The Prison of Yogg-Saron */)
                             ;
                         else
-                        {
-                            p->RemoveAura(spell_sanity);
-                            me->CastSpell(p, 63120 /* Insane */, true);
-                        }
+                            remove_sanity(*p);
             }
+            break;
+        case event_berserk:
+            events.PopEvent();
+            me->MonsterTextEmote(berserk_text(), uint64(), true);
+            events.ScheduleEvent(event_extinguish_all_life, 0);
+            break;
+        case event_extinguish_all_life:
+            events.RepeatEvent(1500);
+            DoCast(64166 /* Extinguish All Life */);
+            break;
+        case event_summon_guardian:
+            {
+                uint32 time;
+                if (summon_guardian_count < 3)
+                    time = 1000 * 20;
+                else
+                    time = 1000 * urand(10, 19);
+                events.RepeatEvent(std::move(time));
+            }
+            ++summon_guardian_count;
+            DoCast(62978 /* Summon Guardian */);
             break;
         default:
             ASSERT(false);
@@ -562,7 +600,10 @@ void Yoggsaron_AI::EnterCombat(Unit *enemy)
     events.ScheduleEvent(event_apply_sanity, 1000 * 2);
     events.ScheduleEvent(event_close_door, 1000 * 10);
     events.ScheduleEvent(event_turn_outside_players, 1000 * 15);
+    events.ScheduleEvent(event_berserk, 1000 * 60 * 15);
     set_phase(PHASE_1);
+    summon_guardian_count = 0;
+    events.ScheduleEvent(event_summon_guardian, 0);
     if (auto sara = in.sara())
         DoScriptText(SAY_SARA_AGGRO_1, sara);
 }
@@ -609,5 +650,28 @@ void Yoggsaron_AI::stopped()
         for (auto it = players.begin(), last = players.end(); it != last; )
             if (auto p = it++->getSource())
                 p->RemoveAura(spell_sanity);
+    }
+}
+
+void Yoggsaron_AI::turn_insane(Player &target)
+{
+    if (voice)
+        DoScriptText(RAND(WHISP_INSANITY_1, WHISP_INSANITY_2), voice.get(), &target);
+    me->CastSpell(&target, 63120 /* Insane */, true);
+}
+
+void Yoggsaron_AI::mod_sanity(Player &target, int32 amount)
+{
+    if (auto a = target.GetAura(spell_sanity))
+        if (a->ModStackAmount(amount))
+            turn_insane(target);
+}
+
+void Yoggsaron_AI::remove_sanity(Player &target)
+{
+    if (target.HasAura(spell_sanity))
+    {
+        target.RemoveAura(spell_sanity);
+        turn_insane(target);
     }
 }

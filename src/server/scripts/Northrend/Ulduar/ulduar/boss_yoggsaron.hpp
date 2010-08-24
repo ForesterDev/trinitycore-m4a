@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <utility>
 #include <functional>
 #include "ScriptedCreature.h"
@@ -26,6 +27,8 @@ public:
 
     Yoggsaron_AI(Creature *c);
 
+    ~Yoggsaron_AI();
+
     void UpdateAI(const uint32 diff);
 
     void Reset();
@@ -43,5 +46,13 @@ private:
 
     void stopped();
 
+    void turn_insane(Player &target);
+
+    void mod_sanity(Player &target, int32 amount);
+
+    void remove_sanity(Player &target);
+
+    std::unique_ptr<Creature> voice;
     Phases phase;
+    int summon_guardian_count;
 };
