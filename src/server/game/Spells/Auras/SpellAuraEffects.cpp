@@ -1883,6 +1883,12 @@ void AuraEffect::PeriodicDummyTick(Unit * target, Unit * caster) const
                          veh->CastSpell(target, 62475, true);
                 }
                 break;
+            case 63050 /* Sanity */:
+                if (35 < m_base->GetStackAmount())
+                    target->RemoveAura(63752 /* Low Sanity Screen Effect */);
+                else
+                    target->AddAura(63752 /* Low Sanity Screen Effect */, target);
+                break;
             case 64821: // Fuse Armor (Razorscale)
                 if (GetBase()->GetStackAmount() == GetSpellProto()->StackAmount)
                 {
@@ -5748,6 +5754,10 @@ void AuraEffect::HandleAuraDummy(AuraApplication const * aurApp, uint8 mode, boo
                         case 52172:  // Coyote Spirit Despawn Aura
                         case 60244:  // Blood Parrot Despawn Aura
                             target->CastSpell((Unit*)NULL, GetAmount(), true, NULL, this);
+                            break;
+                        case 63120 /* Insane */:
+                            if (caster)
+                                caster->Kill(target);
                             break;
                         case 68839: // Corrupt Soul
                             target->CastSpell(target, 68846, true, NULL, this, GetCasterGUID());

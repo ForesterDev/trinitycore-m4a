@@ -21,29 +21,32 @@
 
 #define GAMEOBJECT_GIVE_OF_THE_OBSERVER 194821
 
-enum Spells
+namespace
 {
-    SPELL_ASCEND                    = 64487,
-    SPELL_BERSERK                   = 47008,
-    SPELL_BIG_BANG                  = 64443,
-    H_SPELL_BIG_BANG                = 64584,
-    SPELL_COSMIC_SMASH              = 62301,
-    H_SPELL_COSMIC_SMASH            = 64598,
-    SPELL_PHASE_PUNCH               = 64412,
-    SPELL_QUANTUM_STRIKE            = 64395,
-    H_SPELL_QUANTUM_STRIKE          = 64592,
-    SPELL_BLACK_HOLE_EXPLOSION      = 64122,
-    SPELL_ARCANE_BARAGE             = 64599,
-    H_SPELL_ARCANE_BARAGE           = 64607
-};
+    enum Spells
+    {
+        SPELL_ASCEND                    = 64487,
+        SPELL_BERSERK                   = 47008,
+        SPELL_BIG_BANG                  = 64443,
+        H_SPELL_BIG_BANG                = 64584,
+        SPELL_COSMIC_SMASH              = 62301,
+        H_SPELL_COSMIC_SMASH            = 64598,
+        SPELL_PHASE_PUNCH               = 64412,
+        SPELL_QUANTUM_STRIKE            = 64395,
+        H_SPELL_QUANTUM_STRIKE          = 64592,
+        SPELL_BLACK_HOLE_EXPLOSION      = 64122,
+        SPELL_ARCANE_BARAGE             = 64599,
+        H_SPELL_ARCANE_BARAGE           = 64607
+    };
 
-enum Creatures
-{
-    CREATURE_COLLAPSING_STAR        = 32955,
-    CREATURE_BLACK_HOLE             = 32953,
-    CREATURE_LIVING_CONSTELLATION   = 33052,
-    CREATURE_DARK_MATTER            = 33089
-};
+    enum Creatures
+    {
+        CREATURE_COLLAPSING_STAR        = 32955,
+        CREATURE_BLACK_HOLE             = 32953,
+        CREATURE_LIVING_CONSTELLATION   = 33052,
+        CREATURE_DARK_MATTER            = 33089
+    };
+}
 
 #define NORDRASSIL_X               1614.288574
 #define NORDRASSIL_Y               -320.713287

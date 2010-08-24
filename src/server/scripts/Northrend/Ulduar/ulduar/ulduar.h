@@ -19,7 +19,7 @@
 #ifndef DEF_ULDUAR_H
 #define DEF_ULDUAR_H
 
-enum Encounter
+enum
 {
     BOSS_LEVIATHAN,
     BOSS_IGNIS,
