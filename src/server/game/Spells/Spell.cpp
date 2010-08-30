@@ -55,6 +55,10 @@
 #include "DisableMgr.h"
 #include "SpellScript.h"
 
+using std::uint_fast8_t;
+using std::min;
+using std::numeric_limits;
+
 #define SPELL_CHANNEL_UPDATE_INTERVAL (1 * IN_MILLISECONDS)
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
@@ -3988,28 +3992,43 @@ void Spell::WriteSpellGoTargets(WorldPacket * data)
             ++miss;
     }
 
-    *data << (uint8)hit;
-    for (std::list<TargetInfo>::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
     {
-        if ((*ihit).missCondition == SPELL_MISS_NONE)       // Add only hits
+        uint_fast8_t count = min(hit, uint32() + numeric_limits<uint8>::max());
+        *data << static_cast<uint8>(count);
+        for (std::list<TargetInfo>::const_iterator ihit = m_UniqueTargetInfo.begin();
+                0 < count && ihit != m_UniqueTargetInfo.end(); ++ihit)
         {
-            *data << uint64(ihit->targetGUID);
-            m_needAliveTargetMask |=ihit->effectMask;
+            if ((*ihit).missCondition == SPELL_MISS_NONE)       // Add only hits
+            {
+                *data << uint64(ihit->targetGUID);
+                m_needAliveTargetMask |=ihit->effectMask;
+                --count;
+            }
+        }
+
+        for (std::list<GOTargetInfo>::const_iterator
+                ighit = m_UniqueGOTargetInfo.begin();
+                0 < count && ighit != m_UniqueGOTargetInfo.end(); ++ighit)
+        {
+            *data << uint64(ighit->targetGUID);                 // Always hits
+            --count;
         }
     }
 
-    for (std::list<GOTargetInfo>::const_iterator ighit = m_UniqueGOTargetInfo.begin(); ighit != m_UniqueGOTargetInfo.end(); ++ighit)
-        *data << uint64(ighit->targetGUID);                 // Always hits
-
-    *data << (uint8)miss;
-    for (std::list<TargetInfo>::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
     {
-        if (ihit->missCondition != SPELL_MISS_NONE)        // Add only miss
+        uint_fast8_t count = min(miss, uint32() + numeric_limits<uint8>::max());
+        *data << static_cast<uint8>(count);
+        for (std::list<TargetInfo>::const_iterator ihit = m_UniqueTargetInfo.begin();
+                0 < count && ihit != m_UniqueTargetInfo.end(); ++ihit)
         {
-            *data << uint64(ihit->targetGUID);
-            *data << uint8(ihit->missCondition);
-            if (ihit->missCondition == SPELL_MISS_REFLECT)
-                *data << uint8(ihit->reflectResult);
+            if (ihit->missCondition != SPELL_MISS_NONE)        // Add only miss
+            {
+                *data << uint64(ihit->targetGUID);
+                *data << uint8(ihit->missCondition);
+                if (ihit->missCondition == SPELL_MISS_REFLECT)
+                    *data << uint8(ihit->reflectResult);
+                --count;
+            }
         }
     }
     // Reset m_needAliveTargetMask for non channeled spell
