@@ -49,12 +49,14 @@ Channel::Channel
         else                                                // for all other channels
             m_flags |= CHANNEL_FLAG_NOT_LFG;
         m_IsSaved = false;
+        is_global = false;
     }
     else if (!custom)
     {
         m_announce = false;
         m_flags |= CHANNEL_FLAG_NOT_LFG | CHANNEL_FLAG_GENERAL;
         m_IsSaved = false;
+        is_global = true;
     }
     else                                                    // it's custom channel
     {
@@ -99,6 +101,7 @@ Channel::Channel
                 m_IsSaved = true;
             }
         }
+        is_global = false;
     }
 }
 
@@ -168,6 +171,16 @@ void Channel::Join(uint64 p, const char *pass)
 
     if (plr)
     {
+        if (player_level_ok(*plr))
+            ;
+        else
+        {
+            ChatHandler(plr).PSendSysMessage
+                ("You do not meet the level requirements of %s.", m_name.c_str());
+            MakeBanned(&data);
+            SendToOne(&data, p);
+            return;
+        }
         if (HasFlag(CHANNEL_FLAG_LFG) &&
             sWorld.getConfig(CONFIG_RESTRICTED_LFG_CHANNEL) && plr->GetSession()->GetSecurity() == SEC_PLAYER && plr->GetGroup())
         {
@@ -723,6 +736,18 @@ void Channel::Invite(uint64 p, const char *newname)
     Player *plr = objmgr.GetPlayer(p);
     if (!plr)
         return;
+    if (player_level_ok(*newp))
+        ;
+    else
+    {
+        ChatHandler(plr).PSendSysMessage(
+                "%s does not meet the level requirements of %s.", newp->GetName(),
+                m_name.c_str());
+        WorldPacket data;
+        MakePlayerInviteBanned(&data, newp->GetName());
+        SendToOne(&data, p);
+        return;
+    }
 
     if (newp->GetTeam() != plr->GetTeam() && !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
     {
@@ -1113,3 +1138,16 @@ void Channel::LeaveNotify(uint64 guid)
     SendToAll(&data);
 }
 
+bool Channel::player_level_ok(const Player &p) const
+{
+    if (!is_global)
+        ;
+    else
+        if (10 <= p.getLevel())
+            ;
+        else if (p.isGameMaster())
+            ;
+        else
+            return false;
+    return true;
+}

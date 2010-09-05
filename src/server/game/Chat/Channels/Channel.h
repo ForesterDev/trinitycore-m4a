@@ -293,6 +293,11 @@ class Channel
         void DeVoice(uint64 guid1, uint64 guid2);
         void JoinNotify(uint64 guid);                                           // invisible notify
         void LeaveNotify(uint64 guid);                                          // invisible notify
+
+private:
+    bool player_level_ok(const Player &p) const;
+
+    bool is_global;
 };
 #endif
 
