@@ -26,7 +26,7 @@
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "MD5.h"
+#include <Cryptography/MD5.h>
 #include "DatabaseEnv.h"
 #include "DatabaseImpl.h"
 

@@ -31,8 +31,8 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "WorldSession.h"
-#include "BigNumber.h"
-#include "SHA1.h"
+#include <Cryptography/BigNumber.h>
+#include <Cryptography/SHA1.h>
 #include "UpdateData.h"
 #include "LootMgr.h"
 #include "Chat.h"

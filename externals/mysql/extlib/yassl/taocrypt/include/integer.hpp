@@ -112,7 +112,7 @@ namespace TaoCrypt {
 
 // general MIN
 template<typename T> inline
-const T& min(const T& a, const T& b)
+    const T &(min)(const T &a, const T &b)
 {
     return a < b ? a : b;
 }
@@ -120,7 +120,7 @@ const T& min(const T& a, const T& b)
 
 // general MAX
 template<typename T> inline
-const T& max(const T& a, const T& b)
+    const T &(max)(const T &a, const T &b)
 {
     return a > b ? a : b;
 }
