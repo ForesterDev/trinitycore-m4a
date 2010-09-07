@@ -1018,6 +1018,11 @@ void Item::SendTimeUpdate(Player* owner)
     owner->GetSession()->SendPacket(&data);
 }
 
+Item::~Item()
+{
+    ASSERT(!IsInUpdateQueue());
+}
+
 Item* Item::CreateItem(uint32 item, uint32 count, Player const* player)
 {
     if (count < 1)

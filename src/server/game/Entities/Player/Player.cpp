@@ -18077,7 +18077,7 @@ void Player::_SaveInventory()
             case ITEM_UNCHANGED:
                 break;
         }
-
+        item->RemoveFromUpdateQueueOf(this);
         item->SaveToDB();                                   // item have unchanged inventory record and can be save standalone
     }
     m_itemUpdateQueue.clear();
