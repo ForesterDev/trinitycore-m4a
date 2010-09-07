@@ -4007,8 +4007,7 @@ void Spell::WriteSpellGoTargets(WorldPacket * data)
         }
 
         for (std::list<GOTargetInfo>::const_iterator
-                ighit = m_UniqueGOTargetInfo.begin();
-                0 < count; ++ighit)
+                ighit = m_UniqueGOTargetInfo.begin(); 0 < count; ++ighit)
         {
             *data << uint64(ighit->targetGUID);                 // Always hits
             --count;
