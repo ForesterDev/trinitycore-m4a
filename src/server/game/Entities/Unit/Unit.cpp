@@ -10058,8 +10058,7 @@ void Unit::EnergizeBySpell(Unit *pVictim, uint32 SpellID, uint32 Damage, Powers 
 
 uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack)
 {
-    if (!spellProto || !pVictim || damagetype == DIRECT_DAMAGE
-            || spellProto->AttributesEx4 & SPELL_ATTR_EX4_FIXED_DAMAGE)
+    if (!spellProto || !pVictim || damagetype == DIRECT_DAMAGE)
         return pdamage;
 
     // For totems get damage bonus from owner
@@ -10515,7 +10514,8 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     }
 
     // Some spells don't benefit from done mods
-    if (spellProto->AttributesEx3 & SPELL_ATTR_EX3_NO_DONE_BONUS)
+    if (spellProto->AttributesEx3 & SPELL_ATTR_EX3_NO_DONE_BONUS
+            || spellProto->AttributesEx4 & SPELL_ATTR_EX4_FIXED_DAMAGE)
     {
         DoneTotal = 0;
         DoneTotalMod = 1.0f;
