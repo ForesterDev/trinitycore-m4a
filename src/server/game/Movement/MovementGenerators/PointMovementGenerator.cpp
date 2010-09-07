@@ -20,7 +20,7 @@
 
 #include "gamePCH.h"
 #include "PointMovementGenerator.h"
-#include "Errors.h"
+#include <Debugging/Errors.h>
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "DestinationHolderImp.h"

@@ -26,7 +26,7 @@
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "Util.h"
-#include "SHA1.h"
+#include <Cryptography/SHA1.h>
 
 extern DatabaseType LoginDatabase;
 

@@ -118,7 +118,6 @@ void pthread_exit(void *a);
 int pthread_join(pthread_t thread, void **value_ptr);
 
 
-#define ETIMEDOUT 145		    /* Win32 doesn't have this */
 #define HAVE_LOCALTIME_R		1
 #define _REENTRANT			1
 #define HAVE_PTHREAD_ATTR_SETSTACKSIZE	1

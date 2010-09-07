@@ -20,7 +20,7 @@
 
 #include "gamePCH.h"
 #include "GuardAI.h"
-#include "Errors.h"
+#include <Debugging/Errors.h>
 #include "Player.h"
 #include "ObjectAccessor.h"
 #include "World.h"
