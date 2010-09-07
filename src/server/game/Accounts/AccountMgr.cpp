@@ -237,7 +237,13 @@ bool AccountMgr::normalizeString(std::string& utf8str)
     if (!Utf8toWStr(utf8str,wstr_buf,wstr_len))
         return false;
 
+#ifndef _MSC_VER
     std::transform(&wstr_buf[0], wstr_buf+wstr_len, &wstr_buf[0], wcharToUpperOnlyLatin);
+#else   // _MSC_VER
+    std::transform(&wstr_buf[0], wstr_buf + wstr_len,
+            stdext::make_unchecked_array_iterator(&wstr_buf[0]),
+            wcharToUpperOnlyLatin);
+#endif  // _MSC_VER
 
     return WStrToUtf8(wstr_buf,wstr_len,utf8str);
 }
