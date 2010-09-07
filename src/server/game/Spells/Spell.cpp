@@ -4008,7 +4008,7 @@ void Spell::WriteSpellGoTargets(WorldPacket * data)
 
         for (std::list<GOTargetInfo>::const_iterator
                 ighit = m_UniqueGOTargetInfo.begin();
-                0 < count && ighit != m_UniqueGOTargetInfo.end(); ++ighit)
+                0 < count; ++ighit)
         {
             *data << uint64(ighit->targetGUID);                 // Always hits
             --count;
@@ -4019,7 +4019,7 @@ void Spell::WriteSpellGoTargets(WorldPacket * data)
         uint_fast8_t count = min(miss, uint32() + numeric_limits<uint8>::max());
         *data << static_cast<uint8>(count);
         for (std::list<TargetInfo>::const_iterator ihit = m_UniqueTargetInfo.begin();
-                0 < count && ihit != m_UniqueTargetInfo.end(); ++ihit)
+                0 < count; ++ihit)
         {
             if (ihit->missCondition != SPELL_MISS_NONE)        // Add only miss
             {
