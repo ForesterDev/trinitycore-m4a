@@ -719,12 +719,13 @@ void ArenaTeam::UpdateArenaPointsHelper(std::map<uint32, uint32>& PlayerPoints)
         return;
     // to get points, a player has to participate in at least 30% of the matches
     uint32 min_plays = (uint32) ceil(m_stats.games_week * 0.3);
+    auto points = GetPoints(m_stats.rating);
     for (MemberList::const_iterator itr = m_members.begin(); itr !=  m_members.end(); ++itr)
     {
         // the player participated in enough games, update his points
         uint32 points_to_add = 0;
         if (itr->games_week >= min_plays)
-            points_to_add = GetPoints(itr->personal_rating);
+            points_to_add = points;
         // OBSOLETE : CharacterDatabase.PExecute("UPDATE arena_team_member SET points_to_add = '%u' WHERE arenateamid = '%u' AND guid = '%u'", points_to_add, m_TeamId, itr->guid);
 
         std::map<uint32, uint32>::iterator plr_itr = PlayerPoints.find(GUID_LOPART(itr->guid));
