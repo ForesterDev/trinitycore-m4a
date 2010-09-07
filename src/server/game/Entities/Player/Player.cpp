@@ -628,7 +628,16 @@ Player::~Player ()
 {
     // it must be unloaded already in PlayerLogout and accessed only for loggined player
     //m_social = NULL;
-
+    if (m_itemUpdateQueue.empty())
+        ;
+    else
+    {
+        for (auto it = m_itemUpdateQueue.begin(), last = m_itemUpdateQueue.end();
+                it != last; )
+            if (auto p = *it++)
+                p->RemoveFromUpdateQueueOf(this);
+        m_itemUpdateQueue.clear();
+    }
     // Note: buy back item already deleted from DB when player was saved
     for (uint8 i = 0; i < PLAYER_SLOTS_COUNT; ++i)
         delete m_items[i];
