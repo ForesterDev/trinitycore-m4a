@@ -56,7 +56,8 @@ class HashMapHolder
         static void Insert(T* o)
         {
             ACE_GUARD(LockType, Guard, i_lock);
-            auto res = m_objectMap.insert(MapType::value_type(o->GetGUID(), std::move(o)));
+            auto res = m_objectMap
+                    .insert(typename MapType::value_type(o->GetGUID(), std::move(o)));
             ASSERT(res.second);
         }
 
