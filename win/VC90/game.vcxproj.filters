@@ -699,6 +699,9 @@
     <ClCompile Include="..\..\src\server\game\Tools\CharacterDatabaseCleaner.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\server\game\AI\Instance_object_AI.cpp">
+      <Filter>AI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\server\game\AI\CreatureAI.h">
@@ -1210,6 +1213,12 @@
     </ClInclude>
     <ClInclude Include="..\..\src\server\game\Tools\CharacterDatabaseCleaner.h">
       <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\Instance_object_AI.hpp">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\server\game\AI\Instance_boss_AI.hpp">
+      <Filter>AI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
