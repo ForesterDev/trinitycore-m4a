@@ -3,13 +3,13 @@
 #include <memory>
 #include <utility>
 #include <functional>
+#include <Instance_boss_AI.hpp>
 #include "ScriptedCreature.h"
-#include "ulduar.h"
 
 class instance_ulduar;
 
 class Yoggsaron_AI
-    : public BossAI
+    : public Instance_boss_AI<instance_ulduar, BossAI>
 {
 public:
     friend struct npc_ys_thorimAI;
@@ -25,7 +25,7 @@ public:
 
     typedef void Reset_callback();
 
-    Yoggsaron_AI(Creature *c);
+    explicit Yoggsaron_AI(Creature *c);
 
     ~Yoggsaron_AI();
 
@@ -38,10 +38,6 @@ public:
     void JustDied(Unit *);
 
 private:
-    instance_ulduar &ulduar();
-
-    const instance_ulduar &ulduar() const;
-
     void set_phase(Phases new_phase);
 
     void stopped();

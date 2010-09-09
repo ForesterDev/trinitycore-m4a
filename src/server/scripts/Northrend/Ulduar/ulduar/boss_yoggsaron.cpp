@@ -25,6 +25,7 @@ EndScriptData */
 
 #include "ScriptPCH.h"
 #include "boss_yoggsaron.hpp"
+#include <Instance_object_AI.hpp>
 #include "ulduar.h"
 #include "instance_ulduar.hpp"
 
@@ -45,11 +46,6 @@ namespace
     {
         sara_prefight_interval = 1000 * 60 * 60
     };
-
-    void xinstance()
-    {
-        throw std::runtime_error("AI owner missing instance_ulduar");
-    }
 
     const char *berserk_text()
     {
@@ -177,6 +173,44 @@ const Position SanityWellPos[10] =
 {1897.75,-48.24,332.35,0}
 };
 
+namespace
+{
+    struct Sara_AI
+        : Instance_object_AI<instance_ulduar, ScriptedAI>
+    {
+        explicit Sara_AI(Creature *c)
+            : Instance_object_AI(c)
+        {
+        }
+
+        Sara_AI(Sara_AI &&right)
+            : Instance_object_AI(std::move(right))
+        {
+        }
+
+        void DamageTaken(Unit *, uint32 &damage)
+        {
+            auto health = me->GetHealth();
+            if (damage < health)
+                ;
+            else
+                damage = health - 1;
+        }
+    };
+
+    struct Guardian_of_yoggsaron_AI
+        : Instance_object_AI<instance_ulduar, ScriptedAI>
+    {
+        explicit Guardian_of_yoggsaron_AI(Creature *c)
+            : Instance_object_AI(c)
+        {
+        }
+
+        void DamageTaken(Unit *, uint32 &damage)
+        {
+        }
+    };
+}
 
 /*------------------------------------------------------*
  *                  Images of Keepers                   *
@@ -312,23 +346,19 @@ CreatureAI* GetAI_npc_sanity_well(Creature* pCreature)
     return new npc_sanity_wellAI(pCreature);
 }
 
-struct npc_ys_thorimAI : public ScriptedAI
+struct npc_ys_thorimAI
+    : public Instance_object_AI<instance_ulduar, ScriptedAI>
 {
     npc_ys_thorimAI(Creature *pCreature)
-        : ScriptedAI(pCreature),
+        : Instance_object_AI(pCreature),
             phase(Yoggsaron_AI::PHASE_NULL)
     {
         pInstance = pCreature->GetInstanceData();
-        if (auto in = dynamic_cast<instance_ulduar *>(pInstance))
-        {
-            if (auto ys = in->yoggsaron())
-                if (auto ai = dynamic_cast<Yoggsaron_AI *>(ys->AI()))
-                    phase = ai->phase;
-            me->SetReactState(REACT_PASSIVE);
-            me->SetVisibility(VISIBILITY_OFF);
-        }
-        else
-            xinstance();
+        if (auto ys = instance().yoggsaron())
+            if (auto ai = dynamic_cast<Yoggsaron_AI *>(ys->AI()))
+                phase = ai->phase;
+        me->SetReactState(REACT_PASSIVE);
+        me->SetVisibility(VISIBILITY_OFF);
     }
 
     ScriptedInstance* pInstance;
@@ -356,23 +386,19 @@ CreatureAI* GetAI_npc_ys_thorim(Creature* pCreature)
     return new npc_ys_thorimAI(pCreature);
 }
 
-struct npc_ys_mimironAI : public ScriptedAI
+struct npc_ys_mimironAI
+    : public Instance_object_AI<instance_ulduar, ScriptedAI>
 {
     npc_ys_mimironAI(Creature *pCreature)
-        : ScriptedAI(pCreature),
+        : Instance_object_AI(pCreature),
             phase(Yoggsaron_AI::PHASE_NULL)
     {
         pInstance = pCreature->GetInstanceData();
-        if (auto in = dynamic_cast<instance_ulduar *>(pInstance))
-        {
-            if (auto ys = in->yoggsaron())
-                if (auto ai = dynamic_cast<Yoggsaron_AI *>(ys->AI()))
-                    phase = ai->phase;
-            me->SetReactState(REACT_PASSIVE);
-            me->SetVisibility(VISIBILITY_OFF);
-        }
-        else
-            xinstance();
+        if (auto ys = instance().yoggsaron())
+            if (auto ai = dynamic_cast<Yoggsaron_AI *>(ys->AI()))
+                phase = ai->phase;
+        me->SetReactState(REACT_PASSIVE);
+        me->SetVisibility(VISIBILITY_OFF);
     }
 
     ScriptedInstance* pInstance;
@@ -441,8 +467,14 @@ CreatureAI* GetAI_npc_ys_hodir(Creature* pCreature)
 
 void AddSC_boss_yogg_saron()
 {
-    Script *newscript;
-    
+    Script *newscript = new Script;
+    newscript->Name = "boss_sara";
+    newscript->GetAI = &get_ai<Sara_AI>;
+    newscript->RegisterSelf();
+    newscript = new Script;
+    newscript->Name = "mob_guardian_of_yoggsaron";
+    newscript->GetAI = &get_ai<Guardian_of_yoggsaron_AI>;
+    newscript->RegisterSelf();
     newscript = new Script;
     newscript->Name="npc_keeper_image";
     newscript->pGossipHello =  &GossipHello_keeper_image;
@@ -481,20 +513,15 @@ void AddSC_boss_yogg_saron()
 }
 
 Yoggsaron_AI::Yoggsaron_AI(Creature *c)
-    : BossAI(c, BOSS_YOGGSARON),
+    : Instance_boss_AI(c, BOSS_YOGGSARON),
         voice(new Creature)
 {
-    if (dynamic_cast<instance_ulduar *>(instance))
-    {
-        me->SetReactState(REACT_PASSIVE);
-        if (voice->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), me->GetMap(), 0x0,
-                        33280 /* Voice of Yogg-Saron */, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f))
-            ;
-        else
-            voice = nullptr;
-    }
+    me->SetReactState(REACT_PASSIVE);
+    if (voice->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), me->GetMap(), 0x0,
+                    33280 /* Voice of Yogg-Saron */, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f))
+        ;
     else
-        xinstance();
+        voice = nullptr;
 }
 
 Yoggsaron_AI::~Yoggsaron_AI()
@@ -509,13 +536,13 @@ void Yoggsaron_AI::UpdateAI(uint32 diff)
         {
         case event_sara_prefight:
             events.RepeatEvent(sara_prefight_interval);
-            if (auto sara = ulduar().sara())
+            if (auto sara = instance().sara())
                 DoScriptText(RAND(SAY_SARA_PREFIGHT_1, SAY_SARA_PREFIGHT_2), sara);
             break;
         case event_apply_sanity:
             events.PopEvent();
             {
-                auto &players = ulduar().instance->GetPlayers();
+                auto &players = instance().instance->GetPlayers();
                 for (auto it = players.begin(), last = players.end(); it != last; )
                     if (auto p = it++->getSource())
                         if (auto a = p->AddAura(spell_sanity, p))
@@ -524,7 +551,7 @@ void Yoggsaron_AI::UpdateAI(uint32 diff)
             break;
         case event_close_door:
             events.PopEvent();
-            if (auto door = ulduar().yoggsaron_door())
+            if (auto door = instance().yoggsaron_door())
             {
                 door->setActive(true);
                 door->SetGoState(GO_STATE_READY);
@@ -533,7 +560,7 @@ void Yoggsaron_AI::UpdateAI(uint32 diff)
         case event_turn_outside_players:
             events.PopEvent();
             {
-                auto &players = ulduar().instance->GetPlayers();
+                auto &players = instance().instance->GetPlayers();
                 for (auto it = players.begin(), last = players.end(); it != last; )
                     if (auto p = it++->getSource())
                         if (p->wmo_id() == 47478 /* The Prison of Yogg-Saron */)
@@ -576,7 +603,7 @@ void Yoggsaron_AI::Reset()
     stopped();
     BossAI::Reset();
     events.ScheduleEvent(event_sara_prefight, sara_prefight_interval);
-    auto &in = ulduar();
+    auto &in = instance();
     if (auto sara = in.sara())
     {
         sara->setFaction(35);
@@ -593,7 +620,7 @@ void Yoggsaron_AI::Reset()
 
 void Yoggsaron_AI::EnterCombat(Unit *enemy)
 {
-    auto &in = ulduar();
+    auto &in = instance();
     in.disconnect_prison();
     BossAI::EnterCombat(enemy);
     events.CancelEvent(event_sara_prefight);
@@ -615,20 +642,10 @@ void Yoggsaron_AI::JustDied(Unit *killer)
     BossAI::JustDied(killer);
 }
 
-instance_ulduar &Yoggsaron_AI::ulduar()
-{
-    return *static_cast<instance_ulduar *>(instance);
-}
-
-const instance_ulduar &Yoggsaron_AI::ulduar() const
-{
-    return *static_cast<const instance_ulduar *>(instance);
-}
-
 void Yoggsaron_AI::set_phase(Phases new_phase)
 {
     phase = std::move(new_phase);
-    auto &in = ulduar();
+    auto &in = instance();
     if (auto mimiron = in.ys_mimiron())
         if (auto ai = dynamic_cast<npc_ys_mimironAI *>(mimiron->AI()))
             ai->phase = phase;
@@ -639,7 +656,7 @@ void Yoggsaron_AI::set_phase(Phases new_phase)
 
 void Yoggsaron_AI::stopped()
 {
-    auto &in = ulduar();
+    auto &in = instance();
     if (auto door = in.yoggsaron_door())
     {
         door->SetGoState(GO_STATE_ACTIVE);
@@ -656,7 +673,10 @@ void Yoggsaron_AI::stopped()
 void Yoggsaron_AI::turn_insane(Player &target)
 {
     if (voice)
+    {
+        voice->SetPosition(target);
         DoScriptText(RAND(WHISP_INSANITY_1, WHISP_INSANITY_2), voice.get(), &target);
+    }
     me->CastSpell(&target, 63120 /* Insane */, true);
 }
 

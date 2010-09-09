@@ -254,6 +254,7 @@
     <ClCompile Include="..\..\src\server\game\AI\CreatureAISelector.cpp" />
     <ClCompile Include="..\..\src\server\game\AI\EventAI\CreatureEventAI.cpp" />
     <ClCompile Include="..\..\src\server\game\AI\EventAI\CreatureEventAIMgr.cpp" />
+    <ClCompile Include="..\..\src\server\game\AI\Instance_object_AI.cpp" />
     <ClCompile Include="..\..\src\server\game\AI\ScriptedAI\ScriptedCreature.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -474,6 +475,8 @@
     <ClInclude Include="..\..\src\server\game\AI\CreatureAISelector.h" />
     <ClInclude Include="..\..\src\server\game\AI\EventAI\CreatureEventAI.h" />
     <ClInclude Include="..\..\src\server\game\AI\EventAI\CreatureEventAIMgr.h" />
+    <ClInclude Include="..\..\src\server\game\AI\Instance_boss_AI.hpp" />
+    <ClInclude Include="..\..\src\server\game\AI\Instance_object_AI.hpp" />
     <ClInclude Include="..\..\src\server\game\AI\ScriptedAI\ScriptedCreature.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
