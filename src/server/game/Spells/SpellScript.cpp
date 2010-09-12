@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include <string>
 #include "SpellScript.h"
 #include "Spell.h"
@@ -46,8 +47,8 @@ uint8 _SpellScript::EffectHook::GetAffectedEffectsMask(SpellEntry const * spellE
         {
             if ((effIndex == EFFECT_FIRST_FOUND) && mask)
                 return mask;
-            if (CheckEffect(spellEntry, effIndex))
-                mask |= (uint8)1<<effIndex;
+            if (CheckEffect(spellEntry, i))
+                mask |= (uint8)1 << i;
         }
     }
     else

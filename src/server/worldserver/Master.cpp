@@ -48,7 +48,7 @@
 #include "Socket.h"
 #include "SocketHandler.h"
 #include "ListenSocket.h"
-#include "BigNumber.h"
+#include <Cryptography/BigNumber.h>
 
 #ifdef _WIN32
 #include "ServiceWin32.h"

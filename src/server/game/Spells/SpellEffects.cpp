@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -757,6 +758,9 @@ void Spell::SpellDamageSchoolDmg(uint32 effect_idx)
                     damage += m_damage / 2;
                     damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)* 0.035f);
                 }
+                // Scourge Strike
+                if (m_spellInfo->SpellFamilyFlags[2] & 0x80)
+                    apply_direct_bonus = false;
                 break;
             }
         }
@@ -1540,7 +1544,7 @@ void Spell::EffectDummy(uint32 i)
                 // Bloodthirst
                 case 23881:
                 {
-                    m_caster->CastCustomSpell(unitTarget, 23885, &damage, NULL, NULL, true, NULL);
+                    m_caster->CastCustomSpell(unitTarget, 55970, &damage, NULL, NULL, true, NULL);
                     return;
                 }
             }
@@ -1759,13 +1763,6 @@ void Spell::EffectDummy(uint32 i)
                 if (AuraEffect const * aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 2751, 0))
                     bp = bp * (m_caster->CalculateSpellDamage(m_caster, aurEff->GetSpellProto(), 2) + 100.0f) / 100.0f;
                 m_caster->CastCustomSpell(m_caster, 45470, &bp, NULL, NULL, false);
-                return;
-            }
-            // Scourge Strike
-            if (m_spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_DK_SCOURGE_STRIKE)
-            {
-                int32 bp = (m_damage * damage * unitTarget->GetDiseasesByCaster(m_caster->GetGUID())) / 100;
-                m_caster->CastCustomSpell(unitTarget, 70890, &bp, NULL, NULL, true);
                 return;
             }
             // Death Coil
@@ -2707,6 +2704,10 @@ void Spell::EffectHealPct(uint32 /*i*/)
         // Rune Tap - Party
         if (m_spellInfo->Id == 59754 && unitTarget == m_caster)
             return;
+
+        // Glyph of Bloodthirst
+        if (m_spellInfo->Id == 55969 && caster->HasAura(58369))
+            damage *= 2;
 
         uint32 addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, unitTarget->GetMaxHealth() * damage / 100.0f, HEAL);
         //if (Player *modOwner = m_caster->GetSpellModOwner())
@@ -4729,6 +4730,7 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                         {
                             if (NewPet->LoadPetFromDB(plr, 0, plr->GetLastPetNumber(), true))
                             {
+                                NewPet->setDeathState(ALIVE);
                                 NewPet->SetHealth(NewPet->GetMaxHealth());
                                 NewPet->SetPower(NewPet->getPowerType(),NewPet->GetMaxPower(NewPet->getPowerType()));
 
@@ -5798,8 +5800,9 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                         Aura * aura = (*i).second->GetBase();
                         if (aura->GetCasterGUID() != m_caster->GetGUID())
                             continue;
+                        auto proto = aura->GetSpellProto();
                         // Search only Serpent Sting, Viper Sting, Scorpid Sting auras
-                        flag96 familyFlag = aura->GetSpellProto()->SpellFamilyFlags;
+                        flag96 familyFlag = proto->SpellFamilyFlags;
                         if (!(familyFlag[1] & 0x00000080 || familyFlag[0] & 0x0000C000))
                             continue;
                         if (AuraEffect const * aurEff = aura->GetEffect(0))
@@ -5809,7 +5812,9 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                             {
                                 int32 TickCount = aurEff->GetTotalTicks();
                                 spellId = 53353; // 53353 Chimera Shot - Serpent
-                                basePoint = aurEff->GetAmount() * TickCount * 40 / 100;
+                                basePoint =
+                                    (m_caster->SpellDamageBonus(unitTarget, proto, aurEff->GetAmount(), DOT)
+                                        * TickCount * 40 + 50) / 100;
                             }
                             // Viper Sting - Instantly restores mana to you equal to 60% of the total amount drained by your Viper Sting.
                             else if (familyFlag[1] & 0x00000080)
@@ -5840,7 +5845,7 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                         break;
                     }
                     if (spellId)
-                        m_caster->CastCustomSpell(unitTarget, spellId, &basePoint, 0, 0, false);
+                        m_caster->CastCustomSpell(unitTarget, spellId, &basePoint, 0, 0, true);
                     return;
                 }
                 // Master's Call

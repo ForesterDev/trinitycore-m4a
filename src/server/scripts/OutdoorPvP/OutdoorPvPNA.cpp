@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "OutdoorPvPNA.h"
 #include "Player.h"
 #include "ObjectMgr.h"

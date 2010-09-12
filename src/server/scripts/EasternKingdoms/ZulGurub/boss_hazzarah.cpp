@@ -90,17 +90,13 @@ struct boss_hazzarahAI : public ScriptedAI
         DoMeleeAttackIfReady();
     }
 };
-CreatureAI* GetAI_boss_hazzarah(Creature* pCreature)
-{
-    return new boss_hazzarahAI (pCreature);
-}
 
 void AddSC_boss_hazzarah()
 {
     Script *newscript;
     newscript = new Script;
     newscript->Name = "boss_hazzarah";
-    newscript->GetAI = &GetAI_boss_hazzarah;
+    newscript->GetAI = &get_ai<boss_hazzarahAI>;
     newscript->RegisterSelf();
 }
 

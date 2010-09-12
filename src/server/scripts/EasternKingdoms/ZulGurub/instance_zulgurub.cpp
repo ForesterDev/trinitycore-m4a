@@ -145,17 +145,12 @@ struct instance_zulgurub : public ScriptedInstance
     }
 };
 
-InstanceData* GetInstanceData_instance_zulgurub(Map* pMap)
-{
-    return new instance_zulgurub(pMap);
-}
-
 void AddSC_instance_zulgurub()
 {
     Script *newscript;
     newscript = new Script;
     newscript->Name = "instance_zulgurub";
-    newscript->GetInstanceData = &GetInstanceData_instance_zulgurub;
+    newscript->GetInstanceData = &get_instance_data<instance_zulgurub>;
     newscript->RegisterSelf();
 }
 

@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "CreatureAIImpl.h"
 #include "Log.h"
@@ -3611,15 +3612,6 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
             if (aura->GetSpellProto()->StackAmount)
             {
                 aura->ModStackAmount(foundAura->GetStackAmount());
-            }
-            // Update periodic timers from the previous aura
-            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-            {
-                AuraEffect *existingEff = foundAura->GetEffect(i);
-                AuraEffect *newEff = aura->GetEffect(i);
-                if (!existingEff || !newEff) 
-                    continue;
-                newEff->SetPeriodicTimer(existingEff->GetPeriodicTimer());
             }
 
             // Use the new one to replace the old one
@@ -7539,21 +7531,24 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             // Unholy Blight
             if (dummySpell->Id == 49194)
             {
-                basepoints0 = triggerAmount * damage / 100;
-                // Glyph of Unholy Blight
-                if (AuraEffect *glyph=GetAuraEffect(63332,0))
-                    basepoints0 += basepoints0 * glyph->GetAmount() / 100;
-                // Find replaced aura to use it's remaining amount
-                AuraEffectList const& DoTAuras = target->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
-                for (Unit::AuraEffectList::const_iterator i = DoTAuras.begin(); i != DoTAuras.end(); ++i)
+                if (auto triggered = sSpellStore.LookupEntry(50536))
                 {
-                     if ((*i)->GetCasterGUID() != GetGUID() || (*i)->GetId() != 50536)
-                         continue;
-                     basepoints0 += ((*i)->GetAmount() * ((*i)->GetTotalTicks() - ((*i)->GetTickNumber()))) / (*i)->GetTotalTicks();
-                     break;
+                    basepoints0 = triggerAmount * damage / 100;
+                    // Glyph of Unholy Blight
+                    if (AuraEffect *glyph=GetAuraEffect(63332,0))
+                        basepoints0 += basepoints0 * glyph->GetAmount() / 100;
+                    // Find replaced aura to use it's remaining amount
+                    AuraEffectList const& DoTAuras = target->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+                    for (Unit::AuraEffectList::const_iterator i = DoTAuras.begin(); i != DoTAuras.end(); ++i)
+                    {
+                         if ((*i)->GetCasterGUID() != GetGUID() || (*i)->GetId() != 50536)
+                             continue;
+                         basepoints0 += ((*i)->GetAmount() * ((*i)->GetTotalTicks() - ((*i)->GetTickNumber()))) / (*i)->GetTotalTicks();
+                         break;
+                    }
+                    basepoints0 /= GetSpellDuration(triggered) / triggered->EffectAmplitude[0];
+                    triggered_spell_id = 50536;
                 }
-
-                triggered_spell_id = 50536;
                 break;
             }
             // Vendetta
@@ -8027,6 +8022,13 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
                     if (procSpell && procSpell->Dispel == DISPEL_DISEASE)
                         return false;
                     return true;
+                case 53386 /* Cinderglacier */:
+                    *handled = true;
+                    if (procSpell)
+                        if (procSpell->SchoolMask
+                                & (SPELL_SCHOOL_MASK_FROST | SPELL_SCHOOL_MASK_SHADOW))
+                            return true;
+                    return false;
             }
             break;
         }
@@ -10392,8 +10394,11 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     float TakenTotalMod = (sumNegativeMod+maxPositiveMod+100.0f)/100.0f;
 
     // Taken/Done fixed damage bonus auras
-    int32 DoneAdvertisedBenefit  = SpellBaseDamageBonus(GetSpellSchoolMask(spellProto));
-    int32 TakenAdvertisedBenefit = SpellBaseDamageBonusForVictim(GetSpellSchoolMask(spellProto), pVictim);
+    int32 DoneAdvertisedBenefit = spellProto->DmgClass == SPELL_DAMAGE_CLASS_MAGIC
+            ? SpellBaseDamageBonus(GetSpellSchoolMask(spellProto)) : 0;
+    int32 TakenAdvertisedBenefit = spellProto->DmgClass == SPELL_DAMAGE_CLASS_MAGIC
+            ? SpellBaseDamageBonusForVictim(GetSpellSchoolMask(spellProto), pVictim)
+            : 0;
     // Pets just add their bonus damage to their spell damage
     // note that their spell damage is just gain of their own auras
     if (HasUnitTypeMask(UNIT_MASK_GUARDIAN))
@@ -10408,15 +10413,31 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         {
             coeff = bonus->dot_damage;
             if (bonus->ap_dot_bonus > 0)
-                DoneTotal += bonus->ap_dot_bonus * stack * ApCoeffMod * GetTotalAttackPowerValue(
-                (IsRangedWeaponSpell(spellProto) && spellProto->DmgClass !=SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK);
+            {
+                auto type = IsRangedWeaponSpell(spellProto)
+                        && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE ? RANGED_ATTACK
+                        : BASE_ATTACK;
+                auto ap = GetTotalAttackPowerValue(type);
+                if (type == RANGED_ATTACK)
+                    ap += pVictim
+                            ->GetTotalAuraModifier(SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS);
+                DoneTotal += bonus->ap_dot_bonus * stack * ApCoeffMod * ap;
+            }
         }
         else
         {
             coeff = bonus->direct_damage;
             if (bonus->ap_bonus > 0)
-                DoneTotal += bonus->ap_bonus * stack * ApCoeffMod * GetTotalAttackPowerValue(
-                (IsRangedWeaponSpell(spellProto) && spellProto->DmgClass !=SPELL_DAMAGE_CLASS_MELEE)? RANGED_ATTACK : BASE_ATTACK);
+            {
+                auto type = IsRangedWeaponSpell(spellProto)
+                        && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE ? RANGED_ATTACK
+                        : BASE_ATTACK;
+                auto ap = GetTotalAttackPowerValue(type);
+                if (type == RANGED_ATTACK)
+                    ap += pVictim
+                            ->GetTotalAuraModifier(SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS);
+                DoneTotal += bonus->ap_bonus * stack * ApCoeffMod * ap;
+            }
         }
     }
     // Default calculation
@@ -10491,7 +10512,8 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     }
 
     // Some spells don't benefit from done mods
-    if (spellProto->AttributesEx3 & SPELL_ATTR_EX3_NO_DONE_BONUS)
+    if (spellProto->AttributesEx3 & SPELL_ATTR_EX3_NO_DONE_BONUS
+            || spellProto->AttributesEx4 & SPELL_ATTR_EX4_FIXED_DAMAGE)
     {
         DoneTotal = 0;
         DoneTotalMod = 1.0f;
@@ -13765,6 +13787,7 @@ bool InitTriggerAuraData()
     isTriggerAura[SPELL_AURA_MOD_POWER_COST_SCHOOL] = true;
     isTriggerAura[SPELL_AURA_REFLECT_SPELLS_SCHOOL] = true;
     isTriggerAura[SPELL_AURA_MECHANIC_IMMUNITY] = true;
+    isTriggerAura[SPELL_AURA_MOD_DAMAGE_PERCENT_DONE] = true;
     isTriggerAura[SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN] = true;
     isTriggerAura[SPELL_AURA_SPELL_MAGNET] = true;
     isTriggerAura[SPELL_AURA_MOD_ATTACK_POWER] = true;
@@ -14081,9 +14104,11 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
                 case SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT:
                 case SPELL_AURA_MOD_POWER_COST_SCHOOL:
                     // Skip melee hits and spells ws wrong school or zero cost
-                    if (procSpell &&
-                        (procSpell->manaCost != 0 || procSpell->ManaCostPercentage != 0) && // Cost check
-                        (triggeredByAura->GetMiscValue() & procSpell->SchoolMask) == 0)         // School check
+                    if (procSpell
+                            // Cost check
+                            && (procSpell->manaCost != 0 || procSpell->ManaCostPercentage != 0)
+                            // School check
+                            && triggeredByAura->GetMiscValue() & procSpell->SchoolMask)
                         takeCharges = true;
                     break;
                 case SPELL_AURA_MECHANIC_IMMUNITY:
@@ -14160,7 +14185,6 @@ Player* Unit::GetSpellModOwner() const
 {
     if (GetTypeId() == TYPEID_PLAYER)
         return (Player*)this;
-    if (this->ToCreature()->isPet() || this->ToCreature()->isTotem())
     {
         Unit* owner = GetOwner();
         if (owner && owner->GetTypeId() == TYPEID_PLAYER)

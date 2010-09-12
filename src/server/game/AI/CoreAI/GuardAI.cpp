@@ -18,8 +18,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "GuardAI.h"
-#include "Errors.h"
+#include <Debugging/Errors.h>
 #include "Player.h"
 #include "ObjectAccessor.h"
 #include "World.h"

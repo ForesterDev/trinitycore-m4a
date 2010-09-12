@@ -69,11 +69,6 @@ struct npc_ragged_johnAI : public ScriptedAI
     void EnterCombat(Unit * /*who*/) {}
 };
 
-CreatureAI* GetAI_npc_ragged_john(Creature* pCreature)
-{
-    return new npc_ragged_johnAI (pCreature);
-}
-
 bool GossipHello_npc_ragged_john(Player* pPlayer, Creature* pCreature)
 {
     if (pCreature->isQuestGiver())
@@ -148,7 +143,7 @@ void AddSC_burning_steppes()
 
     newscript = new Script;
     newscript->Name = "npc_ragged_john";
-    newscript->GetAI = &GetAI_npc_ragged_john;
+    newscript->GetAI = &get_ai<npc_ragged_johnAI>;
     newscript->pGossipHello =  &GossipHello_npc_ragged_john;
     newscript->pGossipSelect = &GossipSelect_npc_ragged_john;
     newscript->RegisterSelf();

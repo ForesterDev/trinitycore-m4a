@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "SpellMgr.h"
 #include "ObjectMgr.h"
 #include "SpellAuraDefines.h"
@@ -3649,6 +3650,10 @@ void SpellMgr::LoadSpellCustomAttr()
         case 39365: // Thundering Storm
         case 41071: // Raise Dead (HACK)
         case 52124: // Sky Darkener Assault
+        case 63018: // Searing Light (HACK)
+        case 65121: // Searing Light (HACK)
+        case 63024: // Gravity Bomb (HACK)
+        case 64234: // Gravity Bomb (HACK)
         case 42442: // Vengeance Landing Cannonfire
         case 45863: // Cosmetic - Incinerate to Random Target
         case 25425: // Shoot
@@ -3838,6 +3843,10 @@ void SpellMgr::LoadSpellCustomAttr()
             // that will be clear if we get more spells with problem like this
             spellInfo->AttributesEx |= SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY;
             count++;
+            break;
+        case 63675 /* Improved Devouring Plague */:
+            spellInfo->AttributesEx3 |= SPELL_ATTR_EX3_NO_DONE_BONUS;
+            ++count;
             break;
         default:
             break;

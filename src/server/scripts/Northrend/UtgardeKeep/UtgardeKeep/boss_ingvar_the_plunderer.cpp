@@ -144,7 +144,8 @@ struct boss_ingvar_the_plundererAI : public ScriptedAI
         bEventInProgress = false;
         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
         me->UpdateEntry(MOB_INGVAR_UNDEAD);
-        me->SetInCombatWith(me->getVictim());
+        if (auto victim = me->getVictim())
+            me->SetInCombatWith(victim);
         me->GetMotionMaster()->MoveChase(me->getVictim());
 
         DoScriptText(YELL_AGGRO_2,me);
