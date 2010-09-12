@@ -18,7 +18,6 @@
 
 #include "gamePCH.h"
 #include "OutdoorPvP.h"
-#include "OutdoorPvPImpl.h"
 #include "OutdoorPvPMgr.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"

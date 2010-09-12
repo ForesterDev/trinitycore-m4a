@@ -20,21 +20,19 @@
 
 #include "gamePCH.h"
 #include "Common.h"
-
 #include "Transport.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
 #include "Path.h"
-
+#include "ScriptMgr.h"
 #include "WorldPacket.h"
 #include "DBCStores.h"
 #include "ProgressBar.h"
-
 #include "World.h"
 
 void MapManager::LoadTransports()
 {
-    QueryResult_AutoPtr result = WorldDatabase.Query("SELECT entry, name, period FROM transports");
+    QueryResult_AutoPtr result = WorldDatabase.Query("SELECT entry, name, period, ScriptName FROM transports");
 
     uint32 count = 0;
 
@@ -54,13 +52,13 @@ void MapManager::LoadTransports()
     {
         bar.step();
 
-        Transport *t = new Transport;
-
         Field *fields = result->Fetch();
-
         uint32 entry = fields[0].GetUInt32();
         std::string name = fields[1].GetCppString();
-        t->m_period = fields[2].GetUInt32();
+        uint32 period = fields[2].GetUInt32();
+        uint32 scriptId = objmgr.GetScriptId(fields[3].GetString());
+
+        Transport *t = new Transport(period, scriptId);
 
         const GameObjectInfo *goinfo = objmgr.GetGameObjectInfo(entry);
 
@@ -116,7 +114,8 @@ void MapManager::LoadTransports()
         }
 
         ++count;
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     sLog.outString();
     sLog.outString(">> Loaded %u transports", count);
@@ -180,7 +179,7 @@ void MapManager::LoadTransportNPCs()
     sLog.outString(">> Loaded %u transport npcs", count);
 }
 
-Transport::Transport() : GameObject()
+Transport::Transport(uint32 period, uint32 script) : m_period(period), ScriptId(script), GameObject()
 {
     m_updateFlag = (UPDATEFLAG_TRANSPORT | UPDATEFLAG_HIGHGUID | UPDATEFLAG_HAS_POSITION | UPDATEFLAG_ROTATION);
 }
@@ -530,6 +529,8 @@ bool Transport::AddPassenger(Player* passenger)
 {
     if (m_passengers.insert(passenger).second)
         sLog.outDetail("Player %s boarded transport %s.", passenger->GetName(), GetName());
+
+    sScriptMgr.OnAddPassenger(this, passenger);
     return true;
 }
 
@@ -537,10 +538,12 @@ bool Transport::RemovePassenger(Player* passenger)
 {
     if (m_passengers.erase(passenger))
         sLog.outDetail("Player %s removed from transport %s.", passenger->GetName(), GetName());
+
+    sScriptMgr.OnRemovePassenger(this, passenger);
     return true;
 }
 
-void Transport::Update(uint32 /*p_time*/)
+void Transport::Update(uint32 p_diff)
 {
     if (m_WayPoints.size() <= 1)
         return;
@@ -562,18 +565,22 @@ void Transport::Update(uint32 /*p_time*/)
         }
         else
         {
-            Relocate(m_curr->second.x, m_curr->second.y, m_curr->second.z, GetAngle(m_next->second.x,m_next->second.y) + 3.1415926f);
+            Relocate(m_curr->second.x, m_curr->second.y, m_curr->second.z, GetAngle(m_next->second.x,m_next->second.y) + float(M_PI));
             UpdateNPCPositions(); // COME BACK MARKER
         }
+
+        sScriptMgr.OnRelocate(this, m_curr->second.mapid, m_curr->second.x, m_curr->second.y, m_curr->second.z);
 
         m_nextNodeTime = m_curr->first;
 
         if (m_curr == m_WayPoints.begin() && (sLog.getLogFilter() & LOG_FILTER_TRANSPORT_MOVES) == 0)
-            sLog.outDetail(" ************ BEGIN ************** %s", this->m_name.c_str());
+            sLog.outDetail(" ************ BEGIN ************** %s", m_name.c_str());
 
         if ((sLog.getLogFilter() & LOG_FILTER_TRANSPORT_MOVES) == 0)
-            sLog.outDetail("%s moved to %d %f %f %f %d", this->m_name.c_str(), m_curr->second.id, m_curr->second.x, m_curr->second.y, m_curr->second.z, m_curr->second.mapid);
+            sLog.outDetail("%s moved to %d %f %f %f %d", m_name.c_str(), m_curr->second.id, m_curr->second.x, m_curr->second.y, m_curr->second.z, m_curr->second.mapid);
     }
+
+    sScriptMgr.OnTransportUpdate(this, p_diff);
 }
 
 void Transport::UpdateForMap(Map const* targetMap)
@@ -677,6 +684,7 @@ uint32 Transport::AddNPCPassenger(uint32 tguid, uint32 entry, float x, float y, 
         currenttguid = std::max(tguid,currenttguid);
 
     pCreature->SetGUIDTransport(tguid);
+    sScriptMgr.OnAddCreaturePassenger(this, pCreature);
     return tguid;
 }
 

@@ -46,6 +46,7 @@
 #include "Config.h"
 #include "DatabaseEnv.h"
 #include "WorldSocket.h"
+#include "ScriptMgr.h"
 
 /**
 * This is a helper class to WorldSocketMgr ,that manages
@@ -117,6 +118,8 @@ class ReactorRunnable : protected ACE_Task_Base
             sock->reactor (m_Reactor);
             m_NewSockets.insert (sock);
 
+            sScriptMgr.OnSocketOpen(sock);
+
             return 0;
         }
 
@@ -140,6 +143,8 @@ class ReactorRunnable : protected ACE_Task_Base
 
                 if (sock->IsClosed())
                 {
+                    sScriptMgr.OnSocketClose(sock, true);
+
                     sock->RemoveReference();
                     --m_Connections;
                 }
@@ -177,7 +182,11 @@ class ReactorRunnable : protected ACE_Task_Base
                     {
                         t = i;
                         ++i;
+
                         (*t)->CloseSocket();
+
+                        sScriptMgr.OnSocketClose((*t), false);
+
                         (*t)->RemoveReference();
                         --m_Connections;
                         m_Sockets.erase (t);
@@ -280,6 +289,8 @@ WorldSocketMgr::StartNetwork (ACE_UINT16 port, const char* address)
     if (StartReactiveIO(port, address) == -1)
         return -1;
 
+    sScriptMgr.OnNetworkStart();
+
     return 0;
 }
 
@@ -301,6 +312,8 @@ WorldSocketMgr::StopNetwork()
     }
 
     Wait();
+
+    sScriptMgr.OnNetworkStop();
 }
 
 void

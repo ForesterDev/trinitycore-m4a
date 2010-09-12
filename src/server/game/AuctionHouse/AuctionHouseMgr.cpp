@@ -25,9 +25,8 @@
 #include "WorldSession.h"
 #include "DatabaseEnv.h"
 #include "SQLStorage.h"
-
 #include "DBCStores.h"
-
+#include "ScriptMgr.h"
 #include "AccountMgr.h"
 #include "AuctionHouseMgr.h"
 #include "Item.h"
@@ -217,7 +216,7 @@ void AuctionHouseMgr::SendAuctionSuccessfulMail(AuctionEntry * auction)
         uint32 profit = auction->bid + auction->deposit - auctionCut;
 
         //FIXME: what do if owner offline
-        if (owner && owner->GetGUIDLow() != auctionbot.GetAHBplayerGUID())
+        if (owner)
         {
             owner->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GOLD_EARNED_BY_AUCTIONS, profit);
             owner->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_AUCTION_SOLD, auction->bid);
@@ -232,7 +231,8 @@ void AuctionHouseMgr::SendAuctionSuccessfulMail(AuctionEntry * auction)
 
 //does not clear ram
 void AuctionHouseMgr::SendAuctionExpiredMail(AuctionEntry * auction)
-{ //return an item in auction to its owner by mail
+{
+    //return an item in auction to its owner by mail
     Item *pItem = GetAItem(auction->item_guidlow);
     if (!pItem)
         return;
@@ -246,7 +246,7 @@ void AuctionHouseMgr::SendAuctionExpiredMail(AuctionEntry * auction)
         std::ostringstream subject;
         subject << auction->item_template << ":0:" << AUCTION_EXPIRED << ":0:0";
 
-        if (owner && owner->GetGUIDLow() != auctionbot.GetAHBplayerGUID())
+        if (owner)
             owner->GetSession()->SendAuctionOwnerNotification(auction);
 
         MailDraft(subject.str(), "")                        // TODO: fix body
@@ -473,22 +473,25 @@ AuctionHouseEntry const* AuctionHouseMgr::GetAuctionHouseEntry(uint32 factionTem
 
     return sAuctionHouseStore.LookupEntry(houseid);
 }
-    void AuctionHouseObject::AddAuction(AuctionEntry *ah)
-    {
-        ASSERT(ah);
-        AuctionsMap[ah->Id] = ah;
-        auctionbot.IncrementItemCounts(ah);
-    }
 
-    bool AuctionHouseObject::RemoveAuction(AuctionEntry *auction, uint32 item_template)
-    {
-        auctionbot.DecrementItemCounts(auction, item_template);
-        bool wasInMap = AuctionsMap.erase(auction->Id) ? true : false;
+void AuctionHouseObject::AddAuction(AuctionEntry *auction)
+{
+    ASSERT(auction);
+
+    AuctionsMap[auction->Id] = auction;
+    sScriptMgr.OnAuctionAdd(this, auction);
+}
+
+bool AuctionHouseObject::RemoveAuction(AuctionEntry *auction, uint32 item_template)
+{
+    bool wasInMap = AuctionsMap.erase(auction->Id) ? true : false;
+
+    sScriptMgr.OnAuctionRemove(this, auction);
 
 	// we need to delete the entry, it is not referenced any more
 	delete auction;
 	return wasInMap;
-    }
+}
 
 void AuctionHouseObject::Update()
 {
@@ -513,7 +516,8 @@ void AuctionHouseObject::Update()
     {
         uint32 tmpdata = result->Fetch()->GetUInt32();
         expiredAuctions.push_back(tmpdata);
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     while (!expiredAuctions.empty())
     {
@@ -530,7 +534,10 @@ void AuctionHouseObject::Update()
 
         ///- Either cancel the auction if there was no bidder
         if (auction->bidder == 0)
+        {
             auctionmgr.SendAuctionExpiredMail(auction);
+            sScriptMgr.OnAuctionExpire(this, auction);
+        }
         ///- Or perform the transaction
         else
         {
@@ -539,6 +546,7 @@ void AuctionHouseObject::Update()
             //we send the money to the seller
             auctionmgr.SendAuctionSuccessfulMail(auction);
             auctionmgr.SendAuctionWonMail(auction);
+            sScriptMgr.OnAuctionSuccessful(this, auction);
         }
 
         ///- In any case clear the auction

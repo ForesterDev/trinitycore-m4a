@@ -40,6 +40,7 @@
 #include "ace/Singleton.h"
 #include "SQLStorage.h"
 #include "Vehicle.h"
+#include "Weather.h"
 #include "ObjectMgr.h"
 #include <string>
 #include <map>
@@ -294,19 +295,6 @@ struct QuestPOI
 typedef std::vector<QuestPOI> QuestPOIVector;
 typedef UNORDERED_MAP<uint32, QuestPOIVector> QuestPOIMap;
 
-#define WEATHER_SEASONS 4
-struct WeatherSeasonChances
-{
-    uint32 rainChance;
-    uint32 snowChance;
-    uint32 stormChance;
-};
-
-struct WeatherZoneChances
-{
-    WeatherSeasonChances data[WEATHER_SEASONS];
-};
-
 struct GraveYardData
 {
     uint32 safeLocId;
@@ -397,7 +385,7 @@ class ObjectMgr
 
         typedef UNORDERED_MAP<uint32, PointOfInterest> PointOfInterestMap;
 
-        typedef UNORDERED_MAP<uint32, WeatherZoneChances> WeatherZoneMap;
+        typedef UNORDERED_MAP<uint32, WeatherData> WeatherZoneMap;
 
         typedef std::vector<std::string> ScriptNameMap;
 
@@ -687,7 +675,7 @@ class ObjectMgr
 
         void LoadNPCSpellClickSpells();
 
-        void LoadWeatherZoneChances();
+        void LoadWeatherData();
         void LoadGameTele();
 
         void LoadNpcTextId();
@@ -740,7 +728,7 @@ class ObjectMgr
             return NULL;
         }
 
-        WeatherZoneChances const* GetWeatherChances(uint32 zone_id) const
+        WeatherData const* GetWeatherChances(uint32 zone_id) const
         {
             WeatherZoneMap::const_iterator itr = mWeatherZoneMap.find(zone_id);
             if (itr != mWeatherZoneMap.end())

@@ -12,15 +12,14 @@ file(GLOB_RECURSE sources_CommandLine CommandLine/*.cpp CommandLine/*.h)
 file(GLOB_RECURSE sources_RemoteAccess RemoteAccess/*.cpp RemoteAccess/*.h)
 file(GLOB_RECURSE sources_TCSoap TCSoap/*.cpp TCSoap/*.h)
 file(GLOB_RECURSE sources_WorldThread WorldThread/*.cpp WorldThread/*.h)
+file(GLOB sources_localdir *.cpp *.h)
 
 set(worldserver_SRCS
   ${sources_CommandLine}
   ${sources_RemoteAccess}
   ${sources_TCSoap}
   ${sources_WorldThread}
-  Main.cpp
-  Master.cpp
-  Master.h
+  ${sources_localdir}
 )
 
 if( WIN32 )
@@ -38,7 +37,6 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/externals/gsoap
   ${CMAKE_SOURCE_DIR}/externals/sockets/include
   ${CMAKE_SOURCE_DIR}/externals/mersennetwister
-  ${CMAKE_SOURCE_DIR}/dep/include
   ${CMAKE_SOURCE_DIR}/src/server/collision
   ${CMAKE_SOURCE_DIR}/src/server/collision/Management
   ${CMAKE_SOURCE_DIR}/src/server/shared

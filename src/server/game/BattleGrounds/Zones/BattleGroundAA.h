@@ -62,4 +62,3 @@ class BattleGroundAA : public BattleGround
         void HandleKillPlayer(Player* player, Player *killer);
 };
 #endif
-
