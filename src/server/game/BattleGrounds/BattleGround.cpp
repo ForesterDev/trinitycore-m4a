@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "Player.h"
 #include "ObjectMgr.h"
 #include "World.h"
@@ -1054,6 +1055,7 @@ void BattleGround::StartBattleGround()
 
 void BattleGround::AddPlayer(Player *plr)
 {
+    ASSERT(m_Players.size() < max_battleground_players);
     // remove afk from player
     if (plr->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK))
         plr->ToggleAFK();

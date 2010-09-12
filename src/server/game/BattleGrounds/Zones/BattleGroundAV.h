@@ -21,6 +21,10 @@
 #ifndef __BATTLEGROUNDAV_H
 #define __BATTLEGROUNDAV_H
 
+#include <memory>
+#include <array>
+#include "BattleGround.h"
+
 class BattleGround;
 
 #define LANG_BG_AV_A_CAPTAIN_BUFF       "Begone. Uncouth scum! The Alliance shall prevail in Alterac Valley!"
@@ -1525,6 +1529,21 @@ class BattleGroundAVScore : public BattleGroundScore
     public:
         BattleGroundAVScore() : GraveyardsAssaulted(0), GraveyardsDefended(0), TowersAssaulted(0), TowersDefended(0), MinesCaptured(0), LeadersKilled(0), SecondaryObjectives(0) {};
         virtual ~BattleGroundAVScore() {};
+
+        std::pair<std::size_t, Stat_data_type> stat_data() const
+        {
+            std::array<int32, max_stats> d;
+            auto first = d.begin(), it = first;
+            *it++ = GraveyardsAssaulted;
+            *it++ = GraveyardsDefended;
+            *it++ = TowersAssaulted;
+            *it++ = TowersDefended;
+            *it++ = MinesCaptured;
+            *it++ = LeadersKilled;
+            *it++ = SecondaryObjectives;
+            return std::make_pair(it - first, std::move(d));
+        }
+
         uint32 GraveyardsAssaulted;
         uint32 GraveyardsDefended;
         uint32 TowersAssaulted;

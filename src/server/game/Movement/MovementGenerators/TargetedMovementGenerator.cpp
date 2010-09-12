@@ -18,9 +18,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "ByteBuffer.h"
 #include "TargetedMovementGenerator.h"
-#include "Errors.h"
+#include <Debugging/Errors.h>
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "DestinationHolderImp.h"

@@ -267,8 +267,74 @@ public:
     }
 };
 
+#define SPELL_SEEDS_OF_NATURES_WRATH 49587
+#define QUEST_THAT_WHICH_CREATES_CAN_ALSO_DESTROY 12459
+
+#define NPC_WEAKENED_REANIMATED_FROST_WYRM 27821
+#define NPC_WEAKENED_TURGID_THE_VILE 27809
+#define NPC_WEAKENED_OVERSEER_DEATHGAZE 27807
+
+struct npc_reanimated_frost_wormAI : public ScriptedAI
+{
+    npc_reanimated_frost_wormAI(Creature *c) : ScriptedAI(c) {}
+
+    void SpellHit(Unit *hitter, const SpellEntry *spell)
+    {
+        if ((spell->Id == SPELL_SEEDS_OF_NATURES_WRATH) &&
+            (hitter->GetTypeId() == TYPEID_PLAYER) &&
+            (CAST_PLR(hitter)->IsActiveQuest(QUEST_THAT_WHICH_CREATES_CAN_ALSO_DESTROY)))
+        {
+            me->UpdateEntry(NPC_WEAKENED_REANIMATED_FROST_WYRM);
+        }
+    }
+};
+
+struct npc_turgid_the_vileAI : public ScriptedAI
+{
+    npc_turgid_the_vileAI(Creature *c) : ScriptedAI(c) {}
+
+    void SpellHit(Unit *hitter, const SpellEntry *spell)
+    {
+        if ((spell->Id == SPELL_SEEDS_OF_NATURES_WRATH) &&
+            (hitter->GetTypeId() == TYPEID_PLAYER) &&
+            (CAST_PLR(hitter)->IsActiveQuest(QUEST_THAT_WHICH_CREATES_CAN_ALSO_DESTROY)))
+        {
+            me->UpdateEntry(NPC_WEAKENED_TURGID_THE_VILE);
+        }
+    }
+};
+
+struct npc_overseer_deathgazeAI : public ScriptedAI
+{
+    npc_overseer_deathgazeAI(Creature *c) : ScriptedAI(c) {}
+
+    void SpellHit(Unit *hitter, const SpellEntry *spell)
+    {
+        if ((spell->Id == SPELL_SEEDS_OF_NATURES_WRATH) &&
+            (hitter->GetTypeId() == TYPEID_PLAYER) &&
+            (CAST_PLR(hitter)->IsActiveQuest(QUEST_THAT_WHICH_CREATES_CAN_ALSO_DESTROY)))
+        {
+            me->UpdateEntry(NPC_WEAKENED_OVERSEER_DEATHGAZE);
+        }
+    }
+};
+
 void AddSC_dragonblight()
 {
     new npc_alexstrasza_wr_gate;
     new npc_inquisitor_hallard;
+    newscript = new Script;
+    newscript->Name = "npc_reanimated_frost_worm";
+    newscript->GetAI = &get_ai<npc_reanimated_frost_wormAI>;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_turgid_the_vile";
+    newscript->GetAI = &get_ai<npc_turgid_the_vileAI>;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_overseer_deathgaze";
+    newscript->GetAI = &get_ai<npc_overseer_deathgazeAI>;
+    newscript->RegisterSelf();
 }
