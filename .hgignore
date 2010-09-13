@@ -1,0 +1,15 @@
+# use glob syntax.
+syntax: glob
+
+build/
+.directory
+*.orig
+*.rej
+*~
+.git/
+*.kdev*
+
+# use regexp syntax.
+syntax: regexp
+glob:**.sdf
+glob:**.opensdf
