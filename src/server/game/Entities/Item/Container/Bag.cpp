@@ -158,6 +158,7 @@ void Bag::RemoveItem(uint8 slot, bool /*update*/)
 
 void Bag::StoreItem(uint8 slot, Item *pItem, bool /*update*/)
 {
+    ASSERT(GetState() != ITEM_REMOVED);
     ASSERT(slot < MAX_BAG_SIZE);
 
     if (pItem && pItem->GetGUID() != this->GetGUID())

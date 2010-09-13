@@ -663,6 +663,9 @@ void Item::UpdateItemSuffixFactor()
 
 void Item::SetState(ItemUpdateState state, Player *forplayer)
 {
+    if (state == ITEM_REMOVED)
+        if (auto this_bag = dynamic_cast<Bag *>(this))
+            ASSERT(this_bag->IsEmpty());
     if (uState == ITEM_NEW && state == ITEM_REMOVED)
     {
         // pretend the item never existed
