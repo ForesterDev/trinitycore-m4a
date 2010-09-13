@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -751,6 +752,9 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     damage += m_damage / 2;
                     damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)* 0.035f);
                 }
+                // Scourge Strike
+                if (m_spellInfo->SpellFamilyFlags[2] & 0x80)
+                    apply_direct_bonus = false;
                 break;
             }
         }
@@ -1262,7 +1266,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 // Bloodthirst
                 case 23881:
                 {
-                    m_caster->CastCustomSpell(unitTarget, 23885, &damage, NULL, NULL, true, NULL);
+                    m_caster->CastCustomSpell(unitTarget, 55970, &damage, NULL, NULL, true, NULL);
                     return;
                 }
             }

@@ -17,12 +17,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "DatabaseEnv.h"
 #include "AddonMgr.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "Util.h"
-#include "SHA1.h"
+#include <Cryptography/SHA1.h>
 #include "ProgressBar.h"
 
 AddonMgr::AddonMgr()

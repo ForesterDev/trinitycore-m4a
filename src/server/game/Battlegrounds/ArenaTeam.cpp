@@ -16,11 +16,20 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "ObjectMgr.h"
 #include "WorldPacket.h"
 
 #include "ArenaTeam.h"
 #include "World.h"
+
+namespace
+{
+    enum
+    {
+        low_rating_threshold = 1300
+    };
+}
 
 void ArenaTeamMember::ModifyPersonalRating(Player* plr, int32 mod, uint32 slot)
 {
@@ -181,8 +190,8 @@ bool ArenaTeam::AddMember(const uint64& PlayerGuid)
         if (sWorld.getIntConfig(CONFIG_ARENA_SEASON_ID) < 6)
             newmember.personal_rating = 1500;
         else
-            if (GetRating() >= 1000)
-                newmember.personal_rating = 1000;
+            if (GetRating() >= low_rating_threshold)
+                newmember.personal_rating = low_rating_threshold;
     }*/
 
     m_members.push_back(newmember);
@@ -636,8 +645,8 @@ float ArenaTeam::GetChanceAgainst(uint32 own_rating, uint32 enemy_rating)
     // ELO system
 
 /*    if (sWorld.getIntConfig(CONFIG_ARENA_SEASON_ID) >= 6)
-        if (enemy_rating < 1000)
-            enemy_rating = 1000;*/
+        if (enemy_rating < low_rating_threshold)
+            enemy_rating = low_rating_threshold;*/
     return 1.0f/(1.0f+exp(log(10.0f)*(float)((float)enemy_rating - (float)own_rating)/400.0f));
 }
 
@@ -653,7 +662,7 @@ int32 ArenaTeam::GetRatingMod(uint32 own_rating, uint32 enemy_rating, bool won, 
     
     if (won && !calculating_mmr)
     {
-        if (own_rating < 1000)
+        if (own_rating < low_rating_threshold)
             mod = 48.0f * (won_mod - chance);
         else if (own_rating < 1300)
             mod = (24.0f + (24.0f * (1300.0f - int32(own_rating)) / 300.0f)) * (won_mod - chance);
@@ -800,12 +809,13 @@ void ArenaTeam::UpdateArenaPointsHelper(std::map<uint32, uint32>& PlayerPoints)
         return;
     // to get points, a player has to participate in at least 30% of the matches
     uint32 min_plays = (uint32) ceil(m_stats.games_week * 0.3);
+    auto points = GetPoints(m_stats.rating);
     for (MemberList::const_iterator itr = m_members.begin(); itr !=  m_members.end(); ++itr)
     {
         // the player participated in enough games, update his points
         uint32 points_to_add = 0;
         if (itr->games_week >= min_plays)
-            points_to_add = GetPoints(itr->personal_rating);
+            points_to_add = points;
         // OBSOLETE : CharacterDatabase.PExecute("UPDATE arena_team_member SET points_to_add = '%u' WHERE arenateamid = '%u' AND guid = '%u'", points_to_add, m_TeamId, itr->guid);
 
         std::map<uint32, uint32>::iterator plr_itr = PlayerPoints.find(GUID_LOPART(itr->guid));

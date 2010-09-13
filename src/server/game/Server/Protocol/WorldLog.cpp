@@ -22,6 +22,7 @@
     \ingroup u2w
 */
 
+#include "gamePCH.h"
 #include "WorldLog.h"
 #include "Config.h"
 #include "Log.h"

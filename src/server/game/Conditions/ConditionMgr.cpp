@@ -20,6 +20,7 @@
 
 
 
+#include "gamePCH.h"
 #include "Player.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"

@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
  #include <ace/Auto_Ptr.h>
 
 #include "Common.h"
@@ -1015,6 +1016,11 @@ void Item::SendTimeUpdate(Player* owner)
     data << (uint64)GetGUID();
     data << (uint32)GetUInt32Value(ITEM_FIELD_DURATION);
     owner->GetSession()->SendPacket(&data);
+}
+
+Item::~Item()
+{
+    ASSERT(!IsInUpdateQueue());
 }
 
 Item* Item::CreateItem(uint32 item, uint32 count, Player const* player)

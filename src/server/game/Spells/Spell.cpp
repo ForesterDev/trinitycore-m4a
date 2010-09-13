@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -53,6 +54,10 @@
 #include "ConditionMgr.h"
 #include "DisableMgr.h"
 #include "SpellScript.h"
+
+using std::uint_fast8_t;
+using std::min;
+using std::numeric_limits;
 
 #define SPELL_CHANNEL_UPDATE_INTERVAL (1 * IN_MILLISECONDS)
 
@@ -421,9 +426,12 @@ void SpellCastTargets::write (ByteBuffer & data)
         data << m_strTarget;
 }
 
-Spell::Spell(Unit* Caster, SpellEntry const *info, bool triggered, uint64 originalCasterGUID, bool skipCheck):
-m_spellInfo(sSpellMgr.GetSpellForDifficultyFromSpell(info, Caster)),
-m_caster(Caster), m_spellValue(new SpellValue(m_spellInfo))
+Spell::Spell(Unit *Caster, const SpellEntry *info, bool triggered,
+        uint64 originalCasterGUID, bool skipCheck)
+    : m_spellInfo(sSpellMgr.GetSpellForDifficultyFromSpell(info, Caster)),
+        m_caster(Caster),
+        m_spellValue(new SpellValue(m_spellInfo)),
+        use_count()
 {
     m_customAttr = sSpellMgr.GetSpellCustomAttr(m_spellInfo->Id);
     m_skipCheck = skipCheck;
@@ -537,6 +545,7 @@ m_caster(Caster), m_spellValue(new SpellValue(m_spellInfo))
 
 Spell::~Spell()
 {
+    assert(!use_count);
     // unload scripts
     while(!m_loadedScripts.empty())
     {
@@ -1326,11 +1335,26 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
 
         caster->DealSpellDamage(&damageInfo, true);
 
-        // Haunt
-        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->SpellFamilyFlags[1] & 0x40000 && m_spellAura && m_spellAura->GetEffect(1))
+        switch (m_spellInfo->SpellFamilyName)
         {
-            AuraEffect * aurEff = m_spellAura->GetEffect(1);
-            aurEff->SetAmount(aurEff->GetAmount() * damageInfo.damage / 100);
+        case SPELLFAMILY_WARLOCK:
+            // Haunt
+            if (m_spellInfo->SpellFamilyFlags[1] & 0x40000 && m_spellAura
+                    && m_spellAura->GetEffect(1))
+            {
+                AuraEffect * aurEff = m_spellAura->GetEffect(1);
+                aurEff->SetAmount(aurEff->GetAmount() * damageInfo.damage / 100);
+            }
+            break;
+        case SPELLFAMILY_DEATHKNIGHT:
+            // Scourge Strike
+            if (m_spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_DK_SCOURGE_STRIKE)
+            {
+                int32 bp = (damageInfo.damage * CalculateDamage(2, nullptr)
+                        * unitTarget->GetDiseasesByCaster(m_caster->GetGUID())) / 100;
+                m_caster->CastCustomSpell(unitTarget, 70890, &bp, NULL, NULL, true);
+            }
+            break;
         }
     }
     // Passive spell hits/misses or active spells only misses (only triggers)
@@ -2866,6 +2890,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
 
 void Spell::prepare(SpellCastTargets const* targets, AuraEffect const * triggeredByAura)
 {
+    Use use(*this);
     if (m_CastItem)
         m_castItemGUID = m_CastItem->GetGUID();
     else
@@ -4098,28 +4123,42 @@ void Spell::WriteSpellGoTargets(WorldPacket * data)
             ++miss;
     }
 
-    *data << (uint8)hit;
-    for (std::list<TargetInfo>::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
     {
-        if ((*ihit).missCondition == SPELL_MISS_NONE)       // Add only hits
+        uint_fast8_t count = min(hit, uint32() + numeric_limits<uint8>::max());
+        *data << static_cast<uint8>(count);
+        for (std::list<TargetInfo>::const_iterator ihit = m_UniqueTargetInfo.begin();
+                0 < count && ihit != m_UniqueTargetInfo.end(); ++ihit)
         {
-            *data << uint64(ihit->targetGUID);
-            m_channelTargetEffectMask |=ihit->effectMask;
+            if ((*ihit).missCondition == SPELL_MISS_NONE)       // Add only hits
+            {
+                *data << uint64(ihit->targetGUID);
+                m_channelTargetEffectMask |=ihit->effectMask;
+                --count;
+            }
+        }
+
+        for (std::list<GOTargetInfo>::const_iterator
+                ighit = m_UniqueGOTargetInfo.begin(); 0 < count; ++ighit)
+        {
+            *data << uint64(ighit->targetGUID);                 // Always hits
+            --count;
         }
     }
 
-    for (std::list<GOTargetInfo>::const_iterator ighit = m_UniqueGOTargetInfo.begin(); ighit != m_UniqueGOTargetInfo.end(); ++ighit)
-        *data << uint64(ighit->targetGUID);                 // Always hits
-
-    *data << (uint8)miss;
-    for (std::list<TargetInfo>::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
     {
-        if (ihit->missCondition != SPELL_MISS_NONE)        // Add only miss
+        uint_fast8_t count = min(miss, uint32() + numeric_limits<uint8>::max());
+        *data << static_cast<uint8>(count);
+        for (std::list<TargetInfo>::const_iterator ihit = m_UniqueTargetInfo.begin();
+                0 < count; ++ihit)
         {
-            *data << uint64(ihit->targetGUID);
-            *data << uint8(ihit->missCondition);
-            if (ihit->missCondition == SPELL_MISS_REFLECT)
-                *data << uint8(ihit->reflectResult);
+            if (ihit->missCondition != SPELL_MISS_NONE)        // Add only miss
+            {
+                *data << uint64(ihit->targetGUID);
+                *data << uint8(ihit->missCondition);
+                if (ihit->missCondition == SPELL_MISS_REFLECT)
+                    *data << uint8(ihit->reflectResult);
+                --count;
+            }
         }
     }
     // Reset m_needAliveTargetMask for non channeled spell

@@ -24,10 +24,14 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH 1)
 # set macro-directory
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/macros")
 
-# build in Release-mode by default if not explicitly set
+# build in Release With Debug Information mode by default if not explicitly set
 if( NOT CMAKE_BUILD_TYPE )
-  set(CMAKE_BUILD_TYPE "Release")
+  set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 endif()
+
+if(CMAKE_COMPILER_IS_GNUCXX)
+  add_definitions(-std=c++0x)
+endif(CMAKE_COMPILER_IS_GNUCXX)
 
 include(CheckCXXSourceRuns)
 include(CheckIncludeFiles)

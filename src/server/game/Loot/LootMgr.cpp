@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "LootMgr.h"
 #include "Log.h"
 #include "ObjectMgr.h"
@@ -1224,7 +1225,7 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, Player* lootOwner
             if (!Referenced)
                 continue;                                     // Error message already printed at loading stage
 
-            for (uint32 loop = 0; loop < i->maxcount; ++loop) // Ref multiplicator
+            for (uint32 loop = 0; loop < i->maxcount * 2; ++loop)   // Ref multiplicator
                 Referenced->Process(loot, store, lootOwner, rate, lootMode, i->group);
         }
         else                                                  // Plain entries (not a reference, not grouped)

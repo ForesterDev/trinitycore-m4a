@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "SharedDefines.h"
 #include "WorldPacket.h"
@@ -415,13 +416,8 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
                 *data << uint32(GetGUIDLow());              // GetGUIDLow()
                 break;
             case TYPEID_UNIT:
-            {
-                if (this->ToCreature()->canFly())
-                    flags |= MOVEMENTFLAG_LEVITATING;
-
                 *data << uint32(0x0000000B);                // unk, can be 0xB or 0xC
                 break;
-            }
             case TYPEID_PLAYER:
                 if (flags & UPDATEFLAG_SELF)
                     *data << uint32(0x0000002F);            // unk, can be 0x15 or 0x22

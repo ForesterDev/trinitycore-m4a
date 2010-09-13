@@ -95,9 +95,9 @@
 #                 number (bitmask value of selected processors)
 #
 #    ProcessPriority
-#        Process proirity setting (Used only at Windows)
-#        Default: 1 (HIGH)
-#                 0 (Normal)
+#        Process priority setting (Used only at Windows)
+#        Default: 0 (Normal)
+#                 1 (HIGH)
 #
 #    RealmsStateUpdateDelay
 #        Realm list Update up delay
@@ -135,7 +135,7 @@ LogColors = ""
 EnableLogDB = 0
 DBLogLevel = 1
 UseProcessors = 0
-ProcessPriority = 1
+ProcessPriority = 0
 RealmsStateUpdateDelay = 20
 WrongPass.MaxCount = 0
 WrongPass.BanTime = 600

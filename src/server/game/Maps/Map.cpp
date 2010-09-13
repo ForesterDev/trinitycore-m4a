@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "MapManager.h"
 #include "Player.h"
 #include "Vehicle.h"
@@ -317,6 +318,13 @@ void Map::SwitchGridContainers(T* obj, bool on)
 
 template void Map::SwitchGridContainers(Creature *, bool);
 //template void Map::SwitchGridContainers(DynamicObject *, bool);
+
+void Map::player_zone_changed(Player &p)
+{
+    if (auto instance = dynamic_cast<InstanceMap *>(this))
+        if (auto script = instance->GetInstanceScript())
+            script->player_zone_changed(p);
+}
 
 template<class T>
 void Map::DeleteFromWorld(T* obj)
@@ -1847,6 +1855,21 @@ void Map::GetZoneAndAreaIdByAreaFlag(uint32& zoneid, uint32& areaid, uint16 area
 
     areaid = entry ? entry->ID : 0;
     zoneid = entry ? ((entry->zone != 0) ? entry->zone : entry->ID) : 0;
+}
+
+WMO_id Map::wmo_id(const Position &p) const
+{
+    {
+        uint32 flags;
+        int32 adt_id;
+        int32 root_id;
+        int32 group_id;
+        if (GetAreaInfo(p.m_positionX, p.m_positionY, p.m_positionZ, flags, adt_id,
+                    root_id, group_id))
+            if (auto e = GetWMOAreaTableEntryByTripple(root_id, adt_id, group_id))
+                return e->Id;
+    }
+    return 0;
 }
 
 bool Map::IsInWater(float x, float y, float pZ, LiquidData *data) const

@@ -11,3 +11,5 @@ build/
 
 # use regexp syntax.
 syntax: regexp
+glob:**.sdf
+glob:**.opensdf
