@@ -1685,7 +1685,7 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                 unitTarget->ToPlayer()->RemoveSpellCooldown(spellId);
 
             triggered_spell_id =  spellId;
-            return;
+            break;
         }
         // Demonic Empowerment -- succubus
         case 54437:
