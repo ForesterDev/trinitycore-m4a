@@ -9,7 +9,7 @@ class InstanceScript;
 
 namespace Detail
 {
-    InstanceScript *get_instance_script(WorldObject &object);
+    InstanceScript *get_instance_script(Creature &creature);
 }
 
 template<class Instance,

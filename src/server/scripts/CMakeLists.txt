@@ -143,6 +143,8 @@ add_library(scripts STATIC ${scripts_STAT_SRCS})
 
 add_dependencies(scripts genrev)
 
+target_link_libraries(scripts game)
+
 # Generate precompiled header
 if( USE_SCRIPTPCH )
   if(CMAKE_COMPILER_IS_GNUCXX)
