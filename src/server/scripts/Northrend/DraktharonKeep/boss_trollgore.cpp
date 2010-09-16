@@ -52,7 +52,7 @@ enum Creatures
     NPC_DRAKKARI_INVADER_2                        = 27709
 };
 
-Position AddSpawnPoint = { -260.493011, -622.968018, 26.605301, 3.036870 };
+Position AddSpawnPoint = { -260.493011f, -622.968018f, 26.605301f, 3.036870f };
 
 class boss_trollgore : public CreatureScript
 {
@@ -63,7 +63,7 @@ public:
     {
         boss_trollgoreAI(Creature *c) : ScriptedAI(c), lSummons(me)
         {
-            pInstance = c->GetInstanceData();
+            pInstance = c->GetInstanceScript();
         }
 
         uint32 uiConsumeTimer;
@@ -77,12 +77,12 @@ public:
 
         SummonList lSummons;
 
-        ScriptedInstance* pInstance;
+        InstanceScript* pInstance;
 
         void Reset()
         {
             uiConsumeTimer = 15*IN_MILLISECONDS;
-            uiAuraCountTimer = 15.5*IN_MILLISECONDS;
+            uiAuraCountTimer = 15500;
             uiCrushTimer = urand(1*IN_MILLISECONDS,5*IN_MILLISECONDS);
             uiInfectedWoundTimer = urand(60*IN_MILLISECONDS,10*IN_MILLISECONDS);
             uiExplodeCorpseTimer = 3*IN_MILLISECONDS;

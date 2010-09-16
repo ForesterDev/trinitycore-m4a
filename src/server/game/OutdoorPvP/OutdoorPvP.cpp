@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "OutdoorPvP.h"
 #include "OutdoorPvPMgr.h"
 #include "ObjectAccessor.h"
@@ -30,10 +31,10 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 
-OPvPCapturePoint::OPvPCapturePoint(OutdoorPvP * pvp)
-: m_PvP(pvp), m_value(0), m_maxValue(0), m_team(TEAM_NEUTRAL),
-m_State(OBJECTIVESTATE_NEUTRAL), m_OldState(OBJECTIVESTATE_NEUTRAL), m_capturePointGUID(0), m_neutralValuePct(0),
-m_maxSpeed(0), m_capturePoint(NULL)
+OPvPCapturePoint::OPvPCapturePoint(OutdoorPvP * pvp):
+m_capturePointGUID(0), m_capturePoint(NULL), m_maxValue(0), m_maxSpeed(0),
+m_value(0), m_team(TEAM_NEUTRAL), m_OldState(OBJECTIVESTATE_NEUTRAL),
+m_State(OBJECTIVESTATE_NEUTRAL), m_neutralValuePct(0), m_PvP(pvp)
 {
 }
 
@@ -72,7 +73,7 @@ void OPvPCapturePoint::AddGO(uint32 type, uint32 guid, uint32 entry)
 {
     if (!entry)
     {
-        const GameObjectData *data = objmgr.GetGOData(guid);
+        const GameObjectData *data = sObjectMgr.GetGOData(guid);
         if (!data)
             return;
         entry = data->id;
@@ -85,7 +86,7 @@ void OPvPCapturePoint::AddCre(uint32 type, uint32 guid, uint32 entry)
 {
     if (!entry)
     {
-        const CreatureData *data = objmgr.GetCreatureData(guid);
+        const CreatureData *data = sObjectMgr.GetCreatureData(guid);
         if (!data)
             return;
         entry = data->id;
@@ -96,7 +97,7 @@ void OPvPCapturePoint::AddCre(uint32 type, uint32 guid, uint32 entry)
 
 bool OPvPCapturePoint::AddObject(uint32 type, uint32 entry, uint32 map, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3)
 {
-    if (uint32 guid = objmgr.AddGOData(entry, map, x, y, z, o, 0, rotation0, rotation1, rotation2, rotation3))
+    if (uint32 guid = sObjectMgr.AddGOData(entry, map, x, y, z, o, 0, rotation0, rotation1, rotation2, rotation3))
     {
         AddGO(type, guid, entry);
         return true;
@@ -107,7 +108,7 @@ bool OPvPCapturePoint::AddObject(uint32 type, uint32 entry, uint32 map, float x,
 
 bool OPvPCapturePoint::AddCreature(uint32 type, uint32 entry, uint32 team, uint32 map, float x, float y, float z, float o, uint32 spawntimedelay)
 {
-    if (uint32 guid = objmgr.AddCreData(entry, team, map, x, y, z, o, spawntimedelay))
+    if (uint32 guid = sObjectMgr.AddCreData(entry, team, map, x, y, z, o, spawntimedelay))
     {
         AddCre(type, guid, entry);
         return true;
@@ -121,19 +122,19 @@ bool OPvPCapturePoint::SetCapturePointData(uint32 entry, uint32 map, float x, fl
     sLog.outDebug("Creating capture point %u", entry);
 
     // check info existence
-    GameObjectInfo const* goinfo = objmgr.GetGameObjectInfo(entry);
+    GameObjectInfo const* goinfo = sObjectMgr.GetGameObjectInfo(entry);
     if (!goinfo || goinfo->type != GAMEOBJECT_TYPE_CAPTURE_POINT)
     {
         sLog.outError("OutdoorPvP: GO %u is not capture point!", entry);
         return false;
     }
 
-    m_capturePointGUID = objmgr.AddGOData(entry, map, x, y, z, o, 0, rotation0, rotation1, rotation2, rotation3);
+    m_capturePointGUID = sObjectMgr.AddGOData(entry, map, x, y, z, o, 0, rotation0, rotation1, rotation2, rotation3);
     if (!m_capturePointGUID)
         return false;
 
     // get the needed values from goinfo
-    m_maxValue = goinfo->capturePoint.maxTime;
+    m_maxValue = (float)goinfo->capturePoint.maxTime;
     m_maxSpeed = m_maxValue / (goinfo->capturePoint.minTime ? goinfo->capturePoint.minTime : 60);
     m_neutralValuePct = goinfo->capturePoint.neutralPercent;
     m_minValue = m_maxValue * goinfo->capturePoint.neutralPercent / 100;
@@ -169,7 +170,7 @@ bool OPvPCapturePoint::DelCreature(uint32 type)
     // delete respawn time for this creature
     WorldDatabase.PExecute("DELETE FROM creature_respawn WHERE guid = '%u'", guid);
     cr->AddObjectToRemoveList();
-    objmgr.DeleteCreatureData(guid);
+    sObjectMgr.DeleteCreatureData(guid);
     m_CreatureTypes[m_Creatures[type]] = 0;
     m_Creatures[type] = 0;
     return true;
@@ -189,7 +190,7 @@ bool OPvPCapturePoint::DelObject(uint32 type)
     uint32 guid = obj->GetDBTableGUIDLow();
     obj->SetRespawnTime(0);                                 // not save respawn time
     obj->Delete();
-    objmgr.DeleteGOData(guid);
+    sObjectMgr.DeleteGOData(guid);
     m_ObjectTypes[m_Objects[type]] = 0;
     m_Objects[type] = 0;
     return true;
@@ -197,7 +198,7 @@ bool OPvPCapturePoint::DelObject(uint32 type)
 
 bool OPvPCapturePoint::DelCapturePoint()
 {
-    objmgr.DeleteGOData(m_capturePointGUID);
+    sObjectMgr.DeleteGOData(m_capturePointGUID);
     m_capturePointGUID = 0;
 
     if (m_capturePoint)
@@ -274,7 +275,7 @@ bool OPvPCapturePoint::Update(uint32 diff)
     if (!m_capturePoint)
         return false;
 
-    float radius = m_capturePoint->GetGOInfo()->capturePoint.radius;
+    float radius = (float)m_capturePoint->GetGOInfo()->capturePoint.radius;
 
     for (uint32 team = 0; team < 2; ++team)
     {

@@ -107,7 +107,6 @@ CREATE TABLE `arena_team_member` (
   `wons_week` int(10) unsigned NOT NULL default '0',
   `played_season` int(10) unsigned NOT NULL default '0',
   `wons_season` int(10) unsigned NOT NULL default '0',
-  `personal_rating` int(10) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY  (`arenateamid`,`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -119,6 +118,31 @@ CREATE TABLE `arena_team_member` (
 LOCK TABLES `arena_team_member` WRITE;
 /*!40000 ALTER TABLE `arena_team_member` DISABLE KEYS */;
 /*!40000 ALTER TABLE `arena_team_member` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `character_arena_stats`
+--
+
+DROP TABLE IF EXISTS `character_arena_stats`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `character_arena_stats` (
+  `guid`  int(10) NOT NULL ,
+  `slot`  smallint(1) NOT NULL ,
+  `personal_rating`  int(10) NOT NULL ,
+  `matchmaker_rating`  int(10) NOT NULL ,
+  PRIMARY KEY (`guid`, `slot`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `character_arena_stats`
+--
+
+LOCK TABLES `character_arena_stats` WRITE;
+/*!40000 ALTER TABLE `character_arena_stats` DISABLE KEYS */;
+/*!40000 ALTER TABLE `character_arena_stats` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -183,89 +207,6 @@ LOCK TABLES `auctionhouse` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `auctionhousebot`
---
-
-DROP TABLE IF EXISTS `auctionhousebot`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `auctionhousebot` (
-  `auctionhouse` int(11) NOT NULL default '0' COMMENT 'mapID of the auctionhouse.',
-  `name` char(25) default NULL COMMENT 'Text name of the auctionhouse.',
-  `minitems` int(11) default '0' COMMENT 'This is the minimum number of items you want to keep in the auction house. a 0 here will make it the same as the maximum.',
-  `maxitems` int(11) default '0' COMMENT 'This is the number of items you want to keep in the auction house.',
-  `percentgreytradegoods` int(11) default '0' COMMENT 'Sets the percentage of the Grey Trade Goods auction items',
-  `percentwhitetradegoods` int(11) default '27' COMMENT 'Sets the percentage of the White Trade Goods auction items',
-  `percentgreentradegoods` int(11) default '12' COMMENT 'Sets the percentage of the Green Trade Goods auction items',
-  `percentbluetradegoods` int(11) default '10' COMMENT 'Sets the percentage of the Blue Trade Goods auction items',
-  `percentpurpletradegoods` int(11) default '1' COMMENT 'Sets the percentage of the Purple Trade Goods auction items',
-  `percentorangetradegoods` int(11) default '0' COMMENT 'Sets the percentage of the Orange Trade Goods auction items',
-  `percentyellowtradegoods` int(11) default '0' COMMENT 'Sets the percentage of the Yellow Trade Goods auction items',
-  `percentgreyitems` int(11) default '0' COMMENT 'Sets the percentage of the non trade Grey auction items',
-  `percentwhiteitems` int(11) default '10' COMMENT 'Sets the percentage of the non trade White auction items',
-  `percentgreenitems` int(11) default '30' COMMENT 'Sets the percentage of the non trade Green auction items',
-  `percentblueitems` int(11) default '8' COMMENT 'Sets the percentage of the non trade Blue auction items',
-  `percentpurpleitems` int(11) default '2' COMMENT 'Sets the percentage of the non trade Purple auction items',
-  `percentorangeitems` int(11) default '0' COMMENT 'Sets the percentage of the non trade Orange auction items',
-  `percentyellowitems` int(11) default '0' COMMENT 'Sets the percentage of the non trade Yellow auction items',
-  `minpricegrey` int(11) default '100' COMMENT 'Minimum price of Grey items (percentage).',
-  `maxpricegrey` int(11) default '150' COMMENT 'Maximum price of Grey items (percentage).',
-  `minpricewhite` int(11) default '150' COMMENT 'Minimum price of White items (percentage).',
-  `maxpricewhite` int(11) default '250' COMMENT 'Maximum price of White items (percentage).',
-  `minpricegreen` int(11) default '800' COMMENT 'Minimum price of Green items (percentage).',
-  `maxpricegreen` int(11) default '1400' COMMENT 'Maximum price of Green items (percentage).',
-  `minpriceblue` int(11) default '1250' COMMENT 'Minimum price of Blue items (percentage).',
-  `maxpriceblue` int(11) default '1750' COMMENT 'Maximum price of Blue items (percentage).',
-  `minpricepurple` int(11) default '2250' COMMENT 'Minimum price of Purple items (percentage).',
-  `maxpricepurple` int(11) default '4550' COMMENT 'Maximum price of Purple items (percentage).',
-  `minpriceorange` int(11) default '3250' COMMENT 'Minimum price of Orange items (percentage).',
-  `maxpriceorange` int(11) default '5550' COMMENT 'Maximum price of Orange items (percentage).',
-  `minpriceyellow` int(11) default '5250' COMMENT 'Minimum price of Yellow items (percentage).',
-  `maxpriceyellow` int(11) default '6550' COMMENT 'Maximum price of Yellow items (percentage).',
-  `minbidpricegrey` int(11) default '70' COMMENT 'Starting bid price of Grey items as a percentage of the randomly chosen buyout price. Default: 70',
-  `maxbidpricegrey` int(11) default '100' COMMENT 'Starting bid price of Grey items as a percentage of the randomly chosen buyout price. Default: 100',
-  `minbidpricewhite` int(11) default '70' COMMENT 'Starting bid price of White items as a percentage of the randomly chosen buyout price. Default: 70',
-  `maxbidpricewhite` int(11) default '100' COMMENT 'Starting bid price of White items as a percentage of the randomly chosen buyout price. Default: 100',
-  `minbidpricegreen` int(11) default '80' COMMENT 'Starting bid price of Green items as a percentage of the randomly chosen buyout price. Default: 80',
-  `maxbidpricegreen` int(11) default '100' COMMENT 'Starting bid price of Green items as a percentage of the randomly chosen buyout price. Default: 100',
-  `minbidpriceblue` int(11) default '75' COMMENT 'Starting bid price of Blue items as a percentage of the randomly chosen buyout price. Default: 75',
-  `maxbidpriceblue` int(11) default '100' COMMENT 'Starting bid price of Blue items as a percentage of the randomly chosen buyout price. Default: 100',
-  `minbidpricepurple` int(11) default '80' COMMENT 'Starting bid price of Purple items as a percentage of the randomly chosen buyout price. Default: 80',
-  `maxbidpricepurple` int(11) default '100' COMMENT 'Starting bid price of Purple items as a percentage of the randomly chosen buyout price. Default: 100',
-  `minbidpriceorange` int(11) default '80' COMMENT 'Starting bid price of Orange items as a percentage of the randomly chosen buyout price. Default: 80',
-  `maxbidpriceorange` int(11) default '100' COMMENT 'Starting bid price of Orange items as a percentage of the randomly chosen buyout price. Default: 100',
-  `minbidpriceyellow` int(11) default '80' COMMENT 'Starting bid price of Yellow items as a percentage of the randomly chosen buyout price. Default: 80',
-  `maxbidpriceyellow` int(11) default '100' COMMENT 'Starting bid price of Yellow items as a percentage of the randomly chosen buyout price. Default: 100',
-  `maxstackgrey` int(11) default '0' COMMENT 'Stack size limits for item qualities - a value of 0 will disable a maximum stack size for that quality, which will allow the bot to create items in stack as large as the item allows.',
-  `maxstackwhite` int(11) default '0' COMMENT 'Stack size limits for item qualities - a value of 0 will disable a maximum stack size for that quality, which will allow the bot to create items in stack as large as the item allows.',
-  `maxstackgreen` int(11) default '0' COMMENT 'Stack size limits for item qualities - a value of 0 will disable a maximum stack size for that quality, which will allow the bot to create items in stack as large as the item allows.',
-  `maxstackblue` int(11) default '0' COMMENT 'Stack size limits for item qualities - a value of 0 will disable a maximum stack size for that quality, which will allow the bot to create items in stack as large as the item allows.',
-  `maxstackpurple` int(11) default '0' COMMENT 'Stack size limits for item qualities - a value of 0 will disable a maximum stack size for that quality, which will allow the bot to create items in stack as large as the item allows.',
-  `maxstackorange` int(11) default '0' COMMENT 'Stack size limits for item qualities - a value of 0 will disable a maximum stack size for that quality, which will allow the bot to create items in stack as large as the item allows.',
-  `maxstackyellow` int(11) default '0' COMMENT 'Stack size limits for item qualities - a value of 0 will disable a maximum stack size for that quality, which will allow the bot to create items in stack as large as the item allows.',
-  `buyerpricegrey` int(11) default '1' COMMENT 'Multiplier to vendorprice when buying grey items from auctionhouse',
-  `buyerpricewhite` int(11) default '3' COMMENT 'Multiplier to vendorprice when buying white items from auctionhouse',
-  `buyerpricegreen` int(11) default '5' COMMENT 'Multiplier to vendorprice when buying green items from auctionhouse',
-  `buyerpriceblue` int(11) default '12' COMMENT 'Multiplier to vendorprice when buying blue items from auctionhouse',
-  `buyerpricepurple` int(11) default '15' COMMENT 'Multiplier to vendorprice when buying purple items from auctionhouse',
-  `buyerpriceorange` int(11) default '20' COMMENT 'Multiplier to vendorprice when buying orange items from auctionhouse',
-  `buyerpriceyellow` int(11) default '22' COMMENT 'Multiplier to vendorprice when buying yellow items from auctionhouse',
-  `buyerbiddinginterval` int(11) default '1' COMMENT 'Interval how frequently AHB bids on each AH. Time in minutes',
-  `buyerbidsperinterval` int(11) default '1' COMMENT 'number of bids to put in per bidding interval',
-  PRIMARY KEY  (`auctionhouse`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `auctionhousebot`
---
-
-INSERT INTO `auctionhousebot`(`auctionhouse`,`name`,`minitems`,`maxitems`,`percentgreytradegoods`,`percentwhitetradegoods`,`percentgreentradegoods`,`percentbluetradegoods`,`percentpurpletradegoods`,`percentorangetradegoods`,`percentyellowtradegoods`,`percentgreyitems`,`percentwhiteitems`,`percentgreenitems`,`percentblueitems`,`percentpurpleitems`,`percentorangeitems`,`percentyellowitems`,`minpricegrey`,`maxpricegrey`,`minpricewhite`,`maxpricewhite`,`minpricegreen`,`maxpricegreen`,`minpriceblue`,`maxpriceblue`,`minpricepurple`,`maxpricepurple`,`minpriceorange`,`maxpriceorange`,`minpriceyellow`,`maxpriceyellow`,`minbidpricegrey`,`maxbidpricegrey`,`minbidpricewhite`,`maxbidpricewhite`,`minbidpricegreen`,`maxbidpricegreen`,`minbidpriceblue`,`maxbidpriceblue`,`minbidpricepurple`,`maxbidpricepurple`,`minbidpriceorange`,`maxbidpriceorange`,`minbidpriceyellow`,`maxbidpriceyellow`,`maxstackgrey`,`maxstackwhite`,`maxstackgreen`,`maxstackblue`,`maxstackpurple`,`maxstackorange`,`maxstackyellow`,`buyerpricegrey`,`buyerpricewhite`,`buyerpricegreen`,`buyerpriceblue`,`buyerpricepurple`,`buyerpriceorange`,`buyerpriceyellow`,`buyerbiddinginterval`,`buyerbidsperinterval`) VALUES
-(2,'Alliance',0,0,0,27,12,10,1,0,0,0,10,30,8,2,0,0,100,150,150,250,800,1400,1250,1750,2250,4550,3250,5550,5250,6550,70,100,70,100,80,100,75,100,80,100,80,100,80,100,0,0,3,2,1,1,1,1,3,5,12,15,20,22,1,1),
-(6,'Horde',0,0,0,27,12,10,1,0,0,0,10,30,8,2,0,0,100,150,150,250,800,1400,1250,1750,2250,4550,3250,5550,5250,6550,70,100,70,100,80,100,75,100,80,100,80,100,80,100,0,0,3,2,1,1,1,1,3,5,12,15,20,22,1,1),
-(7,'Neutral',0,0,0,27,12,10,1,0,0,0,10,30,8,2,0,0,100,150,150,250,800,1400,1250,1750,2250,4550,3250,5550,5250,6550,70,100,70,100,80,100,75,100,80,100,80,100,80,100,0,0,3,2,1,1,1,1,3,5,12,15,20,22,1,1);
-
---
 -- Table structure for table `bugreport`
 --
 
@@ -277,7 +218,7 @@ CREATE TABLE `bugreport` (
   `type` longtext NOT NULL default '',
   `content` longtext NOT NULL default '',
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Debug System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Debug System';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -305,7 +246,7 @@ CREATE TABLE `channels` (
   `m_password` text,
   `BannedList` longtext,
   PRIMARY KEY  (`m_name`(10),`m_team`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Channel System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Channel System';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1272,7 +1213,7 @@ DROP TABLE IF EXISTS `game_event_save`;
 CREATE TABLE `game_event_save` (
   `event_id` mediumint(8) unsigned NOT NULL,
   `state` tinyint(3) unsigned NOT NULL default '1',
-  `next_start` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `next_start` BIGINT(11) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY  (`event_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1284,6 +1225,55 @@ CREATE TABLE `game_event_save` (
 LOCK TABLES `game_event_save` WRITE;
 /*!40000 ALTER TABLE `game_event_save` DISABLE KEYS */;
 /*!40000 ALTER TABLE `game_event_save` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `gm_subsurveys`
+--
+DROP TABLE IF EXISTS `gm_subsurveys`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `gm_subsurveys` (
+  `surveyid` int(10) NOT NULL,
+  `subsurveyid` int(11) UNSIGNED NOT NULL DEFAULT '0',
+  `rank` int(11) UNSIGNED NOT NULL DEFAULT '0',
+  `comment` longtext NOT NULL,
+  PRIMARY KEY (`surveyid`,`subsurveyid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `gm_subsurveys`
+--
+
+LOCK TABLES `gm_subsurveys` WRITE;
+/*!40000 ALTER TABLE `gm_subsurveys` DISABLE KEYS */;
+/*!40000 ALTER TABLE `gm_subsurveys` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `gm_surveys`
+--
+DROP TABLE IF EXISTS `gm_surveys`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `gm_surveys` (
+  `surveyid` int(10) NOT NULL auto_increment,
+  `player` int(11) UNSIGNED NOT NULL DEFAULT '0',
+  `mainSurvey` int(11) UNSIGNED NOT NULL DEFAULT '0',
+  `overall_comment` longtext NOT NULL,
+  `timestamp` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`surveyid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `gm_surveys`
+--
+
+LOCK TABLES `gm_surveys` WRITE;
+/*!40000 ALTER TABLE `gm_surveys` DISABLE KEYS */;
+/*!40000 ALTER TABLE `gm_surveys` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1307,6 +1297,9 @@ CREATE TABLE `gm_tickets` (
   `closed` int(10) NOT NULL default '0',
   `assignedto` int(10) NOT NULL default '0',
   `comment` text NOT NULL,
+  `completed` int(11) NOT NULL DEFAULT '0',
+  `escalated` int(11) NOT NULL DEFAULT '0',
+  `viewed` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY  (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1394,7 +1387,8 @@ CREATE TABLE `groups` (
   `groupType` mediumint(8) unsigned NOT NULL,
   `difficulty` tinyint(3) unsigned NOT NULL default '0',
   `raiddifficulty` int(11) UNSIGNED NOT NULL default '0',
-  PRIMARY KEY  (`guid`)
+  PRIMARY KEY (`guid`),
+  KEY `leaderGuid` (`leaderGuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Groups';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1670,7 +1664,8 @@ CREATE TABLE `instance` (
   `data` longtext,
   PRIMARY KEY  (`id`),
   KEY `map` (`map`),
-  KEY `resettime` (`resettime`)
+  KEY `resettime` (`resettime`),
+  KEY `difficulty` (`difficulty`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1694,7 +1689,8 @@ CREATE TABLE `instance_reset` (
   `mapid` int(11) unsigned NOT NULL default '0',
   `difficulty` tinyint(1) unsigned NOT NULL default '0',
   `resettime` bigint(40) NOT NULL default '0',
-  PRIMARY KEY  (`mapid`,`difficulty`)
+  PRIMARY KEY (`mapid`,`difficulty`),
+  KEY `difficulty` (`difficulty`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1765,6 +1761,34 @@ CREATE TABLE `item_refund_instance` (
 LOCK TABLES `item_refund_instance` WRITE;
 /*!40000 ALTER TABLE `item_refund_instance` DISABLE KEYS */;
 /*!40000 ALTER TABLE `item_refund_instance` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `lag_reports`
+--
+
+DROP TABLE IF EXISTS `lag_reports`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `lag_reports` (
+  `report_id` int(10) NOT NULL auto_increment,
+  `player` int(11) UNSIGNED NOT NULL DEFAULT '0',
+  `lag_type` int(10) NOT NULL DEFAULT '0',
+  `map` int(11) NOT NULL DEFAULT '0',
+  `posX` float NOT NULL default '0',
+  `posY` float NOT NULL default '0',
+  `posZ` float NOT NULL default '0',
+  PRIMARY KEY  (`report_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `lag_reports`
+--
+
+LOCK TABLES `lag_reports` WRITE;
+/*!40000 ALTER TABLE `lag_reports` DISABLE KEYS */;
+/*!40000 ALTER TABLE `lag_reports` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

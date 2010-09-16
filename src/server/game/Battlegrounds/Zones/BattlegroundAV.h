@@ -21,7 +21,11 @@
 #ifndef __BATTLEGROUNDAV_H
 #define __BATTLEGROUNDAV_H
 
-class BattleGround;
+#include <memory>
+#include <array>
+#include "Battleground.h"
+
+class Battleground;
 
 #define LANG_BG_AV_A_CAPTAIN_BUFF       "Begone. Uncouth scum! The Alliance shall prevail in Alterac Valley!"
 #define LANG_BG_AV_H_CAPTAIN_BUFF       "Now is the time to attack! For the Horde!"
@@ -612,7 +616,7 @@ enum BG_AV_CreaturePlace
     AV_CPLACE_TRIGGER13       = 314,
     AV_CPLACE_TRIGGER14       = 315,
     AV_CPLACE_TRIGGER15       = 316,
-    
+
     //boss,captain triggers
     AV_CPLACE_TRIGGER16       = 317,
     AV_CPLACE_TRIGGER17       = 318,
@@ -955,11 +959,11 @@ const float BG_AV_CreaturePos[AV_CPLACE_MAX][4] = {
     {-910.14f,-229.959f,72.9279f,0.27677f},
     {-851.563f,-88.6527f,68.5983f,3.61896f},
     //boss
-    {-848.902f,-92.931f,68.6325f,3.33350},
+    {-848.902f,-92.931f,68.6325f,3.33350f},
     //herald
-    {-48.459f,-288.802f,55.47f,1.0},
+    {-48.459f,-288.802f,55.47f,1.0f},
     //triggers
-    {637.083,-32.6603,45.9715,1.14353},         //firstaid_station
+    {637.083f,-32.6603f,45.9715f,1.14353f},         //firstaid_station
     {669.007f,-294.078f,30.2909f,2.77507f},     //stormpike_grave
     {77.8013f,-404.7f,46.7549f,-0.872665f},     //stoneheart_grave
     {-202.581f,-112.73f,78.4876f,-0.715585f},   //snowfall_grave
@@ -968,7 +972,7 @@ const float BG_AV_CreaturePos[AV_CPLACE_MAX][4] = {
     {-1402.21f,-307.431f,89.4424f,0.191986f},   //frostwolf_hut
     {553.779f,-78.6566f,51.9378f,-1.22173f},    //dunbaldar_south
     {674.001f,-143.125f,63.6615f,0.994838f},    //dunbaldar_north
-    {203.281f,-360.366f,56.3869f,-0.925024},    //icewing_bunker
+    {203.281f,-360.366f,56.3869f,-0.925024f},    //icewing_bunker
     {-152.437f,-441.758f,40.3982f,-1.95477f},   //stoneheart_bunker
     {-571.88f,-262.777f,75.0087f,-0.802851f},   //iceblood_tower
     {-768.907f,-363.71f,90.8949f,1.07991f},     //tower_point
@@ -1514,17 +1518,32 @@ struct BG_AV_NodeInfo
     uint16       PrevOwner;
     BG_AV_States State;
     BG_AV_States PrevState;
-    int          Timer;
+    uint32       Timer;
     bool         Tower;
 };
 
 inline BG_AV_Nodes &operator++(BG_AV_Nodes &i){ return i = BG_AV_Nodes(i + 1); }
 
-class BattleGroundAVScore : public BattleGroundScore
+class BattlegroundAVScore : public BattlegroundScore
 {
     public:
-        BattleGroundAVScore() : GraveyardsAssaulted(0), GraveyardsDefended(0), TowersAssaulted(0), TowersDefended(0), MinesCaptured(0), LeadersKilled(0), SecondaryObjectives(0) {};
-        virtual ~BattleGroundAVScore() {};
+        BattlegroundAVScore() : GraveyardsAssaulted(0), GraveyardsDefended(0), TowersAssaulted(0), TowersDefended(0), MinesCaptured(0), LeadersKilled(0), SecondaryObjectives(0) {};
+        virtual ~BattlegroundAVScore() {};
+
+        std::pair<std::size_t, Stat_data_type> stat_data() const
+        {
+            std::array<int32, max_stats> d;
+            auto first = d.begin(), it = first;
+            *it++ = GraveyardsAssaulted;
+            *it++ = GraveyardsDefended;
+            *it++ = TowersAssaulted;
+            *it++ = TowersDefended;
+            *it++ = MinesCaptured;
+            *it++ = LeadersKilled;
+            *it++ = SecondaryObjectives;
+            return std::make_pair(it - first, std::move(d));
+        }
+
         uint32 GraveyardsAssaulted;
         uint32 GraveyardsDefended;
         uint32 TowersAssaulted;
@@ -1534,13 +1553,13 @@ class BattleGroundAVScore : public BattleGroundScore
         uint32 SecondaryObjectives;
 };
 
-class BattleGroundAV : public BattleGround
+class BattlegroundAV : public Battleground
 {
-    friend class BattleGroundMgr;
+    friend class BattlegroundMgr;
 
     public:
-        BattleGroundAV();
-        ~BattleGroundAV();
+        BattlegroundAV();
+        ~BattlegroundAV();
         void Update(uint32 diff);
 
         /* inherited from BattlegroundClass */
@@ -1550,7 +1569,7 @@ class BattleGroundAV : public BattleGround
 
         void RemovePlayer(Player *plr,uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
-        bool SetupBattleGround();
+        bool SetupBattleground();
         virtual void ResetBGSubclass();
 
         /*general stuff*/
@@ -1564,7 +1583,7 @@ class BattleGroundAV : public BattleGround
         void HandleQuestComplete(uint32 questid, Player *player);
         bool PlayerCanDoMineQuest(int32 GOId,uint32 team);
 
-        void EndBattleGround(uint32 winner);
+        void EndBattleground(uint32 winner);
 
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
 
@@ -1582,23 +1601,23 @@ class BattleGroundAV : public BattleGround
         void PopulateNode(BG_AV_Nodes node);
         void DePopulateNode(BG_AV_Nodes node);
 
-        const BG_AV_Nodes GetNodeThroughObject(uint32 object);
-        const uint32 GetObjectThroughNode(BG_AV_Nodes node);
+        BG_AV_Nodes GetNodeThroughObject(uint32 object);
+        uint32 GetObjectThroughNode(BG_AV_Nodes node);
         const char* GetNodeName(BG_AV_Nodes node);
-        const bool IsTower(BG_AV_Nodes node) {   return m_Nodes[node].Tower; }
+        bool IsTower(BG_AV_Nodes node) { return m_Nodes[node].Tower; }
 
         /*mine*/
         void ChangeMineOwner(uint8 mine, uint32 team, bool initial=false);
 
         /*worldstates*/
         void FillInitialWorldStates(WorldPacket& data);
-        const uint8 GetWorldStateType(uint8 state, uint16 team);
+        uint8 GetWorldStateType(uint8 state, uint16 team);
         void SendMineWorldStates(uint32 mine);
         void UpdateNodeWorldState(BG_AV_Nodes node);
 
         /*general */
         Creature* AddAVCreature(uint16 cinfoid, uint16 type);
-        const uint16 GetBonusHonor(uint8 kills); //TODO remove this when the core handles this right
+        uint16 GetBonusHonor(uint8 kills); //TODO remove this when the core handles this right
 
         /*variables */
         int32 m_Team_Scores[2];

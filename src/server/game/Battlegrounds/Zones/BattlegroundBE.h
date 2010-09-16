@@ -20,9 +20,13 @@
 #ifndef __BATTLEGROUNDBE_H
 #define __BATTLEGROUNDBE_H
 
-class BattleGround;
+#include <memory>
+#include <array>
+#include "Battleground.h"
 
-enum BattleGroundBEObjectTypes
+class Battleground;
+
+enum BattlegroundBEObjectTypes
 {
     BG_BE_OBJECT_DOOR_1         = 0,
     BG_BE_OBJECT_DOOR_2         = 1,
@@ -33,7 +37,7 @@ enum BattleGroundBEObjectTypes
     BG_BE_OBJECT_MAX            = 6
 };
 
-enum BattleGroundBEObjects
+enum BattlegroundBEObjects
 {
     BG_BE_OBJECT_TYPE_DOOR_1    = 183971,
     BG_BE_OBJECT_TYPE_DOOR_2    = 183973,
@@ -43,20 +47,27 @@ enum BattleGroundBEObjects
     BG_BE_OBJECT_TYPE_BUFF_2    = 184664
 };
 
-class BattleGroundBEScore : public BattleGroundScore
+class BattlegroundBEScore : public BattlegroundScore
 {
     public:
-        BattleGroundBEScore() {};
-        virtual ~BattleGroundBEScore() {};
+        BattlegroundBEScore() {};
+        virtual ~BattlegroundBEScore() {};
+
+        std::pair<std::size_t, Stat_data_type> stat_data() const
+        {
+            std::array<int32, max_stats> d;
+            auto first = d.begin(), it = first;
+            return std::make_pair(it - first, std::move(d));
+        }
 };
 
-class BattleGroundBE : public BattleGround
+class BattlegroundBE : public Battleground
 {
-    friend class BattleGroundMgr;
+    friend class BattlegroundMgr;
 
     public:
-        BattleGroundBE();
-        ~BattleGroundBE();
+        BattlegroundBE();
+        ~BattlegroundBE();
         void Update(uint32 diff);
 
         /* inherited from BattlegroundClass */
@@ -66,7 +77,7 @@ class BattleGroundBE : public BattleGround
 
         void RemovePlayer(Player *plr, uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
-        bool SetupBattleGround();
+        bool SetupBattleground();
         virtual void Reset();
         virtual void FillInitialWorldStates(WorldPacket &d);
         void HandleKillPlayer(Player* player, Player *killer);

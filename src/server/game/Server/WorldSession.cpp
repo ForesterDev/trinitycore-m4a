@@ -22,6 +22,7 @@
     \ingroup u2w
 */
 
+#include "gamePCH.h"
 #include "WorldSocket.h"                                    // must be first to make ACE happy with ACE includes in it
 #include "Common.h"
 #include "DatabaseEnv.h"
@@ -36,7 +37,7 @@
 #include "Guild.h"
 #include "World.h"
 #include "ObjectAccessor.h"
-#include "BattleGroundMgr.h"
+#include "BattlegroundMgr.h"
 #include "OutdoorPvPMgr.h"
 #include "MapManager.h"
 #include "SocialMgr.h"
@@ -46,17 +47,19 @@
 #include "Transport.h"
 
 /// WorldSession constructor
-WorldSession::WorldSession(uint32 id, WorldSocket *sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale) :
-LookingForGroup_auto_join(false), LookingForGroup_auto_add(false), m_muteTime(mute_time),
-_player(NULL), m_Socket(sock),_security(sec), _accountId(id), m_expansion(expansion),
-m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(objmgr.GetIndexForLocale(locale)),
-_logoutTime(0), m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
-m_latency(0), m_TutorialsChanged(false), m_timeOutTime(0)
+WorldSession::WorldSession(uint32 id, WorldSocket *sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter):
+m_muteTime(mute_time), m_timeOutTime(0), _player(NULL), m_Socket(sock),
+_security(sec), _accountId(id), m_expansion(expansion), _logoutTime(0),
+m_inQueue(false), m_playerLoading(false), m_playerLogout(false),
+m_playerRecentlyLogout(false), m_playerSave(false),
+m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)),
+m_sessionDbLocaleIndex(sObjectMgr.GetIndexForLocale(locale)),
+m_latency(0), m_TutorialsChanged(false), recruiterId(recruiter)
 {
     if (sock)
     {
-        m_Address = sock->GetRemoteAddress ();
-        sock->AddReference ();
+        m_Address = sock->GetRemoteAddress();
+        sock->AddReference();
         ResetTimeOutTime();
         LoginDatabase.PExecute("UPDATE account SET online = 1 WHERE id = %u;", GetAccountId());
     }
@@ -78,7 +81,7 @@ WorldSession::~WorldSession()
     }
 
     ///- empty incoming packet queue
-    WorldPacket* packet;
+    WorldPacket* packet = NULL;
     while (_recvQueue.next(packet))
         delete packet;
 
@@ -164,7 +167,7 @@ void WorldSession::LogUnprocessedTail(WorldPacket *packet)
     sLog.outError("SESSION: opcode %s (0x%.4X) have unprocessed tail data (read stop at %u from %u)",
         LookupOpcodeName(packet->GetOpcode()),
         packet->GetOpcode(),
-        packet->rpos(),packet->wpos());
+        uint32(packet->rpos()), uint32(packet->wpos()));
 
         packet->print_storage();
 }
@@ -174,12 +177,12 @@ bool WorldSession::Update(uint32 diff)
 {
     /// Update Timeout timer.
     UpdateTimeOutTime(diff);
-    
-    ///- Before we process anything:    
+
+    ///- Before we process anything:
     /// If necessary, kick the player from the character select screen
     if (IsConnectionIdle())
         m_Socket->CloseSocket();
-    
+
     ///- Retrieve packets from the receive queue and call the appropriate handlers
     /// not proccess packets if socket already closed
     WorldPacket* packet;
@@ -261,7 +264,7 @@ bool WorldSession::Update(uint32 diff)
                         // and before other STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT opcodes.
                         if (packet->GetOpcode() != CMSG_SET_ACTIVE_VOICE_CHANNEL)
                             m_playerRecentlyLogout = false;
-                        
+
                         sScriptMgr.OnPacketReceive(m_Socket, WorldPacket(*packet));
                         (this->*opHandle.handler)(*packet);
                         if (sLog.IsOutDebug() && packet->rpos() < packet->wpos())
@@ -290,6 +293,8 @@ bool WorldSession::Update(uint32 diff)
 
         delete packet;
     }
+
+    ProcessQueryCallbacks();
 
     time_t currTime = time(NULL);
     ///- If necessary, log the player out
@@ -370,7 +375,7 @@ void WorldSession::LogoutPlayer(bool Save)
             // give bg rewards and update counters like kill by first from attackers
             // this can't be called for all attackers.
             if (!aset.empty())
-                if (BattleGround *bg = _player->GetBattleGround())
+                if (Battleground *bg = _player->GetBattleground())
                     bg->HandleKillPlayer(_player,*aset.begin());
         }
         else if (_player->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
@@ -383,7 +388,7 @@ void WorldSession::LogoutPlayer(bool Save)
             _player->RepopAtGraveyard();
         }
         //drop a flag if player is carrying it
-        if (BattleGround *bg = _player->GetBattleGround())
+        if (Battleground *bg = _player->GetBattleground())
             bg->EventPlayerLoggedOut(_player);
 
         ///- Teleport to home if the player is in an invalid instance
@@ -394,10 +399,10 @@ void WorldSession::LogoutPlayer(bool Save)
 
         for (int i=0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
         {
-            if (BattleGroundQueueTypeId bgQueueTypeId = _player->GetBattleGroundQueueTypeId(i))
+            if (BattlegroundQueueTypeId bgQueueTypeId = _player->GetBattlegroundQueueTypeId(i))
             {
-                _player->RemoveBattleGroundQueueId(bgQueueTypeId);
-                sBattleGroundMgr.m_BattleGroundQueues[ bgQueueTypeId ].RemovePlayer(_player->GetGUID(), true);
+                _player->RemoveBattlegroundQueueId(bgQueueTypeId);
+                sBattlegroundMgr.m_BattlegroundQueues[ bgQueueTypeId ].RemovePlayer(_player->GetGUID(), true);
             }
         }
 
@@ -407,7 +412,7 @@ void WorldSession::LogoutPlayer(bool Save)
             HandleMoveWorldportAckOpcode();
 
         ///- If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
-        Guild *guild = objmgr.GetGuildById(_player->GetGuildId());
+        Guild *guild = sObjectMgr.GetGuildById(_player->GetGuildId());
         if (guild)
         {
             guild->SetMemberStats(_player->GetGUID());
@@ -527,7 +532,7 @@ void WorldSession::SendNotification(int32 string_id,...)
 
 const char * WorldSession::GetTrinityString(int32 entry) const
 {
-    return objmgr.GetTrinityString(entry,GetSessionDbLocaleIndex());
+    return sObjectMgr.GetTrinityString(entry, GetSessionDbLocaleIndex());
 }
 
 void WorldSession::Handle_NULL(WorldPacket& recvPacket)
@@ -624,11 +629,11 @@ void WorldSession::SetAccountData(AccountDataType type, time_t time_, std::strin
     {
         uint32 acc = GetAccountId();
 
-        CharacterDatabase.BeginTransaction ();
-        CharacterDatabase.PExecute("DELETE FROM account_data WHERE account='%u' AND type='%u'", acc, type);
+        SQLTransaction trans = CharacterDatabase.BeginTransaction();
+        trans->PAppend("DELETE FROM account_data WHERE account='%u' AND type='%u'", acc, type);
         CharacterDatabase.escape_string(data);
-        CharacterDatabase.PExecute("INSERT INTO account_data VALUES ('%u','%u','%u','%s')", acc, type, (uint32)time_, data.c_str());
-        CharacterDatabase.CommitTransaction ();
+        trans->PAppend("INSERT INTO account_data VALUES ('%u','%u','%u','%s')", acc, type, (uint32)time_, data.c_str());
+        CharacterDatabase.CommitTransaction(trans);
     }
     else
     {
@@ -636,11 +641,11 @@ void WorldSession::SetAccountData(AccountDataType type, time_t time_, std::strin
         if (!m_GUIDLow)
             return;
 
-        CharacterDatabase.BeginTransaction ();
-        CharacterDatabase.PExecute("DELETE FROM character_account_data WHERE guid='%u' AND type='%u'", m_GUIDLow, type);
+        SQLTransaction trans = CharacterDatabase.BeginTransaction();
+        trans->PAppend("DELETE FROM character_account_data WHERE guid='%u' AND type='%u'", m_GUIDLow, type);
         CharacterDatabase.escape_string(data);
-        CharacterDatabase.PExecute("INSERT INTO character_account_data VALUES ('%u','%u','%u','%s')", m_GUIDLow, type, (uint32)time_, data.c_str());
-        CharacterDatabase.CommitTransaction ();
+        trans->PAppend("INSERT INTO character_account_data VALUES ('%u','%u','%u','%s')", m_GUIDLow, type, (uint32)time_, data.c_str());
+        CharacterDatabase.CommitTransaction(trans);
     }
 
     m_accountData[type].Time = time_;
@@ -688,7 +693,7 @@ void WorldSession::SendTutorialsData()
     SendPacket(&data);
 }
 
-void WorldSession::SaveTutorialsData()
+void WorldSession::SaveTutorialsData(SQLTransaction& trans)
 {
     if (!m_TutorialsChanged)
         return;
@@ -700,14 +705,10 @@ void WorldSession::SaveTutorialsData()
         Rows = result->Fetch()[0].GetUInt32();
 
     if (Rows)
-    {
-        CharacterDatabase.PExecute("UPDATE character_tutorial SET tut0='%u', tut1='%u', tut2='%u', tut3='%u', tut4='%u', tut5='%u', tut6='%u', tut7='%u' WHERE account = '%u'",
+        trans->PAppend("UPDATE character_tutorial SET tut0='%u', tut1='%u', tut2='%u', tut3='%u', tut4='%u', tut5='%u', tut6='%u', tut7='%u' WHERE account = '%u'",
             m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7], GetAccountId());
-    }
     else
-    {
-        CharacterDatabase.PExecute("INSERT INTO character_tutorial (account,tut0,tut1,tut2,tut3,tut4,tut5,tut6,tut7) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')", GetAccountId(), m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
-    }
+        trans->PAppend("INSERT INTO character_tutorial (account,tut0,tut1,tut2,tut3,tut4,tut5,tut6,tut7) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')", GetAccountId(), m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
 
     m_TutorialsChanged = false;
 }
@@ -721,8 +722,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
 
     if (mi->flags & MOVEMENTFLAG_ONTRANSPORT)
     {
-        if (!data.readPackGUID(mi->t_guid))
-            return;
+        data.readPackGUID(mi->t_guid);
 
         data >> mi->t_pos.PositionXYZOStream();
         data >> mi->t_time;
@@ -956,4 +956,99 @@ void WorldSession::SetPlayer(Player *plr)
     // set m_GUID that can be used while player loggined and later until m_playerRecentlyLogout not reset
     if (_player)
         m_GUIDLow = _player->GetGUIDLow();
+}
+
+void WorldSession::ProcessQueryCallbacks()
+{
+    QueryResult_AutoPtr result;
+
+    //! HandleNameQueryOpcode
+    while (!m_nameQueryCallbacks.is_empty())
+    {
+        QueryResultFuture lResult;
+        ACE_Time_Value timeout = ACE_Time_Value::zero;
+        if (m_nameQueryCallbacks.next_readable(lResult, &timeout) != 1)
+           break;
+ 
+        lResult.get(result);
+        SendNameQueryOpcodeFromDBCallBack(result);
+    }
+    
+    //! HandleCharEnumOpcode
+    if (m_charEnumCallback.ready())
+    {
+        m_charEnumCallback.get(result);
+        HandleCharEnum(result);
+        m_charEnumCallback.cancel();
+    }
+
+    //! HandlePlayerLoginOpcode
+    if (m_charLoginCallback.ready())
+    {
+        SQLQueryHolder* param;
+        m_charLoginCallback.get(param);
+        HandlePlayerLogin((LoginQueryHolder*)param);
+        m_charLoginCallback.cancel();
+    }
+
+    //! HandleAddFriendOpcode
+    if (m_addFriendCallback.IsReady())
+    {
+        std::string param = m_addFriendCallback.GetParam();
+        m_addFriendCallback.GetResult(result);
+        HandleAddFriendOpcodeCallBack(result, param);
+        m_addFriendCallback.FreeResult();
+    }
+
+    //- HandleCharRenameOpcode
+    if (m_charRenameCallback.IsReady())
+    {
+        std::string param = m_charRenameCallback.GetParam();
+        m_charRenameCallback.GetResult(result);
+        HandleChangePlayerNameOpcodeCallBack(result, param);
+        m_charRenameCallback.FreeResult();
+    }
+    
+    //- HandleCharAddIgnoreOpcode
+    if (m_addIgnoreCallback.ready())
+    {
+        m_addIgnoreCallback.get(result);
+        HandleAddIgnoreOpcodeCallBack(result);
+        m_addIgnoreCallback.cancel();
+    }
+
+    //- SendStabledPet
+    if (m_sendStabledPetCallback.IsReady())
+    {
+        uint64 param = m_sendStabledPetCallback.GetParam();
+        m_sendStabledPetCallback.GetResult(result);
+        SendStablePetCallback(result, param);
+        m_sendStabledPetCallback.FreeResult();
+    }
+
+    //- HandleStablePet
+    if (m_stablePetCallback.ready())
+    {
+        m_stablePetCallback.get(result);
+        HandleStablePetCallback(result);
+        m_stablePetCallback.cancel();
+    }
+
+    //- HandleUnstablePet
+    if (m_unstablePetCallback.IsReady())
+    {
+        uint32 param = m_unstablePetCallback.GetParam();
+        m_unstablePetCallback.GetResult(result);
+        HandleUnstablePetCallback(result, param);
+        m_unstablePetCallback.FreeResult();
+    }
+
+    //- HandleStableSwapPet
+    if (m_stableSwapCallback.IsReady())
+    {
+        uint32 param = m_stableSwapCallback.GetParam();
+        m_stableSwapCallback.GetResult(result);
+        HandleStableSwapPetCallback(result, param);
+        m_stableSwapCallback.FreeResult();
+    }
 }

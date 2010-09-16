@@ -49,7 +49,9 @@
 #ifdef VERSION
 #undef VERSION
 #endif //VERSION
+
 # include "config.h"
+
 #undef PACKAGE
 #undef PACKAGE_BUGREPORT
 #undef PACKAGE_NAME
@@ -60,21 +62,6 @@
 #endif //HAVE_CONFIG_H
 
 #include "Define.h"
-
-#if COMPILER == COMPILER_MICROSOFT
-#   pragma warning(disable:4996)                            // 'function': was declared deprecated
-#ifndef __SHOW_STUPID_WARNINGS__
-#   pragma warning(disable:4005)                            // 'identifier' : macro redefinition
-#   pragma warning(disable:4018)                            // 'expression' : signed/unsigned mismatch
-#   pragma warning(disable:4244)                            // 'argument' : conversion from 'type1' to 'type2', possible loss of data
-#   pragma warning(disable:4267)                            // 'var' : conversion from 'size_t' to 'type', possible loss of data
-#   pragma warning(disable:4305)                            // 'identifier' : truncation from 'type1' to 'type2'
-#   pragma warning(disable:4311)                            // 'variable' : pointer truncation from 'type' to 'type'
-#   pragma warning(disable:4355)                            // 'this' : used in base member initializer list
-#   pragma warning(disable:4800)                            // 'type' : forcing value to bool 'true' or 'false' (performance warning)
-#   pragma warning(disable:4522)                            //warning when class has 2 constructors
-#endif                                                      // __SHOW_STUPID_WARNINGS__
-#endif                                                      // __GNUC__
 
 #include "Dynamic/UnorderedMap.h"
 #include <stdio.h>
@@ -92,6 +79,7 @@
 #define STRCASECMP strcasecmp
 #endif
 
+#include <iterator>
 #include <set>
 #include <list>
 #include <string>
@@ -109,7 +97,6 @@
 #include <ace/Thread_Mutex.h>
 
 #if PLATFORM == PLATFORM_WINDOWS
-#  define FD_SETSIZE 4096
 #  include <ace/config-all.h>
 // XP winver - needed to compile with standard leak check in MemoryLeaks.h
 // uncomment later if needed
@@ -124,6 +111,66 @@
 #  include <unistd.h>
 #  include <netdb.h>
 #endif
+
+#if COMPILER == COMPILER_GNU
+namespace std
+{
+    template<class ty> inline
+        ty *addressof(ty &val)
+    {   // return address of val
+        return reinterpret_cast<ty *>(&const_cast<unsigned char &>
+                (reinterpret_cast<const volatile unsigned char &>(val)));
+    }
+}
+
+template<class iter> inline
+    typename std::iterator_traits<iter>::iterator_category iter_cat(const iter &)
+{   // return category from iterator argument
+    typename std::iterator_traits<iter>::iterator_category cat;
+    return cat;
+}
+
+namespace std
+{
+    template<class container> inline
+        typename container::iterator begin(container &cont)
+    {   // get beginning of sequence
+        return cont.begin();
+    }
+
+    template<class container> inline
+        typename container::const_iterator begin(const container &cont)
+    {   // get beginning of sequence
+        return cont.begin();
+    }
+
+    template<class container> inline
+        typename container::iterator end(container &cont)
+    {   // get end of sequence
+        return cont.end();
+    }
+
+    template<class container> inline
+        typename container::const_iterator end(const container &cont)
+    {   // get end of sequence
+        return cont.end();
+    }
+
+    template<class ty,
+            std::size_t size> inline
+        ty *begin(ty (&array)[size])
+    {   // get beginning of array
+        return array;
+    }
+
+    template<class ty,
+            std::size_t size> inline
+        ty *end(ty (&array)[size])
+    {   // get end of array
+        return array + size;
+    }
+}
+#endif  // COMPILER == COMPILER_GNU
 
 #if COMPILER == COMPILER_MICROSOFT
 
@@ -198,6 +245,8 @@ extern char const* localeNames[MAX_LOCALE];
 
 LocaleConstant GetLocaleByName(const std::string& name);
 
+typedef std::vector<std::string> StringVector;
+
 // we always use stdlibc++ std::max/std::min, undefine some not C++ standard defines (Win API and some other platforms)
 #ifdef max
 #undef max
@@ -208,8 +257,8 @@ LocaleConstant GetLocaleByName(const std::string& name);
 #endif
 
 #ifndef M_PI
-#define M_PI            3.14159265358979323846
+#define M_PI            3.14159265358979323846f
 #endif
 
+#define MAX_QUERY_LEN 32*1024
 #endif
-

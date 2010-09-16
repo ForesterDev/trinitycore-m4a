@@ -43,8 +43,9 @@ class Transport : public GameObject
 {
     public:
         Transport(uint32 period, uint32 script);
+        ~Transport();
 
-        bool Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress, uint32 dynflags);
+        bool Create(uint32 guidlow, uint32 entry, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress, uint32 dynflags);
         bool GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids);
         void Update(uint32 p_time);
         bool AddPassenger(Player* passenger);
@@ -64,7 +65,7 @@ class Transport : public GameObject
         struct WayPoint
         {
             WayPoint() : mapid(0), x(0), y(0), z(0), teleport(false), id(0) {}
-            WayPoint(uint32 _mapid, float _x, float _y, float _z, bool _teleport, uint32 _id = 0, 
+            WayPoint(uint32 _mapid, float _x, float _y, float _z, bool _teleport, uint32 _id = 0,
                 uint32 _arrivalEventID = 0, uint32 _departureEventID = 0)
                 : mapid(_mapid), x(_x), y(_y), z(_z), teleport(_teleport), id(_id),
                 arrivalEventID(_arrivalEventID), departureEventID(_departureEventID)

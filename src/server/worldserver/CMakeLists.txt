@@ -14,7 +14,19 @@ file(GLOB_RECURSE sources_TCSoap TCSoap/*.cpp TCSoap/*.h)
 file(GLOB_RECURSE sources_WorldThread WorldThread/*.cpp WorldThread/*.h)
 file(GLOB sources_localdir *.cpp *.h)
 
+if( USE_COREPCH )
+  include_directories(${CMAKE_CURRENT_BINARY_DIR})
+endif()
+
+if ( USE_COREPCH AND MSVC )
+  set(worldserver_SRCS
+    PrecompiledHeaders/worldPCH.cpp
+    PrecompiledHeaders/worldPCH.h
+  )
+endif()
+
 set(worldserver_SRCS
+  ${worldserver_SRCS}
   ${sources_CommandLine}
   ${sources_RemoteAccess}
   ${sources_TCSoap}
@@ -25,18 +37,17 @@ set(worldserver_SRCS
 if( WIN32 )
   set(worldserver_SRCS
     ${worldserver_SRCS}
+    ${sources_Debugging}
     worldserver.rc
   )
 endif()
 
 include_directories(
-  ${ACE_INCLUDE_DIR}
-  ${MYSQL_INCLUDE_DIR}
-  ${OPENSSL_INCLUDE_DIR}
   ${CMAKE_BINARY_DIR}
-  ${CMAKE_SOURCE_DIR}/externals/gsoap
-  ${CMAKE_SOURCE_DIR}/externals/sockets/include
-  ${CMAKE_SOURCE_DIR}/externals/mersennetwister
+  ${CMAKE_SOURCE_DIR}/dep/gsoap
+  ${CMAKE_SOURCE_DIR}/dep/sockets/include
+  ${CMAKE_SOURCE_DIR}/dep/SFMT
+  ${CMAKE_SOURCE_DIR}/dep/mersennetwister
   ${CMAKE_SOURCE_DIR}/src/server/collision
   ${CMAKE_SOURCE_DIR}/src/server/collision/Management
   ${CMAKE_SOURCE_DIR}/src/server/shared
@@ -64,8 +75,8 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/game/AI/ScriptedAI
   ${CMAKE_SOURCE_DIR}/src/server/game/AuctionHouse
   ${CMAKE_SOURCE_DIR}/src/server/game/AuctionHouse/AuctionHouseBot
-  ${CMAKE_SOURCE_DIR}/src/server/game/BattleGrounds
-  ${CMAKE_SOURCE_DIR}/src/server/game/BattleGrounds/Zones
+  ${CMAKE_SOURCE_DIR}/src/server/game/Battlegrounds
+  ${CMAKE_SOURCE_DIR}/src/server/game/Battlegrounds/Zones
   ${CMAKE_SOURCE_DIR}/src/server/game/Calendar
   ${CMAKE_SOURCE_DIR}/src/server/game/Chat
   ${CMAKE_SOURCE_DIR}/src/server/game/Chat/Channels
@@ -120,11 +131,14 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/game/Tools
   ${CMAKE_SOURCE_DIR}/src/server/game/Weather
   ${CMAKE_SOURCE_DIR}/src/server/game/World
-  ${CMAKE_SOURCE_DIR}/src/server/worldserver
-  ${CMAKE_SOURCE_DIR}/src/server/worldserver/CommandLine
-  ${CMAKE_SOURCE_DIR}/src/server/worldserver/RemoteAccess
-  ${CMAKE_SOURCE_DIR}/src/server/worldserver/TCSoap
-  ${CMAKE_SOURCE_DIR}/src/server/worldserver/WorldThread
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/CommandLine
+  ${CMAKE_CURRENT_SOURCE_DIR}/RemoteAccess
+  ${CMAKE_CURRENT_SOURCE_DIR}/TCSoap
+  ${CMAKE_CURRENT_SOURCE_DIR}/WorldThread
+  ${ACE_INCLUDE_DIR}
+  ${MYSQL_INCLUDE_DIR}
+  ${OPENSSL_INCLUDE_DIR}
 )
 
 set(worldserver_LINK_FLAGS "")
@@ -135,63 +149,53 @@ if( NOT WIN32 )
   add_definitions(-D_TRINITY_CORE_CONFIG='"${CONF_DIR}/worldserver.conf"')
 endif()
 
-add_dependencies(worldserver revision.h)
+add_dependencies(worldserver genrev)
 
 if( UNIX )
-  set(worldserver_LINK_FLAGS "-pthread ${worldserver_LINK_FLAGS}")
-endif()
-
-if( CMAKE_SYSTEM_NAME MATCHES "Darwin" )
-  set(worldserver_LINK_FLAGS "-framework Carbon ${worldserver_LINK_FLAGS}")
-  set(SCRIPT_LIB "")
+  set(worldserver_LINK_FLAGS "-pthread -lncurses ${worldserver_LINK_FLAGS}")
 endif()
 
 set_target_properties(worldserver PROPERTIES LINK_FLAGS "${worldserver_LINK_FLAGS}")
 
-if( SCRIPTS )
-  set(SCRIPT_LIB "scripts")
-else()
-  set(SCRIPT_LIB "")
-endif()
+target_link_libraries(worldserver
+  game
+  shared
+  scripts
+  trinitysockets
+  collision
+  g3dlib
+  gsoap
+  ${JEMALLOC_LIB}
+  ${READLINE_LIBRARY}
+  ${TERMCAP_LIBRARY}
+  ${ACE_LIBRARY}
+  ${MYSQL_LIBRARY}
+  ${OPENSSL_LIBRARIES}
+  ${OPENSSL_EXTRA_LIBRARIES}
+  ${ZLIB_LIBRARIES}
+  ${OSX_LIBS}
+)
 
 if( WIN32 )
-  target_link_libraries(
-    worldserver
-    game
-    shared
-    zlib
-    trinitysockets
-    collision
-    g3dlib
-    gsoap
-    ace
-    ${SCRIPT_LIB}
-    ${MYSQL_LIBRARY}
-    ${OPENSSL_LIBRARIES}
-    ${OPENSSL_EXTRA_LIBRARIES}
-  )
-else()
-  target_link_libraries(
-    worldserver
-    game
-    shared
-    trinitysockets
-    collision
-    g3dlib
-    gsoap
-    jemalloc
-    ${SCRIPT_LIB}
-    ${READLINE_LIBRARY}
-    ${TERMCAP_LIBRARY}
-    ${ACE_LIBRARY}
-    ${MYSQL_LIBRARY}
-    ${OPENSSL_LIBRARIES}
-    ${ZLIB_LIBRARIES} 
-    ${OSX_LIBS}
+  add_custom_command(TARGET worldserver
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/worldserver.conf.dist ${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/
   )
 endif()
 
 if( UNIX )
   install(TARGETS worldserver DESTINATION bin)
-  install(FILES   worldserver.conf.dist DESTINATION etc)
+  install(FILES worldserver.conf.dist DESTINATION etc)
+elseif( WIN32 )
+  install(TARGETS worldserver DESTINATION "${CMAKE_INSTALL_PREFIX}")
+  install(FILES worldserver.conf.dist DESTINATION "${CMAKE_INSTALL_PREFIX}")
+endif()
+
+# Generate precompiled header
+if( USE_COREPCH )
+  if(CMAKE_COMPILER_IS_GNUCXX)
+    add_precompiled_header(worldserver ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/worldPCH.h)
+  elseif(MSVC)
+    add_native_precompiled_header(worldserver ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/worldPCH)
+  endif()
 endif()

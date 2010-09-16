@@ -22,7 +22,7 @@
 #include <string>
 
 #include "Common.h"
-#include "ace/Singleton.h"
+#include <ace/Singleton.h>
 #include "DatabaseEnv.h"
 #include "DBCEnums.h"
 #include "DBCStores.h"
@@ -216,8 +216,8 @@ typedef std::map<uint32,AchievementReward> AchievementRewards;
 
 struct AchievementRewardLocale
 {
-    std::vector<std::string> subject;
-    std::vector<std::string> text;
+    StringVector subject;
+    StringVector text;
 };
 
 typedef std::map<uint32,AchievementRewardLocale> AchievementRewardLocales;
@@ -244,7 +244,7 @@ class AchievementMgr
         void Reset();
         static void DeleteFromDB(uint32 lowguid);
         void LoadFromDB(QueryResult_AutoPtr achievementResult, QueryResult_AutoPtr criteriaResult);
-        void SaveToDB();
+        void SaveToDB(SQLTransaction& trans);
         void ResetAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1 = 0, uint32 miscvalue2 = 0, bool evenIfCriteriaComplete = false);
         void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1 = 0, uint32 miscvalue2 = 0, Unit *unit = NULL, uint32 time = 0);
         void CompletedAchievement(AchievementEntry const* entry);
@@ -254,7 +254,7 @@ class AchievementMgr
         bool HasAchieved(AchievementEntry const* achievement) const;
         Player* GetPlayer() { return m_player; }
         void UpdateTimedAchievements(uint32 timeDiff);
-        void StartTimedAchievement(AchievementCriteriaTimedTypes type, uint32 entry);
+        void StartTimedAchievement(AchievementCriteriaTimedTypes type, uint32 entry, uint32 timeLost = 0);
         void RemoveTimedAchievement(AchievementCriteriaTimedTypes type, uint32 entry);   // used for quest and scripted timed achievements
 
     private:
@@ -263,6 +263,7 @@ class AchievementMgr
         void SendCriteriaUpdate(AchievementCriteriaEntry const* entry, CriteriaProgress const* progress, uint32 timeElapsed, bool timedCompleted);
         CriteriaProgress* GetCriteriaProgress(AchievementCriteriaEntry const* entry);
         void SetCriteriaProgress(AchievementCriteriaEntry const* entry, uint32 changeValue, ProgressType ptype = PROGRESS_SET);
+        void RemoveCriteriaProgress(AchievementCriteriaEntry const* entry);
         void CompletedCriteriaFor(AchievementEntry const* achievement);
         bool IsCompletedCriteria(AchievementCriteriaEntry const* criteria, AchievementEntry const* achievement);
         bool IsCompletedAchievement(AchievementEntry const* entry);
@@ -345,6 +346,6 @@ class AchievementGlobalMgr
         AchievementRewardLocales m_achievementRewardLocales;
 };
 
-#define achievementmgr (*ACE_Singleton<AchievementGlobalMgr, ACE_Null_Mutex>::instance())
+#define sAchievementMgr (*ACE_Singleton<AchievementGlobalMgr, ACE_Null_Mutex>::instance())
 
 #endif

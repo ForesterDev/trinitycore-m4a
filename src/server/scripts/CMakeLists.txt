@@ -8,31 +8,27 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-file(GLOB_RECURSE scripts_easternkingdoms EasternKingdoms/*.cpp EasternKingdoms/*.h)
-file(GLOB_RECURSE scripts_kalimdor Kalimdor/*.cpp Kalimdor/*.h)
-file(GLOB_RECURSE scripts_northrend Northrend/*.cpp Northrend/*.h)
-file(GLOB_RECURSE scripts_outland Outland/*.cpp Outland/*.h)
-file(GLOB_RECURSE scripts_world World/*.cpp World/*.h)
-file(GLOB_RECURSE scripts_spells Spells/*.cpp Spells/*.h)
-file(GLOB_RECURSE scripts_examples Examples/*.cpp Examples/*.h)
-file(GLOB_RECURSE scripts_outdoorpvp OutdoorPvP/*.cpp OutdoorPvP/*.h)
-
 # Enable precompiled headers when using the GCC compiler.
-if(PCH)
+if( USE_SCRIPTPCH )
   include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
   )
 endif()
 
+if( USE_SCRIPTPCH AND MSVC )
+  set(scripts_STAT_SRCS
+    PrecompiledHeaders/ScriptPCH.cpp
+    PrecompiledHeaders/ScriptPCH.h
+  )
+endif()
+
+message(STATUS "SCRIPT PREPARATIONS")
+include(Spells/CMakeLists.txt)
+
+include(Examples/CMakeLists.txt)
+
 set(scripts_STAT_SRCS
-  ${scripts_easternkingdoms}
-  ${scripts_kalimdor}
-  ${scripts_northrend}
-  ${scripts_outland}
-  ${scripts_world}
-  ${scripts_spells}
-  ${scripts_examples}
-  ${scripts_outdoorpvp}
+  ${scripts_STAT_SRCS}
   ../game/AI/ScriptedAI/ScriptedEscortAI.cpp
   ../game/AI/ScriptedAI/ScriptedCreature.cpp
   ../game/AI/ScriptedAI/ScriptedFollowerAI.cpp
@@ -40,13 +36,24 @@ set(scripts_STAT_SRCS
   ../game/AI/ScriptedAI/ScriptedSimpleAI.cpp
 )
 
-message("-- Added Script Library to SCRIPTS lib")
+if(SCRIPTS)
+  include(Custom/CMakeLists.txt)
+  include(World/CMakeLists.txt)
+  include(OutdoorPvP/CMakeLists.txt)
+  include(EasternKingdoms/CMakeLists.txt)
+  include(Kalimdor/CMakeLists.txt)
+  include(Outland/CMakeLists.txt)
+  include(Northrend/CMakeLists.txt)
+endif()
+
+message(STATUS "SCRIPT PREPARATION COMPLETE")
+message("")
 
 include_directories(
-  ${ACE_INCLUDE_DIR}
   ${CMAKE_BINARY_DIR}
-  ${CMAKE_SOURCE_DIR}/externals/mersennetwister
-  ${CMAKE_SOURCE_DIR}/externals/zlib
+  ${CMAKE_SOURCE_DIR}/dep/SFMT
+  ${CMAKE_SOURCE_DIR}/dep/mersennetwister
+  ${CMAKE_SOURCE_DIR}/dep/zlib
   ${CMAKE_SOURCE_DIR}/src/server/shared
   ${CMAKE_SOURCE_DIR}/src/server/shared/Configuration
   ${CMAKE_SOURCE_DIR}/src/server/shared/Cryptography
@@ -73,9 +80,11 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/game/AI/EventAI
   ${CMAKE_SOURCE_DIR}/src/server/game/AI/ScriptedAI
   ${CMAKE_SOURCE_DIR}/src/server/game/AuctionHouse
-  ${CMAKE_SOURCE_DIR}/src/server/game/BattleGrounds
+  ${CMAKE_SOURCE_DIR}/src/server/game/Battlegrounds
+  ${CMAKE_SOURCE_DIR}/src/server/game/Battlegrounds/Zones
   ${CMAKE_SOURCE_DIR}/src/server/game/Calendar
   ${CMAKE_SOURCE_DIR}/src/server/game/Chat
+  ${CMAKE_SOURCE_DIR}/src/server/game/Chat/Channels
   ${CMAKE_SOURCE_DIR}/src/server/game/Conditions
   ${CMAKE_SOURCE_DIR}/src/server/shared/Configuration
   ${CMAKE_SOURCE_DIR}/src/server/game/Combat
@@ -125,23 +134,22 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/game/Tools
   ${CMAKE_SOURCE_DIR}/src/server/game/Weather
   ${CMAKE_SOURCE_DIR}/src/server/game/World
+  ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders
+  ${ACE_INCLUDE_DIR}
   ${MYSQL_INCLUDE_DIR}
 )
 
-# Add ScriptPCH.cpp to project on Windows
-if(MSVC)
-set(scripts_STAT_SRCS
-    ../game/PrecompiledHeaders/ScriptPCH.cpp
-    ${scripts_STAT_SRCS})
-endif()
-
 add_library(scripts STATIC ${scripts_STAT_SRCS})
 
+add_dependencies(scripts genrev)
+
+target_link_libraries(scripts game)
+
 # Generate precompiled header
-if(PCH)
+if( USE_SCRIPTPCH )
   if(CMAKE_COMPILER_IS_GNUCXX)
-    add_precompiled_header(scripts ${CMAKE_SOURCE_DIR}/src/server/game/PrecompiledHeaders/ScriptPCH.h)
+    add_precompiled_header(scripts ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/ScriptPCH.h)
   elseif(MSVC)
-    add_native_precompiled_header(scripts ${CMAKE_SOURCE_DIR}/src/server/game/PrecompiledHeaders/ScriptPCH)
+    add_native_precompiled_header(scripts ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/ScriptPCH)
   endif()
 endif()

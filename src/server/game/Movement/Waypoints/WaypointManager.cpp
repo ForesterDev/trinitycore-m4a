@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "DatabaseEnv.h"
 #include "GridDefines.h"
 #include "WaypointManager.h"
@@ -55,9 +56,8 @@ void WaypointStore::Load()
     }
 
     WaypointPath* path_data = NULL;
-    uint32 total_records = result->GetRowCount();
 
-    barGoLink bar(total_records);
+    barGoLink bar(result->GetRowCount());
     uint32 count = 0;
     Field *fields;
     uint32 last_id = 0;

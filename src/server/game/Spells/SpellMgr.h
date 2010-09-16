@@ -322,6 +322,21 @@ inline bool IsDeathPersistentSpell(SpellEntry const *spellInfo)
     return spellInfo->AttributesEx3 & SPELL_ATTR_EX3_DEATH_PERSISTENT;
 }
 
+inline bool IsRequiringDeadTargetSpell(SpellEntry const *spellInfo)
+{
+    return spellInfo->AttributesEx3 & SPELL_ATTR_EX3_REQUIRE_DEAD_TARGET;
+}
+
+inline bool IsAllowingDeadTargetSpell(SpellEntry const *spellInfo)
+{
+    return spellInfo->AttributesEx2 & SPELL_ATTR_EX2_ALLOW_DEAD_TARGET;
+}
+
+inline bool IsDeadTargetSpell(SpellEntry const *spellInfo)
+{
+    return IsAllowingDeadTargetSpell(spellInfo) || IsRequiringDeadTargetSpell(spellInfo);
+}
+
 inline bool IsNonCombatSpell(SpellEntry const *spellInfo)
 {
     return (spellInfo->Attributes & SPELL_ATTR_CANT_USED_IN_COMBAT) != 0;
@@ -880,6 +895,7 @@ inline bool IsProfessionSkill(uint32 skill)
 #define SPELL_ATTR_CU_NEGATIVE_EFF1     0x00020000
 #define SPELL_ATTR_CU_NEGATIVE_EFF2     0x00040000
 #define SPELL_ATTR_CU_NEGATIVE          0x00070000
+#define SPELL_ATTR_CU_IGNORE_ARMOR      0x00080000
 
 typedef std::vector<uint32> SpellCustomAttribute;
 typedef std::vector<bool> EnchantCustomAttribute;
@@ -1237,6 +1253,8 @@ class SpellMgr
         bool IsSkillTypeSpell(uint32 spellId, SkillType type) const;
         static int32 CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 effIndex, Unit const * caster = NULL, int32 const * basePoints = NULL, Unit const * target = NULL);
         static int32 CalculateSpellEffectBaseAmount(int32 value, SpellEntry const * spellEntry, uint8 effIndex);
+        static float CalculateSpellEffectValueMultiplier(SpellEntry const * spellEntry, uint8 effIndex, Unit * caster, Spell * spell = NULL);
+        static float CalculateSpellEffectDamageMultiplier(SpellEntry const * spellEntry, uint8 effIndex, Unit * caster, Spell * spell = NULL);
 
         // Spell correctess for client using
         static bool IsSpellValid(SpellEntry const * spellInfo, Player* pl = NULL, bool msg = true);
@@ -1420,5 +1438,5 @@ class SpellMgr
         SpellDifficultySearcherMap mSpellDifficultySearcherMap;
 };
 
-#define spellmgr SpellMgr::Instance()
+#define sSpellMgr SpellMgr::Instance()
 #endif

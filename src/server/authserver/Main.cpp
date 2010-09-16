@@ -24,7 +24,6 @@
 
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
-#include "Database/PreparedStatements.h"
 
 #include "Configuration/Config.h"
 #include "Log.h"
@@ -64,7 +63,7 @@ bool StartDB();
 
 bool stopEvent = false;                                     ///< Setting it to true stops the server
 
-DatabaseType LoginDatabase;                                 ///< Accessor to the realm server database
+LoginDatabaseWorkerPool LoginDatabase;                      ///< Accessor to the realm server database
 
 /// Handle realmd's termination signals
 class RealmdSignalHandler : public Trinity::SignalHandler
@@ -207,7 +206,7 @@ extern int main(int argc, char **argv)
     sLog.SetLogDBLater(sConfig.GetBoolDefault("EnableLogDB", false)); // set var to enable DB logging once startup finished.
     sLog.SetLogDB(false);
     sLog.SetRealmID(0);                                               // ensure we've set realm to 0 (realmd realmid)
- 
+
     ///- Get the list of realms for the server
     sRealmList->Initialize(sConfig.GetIntDefault("RealmsStateUpdateDelay", 20));
     if (sRealmList->size() == 0)
@@ -219,7 +218,7 @@ extern int main(int argc, char **argv)
     ///- Launch the listening network socket
     RealmAcceptor acceptor;
 
-    uint16 rmport = sConfig.GetIntDefault("RealmServerPort", DEFAULT_REALMSERVER_PORT);
+    uint16 rmport = sConfig.GetIntDefault("RealmServerPort", 3724);
     std::string bind_ip = sConfig.GetStringDefault("BindIP", "0.0.0.0");
 
     ACE_INET_Addr bind_addr(rmport, bind_ip.c_str());
@@ -242,7 +241,7 @@ extern int main(int argc, char **argv)
     Handler.register_handler(SIGTERM, &SignalTERM);
     #ifdef _WIN32
     Handler.register_handler(SIGBREAK, &SignalBREAK);
-    #endif /* _WIN32 */();
+    #endif /* _WIN32 */
 
     ///- Handle affinity for multiple processors and process priority on Windows
     #ifdef _WIN32
@@ -315,7 +314,7 @@ extern int main(int argc, char **argv)
         {
             loopCounter = 0;
             sLog.outDetail("Ping MySQL to keep connection alive");
-            sPreparedStatement.Query(&LoginDatabase, "auth_ping");
+            LoginDatabase.Query("SELECT 1 FROM realmlist");
         }
 #ifdef _WIN32
         if (m_ServiceStatus == 0) stopEvent = true;
@@ -323,9 +322,8 @@ extern int main(int argc, char **argv)
 #endif
     }
 
-    ///- Wait for the delay thread to exit
-    LoginDatabase.ThreadEnd();
-    LoginDatabase.HaltDelayThread();
+    ///- Close the Database Pool
+    LoginDatabase.Close();
 
     sLog.outString("Halting process...");
     return 0;
@@ -341,16 +339,19 @@ bool StartDB()
         return false;
     }
 
-    if (!LoginDatabase.Initialize(dbstring.c_str()))
+    uint8 num_threads = sConfig.GetIntDefault("LoginDatabase.WorkerThreads", 1);
+    if (num_threads < 1 || num_threads > 32)
+    {
+        sLog.outError("Improper value specified for LoginDatabase.WorkerThreads, defaulting to 1.");
+        num_threads = 1;
+    }
+
+    //- Authserver has singlethreaded synchronous DB access, hence MYSQL_BUNDLE_ALL
+    if (!LoginDatabase.Open(dbstring.c_str(), num_threads, MYSQL_BUNDLE_ALL))
     {
         sLog.outError("Cannot connect to database");
         return false;
     }
-    LoginDatabase.ThreadStart();
-    
-    uint32 count = 0;
-    sPreparedStatement.LoadAuthserver(&LoginDatabase, count);
-    sLog.outString("Loaded %u prepared MySQL statements for auth DB.", count);
 
     return true;
 }

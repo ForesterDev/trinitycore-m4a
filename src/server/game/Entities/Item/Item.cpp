@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
  #include <ace/Auto_Ptr.h>
 
 #include "Common.h"
@@ -267,7 +268,7 @@ bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
     SetUInt64Value(ITEM_FIELD_OWNER, owner ? owner->GetGUID() : 0);
     SetUInt64Value(ITEM_FIELD_CONTAINED, owner ? owner->GetGUID() : 0);
 
-    ItemPrototype const *itemProto = objmgr.GetItemPrototype(itemid);
+    ItemPrototype const *itemProto = sObjectMgr.GetItemPrototype(itemid);
     if (!itemProto)
         return false;
 
@@ -301,7 +302,7 @@ void Item::UpdateDuration(Player* owner, uint32 diff)
     SetState(ITEM_CHANGED, owner);                          // save new time in database
 }
 
-void Item::SaveToDB()
+void Item::SaveToDB(SQLTransaction& trans)
 {
     uint32 guid = GetGUIDLow();
     switch (uState)
@@ -334,7 +335,7 @@ void Item::SaveToDB()
             ss << GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME) << ",'";
             ss << text << "')";
 
-            CharacterDatabase.Execute(ss.str().c_str());
+            trans->Append(ss.str().c_str());
         }break;
         case ITEM_CHANGED:
         {
@@ -364,16 +365,16 @@ void Item::SaveToDB()
             ss << ", playedTime = " << GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME);
             ss << ", text = '" << text << "' WHERE guid = " << guid;
 
-            CharacterDatabase.Execute(ss.str().c_str());
+            trans->Append(ss.str().c_str());
 
             if (HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_WRAPPED))
-                CharacterDatabase.PExecute("UPDATE character_gifts SET guid = '%u' WHERE item_guid = '%u'", GUID_LOPART(GetOwnerGUID()),GetGUIDLow());
+                trans->PAppend("UPDATE character_gifts SET guid = '%u' WHERE item_guid = '%u'", GUID_LOPART(GetOwnerGUID()),GetGUIDLow());
         }break;
         case ITEM_REMOVED:
         {
-            CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid = '%u'", guid);
+            trans->PAppend("DELETE FROM item_instance WHERE guid = '%u'", guid);
             if (HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_WRAPPED))
-                CharacterDatabase.PExecute("DELETE FROM character_gifts WHERE item_guid = '%u'", GetGUIDLow());
+                trans->PAppend("DELETE FROM character_gifts WHERE item_guid = '%u'", GetGUIDLow());
             delete this;
             return;
         }
@@ -471,24 +472,24 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult_AutoPtr result
     return true;
 }
 
-void Item::DeleteFromDB()
+void Item::DeleteFromDB(SQLTransaction& trans)
 {
-    CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid = '%u'",GetGUIDLow());
+    trans->PAppend("DELETE FROM item_instance WHERE guid = '%u'",GetGUIDLow());
 }
 
-void Item::DeleteFromInventoryDB()
+void Item::DeleteFromInventoryDB(SQLTransaction& trans)
 {
-    CharacterDatabase.PExecute("DELETE FROM character_inventory WHERE item = '%u'",GetGUIDLow());
+    trans->PAppend("DELETE FROM character_inventory WHERE item = '%u'",GetGUIDLow());
 }
 
 ItemPrototype const *Item::GetProto() const
 {
-    return objmgr.GetItemPrototype(GetEntry());
+    return sObjectMgr.GetItemPrototype(GetEntry());
 }
 
 Player* Item::GetOwner()const
 {
-    return objmgr.GetPlayer(GetOwnerGUID());
+    return sObjectMgr.GetPlayer(GetOwnerGUID());
 }
 
 uint32 Item::GetSkill()
@@ -662,6 +663,9 @@ void Item::UpdateItemSuffixFactor()
 
 void Item::SetState(ItemUpdateState state, Player *forplayer)
 {
+    if (state == ITEM_REMOVED)
+        if (auto this_bag = dynamic_cast<Bag *>(this))
+            ASSERT(this_bag->IsEmpty());
     if (uState == ITEM_NEW && state == ITEM_REMOVED)
     {
         // pretend the item never existed
@@ -829,7 +833,7 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
         // Special case - accept vellum for armor/weapon requirements
         if ((spellInfo->EquippedItemClass == ITEM_CLASS_ARMOR && proto->IsArmorVellum())
             ||(spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON && proto->IsWeaponVellum()))
-            if (spellmgr.IsSkillTypeSpell(spellInfo->Id, SKILL_ENCHANTING)) // only for enchanting spells
+            if (sSpellMgr.IsSkillTypeSpell(spellInfo->Id, SKILL_ENCHANTING)) // only for enchanting spells
                 return true;
 
         if (spellInfo->EquippedItemClass != int32(proto->Class))
@@ -1000,7 +1004,7 @@ uint8 Item::GetGemCountWithLimitCategory(uint32 limitCategory) const
 bool Item::IsLimitedToAnotherMapOrZone(uint32 cur_mapId, uint32 cur_zoneId) const
 {
     ItemPrototype const* proto = GetProto();
-    return proto && (proto->Map && proto->Map != cur_mapId || proto->Area && proto->Area != cur_zoneId);
+    return proto && ((proto->Map && proto->Map != cur_mapId) || (proto->Area && proto->Area != cur_zoneId));
 }
 
 // Though the client has the information in the item's data field,
@@ -1017,12 +1021,17 @@ void Item::SendTimeUpdate(Player* owner)
     owner->GetSession()->SendPacket(&data);
 }
 
+Item::~Item()
+{
+    ASSERT(!IsInUpdateQueue());
+}
+
 Item* Item::CreateItem(uint32 item, uint32 count, Player const* player)
 {
     if (count < 1)
         return NULL;                                        //don't create item at zero count
 
-    ItemPrototype const *pProto = objmgr.GetItemPrototype(item);
+    ItemPrototype const *pProto = sObjectMgr.GetItemPrototype(item);
     if (pProto)
     {
         if (count > pProto->GetMaxStackSize())
@@ -1031,7 +1040,7 @@ Item* Item::CreateItem(uint32 item, uint32 count, Player const* player)
         ASSERT(count !=0 && "pProto->Stackable == 0 but checked at loading already");
 
         Item *pItem = NewItemOrBag(pProto);
-        if (pItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), item, player))
+        if (pItem->Create(sObjectMgr.GenerateLowGuid(HIGHGUID_ITEM), item, player))
         {
             pItem->SetCount(count);
             return pItem;
@@ -1071,7 +1080,7 @@ bool Item::IsBindedNotWith(Player const* player) const
     // BOA item case
     if (IsBoundAccountWide())
         return false;
-        
+
     return true;
 }
 
@@ -1103,11 +1112,11 @@ void Item::BuildUpdate(UpdateDataMapType& data_map)
 
 void Item::SaveRefundDataToDB()
 {
-    CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("DELETE FROM item_refund_instance WHERE item_guid = '%u'", GetGUIDLow());
-    CharacterDatabase.PExecute("INSERT INTO item_refund_instance (`item_guid`,`player_guid`,`paidMoney`,`paidExtendedCost`)"
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+    trans->PAppend("DELETE FROM item_refund_instance WHERE item_guid = '%u'", GetGUIDLow());
+    trans->PAppend("INSERT INTO item_refund_instance (`item_guid`,`player_guid`,`paidMoney`,`paidExtendedCost`)"
     " VALUES('%u','%u','%u','%u')", GetGUIDLow(), GetRefundRecipient(), GetPaidMoney(), GetPaidExtendedCost());
-    CharacterDatabase.CommitTransaction();
+    CharacterDatabase.CommitTransaction(trans);
 }
 
 void Item::DeleteRefundDataFromDB()
@@ -1143,7 +1152,7 @@ void Item::UpdatePlayedTime(Player *owner)
     uint32 current_playtime = GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME);
     // Calculate time elapsed since last played time update
     time_t curtime = time(NULL);
-    uint32 elapsed = curtime - m_lastPlayedTimeUpdate;
+    uint32 elapsed = uint32(curtime - m_lastPlayedTimeUpdate);
     uint32 new_playtime = current_playtime + elapsed;
     // Check if the refund timer has expired yet
     if (new_playtime <= 2*HOUR)
@@ -1164,7 +1173,7 @@ void Item::UpdatePlayedTime(Player *owner)
 uint32 Item::GetPlayedTime()
 {
     time_t curtime = time(NULL);
-    uint32 elapsed = curtime - m_lastPlayedTimeUpdate;
+    uint32 elapsed = uint32(curtime - m_lastPlayedTimeUpdate);
     return GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME) + elapsed;
 }
 

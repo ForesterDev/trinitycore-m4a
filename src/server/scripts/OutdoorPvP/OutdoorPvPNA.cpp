@@ -23,6 +23,7 @@
 #include "WorldPacket.h"
 #include "Language.h"
 #include "World.h"
+#include "ScriptPCH.h"
 
 OutdoorPvPNA::OutdoorPvPNA()
 {
@@ -69,7 +70,7 @@ uint32 OPvPCapturePointNA::GetAliveGuardsCount()
                     if (cr->isAlive())
                         ++cnt;
                 }
-                else if (CreatureData const * cd = objmgr.GetCreatureData(GUID_LOPART(itr->second)))
+                else if (CreatureData const * cd = sObjectMgr.GetCreatureData(GUID_LOPART(itr->second)))
                 {
                     if (!cd->is_dead)
                         ++cnt;
@@ -137,15 +138,15 @@ void OPvPCapturePointNA::DeSpawnGOs()
 void OPvPCapturePointNA::FactionTakeOver(uint32 team)
 {
     if (m_ControllingFaction)
-        objmgr.RemoveGraveYardLink(NA_HALAA_GRAVEYARD,NA_HALAA_GRAVEYARD_ZONE,m_ControllingFaction,false);
+        sObjectMgr.RemoveGraveYardLink(NA_HALAA_GRAVEYARD,NA_HALAA_GRAVEYARD_ZONE,m_ControllingFaction,false);
     if (m_ControllingFaction == ALLIANCE)
-        sWorld.SendZoneText(NA_HALAA_GRAVEYARD_ZONE,objmgr.GetTrinityStringForDBCLocale(LANG_OPVP_NA_LOOSE_A));
+        sWorld.SendZoneText(NA_HALAA_GRAVEYARD_ZONE,sObjectMgr.GetTrinityStringForDBCLocale(LANG_OPVP_NA_LOOSE_A));
     else if (m_ControllingFaction == HORDE)
-        sWorld.SendZoneText(NA_HALAA_GRAVEYARD_ZONE,objmgr.GetTrinityStringForDBCLocale(LANG_OPVP_NA_LOOSE_H));
+        sWorld.SendZoneText(NA_HALAA_GRAVEYARD_ZONE,sObjectMgr.GetTrinityStringForDBCLocale(LANG_OPVP_NA_LOOSE_H));
 
     m_ControllingFaction = team;
     if (m_ControllingFaction)
-        objmgr.AddGraveYardLink(NA_HALAA_GRAVEYARD,NA_HALAA_GRAVEYARD_ZONE,m_ControllingFaction,false);
+        sObjectMgr.AddGraveYardLink(NA_HALAA_GRAVEYARD,NA_HALAA_GRAVEYARD_ZONE,m_ControllingFaction,false);
     DeSpawnGOs();
     DeSpawnNPCs();
     SpawnGOsForTeam(team);
@@ -163,7 +164,7 @@ void OPvPCapturePointNA::FactionTakeOver(uint32 team)
         m_PvP->SendUpdateWorldState(NA_UI_HORDE_GUARDS_SHOW, 0);
         m_PvP->SendUpdateWorldState(NA_UI_ALLIANCE_GUARDS_SHOW, 1);
         m_PvP->SendUpdateWorldState(NA_UI_GUARDS_LEFT, m_GuardsAlive);
-        sWorld.SendZoneText(NA_HALAA_GRAVEYARD_ZONE,objmgr.GetTrinityStringForDBCLocale(LANG_OPVP_NA_CAPTURE_A));
+        sWorld.SendZoneText(NA_HALAA_GRAVEYARD_ZONE,sObjectMgr.GetTrinityStringForDBCLocale(LANG_OPVP_NA_CAPTURE_A));
     }
     else
     {
@@ -175,7 +176,7 @@ void OPvPCapturePointNA::FactionTakeOver(uint32 team)
         m_PvP->SendUpdateWorldState(NA_UI_HORDE_GUARDS_SHOW, 1);
         m_PvP->SendUpdateWorldState(NA_UI_ALLIANCE_GUARDS_SHOW, 0);
         m_PvP->SendUpdateWorldState(NA_UI_GUARDS_LEFT, m_GuardsAlive);
-        sWorld.SendZoneText(NA_HALAA_GRAVEYARD_ZONE,objmgr.GetTrinityStringForDBCLocale(LANG_OPVP_NA_CAPTURE_H));
+        sWorld.SendZoneText(NA_HALAA_GRAVEYARD_ZONE,sObjectMgr.GetTrinityStringForDBCLocale(LANG_OPVP_NA_CAPTURE_H));
     }
     UpdateWyvernRoostWorldState(NA_ROOST_S);
     UpdateWyvernRoostWorldState(NA_ROOST_N);
@@ -204,10 +205,10 @@ void OPvPCapturePointNA::HandlePlayerLeave(Player *plr)
 
 OPvPCapturePointNA::OPvPCapturePointNA(OutdoorPvP *pvp) :
 OPvPCapturePoint(pvp), m_capturable(true), m_GuardsAlive(0), m_ControllingFaction(0),
-m_HalaaState(HALAA_N), m_WyvernStateSouth(0), m_WyvernStateNorth(0), m_WyvernStateWest(0),
-m_WyvernStateEast(0), m_RespawnTimer(NA_RESPAWN_TIME), m_GuardCheckTimer(NA_GUARD_CHECK_TIME)
+m_WyvernStateNorth(0), m_WyvernStateSouth(0), m_WyvernStateEast(0), m_WyvernStateWest(0),
+m_HalaaState(HALAA_N), m_RespawnTimer(NA_RESPAWN_TIME), m_GuardCheckTimer(NA_GUARD_CHECK_TIME)
 {
-    SetCapturePointData(182210,530,-1572.57,7945.3,-22.475,2.05949,0,0,0.857167,0.515038);
+    SetCapturePointData(182210,530,-1572.57f,7945.3f,-22.475f,2.05949f,0.0f,0.0f,0.857167f,0.515038f);
 }
 
 bool OutdoorPvPNA::SetupOutdoorPvP()
@@ -411,7 +412,7 @@ bool OPvPCapturePointNA::HandleCustomSpell(Player * plr, uint32 spellId, GameObj
 
 int32 OPvPCapturePointNA::HandleOpenGo(Player *plr, uint64 guid)
 {
-    uint32 retval = OPvPCapturePoint::HandleOpenGo(plr, guid);
+    int32 retval = OPvPCapturePoint::HandleOpenGo(plr, guid);
     if (retval >= 0)
     {
         const go_type * gos = NULL;

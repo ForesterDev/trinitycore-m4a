@@ -205,19 +205,19 @@ typedef UNORDERED_MAP<uint16, CreatureBaseStats> CreatureBaseStatsMap;
 
 struct CreatureLocale
 {
-    std::vector<std::string> Name;
-    std::vector<std::string> SubName;
+    StringVector Name;
+    StringVector SubName;
 };
 
 struct GossipMenuItemsLocale
 {
-    std::vector<std::string> OptionText;
-    std::vector<std::string> BoxText;
+    StringVector OptionText;
+    StringVector BoxText;
 };
 
 struct PointOfInterestLocale
 {
-    std::vector<std::string> IconName;
+    StringVector IconName;
 };
 
 struct EquipmentInfo
@@ -311,7 +311,7 @@ struct VendorItem
         : item(_item), maxcount(_maxcount), incrtime(_incrtime), ExtendedCost(_ExtendedCost) {}
 
     uint32 item;
-    int32  maxcount;                                        // 0 for infinity item amount
+    uint32  maxcount;                                       // 0 for infinity item amount
     uint32 incrtime;                                        // time for restore items amount if maxcount != 0
     uint32 ExtendedCost;
 
@@ -427,7 +427,7 @@ class Creature : public Unit, public GridObject<Creature>
         bool canWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
         bool canSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
         //bool canFly()  const { return GetCreatureInfo()->InhabitType & INHABIT_AIR; }
-        
+
         void SetReactState(ReactStates st) { m_reactState = st; }
         ReactStates GetReactState() { return m_reactState; }
         bool HasReactState(ReactStates state) const { return (m_reactState == state); }
@@ -712,7 +712,7 @@ class Creature : public Unit, public GridObject<Creature>
 
         bool DisableReputationGain;
 
-        CreatureInfo const* m_creatureInfo;                 // in difficulty mode > 0 can different from objmgr.::GetCreatureTemplate(GetEntry())
+        CreatureInfo const* m_creatureInfo;                 // in difficulty mode > 0 can different from sObjectMgr.::GetCreatureTemplate(GetEntry())
         CreatureData const* m_creatureData;
 
         uint16 m_LootMode;                                  // bitmask, default LOOT_MODE_DEFAULT, determines what loot will be lootable

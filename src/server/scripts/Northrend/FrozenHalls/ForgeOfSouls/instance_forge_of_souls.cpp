@@ -28,11 +28,11 @@
 class instance_forge_of_souls : public InstanceMapScript
 {
 public:
-    instance_forge_of_souls() : InstanceMapScript("instance_forge_of_souls") { }
+    instance_forge_of_souls() : InstanceMapScript("instance_forge_of_souls", 632) { }
 
-    struct instance_forge_of_souls_ScriptedInstance : public ScriptedInstance
+    struct instance_forge_of_souls_InstanceScript : public InstanceScript
     {
-        instance_forge_of_souls_ScriptedInstance(Map* pMap) : ScriptedInstance(pMap) {};
+        instance_forge_of_souls_InstanceScript(Map* pMap) : InstanceScript(pMap) {};
 
         uint64 uiBronjahm;
         uint64 uiDevourer;
@@ -65,7 +65,7 @@ public:
 
             if (!players.isEmpty())
                 if (Player* pPlayer = players.begin()->getSource())
-                    uiTeamInInstance = pPlayer->GetTeam();
+                    uiTeamInInstance = pPlayer->GetTeamId();
 
             switch(pCreature->GetEntry())
             {
@@ -159,9 +159,9 @@ public:
         }
     };
 
-    InstanceData* GetInstanceData(InstanceMap *map) const
+    InstanceScript* GetInstanceScript(InstanceMap *map) const
     {
-        return new instance_forge_of_souls_ScriptedInstance(map);
+        return new instance_forge_of_souls_InstanceScript(map);
     }
 };
 

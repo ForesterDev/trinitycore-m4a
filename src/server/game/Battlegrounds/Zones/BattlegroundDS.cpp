@@ -16,15 +16,16 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "BattleGround.h"
-#include "BattleGroundDS.h"
+#include "gamePCH.h"
+#include "Battleground.h"
+#include "BattlegroundDS.h"
 #include "Language.h"
 #include "Player.h"
 #include "Object.h"
 #include "ObjectMgr.h"
 #include "WorldPacket.h"
 
-BattleGroundDS::BattleGroundDS()
+BattlegroundDS::BattlegroundDS()
 {
     m_BgObjects.resize(BG_DS_OBJECT_MAX);
 
@@ -39,14 +40,14 @@ BattleGroundDS::BattleGroundDS()
     m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_ARENA_HAS_BEGUN;
 }
 
-BattleGroundDS::~BattleGroundDS()
+BattlegroundDS::~BattlegroundDS()
 {
 
 }
 
-void BattleGroundDS::Update(uint32 diff)
+void BattlegroundDS::Update(uint32 diff)
 {
-    BattleGround::Update(diff);
+    Battleground::Update(diff);
     if (getWaterFallTimer() < diff)
     {
         if (isWaterFallActive())
@@ -68,13 +69,13 @@ void BattleGroundDS::Update(uint32 diff)
         setWaterFallTimer(getWaterFallTimer() - diff);
 }
 
-void BattleGroundDS::StartingEventCloseDoors()
+void BattlegroundDS::StartingEventCloseDoors()
 {
     for (uint32 i = BG_DS_OBJECT_DOOR_1; i <= BG_DS_OBJECT_DOOR_2; ++i)
         SpawnBGObject(i, RESPAWN_IMMEDIATELY);
 }
 
-void BattleGroundDS::StartingEventOpenDoors()
+void BattlegroundDS::StartingEventOpenDoors()
 {
     for (uint32 i = BG_DS_OBJECT_DOOR_1; i <= BG_DS_OBJECT_DOOR_2; ++i)
         DoorOpen(i);
@@ -89,18 +90,18 @@ void BattleGroundDS::StartingEventOpenDoors()
         SpawnBGObject(i, getWaterFallTimer());
 }
 
-void BattleGroundDS::AddPlayer(Player *plr)
+void BattlegroundDS::AddPlayer(Player *plr)
 {
-    BattleGround::AddPlayer(plr);
+    Battleground::AddPlayer(plr);
     //create score and add it to map, default values are set in constructor
-    BattleGroundDSScore* sc = new BattleGroundDSScore;
+    BattlegroundDSScore* sc = new BattlegroundDSScore;
 
     m_PlayerScores[plr->GetGUID()] = sc;
 
     UpdateArenaWorldState();
 }
 
-void BattleGroundDS::RemovePlayer(Player * /*plr*/, uint64 /*guid*/)
+void BattlegroundDS::RemovePlayer(Player * /*plr*/, uint64 /*guid*/)
 {
     if (GetStatus() == STATUS_WAIT_LEAVE)
         return;
@@ -109,24 +110,24 @@ void BattleGroundDS::RemovePlayer(Player * /*plr*/, uint64 /*guid*/)
     CheckArenaWinConditions();
 }
 
-void BattleGroundDS::HandleKillPlayer(Player* player, Player* killer)
+void BattlegroundDS::HandleKillPlayer(Player* player, Player* killer)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
 
     if (!killer)
     {
-        sLog.outError("BattleGroundDS: Killer player not found");
+        sLog.outError("BattlegroundDS: Killer player not found");
         return;
     }
 
-    BattleGround::HandleKillPlayer(player,killer);
+    Battleground::HandleKillPlayer(player,killer);
 
     UpdateArenaWorldState();
     CheckArenaWinConditions();
 }
 
-void BattleGroundDS::HandleAreaTrigger(Player *Source, uint32 Trigger)
+void BattlegroundDS::HandleAreaTrigger(Player *Source, uint32 Trigger)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
@@ -143,36 +144,36 @@ void BattleGroundDS::HandleAreaTrigger(Player *Source, uint32 Trigger)
     }
 }
 
-bool BattleGroundDS::HandlePlayerUnderMap(Player *player)
+bool BattlegroundDS::HandlePlayerUnderMap(Player *player)
 {
-    player->TeleportTo(GetMapId(), 1299.046, 784.825, 9.338, 2.422, false);
+    player->TeleportTo(GetMapId(), 1299.046f, 784.825f, 9.338f, 2.422f, false);
     return true;
 }
 
-void BattleGroundDS::FillInitialWorldStates(WorldPacket &data)
+void BattlegroundDS::FillInitialWorldStates(WorldPacket &data)
 {
     data << uint32(3610) << uint32(1);                                              // 9 show
     UpdateArenaWorldState();
 }
 
-void BattleGroundDS::Reset()
+void BattlegroundDS::Reset()
 {
     //call parent's class reset
-    BattleGround::Reset();
+    Battleground::Reset();
 }
 
 
-bool BattleGroundDS::SetupBattleGround()
+bool BattlegroundDS::SetupBattleground()
 {
     // gates
-    if (!AddObject(BG_DS_OBJECT_DOOR_1, BG_DS_OBJECT_TYPE_DOOR_1, 1350.95, 817.2, 20.8096, 3.15, 0, 0, 0.99627, 0.0862864, RESPAWN_IMMEDIATELY)
-        || !AddObject(BG_DS_OBJECT_DOOR_2, BG_DS_OBJECT_TYPE_DOOR_2, 1232.65, 764.913, 20.0729, 6.3, 0, 0, 0.0310211, -0.999519, RESPAWN_IMMEDIATELY)
+    if (!AddObject(BG_DS_OBJECT_DOOR_1, BG_DS_OBJECT_TYPE_DOOR_1, 1350.95f, 817.2f, 20.8096f, 3.15f, 0, 0, 0.99627f, 0.0862864f, RESPAWN_IMMEDIATELY)
+        || !AddObject(BG_DS_OBJECT_DOOR_2, BG_DS_OBJECT_TYPE_DOOR_2, 1232.65f, 764.913f, 20.0729f, 6.3f, 0, 0, 0.0310211f, -0.999519f, RESPAWN_IMMEDIATELY)
     // water
-        || !AddObject(BG_DS_OBJECT_WATER_1, BG_DS_OBJECT_TYPE_WATER_1, 1291.56, 790.837, 7.1, 3.14238, 0, 0, 0.694215, -0.719768, 120)
-        || !AddObject(BG_DS_OBJECT_WATER_2, BG_DS_OBJECT_TYPE_WATER_2, 1291.56, 790.837, 7.1, 3.14238, 0, 0, 0.694215, -0.719768, 120)
+        || !AddObject(BG_DS_OBJECT_WATER_1, BG_DS_OBJECT_TYPE_WATER_1, 1291.56f, 790.837f, 7.1f, 3.14238f, 0, 0, 0.694215f, -0.719768f, 120)
+        || !AddObject(BG_DS_OBJECT_WATER_2, BG_DS_OBJECT_TYPE_WATER_2, 1291.56f, 790.837f, 7.1f, 3.14238f, 0, 0, 0.694215f, -0.719768f, 120)
     // buffs
-        || !AddObject(BG_DS_OBJECT_BUFF_1, BG_DS_OBJECT_TYPE_BUFF_1, 1291.7, 813.424, 7.11472, 4.64562, 0, 0, 0.730314, -0.683111, 120)
-        || !AddObject(BG_DS_OBJECT_BUFF_2, BG_DS_OBJECT_TYPE_BUFF_2, 1291.7, 768.911, 7.11472, 1.55194, 0, 0, 0.700409, 0.713742, 120))
+        || !AddObject(BG_DS_OBJECT_BUFF_1, BG_DS_OBJECT_TYPE_BUFF_1, 1291.7f, 813.424f, 7.11472f, 4.64562f, 0, 0, 0.730314f, -0.683111f, 120)
+        || !AddObject(BG_DS_OBJECT_BUFF_2, BG_DS_OBJECT_TYPE_BUFF_2, 1291.7f, 768.911f, 7.11472f, 1.55194f, 0, 0, 0.700409f, 0.713742f, 120))
     {
         sLog.outErrorDb("BatteGroundDS: Failed to spawn some object!");
         return false;

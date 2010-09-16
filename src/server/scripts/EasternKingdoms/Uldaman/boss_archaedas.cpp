@@ -64,7 +64,7 @@ class boss_archaedas : public CreatureScript
         {
             boss_archaedasAI(Creature *c) : ScriptedAI(c)
             {
-                pInstance = me->GetInstanceData();
+                pInstance = me->GetInstanceScript();
             }
 
             uint32 Tremor_Timer;
@@ -74,7 +74,7 @@ class boss_archaedas : public CreatureScript
 
             bool guardiansAwake;
             bool vaultWalkersAwake;
-            ScriptedInstance* pInstance;
+            InstanceScript* pInstance;
 
             void Reset()
             {
@@ -154,7 +154,7 @@ class boss_archaedas : public CreatureScript
                 } else WallMinionTimer -= diff;
 
                 //If we are <66 summon the guardians
-                if (!guardiansAwake && me->GetHealth()*100 / me->GetMaxHealth() <= 66) {
+                if (!guardiansAwake && !HealthAbovePct(66)) {
                     ActivateMinion(pInstance->GetData64(5),true);   // EarthenGuardian1
                     ActivateMinion(pInstance->GetData64(6),true);   // EarthenGuardian2
                     ActivateMinion(pInstance->GetData64(7),true);   // EarthenGuardian3
@@ -167,7 +167,7 @@ class boss_archaedas : public CreatureScript
                 }
 
                 //If we are <33 summon the vault walkers
-                if (!vaultWalkersAwake && me->GetHealth()*100 / me->GetMaxHealth() <= 33) {
+                if (!vaultWalkersAwake && !HealthAbovePct(33)) {
                     ActivateMinion(pInstance->GetData64(1),true);    // VaultWalker1
                     ActivateMinion(pInstance->GetData64(2),true);    // VaultWalker2
                     ActivateMinion(pInstance->GetData64(3),true);    // VaultWalker3
@@ -189,7 +189,7 @@ class boss_archaedas : public CreatureScript
                 DoMeleeAttackIfReady();
             }
 
-            void JustDied (Unit *pKiller) {
+            void JustDied (Unit * /*pKiller*/) {
                 if (pInstance)
                 {
                     pInstance->SetData(NULL,3);        // open the vault door
@@ -226,7 +226,7 @@ class mob_archaedas_minions : public CreatureScript
         {
             mob_archaedas_minionsAI(Creature *c) : ScriptedAI(c)
             {
-                pInstance = me->GetInstanceData();
+                pInstance = me->GetInstanceScript();
             }
 
             uint32 Arcing_Timer;
@@ -234,7 +234,7 @@ class mob_archaedas_minions : public CreatureScript
             bool wakingUp;
 
             bool amIAwake;
-            ScriptedInstance* pInstance;
+            InstanceScript* pInstance;
 
             void Reset()
             {
@@ -322,10 +322,10 @@ class mob_stonekeepers : public CreatureScript
         {
             mob_stonekeepersAI(Creature *c) : ScriptedAI(c)
             {
-                pInstance = (me->GetInstanceData());
+                pInstance = (me->GetInstanceScript());
             }
 
-            ScriptedInstance* pInstance;
+            InstanceScript* pInstance;
 
             void Reset()
             {
@@ -374,18 +374,18 @@ EndScriptData */
 
 #define SPELL_BOSS_OBJECT_VISUAL    11206
 
-class go_altar_of_archaedas : public CreatureScript
+class go_altar_of_archaedas : public GameObjectScript
 {
     public:
 
         go_altar_of_archaedas()
-            : CreatureScript("go_altar_of_archaedas")
+            : GameObjectScript("go_altar_of_archaedas")
         {
         }
 
         bool OnGossipHello(Player* pPlayer, GameObject* /*pGo*/)
         {
-            ScriptedInstance* pInstance = pPlayer->GetInstanceData();
+            InstanceScript* pInstance = pPlayer->GetInstanceScript();
             if (!pInstance)
                 return false;
 
@@ -406,18 +406,18 @@ EndScriptData */
 
 #define SPELL_BOSS_OBJECT_VISUAL    11206
 
-class go_altar_of_the_keepers : public CreatureScript
+class go_altar_of_the_keepers : public GameObjectScript
 {
     public:
 
         go_altar_of_the_keepers()
-            : CreatureScript("go_altar_of_the_keepers")
+            : GameObjectScript("go_altar_of_the_keepers")
         {
         }
 
         bool OnGossipHello(Player* pPlayer, GameObject* /*pGo*/)
         {
-            ScriptedInstance* pInstance = pPlayer->GetInstanceData();
+            InstanceScript* pInstance = pPlayer->GetInstanceScript();
             if (!pInstance)
                 return false;
 

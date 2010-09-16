@@ -135,6 +135,7 @@ public:
 
     bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
         if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
         {
             CAST_AI(npc_escortAI, (pCreature->AI()))->Start(true, false, pPlayer->GetGUID());
@@ -208,6 +209,7 @@ public:
 
     bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
         switch(uiAction)
         {
             case GOSSIP_ACTION_INFO_DEF+1:
@@ -264,6 +266,7 @@ public:
 
     bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
         switch (uiAction)
         {
         case GOSSIP_ACTION_INFO_DEF+1:
@@ -329,8 +332,8 @@ public:
 enum eEnums
 {
     SPELL_EXPLODE_CRYSTAL       = 62487,
-    SPELL_FLAMES                = 64561,    
-    
+    SPELL_FLAMES                = 64561,
+
     SAY_WP_7                    = -1800047,
     SAY_WP_6                    = -1800048,
     SAY_WP_5                    = -1800049,
@@ -350,38 +353,38 @@ public:
     struct npc_engineer_heliceAI : public npc_escortAI
     {
         npc_engineer_heliceAI(Creature* pCreature) : npc_escortAI(pCreature) { }
-        
-        uint32 m_uiChatTimer;    
+
+        uint32 m_uiChatTimer;
 
         void WaypointReached(uint32 i)
-        {        
+        {
             Player* pPlayer = GetPlayerForEscort();
             switch (i)
             {
                 case 0:
                     DoScriptText(SAY_WP_2, me);
                     break;
-                case 1:     
+                case 1:
                     DoScriptText(SAY_WP_3, me);
-                    me->CastSpell(5918.33, 5372.91, -98.770, SPELL_EXPLODE_CRYSTAL, true);
-                    me->SummonGameObject(184743, 5918.33, 5372.91, -98.770, 0, 0, 0, 0, 0, TEMPSUMMON_MANUAL_DESPAWN);     //approx 3 to 4 seconds           
+                    me->CastSpell(5918.33f, 5372.91f, -98.770f, SPELL_EXPLODE_CRYSTAL, true);
+                    me->SummonGameObject(184743, 5918.33f, 5372.91f, -98.770f, 0, 0, 0, 0, 0, TEMPSUMMON_MANUAL_DESPAWN);     //approx 3 to 4 seconds
                     me->HandleEmoteCommand(EMOTE_ONESHOT_LAUGH);
                     break;
-                case 2:                
+                case 2:
                     DoScriptText(SAY_WP_4, me);
                     break;
                 case 7:
                     DoScriptText(SAY_WP_5, me);
                     break;
-                case 8:              
-                    me->CastSpell(5887.37, 5379.39, -91.289, SPELL_EXPLODE_CRYSTAL, true);
-                    me->SummonGameObject(184743, 5887.37, 5379.39, -91.289, 0, 0, 0, 0, 0, TEMPSUMMON_MANUAL_DESPAWN);      //approx 3 to 4 seconds 
+                case 8:
+                    me->CastSpell(5887.37f, 5379.39f, -91.289f, SPELL_EXPLODE_CRYSTAL, true);
+                    me->SummonGameObject(184743, 5887.37f, 5379.39f, -91.289f, 0, 0, 0, 0, 0, TEMPSUMMON_MANUAL_DESPAWN);      //approx 3 to 4 seconds
                     me->HandleEmoteCommand(EMOTE_ONESHOT_LAUGH);
                     break;
-                case 9:                
+                case 9:
                     DoScriptText(SAY_WP_6, me);
                     break;
-                case 13: 
+                case 13:
                     if (pPlayer)
                     {
                         pPlayer->GroupEventHappens(QUEST_DISASTER, me);
@@ -389,20 +392,20 @@ public:
                     }
                     break;
             }
-        }   
+        }
 
         void Reset()
-        {        
-            m_uiChatTimer = 4000;        
+        {
+            m_uiChatTimer = 4000;
         }
         void JustDied(Unit* /*pKiller*/)
         {
             Player* pPlayer = GetPlayerForEscort();
             if (HasEscortState(STATE_ESCORT_ESCORTING))
             {
-                if (pPlayer)         
-                    pPlayer->FailQuest(QUEST_DISASTER);            
-            }        
+                if (pPlayer)
+                    pPlayer->FailQuest(QUEST_DISASTER);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff)
@@ -412,12 +415,12 @@ public:
             if (HasEscortState(STATE_ESCORT_ESCORTING))
             {
                 if (m_uiChatTimer <= uiDiff)
-                {                 
+                {
                     m_uiChatTimer = 12000;
                 }
                 else
                     m_uiChatTimer -= uiDiff;
-            }        
+            }
         }
     };
 
@@ -428,11 +431,11 @@ public:
 
     bool OnQuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
     {
-        if (pQuest->GetQuestId() == QUEST_DISASTER)  
+        if (pQuest->GetQuestId() == QUEST_DISASTER)
         {
-            if (npc_engineer_heliceAI* pEscortAI = CAST_AI(npc_engineer_heliceAI, pCreature->AI()))
-            {            
-                pCreature->GetMotionMaster()->MoveJumpTo(0, 0.4, 0.4);
+            if (npc_engineer_heliceAI* pEscortAI = CAST_AI(npc_engineer_helice::npc_engineer_heliceAI, pCreature->AI()))
+            {
+                pCreature->GetMotionMaster()->MoveJumpTo(0, 0.4f, 0.4f);
                 pCreature->setFaction(113);
 
                 pEscortAI->Start(false, false, pPlayer->GetGUID());

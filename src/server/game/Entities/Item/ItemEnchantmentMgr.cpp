@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include <stdlib.h>
 #include <functional>
 #include "ItemEnchantmentMgr.h"
@@ -93,8 +94,8 @@ uint32 GetItemEnchantMod(int32 entry)
 
     if (entry == -1)
         return 0;
-    
-    EnchantmentStore::const_iterator tab = RandomItemEnch.find(entry);    
+
+    EnchantmentStore::const_iterator tab = RandomItemEnch.find(entry);
     if (tab == RandomItemEnch.end())
     {
         sLog.outErrorDb("Item RandomProperty / RandomSuffix id #%u used in `item_template` but it does not have records in `item_enchantment_template` table.",entry);
@@ -127,7 +128,7 @@ uint32 GetItemEnchantMod(int32 entry)
 
 uint32 GenerateEnchSuffixFactor(uint32 item_id)
 {
-    ItemPrototype const *itemProto = objmgr.GetItemPrototype(item_id);
+    ItemPrototype const *itemProto = sObjectMgr.GetItemPrototype(item_id);
 
     if (!itemProto)
         return 0;

@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "ObjectMgr.h"
 #include "DatabaseEnv.h"
@@ -72,7 +73,7 @@ void Bag::RemoveFromWorld()
 
 bool Bag::Create(uint32 guidlow, uint32 itemid, Player const* owner)
 {
-    ItemPrototype const * itemProto = objmgr.GetItemPrototype(itemid);
+    ItemPrototype const * itemProto = sObjectMgr.GetItemPrototype(itemid);
 
     if (!itemProto || itemProto->ContainerSlots > MAX_BAG_SIZE)
         return false;
@@ -102,9 +103,9 @@ bool Bag::Create(uint32 guidlow, uint32 itemid, Player const* owner)
     return true;
 }
 
-void Bag::SaveToDB()
+void Bag::SaveToDB(SQLTransaction& trans)
 {
-    Item::SaveToDB();
+    Item::SaveToDB(trans);
 }
 
 bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult_AutoPtr result, uint32 entry)
@@ -125,13 +126,13 @@ bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult_AutoPtr result,
     return true;
 }
 
-void Bag::DeleteFromDB()
+void Bag::DeleteFromDB(SQLTransaction& trans)
 {
     for (uint8 i = 0; i < MAX_BAG_SIZE; ++i)
         if (m_bagslot[i])
-            m_bagslot[i]->DeleteFromDB();
+            m_bagslot[i]->DeleteFromDB(trans);
 
-    Item::DeleteFromDB();
+    Item::DeleteFromDB(trans);
 }
 
 uint32 Bag::GetFreeSlots() const
@@ -157,6 +158,7 @@ void Bag::RemoveItem(uint8 slot, bool /*update*/)
 
 void Bag::StoreItem(uint8 slot, Item *pItem, bool /*update*/)
 {
+    ASSERT(GetState() != ITEM_REMOVED);
     ASSERT(slot < MAX_BAG_SIZE);
 
     if (pItem && pItem->GetGUID() != this->GetGUID())

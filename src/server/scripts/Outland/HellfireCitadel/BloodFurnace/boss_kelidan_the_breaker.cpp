@@ -60,11 +60,11 @@ enum eKelidan
 
 const float ShadowmoonChannelers[5][4]=
 {
-    {302,-87,-24.4,0.157},
-    {321,-63.5,-24.6,4.887},
-    {346,-74.5,-24.6,3.595},
-    {344,-103.5,-24.5,2.356},
-    {316,-109,-24.6,1.257}
+    {302.0f,-87.0f,-24.4f,0.157f},
+    {321.0f,-63.5f,-24.6f,4.887f},
+    {346.0f,-74.5f,-24.6f,3.595f},
+    {344.0f,-103.5f,-24.5f,2.356f},
+    {316.0f,-109.0f,-24.6f,1.257f}
 };
 
 class boss_kelidan_the_breaker : public CreatureScript
@@ -80,12 +80,12 @@ class boss_kelidan_the_breaker : public CreatureScript
         {
             boss_kelidan_the_breakerAI(Creature* pCreature) : ScriptedAI(pCreature)
             {
-                pInstance = pCreature->GetInstanceData();
+                pInstance = pCreature->GetInstanceScript();
                 for (uint8 i=0; i<5; ++i)
                     Channelers[i] = 0;
             }
 
-            ScriptedInstance* pInstance;
+            InstanceScript* pInstance;
 
             uint32 ShadowVolley_Timer;
             uint32 BurningNova_Timer;
@@ -228,8 +228,8 @@ class boss_kelidan_the_breaker : public CreatureScript
                 {
                     DoCast(me, SPELL_SHADOW_BOLT_VOLLEY);
                     ShadowVolley_Timer = 5000+rand()%8000;
-                } 
-                else 
+                }
+                else
                     ShadowVolley_Timer -=diff;
 
                 if (Corruption_Timer <= diff)
@@ -237,7 +237,7 @@ class boss_kelidan_the_breaker : public CreatureScript
                     DoCast(me, SPELL_CORRUPTION);
                     Corruption_Timer = 30000+rand()%20000;
                 }
-                else 
+                else
                     Corruption_Timer -=diff;
 
                 if (BurningNova_Timer <= diff)
@@ -344,8 +344,8 @@ class mob_shadowmoon_channeler : public CreatureScript
                                     DoCast(channeled, SPELL_CHANNELING);
                             }
                         check_Timer = 5000;
-                    } 
-                    else 
+                    }
+                    else
                         check_Timer -= diff;
                     return;
                 }
@@ -355,16 +355,16 @@ class mob_shadowmoon_channeler : public CreatureScript
                     if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
                         DoCast(pTarget, SPELL_MARK_OF_SHADOW);
                     MarkOfShadow_Timer = 15000+rand()%5000;
-                } 
-                else 
+                }
+                else
                     MarkOfShadow_Timer -=diff;
 
                 if (ShadowBolt_Timer <= diff)
                 {
                     DoCast(me->getVictim(), SPELL_SHADOW_BOLT);
                     ShadowBolt_Timer = 5000+rand()%1000;
-                } 
-                else 
+                }
+                else
                     ShadowBolt_Timer -=diff;
 
                 DoMeleeAttackIfReady();

@@ -37,11 +37,9 @@
 #include "Map.h"
 #include "ObjectAccessor.h"
 #include "ObjectDefines.h"
-#include "ace/Singleton.h"
+#include <ace/Singleton.h>
 #include "SQLStorage.h"
 #include "Vehicle.h"
-#include "Weather.h"
-#include "ObjectMgr.h"
 #include <string>
 #include <map>
 #include <limits>
@@ -75,11 +73,26 @@ struct GameTele
 
 typedef UNORDERED_MAP<uint32, GameTele > GameTeleMap;
 
+enum ScriptsType
+{
+    SCRIPTS_FIRST = 1,
+
+    SCRIPTS_QUEST_END = SCRIPTS_FIRST,
+    SCRIPTS_QUEST_START,
+    SCRIPTS_SPELL,
+    SCRIPTS_GAMEOBJECT,
+    SCRIPTS_EVENT,
+    SCRIPTS_WAYPOINT,
+    SCRIPTS_GOSSIP,
+
+    SCRIPTS_LAST
+};
+
 struct ScriptInfo
 {
     uint32 id;
     uint32 delay;
-    uint32 command;
+    ScriptCommands command;
     uint32 datalong;
     uint32 datalong2;
     int32  dataint;
@@ -87,6 +100,9 @@ struct ScriptInfo
     float y;
     float z;
     float o;
+    ScriptsType type;
+
+    std::string GetDebugInfo() const;
 };
 
 typedef std::multimap<uint32, ScriptInfo> ScriptMap;
@@ -100,6 +116,10 @@ extern ScriptMapMap sGameObjectScripts;
 extern ScriptMapMap sEventScripts;
 extern ScriptMapMap sGossipScripts;
 extern ScriptMapMap sWaypointScripts;
+
+std::string GetScriptsTableNameByType(ScriptsType type);
+ScriptMapMap* GetScriptsMapByType(ScriptsType type);
+std::string GetScriptCommandName(ScriptCommands command);
 
 struct SpellClickInfo
 {
@@ -154,7 +174,7 @@ typedef UNORDERED_MAP<uint64/*(instance,guid) pair*/,time_t> RespawnTimes;
 
 struct TrinityStringLocale
 {
-    std::vector<std::string> Content;                       // 0 -> default, i -> i-1 locale index
+    StringVector Content;                       // 0 -> default, i -> i-1 locale index
 };
 
 typedef std::map<uint32,uint32> CreatureLinkedRespawnMap;
@@ -317,23 +337,6 @@ enum SkillRangeType
     SKILL_RANGE_NONE,                                       // 0..0 always
 };
 
-struct GM_Ticket
-{
-    uint64 guid;
-    uint64 playerGuid;
-    std::string name;
-    float pos_x;
-    float pos_y;
-    float pos_z;
-    uint32 map;
-    std::string message;
-    uint64 createtime;
-    uint64 timestamp;
-    int64 closed; // 0 = Open, -1 = Console, playerGuid = player abandoned ticket, other = GM who closed it.
-    uint64 assignedToGM;
-    std::string comment;
-};
-typedef std::list<GM_Ticket*> GmTicketList;
 SkillRangeType GetSkillRangeType(SkillLineEntry const *pSkill, bool racial);
 
 #define MAX_PLAYER_NAME          12                         // max allowed by client name length
@@ -361,7 +364,7 @@ class ObjectMgr
     friend class ACE_Singleton<ObjectMgr, ACE_Null_Mutex>;
     ObjectMgr();
     ~ObjectMgr();
-    
+
     public:
         typedef UNORDERED_MAP<uint32, Item*> ItemMap;
 
@@ -385,9 +388,9 @@ class ObjectMgr
 
         typedef UNORDERED_MAP<uint32, PointOfInterest> PointOfInterestMap;
 
-        typedef UNORDERED_MAP<uint32, WeatherData> WeatherZoneMap;
-
         typedef std::vector<std::string> ScriptNameMap;
+
+        typedef std::map<uint32, uint32> CharacterConversionMap;
 
         Player* GetPlayer(const char* name) const { return sObjectAccessor.FindPlayerByName(name);}
         Player* GetPlayer(uint64 guid) const { return ObjectAccessor::FindPlayer(guid); }
@@ -580,6 +583,14 @@ class ObjectMgr
             return NULL;
         }
 
+        VehicleScalingInfo const* GetVehicleScalingInfo(uint32 vehicleEntry) const
+        {
+            VehicleScalingMap::const_iterator itr = m_VehicleScalingMap.find(vehicleEntry);
+            if (itr != m_VehicleScalingMap.end())
+                return &itr->second;
+            return NULL;
+        }
+
         void LoadGuilds();
         void LoadArenaTeams();
         void LoadGroups();
@@ -616,8 +627,8 @@ class ObjectMgr
         void LoadSpellScriptNames();
         void ValidateSpellScripts();
 
-        bool LoadTrinityStrings(DatabaseType& db, char const* table, int32 min_value, int32 max_value);
-        bool LoadTrinityStrings() { return LoadTrinityStrings(WorldDatabase,"trinity_string",MIN_TRINITY_STRING_ID,MAX_TRINITY_STRING_ID); }
+        bool LoadTrinityStrings(char const* table, int32 min_value, int32 max_value);
+        bool LoadTrinityStrings() { return LoadTrinityStrings("trinity_string",MIN_TRINITY_STRING_ID,MAX_TRINITY_STRING_ID); }
         void LoadDbScriptStrings();
         void LoadCreatureClassLevelStats();
         void LoadCreatureLocales();
@@ -646,6 +657,7 @@ class ObjectMgr
         void LoadInstanceTemplate();
         void LoadMailLevelRewards();
         void LoadVehicleAccessories();
+        void LoadVehicleScaling();
 
         void LoadGossipText();
 
@@ -675,7 +687,6 @@ class ObjectMgr
 
         void LoadNPCSpellClickSpells();
 
-        void LoadWeatherData();
         void LoadGameTele();
 
         void LoadNpcTextId();
@@ -687,7 +698,6 @@ class ObjectMgr
         void LoadTrainerSpell();
         bool AddSpellToTrainer(uint32 entry, uint32 spell, Field *fields, std::set<uint32> *skip_trainers, std::set<uint32> *talentIds);
         int  LoadReferenceTrainer(uint32 trainer, int32 spell, std::set<uint32> *skip_trainers, std::set<uint32> *talentIds);
-        void LoadGMTickets();
 
         std::string GeneratePetName(uint32 entry);
         uint32 GetBaseXP(uint8 level);
@@ -726,15 +736,6 @@ class ObjectMgr
                     return &*set_itr;
 
             return NULL;
-        }
-
-        WeatherData const* GetWeatherChances(uint32 zone_id) const
-        {
-            WeatherZoneMap::const_iterator itr = mWeatherZoneMap.find(zone_id);
-            if (itr != mWeatherZoneMap.end())
-                return &itr->second;
-            else
-                return NULL;
         }
 
         CellObjectGuids const& GetCellObjectGuids(uint16 mapid, uint8 spawnMode, uint32 cell_id)
@@ -843,9 +844,17 @@ class ObjectMgr
         void AddCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid, uint32 instance);
         void DeleteCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid);
 
-        time_t GetCreatureRespawnTime(uint32 loguid, uint32 instance) { return mCreatureRespawnTimes[MAKE_PAIR64(loguid,instance)]; }
+        time_t GetCreatureRespawnTime(uint32 loguid, uint32 instance)
+        { 
+            ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, m_CreatureRespawnTimesMtx, 0);
+            return mCreatureRespawnTimes[MAKE_PAIR64(loguid,instance)];
+        }
         void SaveCreatureRespawnTime(uint32 loguid, uint32 instance, time_t t);
-        time_t GetGORespawnTime(uint32 loguid, uint32 instance) { return mGORespawnTimes[MAKE_PAIR64(loguid,instance)]; }
+        time_t GetGORespawnTime(uint32 loguid, uint32 instance)
+        {
+            ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, m_GORespawnTimesMtx, 0);
+            return mGORespawnTimes[MAKE_PAIR64(loguid,instance)];
+        }
         void SaveGORespawnTime(uint32 loguid, uint32 instance, time_t t);
         void DeleteRespawnTimeForInstance(uint32 instance);
 
@@ -925,23 +934,6 @@ class ObjectMgr
             return SpellClickInfoMapBounds(mSpellClickInfoMap.lower_bound(creature_id),mSpellClickInfoMap.upper_bound(creature_id));
         }
 
-        GM_Ticket *GetGMTicket(uint64 ticketGuid)
-        {
-            for (GmTicketList::const_iterator i = m_GMTicketList.begin(); i != m_GMTicketList.end(); ++i)
-                if ((*i) && (*i)->guid == ticketGuid)
-                    return (*i);
-
-            return NULL;
-        }
-        GM_Ticket *GetGMTicketByPlayer(uint64 playerGuid)
-        {
-            for (GmTicketList::const_iterator i = m_GMTicketList.begin(); i != m_GMTicketList.end(); ++i)
-                if ((*i) && (*i)->playerGuid == playerGuid && (*i)->closed == 0)
-                    return (*i);
-
-            return NULL;
-        }
-
         GossipMenusMapBounds GetGossipMenusMapBounds(uint32 uiMenuId) const
         {
             return GossipMenusMapBounds(m_mGossipMenusMap.lower_bound(uiMenuId),m_mGossipMenusMap.upper_bound(uiMenuId));
@@ -961,15 +953,26 @@ class ObjectMgr
             return GossipMenuItemsMapBoundsNonConst(m_mGossipMenuItemsMap.lower_bound(uiMenuId),m_mGossipMenuItemsMap.upper_bound(uiMenuId));
         }
 
-        void AddOrUpdateGMTicket(GM_Ticket &ticket, bool create = false);
-        void _AddOrUpdateGMTicket(GM_Ticket &ticket);
-        void RemoveGMTicket(uint64 ticketGuid, int64 source = -1, bool permanently = false);
-        void RemoveGMTicket(GM_Ticket *ticket, int64 source = -1, bool permanently = false);
-        GmTicketList m_GMTicketList;
-        uint64 GenerateGMTicketId();
-
         // for wintergrasp only
         GraveYardMap        mGraveYardMap;
+
+        void AddLocaleString(std::string& s, LocaleConstant locale, StringVector& data);
+        inline void GetLocaleString(const StringVector& data, int loc_idx, std::string& value) const
+        {
+            if (data.size() > size_t(loc_idx) && !data[loc_idx].empty())
+                value = data[loc_idx];
+        }
+
+        CharacterConversionMap factionchange_achievements;
+        CharacterConversionMap factionchange_items;
+        CharacterConversionMap factionchange_spells;
+        CharacterConversionMap factionchange_reputations;
+
+        void LoadFactionChangeAchievements();
+        void LoadFactionChangeItems();
+        void LoadFactionChangeSpells();
+        void LoadFactionChangeReputations();
+
     protected:
 
         // first free id for selected id type
@@ -980,7 +983,6 @@ class ObjectMgr
         uint32 m_ItemTextId;
         uint32 m_mailid;
         uint32 m_hiPetNumber;
-        uint64 m_GMticketid;
 
         // first free low guid for seelcted guid type
         uint32 m_hiCharGuid;
@@ -992,6 +994,7 @@ class ObjectMgr
         uint32 m_hiDoGuid;
         uint32 m_hiCorpseGuid;
         uint32 m_hiGroupGuid;
+        uint32 m_hiMoTransGuid;
 
         QuestMap            mQuestTemplates;
 
@@ -1022,8 +1025,6 @@ class ObjectMgr
 
         QuestPOIMap         mQuestPOIMap;
 
-        WeatherZoneMap      mWeatherZoneMap;
-
         //character reserved names
         typedef std::set<std::wstring> ReservedNamesMap;
         ReservedNamesMap    m_ReservedNames;
@@ -1041,6 +1042,7 @@ class ObjectMgr
         ItemRequiredTargetMap m_ItemRequiredTarget;
 
         VehicleAccessoryMap m_VehicleAccessoryMap;
+        VehicleScalingMap m_VehicleScalingMap;
 
         typedef             std::vector<LocaleConstant> LocalForIndex;
         LocalForIndex        m_LocalForIndex;
@@ -1048,8 +1050,8 @@ class ObjectMgr
         int DBCLocaleIndex;
 
     private:
-        void LoadScripts(ScriptMapMap& scripts, char const* tablename);
-        void CheckScripts(ScriptMapMap const& scripts,std::set<int32>& ids);
+        void LoadScripts(ScriptsType type);
+        void CheckScripts(ScriptsType type, std::set<int32>& ids);
         void LoadCreatureAddons(SQLStorage& creatureaddons, char const* entryName, char const* comment);
         void ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* table, char const* guidEntryStr);
         void LoadQuestRelationsHelper(QuestRelations& map,char const* table);
@@ -1077,7 +1079,7 @@ class ObjectMgr
         typedef std::map<uint32,int32> FishingBaseSkillMap; // [areaId][base skill level]
         FishingBaseSkillMap mFishingBaseForArea;
 
-        typedef std::map<uint32,std::vector<std::string> > HalfNameMap;
+        typedef std::map<uint32, StringVector> HalfNameMap;
         HalfNameMap PetHalfName0;
         HalfNameMap PetHalfName1;
 
@@ -1099,7 +1101,9 @@ class ObjectMgr
         GossipMenuItemsLocaleMap mGossipMenuItemsLocaleMap;
         PointOfInterestLocaleMap mPointOfInterestLocaleMap;
         RespawnTimes mCreatureRespawnTimes;
+        ACE_Thread_Mutex m_CreatureRespawnTimesMtx;
         RespawnTimes mGORespawnTimes;
+        ACE_Thread_Mutex m_GORespawnTimesMtx;
 
         CacheNpcTextIdMap m_mCacheNpcTextIdMap;
         CacheVendorItemMap m_mCacheVendorItemMap;
@@ -1110,10 +1114,10 @@ class ObjectMgr
 
 };
 
-#define objmgr (*ACE_Singleton<ObjectMgr, ACE_Null_Mutex>::instance())
+#define sObjectMgr (*ACE_Singleton<ObjectMgr, ACE_Null_Mutex>::instance())
 
 // scripting access functions
- bool LoadTrinityStrings(DatabaseType& db, char const* table,int32 start_value = MAX_CREATURE_AI_TEXT_STRING_ID, int32 end_value = std::numeric_limits<int32>::min());
+ bool LoadTrinityStrings(char const* table,int32 start_value = MAX_CREATURE_AI_TEXT_STRING_ID, int32 end_value = std::numeric_limits<int32>::min());
  uint32 GetAreaTriggerScriptId(uint32 trigger_id);
  uint32 GetScriptId(const char *name);
  ObjectMgr::ScriptNameMap& GetScriptNames();

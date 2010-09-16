@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "SpellMgr.h"
 #include "ObjectMgr.h"
 #include "SpellAuraDefines.h"
@@ -26,7 +27,7 @@
 #include "World.h"
 #include "Chat.h"
 #include "Spell.h"
-#include "BattleGroundMgr.h"
+#include "BattlegroundMgr.h"
 #include "CreatureAI.h"
 #include "MapManager.h"
 
@@ -119,9 +120,10 @@ SpellMgr::SpellMgr()
             case TARGET_UNIT_PASSENGER_5:
             case TARGET_UNIT_PASSENGER_6:
             case TARGET_UNIT_PASSENGER_7:
+            case TARGET_UNIT_SUMMONER:
                 SpellTargetType[i] = TARGET_TYPE_UNIT_CASTER;
                 break;
-            case TARGET_UNIT_MINIPET:
+            case TARGET_UNIT_TARGET_PUPPET:
             case TARGET_UNIT_TARGET_ALLY:
             case TARGET_UNIT_TARGET_RAID:
             case TARGET_UNIT_TARGET_ANY:
@@ -130,7 +132,6 @@ SpellMgr::SpellMgr()
             case TARGET_UNIT_PARTY_TARGET:
             case TARGET_UNIT_CLASS_TARGET:
             case TARGET_UNIT_CHAINHEAL:
-            case TARGET_UNIT_UNK_92:
                 SpellTargetType[i] = TARGET_TYPE_UNIT_TARGET;
                 break;
             case TARGET_UNIT_NEARBY_ENEMY:
@@ -160,6 +161,7 @@ SpellMgr::SpellMgr()
             case TARGET_UNIT_CONE_ENTRY:
             case TARGET_UNIT_CONE_ENEMY_UNKNOWN:
             case TARGET_UNIT_AREA_PATH:
+            case TARGET_GAMEOBJECT_AREA_PATH:
                 SpellTargetType[i] = TARGET_TYPE_AREA_CONE;
                 break;
             case TARGET_DST_CASTER:
@@ -214,8 +216,9 @@ SpellMgr::SpellMgr()
             case TARGET_DST_NEARBY_ENTRY:
                 SpellTargetType[i] = TARGET_TYPE_DEST_SPECIAL;
                 break;
-            case TARGET_UNIT_CHANNEL:
-            case TARGET_DEST_CHANNEL:
+            case TARGET_UNIT_CHANNEL_TARGET:
+            case TARGET_DEST_CHANNEL_TARGET:
+            case TARGET_DEST_CHANNEL_CASTER:
                 SpellTargetType[i] = TARGET_TYPE_CHANNEL;
                 break;
             default:
@@ -223,7 +226,7 @@ SpellMgr::SpellMgr()
         }
     }
 
-    for (int i = 0; i < TOTAL_SPELL_TARGETS; ++i)
+    for (int32 i = 0; i < TOTAL_SPELL_TARGETS; ++i)
     {
         switch(i)
         {
@@ -241,6 +244,7 @@ SpellMgr::SpellMgr()
             case TARGET_UNIT_CONE_ALLY:
             case TARGET_UNIT_CONE_ENEMY_UNKNOWN:
             case TARGET_UNIT_AREA_PATH:
+            case TARGET_GAMEOBJECT_AREA_PATH:
             case TARGET_UNIT_RAID_CASTER:
                 IsAreaEffectTarget[i] = true;
                 break;
@@ -364,7 +368,7 @@ bool IsAutocastableSpell(uint32 spellId)
 
 bool IsHigherHankOfSpell(uint32 spellId_1, uint32 spellId_2)
 {
-    return spellmgr.GetSpellRank(spellId_1)<spellmgr.GetSpellRank(spellId_2);
+    return sSpellMgr.GetSpellRank(spellId_1)<sSpellMgr.GetSpellRank(spellId_2);
 }
 
 uint32 CalculatePowerCost(SpellEntry const * spellInfo, Unit const * caster, SpellSchoolMask schoolMask)
@@ -540,7 +544,7 @@ SpellSpecific GetSpellSpecific(SpellEntry const * spellInfo)
             // scrolls effects
             else
             {
-                uint32 firstSpell = spellmgr.GetFirstSpellInChain(spellInfo->Id);
+                uint32 firstSpell = sSpellMgr.GetFirstSpellInChain(spellInfo->Id);
                 switch (firstSpell)
                 {
                     case 8118: // Strength
@@ -734,7 +738,6 @@ bool IsPositiveTarget(uint32 targetA, uint32 targetB)
         case TARGET_UNIT_CONE_ENEMY:
         case TARGET_DEST_DYNOBJ_ENEMY:
         case TARGET_DST_TARGET_ENEMY:
-        case TARGET_UNIT_CHANNEL:
             return false;
         default:
             break;
@@ -788,6 +791,10 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
             // Aspect of the Viper
             if (spellId == 34074)
                 return true;
+            break;
+        case SPELLFAMILY_SHAMAN:
+            if (spellId == 30708)
+                return false;
             break;
         default:
             break;
@@ -981,7 +988,7 @@ bool IsPositiveSpell(uint32 spellId)
 {
     if (!sSpellStore.LookupEntry(spellId)) // non-existing spells
         return false;
-    return !(spellmgr.GetSpellCustomAttr(spellId) & SPELL_ATTR_CU_NEGATIVE);
+    return !(sSpellMgr.GetSpellCustomAttr(spellId) & SPELL_ATTR_CU_NEGATIVE);
 }
 
 bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
@@ -991,9 +998,9 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
     switch(effIndex)
     {
         default:
-        case 0: return !(spellmgr.GetSpellCustomAttr(spellId) & SPELL_ATTR_CU_NEGATIVE_EFF0);
-        case 1: return !(spellmgr.GetSpellCustomAttr(spellId) & SPELL_ATTR_CU_NEGATIVE_EFF1);
-        case 2: return !(spellmgr.GetSpellCustomAttr(spellId) & SPELL_ATTR_CU_NEGATIVE_EFF2);
+        case 0: return !(sSpellMgr.GetSpellCustomAttr(spellId) & SPELL_ATTR_CU_NEGATIVE_EFF0);
+        case 1: return !(sSpellMgr.GetSpellCustomAttr(spellId) & SPELL_ATTR_CU_NEGATIVE_EFF1);
+        case 2: return !(sSpellMgr.GetSpellCustomAttr(spellId) & SPELL_ATTR_CU_NEGATIVE_EFF2);
     }
 }
 
@@ -1225,7 +1232,7 @@ void SpellMgr::LoadSpellTargetPositions()
         }
         if (found)
         {
-//            if (!spellmgr.GetSpellTargetPosition(i))
+//            if (!sSpellMgr.GetSpellTargetPosition(i))
 //                sLog.outDebug("Spell (ID: %u) does not have record in `spell_target_position`", i);
         }
     }
@@ -1701,7 +1708,7 @@ bool SpellMgr::canStackSpellRanks(SpellEntry const *spellInfo)
     if (IsProfessionOrRidingSpell(spellInfo->Id))
         return false;
 
-    if (spellmgr.IsSkillBonusSpell(spellInfo->Id))
+    if (sSpellMgr.IsSkillBonusSpell(spellInfo->Id))
         return false;
 
     // All stance spells. if any better way, change it.
@@ -1824,7 +1831,7 @@ bool SpellMgr::IsSkillTypeSpell(uint32 spellId, SkillType type) const
 }
 
 // basepoints provided here have to be valid basepoints (use SpellMgr::CalculateSpellEffectBaseAmount)
-int32 SpellMgr::CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 effIndex, Unit const * caster, int32 const * effBasePoints, Unit const * target)
+int32 SpellMgr::CalculateSpellEffectAmount(SpellEntry const * spellEntry, uint8 effIndex, Unit const * caster, int32 const * effBasePoints, Unit const * /*target*/)
 {
     float basePointsPerLevel = spellEntry->EffectRealPointsPerLevel[effIndex];
     int32 basePoints = effBasePoints ? *effBasePoints : spellEntry->EffectBasePoints[effIndex];
@@ -1892,6 +1899,26 @@ int32 SpellMgr::CalculateSpellEffectBaseAmount(int32 value, SpellEntry const * s
         return value;
     else
         return value - 1;
+}
+
+float SpellMgr::CalculateSpellEffectValueMultiplier(SpellEntry const * spellEntry, uint8 effIndex, Unit * caster, Spell * spell)
+{
+    float multiplier = spellEntry->EffectValueMultiplier[effIndex];
+
+    if (caster)
+        if (Player * modOwner = caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(spellEntry->Id, SPELLMOD_VALUE_MULTIPLIER, multiplier, spell);
+    return multiplier;
+}
+
+float SpellMgr::CalculateSpellEffectDamageMultiplier(SpellEntry const * spellEntry, uint8 effIndex, Unit * caster, Spell * spell)
+{
+    float multiplier = spellEntry->EffectDamageMultiplier[effIndex];
+
+    if (caster)
+        if (Player * modOwner = caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(spellEntry->Id, SPELLMOD_DAMAGE_MULTIPLIER, multiplier, spell);
+    return multiplier;
 }
 
 SpellEntry const* SpellMgr::SelectAuraRankForPlayerLevel(SpellEntry const* spellInfo, uint32 playerLevel) const
@@ -1962,10 +1989,6 @@ void SpellMgr::LoadSpellLearnSkills()
                 else
                     dbc_node.value = dbc_node.step * 75;
                 dbc_node.maxvalue = dbc_node.step * 75;
-
-                // FIXME: db_node not used... remove it?
-                SpellLearnSkillNode const* db_node = GetSpellLearnSkill(spell);
-
                 mSpellLearnSkills[spell] = dbc_node;
                 ++dbc_count;
                 break;
@@ -2229,7 +2252,7 @@ bool LoadPetDefaultSpells_helper(CreatureInfo const* cInfo, PetDefaultSpellsEntr
         return false;
 
     // remove duplicates with levelupSpells if any
-    if (PetLevelupSpellSet const *levelupSpells = cInfo->family ? spellmgr.GetPetLevelupSpellList(cInfo->family) : NULL)
+    if (PetLevelupSpellSet const *levelupSpells = cInfo->family ? sSpellMgr.GetPetLevelupSpellList(cInfo->family) : NULL)
     {
         for (uint8 j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
         {
@@ -2527,7 +2550,7 @@ void SpellMgr::LoadSpellAreas()
             continue;
         }
 
-        if (spellArea.questStart && !objmgr.GetQuestTemplate(spellArea.questStart))
+        if (spellArea.questStart && !sObjectMgr.GetQuestTemplate(spellArea.questStart))
         {
             sLog.outErrorDb("Spell %u listed in `spell_area` have wrong start quest (%u) requirement", spell,spellArea.questStart);
             continue;
@@ -2535,7 +2558,7 @@ void SpellMgr::LoadSpellAreas()
 
         if (spellArea.questEnd)
         {
-            if (!objmgr.GetQuestTemplate(spellArea.questEnd))
+            if (!sObjectMgr.GetQuestTemplate(spellArea.questEnd))
             {
                 sLog.outErrorDb("Spell %u listed in `spell_area` have wrong end quest (%u) requirement", spell,spellArea.questEnd);
                 continue;
@@ -2683,7 +2706,7 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const *spell
     }
 
     // DB base check (if non empty then must fit at least single for allow)
-    SpellAreaMapBounds saBounds = spellmgr.GetSpellAreaMapBounds(spellInfo->Id);
+    SpellAreaMapBounds saBounds = sSpellMgr.GetSpellAreaMapBounds(spellInfo->Id);
     if (saBounds.first != saBounds.second)
     {
         for (SpellAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
@@ -2699,9 +2722,9 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const *spell
     {
         case 23333:                                         // Warsong Flag
         case 23335:                                         // Silverwing Flag
-            return map_id == 489 && player && player->InBattleGround() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+            return map_id == 489 && player && player->InBattleground() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         case 34976:                                         // Netherstorm Flag
-            return map_id == 566 && player && player->InBattleGround() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+            return map_id == 566 && player && player->InBattleground() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         case 2584:                                          // Waiting to Resurrect
         case 22011:                                         // Spirit Heal Channel
         case 22012:                                         // Spirit Heal
@@ -2714,7 +2737,7 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const *spell
             if (!mapEntry)
                 return SPELL_FAILED_INCORRECT_AREA;
 
-            return zone_id == 4197 || (mapEntry->IsBattleGround() && player && player->InBattleGround()) ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+            return zone_id == 4197 || (mapEntry->IsBattleground() && player && player->InBattleground()) ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         }
         case 44521:                                         // Preparation
         {
@@ -2725,10 +2748,10 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const *spell
             if (!mapEntry)
                 return SPELL_FAILED_INCORRECT_AREA;
 
-            if (!mapEntry->IsBattleGround())
+            if (!mapEntry->IsBattleground())
                 return SPELL_FAILED_REQUIRES_AREA;
 
-            BattleGround* bg = player->GetBattleGround();
+            Battleground* bg = player->GetBattleground();
             return bg && bg->GetStatus() == STATUS_WAIT_JOIN ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         }
         case 32724:                                         // Gold Team (Alliance)
@@ -2740,7 +2763,7 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const *spell
             if (!mapEntry)
                 return SPELL_FAILED_INCORRECT_AREA;
 
-            return mapEntry->IsBattleArena() && player && player->InBattleGround() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+            return mapEntry->IsBattleArena() && player && player->InBattleground() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         }
         case 32727:                                         // Arena Preparation
         {
@@ -2754,7 +2777,7 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const *spell
             if (!mapEntry->IsBattleArena())
                 return SPELL_FAILED_REQUIRES_AREA;
 
-            BattleGround *bg = player->GetBattleGround();
+            Battleground *bg = player->GetBattleground();
             return bg && bg->GetStatus() == STATUS_WAIT_JOIN ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         }
     }
@@ -3075,7 +3098,7 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
             return false;
 
     if (questStart)                              // not in expected required quest state
-        if (!player || (!questStartCanActive || !player->IsActiveQuest(questStart)) && !player->GetQuestRewardStatus(questStart))
+        if (!player || ((!questStartCanActive || !player->IsActiveQuest(questStart)) && !player->GetQuestRewardStatus(questStart)))
             return false;
 
     if (questEnd)                                // not in expected forbidden quest state
@@ -3083,7 +3106,7 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
             return false;
 
     if (auraSpell)                               // not have expected aura
-        if (!player || auraSpell > 0 && !player->HasAura(auraSpell) || auraSpell < 0 && player->HasAura(-auraSpell))
+        if (!player || (auraSpell > 0 && !player->HasAura(auraSpell)) || (auraSpell < 0 && player->HasAura(-auraSpell)))
             return false;
 
     // Extra conditions -- leaving the possibility add extra conditions...
@@ -3112,7 +3135,7 @@ bool SpellMgr::CanAurasStack(SpellEntry const *spellInfo_1, SpellEntry const *sp
     SpellSpecific spellSpec_2 = GetSpellSpecific(spellInfo_2);
     if (spellSpec_1 && spellSpec_2)
         if (IsSingleFromSpellSpecificPerTarget(spellSpec_1, spellSpec_2)
-            || sameCaster && IsSingleFromSpellSpecificPerCaster(spellSpec_1, spellSpec_2))
+            || (sameCaster && IsSingleFromSpellSpecificPerCaster(spellSpec_1, spellSpec_2)))
             return false;
 
     SpellGroupStackRule stackRule = CheckSpellGroupStackRules(spellInfo_1->Id, spellInfo_2->Id);
@@ -3170,34 +3193,7 @@ bool SpellMgr::CanAurasStack(SpellEntry const *spellInfo_1, SpellEntry const *sp
         return false;
     }
 
-    // use icon to check generic spells
-    if (!spellInfo_1->SpellFamilyName)
-    {
-        if (!spellInfo_1->SpellIconID || spellInfo_1->SpellIconID == 1
-            || spellInfo_1->SpellIconID != spellInfo_2->SpellIconID)
-            return true;
-    }
-    // use familyflag to check class spells
-    else
-    {
-        if (!spellInfo_1->SpellFamilyFlags
-            || spellInfo_1->SpellFamilyFlags != spellInfo_2->SpellFamilyFlags)
-            return true;
-    }
-
-    //use data of highest rank spell(needed for spells which ranks have different effects)
-    spellInfo_1 = sSpellStore.LookupEntry(spellId_1);
-    spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
-
-    //if spells do not have the same effect or aura or miscvalue, they will stack
-    for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-        if (spellInfo_1->Effect[i] != spellInfo_2->Effect[i]
-            || spellInfo_1->EffectApplyAuraName[i] != spellInfo_2->EffectApplyAuraName[i]
-            || spellInfo_1->EffectMiscValue[i] != spellInfo_2->EffectMiscValue[i]) // paladin resist aura
-            return true; // need itemtype check? need an example to add that check
-
-    // different spells with same effect
-    return false;
+    return true;
 }
 
 bool CanSpellDispelAura(SpellEntry const * dispelSpell, SpellEntry const * aura)
@@ -3230,7 +3226,7 @@ bool CanSpellPierceImmuneAura(SpellEntry const * pierceSpell, SpellEntry const *
     // these spells (Cyclone for example) can pierce all...
     if ((pierceSpell->AttributesEx & SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE)
         // ...but not these (Divine shield for example)
-        && !(aura && (aura->AttributesEx & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)))
+        && !(aura && (aura->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)))
         return true;
 
     return false;
@@ -3520,6 +3516,8 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Targets |= TARGET_FLAG_UNIT;
                     count++;
                     break;
+                default:
+                    break;
             }
         }
 
@@ -3649,6 +3647,10 @@ void SpellMgr::LoadSpellCustomAttr()
         case 39365: // Thundering Storm
         case 41071: // Raise Dead (HACK)
         case 52124: // Sky Darkener Assault
+        case 63018: // Searing Light (HACK)
+        case 65121: // Searing Light (HACK)
+        case 63024: // Gravity Bomb (HACK)
+        case 64234: // Gravity Bomb (HACK)
         case 42442: // Vengeance Landing Cannonfire
         case 45863: // Cosmetic - Incinerate to Random Target
         case 25425: // Shoot
@@ -3793,11 +3795,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->SpellFamilyFlags[2] = 0x10;
             count++;
             break;
-        // cleansing totem pulse when it is spawned
-        case 8172:
-            spellInfo->AttributesEx5 |= SPELL_ATTR_EX5_START_PERIODIC_AT_APPLY;
-            count++;
-            break;
         case 41013:     // Parasitic Shadowfiend Passive
             spellInfo->EffectApplyAuraName[0] = 4; // proc debuff, and summon infinite fiends
             count++;
@@ -3837,6 +3834,53 @@ void SpellMgr::LoadSpellCustomAttr()
             // may be db data bug, or blizz may keep reapplying area auras every update with checking immunity
             // that will be clear if we get more spells with problem like this
             spellInfo->AttributesEx |= SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY;
+            count++;
+            break;
+        case 69055:     // Saber Lash
+        case 70814:     // Saber Lash
+            spellInfo->EffectRadiusIndex[0] = 8;
+            count++;
+            break;
+        case 69075:     // Bone Storm
+        case 70834:     // Bone Storm
+        case 70835:     // Bone Storm
+        case 70836:     // Bone Storm
+            spellInfo->EffectRadiusIndex[0] = 12;
+            count++;
+            break;
+        case 18500: // Wing Buffet
+        case 33086: // Wild Bite
+        case 49749: // Piercing Blow
+        case 52890: // Penetrating Strike
+        case 53454: // Impale
+        case 59446: // Impale
+        case 62383: // Shatter
+        case 64777: // Machine Gun
+        case 65239: // Machine Gun
+        case 65919: // Impale
+        case 67858: // Impale
+        case 67859: // Impale
+        case 67860: // Impale
+        case 69293: // Wing Buffet
+        case 74439: // Machine Gun
+            mSpellCustomAttr[i] |= SPELL_ATTR_CU_IGNORE_ARMOR;
+            count++;
+            break;
+        // THESE SPELLS ARE WORKING CORRECTLY EVEN WITHOUT THIS HACK
+        // THE ONLY REASON ITS HERE IS THAT CURRENT GRID SYSTEM
+        // DOES NOT ALLOW FAR OBJECT SELECTION (dist > 333)
+        case 70781: // Light's Hammer Teleport
+        case 70856: // Oratory of the Damned Teleport
+        case 70857: // Rampart of Skulls Teleport
+        case 70858: // Deathbringer's Rise Teleport
+        case 70859: // Upper Spire Teleport
+        case 70860: // Frozen Throne Teleport
+        case 70861: // Sindragosa's Lair Teleport
+            spellInfo->EffectImplicitTargetA[0] = TARGET_DST_DB;
+            count++;
+            break;
+        case 63675: // Improved Devouring Plague
+            spellInfo->AttributesEx3 |= SPELL_ATTR_EX3_NO_DONE_BONUS;
             count++;
             break;
         default:

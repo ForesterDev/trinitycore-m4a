@@ -21,6 +21,10 @@
 #ifndef TRINITYCORE_ARENATEAM_H
 #define TRINITYCORE_ARENATEAM_H
 
+#include "QueryResult.h"
+
+class WorldSession;
+
 enum ArenaTeamCommandTypes
 {
     ERR_ARENA_TEAM_CREATE_S                 = 0x00,
@@ -97,8 +101,10 @@ struct ArenaTeamMember
     uint32 games_season;
     uint32 wins_season;
     uint32 personal_rating;
+    uint32 matchmaker_rating;
 
     void ModifyPersonalRating(Player* plr, int32 mod, uint32 slot);
+    void ModifyMatchmakerRating(int32 mod, uint32 slot);
 };
 
 struct ArenaTeamStats
@@ -133,6 +139,7 @@ class ArenaTeam
         const ArenaTeamStats& GetStats() const { return m_stats; }
         void SetStats(uint32 stat_type, uint32 value);
         uint32 GetRating() const          { return m_stats.rating; }
+        uint32 GetAverageMMR(Group *group) const;
 
         uint32 GetEmblemStyle() const     { return m_EmblemStyle; }
         uint32 GetEmblemColor() const     { return m_EmblemColor; }
@@ -190,12 +197,13 @@ class ArenaTeam
         void InspectStats(WorldSession *session, uint64 guid);
 
         uint32 GetPoints(uint32 MemberRating);
+        int32 GetRatingMod(uint32 own_rating, uint32 enemy_rating, bool won, bool calculating_mmr = false);
         float GetChanceAgainst(uint32 own_rating, uint32 enemy_rating);
         int32 WonAgainst(uint32 againstRating);
-        void MemberWon(Player * plr, uint32 againstRating);
+        void MemberWon(Player * plr, uint32 againstMatchmakerRating);
         int32 LostAgainst(uint32 againstRating);
-        void MemberLost(Player * plr, uint32 againstRating);
-        void OfflineMemberLost(uint64 guid, uint32 againstRating);
+        void MemberLost(Player * plr, uint32 againstMatchmakerRating);
+        void OfflineMemberLost(uint64 guid, uint32 againstMatchmakerRating);
 
         void UpdateArenaPointsHelper(std::map<uint32, uint32> & PlayerPoints);
 

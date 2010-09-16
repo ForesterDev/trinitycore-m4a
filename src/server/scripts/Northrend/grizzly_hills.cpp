@@ -95,6 +95,7 @@ public:
 
     bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
         switch(uiAction)
         {
             case GOSSIP_ACTION_INFO_DEF+1:
@@ -191,7 +192,7 @@ public:
                         MrfloppyGUID = Mrfloppy->GetGUID();
                     break;
                 case 10:
-                    if (Creature *Mrfloppy = Unit::GetCreature(*me, MrfloppyGUID))
+                    if (Unit::GetCreature(*me, MrfloppyGUID))
                     {
                         DoScriptText(SAY_WORGHAGGRO1, me);
                         me->SummonCreature(NPC_HUNGRY_WORG,me->GetPositionX()+5,me->GetPositionY()+2,me->GetPositionZ()+1,3.229f,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,120000);
@@ -318,7 +319,7 @@ public:
                 Mrfloppy->GetMotionMaster()->MoveFollow(pCreature, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
             }
 
-            if (npc_escortAI* pEscortAI = CAST_AI(npc_emilyAI, (pCreature->AI())))
+            if (npc_escortAI* pEscortAI = CAST_AI(npc_emily::npc_emilyAI, (pCreature->AI())))
                 pEscortAI->Start(true, false, pPlayer->GetGUID());
         }
         return true;
@@ -472,7 +473,7 @@ public:
         {
             if (m_uiPhase == 1)
             {
-                if (GameObject* haunch = me->FindNearestGameObject(OBJECT_HAUNCH, 2.0f))
+                if (me->FindNearestGameObject(OBJECT_HAUNCH, 2.0f))
                 {
                     me->SetStandState(UNIT_STAND_STATE_DEAD);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
@@ -517,7 +518,7 @@ public:
         void UpdateAI(const uint32 uiDiff)
         {
             // call this each update tick?
-            if (Creature* stag = me->FindNearestCreature(TALLHORN_STAG, 0.2f))
+            if (me->FindNearestCreature(TALLHORN_STAG, 0.2f))
             {
                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_USESTANDING);
             }
@@ -576,12 +577,12 @@ public:
     struct npc_wounded_skirmisherAI : public ScriptedAI
     {
         npc_wounded_skirmisherAI(Creature *c) : ScriptedAI(c) {}
-        
+
         uint64 uiPlayerGUID;
 
         uint32 DespawnTimer;
 
-        void Reset () 
+        void Reset ()
         {
             DespawnTimer = 5000;
             uiPlayerGUID = 0;
@@ -594,23 +595,23 @@ public:
         }
 
         void SpellHit(Unit *caster, const SpellEntry *spell)
-        {        
+        {
             if (spell->Id == SPELL_RENEW_SKIRMISHER && caster->GetTypeId() == TYPEID_PLAYER
                 && caster->ToPlayer()->GetQuestStatus(12288) == QUEST_STATUS_INCOMPLETE)
-            {            
+            {
                 caster->ToPlayer()->KilledMonsterCredit(CREDIT_NPC, 0);
                 DoScriptText(RAND(RANDOM_SAY_1,RANDOM_SAY_2,RANDOM_SAY_3),caster);
-                if(me->IsStandState())            
-                    me->GetMotionMaster()->MovePoint(1, me->GetPositionX()+7, me->GetPositionY()+7, me->GetPositionZ());                                                                                   
+                if(me->IsStandState())
+                    me->GetMotionMaster()->MovePoint(1, me->GetPositionX()+7, me->GetPositionY()+7, me->GetPositionZ());
                 else
                 {
                     me->SetStandState(UNIT_STAND_STATE_STAND);
-                    me->ForcedDespawn(DespawnTimer);   
+                    me->ForcedDespawn(DespawnTimer);
                 }
-                    
+
             }
         }
-        
+
         void UpdateAI(const uint32 /*diff*/)
         {
             if (!UpdateVictim())

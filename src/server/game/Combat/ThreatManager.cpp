@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "ThreatManager.h"
 #include "Unit.h"
 #include "Creature.h"
@@ -27,6 +28,7 @@
 #include "ObjectAccessor.h"
 #include "UnitEvents.h"
 #include "SpellAuras.h"
+#include "SpellMgr.h"
 
 //==============================================================
 //================= ThreatCalcHelper ===========================
@@ -256,7 +258,7 @@ void ThreatContainer::modifyThreatPercent(Unit *pVictim, int32 iPercent)
 void ThreatContainer::update()
 {
     if (iDirty && iThreatList.size() >1)
-    {    
+    {
         iThreatList.sort(Trinity::ThreatOrderPred());
     }
     iDirty = false;
@@ -315,8 +317,8 @@ HostileReference* ThreatContainer::selectNextVictim(Creature* pAttacker, Hostile
                 }
 
                 if (currentRef->getThreat() > 1.3f * pCurrentVictim->getThreat() ||
-                    currentRef->getThreat() > 1.1f * pCurrentVictim->getThreat() &&
-                    pAttacker->IsWithinMeleeRange(target))
+                    (currentRef->getThreat() > 1.1f * pCurrentVictim->getThreat() &&
+                    pAttacker->IsWithinMeleeRange(target)))
                 {                                           //implement 110% threat rule for targets in melee range
                     found = true;                           //and 130% rule for targets in ranged distances
                     break;                                  //for selecting alive targets
@@ -387,7 +389,7 @@ void ThreatManager::addThreat(Unit* pVictim, float fThreat, SpellSchoolMask scho
         Unit *unit = pVictim->GetMisdirectionTarget();
         if (unit)
             if (Aura* pAura = unit->GetAura(63326)) // Glyph of Vigilance
-                reducedThreadPercent += pAura->GetSpellProto()->EffectBasePoints[0];
+                reducedThreadPercent += SpellMgr::CalculateSpellEffectAmount(pAura->GetSpellProto(), 0);
 
         float reducedThreat = threat * reducedThreadPercent / 100;
         threat -= reducedThreat;

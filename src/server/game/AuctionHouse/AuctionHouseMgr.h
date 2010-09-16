@@ -19,7 +19,7 @@
 #ifndef _AUCTION_HOUSE_MGR_H
 #define _AUCTION_HOUSE_MGR_H
 
-#include "ace/Singleton.h"
+#include <ace/Singleton.h>
 
 #include "SharedDefines.h"
 
@@ -66,8 +66,8 @@ struct AuctionEntry
     uint32 GetAuctionCut() const;
     uint32 GetAuctionOutBid() const;
     bool BuildAuctionInfo(WorldPacket & data) const;
-    void DeleteFromDB() const;
-    void SaveToDB() const;
+    void DeleteFromDB(SQLTransaction& trans) const;
+    void SaveToDB(SQLTransaction& trans) const;
 };
 
 //this class is used as auctionhouse instance
@@ -119,9 +119,9 @@ class AuctionHouseMgr
 {
     friend class ACE_Singleton<AuctionHouseMgr, ACE_Null_Mutex>;
     AuctionHouseMgr();
-    
+    ~AuctionHouseMgr();
+
     public:
-        ~AuctionHouseMgr();
 
         typedef UNORDERED_MAP<uint32, Item*> ItemMap;
 
@@ -132,22 +132,25 @@ class AuctionHouseMgr
         {
             ItemMap::const_iterator itr = mAitems.find(id);
             if (itr != mAitems.end())
-            {
                 return itr->second;
-            }
+
             return NULL;
         }
 
         //auction messages
-        void SendAuctionWonMail(AuctionEntry * auction);
-        void SendAuctionSalePendingMail(AuctionEntry * auction);
-        void SendAuctionSuccessfulMail(AuctionEntry * auction);
-        void SendAuctionExpiredMail(AuctionEntry * auction);
+        void SendAuctionWonMail(AuctionEntry * auction, SQLTransaction& trans);
+        void SendAuctionSalePendingMail(AuctionEntry * auction, SQLTransaction& trans);
+        void SendAuctionSuccessfulMail(AuctionEntry * auction, SQLTransaction& trans);
+        void SendAuctionExpiredMail(AuctionEntry * auction, SQLTransaction& trans);
+        void SendAuctionOutbiddedMail(AuctionEntry * auction, uint32 newPrice, Player* newBidder, SQLTransaction& trans);
+        void SendAuctionCancelledToBidderMail(AuctionEntry* auction, SQLTransaction& trans);
+
         static uint32 GetAuctionDeposit(AuctionHouseEntry const* entry, uint32 time, Item *pItem);
         static AuctionHouseEntry const* GetAuctionHouseEntry(uint32 factionTemplateId);
 
     public:
-    //load first auction items, because of check if item exists, when loading
+
+        //load first auction items, because of check if item exists, when loading
         void LoadAuctionItems();
         void LoadAuctions();
 
@@ -157,6 +160,7 @@ class AuctionHouseMgr
         void Update();
 
     private:
+
         AuctionHouseObject mHordeAuctions;
         AuctionHouseObject mAllianceAuctions;
         AuctionHouseObject mNeutralAuctions;
@@ -164,6 +168,6 @@ class AuctionHouseMgr
         ItemMap mAitems;
 };
 
-#define auctionmgr (*ACE_Singleton<AuctionHouseMgr, ACE_Null_Mutex>::instance())
+#define sAuctionMgr (*ACE_Singleton<AuctionHouseMgr, ACE_Null_Mutex>::instance())
 
 #endif

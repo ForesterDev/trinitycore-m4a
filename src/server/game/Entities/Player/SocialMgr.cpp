@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "SocialMgr.h"
 
 #include "DatabaseEnv.h"
@@ -117,7 +118,7 @@ void PlayerSocial::SetFriendNote(uint32 friend_guid, std::string note)
 
 void PlayerSocial::SendSocialList()
 {
-    Player *plr = objmgr.GetPlayer(GetPlayerGUID());
+    Player *plr = sObjectMgr.GetPlayer(GetPlayerGUID());
     if (!plr)
         return;
 
@@ -190,8 +191,8 @@ void SocialMgr::GetFriendInfo(Player *player, uint32 friendGUID, FriendInfo &fri
 
     uint32 team = player->GetTeam();
     AccountTypes security = player->GetSession()->GetSecurity();
-    bool allowTwoSideWhoList = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
-    AccountTypes gmLevelInWhoList = AccountTypes (sWorld.getConfig(CONFIG_GM_LEVEL_IN_WHO_LIST));
+    bool allowTwoSideWhoList = sWorld.getBoolConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
+    AccountTypes gmLevelInWhoList = AccountTypes (sWorld.getIntConfig(CONFIG_GM_LEVEL_IN_WHO_LIST));
 
     PlayerSocialMap::iterator itr = player->GetSocial()->m_playerSocialMap.find(friendGUID);
     if (itr != player->GetSocial()->m_playerSocialMap.end())
@@ -266,8 +267,8 @@ void SocialMgr::BroadcastToFriendListers(Player *player, WorldPacket *packet)
     uint32 team = player->GetTeam();
     AccountTypes security = player->GetSession()->GetSecurity();
     uint32 guid = player->GetGUIDLow();
-    AccountTypes gmLevelInWhoList = AccountTypes(sWorld.getConfig(CONFIG_GM_LEVEL_IN_WHO_LIST));
-    bool allowTwoSideWhoList = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
+    AccountTypes gmLevelInWhoList = AccountTypes(sWorld.getIntConfig(CONFIG_GM_LEVEL_IN_WHO_LIST));
+    bool allowTwoSideWhoList = sWorld.getBoolConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
 
     for (SocialMap::const_iterator itr = m_socialMap.begin(); itr != m_socialMap.end(); ++itr)
     {

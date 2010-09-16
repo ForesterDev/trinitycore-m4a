@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "ProgressBar.h"
 #include "SpellMgr.h"
 #include "ObjectMgr.h"
@@ -116,7 +117,7 @@ void DisableMgr::LoadDisables()
                         break;
                     case MAP_BATTLEGROUND:
                     case MAP_ARENA:
-                        sLog.outErrorDb("Battleground map specified to be disabled in map case, skipped.", entry);
+                        sLog.outErrorDb("Battleground map %u specified to be disabled in map case, skipped.", entry);
                         continue;
                 }
                 if (isFlagInvalid)
@@ -182,7 +183,7 @@ void DisableMgr::CheckQuestDisables()
     {
         bar.step();
         const uint32 entry = itr->first;
-        if (!objmgr.GetQuestTemplate(entry))
+        if (!sObjectMgr.GetQuestTemplate(entry))
         {
             sLog.outErrorDb("Quest entry %u from `disables` doesn't exist, skipped.", entry);
             m_DisableMap[DISABLE_TYPE_QUEST].erase(itr++);
@@ -238,7 +239,9 @@ bool DisableMgr::IsDisabledFor(DisableType type, uint32 entry, Unit const* pUnit
                 if (mapEntry->IsDungeon())
                 {
                     uint8 disabledModes = itr->second;
-                    switch(mapEntry->IsRaid() ? pPlayer->GetRaidDifficulty() : pPlayer->GetDungeonDifficulty())
+                    Difficulty targetDifficulty = pPlayer->GetDifficulty(mapEntry->IsRaid());
+                    GetDownscaledMapDifficultyData(entry, targetDifficulty);
+                    switch(targetDifficulty)
                     {
                         case DUNGEON_DIFFICULTY_NORMAL:
                             return disabledModes & DUNGEON_STATUSFLAG_NORMAL;

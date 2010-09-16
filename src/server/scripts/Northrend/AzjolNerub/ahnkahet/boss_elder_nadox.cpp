@@ -64,7 +64,7 @@ public:
     {
         boss_elder_nadoxAI(Creature *c) : ScriptedAI(c)
         {
-            pInstance = c->GetInstanceData();
+            pInstance = c->GetInstanceScript();
         }
 
         uint32 uiPlagueTimer;
@@ -76,7 +76,7 @@ public:
 
         bool bGuardSpawned;
 
-        ScriptedInstance *pInstance;
+        InstanceScript *pInstance;
 
         void Reset()
         {
@@ -132,6 +132,7 @@ public:
             } else uiPlagueTimer -= diff;
 
             if (IsHeroic())
+            {
                 if (uiRagueTimer <= diff)
                 {
                     if (Creature *pSwarmer = me->FindNearestCreature(MOB_AHNKAHAR_SWARMER, 35))
@@ -140,6 +141,7 @@ public:
                         uiRagueTimer = 15*IN_MILLISECONDS;
                     }
                 } else uiRagueTimer -= diff;
+            }
 
             if (uiSwarmerSpawnTimer <= diff)
             {
@@ -197,10 +199,10 @@ public:
     {
         mob_ahnkahar_nerubianAI(Creature *c) : ScriptedAI(c)
         {
-            pInstance = c->GetInstanceData();
+            pInstance = c->GetInstanceScript();
         }
 
-        ScriptedInstance *pInstance;
+        InstanceScript *pInstance;
         uint32 uiSprintTimer;
 
         void Reset()

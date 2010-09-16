@@ -22,6 +22,7 @@
  */
 
 #include "ScriptPCH.h"
+#include "SpellAuraEffects.h"
 
 enum RogueSpells
 {
@@ -31,21 +32,21 @@ enum RogueSpells
     ROGUE_SPELL_GLYPH_OF_PREPARATION             = 56819,
 };
 
-class spell_rog_cheat_death : public SpellHandlerScript
+class spell_rog_cheat_death : public SpellScriptLoader
 {
     public:
-        spell_rog_cheat_death() : SpellHandlerScript("spell_rog_cheat_death") { }
+        spell_rog_cheat_death() : SpellScriptLoader("spell_rog_cheat_death") { }
 
         class spell_rog_cheat_death_SpellScript : public SpellScript
         {
-            bool Validate(SpellEntry const * spellEntry)
+            bool Validate(SpellEntry const * /*spellEntry*/)
             {
                 if (!sSpellStore.LookupEntry(ROGUE_SPELL_CHEATING_DEATH))
                     return false;
                 return true;
             }
 
-            void HandleDummy(SpellEffIndex effIndex)
+            void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 Unit *caster = GetCaster();
                 caster->CastSpell(caster, ROGUE_SPELL_CHEATING_DEATH, true);
@@ -54,7 +55,7 @@ class spell_rog_cheat_death : public SpellHandlerScript
             void Register()
             {
                 // add dummy effect spell handler to Cheat Death
-                EffectHandlers += EffectHandlerFn(spell_rog_cheat_death_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnEffect += SpellEffectFn(spell_rog_cheat_death_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
@@ -64,21 +65,21 @@ class spell_rog_cheat_death : public SpellHandlerScript
         }
 };
 
-class spell_rog_hunger_for_blood : public SpellHandlerScript
+class spell_rog_hunger_for_blood : public SpellScriptLoader
 {
     public:
-        spell_rog_hunger_for_blood() : SpellHandlerScript("spell_rog_hunger_for_blood") { }
+        spell_rog_hunger_for_blood() : SpellScriptLoader("spell_rog_hunger_for_blood") { }
 
         class spell_rog_hunger_for_blood_SpellScript : public SpellScript
         {
-            bool Validate(SpellEntry const * spellEntry)
+            bool Validate(SpellEntry const * /*spellEntry*/)
             {
                 if (!sSpellStore.LookupEntry(ROGUE_SPELL_HUNGER_FOR_BLOOD_BUFF))
                     return false;
                 return true;
             }
 
-            void HandleDummy(SpellEffIndex effIndex)
+            void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 Unit *caster = GetCaster();
                 caster->CastSpell(caster, ROGUE_SPELL_HUNGER_FOR_BLOOD_BUFF, true);
@@ -87,7 +88,7 @@ class spell_rog_hunger_for_blood : public SpellHandlerScript
             void Register()
             {
                 // add dummy effect spell handler to Hunger for Blood
-                EffectHandlers += EffectHandlerFn(spell_rog_hunger_for_blood_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnEffect += SpellEffectFn(spell_rog_hunger_for_blood_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
@@ -97,21 +98,21 @@ class spell_rog_hunger_for_blood : public SpellHandlerScript
         }
 };
 
-class spell_rog_preparation : public SpellHandlerScript
+class spell_rog_preparation : public SpellScriptLoader
 {
     public:
-        spell_rog_preparation() : SpellHandlerScript("spell_rog_preparation") { }
+        spell_rog_preparation() : SpellScriptLoader("spell_rog_preparation") { }
 
         class spell_rog_preparation_SpellScript : public SpellScript
         {
-            bool Validate(SpellEntry const * spellEntry)
+            bool Validate(SpellEntry const * /*spellEntry*/)
             {
                 if (!sSpellStore.LookupEntry(ROGUE_SPELL_GLYPH_OF_PREPARATION))
                     return false;
                 return true;
             }
 
-            void HandleDummy(SpellEffIndex effIndex)
+            void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 Unit *caster = GetCaster();
                 if (caster->GetTypeId() != TYPEID_PLAYER)
@@ -122,7 +123,7 @@ class spell_rog_preparation : public SpellHandlerScript
                 for (SpellCooldowns::const_iterator itr = cm.begin(); itr != cm.end();)
                 {
                     SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
-    
+
                     if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
                     {
                         if (spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_ROGUE_COLDB_SHADOWSTEP ||      // Cold Blood, Shadowstep
@@ -149,7 +150,7 @@ class spell_rog_preparation : public SpellHandlerScript
             void Register()
             {
                 // add dummy effect spell handler to Preparation
-                EffectHandlers += EffectHandlerFn(spell_rog_preparation_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnEffect += SpellEffectFn(spell_rog_preparation_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
@@ -159,21 +160,21 @@ class spell_rog_preparation : public SpellHandlerScript
         }
 };
 
-class spell_rog_shiv : public SpellHandlerScript
+class spell_rog_shiv : public SpellScriptLoader
 {
     public:
-        spell_rog_shiv() : SpellHandlerScript("spell_rog_shiv") { }
+        spell_rog_shiv() : SpellScriptLoader("spell_rog_shiv") { }
 
         class spell_rog_shiv_SpellScript : public SpellScript
         {
-            bool Validate(SpellEntry const * spellEntry)
+            bool Validate(SpellEntry const * /*spellEntry*/)
             {
                 if (!sSpellStore.LookupEntry(ROGUE_SPELL_SHIV_TRIGGERED))
                     return false;
                 return true;
             }
 
-            void HandleDummy(SpellEffIndex effIndex)
+            void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 Unit *caster = GetCaster();
                 if (caster->GetTypeId() != TYPEID_PLAYER)
@@ -186,7 +187,7 @@ class spell_rog_shiv : public SpellHandlerScript
             void Register()
             {
                 // add dummy effect spell handler to Shiv
-                EffectHandlers += EffectHandlerFn(spell_rog_shiv_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnEffect += SpellEffectFn(spell_rog_shiv_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
@@ -196,10 +197,108 @@ class spell_rog_shiv : public SpellHandlerScript
         }
 };
 
+class spell_rog_deadly_poison : public SpellScriptLoader
+{
+    public:
+        spell_rog_deadly_poison() : SpellScriptLoader("spell_rog_deadly_poison") { }
+
+        class spell_rog_deadly_poison_SpellScript : public SpellScript
+        {
+        private:
+            uint8 stackAmount;
+        public:
+            spell_rog_deadly_poison_SpellScript() : stackAmount(0) { }
+
+            bool Validate(SpellEntry const * /*spellEntry*/)
+            {
+                return true;
+            }
+
+            void HandleBeforeHit()
+            {
+                Player * player = GetCaster()->ToPlayer();
+                Unit * target = GetHitUnit();
+                if (!player || !target)
+                    return;
+
+                if (AuraEffect * aurEff =
+                    target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_ROGUE, 0x00010000, 0x00080000, 0, player->GetGUID()))
+                    stackAmount = aurEff->GetBase()->GetStackAmount();
+            }
+
+            void HandleAfterHit()
+            {
+                if (stackAmount < 5)
+                    return;
+
+                Player * player = GetCaster()->ToPlayer();
+                Unit * target = GetHitUnit();
+                Item * castItem = GetCastItem();
+                if (!player || !target || !castItem)
+                    return;
+
+                Item * item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                if (item == castItem)
+                    item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+                if (!item)
+                    return;
+
+                // item combat enchantments
+                for (uint8 e_slot = 0; e_slot < MAX_ENCHANTMENT_SLOT; ++e_slot)
+                {
+                    uint32 enchant_id = item->GetEnchantmentId(EnchantmentSlot(e_slot));
+                    SpellItemEnchantmentEntry const * pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+                    if (!pEnchant)
+                        continue;
+
+                    for (uint8 s = 0; s < 3; ++s)
+                    {
+                        if (pEnchant->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
+                            continue;
+
+                        SpellEntry const *spellInfo = sSpellStore.LookupEntry(pEnchant->spellid[s]);
+                        if (!spellInfo)
+                        {
+                            sLog.outError("Player::CastItemCombatSpell Enchant %i, cast unknown spell %i", pEnchant->ID, pEnchant->spellid[s]);
+                            continue;
+                        }
+
+                        // Proc only rogue poisons and do not reproc deadly
+                        if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
+                        {
+                            if (spellInfo->SpellFamilyFlags.IsEqual(0x00010000, 0x00080000, 0) ||
+                                (spellInfo->Dispel != DISPEL_POISON))
+                                continue;
+                        }
+                        else
+                            continue;
+
+                        if (IsPositiveSpell(pEnchant->spellid[s]))
+                            player->CastSpell(player, pEnchant->spellid[s], true, item);
+                        else
+                            player->CastSpell(target, pEnchant->spellid[s], true, item);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                BeforeHit += SpellHitFn(spell_rog_deadly_poison_SpellScript::HandleBeforeHit);
+                AfterHit += SpellHitFn(spell_rog_deadly_poison_SpellScript::HandleAfterHit);
+            }
+        };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_rog_deadly_poison_SpellScript();
+        }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_cheat_death;
     new spell_rog_hunger_for_blood;
     new spell_rog_preparation;
     new spell_rog_shiv;
+    new spell_rog_deadly_poison;
 }

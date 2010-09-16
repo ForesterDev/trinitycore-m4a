@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "Log.h"
 #include "ObjectAccessor.h"
 #include "CreatureAI.h"
@@ -25,8 +26,8 @@
 #include "TemporarySummon.h"
 
 TempSummon::TempSummon(SummonPropertiesEntry const *properties, Unit *owner) :
-Creature(), m_type(TEMPSUMMON_MANUAL_DESPAWN), m_timer(0), m_lifetime(0)
-, m_Properties(properties)
+Creature(), m_Properties(properties), m_type(TEMPSUMMON_MANUAL_DESPAWN), 
+m_timer(0), m_lifetime(0) 
 {
     m_summonerGUID = owner ? owner->GetGUID() : 0;
     m_unitTypeMask |= UNIT_MASK_SUMMON;
@@ -295,12 +296,13 @@ void Minion::RemoveFromWorld()
 
 bool Minion::IsGuardianPet() const
 {
-    return isPet() || m_Properties && m_Properties->Category == SUMMON_CATEGORY_PET;
+    return isPet() || (m_Properties && m_Properties->Category == SUMMON_CATEGORY_PET);
 }
 
 Guardian::Guardian(SummonPropertiesEntry const *properties, Unit *owner) : Minion(properties, owner)
-, m_bonusdamage(0)
+, m_bonusSpellDamage(0)
 {
+    memset(m_statFromOwner, 0, sizeof(float)*MAX_STATS);
     m_unitTypeMask |= UNIT_MASK_GUARDIAN;
     if (properties && properties->Type == SUMMON_TYPE_PET)
     {

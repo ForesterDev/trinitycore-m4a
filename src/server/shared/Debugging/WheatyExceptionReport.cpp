@@ -3,6 +3,7 @@
 // MSDN Magazine, 2002
 // FILE: WheatyExceptionReport.CPP
 //==========================================
+#if PLATFORM == PLATFORM_WINDOWS
 #define WIN32_LEAN_AND_MEAN
 #pragma warning(disable:4996)
 #pragma warning(disable:4312)
@@ -13,11 +14,15 @@
 #include <tchar.h>
 #define _NO_CVCONST_H
 #include <dbghelp.h>
+
 #include "WheatyExceptionReport.h"
+
+#include "Common.h"
 #include "SystemConfig.h"
 #include "revision.h"
+
 #define CrashFolder _T("Crashes")
-//#pragma comment(linker, "/defaultlib:dbghelp.lib")
+#pragma comment(linker, "/DEFAULTLIB:dbghelp.lib")
 
 inline LPTSTR ErrorMessage(DWORD dw)
 {
@@ -593,7 +598,7 @@ PVOID addr, PTSTR szModule, DWORD len, DWORD& section, DWORD_PTR& offset)
     {
         DWORD_PTR sectionStart = pSection->VirtualAddress;
         DWORD_PTR sectionEnd = sectionStart
-            + DWORD_PTR(max(pSection->SizeOfRawData, pSection->Misc.VirtualSize));
+            + DWORD_PTR(std::max(pSection->SizeOfRawData, pSection->Misc.VirtualSize));
 
         // Is the address in this section???
         if ((rva >= sectionStart) && (rva <= sectionEnd))
@@ -1037,3 +1042,4 @@ int __cdecl WheatyExceptionReport::_tprintf(const TCHAR * format, ...)
     return retValue;
 }
 
+#endif  // _WIN32

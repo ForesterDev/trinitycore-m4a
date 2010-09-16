@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "DBCStores.h"
 
 #include "Logging/Log.h"
@@ -34,7 +35,7 @@ typedef std::map<uint32,uint32> AreaFlagByMapID;
 
 struct WMOAreaTableTripple
 {
-    WMOAreaTableTripple(int32 r, int32 a, int32 g) : rootId(r), adtId(a), groupId(g)
+    WMOAreaTableTripple(int32 r, int32 a, int32 g) :  groupId(g), rootId(r), adtId(a)
     {
     }
 
@@ -170,6 +171,9 @@ static uint32 sTalentTabPages[MAX_CLASSES][3];
 DBCStorage <TaxiNodesEntry> sTaxiNodesStore(TaxiNodesEntryfmt);
 TaxiMask sTaxiNodesMask;
 TaxiMask sOldContinentsNodesMask;
+TaxiMask sHordeTaxiNodesMask;
+TaxiMask sAllianceTaxiNodesMask;
+TaxiMask sDeathKnightTaxiNodesMask;
 
 // DBC used only for initialization sTaxiPathSetBySource at startup.
 TaxiPathSetBySource sTaxiPathSetBySource;
@@ -444,7 +448,7 @@ void LoadDBCStores(const std::string& dataPath)
             continue;
 
         for (int x = 0; x < MAX_DIFFICULTY; ++x)
-            spellmgr.SetSpellDifficultyId(uint32(newEntry.SpellID[x]), spellDiff->ID);
+            sSpellMgr.SetSpellDifficultyId(uint32(newEntry.SpellID[x]), spellDiff->ID);
     }
 
     // create talent spells set
@@ -515,11 +519,14 @@ void LoadDBCStores(const std::string& dataPath)
         for (uint32 i = 1; i < sSpellStore.GetNumRows (); ++i)
             if (SpellEntry const* sInfo = sSpellStore.LookupEntry (i))
                 for (int j=0; j < 3; ++j)
-                    if (sInfo->Effect[j] == 123 /*SPELL_EFFECT_SEND_TAXI*/)
+                    if (sInfo->Effect[j] == SPELL_EFFECT_SEND_TAXI)
                         spellPaths.insert(sInfo->EffectMiscValue[j]);
 
         memset(sTaxiNodesMask,0,sizeof(sTaxiNodesMask));
-        memset(sOldContinentsNodesMask,0,sizeof(sTaxiNodesMask));
+        memset(sOldContinentsNodesMask,0,sizeof(sOldContinentsNodesMask));
+        memset(sHordeTaxiNodesMask,0,sizeof(sHordeTaxiNodesMask));
+        memset(sAllianceTaxiNodesMask,0,sizeof(sAllianceTaxiNodesMask));
+        memset(sDeathKnightTaxiNodesMask,0,sizeof(sDeathKnightTaxiNodesMask));
         for (uint32 i = 1; i < sTaxiNodesStore.GetNumRows(); ++i)
         {
             TaxiNodesEntry const* node = sTaxiNodesStore.LookupEntry(i);
@@ -548,6 +555,13 @@ void LoadDBCStores(const std::string& dataPath)
             uint8  field   = (uint8)((i - 1) / 32);
             uint32 submask = 1<<((i-1)%32);
             sTaxiNodesMask[field] |= submask;
+
+            if (node->MountCreatureID[0] && node->MountCreatureID[0] != 32981)
+                sHordeTaxiNodesMask[field] |= submask;
+            if (node->MountCreatureID[1] && node->MountCreatureID[1] != 32981)
+                sAllianceTaxiNodesMask[field] |= submask;
+            if (node->MountCreatureID[0] == 32981 || node->MountCreatureID[1] == 32981)
+                sDeathKnightTaxiNodesMask[field] |= submask;
 
             // old continent node (+ nodes virtually at old continents, check explicitly to avoid loading map files for zone info)
             if (node->map_id < 2 || i == 82 || i == 83 || i == 93 || i == 94)
@@ -808,19 +822,29 @@ MapDifficulty const* GetDownscaledMapDifficultyData(uint32 mapId, Difficulty &di
 
 PvPDifficultyEntry const* GetBattlegroundBracketByLevel(uint32 mapid, uint32 level)
 {
-    // prevent out-of-range levels for dbc data
-    if (level > DEFAULT_MAX_LEVEL)
-        level = DEFAULT_MAX_LEVEL;
-
+    PvPDifficultyEntry const* maxEntry = NULL;              // used for level > max listed level case
     for (uint32 i = 0; i < sPvPDifficultyStore.GetNumRows(); ++i)
+    {
         if (PvPDifficultyEntry const* entry = sPvPDifficultyStore.LookupEntry(i))
-            if (entry->mapId == mapid && entry->minLevel <= level && entry->maxLevel >= level)
+        {
+            // skip unrelated and too-high brackets
+            if (entry->mapId != mapid || entry->minLevel > level)
+                continue;
+
+            // exactly fit
+            if (entry->maxLevel >= level)
                 return entry;
 
-    return NULL;
+            // remember for possible out-of-range case (search higher from existed)
+            if (!maxEntry || maxEntry->maxLevel < entry->maxLevel)
+                maxEntry = entry;
+        }
+    }
+
+    return maxEntry;
 }
 
-PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattleGroundBracketId id)
+PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattlegroundBracketId id)
 {
     for (uint32 i = 0; i < sPvPDifficultyStore.GetNumRows(); ++i)
         if (PvPDifficultyEntry const* entry = sPvPDifficultyStore.LookupEntry(i))

@@ -59,9 +59,9 @@ enum Achievements
     ACHIEV_OH_NOVOS                               = 2057
 };
 
-static Position AddSpawnPoint = { -379.20, -816.76, 59.70 };
-static Position CrystalHandlerSpawnPoint = { -326.626343, -709.956604, 27.813314 };
-static Position AddDestinyPoint = { -379.314545, -772.577637, 28.58837 };
+static Position AddSpawnPoint = { -379.20f, -816.76f, 59.70f, 0.0f };
+static Position CrystalHandlerSpawnPoint = { -326.626343f, -709.956604f, 27.813314f, 0.0f };
+static Position AddDestinyPoint = { -379.314545f, -772.577637f, 28.58837f, 0.0f };
 
 class boss_novos : public CreatureScript
 {
@@ -72,7 +72,7 @@ public:
     {
         boss_novosAI(Creature *c) : Scripted_NoMovementAI(c), lSummons(me)
         {
-            pInstance = c->GetInstanceData();
+            pInstance = c->GetInstanceScript();
         }
 
         uint32 uiTimer;
@@ -86,7 +86,7 @@ public:
 
         CombatPhase Phase;
 
-        ScriptedInstance* pInstance;
+        InstanceScript* pInstance;
 
         void Reset()
         {
@@ -169,6 +169,8 @@ public:
                         uiTimer = urand(1*IN_MILLISECONDS,3*IN_MILLISECONDS);
                     } else uiTimer -= diff;
                     break;
+                default:
+                    break;
             }
         }
         void JustDied(Unit* /*killer*/)
@@ -243,12 +245,12 @@ public:
     {
         mob_crystal_handlerAI(Creature *c) : ScriptedAI(c)
         {
-            pInstance = c->GetInstanceData();
+            pInstance = c->GetInstanceScript();
         }
 
         uint32 uiFlashOfDarknessTimer;
 
-        ScriptedInstance *pInstance;
+        InstanceScript *pInstance;
 
         void Reset()
         {
@@ -300,10 +302,10 @@ public:
     {
         mob_novos_minionAI(Creature *c) : ScriptedAI(c)
         {
-            pInstance = c->GetInstanceData();
+            pInstance = c->GetInstanceScript();
         }
 
-        ScriptedInstance *pInstance;
+        InstanceScript *pInstance;
 
         void MovementInform(uint32 type, uint32 id)
         {

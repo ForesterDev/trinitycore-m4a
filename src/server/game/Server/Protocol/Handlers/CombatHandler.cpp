@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "Log.h"
 #include "WorldPacket.h"
@@ -31,7 +32,7 @@ void WorldSession::HandleAttackSwingOpcode(WorldPacket & recv_data)
     uint64 guid;
     recv_data >> guid;
 
-    DEBUG_LOG("WORLD: Recvd CMSG_ATTACKSWING Message guidlow:%u guidhigh:%u", GUID_LOPART(guid), GUID_HIPART(guid));
+    sLog.outStaticDebug("WORLD: Recvd CMSG_ATTACKSWING Message guidlow:%u guidhigh:%u", GUID_LOPART(guid), GUID_HIPART(guid));
 
     Unit *pEnemy = ObjectAccessor::GetUnit(*_player, guid);
 

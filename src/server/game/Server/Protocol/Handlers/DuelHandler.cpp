@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -44,8 +45,8 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
         return;
 
     //sLog.outDebug("WORLD: received CMSG_DUEL_ACCEPTED");
-    DEBUG_LOG("Player 1 is: %u (%s)", pl->GetGUIDLow(),pl->GetName());
-    DEBUG_LOG("Player 2 is: %u (%s)", plTarget->GetGUIDLow(),plTarget->GetName());
+    sLog.outStaticDebug("Player 1 is: %u (%s)", pl->GetGUIDLow(),pl->GetName());
+    sLog.outStaticDebug("Player 2 is: %u (%s)", plTarget->GetGUIDLow(),plTarget->GetName());
 
     time_t now = time(NULL);
     pl->duel->startTimer = now;

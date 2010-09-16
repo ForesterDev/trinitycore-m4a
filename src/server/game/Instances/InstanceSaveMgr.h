@@ -23,8 +23,8 @@
 #define __InstanceSaveMgr_H
 
 #include "Define.h"
-#include "ace/Singleton.h"
-#include "ace/Thread_Mutex.h"
+#include <ace/Singleton.h>
+#include <ace/Thread_Mutex.h>
 #include <list>
 #include <map>
 #include "UnorderedMap.h"
@@ -122,9 +122,9 @@ class InstanceSaveManager
     friend class ACE_Singleton<InstanceSaveManager, ACE_Null_Mutex>;
     friend class InstanceSave;
     public:
-        InstanceSaveManager() : lock_instLists(false) {};        
+        InstanceSaveManager() : lock_instLists(false) {};
         ~InstanceSaveManager();
-        
+
         typedef UNORDERED_MAP<uint32 /*InstanceId*/, InstanceSave*> InstanceSaveHashMap;
         typedef UNORDERED_MAP<uint32 /*mapId*/, InstanceSaveHashMap> InstanceSaveMapMap;
 
@@ -177,11 +177,11 @@ class InstanceSaveManager
         uint32 GetNumBoundGroupsTotal();
 
     private:
-        
+
         void _ResetOrWarnAll(uint32 mapid, Difficulty difficulty, bool warn, uint32 timeleft);
         void _ResetInstance(uint32 mapid, uint32 instanceId);
         void _ResetSave(InstanceSaveHashMap::iterator &itr);
-        void _DelHelper(DatabaseType &db, const char *fields, const char *table, const char *queryTail,...);
+        void _DelHelper(const char *fields, const char *table, const char *queryTail,...);
         // used during global instance resets
         bool lock_instLists;
         // fast lookup by instance id
@@ -191,5 +191,5 @@ class InstanceSaveManager
         ResetTimeQueue m_resetTimeQueue;
 };
 
-#define sInstanceSaveManager (*ACE_Singleton<InstanceSaveManager, ACE_Thread_Mutex>::instance())
+#define sInstanceSaveMgr (*ACE_Singleton<InstanceSaveManager, ACE_Thread_Mutex>::instance())
 #endif

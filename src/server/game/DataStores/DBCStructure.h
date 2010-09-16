@@ -43,8 +43,8 @@
 struct AchievementEntry
 {
     uint32    ID;                                           // 0
-    uint32    factionFlag;                                  // 1 -1=all, 0=horde, 1=alliance
-    uint32    mapID;                                        // 2 -1=none
+    int32    factionFlag;                                   // 1 -1=all, 0=horde, 1=alliance
+    int32    mapID;                                         // 2 -1=none
     //uint32 parentAchievement;                             // 3 its Achievement parent (can`t start while parent uncomplete, use its Criteria if don`t have own, use its progress on begin)
     char *name[16];                                         // 4-19
     //uint32 name_flags;                                    // 20
@@ -480,6 +480,12 @@ struct AchievementCriteriaEntry
             uint32  unused;                                 // 3
             uint32  killCount;                              // 4
         } honorable_kill;
+
+        struct
+        {
+            uint32  unused;
+            uint32  dungeonsComplete;
+        } use_lfg;
 
         struct
         {
@@ -1105,7 +1111,7 @@ struct LFGDungeonEntry
     //char*   name[16];                                     // 1-17 Name lang
     uint32  minlevel;                                       // 18
     uint32  maxlevel;                                       // 19
-    uint32  reclevel;                                       // 20      
+    uint32  reclevel;                                       // 20
     uint32  recminlevel;                                    // 21
     uint32  recmaxlevel;                                    // 22
     int32  map;                                             // 23
@@ -1172,9 +1178,9 @@ struct MapEntry
     bool IsNonRaidDungeon() const { return map_type == MAP_INSTANCE; }
     bool Instanceable() const { return map_type == MAP_INSTANCE || map_type == MAP_RAID || map_type == MAP_BATTLEGROUND || map_type == MAP_ARENA; }
     bool IsRaid() const { return map_type == MAP_RAID; }
-    bool IsBattleGround() const { return map_type == MAP_BATTLEGROUND; }
+    bool IsBattleground() const { return map_type == MAP_BATTLEGROUND; }
     bool IsBattleArena() const { return map_type == MAP_ARENA; }
-    bool IsBattleGroundOrArena() const { return map_type == MAP_BATTLEGROUND || map_type == MAP_ARENA; }
+    bool IsBattlegroundOrArena() const { return map_type == MAP_BATTLEGROUND || map_type == MAP_ARENA; }
 
     bool GetEntrancePos(int32 &mapid, float &x, float &y) const
     {
@@ -1222,7 +1228,7 @@ struct PvPDifficultyEntry
     uint32      difficulty;                                 // 5
 
     // helpers
-    BattleGroundBracketId GetBracketId() const { return BattleGroundBracketId(bracketId); }
+    BattlegroundBracketId GetBracketId() const { return BattlegroundBracketId(bracketId); }
 };
 
 struct QuestSortEntry
@@ -1472,7 +1478,7 @@ struct SpellEntry
     uint32    EffectRadiusIndex[MAX_SPELL_EFFECTS];         // 92-94    m_effectRadiusIndex - spellradius.dbc
     uint32    EffectApplyAuraName[MAX_SPELL_EFFECTS];       // 95-97    m_effectAura
     uint32    EffectAmplitude[MAX_SPELL_EFFECTS];           // 98-100   m_effectAuraPeriod
-    float     EffectMultipleValue[MAX_SPELL_EFFECTS];       // 101-103  m_effectAmplitude
+    float     EffectValueMultiplier[MAX_SPELL_EFFECTS];      // 101-103
     uint32    EffectChainTarget[MAX_SPELL_EFFECTS];         // 104-106  m_effectChainTargets
     uint32    EffectItemType[MAX_SPELL_EFFECTS];            // 107-109  m_effectItemType
     int32     EffectMiscValue[MAX_SPELL_EFFECTS];           // 110-112  m_effectMiscValue
@@ -1502,7 +1508,7 @@ struct SpellEntry
     uint32    DmgClass;                                     // 213      m_defenseType
     uint32    PreventionType;                               // 214      m_preventionType
     //uint32    StanceBarOrder;                             // 215      m_stanceBarOrder not used
-    float     DmgMultiplier[3];                             // 216-218  m_effectChainAmplitude
+    float     EffectDamageMultiplier[MAX_SPELL_EFFECTS];    // 216-218  m_effectChainAmplitude
     //uint32    MinFactionId;                               // 219      m_minFactionID not used
     //uint32    MinReputation;                              // 220      m_minReputation not used
     //uint32    RequiredAuraVision;                         // 221      m_requiredAuraVision not used
@@ -1512,7 +1518,7 @@ struct SpellEntry
     uint32    runeCostID;                                   // 226      m_runeCostID
     //uint32    spellMissileID;                             // 227      m_spellMissileID not used
     //uint32  PowerDisplayId;                               // 228      PowerDisplay.dbc, new in 3.1
-    //float   unk_320_4[3];                                 // 229-231  3.2.0
+    float     EffectBonusMultiplier[MAX_SPELL_EFFECTS];     // 229-231  3.2.0
     //uint32  spellDescriptionVariableID;                   // 232      3.2.0
     //uint32  SpellDifficultyId;                            // 233      3.3.0
 

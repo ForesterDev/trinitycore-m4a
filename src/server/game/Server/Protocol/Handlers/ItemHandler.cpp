@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -287,7 +288,7 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket & recv_data)
 
     sLog.outDetail("STORAGE: Item Query = %u", item);
 
-    ItemPrototype const *pProto = objmgr.GetItemPrototype(item);
+    ItemPrototype const *pProto = sObjectMgr.GetItemPrototype(item);
     if (pProto)
     {
         std::string Name        = pProto->Name1;
@@ -296,13 +297,10 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket & recv_data)
         int loc_idx = GetSessionDbLocaleIndex();
         if (loc_idx >= 0)
         {
-            ItemLocale const *il = objmgr.GetItemLocale(pProto->ItemId);
-            if (il)
+            if (ItemLocale const *il = sObjectMgr.GetItemLocale(pProto->ItemId))
             {
-                if (il->Name.size() > size_t(loc_idx) && !il->Name[loc_idx].empty())
-                    Name = il->Name[loc_idx];
-                if (il->Description.size() > size_t(loc_idx) && !il->Description[loc_idx].empty())
-                    Description = il->Description[loc_idx];
+                sObjectMgr.GetLocaleString(il->Name, loc_idx, Name);
+                sObjectMgr.GetLocaleString(il->Description, loc_idx, Description);
             }
         }
                                                             // guess size
@@ -619,7 +617,7 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
     if (pItem)
     {
         uint32 price = _player->GetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START);
-        if (_player->GetMoney() < price)
+        if (!_player->HasEnoughMoney(price))
         {
             _player->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, pItem->GetEntry(), 0);
             return;
@@ -762,16 +760,13 @@ void WorldSession::SendListInventory(uint64 vendorguid)
     {
         if (VendorItem const* crItem = vItems->GetItem(vendorslot))
         {
-            if (ItemPrototype const *pProto = objmgr.GetItemPrototype(crItem->item))
+            if (ItemPrototype const *pProto = sObjectMgr.GetItemPrototype(crItem->item))
             {
                 if ((pProto->AllowableClass & _player->getClassMask()) == 0 && pProto->Bonding == BIND_WHEN_PICKED_UP && !_player->isGameMaster())
                     continue;
                 // Only display items in vendor lists for the team the
                 // player is on. If GM on, display all items.
-                // `item_template`.`Faction` is actually `Team`.
-                // 1 == Horde / 2 == Alliance. Field will be renamed in later
-                // patch.
-                if (pProto->Flags2 & ITEM_FLAGS_EXTRA_HORDE_ONLY && _player->GetTeam() == ALLIANCE || pProto->Flags2 == ITEM_FLAGS_EXTRA_ALLIANCE_ONLY && _player->GetTeam() == HORDE && !_player->isGameMaster())
+                if (!_player->isGameMaster() && ((pProto->Flags2 & ITEM_FLAGS_EXTRA_HORDE_ONLY && _player->GetTeam() == ALLIANCE) || (pProto->Flags2 == ITEM_FLAGS_EXTRA_ALLIANCE_ONLY && _player->GetTeam() == HORDE)))
                     continue;
                 ++count;
 
@@ -889,7 +884,7 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
 
     uint32 price = slotEntry->price;
 
-    if (_player->GetMoney() < price)
+    if (!_player->HasEnoughMoney(price))
     {
         data << uint32(ERR_BANKSLOT_INSUFFICIENT_FUNDS);
         SendPacket(&data);
@@ -1023,18 +1018,14 @@ void WorldSession::HandleItemNameQueryOpcode(WorldPacket & recv_data)
     recv_data.read_skip<uint64>();                          // guid
 
     sLog.outDebug("WORLD: CMSG_ITEM_NAME_QUERY %u", itemid);
-    ItemSetNameEntry const *pName = objmgr.GetItemSetNameEntry(itemid);
+    ItemSetNameEntry const *pName = sObjectMgr.GetItemSetNameEntry(itemid);
     if (pName)
     {
         std::string Name = pName->name;
         int loc_idx = GetSessionDbLocaleIndex();
         if (loc_idx >= 0)
-        {
-            ItemSetNameLocale const *isnl = objmgr.GetItemSetNameLocale(itemid);
-            if (isnl)
-                if (isnl->Name.size() > size_t(loc_idx) && !isnl->Name[loc_idx].empty())
-                    Name = isnl->Name[loc_idx];
-        }
+            if (ItemSetNameLocale const *isnl = sObjectMgr.GetItemSetNameLocale(itemid))
+                sObjectMgr.GetLocaleString(isnl->Name, loc_idx, Name);
 
         WorldPacket data(SMSG_ITEM_NAME_QUERY_RESPONSE, (4+Name.size()+1+4));
         data << uint32(itemid);
@@ -1120,8 +1111,8 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
         return;
     }
 
-    CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("INSERT INTO character_gifts VALUES ('%u', '%u', '%u', '%u')", GUID_LOPART(item->GetOwnerGUID()), item->GetGUIDLow(), item->GetEntry(), item->GetUInt32Value(ITEM_FIELD_FLAGS));
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+    trans->PAppend("INSERT INTO character_gifts VALUES ('%u', '%u', '%u', '%u')", GUID_LOPART(item->GetOwnerGUID()), item->GetGUIDLow(), item->GetEntry(), item->GetUInt32Value(ITEM_FIELD_FLAGS));
     item->SetEntry(gift->GetEntry());
 
     switch (item->GetEntry())
@@ -1141,9 +1132,9 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
     {
         // after save it will be impossible to remove the item from the queue
         item->RemoveFromUpdateQueueOf(_player);
-        item->SaveToDB();                                   // item gave inventory record unchanged and can be save standalone
+        item->SaveToDB(trans);                                   // item gave inventory record unchanged and can be save standalone
     }
-    CharacterDatabase.CommitTransaction();
+    CharacterDatabase.CommitTransaction(trans);
 
     uint32 count = 1;
     _player->DestroyItemCount(gift, count, true);

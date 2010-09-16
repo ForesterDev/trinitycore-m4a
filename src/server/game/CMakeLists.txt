@@ -8,19 +8,16 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-######## game ########
-
-# Enable precompiled headers when using the GCC compiler.
-if(PCH)
+if( USE_COREPCH )
   include_directories(${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
 file(GLOB_RECURSE sources_Accounts Accounts/*.cpp Accounts/*.h)
 file(GLOB_RECURSE sources_Achievements Achievements/*.cpp Achievements/*.h)
 file(GLOB_RECURSE sources_Addons Addons/*.cpp Addons/*.h)
-file(GLOB_RECURSE sources_AI AI/*.cpp AI/*.h)
+file(GLOB_RECURSE sources_AI AI/*.cpp AI/*.h AI/*.hpp)
 file(GLOB_RECURSE sources_AuctionHouse AuctionHouse/*.cpp AuctionHouse/*.h)
-file(GLOB_RECURSE sources_BattleGrounds BattleGrounds/*.cpp BattleGrounds/*.h)
+file(GLOB_RECURSE sources_Battlegrounds Battlegrounds/*.cpp Battlegrounds/*.h)
 file(GLOB_RECURSE sources_Calendar Calendar/*.cpp Calendar/*.h)
 file(GLOB_RECURSE sources_Chat Chat/*.cpp Chat/*.h)
 file(GLOB_RECURSE sources_Combat Combat/*.cpp Combat/*.h)
@@ -48,17 +45,27 @@ file(GLOB_RECURSE sources_Server Server/*.cpp Server/*.h)
 file(GLOB_RECURSE sources_Skills Skills/*.cpp Skills/*.h)
 file(GLOB_RECURSE sources_Spells Spells/*.cpp Spells/*.h)
 file(GLOB_RECURSE sources_Tools Tools/*.cpp Tools/*.h)
+file(GLOB_RECURSE sources_Tickets Tickets/*.cpp Tickets/*.h)
 file(GLOB_RECURSE sources_Weather Weather/*.cpp Weather/*.h)
 file(GLOB_RECURSE sources_World World/*.cpp World/*.h)
 
 # Create game-libary
+
+if( USE_COREPCH AND MSVC )
+  set(game_STAT_SRCS
+    PrecompiledHeaders/gamePCH.cpp
+    PrecompiledHeaders/gamePCH.h
+  )
+endif()
+
 set(game_STAT_SRCS
+  ${game_STAT_SRCS}
   ${sources_Accounts}
   ${sources_Achievements}
   ${sources_Addons}
   ${sources_AI}
   ${sources_AuctionHouse}
-  ${sources_BattleGrounds}
+  ${sources_Battlegrounds}
   ${sources_Calendar}
   ${sources_Chat}
   ${sources_Combat}
@@ -86,28 +93,16 @@ set(game_STAT_SRCS
   ${sources_Skills}
   ${sources_Spells}
   ${sources_Tools}
+  ${sources_Tickets}
   ${sources_Weather}
   ${sources_World}
 )
 
-if( MSVC )
-  set(sources_PrecompiledHeaders 
-    PrecompiledHeaders/gamePCH.cpp
-    PrecompiledHeaders/gamePCH.h
-  )
-  set(game_STAT_SRCS
-    ${game_STAT_SRCS}
-    ${sources_PrecompiledHeaders}
-  )
-endif()
-
 include_directories(
-  ${ACE_INCLUDE_DIR}
-  ${MYSQL_INCLUDE_DIR}
-  ${OPENSSL_INCLUDE_DIR}
   ${CMAKE_BINARY_DIR}
-  ${CMAKE_SOURCE_DIR}/externals/mersennetwister
-  ${CMAKE_SOURCE_DIR}/externals/zlib
+  ${CMAKE_SOURCE_DIR}/dep/mersennetwister
+  ${CMAKE_SOURCE_DIR}/dep/SFMT
+  ${CMAKE_SOURCE_DIR}/dep/zlib
   ${CMAKE_SOURCE_DIR}/src/server/collision
   ${CMAKE_SOURCE_DIR}/src/server/collision/Management
   ${CMAKE_SOURCE_DIR}/src/server/shared
@@ -125,82 +120,87 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/shared/Policies
   ${CMAKE_SOURCE_DIR}/src/server/shared/Threading
   ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
-  ${CMAKE_SOURCE_DIR}/src/server/game
-  ${CMAKE_SOURCE_DIR}/src/server/game/Accounts
-  ${CMAKE_SOURCE_DIR}/src/server/game/Achievements
-  ${CMAKE_SOURCE_DIR}/src/server/game/Addons
-  ${CMAKE_SOURCE_DIR}/src/server/game/AI
-  ${CMAKE_SOURCE_DIR}/src/server/game/AI/CoreAI
-  ${CMAKE_SOURCE_DIR}/src/server/game/AI/EventAI
-  ${CMAKE_SOURCE_DIR}/src/server/game/AI/ScriptedAI
-  ${CMAKE_SOURCE_DIR}/src/server/game/AuctionHouse
-  ${CMAKE_SOURCE_DIR}/src/server/game/BattleGrounds
-  ${CMAKE_SOURCE_DIR}/src/server/game/BattleGrounds/Zones
-  ${CMAKE_SOURCE_DIR}/src/server/game/Calendar
-  ${CMAKE_SOURCE_DIR}/src/server/game/Chat
-  ${CMAKE_SOURCE_DIR}/src/server/game/Chat/Channels
-  ${CMAKE_SOURCE_DIR}/src/server/game/Chat/Commands
-  ${CMAKE_SOURCE_DIR}/src/server/game/Combat
-  ${CMAKE_SOURCE_DIR}/src/server/game/Conditions
-  ${CMAKE_SOURCE_DIR}/src/server/game/DataStores
-  ${CMAKE_SOURCE_DIR}/src/server/game/DungeonFinding
-  ${CMAKE_SOURCE_DIR}/src/server/game/Entities
-  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Creature
-  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Corpse
-  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/DynamicObject
-  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/GameObject
-  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Item
-  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Item/Container
-  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Object
-  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Object/Updates
-  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Pet
-  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Player
-  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Totem
-  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Unit
-  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Vehicle
-  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Transport
-  ${CMAKE_SOURCE_DIR}/src/server/game/Events
-  ${CMAKE_SOURCE_DIR}/src/server/game/Globals
-  ${CMAKE_SOURCE_DIR}/src/server/game/Grids/Cells
-  ${CMAKE_SOURCE_DIR}/src/server/game/Grids/Notifiers
-  ${CMAKE_SOURCE_DIR}/src/server/game/Grids
-  ${CMAKE_SOURCE_DIR}/src/server/game/Groups
-  ${CMAKE_SOURCE_DIR}/src/server/game/Guilds
-  ${CMAKE_SOURCE_DIR}/src/server/game/Instances
-  ${CMAKE_SOURCE_DIR}/src/server/game/Loot
-  ${CMAKE_SOURCE_DIR}/src/server/game/Mails
-  ${CMAKE_SOURCE_DIR}/src/server/game/Maps
-  ${CMAKE_SOURCE_DIR}/src/server/game/Miscellaneous
-  ${CMAKE_SOURCE_DIR}/src/server/game/Movement
-  ${CMAKE_SOURCE_DIR}/src/server/game/Movement/MovementGenerators
-  ${CMAKE_SOURCE_DIR}/src/server/game/Movement/Waypoints
-  ${CMAKE_SOURCE_DIR}/src/server/game/OutdoorPvP
-  ${CMAKE_SOURCE_DIR}/src/server/game/OutdoorPvP/Zones
-  ${CMAKE_SOURCE_DIR}/src/server/game/Pools
-  ${CMAKE_SOURCE_DIR}/src/server/game/PrecompiledHeaders
-  ${CMAKE_SOURCE_DIR}/src/server/game/Quests
-  ${CMAKE_SOURCE_DIR}/src/server/game/Reputation
-  ${CMAKE_SOURCE_DIR}/src/server/game/Scripting
-  ${CMAKE_SOURCE_DIR}/src/server/game/Server/Protocol
-  ${CMAKE_SOURCE_DIR}/src/server/game/Server/Protocol/Handlers
-  ${CMAKE_SOURCE_DIR}/src/server/game/Server
-  ${CMAKE_SOURCE_DIR}/src/server/game/Skills
-  ${CMAKE_SOURCE_DIR}/src/server/game/Spells
-  ${CMAKE_SOURCE_DIR}/src/server/game/Spells/Auras
-  ${CMAKE_SOURCE_DIR}/src/server/game/Tools
-  ${CMAKE_SOURCE_DIR}/src/server/game/Weather
-  ${CMAKE_SOURCE_DIR}/src/server/game/World
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/Accounts
+  ${CMAKE_CURRENT_SOURCE_DIR}/Achievements
+  ${CMAKE_CURRENT_SOURCE_DIR}/Addons
+  ${CMAKE_CURRENT_SOURCE_DIR}/AI
+  ${CMAKE_CURRENT_SOURCE_DIR}/AI/CoreAI
+  ${CMAKE_CURRENT_SOURCE_DIR}/AI/EventAI
+  ${CMAKE_CURRENT_SOURCE_DIR}/AI/ScriptedAI
+  ${CMAKE_CURRENT_SOURCE_DIR}/AuctionHouse
+  ${CMAKE_CURRENT_SOURCE_DIR}/Battlegrounds
+  ${CMAKE_CURRENT_SOURCE_DIR}/Battlegrounds/Zones
+  ${CMAKE_CURRENT_SOURCE_DIR}/Calendar
+  ${CMAKE_CURRENT_SOURCE_DIR}/Chat
+  ${CMAKE_CURRENT_SOURCE_DIR}/Chat/Channels
+  ${CMAKE_CURRENT_SOURCE_DIR}/Chat/Commands
+  ${CMAKE_CURRENT_SOURCE_DIR}/Combat
+  ${CMAKE_CURRENT_SOURCE_DIR}/Conditions
+  ${CMAKE_CURRENT_SOURCE_DIR}/DataStores
+  ${CMAKE_CURRENT_SOURCE_DIR}/DungeonFinding
+  ${CMAKE_CURRENT_SOURCE_DIR}/Entities
+  ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Creature
+  ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Corpse
+  ${CMAKE_CURRENT_SOURCE_DIR}/Entities/DynamicObject
+  ${CMAKE_CURRENT_SOURCE_DIR}/Entities/GameObject
+  ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Item
+  ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Item/Container
+  ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Object
+  ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Object/Updates
+  ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Pet
+  ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Player
+  ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Totem
+  ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Unit
+  ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Vehicle
+  ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Transport
+  ${CMAKE_CURRENT_SOURCE_DIR}/Events
+  ${CMAKE_CURRENT_SOURCE_DIR}/Globals
+  ${CMAKE_CURRENT_SOURCE_DIR}/Grids/Cells
+  ${CMAKE_CURRENT_SOURCE_DIR}/Grids/Notifiers
+  ${CMAKE_CURRENT_SOURCE_DIR}/Grids
+  ${CMAKE_CURRENT_SOURCE_DIR}/Groups
+  ${CMAKE_CURRENT_SOURCE_DIR}/Guilds
+  ${CMAKE_CURRENT_SOURCE_DIR}/Instances
+  ${CMAKE_CURRENT_SOURCE_DIR}/Loot
+  ${CMAKE_CURRENT_SOURCE_DIR}/Mails
+  ${CMAKE_CURRENT_SOURCE_DIR}/Maps
+  ${CMAKE_CURRENT_SOURCE_DIR}/Miscellaneous
+  ${CMAKE_CURRENT_SOURCE_DIR}/Movement
+  ${CMAKE_CURRENT_SOURCE_DIR}/Movement/MovementGenerators
+  ${CMAKE_CURRENT_SOURCE_DIR}/Movement/Waypoints
+  ${CMAKE_CURRENT_SOURCE_DIR}/OutdoorPvP
+  ${CMAKE_CURRENT_SOURCE_DIR}/OutdoorPvP/Zones
+  ${CMAKE_CURRENT_SOURCE_DIR}/Pools
+  ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders
+  ${CMAKE_CURRENT_SOURCE_DIR}/Quests
+  ${CMAKE_CURRENT_SOURCE_DIR}/Reputation
+  ${CMAKE_CURRENT_SOURCE_DIR}/Scripting
+  ${CMAKE_CURRENT_SOURCE_DIR}/Server/Protocol
+  ${CMAKE_CURRENT_SOURCE_DIR}/Server/Protocol/Handlers
+  ${CMAKE_CURRENT_SOURCE_DIR}/Server
+  ${CMAKE_CURRENT_SOURCE_DIR}/Skills
+  ${CMAKE_CURRENT_SOURCE_DIR}/Spells
+  ${CMAKE_CURRENT_SOURCE_DIR}/Spells/Auras
+  ${CMAKE_CURRENT_SOURCE_DIR}/Tools
+  ${CMAKE_CURRENT_SOURCE_DIR}/Tickets
+  ${CMAKE_CURRENT_SOURCE_DIR}/Weather
+  ${CMAKE_CURRENT_SOURCE_DIR}/World
+  ${CMAKE_SOURCE_DIR}/src/server/scripts/PrecompiledHeaders
+  ${ACE_INCLUDE_DIR}
+  ${MYSQL_INCLUDE_DIR}
+  ${OPENSSL_INCLUDE_DIR}
 )
 
 add_library(game STATIC ${game_STAT_SRCS})
 
-add_dependencies(game revision.h)
+add_dependencies(game genrev)
 
 # Generate precompiled header
-if(PCH)
+if( USE_COREPCH )
   if(CMAKE_COMPILER_IS_GNUCXX)
-    add_precompiled_header(game ${CMAKE_SOURCE_DIR}/src/server/game/PrecompiledHeaders/gamePCH.h)
+    add_precompiled_header(game ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/gamePCH.h)
   elseif(MSVC)
-    add_native_precompiled_header(game ${CMAKE_SOURCE_DIR}/src/server/game/PrecompiledHeaders/gamePCH)
+    add_native_precompiled_header(game ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/gamePCH)
   endif()
 endif()
