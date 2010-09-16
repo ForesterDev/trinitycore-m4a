@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "sharedPCH.h"
 #include "AuthCrypt.h"
 #include "Cryptography/HMACSHA1.h"
 #include "Logging/Log.h"

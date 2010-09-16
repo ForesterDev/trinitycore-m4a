@@ -22,6 +22,7 @@
     \ingroup world
 */
 
+#include "gamePCH.h"
 #include "WeatherMgr.h"
 #include "Log.h"
 #include "ProgressBar.h"

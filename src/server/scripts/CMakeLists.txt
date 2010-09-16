@@ -34,6 +34,9 @@ set(scripts_STAT_SRCS
   ../game/AI/ScriptedAI/ScriptedFollowerAI.cpp
   ../game/AI/ScriptedAI/ScriptedGuardAI.cpp
   ../game/AI/ScriptedAI/ScriptedSimpleAI.cpp
+  ../game/Scripting/ScriptLoader.cpp
+  ../game/Scripting/ScriptMgr.cpp
+  ../game/Scripting/ScriptSystem.cpp
 )
 
 if(SCRIPTS)
@@ -150,6 +153,7 @@ if( USE_SCRIPTPCH )
   if(CMAKE_COMPILER_IS_GNUCXX)
     add_precompiled_header(scripts ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/ScriptPCH.h)
   elseif(MSVC)
-    add_native_precompiled_header(scripts ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/ScriptPCH)
+    set_precompiled_header(scripts "ScriptPCH.h"
+      "${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/ScriptPCH.cpp")
   endif()
 endif()

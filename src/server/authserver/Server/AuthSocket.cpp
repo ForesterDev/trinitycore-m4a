@@ -22,6 +22,7 @@
     \ingroup realmd
 */
 
+#include "authPCH.h"
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "ByteBuffer.h"

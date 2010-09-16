@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "sharedPCH.h"
 #include "Threading.h"
 #include "Debugging/Errors.h"
 #include <ace/OS_NS_unistd.h>

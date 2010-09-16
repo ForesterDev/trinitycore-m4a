@@ -106,7 +106,8 @@ enum BossSpells
     SPELL_FROTHING_RAGE     = 66759,
     SPELL_STAGGERED_DAZE    = 66758,
 };
-class boss_gormok : public CreatureScript
+
+class boss_gormok : public CreatureScript
 {
 public:
     boss_gormok() : CreatureScript("boss_gormok") { }
@@ -223,7 +224,8 @@ public:
 
 };
 
-class mob_snobold_vassal : public CreatureScript
+
+class mob_snobold_vassal : public CreatureScript
 {
 public:
     mob_snobold_vassal() : CreatureScript("mob_snobold_vassal") { }
@@ -363,6 +365,11 @@ struct boss_jormungarAI : public ScriptedAI
         m_pInstance = (InstanceScript*)pCreature->GetInstanceScript();
     }
 
+    void done()
+    {
+        m_pInstance->SetData(TYPE_NORTHREND_BEASTS, SNAKES_DONE);
+    }
+
     InstanceScript* m_pInstance;
 
     uint32 m_uiSisterID;
@@ -403,10 +410,12 @@ struct boss_jormungarAI : public ScriptedAI
             if (Creature* pSister = Unit::GetCreature((*me),m_pInstance->GetData64(m_uiSisterID)))
             {
                 if (!pSister->isAlive())
-                    m_pInstance->SetData(TYPE_NORTHREND_BEASTS, SNAKES_DONE);
+                    done();
                 else 
                     m_pInstance->SetData(TYPE_NORTHREND_BEASTS, SNAKES_SPECIAL);
             }
+            else
+                done();
         }
     }
 
@@ -561,7 +570,8 @@ struct boss_jormungarAI : public ScriptedAI
     }
 };
 
-class boss_acidmaw : public CreatureScript
+
+class boss_acidmaw : public CreatureScript
 {
     public:
     boss_acidmaw() : CreatureScript("boss_acidmaw") { }
@@ -594,7 +604,8 @@ struct boss_jormungarAI : public ScriptedAI
 
 };
 
-class boss_dreadscale : public CreatureScript
+
+class boss_dreadscale : public CreatureScript
 {
 public:
     boss_dreadscale() : CreatureScript("boss_dreadscale") { }
@@ -626,7 +637,8 @@ public:
 
 };
 
-class mob_slime_pool : public CreatureScript
+
+class mob_slime_pool : public CreatureScript
 {
 public:
     mob_slime_pool() : CreatureScript("mob_slime_pool") { }
@@ -661,7 +673,8 @@ public:
     };
 
 };
-class boss_icehowl : public CreatureScript
+
+class boss_icehowl : public CreatureScript
 {
 public:
     boss_icehowl() : CreatureScript("boss_icehowl") { }

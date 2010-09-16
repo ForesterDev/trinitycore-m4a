@@ -40,6 +40,7 @@ if( WIN32 )
     ${sources_Debugging}
     worldserver.rc
   )
+  set_ignore_precompiled_header(${sources_Debugging})
 endif()
 
 include_directories(
@@ -133,6 +134,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/game/World
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/CommandLine
+  ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders
   ${CMAKE_CURRENT_SOURCE_DIR}/RemoteAccess
   ${CMAKE_CURRENT_SOURCE_DIR}/TCSoap
   ${CMAKE_CURRENT_SOURCE_DIR}/WorldThread
@@ -196,6 +198,7 @@ if( USE_COREPCH )
   if(CMAKE_COMPILER_IS_GNUCXX)
     add_precompiled_header(worldserver ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/worldPCH.h)
   elseif(MSVC)
-    add_native_precompiled_header(worldserver ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/worldPCH)
+    set_precompiled_header(worldserver "worldPCH.h"
+      "${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/worldPCH.cpp")
   endif()
 endif()

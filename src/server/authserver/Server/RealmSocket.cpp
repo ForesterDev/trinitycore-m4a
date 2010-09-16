@@ -22,6 +22,7 @@
   \ingroup realmd
   */
 
+#include "authPCH.h"
 #include "RealmSocket.h"
 
 #include "Log.h"

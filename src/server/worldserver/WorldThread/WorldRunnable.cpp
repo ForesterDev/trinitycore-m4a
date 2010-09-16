@@ -22,6 +22,7 @@
     \ingroup Trinityd
 */
 
+#include "worldPCH.h"
 #include "Common.h"
 #include "ObjectAccessor.h"
 #include "World.h"

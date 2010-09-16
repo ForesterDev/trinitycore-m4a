@@ -22,6 +22,7 @@
     \ingroup Trinityd
 */
 
+#include "worldPCH.h"
 #include <ace/Sig_Handler.h>
 
 #include "Common.h"

@@ -17,7 +17,9 @@ if((NOT USE_COREPCH) AND (NOT USE_SCRIPTPCH))
   message(STATUS "- MSVC: PCH not used - enabled multithreaded compiling")
 endif()
 
-if(${PLATFORM} STREQUAL "X64")
+if(${PLATFORM} STREQUAL "X86")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
+elseif(${PLATFORM} STREQUAL "X64")
   # This definition is necessary to work around a bug with Intellisense described
   # here: http://tinyurl.com/2cb428.  Syntax highlighting is important for proper
   # debugger functionality.

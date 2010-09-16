@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "collisionPCH.h"
 #include "WorldModel.h"
 #include "VMapDefinitions.h"
 #include "MapTree.h"

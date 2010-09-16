@@ -22,6 +22,7 @@
 /// @{
 /// \file
 
+#include "authPCH.h"
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 

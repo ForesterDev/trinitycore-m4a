@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "sharedPCH.h"
 #include "Config.h"
 #include <ace/Configuration_Import_Export.h>
 
