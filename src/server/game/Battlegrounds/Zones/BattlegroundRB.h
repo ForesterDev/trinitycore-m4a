@@ -21,22 +21,33 @@
 #ifndef __BATTLEGROUNDRB_H
 #define __BATTLEGROUNDRB_H
 
-class BattleGround;
+#include <memory>
+#include <array>
+#include "Battleground.h"
 
-class BattleGroundRBScore : public BattleGroundScore
+class Battleground;
+
+class BattlegroundRBScore : public BattlegroundScore
 {
     public:
-        BattleGroundRBScore() {};
-        virtual ~BattleGroundRBScore() {};
+        BattlegroundRBScore() {};
+        virtual ~BattlegroundRBScore() {};
+
+        std::pair<std::size_t, Stat_data_type> stat_data() const
+        {
+            std::array<int32, max_stats> d;
+            auto first = d.begin(), it = first;
+            return std::make_pair(it - first, std::move(d));
+        }
 };
 
-class BattleGroundRB : public BattleGround
+class BattlegroundRB : public Battleground
 {
-    friend class BattleGroundMgr;
+    friend class BattlegroundMgr;
 
     public:
-        BattleGroundRB();
-        ~BattleGroundRB();
+        BattlegroundRB();
+        ~BattlegroundRB();
         void Update(uint32 diff);
 
         virtual void AddPlayer(Player *plr);

@@ -250,10 +250,16 @@ class Channel
 
     public:
         uint32 m_Team;
-        Channel(const std::string& name, uint32 channel_id, uint32 Team = 0);
+        Channel(const std::string &name, uint32 channel_id, uint32 Team = 0,
+                bool custom = false);
         std::string GetName() const { return m_name; }
         uint32 GetChannelId() const { return m_channelId; }
-        bool IsConstant() const { return m_channelId != 0; }
+
+        bool IsConstant() const
+        {
+            return !(m_flags & CHANNEL_FLAG_CUSTOM);
+        }
+
         bool IsAnnounce() const { return m_announce; }
         bool IsLFG() const { return GetFlags() & CHANNEL_FLAG_LFG; }
         std::string GetPassword() const { return m_password; }
@@ -287,6 +293,11 @@ class Channel
         void DeVoice(uint64 guid1, uint64 guid2);
         void JoinNotify(uint64 guid);                                           // invisible notify
         void LeaveNotify(uint64 guid);                                          // invisible notify
+
+private:
+    bool player_level_ok(const Player &p) const;
+
+    bool is_global;
 };
 #endif
 

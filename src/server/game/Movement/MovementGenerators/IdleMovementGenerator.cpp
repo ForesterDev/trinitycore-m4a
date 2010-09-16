@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "IdleMovementGenerator.h"
 #include "CreatureAI.h"
 #include "Creature.h"
@@ -57,13 +58,13 @@ bool RotateMovementGenerator::Update(Unit& owner, const uint32& diff)
     float angle = owner.GetOrientation();
     if (m_direction == ROTATE_DIRECTION_LEFT)
     {
-        angle += (float)diff * M_PI * 2 / m_maxDuration;
-        while (angle >= M_PI * 2) angle -= M_PI * 2;
+        angle += (float)diff * static_cast<float>(M_PI * 2) / m_maxDuration;
+        while (angle >= static_cast<float>(M_PI * 2)) angle -= static_cast<float>(M_PI * 2);
     }
     else
     {
-        angle -= (float)diff * M_PI * 2 / m_maxDuration;
-        while (angle < 0) angle += M_PI * 2;
+        angle -= (float)diff * static_cast<float>(M_PI * 2) / m_maxDuration;
+        while (angle < 0) angle += static_cast<float>(M_PI * 2);
     }
     owner.SetOrientation(angle);
     owner.SendMovementFlagUpdate(); // this is a hack. we do not have anything correct to send in the beginning

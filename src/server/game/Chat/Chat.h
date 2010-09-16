@@ -22,11 +22,13 @@
 #define TRINITYCORE_CHAT_H
 
 #include "SharedDefines.h"
+#include "Player.h"
 
 #include <vector>
 
 class ChatHandler;
 class WorldSession;
+class WorldObject;
 class Creature;
 class Player;
 class Unit;
@@ -136,6 +138,8 @@ class ChatHandler
         bool HandleCastTargetCommand(const char *args);
 
         bool HandleCharacterCustomizeCommand(const char * args);
+        bool HandleCharacterChangeFactionCommand(const char * args);
+        bool HandleCharacterChangeRaceCommand(const char * args);
         bool HandleCharacterDeletedDeleteCommand(const char* args);
         bool HandleCharacterDeletedListCommand(const char* args);
         bool HandleCharacterDeletedRestoreCommand(const char* args);
@@ -346,6 +350,7 @@ class ChatHandler
         bool HandleReloadAllCommand(const char* args);
         bool HandleReloadAllAchievementCommand(const char* args);
         bool HandleReloadAllAreaCommand(const char* args);
+        bool HandleReloadAllGossipsCommand(const char* args);
         bool HandleReloadAllItemCommand(const char* args);
         bool HandleReloadAllLootCommand(const char* args);
         bool HandleReloadAllNpcCommand(const char* args);
@@ -379,13 +384,17 @@ class ChatHandler
         bool HandleReloadGameTeleCommand(const char* args);
         bool HandleReloadGossipMenuCommand(const char* args);
         bool HandleReloadGossipMenuOptionCommand(const char* args);
+        bool HandleReloadGossipScriptsCommand(const char* args);
         bool HandleReloadGOQuestRelationsCommand(const char* args);
         bool HandleReloadGOQuestInvRelationsCommand(const char* args);
         bool HandleReloadItemEnchantementsCommand(const char* args);
         bool HandleReloadItemSetNamesCommand(const char* args);
+        bool HandleReloadLfgEncountersCommand(const char* args);
+        bool HandleReloadLfgRewardsCommand(const char* args);
         bool HandleReloadLocalesAchievementRewardCommand(const char* args);
         bool HandleReloadLocalesCreatureCommand(const char* args);
         bool HandleReloadLocalesGameobjectCommand(const char* args);
+        bool HandleReloadLocalesGossipMenuOptionCommand(const char* args);
         bool HandleReloadLocalesItemCommand(const char* args);
         bool HandleReloadLocalesItemSetNameCommand(const char* args);
         bool HandleReloadLocalesNpcTextCommand(const char* args);
@@ -415,6 +424,7 @@ class ChatHandler
         bool HandleReloadSpellClickSpellsCommand(const char* args);
         bool HandleReloadQuestAreaTriggersCommand(const char* args);
         bool HandleReloadQuestEndScriptsCommand(const char* args);
+        bool HandleReloadQuestPOICommand(const char* args);
         bool HandleReloadQuestStartScriptsCommand(const char* args);
         bool HandleReloadQuestTemplateCommand(const char* args);
         bool HandleReloadReservedNameCommand(const char*);
@@ -499,9 +509,9 @@ class ChatHandler
         bool HandleDismountCommand(const char* args);
         bool HandleSaveCommand(const char* args);
 
-        bool HandleNamegoCommand(const char* args);
-        bool HandleGonameCommand(const char* args);
-        bool HandleGroupgoCommand(const char* args);
+        bool HandleSummonCommand(const char* args);
+        bool HandleAppearCommand(const char* args);
+        bool HandleGroupSummonCommand(const char* args);
         bool HandleRecallCommand(const char* args);
         bool HandleAnnounceCommand(const char* args);
         bool HandleNotifyCommand(const char* args);
@@ -560,6 +570,7 @@ class ChatHandler
         bool HandleGMTicketListCommand(const char* args);
         bool HandleGMTicketListOnlineCommand(const char* args);
         bool HandleGMTicketListClosedCommand(const char* args);
+        bool HandleGMTicketListEscalatedCommand(const char* args);
         bool HandleGMTicketGetByIdCommand(const char* args);
         bool HandleGMTicketGetByNameCommand(const char* args);
         bool HandleGMTicketCloseByIdCommand(const char* args);
@@ -568,6 +579,11 @@ class ChatHandler
         bool HandleGMTicketCommentCommand(const char* args);
         bool HandleGMTicketDeleteByIdCommand(const char* args);
         bool HandleGMTicketReloadCommand(const char*);
+        bool HandleToggleGMTicketSystem(const char* args);
+        bool HandleGMTicketEscalateCommand(const char* args);
+        bool HandleGMTicketCompleteCommand(const char* args);
+        bool HandleGMTicketResponseAppendCommand(const char* args);
+        bool HandleGMTicketResponseAppendLnCommand(const char* args);
 
         bool HandleMaxSkillCommand(const char* args);
         bool HandleSetSkillCommand(const char* args);

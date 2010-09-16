@@ -87,6 +87,12 @@ enum Races
     (1<<(RACE_GNOME-1))   |(1<<(RACE_TROLL-1))        |(1<<(RACE_BLOODELF-1))| \
     (1<<(RACE_DRAENEI-1)))
 
+#define RACEMASK_ALLIANCE \
+    ((1<<(RACE_HUMAN-1)) | (1<<(RACE_DWARF-1)) | (1<<(RACE_NIGHTELF-1)) | \
+    (1<<(RACE_GNOME-1)) | (1<<(RACE_DRAENEI-1)))
+
+#define RACEMASK_HORDE RACEMASK_ALL_PLAYABLE & ~RACEMASK_ALLIANCE
+
 // Class value is index in ChrClasses.dbc
 enum Classes
 {
@@ -323,7 +329,7 @@ const uint32 ItemQualityColors[MAX_ITEM_QUALITY] = {
 #define SPELL_ATTR_EX_ENABLE_AT_DODGE             0x40000000            // 30 Overpower, Wolverine Bite
 #define SPELL_ATTR_EX_UNK31                       0x80000000            // 31
 
-#define SPELL_ATTR_EX2_UNK0                       0x00000001            // 0
+#define SPELL_ATTR_EX2_ALLOW_DEAD_TARGET          0x00000001            // 0
 #define SPELL_ATTR_EX2_UNK1                       0x00000002            // 1 ? many triggered spells have this flag
 #define SPELL_ATTR_EX2_CANT_REFLECTED             0x00000004            // 2 ? used for detect can or not spell reflected
 #define SPELL_ATTR_EX2_UNK3                       0x00000008            // 3
@@ -368,7 +374,7 @@ const uint32 ItemQualityColors[MAX_ITEM_QUALITY] = {
 #define SPELL_ATTR_EX3_TRIGGERED_CAN_TRIGGER_2    0x00000200            // 9 triggered from effect?
 #define SPELL_ATTR_EX3_MAIN_HAND                  0x00000400            // 10 Main hand weapon required
 #define SPELL_ATTR_EX3_BATTLEGROUND               0x00000800            // 11 Can casted only on battleground
-#define SPELL_ATTR_EX3_UNK12                      0x00001000            // 12
+#define SPELL_ATTR_EX3_REQUIRE_DEAD_TARGET        0x00001000            // 12
 #define SPELL_ATTR_EX3_UNK13                      0x00002000            // 13
 #define SPELL_ATTR_EX3_UNK14                      0x00004000            // 14 "Honorless Target" only this spells have this flag
 #define SPELL_ATTR_EX3_UNK15                      0x00008000            // 15 Auto Shoot, Shoot, Throw,  - this is autoshot flag
@@ -738,7 +744,7 @@ enum SpellEffects
     SPELL_EFFECT_NORMALIZED_WEAPON_DMG     = 121,
     SPELL_EFFECT_122                       = 122,
     SPELL_EFFECT_SEND_TAXI                 = 123,
-    SPELL_EFFECT_PLAYER_PULL               = 124,
+    SPELL_EFFECT_PULL_TOWARDS              = 124,
     SPELL_EFFECT_MODIFY_THREAT_PERCENT     = 125,
     SPELL_EFFECT_STEAL_BENEFICIAL_BUFF     = 126,
     SPELL_EFFECT_PROSPECTING               = 127,
@@ -759,7 +765,7 @@ enum SpellEffects
     SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE  = 142,
     SPELL_EFFECT_APPLY_AREA_AURA_OWNER     = 143,
     SPELL_EFFECT_KNOCK_BACK_DEST           = 144,
-    SPELL_EFFECT_145                       = 145,
+    SPELL_EFFECT_PULL_TOWARDS_DEST         = 145,
     SPELL_EFFECT_ACTIVATE_RUNE             = 146,
     SPELL_EFFECT_QUEST_FAIL                = 147,
     SPELL_EFFECT_148                       = 148,
@@ -1173,8 +1179,8 @@ enum Targets
     TARGET_DEST_CASTER_RADIUS          = 73,
     TARGET_DEST_TARGET_RANDOM          = 74,
     TARGET_DEST_TARGET_RADIUS          = 75,
-    TARGET_DEST_CHANNEL                = 76,
-    TARGET_UNIT_CHANNEL                = 77,
+    TARGET_DEST_CHANNEL_TARGET         = 76,
+    TARGET_UNIT_CHANNEL_TARGET         = 77,
     TARGET_DEST_DEST_FRONT             = 78,
     TARGET_DEST_DEST_BACK              = 79,
     TARGET_DEST_DEST_RIGHT             = 80,
@@ -1187,9 +1193,9 @@ enum Targets
     TARGET_DEST_DEST                   = 87,
     TARGET_DEST_DYNOBJ_NONE            = 88,
     TARGET_DEST_TRAJ                   = 89,
-    TARGET_UNIT_MINIPET                = 90,
+    TARGET_UNIT_TARGET_PUPPET          = 90,
     TARGET_DEST_DEST_RANDOM_DIR_DIST   = 91,
-    TARGET_UNIT_UNK_92                 = 92,
+    TARGET_UNIT_SUMMONER               = 92,
     TARGET_CORPSE_AREA_ENEMY_PLAYER_SRC= 93, // TODO
     TARGET_UNIT_VEHICLE                = 94,
     TARGET_UNIT_DRIVER                 = 95,
@@ -1203,13 +1209,12 @@ enum Targets
     TARGET_UNIT_PASSENGER_7            = 103,
     TARGET_UNIT_AREA_PATH              = 104,
     TARGET_UNIT_UNK_105                = 105, // 1 spell
-    TARGET_DEST_CHANNEL_TARGET         = 106, // TODO
+    TARGET_DEST_CHANNEL_CASTER         = 106,
     TARGET_UNK_AREA_UNK_DST_107        = 107, // not enough info - only generic spells avalible
-    TARGET_GAMEOBJECT_AREA_PATH        = 108, // TODO
+    TARGET_GAMEOBJECT_AREA_PATH        = 108,
     TARGET_DEST_UNK_110                = 110, // some kind of traj?
+    TOTAL_SPELL_TARGETS
 };
-
-#define TOTAL_SPELL_TARGETS              105
 
 enum SpellMissInfo
 {
@@ -2715,7 +2720,7 @@ enum BanReturn
 };
 
 // indexes of BattlemasterList.dbc
-enum BattleGroundTypeId
+enum BattlegroundTypeId
 {
     BATTLEGROUND_TYPE_NONE     = 0,
     BATTLEGROUND_AV            = 1,

@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 //Basic headers
+#include "gamePCH.h"
 #include "WaypointMovementGenerator.h"
 #include "DestinationHolderImp.h"
 //Extended headers
@@ -262,8 +263,11 @@ void FlightPathMovementGenerator::Finalize(Player & player)
 {
     player.clearUnitState(UNIT_STAT_IN_FLIGHT);
 
-    float x, y, z;
+    float x = 0;
+    float y = 0;
+    float z = 0;
     i_destinationHolder.GetLocationNow(player.GetBaseMap(), x, y, z);
+    player.Anti__SetLastTeleTime(time(NULL));
     player.SetPosition(x, y, z, player.GetOrientation());
 
 }
@@ -286,13 +290,13 @@ bool FlightPathMovementGenerator::Update(Player &player, const uint32 &diff)
                 {
                     DoEventIfAny(player,(*i_path)[i_currentNode], true);
 
-                    DEBUG_LOG("loading node %u for player %s", i_currentNode, player.GetName());
+                    sLog.outStaticDebug("loading node %u for player %s", i_currentNode, player.GetName());
                     if ((*i_path)[i_currentNode].mapid == curMap)
                     {
                         // do not send movement, it was sent already
                         i_destinationHolder.SetDestination(traveller, (*i_path)[i_currentNode].x, (*i_path)[i_currentNode].y, (*i_path)[i_currentNode].z, false);
                     }
-                    
+
                      // check if it's time to preload the flightmaster grid at path end
                     if (i_currentNode == m_preloadTargetNode)
                         PreloadEndGrid();

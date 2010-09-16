@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "Creature.h"
 #include "CreatureGroups.h"
 #include "ObjectMgr.h"
@@ -93,7 +94,7 @@ void CreatureGroupManager::LoadCreatureFormations()
         return;
     }
 
-    uint32 total_records = result->GetRowCount();
+    uint64 total_records = result->GetRowCount();
     barGoLink bar(total_records);
     Field *fields;
 
@@ -145,7 +146,7 @@ void CreatureGroupManager::LoadCreatureFormations()
     while (result->NextRow()) ;
 
     sLog.outString();
-    sLog.outString(">> Loaded %u creatures in formations", total_records);
+    sLog.outString(">> Loaded " UI64FMTD " creatures in formations", total_records);
     sLog.outString();
 }
 

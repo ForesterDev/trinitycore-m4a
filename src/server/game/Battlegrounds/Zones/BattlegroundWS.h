@@ -21,7 +21,9 @@
 #ifndef __BATTLEGROUNDWS_H
 #define __BATTLEGROUNDWS_H
 
-#include "BattleGround.h"
+#include <memory>
+#include <array>
+#include "Battleground.h"
 
 enum BG_WS_TimerOrScore
 {
@@ -47,8 +49,10 @@ enum BG_WS_SpellId
 {
     BG_WS_SPELL_WARSONG_FLAG            = 23333,
     BG_WS_SPELL_WARSONG_FLAG_DROPPED    = 23334,
+    BG_WS_SPELL_WARSONG_FLAG_PICKED     = 61266,    // fake spell, does not exist but used as timer start event
     BG_WS_SPELL_SILVERWING_FLAG         = 23335,
     BG_WS_SPELL_SILVERWING_FLAG_DROPPED = 23336,
+    BG_WS_SPELL_SILVERWING_FLAG_PICKED  = 61265,    // fake spell, does not exist but used as timer start event
     BG_WS_SPELL_FOCUSED_ASSAULT         = 46392,
     BG_WS_SPELL_BRUTAL_ASSAULT          = 46393
 };
@@ -144,23 +148,35 @@ enum BG_WS_Objectives
     WS_OBJECTIVE_RETURN_FLAG    = 44
 };
 
-class BattleGroundWGScore : public BattleGroundScore
+#define WS_EVENT_START_BATTLE   8563
+
+class BattlegroundWGScore : public BattlegroundScore
 {
     public:
-        BattleGroundWGScore() : FlagCaptures(0), FlagReturns(0) {};
-        virtual ~BattleGroundWGScore() {};
+        BattlegroundWGScore() : FlagCaptures(0), FlagReturns(0) {};
+        virtual ~BattlegroundWGScore() {};
+
+        std::pair<std::size_t, Stat_data_type> stat_data() const
+        {
+            std::array<int32, max_stats> d;
+            auto first = d.begin(), it = first;
+            *it++ = FlagCaptures;
+            *it++ = FlagReturns;
+            return std::make_pair(it - first, std::move(d));
+        }
+
         uint32 FlagCaptures;
         uint32 FlagReturns;
 };
 
-class BattleGroundWS : public BattleGround
+class BattlegroundWS : public Battleground
 {
-    friend class BattleGroundMgr;
+    friend class BattlegroundMgr;
 
     public:
         /* Construction */
-        BattleGroundWS();
-        ~BattleGroundWS();
+        BattlegroundWS();
+        ~BattlegroundWS();
         void Update(uint32 diff);
 
         /* inherited from BattlegroundClass */
@@ -191,9 +207,9 @@ class BattleGroundWS : public BattleGround
         void RemovePlayer(Player *plr, uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         void HandleKillPlayer(Player *player, Player *killer);
-        bool SetupBattleGround();
+        bool SetupBattleground();
         virtual void Reset();
-        void EndBattleGround(uint32 winner);
+        void EndBattleground(uint32 winner);
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
 
         void UpdateFlagState(uint32 team, uint32 value);

@@ -18,12 +18,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "World.h"
 #include "ObjectMgr.h"
+#include "TicketMgr.h"
 #include "Player.h"
 #include "AccountMgr.h"
 #include "Opcodes.h"
@@ -129,7 +131,7 @@ bool ChatHandler::HandleNpcWhisperCommand(const char* args)
     uint64 receiver_guid= atol(receiver_str);
 
     // check online security
-    if (HasLowerSecurity(objmgr.GetPlayer(receiver_guid), 0))
+    if (HasLowerSecurity(sObjectMgr.GetPlayer(receiver_guid), 0))
         return false;
 
     pCreature->MonsterWhisper(text,receiver_guid);
@@ -288,377 +290,6 @@ bool ChatHandler::HandleGMChatCommand(const char* args)
     return false;
 }
 
-std::string ChatHandler::PGetParseString(int32 entry, ...)
-{
-        const char *format = GetTrinityString(entry);
-        va_list ap;
-        char str [1024];
-        va_start(ap, entry);
-        vsnprintf(str,1024,format, ap);
-        va_end(ap);
-        return (std::string)str;
-}
-
-bool ChatHandler::HandleGMTicketListCommand(const char* /*args*/)
-{
-    SendSysMessage(LANG_COMMAND_TICKETSHOWLIST);
-    for (GmTicketList::iterator itr = objmgr.m_GMTicketList.begin(); itr != objmgr.m_GMTicketList.end(); ++itr)
-    {
-        if ((*itr)->closed != 0)
-            continue;
-        std::string gmname;
-        std::stringstream ss;
-        ss << PGetParseString(LANG_COMMAND_TICKETLISTGUID, (*itr)->guid);
-        ss << PGetParseString(LANG_COMMAND_TICKETLISTNAME, (*itr)->name.c_str());
-        ss << PGetParseString(LANG_COMMAND_TICKETLISTAGECREATE, (secsToTimeString(time(NULL) - (*itr)->createtime, true, false)).c_str());
-        ss << PGetParseString(LANG_COMMAND_TICKETLISTAGE, (secsToTimeString(time(NULL) - (*itr)->timestamp, true, false)).c_str());
-        if (objmgr.GetPlayerNameByGUID((*itr)->assignedToGM, gmname))
-        {
-            ss << PGetParseString(LANG_COMMAND_TICKETLISTASSIGNEDTO, gmname.c_str());
-        }
-        SendSysMessage(ss.str().c_str());
-    }
-    return true;
-}
-
-bool ChatHandler::HandleGMTicketListOnlineCommand(const char* /*args*/)
-{
-    SendSysMessage(LANG_COMMAND_TICKETSHOWONLINELIST);
-    for (GmTicketList::iterator itr = objmgr.m_GMTicketList.begin(); itr != objmgr.m_GMTicketList.end(); ++itr)
-    {
-        if ((*itr)->closed != 0 || !objmgr.GetPlayer((*itr)->playerGuid))
-            continue;
-
-        std::string gmname;
-        std::stringstream ss;
-        ss << PGetParseString(LANG_COMMAND_TICKETLISTGUID, (*itr)->guid);
-        ss << PGetParseString(LANG_COMMAND_TICKETLISTNAME, (*itr)->name.c_str());
-        ss << PGetParseString(LANG_COMMAND_TICKETLISTAGECREATE, (secsToTimeString(time(NULL) - (*itr)->createtime, true, false)).c_str());
-        ss << PGetParseString(LANG_COMMAND_TICKETLISTAGE, (secsToTimeString(time(NULL) - (*itr)->timestamp, true, false)).c_str());
-        if (objmgr.GetPlayerNameByGUID((*itr)->assignedToGM, gmname))
-        {
-            ss << PGetParseString(LANG_COMMAND_TICKETLISTASSIGNEDTO, gmname.c_str());
-        }
-        SendSysMessage(ss.str().c_str());
-    }
-    return true;
-}
-
-bool ChatHandler::HandleGMTicketListClosedCommand(const char* /*args*/)
-{
-    SendSysMessage(LANG_COMMAND_TICKETSHOWCLOSEDLIST);
-    for (GmTicketList::iterator itr = objmgr.m_GMTicketList.begin(); itr != objmgr.m_GMTicketList.end(); ++itr)
-    {
-        if ((*itr)->closed == 0)
-            continue;
-
-        std::string gmname;
-        std::stringstream ss;
-        ss << PGetParseString(LANG_COMMAND_TICKETLISTGUID, (*itr)->guid);
-        ss << PGetParseString(LANG_COMMAND_TICKETLISTNAME, (*itr)->name.c_str());
-        ss << PGetParseString(LANG_COMMAND_TICKETLISTAGECREATE, (secsToTimeString(time(NULL) - (*itr)->createtime, true, false)).c_str());
-        ss << PGetParseString(LANG_COMMAND_TICKETLISTAGE, (secsToTimeString(time(NULL) - (*itr)->timestamp, true, false)).c_str());
-        if (objmgr.GetPlayerNameByGUID((*itr)->assignedToGM, gmname))
-        {
-            ss << PGetParseString(LANG_COMMAND_TICKETLISTASSIGNEDTO, gmname.c_str());
-        }
-        SendSysMessage(ss.str().c_str());
-    }
-    return true;
-}
-
-bool ChatHandler::HandleGMTicketGetByIdCommand(const char* args)
-{
-    if (!*args)
-        return false;
-
-    uint64 tguid = atoi(args);
-    GM_Ticket *ticket = objmgr.GetGMTicket(tguid);
-    if (!ticket || ticket->closed != 0)
-    {
-        SendSysMessage(LANG_COMMAND_TICKETNOTEXIST);
-        return true;
-    }
-
-    std::string gmname;
-    std::stringstream ss;
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTGUID, ticket->guid);
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTNAME, ticket->name.c_str());
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTAGECREATE, (secsToTimeString(time(NULL) - ticket->createtime, true, false)).c_str());
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTAGE, (secsToTimeString(time(NULL) - ticket->timestamp, true, false)).c_str());
-    if (objmgr.GetPlayerNameByGUID(ticket->assignedToGM, gmname))
-    {
-        ss << PGetParseString(LANG_COMMAND_TICKETLISTASSIGNEDTO, gmname.c_str());
-    }
-    ss <<  PGetParseString(LANG_COMMAND_TICKETLISTMESSAGE, ticket->message.c_str());
-    if (ticket->comment != "")
-    {
-        ss <<  PGetParseString(LANG_COMMAND_TICKETLISTCOMMENT, ticket->comment.c_str());
-    }
-    SendSysMessage(ss.str().c_str());
-    return true;
-}
-
-bool ChatHandler::HandleGMTicketGetByNameCommand(const char* args)
-{
-    if (!*args)
-        return false;
-
-    std::string name = (char*)args;
-    normalizePlayerName(name);
-
-    Player *plr = objmgr.GetPlayer(name.c_str());
-    if (!plr)
-    {
-        SendSysMessage(LANG_NO_PLAYERS_FOUND);
-        return true;
-    }
-
-    GM_Ticket *ticket = objmgr.GetGMTicketByPlayer(plr->GetGUID());
-    if (!ticket)
-    {
-        SendSysMessage(LANG_COMMAND_TICKETNOTEXIST);
-        return true;
-    }
-
-    std::string gmname;
-    std::stringstream ss;
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTGUID, ticket->guid);
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTNAME, ticket->name.c_str());
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTAGECREATE, (secsToTimeString(time(NULL) - ticket->createtime, true, false)).c_str());
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTAGE, (secsToTimeString(time(NULL) - ticket->timestamp, true, false)).c_str());
-    if (objmgr.GetPlayerNameByGUID(ticket->assignedToGM, gmname))
-    {
-        ss << PGetParseString(LANG_COMMAND_TICKETLISTASSIGNEDTO, gmname.c_str());
-    }
-    ss <<  PGetParseString(LANG_COMMAND_TICKETLISTMESSAGE, ticket->message.c_str());
-    if (ticket->comment != "")
-    {
-        ss <<  PGetParseString(LANG_COMMAND_TICKETLISTCOMMENT, ticket->comment.c_str());
-    }
-    SendSysMessage(ss.str().c_str());
-    return true;
-}
-
-bool ChatHandler::HandleGMTicketCloseByIdCommand(const char* args)
-{
-    if (!*args)
-        return false;
-
-    uint64 tguid = atoi(args);
-    GM_Ticket *ticket = objmgr.GetGMTicket(tguid);
-    if (!ticket || ticket->closed != 0)
-    {
-        SendSysMessage(LANG_COMMAND_TICKETNOTEXIST);
-        return true;
-    }
-    if (ticket && ticket->assignedToGM != 0 && ticket->assignedToGM != m_session->GetPlayer()->GetGUID())
-    {
-        PSendSysMessage(LANG_COMMAND_TICKETCANNOTCLOSE, ticket->guid);
-        return true;
-    }
-    std::stringstream ss;
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTGUID, ticket->guid);
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTNAME, ticket->name.c_str());
-    ss << PGetParseString(LANG_COMMAND_TICKETCLOSED, m_session->GetPlayer()->GetName());
-    SendGlobalGMSysMessage(ss.str().c_str());
-    Player *plr = objmgr.GetPlayer(ticket->playerGuid);
-    objmgr.RemoveGMTicket(ticket, m_session->GetPlayer()->GetGUID());
-
-    if (!plr || !plr->IsInWorld())
-        return true;
-
-    // send abandon ticket
-    WorldPacket data(SMSG_GMTICKET_DELETETICKET, 4);
-    data << uint32(9);
-    plr->GetSession()->SendPacket(&data);
-    return true;
-}
-
-bool ChatHandler::HandleGMTicketAssignToCommand(const char* args)
-{
-    if (!*args)
-        return false;
-
-    char* tguid = strtok((char*)args, " ");
-    uint64 ticketGuid = atoi(tguid);
-    char* targetgm = strtok(NULL, " ");
-
-    if (!targetgm)
-        return false;
-
-    std::string targm = targetgm;
-    if (!normalizePlayerName(targm))
-        return false;
-
-    Player *cplr = m_session->GetPlayer();
-    GM_Ticket *ticket = objmgr.GetGMTicket(ticketGuid);
-
-    if (!ticket || ticket->closed != 0)
-    {
-        SendSysMessage(LANG_COMMAND_TICKETNOTEXIST);
-        return true;
-    }
-
-    uint64 tarGUID = objmgr.GetPlayerGUIDByName(targm.c_str());
-    uint64 accid = objmgr.GetPlayerAccountIdByGUID(tarGUID);
-    uint32 gmlevel = accmgr.GetSecurity(accid, realmID);
-
-    if (!tarGUID || gmlevel == SEC_PLAYER)
-    {
-        SendSysMessage(LANG_COMMAND_TICKETASSIGNERROR_A);
-        return true;
-    }
-
-    if (ticket->assignedToGM == tarGUID)
-    {
-        PSendSysMessage(LANG_COMMAND_TICKETASSIGNERROR_B, ticket->guid);
-        return true;
-    }
-
-    std::string gmname;
-    objmgr.GetPlayerNameByGUID(tarGUID, gmname);
-    if (ticket->assignedToGM != 0 && ticket->assignedToGM != cplr->GetGUID())
-    {
-        PSendSysMessage(LANG_COMMAND_TICKETALREADYASSIGNED, ticket->guid, gmname.c_str());
-        return true;
-    }
-
-    ticket->assignedToGM = tarGUID;
-    objmgr.AddOrUpdateGMTicket(*ticket);
-    std::stringstream ss;
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTGUID, ticket->guid);
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTNAME, ticket->name.c_str());
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTASSIGNEDTO, gmname.c_str());
-    SendGlobalGMSysMessage(ss.str().c_str());
-    return true;
-}
-
-bool ChatHandler::HandleGMTicketUnAssignCommand(const char* args)
-{
-    if (!*args)
-        return false;
-
-    uint64 ticketGuid = atoi(args);
-    Player *cplr = m_session->GetPlayer();
-    GM_Ticket *ticket = objmgr.GetGMTicket(ticketGuid);
-
-    if (!ticket|| ticket->closed != 0)
-    {
-        SendSysMessage(LANG_COMMAND_TICKETNOTEXIST);
-        return true;
-    }
-    if (ticket->assignedToGM == 0)
-    {
-        PSendSysMessage(LANG_COMMAND_TICKETNOTASSIGNED, ticket->guid);
-        return true;
-    }
-
-    std::string gmname;
-    objmgr.GetPlayerNameByGUID(ticket->assignedToGM, gmname);
-    Player *plr = objmgr.GetPlayer(ticket->assignedToGM);
-    if (plr && plr->IsInWorld() && plr->GetSession()->GetSecurity() > cplr->GetSession()->GetSecurity())
-    {
-        SendSysMessage(LANG_COMMAND_TICKETUNASSIGNSECURITY);
-        return true;
-    }
-
-    std::stringstream ss;
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTGUID, ticket->guid);
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTNAME, ticket->name.c_str());
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTASSIGNEDTO, gmname.c_str());
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTUNASSIGNED, cplr->GetName());
-    SendGlobalGMSysMessage(ss.str().c_str());
-    ticket->assignedToGM = 0;
-    objmgr.AddOrUpdateGMTicket(*ticket);
-    return true;
-}
-
-bool ChatHandler::HandleGMTicketCommentCommand(const char* args)
-{
-    if (!*args)
-        return false;
-
-    char* tguid = strtok((char*)args, " ");
-    uint64 ticketGuid = atoi(tguid);
-    char* comment = strtok(NULL, "\n");
-
-    if (!comment)
-        return false;
-
-    Player *cplr = m_session->GetPlayer();
-    GM_Ticket *ticket = objmgr.GetGMTicket(ticketGuid);
-
-    if (!ticket || ticket->closed != 0)
-    {
-        PSendSysMessage(LANG_COMMAND_TICKETNOTEXIST);
-        return true;
-    }
-    if (ticket->assignedToGM != 0 && ticket->assignedToGM != cplr->GetGUID())
-    {
-        PSendSysMessage(LANG_COMMAND_TICKETALREADYASSIGNED, ticket->guid);
-        return true;
-    }
-
-    std::string gmname;
-    objmgr.GetPlayerNameByGUID(ticket->assignedToGM, gmname);
-    ticket->comment = comment;
-    objmgr.AddOrUpdateGMTicket(*ticket);
-    std::stringstream ss;
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTGUID, ticket->guid);
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTNAME, ticket->name.c_str());
-    if (objmgr.GetPlayerNameByGUID(ticket->assignedToGM, gmname))
-    {
-        ss << PGetParseString(LANG_COMMAND_TICKETLISTASSIGNEDTO, gmname.c_str());
-    }
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTADDCOMMENT, cplr->GetName(), ticket->comment.c_str());
-    SendGlobalGMSysMessage(ss.str().c_str());
-    return true;
-}
-
-bool ChatHandler::HandleGMTicketDeleteByIdCommand(const char* args)
-{
-    if (!*args)
-        return false;
-    uint64 ticketGuid = atoi(args);
-    GM_Ticket *ticket = objmgr.GetGMTicket(ticketGuid);
-
-    if (!ticket)
-    {
-        SendSysMessage(LANG_COMMAND_TICKETNOTEXIST);
-        return true;
-    }
-    if (ticket->closed == 0)
-    {
-        SendSysMessage(LANG_COMMAND_TICKETCLOSEFIRST);
-        return true;
-    }
-
-    std::stringstream ss;
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTGUID, ticket->guid);
-    ss << PGetParseString(LANG_COMMAND_TICKETLISTNAME, ticket->name.c_str());
-    ss << PGetParseString(LANG_COMMAND_TICKETDELETED, m_session->GetPlayer()->GetName());
-    SendGlobalGMSysMessage(ss.str().c_str());
-    Player *plr = objmgr.GetPlayer(ticket->playerGuid);
-    objmgr.RemoveGMTicket(ticket, -1, true);
-    if (plr && plr->IsInWorld())
-    {
-        // Force abandon ticket
-        WorldPacket data(SMSG_GMTICKET_DELETETICKET, 4);
-        data << uint32(9);
-        plr->GetSession()->SendPacket(&data);
-    }
-
-    ticket = NULL;
-    return true;
-}
-
-bool ChatHandler::HandleGMTicketReloadCommand(const char*)
-{
-    objmgr.LoadGMTickets();
-    return true;
-}
-
 //Enable\Dissable Invisible mode
 bool ChatHandler::HandleGMVisibleCommand(const char* args)
 {
@@ -737,8 +368,9 @@ bool ChatHandler::HandleGPSCommand(const char* args)
 
     GridPair p = Trinity::ComputeGridPair(obj->GetPositionX(), obj->GetPositionY());
 
-    int gx=63-p.x_coord;
-    int gy=63-p.y_coord;
+    // 63? WHY?
+    int gx = 63 - p.x_coord;
+    int gy = 63 - p.y_coord;
 
     uint32 have_map = Map::ExistMap(obj->GetMapId(),gx,gy) ? 1 : 0;
     uint32 have_vmap = Map::ExistVMap(obj->GetMapId(),gx,gy) ? 1 : 0;
@@ -748,7 +380,7 @@ bool ChatHandler::HandleGPSCommand(const char* args)
         if(map->IsOutdoors(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ()))
             PSendSysMessage("You are outdoors");
         else
-            PSendSysMessage("You are indoor");
+            PSendSysMessage("You are indoors");
     }
     else PSendSysMessage("no VMAP available for area info");
 
@@ -784,7 +416,7 @@ bool ChatHandler::HandleGPSCommand(const char* args)
 }
 
 //Summon Player
-bool ChatHandler::HandleNamegoCommand(const char* args)
+bool ChatHandler::HandleSummonCommand(const char* args)
 {
     Player* target;
     uint64 target_guid;
@@ -816,7 +448,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
 
         Map* pMap = m_session->GetPlayer()->GetMap();
 
-        if (pMap->IsBattleGroundOrArena())
+        if (pMap->IsBattlegroundOrArena())
         {
             // only allow if gm mode is on
             if (!_player->isGameMaster())
@@ -826,31 +458,22 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
                 return false;
             }
             // if both players are in different bgs
-            else if (target->GetBattleGroundId() && m_session->GetPlayer()->GetBattleGroundId() != target->GetBattleGroundId())
-            {
+            else if (target->GetBattlegroundId() && m_session->GetPlayer()->GetBattlegroundId() != target->GetBattlegroundId())
                 target->LeaveBattleground(false); // Note: should be changed so target gets no Deserter debuff
-                //PSendSysMessage(LANG_CANNOT_GO_TO_BG_FROM_BG,nameLink.c_str());
-                //SetSentErrorMessage(true);
-                //return false;
-            }
+
             // all's well, set bg id
             // when porting out from the bg, it will be reset to 0
-            target->SetBattleGroundId(m_session->GetPlayer()->GetBattleGroundId(), m_session->GetPlayer()->GetBattleGroundTypeId());
+            target->SetBattlegroundId(m_session->GetPlayer()->GetBattlegroundId(), m_session->GetPlayer()->GetBattlegroundTypeId());
             // remember current position as entry point for return at bg end teleportation
-            if (!target->GetMap()->IsBattleGroundOrArena())
-                target->SetBattleGroundEntryPoint();
+            if (!target->GetMap()->IsBattlegroundOrArena())
+                target->SetBattlegroundEntryPoint();
         }
         else if (pMap->IsDungeon())
         {
             Map* cMap = target->GetMap();
+
             if (cMap->Instanceable() && cMap->GetInstanceId() != pMap->GetInstanceId())
-            {
                 target->UnbindInstance(pMap->GetInstanceId(), target->GetDungeonDifficulty(), true);
-                // cannot summon from instance to instance
-                //PSendSysMessage(LANG_CANNOT_SUMMON_TO_INST,nameLink.c_str());
-                //SetSentErrorMessage(true);
-                //return false;
-            }
 
             // we are in instance, and can summon only player in our group with us as lead
             if (!m_session->GetPlayer()->GetGroup() || !target->GetGroup() ||
@@ -908,7 +531,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
 }
 
 //Teleport to Player
-bool ChatHandler::HandleGonameCommand(const char* args)
+bool ChatHandler::HandleAppearCommand(const char* args)
 {
     Player* target;
     uint64 target_guid;
@@ -933,7 +556,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
         std::string chrNameLink = playerLink(target_name);
 
         Map* cMap = target->GetMap();
-        if (cMap->IsBattleGroundOrArena())
+        if (cMap->IsBattlegroundOrArena())
         {
             // only allow if gm mode is on
             if (!_player->isGameMaster())
@@ -943,24 +566,18 @@ bool ChatHandler::HandleGonameCommand(const char* args)
                 return false;
             }
             // if both players are in different bgs
-            else if (_player->GetBattleGroundId() && _player->GetBattleGroundId() != target->GetBattleGroundId())
-            {
+            else if (_player->GetBattlegroundId() && _player->GetBattlegroundId() != target->GetBattlegroundId())
                 _player->LeaveBattleground(false); // Note: should be changed so _player gets no Deserter debuff
-                //PSendSysMessage(LANG_CANNOT_GO_TO_BG_FROM_BG,chrNameLink.c_str());
-                //SetSentErrorMessage(true);
-                //return false;
-            }
+
             // all's well, set bg id
             // when porting out from the bg, it will be reset to 0
-            _player->SetBattleGroundId(target->GetBattleGroundId(), target->GetBattleGroundTypeId());
+            _player->SetBattlegroundId(target->GetBattlegroundId(), target->GetBattlegroundTypeId());
             // remember current position as entry point for return at bg end teleportation
-            if (!_player->GetMap()->IsBattleGroundOrArena())
-                _player->SetBattleGroundEntryPoint();
+            if (!_player->GetMap()->IsBattlegroundOrArena())
+                _player->SetBattlegroundEntryPoint();
         }
         else if (cMap->IsDungeon())
         {
-            //Map* pMap = _player->GetMap();
-
             // we have to go to instance, and can go to player only if:
             //   1) we are in his group (either as leader or as member)
             //   2) we are not bound to any group and have GM mode on
@@ -994,7 +611,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
                 // if no bind exists, create a solo bind
                 InstanceGroupBind *gBind = group ? group->GetBoundInstance(target) : NULL;                // if no bind exists, create a solo bind
                 if (!gBind)
-                    if (InstanceSave *save = sInstanceSaveManager.GetInstanceSave(target->GetInstanceId()))
+                    if (InstanceSave *save = sInstanceSaveMgr.GetInstanceSave(target->GetInstanceId()))
                         _player->BindToInstance(save, !save->CanReset());
             }
 
@@ -1005,8 +622,6 @@ bool ChatHandler::HandleGonameCommand(const char* args)
         }
 
         PSendSysMessage(LANG_APPEARING_AT, chrNameLink.c_str());
-        //if (needReportToTarget(target))
-        //    ChatHandler(target).PSendSysMessage(LANG_APPEARING_TO, GetNameLink().c_str());
 
         // stop flight if need
         if (_player->isInFlight())
@@ -1130,16 +745,6 @@ bool ChatHandler::HandleModifyManaCommand(const char* args)
     if (!*args)
         return false;
 
-    // char* pmana = strtok((char*)args, " ");
-    // if (!pmana)
-    //     return false;
-
-    // char* pmanaMax = strtok(NULL, " ");
-    // if (!pmanaMax)
-    //     return false;
-
-    // int32 manam = atoi(pmanaMax);
-    // int32 mana = atoi(pmana);
     int32 mana = atoi((char*)args);
     int32 manam = atoi((char*)args);
 
@@ -2214,7 +1819,7 @@ bool ChatHandler::HandleTeleCommand(const char * args)
     }
 
     MapEntry const * me = sMapStore.LookupEntry(tele->mapId);
-    if (!me || me->IsBattleGroundOrArena())
+    if (!me || me->IsBattlegroundOrArena())
     {
         SendSysMessage(LANG_CANNOT_TELE_TO_BG);
         SetSentErrorMessage(true);
@@ -2247,6 +1852,8 @@ bool ChatHandler::HandleLookupAreaCommand(const char* args)
         return false;
 
     bool found = false;
+    uint32 count = 0;
+    uint32 maxResults = sWorld.getIntConfig(CONFIG_MAX_RESULTS_LOOKUP_COMMANDS);
 
     // converting string that we try to find to lower case
     wstrToLower (wnamepart);
@@ -2281,6 +1888,12 @@ bool ChatHandler::HandleLookupAreaCommand(const char* args)
 
             if (loc < MAX_LOCALE)
             {
+                if (maxResults && count++ == maxResults)
+                {
+                    PSendSysMessage(LANG_COMMAND_LOOKUP_MAX_RESULTS, maxResults);
+                    return true;
+                }
+
                 // send area in "id - [name]" format
                 std::ostringstream ss;
                 if (m_session)
@@ -2326,14 +1939,23 @@ bool ChatHandler::HandleLookupTeleCommand(const char * args)
     wstrToLower(wnamepart);
 
     std::ostringstream reply;
+    uint32 count = 0;
+    uint32 maxResults = sWorld.getIntConfig(CONFIG_MAX_RESULTS_LOOKUP_COMMANDS);
+    bool limitReached = false;
 
-    GameTeleMap const & teleMap = objmgr.GetGameTeleMap();
+    GameTeleMap const & teleMap = sObjectMgr.GetGameTeleMap();
     for (GameTeleMap::const_iterator itr = teleMap.begin(); itr != teleMap.end(); ++itr)
     {
         GameTele const* tele = &itr->second;
 
         if (tele->wnameLow.find(wnamepart) == std::wstring::npos)
             continue;
+
+        if (maxResults && count++ == maxResults)
+        {
+            limitReached = true;
+            break;
+        }
 
         if (m_session)
             reply << "  |cffffffff|Htele:" << itr->first << "|h[" << tele->name << "]|h|r\n";
@@ -2345,6 +1967,9 @@ bool ChatHandler::HandleLookupTeleCommand(const char * args)
         SendSysMessage(LANG_COMMAND_TELE_NOLOCATION);
     else
         PSendSysMessage(LANG_COMMAND_TELE_LOCATION,reply.str().c_str());
+
+    if (limitReached)
+        PSendSysMessage(LANG_COMMAND_LOOKUP_MAX_RESULTS, maxResults);
 
     return true;
 }
@@ -2421,8 +2046,12 @@ bool ChatHandler::HandleSendMailCommand(const char* args)
     // from console show not existed sender
     MailSender sender(MAIL_NORMAL,m_session ? m_session->GetPlayer()->GetGUIDLow() : 0, MAIL_STATIONERY_GM);
 
+    //- TODO: Fix poor design
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
     MailDraft(subject, text)
-        .SendMailTo(MailReceiver(target,GUID_LOPART(target_guid)),sender);
+        .SendMailTo(trans, MailReceiver(target,GUID_LOPART(target_guid)),sender);
+
+    CharacterDatabase.CommitTransaction(trans);
 
     std::string nameLink = playerLink(target_name);
     PSendSysMessage(LANG_MAIL_SENT, nameLink.c_str());
@@ -2454,14 +2083,14 @@ bool ChatHandler::HandleTeleNameCommand(const char * args)
     }
 
 /*    MapEntry const * me = sMapStore.LookupEntry(tele->mapId);
-    if (!me || me->IsBattleGroundOrArena())
+    if (!me || me->IsBattlegroundOrArena())
     {
         SendSysMessage(LANG_CANNOT_TELE_TO_BG);
         SetSentErrorMessage(true);
         return false;
     }
 
-    Player *chr = objmgr.GetPlayer(name.c_str());*/
+    Player *chr = sObjectMgr.GetPlayer(name.c_str());*/
 
     if (target)
     {
@@ -2538,7 +2167,7 @@ bool ChatHandler::HandleTeleGroupCommand(const char * args)
     }
 
     MapEntry const * me = sMapStore.LookupEntry(tele->mapId);
-    if (!me || me->IsBattleGroundOrArena())
+    if (!me || me->IsBattlegroundOrArena())
     {
         SendSysMessage(LANG_CANNOT_TELE_TO_BG);
         SetSentErrorMessage(true);
@@ -2595,7 +2224,7 @@ bool ChatHandler::HandleTeleGroupCommand(const char * args)
 }
 
 //Summon group of player
-bool ChatHandler::HandleGroupgoCommand(const char* args)
+bool ChatHandler::HandleGroupSummonCommand(const char* args)
 {
     Player* target;
     if (!extractPlayerTarget((char*)args,&target))
@@ -2751,7 +2380,8 @@ bool ChatHandler::HandleGoXYCommand(const char* args)
     uint32 mapid;
     if (pmapid)
         mapid = (uint32)atoi(pmapid);
-    else mapid = _player->GetMapId();
+    else
+        mapid = _player->GetMapId();
 
     if (!MapManager::IsValidMapCoord(mapid,x,y))
     {
@@ -2853,7 +2483,7 @@ bool ChatHandler::HandleGoZoneXYCommand(const char* args)
 
     AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(areaid);
 
-    if (x<0 || x>100 || y<0 || y>100 || !areaEntry)
+    if (x < 0 || x > 100 || y < 0 || y > 100 || !areaEntry)
     {
         PSendSysMessage(LANG_INVALID_ZONE_COORD,x,y,areaid);
         SetSentErrorMessage(true);

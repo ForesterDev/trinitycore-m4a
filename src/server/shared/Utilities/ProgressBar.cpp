@@ -35,7 +35,7 @@ barGoLink::~barGoLink()
     fflush(stdout);
 }
 
-barGoLink::barGoLink( int row_count )
+barGoLink::barGoLink( uint64 row_count )
 {
     rec_no    = 0;
     rec_pos   = 0;
@@ -46,7 +46,7 @@ barGoLink::barGoLink( int row_count )
     #else
     printf( "[" );
     #endif
-    for (int i = 0; i < indic_len; i++ ) printf( empty );
+    for (uint64 i = 0; i < indic_len; ++i) printf( empty );
     #ifdef _WIN32
     printf( "\x3D 0%%\r\x3D" );
     #else
@@ -57,7 +57,7 @@ barGoLink::barGoLink( int row_count )
 
 void barGoLink::step( void )
 {
-    int i, n;
+    uint64 i, n;
 
     if ( num_rec == 0 ) return;
     ++rec_no;

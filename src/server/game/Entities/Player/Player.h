@@ -25,7 +25,6 @@
 #include "ItemPrototype.h"
 #include "Unit.h"
 #include "Item.h"
-
 #include "DatabaseEnv.h"
 #include "NPCHandler.h"
 #include "QuestDef.h"
@@ -37,7 +36,7 @@
 #include "Util.h"                                           // for Tokens typedef
 #include "AchievementMgr.h"
 #include "ReputationMgr.h"
-#include "BattleGround.h"
+#include "Battleground.h"
 #include "DBCEnums.h"
 #include "LFG.h"
 
@@ -239,7 +238,7 @@ typedef std::list<PlayerCreateInfoAction> PlayerCreateInfoActions;
 
 struct PlayerInfo
 {
-                                                            // existence checked by displayId != 0             // existence checked by displayId != 0
+                                                            // existence checked by displayId != 0
     PlayerInfo() : displayId_m(0),displayId_f(0),levelInfo(NULL)
     {
     }
@@ -502,6 +501,8 @@ enum AtLoginFlags
     AT_LOGIN_CUSTOMIZE         = 0x08,
     AT_LOGIN_RESET_PET_TALENTS = 0x10,
     AT_LOGIN_FIRST             = 0x20,
+    AT_LOGIN_CHANGE_FACTION    = 0x40,
+    AT_LOGIN_CHANGE_RACE       = 0x80
 };
 
 typedef std::map<uint32, QuestStatusData> QuestStatusMap;
@@ -701,14 +702,14 @@ enum InstanceResetWarningType
 // PLAYER_FIELD_ARENA_TEAM_INFO_1_1 offsets
 enum ArenaTeamInfoType
 {
-    ARENA_TEAM_ID               = 0,
-    ARENA_TEAM_TYPE             = 1,                        // new in 3.2 - team type?
-    ARENA_TEAM_MEMBER           = 2,                        // 0 - captain, 1 - member
-    ARENA_TEAM_GAMES_WEEK       = 3,
-    ARENA_TEAM_GAMES_SEASON     = 4,
-    ARENA_TEAM_WINS_SEASON      = 5,
-    ARENA_TEAM_PERSONAL_RATING  = 6,
-    ARENA_TEAM_END              = 7
+    ARENA_TEAM_ID                = 0,
+    ARENA_TEAM_TYPE              = 1,                       // new in 3.2 - team type?
+    ARENA_TEAM_MEMBER            = 2,                       // 0 - captain, 1 - member
+    ARENA_TEAM_GAMES_WEEK        = 3,
+    ARENA_TEAM_GAMES_SEASON      = 4,
+    ARENA_TEAM_WINS_SEASON       = 5,
+    ARENA_TEAM_PERSONAL_RATING   = 6,
+    ARENA_TEAM_END               = 7
 };
 
 class InstanceSave;
@@ -787,7 +788,8 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADSKILLS               = 25,
     PLAYER_LOGIN_QUERY_LOADWEKLYQUESTSTATUS     = 26,
     PLAYER_LOGIN_QUERY_LOADRANDOMBG             = 27,
-    MAX_PLAYER_LOGIN_QUERY                      = 28
+    PLAYER_LOGIN_QUERY_LOADARENASTATS           = 28,
+    MAX_PLAYER_LOGIN_QUERY                      = 29
 };
 
 enum PlayerDelayedOperations
@@ -840,8 +842,14 @@ struct AccessRequirement
 enum CharDeleteMethod
 {
     CHAR_DELETE_REMOVE = 0,                      // Completely remove from the database
-    CHAR_DELETE_UNLINK = 1                       // The character gets unlinked from the account, 
+    CHAR_DELETE_UNLINK = 1                       // The character gets unlinked from the account,
                                                  // the name gets freed up and appears as deleted ingame
+};
+
+enum CurrencyItems
+{
+    ITEM_HONOR_POINTS_ID    = 43308,
+    ITEM_ARENA_POINTS_ID    = 43307
 };
 
 class PlayerTaxi
@@ -899,7 +907,7 @@ std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi);
 
 class Player;
 
-/// Holder for BattleGround data
+/// Holder for Battleground data
 struct BGData
 {
     BGData() : bgInstanceID(0), bgTypeID(BATTLEGROUND_TYPE_NONE), bgAfkReportedCount(0), bgAfkReportedTimer(0),
@@ -907,7 +915,7 @@ struct BGData
 
     uint32 bgInstanceID;                    ///< This variable is set to bg->m_InstanceID,
                                             ///  when player is teleported to BG - (it is battleground's GUID)
-    BattleGroundTypeId bgTypeID;
+    BattlegroundTypeId bgTypeID;
 
     std::set<uint32>   bgAfkReporter;
     uint8              bgAfkReportedCount;
@@ -981,6 +989,25 @@ class Player : public Unit, public GridObject<Player>
     public:
         explicit Player (WorldSession *session);
         ~Player ();
+
+        WMO_id wmo_id() const
+        {
+            return wmo_id_;
+        }
+
+        //movement anticheat
+        uint32 m_anti_lastmovetime;     //last movement time
+        float  m_anti_MovedLen;         //Length of traveled way
+        uint32 m_anti_NextLenCheck;
+        float  m_anti_BeginFallZ;    //alternative falling begin
+        uint32 m_anti_lastalarmtime;    //last time when alarm generated
+        uint32 m_anti_alarmcount;       //alarm counter
+        uint32 m_anti_TeleTime;
+        bool m_CanFly;
+        uint32 Anti__GetLastTeleTime() const { return m_anti_TeleTime; }
+        void Anti__SetLastTeleTime(uint32 TeleTime) { m_anti_TeleTime=TeleTime; }
+        bool CanFly() const { return m_CanFly;  }
+        void SetCanFly(bool CanFly) { m_CanFly = CanFly; }
 
         void CleanupsBeforeDelete(bool finalCleanup = true);
 
@@ -1064,7 +1091,7 @@ class Player : public Unit, public GridObject<Player>
         void SetHas310Flyer(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_HAS_310_FLYER; else m_ExtraFlags &= ~PLAYER_EXTRA_HAS_310_FLYER; }
         void SetPvPDeath(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; else m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH; }
 
-        void GiveXP(uint32 xp, Unit* victim);
+        void GiveXP(uint32 xp, Unit* victim, float group_rate=1.0f);
         void GiveLevel(uint8 level);
 
         void InitStatsForLevel(bool reapplyMods = false);
@@ -1078,7 +1105,7 @@ class Player : public Unit, public GridObject<Player>
 
         void setDeathState(DeathState s);                   // overwrite Unit::setDeathState
 
-        void InnEnter (int time,uint32 mapid, float x,float y,float z)
+        void InnEnter (time_t time,uint32 mapid, float x,float y,float z)
         {
             inn_pos_mapid = mapid;
             inn_pos_x = x;
@@ -1098,8 +1125,8 @@ class Player : public Unit, public GridObject<Player>
         float GetInnPosY() const { return inn_pos_y; }
         float GetInnPosZ() const { return inn_pos_z; }
 
-        int GetTimeInnEnter() const { return time_inn_enter; }
-        void UpdateInnerTime (int time) { time_inn_enter = time; }
+        time_t GetTimeInnEnter() const { return time_inn_enter; }
+        void UpdateInnerTime (time_t time) { time_inn_enter = time; }
 
         Pet* GetPet() const;
         Pet* SummonPet(uint32 entry, float x, float y, float z, float ang, PetType petType, uint32 despwtime);
@@ -1242,6 +1269,7 @@ class Player : public Unit, public GridObject<Player>
         }
         void SendNewItem(Item *item, uint32 count, bool received, bool created, bool broadcast = false);
         bool BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot);
+        bool _StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot, int32 price, ItemPrototype const *pProto, Creature *pVendor, VendorItem const* crItem, bool bStore);
 
         float GetReputationPriceDiscount(Creature const* pCreature) const;
 
@@ -1265,6 +1293,8 @@ class Player : public Unit, public GridObject<Player>
         void SendItemDurations();
         void LoadCorpse();
         void LoadPet();
+
+        bool AddItem(uint32 itemId, uint32 count);
 
         uint32 m_stableSlots;
 
@@ -1401,7 +1431,7 @@ class Player : public Unit, public GridObject<Player>
         /***                   LOAD SYSTEM                     ***/
         /*********************************************************/
 
-        bool LoadFromDB(uint32 guid, SqlQueryHolder *holder);
+        bool LoadFromDB(uint32 guid, SQLQueryHolder *holder);
         bool isBeingLoaded() const { return GetSession()->PlayerLoading();}
 
         void Initialize(uint32 guid);
@@ -1416,8 +1446,9 @@ class Player : public Unit, public GridObject<Player>
         /*********************************************************/
 
         void SaveToDB();
-        void SaveInventoryAndGoldToDB();                    // fast save function for item/money cheating preventing
-        void SaveGoldToDB();
+        void SaveInventoryAndGoldToDB(SQLTransaction& trans);                    // fast save function for item/money cheating preventing
+        void SaveGoldToDB(SQLTransaction& trans);
+
         static void SetUInt32ValueInArray(Tokens& data,uint16 index, uint32 value);
         static void SetFloatValueInArray(Tokens& data,uint16 index, float value);
         static void Customize(uint64 guid, uint8 gender, uint8 skin, uint8 face, uint8 hairStyle, uint8 hairColor, uint8 facialHair);
@@ -1440,26 +1471,16 @@ class Player : public Unit, public GridObject<Player>
         void setRegenTimerCount(uint32 time) {m_regenTimerCount = time;}
         void setWeaponChangeTimer(uint32 time) {m_weaponChangeTimer = time;}
 
-        uint32 GetMoney() { return GetUInt32Value (PLAYER_FIELD_COINAGE); }
-        void ModifyMoney(int32 d)
+        uint32 GetMoney() const { return GetUInt32Value (PLAYER_FIELD_COINAGE); }
+        void ModifyMoney(int32 d);
+        bool HasEnoughMoney(uint32 amount) const { return (GetMoney() >= amount); }
+        bool HasEnoughMoney(int32 amount) const
         {
-            if (d < 0)
-                SetMoney (GetMoney() > uint32(-d) ? GetMoney() + d : 0);
-            else
-            {
-                uint32 newAmount = 0;
-                if (GetMoney() < uint32(MAX_MONEY_AMOUNT - d))
-                    newAmount = GetMoney() + d;
-                else
-                {
-                    // "At Gold Limit"
-                    newAmount = MAX_MONEY_AMOUNT;
-                    if (d)
-                        SendEquipError(EQUIP_ERR_TOO_MUCH_GOLD, NULL, NULL);
-                }
-                SetMoney (newAmount);
-            }
+            if (amount > 0)
+                return (GetMoney() >= (uint32) amount);
+            return true;
         }
+
         void SetMoney(uint32 value)
         {
             SetUInt32Value (PLAYER_FIELD_COINAGE, value);
@@ -1537,7 +1558,7 @@ class Player : public Unit, public GridObject<Player>
         bool IsSpellFitByClassAndRace(uint32 spell_id) const;
         bool IsNeedCastPassiveSpellAtLearn(SpellEntry const* spellInfo) const;
 
-        void SendProficiency(uint8 pr1, uint32 pr2);
+        void SendProficiency(ItemClass itemClass, uint32 itemSubclassMask);
         void SendInitialSpells();
         bool addSpell(uint32 spell_id, bool active, bool learning, bool dependent, bool disabled);
         void learnSpell(uint32 spell_id, bool dependent);
@@ -1553,7 +1574,7 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetReputation(uint32 factionentry);
         std::string GetGuildName();
         uint32 GetFreeTalentPoints() const { return GetUInt32Value(PLAYER_CHARACTER_POINTS1); }
-        void SetFreeTalentPoints(uint32 points) { SetUInt32Value(PLAYER_CHARACTER_POINTS1,points); }
+        void SetFreeTalentPoints(uint32 points);
         bool resetTalents(bool no_cost = false);
         uint32 resetTalentsCost() const;
         void InitTalentForLevel();
@@ -1614,7 +1635,7 @@ class Player : public Unit, public GridObject<Player>
         {
             SpellCooldowns::const_iterator itr = m_spellCooldowns.find(spell_id);
             time_t t = time(NULL);
-            return itr != m_spellCooldowns.end() && itr->second.end > t ? itr->second.end - t : 0;
+            return uint32(itr != m_spellCooldowns.end() && itr->second.end > t ? itr->second.end - t : 0);
         }
         void AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 itemId, Spell* spell = NULL, bool infinityCooldown = false);
         void AddSpellCooldown(uint32 spell_id, uint32 itemid, time_t end_time);
@@ -1628,7 +1649,7 @@ class Player : public Unit, public GridObject<Player>
         void RemoveArenaSpellCooldowns();
         void RemoveAllSpellCooldown();
         void _LoadSpellCooldowns(QueryResult_AutoPtr result);
-        void _SaveSpellCooldowns();
+        void _SaveSpellCooldowns(SQLTransaction& trans);
         void SetLastPotionId(uint32 item_id) { m_lastPotionId = item_id; }
         void UpdatePotionCooldown(Spell* spell = NULL);
 
@@ -1780,7 +1801,10 @@ class Player : public Unit, public GridObject<Player>
         void UpdateDefenseBonusesMod();
         inline void RecalculateRating(CombatRating cr) { ApplyRatingMod(cr, 0, true);}
         float GetMeleeCritFromAgility();
+        float GetBaseDodge();
+        float DodgeDiminishingReturn(float value);
         float GetDodgeFromAgility();
+        float ParryDiminishingReturn(float value);
         float GetSpellCritFromIntellect();
         float OCTRegenHPPerSpirit();
         float OCTRegenMPPerSpirit();
@@ -1812,11 +1836,10 @@ class Player : public Unit, public GridObject<Player>
         void RemovedInsignia(Player* looterPlr);
 
         WorldSession* GetSession() const { return m_session; }
-        void SetSession(WorldSession *s) { m_session = s; }
 
         void BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) const;
         void DestroyForPlayer(Player *target, bool anim = false) const;
-        void SendLogXPGain(uint32 GivenXP,Unit* victim,uint32 RestXP);
+        void SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 BonusXP, bool recruitAFriend = false, float group_rate=1.0f);
 
         // notifiers
         void SendAttackSwingCantAttack();
@@ -1915,9 +1938,12 @@ class Player : public Unit, public GridObject<Player>
         void InitDisplayIds();
 
         bool IsAtGroupRewardDistance(WorldObject const* pRewardSource) const;
+        bool IsAtRecruitAFriendDistance(WorldObject const* pOther) const;
         bool RewardPlayerAndGroupAtKill(Unit* pVictim);
         void RewardPlayerAndGroupAtEvent(uint32 creature_id,WorldObject* pRewardSource);
         bool isHonorOrXPTarget(Unit* pVictim);
+
+        bool GetsRecruitAFriendBonus(bool forXP);
 
         ReputationMgr&       GetReputationMgr()       { return m_reputationMgr; }
         ReputationMgr const& GetReputationMgr() const { return m_reputationMgr; }
@@ -1939,6 +1965,18 @@ class Player : public Unit, public GridObject<Player>
         void ModifyHonorPoints(int32 value);
         void ModifyArenaPoints(int32 value);
         uint32 GetMaxPersonalArenaRatingRequirement(uint32 minarenaslot);
+        void SetHonorPoints(uint32 value)
+        {
+            SetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY, value);
+            if (value)
+                AddKnownCurrency(ITEM_HONOR_POINTS_ID); // Arena Points
+        }
+        void SetArenaPoints(uint32 value)
+        {
+            SetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY, value);
+            if (value)
+                AddKnownCurrency(ITEM_ARENA_POINTS_ID); // Arena Points
+        }
 
         //End of PvP System
 
@@ -2016,92 +2054,92 @@ class Player : public Unit, public GridObject<Player>
         /***               BATTLEGROUND SYSTEM                 ***/
         /*********************************************************/
 
-        bool InBattleGround()       const                { return m_bgData.bgInstanceID != 0; }
+        bool InBattleground()       const                { return m_bgData.bgInstanceID != 0; }
         bool InArena()              const;
-        uint32 GetBattleGroundId()  const                { return m_bgData.bgInstanceID; }
-        BattleGroundTypeId GetBattleGroundTypeId() const { return m_bgData.bgTypeID; }
-        BattleGround* GetBattleGround() const;
+        uint32 GetBattlegroundId()  const                { return m_bgData.bgInstanceID; }
+        BattlegroundTypeId GetBattlegroundTypeId() const { return m_bgData.bgTypeID; }
+        Battleground* GetBattleground() const;
 
-        bool InBattleGroundQueue() const
+        bool InBattlegroundQueue() const
         {
             for (uint8 i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
-                if (m_bgBattleGroundQueueID[i].bgQueueTypeId != BATTLEGROUND_QUEUE_NONE)
+                if (m_bgBattlegroundQueueID[i].bgQueueTypeId != BATTLEGROUND_QUEUE_NONE)
                     return true;
             return false;
         }
 
-        BattleGroundQueueTypeId GetBattleGroundQueueTypeId(uint32 index) const { return m_bgBattleGroundQueueID[index].bgQueueTypeId; }
-        uint32 GetBattleGroundQueueIndex(BattleGroundQueueTypeId bgQueueTypeId) const
+        BattlegroundQueueTypeId GetBattlegroundQueueTypeId(uint32 index) const { return m_bgBattlegroundQueueID[index].bgQueueTypeId; }
+        uint32 GetBattlegroundQueueIndex(BattlegroundQueueTypeId bgQueueTypeId) const
         {
             for (uint8 i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
-                if (m_bgBattleGroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
+                if (m_bgBattlegroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
                     return i;
             return PLAYER_MAX_BATTLEGROUND_QUEUES;
         }
-        bool IsInvitedForBattleGroundQueueType(BattleGroundQueueTypeId bgQueueTypeId) const
+        bool IsInvitedForBattlegroundQueueType(BattlegroundQueueTypeId bgQueueTypeId) const
         {
             for (uint8 i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
-                if (m_bgBattleGroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
-                    return m_bgBattleGroundQueueID[i].invitedToInstance != 0;
+                if (m_bgBattlegroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
+                    return m_bgBattlegroundQueueID[i].invitedToInstance != 0;
             return false;
         }
-        bool InBattleGroundQueueForBattleGroundQueueType(BattleGroundQueueTypeId bgQueueTypeId) const
+        bool InBattlegroundQueueForBattlegroundQueueType(BattlegroundQueueTypeId bgQueueTypeId) const
         {
-            return GetBattleGroundQueueIndex(bgQueueTypeId) < PLAYER_MAX_BATTLEGROUND_QUEUES;
+            return GetBattlegroundQueueIndex(bgQueueTypeId) < PLAYER_MAX_BATTLEGROUND_QUEUES;
         }
 
-        void SetBattleGroundId(uint32 val, BattleGroundTypeId bgTypeId)
+        void SetBattlegroundId(uint32 val, BattlegroundTypeId bgTypeId)
         {
             m_bgData.bgInstanceID = val;
             m_bgData.bgTypeID = bgTypeId;
         }
-        uint32 AddBattleGroundQueueId(BattleGroundQueueTypeId val)
+        uint32 AddBattlegroundQueueId(BattlegroundQueueTypeId val)
         {
             for (uint8 i=0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
             {
-                if (m_bgBattleGroundQueueID[i].bgQueueTypeId == BATTLEGROUND_QUEUE_NONE || m_bgBattleGroundQueueID[i].bgQueueTypeId == val)
+                if (m_bgBattlegroundQueueID[i].bgQueueTypeId == BATTLEGROUND_QUEUE_NONE || m_bgBattlegroundQueueID[i].bgQueueTypeId == val)
                 {
-                    m_bgBattleGroundQueueID[i].bgQueueTypeId = val;
-                    m_bgBattleGroundQueueID[i].invitedToInstance = 0;
+                    m_bgBattlegroundQueueID[i].bgQueueTypeId = val;
+                    m_bgBattlegroundQueueID[i].invitedToInstance = 0;
                     return i;
                 }
             }
             return PLAYER_MAX_BATTLEGROUND_QUEUES;
         }
-        bool HasFreeBattleGroundQueueId()
+        bool HasFreeBattlegroundQueueId()
         {
             for (uint8 i=0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
-                if (m_bgBattleGroundQueueID[i].bgQueueTypeId == BATTLEGROUND_QUEUE_NONE)
+                if (m_bgBattlegroundQueueID[i].bgQueueTypeId == BATTLEGROUND_QUEUE_NONE)
                     return true;
             return false;
         }
-        void RemoveBattleGroundQueueId(BattleGroundQueueTypeId val)
+        void RemoveBattlegroundQueueId(BattlegroundQueueTypeId val)
         {
             for (uint8 i=0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
             {
-                if (m_bgBattleGroundQueueID[i].bgQueueTypeId == val)
+                if (m_bgBattlegroundQueueID[i].bgQueueTypeId == val)
                 {
-                    m_bgBattleGroundQueueID[i].bgQueueTypeId = BATTLEGROUND_QUEUE_NONE;
-                    m_bgBattleGroundQueueID[i].invitedToInstance = 0;
+                    m_bgBattlegroundQueueID[i].bgQueueTypeId = BATTLEGROUND_QUEUE_NONE;
+                    m_bgBattlegroundQueueID[i].invitedToInstance = 0;
                     return;
                 }
             }
         }
-        void SetInviteForBattleGroundQueueType(BattleGroundQueueTypeId bgQueueTypeId, uint32 instanceId)
+        void SetInviteForBattlegroundQueueType(BattlegroundQueueTypeId bgQueueTypeId, uint32 instanceId)
         {
             for (uint8 i=0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
-                if (m_bgBattleGroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
-                    m_bgBattleGroundQueueID[i].invitedToInstance = instanceId;
+                if (m_bgBattlegroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
+                    m_bgBattlegroundQueueID[i].invitedToInstance = instanceId;
         }
-        bool IsInvitedForBattleGroundInstance(uint32 instanceId) const
+        bool IsInvitedForBattlegroundInstance(uint32 instanceId) const
         {
             for (uint8 i=0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
-                if (m_bgBattleGroundQueueID[i].invitedToInstance == instanceId)
+                if (m_bgBattlegroundQueueID[i].invitedToInstance == instanceId)
                     return true;
             return false;
         }
-        WorldLocation const& GetBattleGroundEntryPoint() const { return m_bgData.joinPos; }
-        void SetBattleGroundEntryPoint();
+        WorldLocation const& GetBattlegroundEntryPoint() const { return m_bgData.joinPos; }
+        void SetBattlegroundEntryPoint();
 
         void SetBGTeam(uint32 team) { m_bgData.bgTeam = team; }
         uint32 GetBGTeam() const { return m_bgData.bgTeam ? m_bgData.bgTeam : GetTeam(); }
@@ -2112,9 +2150,9 @@ class Player : public Unit, public GridObject<Player>
         void ReportedAfkBy(Player* reporter);
         void ClearAfkReports() { m_bgData.bgAfkReporter.clear(); }
 
-        bool GetBGAccessByLevel(BattleGroundTypeId bgTypeId) const;
+        bool GetBGAccessByLevel(BattlegroundTypeId bgTypeId) const;
         bool isTotalImmunity();
-        bool CanUseBattleGroundObject();
+        bool CanUseBattlegroundObject();
         bool isTotalImmune();
         bool CanCaptureTowerPoint();
 
@@ -2233,7 +2271,17 @@ class Player : public Unit, public GridObject<Player>
         void SetAtLoginFlag(AtLoginFlags f) { m_atLoginFlags |= f; }
         void RemoveAtLoginFlag(AtLoginFlags f, bool in_db_also = false);
 
-        LookingForGroup m_lookingForGroup;
+        // Dungeon Finder
+        bool isLfgDungeonDone(const uint32 entry) { return m_LookingForGroup.donerandomDungeons.find(entry) != m_LookingForGroup.donerandomDungeons.end(); }  
+        LfgDungeonSet *GetLfgDungeons() { return &m_LookingForGroup.applyDungeons; }
+        LfgDungeonSet *GetLfgDungeonsDone() { return &m_LookingForGroup.donerandomDungeons; }
+        void SetLfgDungeonDone(const uint32 entry) { m_LookingForGroup.donerandomDungeons.insert(entry); }
+        std::string GetLfgComment() { return m_LookingForGroup.comment; }
+        void SetLfgComment(std::string _comment) { m_LookingForGroup.comment = _comment; }
+        uint8 GetLfgRoles() { return m_LookingForGroup.roles; }
+        void SetLfgRoles(uint8 _roles) { m_LookingForGroup.roles = _roles; }
+        bool GetLfgUpdate() { return m_LookingForGroup.update; }
+        void SetLfgUpdate(bool update) { m_LookingForGroup.update = update; }
 
         // Temporarily removed pet cache
         uint32 GetTemporaryUnsummonedPetNumber() const { return m_temporaryUnsummonedPetNumber; }
@@ -2290,9 +2338,9 @@ class Player : public Unit, public GridObject<Player>
         void SetAuraUpdateMaskForRaid(uint8 slot) { m_auraRaidUpdateMask |= (uint64(1) << slot); }
         Player* GetNextRandomRaidMember(float radius);
         PartyResult CanUninviteFromGroup() const;
-        // BattleGround Group System
-        void SetBattleGroundRaid(Group *group, int8 subgroup = -1);
-        void RemoveFromBattleGroundRaid();
+        // Battleground Group System
+        void SetBattlegroundRaid(Group *group, int8 subgroup = -1);
+        void RemoveFromBattlegroundRaid();
         Group * GetOriginalGroup() { return m_originalGroup.getTarget(); }
         GroupReference& GetOriginalGroupRef() { return m_originalGroup; }
         uint8 GetOriginalSubGroup() const { return m_originalGroup.getSubGroup(); }
@@ -2361,13 +2409,13 @@ class Player : public Unit, public GridObject<Player>
         /*
         this is an array of BG queues (BgTypeIDs) in which is player
         */
-        struct BgBattleGroundQueueID_Rec
+        struct BgBattlegroundQueueID_Rec
         {
-            BattleGroundQueueTypeId bgQueueTypeId;
+            BattlegroundQueueTypeId bgQueueTypeId;
             uint32 invitedToInstance;
         };
 
-        BgBattleGroundQueueID_Rec m_bgBattleGroundQueueID[PLAYER_MAX_BATTLEGROUND_QUEUES];
+        BgBattlegroundQueueID_Rec m_bgBattlegroundQueueID[PLAYER_MAX_BATTLEGROUND_QUEUES];
         BGData                    m_bgData;
 
         bool m_IsBGRandomWinner;
@@ -2407,6 +2455,7 @@ class Player : public Unit, public GridObject<Player>
         bool _LoadHomeBind(QueryResult_AutoPtr result);
         void _LoadDeclinedNames(QueryResult_AutoPtr result);
         void _LoadArenaTeamInfo(QueryResult_AutoPtr result);
+        void _LoadArenaStatsInfo(QueryResult_AutoPtr result);
         void _LoadEquipmentSets(QueryResult_AutoPtr result);
         void _LoadBGData(QueryResult_AutoPtr result);
         void _LoadGlyphs(QueryResult_AutoPtr result);
@@ -2416,20 +2465,20 @@ class Player : public Unit, public GridObject<Player>
         /***                   SAVE SYSTEM                     ***/
         /*********************************************************/
 
-        void _SaveActions();
-        void _SaveAuras();
-        void _SaveInventory();
-        void _SaveMail();
-        void _SaveQuestStatus();
-        void _SaveDailyQuestStatus();
-        void _SaveWeeklyQuestStatus();
-        void _SaveSkills();
-        void _SaveSpells();
-        void _SaveEquipmentSets();
-        void _SaveBGData();
-        void _SaveGlyphs();
-        void _SaveTalents();
-        void _SaveStats();
+        void _SaveActions(SQLTransaction& trans);
+        void _SaveAuras(SQLTransaction& trans);
+        void _SaveInventory(SQLTransaction& trans);
+        void _SaveMail(SQLTransaction& trans);
+        void _SaveQuestStatus(SQLTransaction& trans);
+        void _SaveDailyQuestStatus(SQLTransaction& trans);
+        void _SaveWeeklyQuestStatus(SQLTransaction& trans);
+        void _SaveSkills(SQLTransaction& trans);
+        void _SaveSpells(SQLTransaction& trans);
+        void _SaveEquipmentSets(SQLTransaction& trans);
+        void _SaveBGData(SQLTransaction& trans);
+        void _SaveGlyphs(SQLTransaction& trans);
+        void _SaveTalents(SQLTransaction& trans);
+        void _SaveStats(SQLTransaction& trans);
 
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
         void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
@@ -2494,10 +2543,10 @@ class Player : public Unit, public GridObject<Player>
 
         float m_auraBaseMod[BASEMOD_END][MOD_END];
         int16 m_baseRatingValue[MAX_COMBAT_RATING];
-        uint16 m_baseSpellPower;
-        uint16 m_baseFeralAP;
-        uint16 m_baseManaRegen;
-        uint16 m_baseHealthRegen;
+        uint32 m_baseSpellPower;
+        uint32 m_baseFeralAP;
+        uint32 m_baseManaRegen;
+        uint32 m_baseHealthRegen;
 
         SpellModList m_spellMods[MAX_SPELLMOD];
         //uint32 m_pad;
@@ -2549,7 +2598,7 @@ class Player : public Unit, public GridObject<Player>
         float m_ammoDPS;
 
         ////////////////////Rest System/////////////////////
-        int time_inn_enter;
+        time_t time_inn_enter;
         uint32 inn_pos_mapid;
         float  inn_pos_x;
         float  inn_pos_y;
@@ -2597,7 +2646,9 @@ class Player : public Unit, public GridObject<Player>
         void SendRefundInfo(Item* item);
         void RefundItem(Item* item);
 
-        void UpdateKnownCurrencies(uint32 itemId, bool apply);
+        // know currencies are not removed at any point (0 displayed)
+        void AddKnownCurrency(uint32 itemId);
+
         int32 CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep, int32 faction, bool for_quest, bool noQuestBonus = false);
         void AdjustQuestReqItemCount(Quest const* pQuest, QuestStatusData& questStatusData);
 
@@ -2652,6 +2703,9 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_timeSyncTimer;
         uint32 m_timeSyncClient;
         uint32 m_timeSyncServer;
+
+        LookingForGroup m_LookingForGroup;
+        WMO_id wmo_id_;
 };
 
 void AddItemsSetItem(Player*player,Item *item);

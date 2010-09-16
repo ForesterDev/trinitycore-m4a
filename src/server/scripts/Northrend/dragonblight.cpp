@@ -58,6 +58,7 @@ public:
 
     bool OnGossipSelect(Player* pPlayer, Creature* /*pCreature*/, uint32 /*uiSender*/, uint32 uiAction)
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
         if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
         {
             pPlayer->CLOSE_GOSSIP_MENU();
@@ -74,7 +75,7 @@ public:
 
 
 enum eInquisitor
-{    
+{
     NPC_GODFREY                 = 27577,
     SPELL_HOLY_FIRE             = 39323,
 
@@ -116,7 +117,7 @@ public:
     npc_inquisitor_hallard() : CreatureScript("npc_inquisitor_hallard") { }
 
     struct npc_inquisitor_hallardAI : public npc_escortAI
-    {    
+    {
         npc_inquisitor_hallardAI(Creature* pCreature) : npc_escortAI(pCreature) { }
 
         bool Completed;
@@ -128,22 +129,22 @@ public:
                 return;
             Creature* Godfrey = me->FindNearestCreature(NPC_GODFREY, 50, true);
             if (!Godfrey)
-                return;  
+                return;
             switch (i)
             {
-                case 1:                
+                case 1:
                     DoScriptText(SAY_WP_1, me, Godfrey);
                     me->SetUInt64Value(UNIT_FIELD_TARGET, Godfrey->GetGUID());
                     me->HandleEmoteCommand(5);
                     me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);                
+                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     break;
                 case 2:
                     Godfrey->HandleEmoteCommand(434);
                     DoScriptText(SAY_WP_2, me, Godfrey);
                     me->HandleEmoteCommand(15);
                     break;
-                case 3:                
+                case 3:
                     DoScriptText(SAY_WP_3, me, Godfrey);
                     me->HandleEmoteCommand(1);
                     break;
@@ -165,7 +166,7 @@ public:
                     me->HandleEmoteCommand(16);
                     break;
                 case 9:
-                    DoScriptText(SAY_WP_9, me, Godfrey);                
+                    DoScriptText(SAY_WP_9, me, Godfrey);
                     me->HandleEmoteCommand(5);
                     break;
                 case 10:
@@ -229,33 +230,33 @@ public:
                 case 27:
                     DoScriptText(SAY_WP_27, me, Godfrey);
                     me->SetUInt64Value(UNIT_FIELD_TARGET, Godfrey->GetGUID());
-                    Completed = true;                
+                    Completed = true;
                     if (pPlayer)
                         pPlayer->GroupEventHappens(QUEST_A_RIGHTEOUS_SERMON, me);
-                    break;                          
+                    break;
             }
         }
 
         void Reset()
-        {  
+        {
             Completed = false;
-        }    
+        }
 
         void UpdateAI(const uint32 diff)
-        {          
-            npc_escortAI::UpdateAI(diff);             
+        {
+            npc_escortAI::UpdateAI(diff);
         }
     };
 
     bool OnQuestAccept(Player* pPlayer, Creature* pCreature, Quest const* quest)
     {
         if (quest->GetQuestId() == QUEST_A_RIGHTEOUS_SERMON)
-        {        
+        {
             DoScriptText(SAY_WP_0, pCreature, pPlayer);
-            if (npc_escortAI* pEscortAI = CAST_AI(npc_inquisitor_hallardAI, pCreature->AI()))
+            if (npc_escortAI* pEscortAI = CAST_AI(npc_inquisitor_hallard::npc_inquisitor_hallardAI, pCreature->AI()))
             {
                 pEscortAI->Start(true, false, pPlayer->GetGUID(), 0, true);
-                pCreature->GetMotionMaster()->MovePoint(0, 3801.543, -679.350, 213.75);            
+                pCreature->GetMotionMaster()->MovePoint(0, 3801.543f, -679.350f, 213.75f);
             }
         }
         return true;
@@ -267,8 +268,104 @@ public:
     }
 };
 
+#define SPELL_SEEDS_OF_NATURES_WRATH 49587
+#define QUEST_THAT_WHICH_CREATES_CAN_ALSO_DESTROY 12459
+
+#define NPC_WEAKENED_REANIMATED_FROST_WYRM 27821
+#define NPC_WEAKENED_TURGID_THE_VILE 27809
+#define NPC_WEAKENED_OVERSEER_DEATHGAZE 27807
+
+struct npc_reanimated_frost_wormAI : public ScriptedAI
+{
+    npc_reanimated_frost_wormAI(Creature *c) : ScriptedAI(c) {}
+
+    void SpellHit(Unit *hitter, const SpellEntry *spell)
+    {
+        if ((spell->Id == SPELL_SEEDS_OF_NATURES_WRATH) &&
+            (hitter->GetTypeId() == TYPEID_PLAYER) &&
+            (CAST_PLR(hitter)->IsActiveQuest(QUEST_THAT_WHICH_CREATES_CAN_ALSO_DESTROY)))
+        {
+            me->UpdateEntry(NPC_WEAKENED_REANIMATED_FROST_WYRM);
+        }
+    }
+};
+
+struct npc_turgid_the_vileAI : public ScriptedAI
+{
+    npc_turgid_the_vileAI(Creature *c) : ScriptedAI(c) {}
+
+    void SpellHit(Unit *hitter, const SpellEntry *spell)
+    {
+        if ((spell->Id == SPELL_SEEDS_OF_NATURES_WRATH) &&
+            (hitter->GetTypeId() == TYPEID_PLAYER) &&
+            (CAST_PLR(hitter)->IsActiveQuest(QUEST_THAT_WHICH_CREATES_CAN_ALSO_DESTROY)))
+        {
+            me->UpdateEntry(NPC_WEAKENED_TURGID_THE_VILE);
+        }
+    }
+};
+
+struct npc_overseer_deathgazeAI : public ScriptedAI
+{
+    npc_overseer_deathgazeAI(Creature *c) : ScriptedAI(c) {}
+
+    void SpellHit(Unit *hitter, const SpellEntry *spell)
+    {
+        if ((spell->Id == SPELL_SEEDS_OF_NATURES_WRATH) &&
+            (hitter->GetTypeId() == TYPEID_PLAYER) &&
+            (CAST_PLR(hitter)->IsActiveQuest(QUEST_THAT_WHICH_CREATES_CAN_ALSO_DESTROY)))
+        {
+            me->UpdateEntry(NPC_WEAKENED_OVERSEER_DEATHGAZE);
+        }
+    }
+};
+
 void AddSC_dragonblight()
 {
     new npc_alexstrasza_wr_gate;
     new npc_inquisitor_hallard;
+    struct NPC_reanimated_frost_worm
+        : CreatureScript
+    {
+        NPC_reanimated_frost_worm()
+            : CreatureScript("npc_reanimated_frost_worm")
+        {
+        }
+
+        CreatureAI *GetAI(Creature *creature) const
+        {
+            return new npc_reanimated_frost_wormAI(std::move(creature));
+        }
+    };
+    new NPC_reanimated_frost_worm;
+
+    struct NPC_turgid_the_vile
+        : CreatureScript
+    {
+        NPC_turgid_the_vile()
+            : CreatureScript("npc_turgid_the_vile")
+        {
+        }
+
+        CreatureAI *GetAI(Creature *creature) const
+        {
+            return new npc_turgid_the_vileAI(std::move(creature));
+        }
+    };
+    new NPC_turgid_the_vile;
+
+    struct NPC_overseer_deathgaze
+        : CreatureScript
+    {
+        NPC_overseer_deathgaze()
+            : CreatureScript("npc_overseer_deathgaze")
+        {
+        }
+
+        CreatureAI *GetAI(Creature *creature) const
+        {
+            return new npc_overseer_deathgazeAI(std::move(creature));
+        }
+    };
+    new NPC_overseer_deathgaze;
 }

@@ -23,7 +23,6 @@
 
 #include "Common.h"
 #include <ace/Singleton.h>
-#include "Database/DatabaseEnv.h"
 
 class Config;
 
@@ -104,6 +103,7 @@ class Log
         void outBasic( const char * str, ... )                  ATTR_PRINTF(2,3);
         void outDetail( const char * str, ... )                 ATTR_PRINTF(2,3);
         void outDebug( const char * str, ... )                  ATTR_PRINTF(2,3);
+        void outStaticDebug( const char * str, ... )            ATTR_PRINTF(2,3);
         void outDebugInLine( const char * str, ... )            ATTR_PRINTF(2,3);
         void outErrorDb( const char * str, ... )                ATTR_PRINTF(2,3);
         void outChar( const char * str, ... )                   ATTR_PRINTF(2,3);
@@ -111,6 +111,7 @@ class Log
         void outRemote( const char * str, ... )                 ATTR_PRINTF(2,3);
         void outChat( const char * str, ... )                   ATTR_PRINTF(2,3);
         void outArena( const char * str, ... )                  ATTR_PRINTF(2,3);
+        void outSQLDriver( const char* str, ... )               ATTR_PRINTF(2,3);
         void outCharDump( const char * str, uint32 account_id, uint32 guid, const char * name );
 
         static void outTimestamp(FILE* file);
@@ -140,6 +141,7 @@ class Log
         FILE* dberLogfile;
         FILE* chatLogfile;
         FILE* arenaLogFile;
+        FILE* sqlLogFile;
 
         // cache values for after initilization use (like gm log per account case)
         std::string m_logsDir;
@@ -173,12 +175,6 @@ class Log
 };
 
 #define sLog (*ACE_Singleton<Log, ACE_Thread_Mutex>::instance())
-
-#ifdef TRINITY_DEBUG
-#define DEBUG_LOG sLog.outDebug
-#else
-#define DEBUG_LOG
-#endif
 
 #endif
 

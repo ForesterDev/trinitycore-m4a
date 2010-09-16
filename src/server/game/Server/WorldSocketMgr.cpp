@@ -23,6 +23,7 @@
 *  \author Derex <derex101@gmail.com>
 */
 
+#include "gamePCH.h"
 #include "WorldSocketMgr.h"
 
 #include <ace/ACE.h>
@@ -57,9 +58,9 @@ class ReactorRunnable : protected ACE_Task_Base
     public:
 
         ReactorRunnable() :
-            m_ThreadId(-1),
+            m_Reactor(0),
             m_Connections(0),
-            m_Reactor(0)
+            m_ThreadId(-1)
         {
             ACE_Reactor_Impl* imp = 0;
 
@@ -156,9 +157,17 @@ class ReactorRunnable : protected ACE_Task_Base
 
         virtual int svc()
         {
-            DEBUG_LOG ("Network Thread Starting");
+            sLog.outStaticDebug ("Network Thread Starting");
 
-            WorldDatabase.ThreadStart();
+            bool needInit = true;
+            if (!(LoginDatabase.GetBundleMask() & MYSQL_BUNDLE_RAR))
+            {
+                LoginDatabase.Init_MySQL_Connection();
+                needInit = false;
+            }
+
+            if (needInit)
+                MySQL::Thread_Init();
 
             ACE_ASSERT (m_Reactor);
 
@@ -195,9 +204,14 @@ class ReactorRunnable : protected ACE_Task_Base
                 }
             }
 
-            WorldDatabase.ThreadEnd();
+            ///- Free MySQL thread resources and deallocate lingering connections
+            if (!(LoginDatabase.GetBundleMask() & MYSQL_BUNDLE_RAR))
+                LoginDatabase.End_MySQL_Connection();
 
-            DEBUG_LOG ("Network Thread Exitting");
+            if (needInit)
+                MySQL::Thread_End();
+
+            sLog.outStaticDebug ("Network Thread Exitting");
 
             return 0;
         }
@@ -217,8 +231,8 @@ class ReactorRunnable : protected ACE_Task_Base
 };
 
 WorldSocketMgr::WorldSocketMgr() :
-    m_NetThreadsCount(0),
     m_NetThreads(0),
+    m_NetThreadsCount(0),
     m_SockOutKBuff(-1),
     m_SockOutUBuff(65536),
     m_UseNoDelay(true),
@@ -250,7 +264,7 @@ WorldSocketMgr::StartReactiveIO (ACE_UINT16 port, const char* address)
     m_NetThreads = new ReactorRunnable[m_NetThreadsCount];
 
     sLog.outBasic ("Max allowed socket connections %d", ACE::max_handles());
-    
+
     // -1 means use default
     m_SockOutKBuff = sConfig.GetIntDefault ("Network.OutKBuff", -1);
 

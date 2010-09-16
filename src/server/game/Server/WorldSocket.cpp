@@ -18,6 +18,7 @@
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
+#include "gamePCH.h"
 #include <ace/Message_Block.h>
 #include <ace/OS_NS_string.h>
 #include <ace/OS_NS_unistd.h>
@@ -39,8 +40,8 @@
 #include "ByteBuffer.h"
 #include "Opcodes.h"
 #include "DatabaseEnv.h"
-#include "BigNumber.h"
-#include "SHA1.h"
+#include <Cryptography/BigNumber.h>
+#include <Cryptography/SHA1.h>
 #include "WorldSession.h"
 #include "WorldSocketMgr.h"
 #include "Log.h"
@@ -100,21 +101,14 @@ struct ClientPktHeader
 #pragma pack(pop)
 #endif
 
-WorldSocket::WorldSocket (void) :
-WorldHandler(),
-m_Session(0),
-m_RecvWPct(0),
-m_RecvPct(),
-m_Header(sizeof (ClientPktHeader)),
-m_OutBuffer(0),
-m_OutBufferSize(65536),
-m_OutActive(false),
-m_Seed(static_cast<uint32> (rand32())),
-m_OverSpeedPings(0),
-m_LastPingTime(ACE_Time_Value::zero)
+WorldSocket::WorldSocket (void): WorldHandler(),
+m_LastPingTime(ACE_Time_Value::zero), m_OverSpeedPings(0), m_Session(0),
+m_RecvWPct(0), m_RecvPct(), m_Header(sizeof (ClientPktHeader)),
+m_OutBuffer(0), m_OutBufferSize(65536), m_OutActive(false),
+m_Seed(static_cast<uint32> (rand32()))
 {
     reference_counting_policy().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
-    
+
     msg_queue()->high_water_mark(8*1024*1024);
     msg_queue()->low_water_mark(8*1024*1024);
 }
@@ -265,7 +259,7 @@ int WorldSocket::open (void *a)
     }
 
     m_Address = remote_addr.get_host_addr();
-    
+
     // Send startup packet.
     WorldPacket packet (SMSG_AUTH_CHALLENGE, 24);
     packet << uint32(1);                                    // 1...31
@@ -281,14 +275,14 @@ int WorldSocket::open (void *a)
 
     if (SendPacket(packet) == -1)
         return -1;
-    
+
     // Register with ACE Reactor
     if (reactor()->register_handler(this, ACE_Event_Handler::READ_MASK | ACE_Event_Handler::WRITE_MASK) == -1)
     {
         sLog.outError ("WorldSocket::open: unable to register client handler errno = %s", ACE_OS::strerror (errno));
         return -1;
     }
-    
+
     // reactor takes care of the socket from now on
     remove_reference();
 
@@ -321,14 +315,14 @@ int WorldSocket::handle_input (ACE_HANDLE)
                 return Update();                           // interesting line ,isn't it ?
             }
 
-            DEBUG_LOG("WorldSocket::handle_input: Peer error closing connection errno = %s", ACE_OS::strerror (errno));
+            sLog.outStaticDebug("WorldSocket::handle_input: Peer error closing connection errno = %s", ACE_OS::strerror (errno));
 
             errno = ECONNRESET;
             return -1;
         }
         case 0:
         {
-            DEBUG_LOG("WorldSocket::handle_input: Peer has closed connection");
+            sLog.outStaticDebug("WorldSocket::handle_input: Peer has closed connection");
 
             errno = ECONNRESET;
             return -1;
@@ -721,12 +715,14 @@ int WorldSocket::ProcessIncoming (WorldPacket* new_pct)
                     sLog.outError ("WorldSocket::ProcessIncoming: Player send CMSG_AUTH_SESSION again");
                     return -1;
                 }
-                
+
                 sScriptMgr.OnPacketReceive(this, WorldPacket(*new_pct));
                 return HandleAuthSession (*new_pct);
             case CMSG_KEEP_ALIVE:
-                DEBUG_LOG ("CMSG_KEEP_ALIVE ,size: %d", new_pct->size());
+                sLog.outStaticDebug ("CMSG_KEEP_ALIVE ,size: " UI64FMTD, uint64(new_pct->size()));
                 sScriptMgr.OnPacketReceive(this, WorldPacket(*new_pct));
+                if (m_Session)
+                    m_Session->ResetTimeOutTime();
                 return 0;
             default:
             {
@@ -737,7 +733,7 @@ int WorldSocket::ProcessIncoming (WorldPacket* new_pct)
                     // Our Idle timer will reset on any non PING opcodes.
                     // Catches people idling on the login screen and any lingering ingame connections.
                     m_Session->ResetTimeOutTime();
-                    
+
                     // OK ,give the packet to WorldSession
                     aptr.release();
                     // WARNINIG here we call it with locks held.
@@ -774,14 +770,14 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
     // NOTE: ATM the socket is singlethread, have this in mind ...
     uint8 digest[20];
     uint32 clientSeed;
-    uint32 unk2, unk3, unk5, unk6, unk7;
+    uint32 unk2, unk3;
     uint64 unk4;
     uint32 BuiltNumberClient;
     uint32 id, security;
     //uint8 expansion = 0;
     LocaleConstant locale;
     std::string account;
-    Sha1Hash sha1;
+    SHA1Hash sha1;
     BigNumber v, s, g, N;
     WorldPacket packet, SendAddonPacked;
 
@@ -803,11 +799,13 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
     recvPacket >> account;
     recvPacket >> unk3;
     recvPacket >> clientSeed;
-    recvPacket >> unk5 >> unk6 >> unk7;
+    recvPacket.read_skip<int32>();
+    recvPacket.read_skip<int32>();
+    recvPacket.read_skip<int32>();
     recvPacket >> unk4;
     recvPacket.read (digest, 20);
 
-    DEBUG_LOG ("WorldSocket::HandleAuthSession: client %u, unk2 %u, account %s, unk3 %u, clientseed %u",
+    sLog.outStaticDebug ("WorldSocket::HandleAuthSession: client %u, unk2 %u, account %s, unk3 %u, clientseed %u",
                 BuiltNumberClient,
                 unk2,
                 account.c_str(),
@@ -829,7 +827,8 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
                                 "s, "                       //5
                                 "expansion, "               //6
                                 "mutetime, "                //7
-                                "locale "                   //8
+                                "locale, "                  //8
+                                "recruiter "                //9
                                 "FROM account "
                                 "WHERE username = '%s'",
                                 safe_account.c_str());
@@ -849,10 +848,10 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
     Field* fields = result->Fetch();
 
     uint8 expansion = fields[6].GetUInt8();
-    uint32 world_expansion = sWorld.getConfig(CONFIG_EXPANSION);
+    uint32 world_expansion = sWorld.getIntConfig(CONFIG_EXPANSION);
     if (expansion > world_expansion)
         expansion = world_expansion;
-    //expansion = ((sWorld.getConfig(CONFIG_EXPANSION) > fields[6].GetUInt8()) ? fields[6].GetUInt8() : sWorld.getConfig(CONFIG_EXPANSION));
+    //expansion = ((sWorld.getIntConfig(CONFIG_EXPANSION) > fields[6].GetUInt8()) ? fields[6].GetUInt8() : sWorld.getIntConfig(CONFIG_EXPANSION));
 
     N.SetHexStr ("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
     g.SetDword (7);
@@ -863,7 +862,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
     const char* sStr = s.AsHexStr();                       //Must be freed by OPENSSL_free()
     const char* vStr = v.AsHexStr();                       //Must be freed by OPENSSL_free()
 
-    DEBUG_LOG ("WorldSocket::HandleAuthSession: (s,v) check s: %s v: %s",
+    sLog.outStaticDebug ("WorldSocket::HandleAuthSession: (s,v) check s: %s v: %s",
                 sStr,
                 vStr);
 
@@ -897,6 +896,8 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
     locale = LocaleConstant (fields[8].GetUInt8());
     if (locale >= MAX_LOCALE)
         locale = LOCALE_enUS;
+
+    uint32 recruiter = fields[9].GetUInt32();
 
     // Checks gmlevel per Realm
     result =
@@ -934,7 +935,6 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
     }
 
     // Check locked state for server
-    sWorld.UpdateAllowedSecurity();
     AccountTypes allowedAccountType = sWorld.GetPlayerSecurityLimit();
     sLog.outDebug("Allowed Level: %u Player Level %u", allowedAccountType, AccountTypes(security));
     if (allowedAccountType > SEC_PLAYER && AccountTypes(security) < allowedAccountType)
@@ -949,7 +949,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
     }
 
     // Check that Key and account name are the same on client and server
-    Sha1Hash sha;
+    SHA1Hash sha;
 
     uint32 t = 0;
     uint32 seed = m_Seed;
@@ -974,7 +974,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
 
     std::string address = GetRemoteAddress();
 
-    DEBUG_LOG ("WorldSocket::HandleAuthSession: Client '%s' authenticated successfully from %s.",
+    sLog.outStaticDebug ("WorldSocket::HandleAuthSession: Client '%s' authenticated successfully from %s.",
                 account.c_str(),
                 address.c_str());
 
@@ -989,7 +989,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
                             safe_account.c_str());
 
     // NOTE ATM the socket is single-threaded, have this in mind ...
-    ACE_NEW_RETURN (m_Session, WorldSession (id, this, AccountTypes(security), expansion, mutetime, locale), -1);
+    ACE_NEW_RETURN (m_Session, WorldSession (id, this, AccountTypes(security), expansion, mutetime, locale, recruiter), -1);
 
     m_Crypt.Init(&K);
 
@@ -997,8 +997,8 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
     m_Session->LoadTutorialsData();
     m_Session->ReadAddonsInfo(recvPacket);
 
-    // Sleep this Network thread for 
-    uint32 sleepTime = sWorld.getConfig(CONFIG_SESSION_ADD_DELAY);
+    // Sleep this Network thread for
+    uint32 sleepTime = sWorld.getIntConfig(CONFIG_SESSION_ADD_DELAY);
     ACE_OS::sleep (ACE_Time_Value (0, sleepTime));
 
     sWorld.AddSession (m_Session);
@@ -1028,7 +1028,7 @@ int WorldSocket::HandlePing (WorldPacket& recvPacket)
         {
             ++m_OverSpeedPings;
 
-            uint32 max_count = sWorld.getConfig (CONFIG_MAX_OVERSPEED_PINGS);
+            uint32 max_count = sWorld.getIntConfig (CONFIG_MAX_OVERSPEED_PINGS);
 
             if (max_count && m_OverSpeedPings > max_count)
             {

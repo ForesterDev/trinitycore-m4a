@@ -51,7 +51,7 @@ class AccountMgr
 
         uint32 GetId(std::string username);
         uint32 GetSecurity(uint32 acc_id);
-        uint32 GetSecurity(uint32 acc_id, int32 realm_id);
+        uint32 GetSecurity(uint64 acc_id, int32 realm_id);
         bool GetName(uint32 acc_id, std::string &name);
         uint32 GetCharactersCount(uint32 acc_id);
         std::string CalculateShaPassHash(std::string& name, std::string& password);
@@ -59,6 +59,6 @@ class AccountMgr
         static bool normalizeString(std::string& utf8str);
 };
 
-#define accmgr (*ACE_Singleton<AccountMgr, ACE_Null_Mutex>::instance())
+#define sAccountMgr (*ACE_Singleton<AccountMgr, ACE_Null_Mutex>::instance())
 #endif
 

@@ -193,7 +193,7 @@ public:
         {
             if (pPlayer->GetQuestStatus(9678) == QUEST_STATUS_INCOMPLETE)
             {
-                if (Creature* Stillblade = pPlayer->SummonCreature(NPC_STILLBLADE, 8106.11, -7542.06, 151.775, 3.02598, TEMPSUMMON_DEAD_DESPAWN, 60000))
+                if (Creature* Stillblade = pPlayer->SummonCreature(NPC_STILLBLADE, 8106.11f, -7542.06f, 151.775f, 3.02598f, TEMPSUMMON_DEAD_DESPAWN, 60000))
                     Stillblade->AI()->AttackStart(pPlayer);
             }
         }
@@ -402,7 +402,7 @@ public:
     bool OnGossipHello(Player *pPlayer, GameObject *pGO)
     {
         if (pGO->GetGoType() == GAMEOBJECT_TYPE_GOOBER)
-            pPlayer->SummonCreature(NPC_ARIKARA, -5008.338, -2118.894, 83.657, 0.874, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+            pPlayer->SummonCreature(NPC_ARIKARA, -5008.338f, -2118.894f, 83.657f, 0.874f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
 
         return true;
     }
@@ -565,6 +565,7 @@ public:
 
     bool OnGossipSelect(Player *pPlayer, GameObject *pGO, uint32 /*uiSender*/, uint32 uiAction)
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
         switch(uiAction)
         {
             case GOSSIP_ACTION_INFO_DEF:
@@ -623,6 +624,7 @@ public:
 
     bool OnGossipSelect(Player *pPlayer, GameObject *pGO, uint32 /*uiSender*/, uint32 uiAction)
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
         switch(uiAction)
         {
             case GOSSIP_ACTION_INFO_DEF:
@@ -783,7 +785,7 @@ public:
     {
         if (pPlayer->GetQuestStatus(QUEST_PRISON_BREAK) == QUEST_STATUS_INCOMPLETE)
         {
-            pGO->SummonCreature(25318, 3485.089844, 6115.7422188, 70.966812, 0, TEMPSUMMON_TIMED_DESPAWN, 60000);
+            pGO->SummonCreature(25318, 3485.089844f, 6115.7422188f, 70.966812f, 0, TEMPSUMMON_TIMED_DESPAWN, 60000);
             pPlayer->CastSpell(pPlayer, SPELL_ARCANE_PRISONER_KILL_CREDIT, true);
             return true;
         } else
@@ -805,7 +807,7 @@ public:
     bool OnGossipHello(Player *pPlayer, GameObject *pGO)
     {
         if (pGO->GetGoType() == GAMEOBJECT_TYPE_GOOBER)
-            pPlayer->SummonCreature(NPC_ZELEMAR, -369.746, 166.759, -21.50, 5.235, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+            pPlayer->SummonCreature(NPC_ZELEMAR, -369.746f, 166.759f, -21.50f, 5.235f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
 
         return true;
     }
@@ -1003,7 +1005,7 @@ public:
         if (!pPrisoner || !pPrisoner->isAlive())
             return true;
 
-        Quest const* qInfo = objmgr.GetQuestTemplate(QUEST_PRISONERS_OF_WYRMSKULL);
+        Quest const* qInfo = sObjectMgr.GetQuestTemplate(QUEST_PRISONERS_OF_WYRMSKULL);
         if (qInfo)
         {
             //TODO: prisoner should help player for a short period of time
@@ -1124,6 +1126,7 @@ public:
 
     bool OnGossipSelect(Player *pPlayer, GameObject *pGO, uint32 /*uiSender*/, uint32 uiAction)
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
         if (uiAction == GOSSIP_ACTION_INFO_DEF +1)
         {
             pPlayer->CLOSE_GOSSIP_MENU();
@@ -1176,7 +1179,7 @@ class go_massive_seaforium_charge : public GameObjectScript
 public:
     go_massive_seaforium_charge() : GameObjectScript("go_massive_seaforium_charge") { }
 
-    bool OnGossipHello(Player* pPlayer, GameObject *pGo)
+    bool OnGossipHello(Player* /*pPlayer*/, GameObject *pGo)
     {
         pGo->SetLootState(GO_JUST_DEACTIVATED);
         return true;

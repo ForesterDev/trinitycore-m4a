@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "DatabaseEnv.h"
 
 
@@ -25,9 +26,7 @@
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "Util.h"
-#include "SHA1.h"
-
-extern DatabaseType LoginDatabase;
+#include <Cryptography/SHA1.h>
 
 AccountMgr::AccountMgr()
 {}
@@ -48,8 +47,7 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
         return AOR_NAME_ALREDY_EXIST;                       // username does already exist
     }
 
-    if (!LoginDatabase.PExecute("INSERT INTO account(username,sha_pass_hash,joindate) VALUES('%s','%s',NOW())", username.c_str(), CalculateShaPassHash(username, password).c_str()))
-        return AOR_DB_INTERNAL_ERROR;                       // unexpected error
+    LoginDatabase.PExecute("INSERT INTO account(username,sha_pass_hash,joindate) VALUES('%s','%s',NOW())", username.c_str(), CalculateShaPassHash(username, password).c_str());
     LoginDatabase.Execute("INSERT INTO realmcharacters (realmid, acctid, numchars) SELECT realmlist.id, account.id, 0 FROM realmlist,account LEFT JOIN realmcharacters ON acctid=account.id WHERE acctid IS NULL");
 
     return AOR_OK;                                          // everything's fine
@@ -87,17 +85,13 @@ AccountOpResult AccountMgr::DeleteAccount(uint32 accid)
     CharacterDatabase.PExecute("DELETE FROM character_tutorial WHERE account = '%u'",accid);
     CharacterDatabase.PExecute("DELETE FROM account_data WHERE account = '%u'",accid);
 
-    LoginDatabase.BeginTransaction();
+    SQLTransaction trans = LoginDatabase.BeginTransaction();
 
-    bool res =
-        LoginDatabase.PExecute("DELETE FROM account WHERE id='%d'", accid) &&
-        LoginDatabase.PExecute("DELETE FROM account_access WHERE id ='%d'", accid) &&
-        LoginDatabase.PExecute("DELETE FROM realmcharacters WHERE acctid='%d'", accid);
+    trans->PAppend("DELETE FROM account WHERE id='%d'", accid);
+    trans->PAppend("DELETE FROM account_access WHERE id ='%d'", accid);
+    trans->PAppend("DELETE FROM realmcharacters WHERE acctid='%d'", accid);
 
-    LoginDatabase.CommitTransaction();
-
-    if (!res)
-        return AOR_DB_INTERNAL_ERROR;                       // unexpected error;
+    LoginDatabase.CommitTransaction(trans);
 
     return AOR_OK;
 }
@@ -120,9 +114,8 @@ AccountOpResult AccountMgr::ChangeUsername(uint32 accid, std::string new_uname, 
     std::string safe_new_uname = new_uname;
     LoginDatabase.escape_string(safe_new_uname);
 
-    if (!LoginDatabase.PExecute("UPDATE account SET v='0',s='0',username='%s',sha_pass_hash='%s' WHERE id='%d'", safe_new_uname.c_str(),
-                CalculateShaPassHash(new_uname, new_passwd).c_str(), accid))
-        return AOR_DB_INTERNAL_ERROR;                       // unexpected error
+    LoginDatabase.PExecute("UPDATE account SET v='0',s='0',username='%s',sha_pass_hash='%s' WHERE id='%d'", safe_new_uname.c_str(),
+                CalculateShaPassHash(new_uname, new_passwd).c_str(), accid);
 
     return AOR_OK;
 }
@@ -141,9 +134,8 @@ AccountOpResult AccountMgr::ChangePassword(uint32 accid, std::string new_passwd)
     normalizeString(new_passwd);
 
     // also reset s and v to force update at next realmd login
-    if (!LoginDatabase.PExecute("UPDATE account SET v='0', s='0', sha_pass_hash='%s' WHERE id='%d'",
-                CalculateShaPassHash(username, new_passwd).c_str(), accid))
-        return AOR_DB_INTERNAL_ERROR;                       // unexpected error
+    LoginDatabase.PExecute("UPDATE account SET v='0', s='0', sha_pass_hash='%s' WHERE id='%d'",
+                CalculateShaPassHash(username, new_passwd).c_str(), accid);
 
     return AOR_OK;
 }
@@ -173,7 +165,7 @@ uint32 AccountMgr::GetSecurity(uint32 acc_id)
     return 0;
 }
 
-uint32 AccountMgr::GetSecurity(uint32 acc_id, int32 realm_id)
+uint32 AccountMgr::GetSecurity(uint64 acc_id, int32 realm_id)
 {
     QueryResult_AutoPtr result = (realm_id == -1)
         ? LoginDatabase.PQuery("SELECT gmlevel FROM account_access WHERE id = '%u' AND RealmID = '%d'", acc_id, realm_id)
@@ -235,15 +227,20 @@ bool AccountMgr::normalizeString(std::string& utf8str)
     size_t wstr_len = MAX_ACCOUNT_STR;
     if (!Utf8toWStr(utf8str,wstr_buf,wstr_len))
         return false;
-
+#ifdef _MSC_VER
+#pragma warning(disable: 4996)
+#endif
     std::transform(&wstr_buf[0], wstr_buf+wstr_len, &wstr_buf[0], wcharToUpperOnlyLatin);
+#ifdef _MSC_VER
+#pragma warning(default: 4996)
+#endif
 
     return WStrToUtf8(wstr_buf,wstr_len,utf8str);
 }
 
 std::string AccountMgr::CalculateShaPassHash(std::string& name, std::string& password)
 {
-    Sha1Hash sha;
+    SHA1Hash sha;
     sha.Initialize();
     sha.UpdateData(name);
     sha.UpdateData(":");

@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "Unit.h"
 #include "Player.h"
 #include "Pet.h"
@@ -25,6 +26,27 @@
 #include "SharedDefines.h"
 #include "SpellAuras.h"
 #include "SpellAuraEffects.h"
+#include "SpellMgr.h"
+
+inline bool _ModifyUInt32(bool apply, uint32& baseValue, int32& amount) 
+{
+    // If amount is negative, change sign and value of apply.
+    if (amount < 0)
+    {
+        apply = !apply;
+        amount = -amount;
+    }
+    if (apply)
+        baseValue += amount;
+    else 
+    {
+        // Make sure we do not get uint32 overflow.
+        if (amount > int32(baseValue))
+            amount = baseValue;
+        baseValue -= amount;
+    }
+    return apply;
+}
 
 /*#######################################
 ########                         ########
@@ -113,12 +135,12 @@ bool Player::UpdateStats(Stats stat)
 
 void Player::ApplySpellPowerBonus(int32 amount, bool apply)
 {
-    m_baseSpellPower+=apply?amount:-amount;
+    apply = _ModifyUInt32(apply, m_baseSpellPower, amount);
 
     // For speed just update for client
     ApplyModUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS, amount, apply);
     for (int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
-        ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+i, amount, apply);;
+        ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + i, amount, apply);
 }
 
 void Player::UpdateSpellDamageAndHealingBonus()
@@ -134,10 +156,10 @@ void Player::UpdateSpellDamageAndHealingBonus()
 
 bool Player::UpdateAllStats()
 {
-    for (int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+    for (int8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
     {
         float value = GetTotalStatValue(Stats(i));
-        SetStat(Stats(i), (int32)value);
+        SetStat(Stats(i), int32(value));
     }
 
     UpdateArmor();
@@ -145,7 +167,7 @@ bool Player::UpdateAllStats()
     UpdateAttackPowerAndDamage(true);
     UpdateMaxHealth();
 
-    for (int i = POWER_MANA; i < MAX_POWERS; ++i)
+    for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
         UpdateMaxPower(Powers(i));
 
     UpdateAllRatings();
@@ -256,7 +278,7 @@ void Player::UpdateMaxPower(Powers power)
 
 void Player::ApplyFeralAPBonus(int32 amount, bool apply)
 {
-    m_baseFeralAP+= apply ? amount:-amount;
+    _ModifyUInt32(apply, m_baseFeralAP, amount);
     UpdateAttackPowerAndDamage();
 }
 
@@ -577,14 +599,16 @@ void Player::UpdateParryPercentage()
     float value = 0.0f;
     if (CanParry())
     {
-        // Base parry
-        value  = 5.0f;
         // Modify value from defense skill
         value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
+        // Modify value from rating
+        value += GetRatingBonusValue(CR_PARRY);
+        // apply diminishing returns
+        value = ParryDiminishingReturn(value);
         // Parry from SPELL_AURA_MOD_PARRY_PERCENT aura
         value += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
-        // Parry from rating
-        value += GetRatingBonusValue(CR_PARRY);
+        // base parry
+        value += 5.0f;
         value = value < 0.0f ? 0.0f : value;
     }
     SetStatFloatValue(PLAYER_PARRY_PERCENTAGE, value);
@@ -596,10 +620,14 @@ void Player::UpdateDodgePercentage()
     float value = GetDodgeFromAgility();
     // Modify value from defense skill
     value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
+    // Modify value from rating
+    value += GetRatingBonusValue(CR_DODGE);
+    // apply diminishing returns
+    value = DodgeDiminishingReturn(value);
     // Dodge from SPELL_AURA_MOD_DODGE_PERCENT aura
     value += GetTotalAuraModifier(SPELL_AURA_MOD_DODGE_PERCENT);
-    // Dodge from rating
-    value += GetRatingBonusValue(CR_DODGE);
+    // Apply base dodge
+    value += GetBaseDodge();
     value = value < 0.0f ? 0.0f : value;
     SetStatFloatValue(PLAYER_DODGE_PERCENTAGE, value);
 }
@@ -637,20 +665,20 @@ void Player::UpdateArmorPenetration(int32 amount)
 
 void Player::UpdateMeleeHitChances()
 {
-    m_modMeleeHitChance = GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
-    m_modMeleeHitChance+=  GetRatingBonusValue(CR_HIT_MELEE);
+    m_modMeleeHitChance = (float)GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
+    m_modMeleeHitChance += GetRatingBonusValue(CR_HIT_MELEE);
 }
 
 void Player::UpdateRangedHitChances()
 {
-    m_modRangedHitChance = GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
-    m_modRangedHitChance+= GetRatingBonusValue(CR_HIT_RANGED);
+    m_modRangedHitChance = (float)GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
+    m_modRangedHitChance += GetRatingBonusValue(CR_HIT_RANGED);
 }
 
 void Player::UpdateSpellHitChances()
 {
-    m_modSpellHitChance = GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
-    m_modSpellHitChance+= GetRatingBonusValue(CR_HIT_SPELL);
+    m_modSpellHitChance = (float)GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
+    m_modSpellHitChance += GetRatingBonusValue(CR_HIT_SPELL);
 }
 
 void Player::UpdateAllSpellCritChances()
@@ -692,13 +720,13 @@ void Player::UpdateExpertise(WeaponAttackType attack)
 
 void Player::ApplyManaRegenBonus(int32 amount, bool apply)
 {
-    m_baseManaRegen+= apply ? amount : -amount;
+    _ModifyUInt32(apply, m_baseManaRegen, amount);
     UpdateManaRegen();
 }
 
 void Player::ApplyHealthRegenBonus(int32 amount, bool apply)
 {
-    m_baseHealthRegen+= apply ? amount : -amount;
+    _ModifyUInt32(apply, m_baseHealthRegen, amount);
 }
 
 void Player::UpdateManaRegen()
@@ -769,10 +797,10 @@ bool Creature::UpdateAllStats()
     UpdateAttackPowerAndDamage();
     UpdateAttackPowerAndDamage(true);
 
-    for (int i = POWER_MANA; i < MAX_POWERS; ++i)
+    for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
         UpdateMaxPower(Powers(i));
 
-    for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
+    for (int8 i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
         UpdateResistances(i);
 
     return true;
@@ -922,6 +950,8 @@ bool Guardian::UpdateStats(Stats stat)
 
     // value = ((base_value * base_pct) + total_value) * total_pct
     float value  = GetTotalStatValue(stat);
+    ApplyStatBuffMod(stat, m_statFromOwner[stat], false);
+    float ownersBonus = 0.0f;
 
     Unit *owner = GetOwner();
     // Handle Death Knight Glyphs and Talents
@@ -935,49 +965,55 @@ bool Guardian::UpdateStats(Stats stat)
             default: break;
         }
         // Ravenous Dead
-        AuraEffect const *aurEff;
+        AuraEffect const *aurEff = NULL;
         // Check just if owner has Ravenous Dead since it's effect is not an aura
         aurEff = owner->GetAuraEffect(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, SPELLFAMILY_DEATHKNIGHT, 3010, 0);
         if (aurEff)
         {
             SpellEntry const* sProto = aurEff->GetSpellProto();                                                       // Then get the SpellProto and add the dummy effect value
-            mod += mod * (sProto->EffectBasePoints[1] / 100.0f);                                                      // Ravenous Dead edits the original scale
+            mod += mod * (SpellMgr::CalculateSpellEffectAmount(sProto, 1) / 100.0f);                                                      // Ravenous Dead edits the original scale
         }
         // Glyph of the Ghoul
         aurEff = owner->GetAuraEffect(58686, 0);
         if (aurEff)
             mod += (aurEff->GetAmount() / 100.0f);                                                                    // Glyph of the Ghoul adds a flat value to the scale mod
-        value += float(owner->GetStat(stat)) * mod;
+        ownersBonus = float(owner->GetStat(stat)) * mod;
+        value += ownersBonus;
     }
     else if (stat == STAT_STAMINA)
     {
         if (owner->getClass() == CLASS_WARLOCK && isPet())
-        value += float(owner->GetStat(STAT_STAMINA)) * 0.75f;
+        {
+            ownersBonus = float(owner->GetStat(STAT_STAMINA)) * 0.75f;
+            value += ownersBonus;
+        }
         else
         {
-            mod = 0.3f;
-            if (this->ToCreature()->isPet())
+            mod = 0.45f;
+            if (isPet())
             {
-                PetSpellMap::const_iterator itr = (((Pet*)this)->m_spells.find(62758));   // Wild Hunt rank 1
-                if (itr == ((Pet*)this)->m_spells.end())
-                {
-                    itr = ((Pet*)this)->m_spells.find(62762);                             // Wild Hunt rank 2
-                }
-                if (itr != ((Pet*)this)->m_spells.end())                                  // If pet has Wild Hunt
-                {
+                PetSpellMap::const_iterator itr = (ToPet()->m_spells.find(62758)); // Wild Hunt rank 1
+                if (itr == ToPet()->m_spells.end())
+                    itr = ToPet()->m_spells.find(62762);                            // Wild Hunt rank 2
 
-                    SpellEntry const* sProto = sSpellStore.LookupEntry(itr->first);       // Then get the SpellProto and add the dummy effect value
-                    mod += mod * (sProto->EffectBasePoints[0] / 100.0f);
+                if (itr != ToPet()->m_spells.end())                                 // If pet has Wild Hunt
+                {
+                    SpellEntry const* sProto = sSpellStore.LookupEntry(itr->first); // Then get the SpellProto and add the dummy effect value
+                    mod += mod * (SpellMgr::CalculateSpellEffectAmount(sProto, 0) / 100.0f);
                 }
             }
-            value += float(owner->GetStat(stat)) * mod;
+            ownersBonus = float(owner->GetStat(stat)) * mod;
+            value += ownersBonus;
         }
     }
                                                             //warlock's and mage's pets gain 30% of owner's intellect
     else if (stat == STAT_INTELLECT)
     {
         if (owner->getClass() == CLASS_WARLOCK || owner->getClass() == CLASS_MAGE)
-            value += float(owner->GetStat(stat)) * 0.3f;
+        {
+            ownersBonus = float(owner->GetStat(stat)) * 0.3f;
+            value += ownersBonus;
+        }
     }
 /*
     else if (stat == STAT_STRENGTH)
@@ -988,6 +1024,8 @@ bool Guardian::UpdateStats(Stats stat)
 */
 
     SetStat(stat, int32(value));
+    m_statFromOwner[stat] = ownersBonus;
+    ApplyStatBuffMod(stat, m_statFromOwner[stat], true);
 
     switch (stat)
     {
@@ -1005,13 +1043,13 @@ bool Guardian::UpdateStats(Stats stat)
 
 bool Guardian::UpdateAllStats()
 {
-    for (int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+    for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
         UpdateStats(Stats(i));
 
-    for (int i = POWER_MANA; i < MAX_POWERS; ++i)
+    for (uint8 i = POWER_MANA; i < MAX_POWERS; ++i)
         UpdateMaxPower(Powers(i));
 
-    for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
+    for (uint8 i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
         UpdateResistances(i);
 
     return true;
@@ -1121,21 +1159,20 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
     {
         if (isHunterPet())                      //hunter pets benefit from owner's attack power
         {
-        float mod = 1.0f;                                                 //Hunter contribution modifier
-            if (this->ToCreature()->isPet())
-        {
-          PetSpellMap::const_iterator itr = ((Pet*)this)->m_spells.find(62758);                     //Wild Hunt rank 1
-          if (itr == ((Pet*)this)->m_spells.end())
-          {
-        itr = ((Pet*)this)->m_spells.find(62762);                                 //Wild Hunt rank 2
-          }
-          if (itr != ((Pet*)this)->m_spells.end())                                     // If pet has Wild Hunt
-          {
+            float mod = 1.0f;                                                 //Hunter contribution modifier
+            if (isPet())
+            {
+                PetSpellMap::const_iterator itr = ToPet()->m_spells.find(62758);    //Wild Hunt rank 1
+                if (itr == ToPet()->m_spells.end())
+                    itr = ToPet()->m_spells.find(62762);                            //Wild Hunt rank 2
 
-        SpellEntry const* sProto = sSpellStore.LookupEntry(itr->first);                                    // Then get the SpellProto and add the dummy effect value
-                mod += (sProto->EffectBasePoints[1] / 100.0f);
-          }
-        }
+                if (itr != ToPet()->m_spells.end())                                 // If pet has Wild Hunt
+                {
+                    SpellEntry const* sProto = sSpellStore.LookupEntry(itr->first); // Then get the SpellProto and add the dummy effect value
+                    mod += (SpellMgr::CalculateSpellEffectAmount(sProto, 1) / 100.0f);
+                }
+            }
+
             bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f * mod;
             SetBonusDamage(int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.1287f * mod));
         }
@@ -1225,20 +1262,20 @@ void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
     //  Pet's base damage changes depending on happiness
     if (isHunterPet() && attType == BASE_ATTACK)
     {
-        switch(((Pet*)this)->GetHappinessState())
+        switch(ToPet()->GetHappinessState())
         {
             case HAPPY:
                 // 125% of normal damage
-                mindamage = mindamage * 1.25;
-                maxdamage = maxdamage * 1.25;
+                mindamage = mindamage * 1.25f;
+                maxdamage = maxdamage * 1.25f;
                 break;
             case CONTENT:
                 // 100% of normal damage, nothing to modify
                 break;
             case UNHAPPY:
                 // 75% of normal damage
-                mindamage = mindamage * 0.75;
-                maxdamage = maxdamage * 0.75;
+                mindamage = mindamage * 0.75f;
+                maxdamage = maxdamage * 0.75f;
                 break;
         }
     }
@@ -1260,4 +1297,11 @@ void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
 
     SetStatFloatValue(UNIT_FIELD_MINDAMAGE, mindamage);
     SetStatFloatValue(UNIT_FIELD_MAXDAMAGE, maxdamage);
+}
+
+void Guardian::SetBonusDamage(int32 damage)
+{
+    m_bonusSpellDamage = damage;
+    if (GetOwner()->GetTypeId() == TYPEID_PLAYER)
+        GetOwner()->SetUInt32Value(PLAYER_PET_SPELL_POWER, damage);
 }

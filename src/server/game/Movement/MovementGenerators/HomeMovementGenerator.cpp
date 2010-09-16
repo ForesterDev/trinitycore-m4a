@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "HomeMovementGenerator.h"
 #include "Creature.h"
 #include "CreatureAI.h"
@@ -80,6 +81,7 @@ HomeMovementGenerator<Creature>::Update(Creature &owner, const uint32& time_diff
         }
 
         owner.clearUnitState(UNIT_STAT_EVADE);
+        owner.LoadCreaturesAddon(true);
         owner.AI()->JustReachedHome();
         return false;
     }

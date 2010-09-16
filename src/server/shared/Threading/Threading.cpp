@@ -17,7 +17,7 @@
  */
 
 #include "Threading.h"
-#include "Errors.h"
+#include "Debugging/Errors.h"
 #include <ace/OS_NS_unistd.h>
 #include <ace/Sched_Params.h>
 #include <vector>
@@ -97,12 +97,12 @@ int ThreadPriority::getPriority(Priority p) const
 
 #define THREADFLAG (THR_NEW_LWP | THR_SCHED_DEFAULT| THR_JOINABLE)
 
-Thread::Thread() : m_task(0), m_iThreadId(0), m_hThreadHandle(0)
+Thread::Thread(): m_iThreadId(0), m_hThreadHandle(0), m_task(0)
 {
 
 }
 
-Thread::Thread(Runnable* instance) : m_task(instance), m_iThreadId(0), m_hThreadHandle(0)
+Thread::Thread(Runnable* instance): m_iThreadId(0), m_hThreadHandle(0), m_task(instance)
 {
     // register reference to m_task to prevent it deeltion until destructor
     if (m_task)

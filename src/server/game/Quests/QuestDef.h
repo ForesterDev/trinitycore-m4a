@@ -141,7 +141,7 @@ enum __QuestFlags
     QUEST_FLAGS_AUTOCOMPLETE   = 0x00010000,                // auto complete
     QUEST_FLAGS_SPECIAL_ITEM   = 0x00020000,                // has something to do with ReqItemId and SrcItemId
     QUEST_FLAGS_OBJ_TEXT       = 0x00040000,                // use Objective text as Complete text
-    QUEST_FLAGS_AUTO_ACCEPT    = 0x00080000,                // The client recognizes this flag as auto-accept. However, NONE of the current quests (3.3.5a) have this flag. Maybe blizz used to use it, or will use it in the future. 
+    QUEST_FLAGS_AUTO_ACCEPT    = 0x00080000,                // The client recognizes this flag as auto-accept. However, NONE of the current quests (3.3.5a) have this flag. Maybe blizz used to use it, or will use it in the future.
 
     // Trinity flags for set SpecialFlags in DB if required but used only at server
     QUEST_TRINITY_FLAGS_REPEATABLE           = 0x00100000,   // Set by 1 in SpecialFlags from DB
@@ -161,14 +161,14 @@ struct QuestLocale
 {
     QuestLocale() { ObjectiveText.resize(QUEST_OBJECTIVES_COUNT); }
 
-    std::vector<std::string> Title;
-    std::vector<std::string> Details;
-    std::vector<std::string> Objectives;
-    std::vector<std::string> OfferRewardText;
-    std::vector<std::string> RequestItemsText;
-    std::vector<std::string> EndText;
-    std::vector<std::string> CompletedText;
-    std::vector< std::vector<std::string> > ObjectiveText;
+    StringVector Title;
+    StringVector Details;
+    StringVector Objectives;
+    StringVector OfferRewardText;
+    StringVector RequestItemsText;
+    StringVector EndText;
+    StringVector CompletedText;
+    std::vector< StringVector > ObjectiveText;
 };
 
 // This Quest class provides a convenient way to access a few pretotaled (cached) quest details,

@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "Totem.h"
 #include "WorldPacket.h"
 #include "Log.h"
@@ -59,8 +60,8 @@ void Totem::InitStats(uint32 duration)
     CreatureInfo const *cinfo = GetCreatureInfo();
     if (m_owner->GetTypeId() == TYPEID_PLAYER && cinfo)
     {
-        uint32 display_id = objmgr.ChooseDisplayId(m_owner->ToPlayer()->GetTeam(), cinfo);
-        CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(display_id);
+        uint32 display_id = sObjectMgr.ChooseDisplayId(m_owner->ToPlayer()->GetTeam(), cinfo);
+        CreatureModelInfo const *minfo = sObjectMgr.GetCreatureModelRandomGender(display_id);
         if (minfo)
             display_id = minfo->modelid;
         switch (m_owner->ToPlayer()->GetTeam())

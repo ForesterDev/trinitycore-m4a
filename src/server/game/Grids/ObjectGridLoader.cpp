@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "ObjectGridLoader.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
@@ -173,7 +174,7 @@ ObjectGridLoader::Visit(GameObjectMapType &m)
     CellPair cell_pair(x,y);
     uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
-    CellObjectGuids const& cell_guids = objmgr.GetCellObjectGuids(i_map->GetId(), i_map->GetSpawnMode(), cell_id);
+    CellObjectGuids const& cell_guids = sObjectMgr.GetCellObjectGuids(i_map->GetId(), i_map->GetSpawnMode(), cell_id);
 
     LoadHelper(cell_guids.gameobjects, cell_pair, m, i_gameObjects, i_map);
 }
@@ -186,7 +187,7 @@ ObjectGridLoader::Visit(CreatureMapType &m)
     CellPair cell_pair(x,y);
     uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
-    CellObjectGuids const& cell_guids = objmgr.GetCellObjectGuids(i_map->GetId(), i_map->GetSpawnMode(), cell_id);
+    CellObjectGuids const& cell_guids = sObjectMgr.GetCellObjectGuids(i_map->GetId(), i_map->GetSpawnMode(), cell_id);
 
     LoadHelper(cell_guids.creatures, cell_pair, m, i_creatures, i_map);
 }
@@ -200,7 +201,7 @@ ObjectWorldLoader::Visit(CorpseMapType &m)
     uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
     // corpses are always added to spawn mode 0 and they are spawned by their instance id
-    CellObjectGuids const& cell_guids = objmgr.GetCellObjectGuids(i_map->GetId(), 0, cell_id);
+    CellObjectGuids const& cell_guids = sObjectMgr.GetCellObjectGuids(i_map->GetId(), 0, cell_id);
     LoadHelper(cell_guids.corpses, cell_pair, m, i_corpses, i_map);
 }
 
@@ -264,7 +265,7 @@ ObjectGridUnloader::Visit(GridRefManager<T> &m)
     {
         T *obj = m.getFirst()->getSource();
         // if option set then object already saved at this moment
-        if (!sWorld.getConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATELY))
+        if (!sWorld.getBoolConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATELY))
             obj->SaveRespawnTime();
         ///- object will get delinked from the manager when deleted
         delete obj;

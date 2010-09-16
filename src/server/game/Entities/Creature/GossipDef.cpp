@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "QuestDef.h"
 #include "GossipDef.h"
 #include "ObjectMgr.h"
@@ -162,7 +163,7 @@ void PlayerMenu::SendGossipMenu(uint32 TitleTextId, uint64 objectGUID)
     {
         QuestMenuItem const& qItem = mQuestMenu.GetItem(iI);
         uint32 questID = qItem.m_qId;
-        Quest const* pQuest = objmgr.GetQuestTemplate(questID);
+        Quest const* pQuest = sObjectMgr.GetQuestTemplate(questID);
 
         data << uint32(questID);
         data << uint32(qItem.m_qIcon);
@@ -173,9 +174,9 @@ void PlayerMenu::SendGossipMenu(uint32 TitleTextId, uint64 objectGUID)
 
         int loc_idx = pSession->GetSessionDbLocaleIndex();
         if (loc_idx >= 0)
-            if (QuestLocale const *ql = objmgr.GetQuestLocale(questID))
-                if (ql->Title.size() > loc_idx && !ql->Title[loc_idx].empty())
-                    Title = ql->Title[loc_idx];
+            if (QuestLocale const *ql = sObjectMgr.GetQuestLocale(questID))
+                sObjectMgr.GetLocaleString(ql->Title, loc_idx, Title);
+
         data << Title;                                      // max 0x200
     }
 
@@ -205,7 +206,7 @@ void PlayerMenu::SendPointOfInterest(float X, float Y, uint32 Icon, uint32 Flags
 
 void PlayerMenu::SendPointOfInterest(uint32 poi_id)
 {
-    PointOfInterest const* poi = objmgr.GetPointOfInterest(poi_id);
+    PointOfInterest const* poi = sObjectMgr.GetPointOfInterest(poi_id);
     if (!poi)
     {
         sLog.outErrorDb("Request to send non-existing POI (Id: %u), ignored.",poi_id);
@@ -216,14 +217,8 @@ void PlayerMenu::SendPointOfInterest(uint32 poi_id)
 
     int loc_idx = pSession->GetSessionDbLocaleIndex();
     if (loc_idx >= 0)
-    {
-        PointOfInterestLocale const *pl = objmgr.GetPointOfInterestLocale(poi_id);
-        if (pl)
-        {
-            if (pl->IconName.size() > size_t(loc_idx) && !pl->IconName[loc_idx].empty())
-                icon_name = pl->IconName[loc_idx];
-        }
-    }
+        if (PointOfInterestLocale const *pl = sObjectMgr.GetPointOfInterestLocale(poi_id))
+            sObjectMgr.GetLocaleString(pl->IconName, loc_idx, icon_name);
 
     WorldPacket data(SMSG_GOSSIP_POI, (4+4+4+4+4+10));    // guess size
     data << uint32(poi->flags);
@@ -239,7 +234,7 @@ void PlayerMenu::SendPointOfInterest(uint32 poi_id)
 
 void PlayerMenu::SendTalking(uint32 textID)
 {
-    GossipText const* pGossip = objmgr.GetGossipText(textID);
+    GossipText const* pGossip = sObjectMgr.GetGossipText(textID);
 
     WorldPacket data(SMSG_NPC_TEXT_UPDATE, 100);          // guess size
     data << textID;                                         // can be < 0
@@ -262,28 +257,25 @@ void PlayerMenu::SendTalking(uint32 textID)
     }
     else
     {
-        std::string Text_0[8],Text_1[8];
-        for (int i=0; i<8; ++i)
+        std::string Text_0[8], Text_1[8];
+        for (int i = 0; i < 8; ++i)
         {
-            Text_0[i]=pGossip->Options[i].Text_0;
-            Text_1[i]=pGossip->Options[i].Text_1;
+            Text_0[i] = pGossip->Options[i].Text_0;
+            Text_1[i] = pGossip->Options[i].Text_1;
         }
         int loc_idx = pSession->GetSessionDbLocaleIndex();
         if (loc_idx >= 0)
         {
-            NpcTextLocale const *nl = objmgr.GetNpcTextLocale(textID);
-            if (nl)
+            if (NpcTextLocale const *nl = sObjectMgr.GetNpcTextLocale(textID))
             {
-                for (int i=0; i<8; ++i)
+                for (int i = 0; i < 8; ++i)
                 {
-                    if (nl->Text_0[i].size() > loc_idx && !nl->Text_0[i][loc_idx].empty())
-                        Text_0[i]=nl->Text_0[i][loc_idx];
-                    if (nl->Text_1[i].size() > loc_idx && !nl->Text_1[i][loc_idx].empty())
-                        Text_1[i]=nl->Text_1[i][loc_idx];
+                    sObjectMgr.GetLocaleString(nl->Text_0[i], loc_idx, Text_0[i]);
+                    sObjectMgr.GetLocaleString(nl->Text_1[i], loc_idx, Text_1[i]);
                 }
             }
         }
-        for (int i=0; i<8; ++i)
+        for (int i = 0; i < 8; ++i)
         {
             data << pGossip->Options[i].Probability;
 
@@ -350,7 +342,7 @@ QuestMenu::~QuestMenu()
 
 void QuestMenu::AddMenuItem(uint32 QuestId, uint8 Icon)
 {
-    Quest const* qinfo = objmgr.GetQuestTemplate(QuestId);
+    Quest const* qinfo = sObjectMgr.GetQuestTemplate(QuestId);
     if (!qinfo) return;
 
     ASSERT(m_qItems.size() <= GOSSIP_MAX_MENU_ITEMS);
@@ -397,19 +389,14 @@ void PlayerMenu::SendQuestGiverQuestList(QEmote eEmote, const std::string& Title
 
         uint32 questID = qmi.m_qId;
 
-        if (Quest const *pQuest = objmgr.GetQuestTemplate(questID))
+        if (Quest const *pQuest = sObjectMgr.GetQuestTemplate(questID))
         {
             std::string title = pQuest->GetTitle();
 
             int loc_idx = pSession->GetSessionDbLocaleIndex();
             if (loc_idx >= 0)
-            {
-                if (QuestLocale const *ql = objmgr.GetQuestLocale(questID))
-                {
-                    if (ql->Title.size() > (size_t)loc_idx && !ql->Title[loc_idx].empty())
-                        title = ql->Title[loc_idx];
-                }
-            }
+                if (QuestLocale const *ql = sObjectMgr.GetQuestLocale(questID))
+                    sObjectMgr.GetLocaleString(ql->Title, loc_idx, title);
 
             data << uint32(questID);
             data << uint32(qmi.m_qIcon);
@@ -445,17 +432,12 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const *pQuest, uint64 npcGUID,
     int loc_idx = pSession->GetSessionDbLocaleIndex();
     if (loc_idx >= 0)
     {
-        QuestLocale const *ql = objmgr.GetQuestLocale(pQuest->GetQuestId());
-        if (ql)
+        if (QuestLocale const *ql = sObjectMgr.GetQuestLocale(pQuest->GetQuestId()))
         {
-            if (ql->Title.size() > loc_idx && !ql->Title[loc_idx].empty())
-                Title=ql->Title[loc_idx];
-            if (ql->Details.size() > loc_idx && !ql->Details[loc_idx].empty())
-                Details=ql->Details[loc_idx];
-            if (ql->Objectives.size() > loc_idx && !ql->Objectives[loc_idx].empty())
-                Objectives=ql->Objectives[loc_idx];
-            if (ql->EndText.size() > loc_idx && !ql->EndText[loc_idx].empty())
-                EndText=ql->EndText[loc_idx];
+            sObjectMgr.GetLocaleString(ql->Title, loc_idx, Title);
+            sObjectMgr.GetLocaleString(ql->Details, loc_idx, Details);
+            sObjectMgr.GetLocaleString(ql->Objectives, loc_idx, Objectives);
+            sObjectMgr.GetLocaleString(ql->EndText, loc_idx, EndText);
         }
     }
 
@@ -491,7 +473,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const *pQuest, uint64 npcGUID,
             data << uint32(pQuest->RewChoiceItemId[i]);
             data << uint32(pQuest->RewChoiceItemCount[i]);
 
-            IProto = objmgr.GetItemPrototype(pQuest->RewChoiceItemId[i]);
+            IProto = sObjectMgr.GetItemPrototype(pQuest->RewChoiceItemId[i]);
 
             if (IProto)
                 data << uint32(IProto->DisplayInfoID);
@@ -509,7 +491,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const *pQuest, uint64 npcGUID,
             data << uint32(pQuest->RewItemId[i]);
             data << uint32(pQuest->RewItemCount[i]);
 
-            IProto = objmgr.GetItemPrototype(pQuest->RewItemId[i]);
+            IProto = sObjectMgr.GetItemPrototype(pQuest->RewItemId[i]);
 
             if (IProto)
                 data << uint32(IProto->DisplayInfoID);
@@ -566,23 +548,16 @@ void PlayerMenu::SendQuestQueryResponse(Quest const *pQuest)
     int loc_idx = pSession->GetSessionDbLocaleIndex();
     if (loc_idx >= 0)
     {
-        QuestLocale const *ql = objmgr.GetQuestLocale(pQuest->GetQuestId());
-        if (ql)
+        if (QuestLocale const *ql = sObjectMgr.GetQuestLocale(pQuest->GetQuestId()))
         {
-            if (ql->Title.size() > loc_idx && !ql->Title[loc_idx].empty())
-                Title=ql->Title[loc_idx];
-            if (ql->Details.size() > loc_idx && !ql->Details[loc_idx].empty())
-                Details=ql->Details[loc_idx];
-            if (ql->Objectives.size() > loc_idx && !ql->Objectives[loc_idx].empty())
-                Objectives=ql->Objectives[loc_idx];
-            if (ql->EndText.size() > loc_idx && !ql->EndText[loc_idx].empty())
-                EndText=ql->EndText[loc_idx];
-            if (ql->CompletedText.size() > (size_t)loc_idx && !ql->CompletedText[loc_idx].empty())
-                CompletedText=ql->CompletedText[loc_idx];
+            sObjectMgr.GetLocaleString(ql->Title, loc_idx, Title);
+            sObjectMgr.GetLocaleString(ql->Details, loc_idx, Details);
+            sObjectMgr.GetLocaleString(ql->Objectives, loc_idx, Objectives);
+            sObjectMgr.GetLocaleString(ql->EndText, loc_idx, EndText);
+            sObjectMgr.GetLocaleString(ql->CompletedText, loc_idx, CompletedText);
 
-            for (int i=0; i<QUEST_OBJECTIVES_COUNT; ++i)
-                if (ql->ObjectiveText[i].size() > loc_idx && !ql->ObjectiveText[i][loc_idx].empty())
-                    ObjectiveText[i]=ql->ObjectiveText[i][loc_idx];
+            for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
+                sObjectMgr.GetLocaleString(ql->ObjectiveText[i], loc_idx, ObjectiveText[i]);
         }
     }
 
@@ -706,13 +681,10 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, uint64 npcGUID, 
     int loc_idx = pSession->GetSessionDbLocaleIndex();
     if (loc_idx >= 0)
     {
-        QuestLocale const *ql = objmgr.GetQuestLocale(pQuest->GetQuestId());
-        if (ql)
+        if (QuestLocale const *ql = sObjectMgr.GetQuestLocale(pQuest->GetQuestId()))
         {
-            if (ql->Title.size() > loc_idx && !ql->Title[loc_idx].empty())
-                Title=ql->Title[loc_idx];
-            if (ql->OfferRewardText.size() > loc_idx && !ql->OfferRewardText[loc_idx].empty())
-                OfferRewardText=ql->OfferRewardText[loc_idx];
+            sObjectMgr.GetLocaleString(ql->Title, loc_idx, Title);
+            sObjectMgr.GetLocaleString(ql->OfferRewardText, loc_idx, OfferRewardText);
         }
     }
 
@@ -747,7 +719,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, uint64 npcGUID, 
     data << uint32(pQuest->GetRewChoiceItemsCount());
     for (uint32 i=0; i < pQuest->GetRewChoiceItemsCount(); ++i)
     {
-        pItem = objmgr.GetItemPrototype(pQuest->RewChoiceItemId[i]);
+        pItem = sObjectMgr.GetItemPrototype(pQuest->RewChoiceItemId[i]);
 
         data << uint32(pQuest->RewChoiceItemId[i]);
         data << uint32(pQuest->RewChoiceItemCount[i]);
@@ -761,7 +733,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, uint64 npcGUID, 
     data << uint32(pQuest->GetRewItemsCount());
     for (uint32 i = 0; i < pQuest->GetRewItemsCount(); ++i)
     {
-        pItem = objmgr.GetItemPrototype(pQuest->RewItemId[i]);
+        pItem = sObjectMgr.GetItemPrototype(pQuest->RewItemId[i]);
         data << uint32(pQuest->RewItemId[i]);
         data << uint32(pQuest->RewItemCount[i]);
 
@@ -809,13 +781,10 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const *pQuest, uint64 npcGUID,
     int loc_idx = pSession->GetSessionDbLocaleIndex();
     if (loc_idx >= 0)
     {
-        QuestLocale const *ql = objmgr.GetQuestLocale(pQuest->GetQuestId());
-        if (ql)
+        if (QuestLocale const *ql = sObjectMgr.GetQuestLocale(pQuest->GetQuestId()))
         {
-            if (ql->Title.size() > loc_idx && !ql->Title[loc_idx].empty())
-                Title=ql->Title[loc_idx];
-            if (ql->RequestItemsText.size() > loc_idx && !ql->RequestItemsText[loc_idx].empty())
-                RequestItemsText=ql->RequestItemsText[loc_idx];
+            sObjectMgr.GetLocaleString(ql->Title, loc_idx, Title);
+            sObjectMgr.GetLocaleString(ql->RequestItemsText, loc_idx, RequestItemsText);
         }
     }
 
@@ -857,7 +826,7 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const *pQuest, uint64 npcGUID,
         if (!pQuest->ReqItemId[i])
             continue;
 
-        pItem = objmgr.GetItemPrototype(pQuest->ReqItemId[i]);
+        pItem = sObjectMgr.GetItemPrototype(pQuest->ReqItemId[i]);
 
         data << uint32(pQuest->ReqItemId[i]);
         data << uint32(pQuest->ReqItemCount[i]);

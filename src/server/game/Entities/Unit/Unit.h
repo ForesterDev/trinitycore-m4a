@@ -111,14 +111,14 @@ enum SpellModOp
     SPELLMOD_JUMP_TARGETS           = 17,
     SPELLMOD_CHANCE_OF_SUCCESS      = 18,
     SPELLMOD_ACTIVATION_TIME        = 19,
-    SPELLMOD_EFFECT_PAST_FIRST      = 20,
+    SPELLMOD_DAMAGE_MULTIPLIER      = 20,
     SPELLMOD_GLOBAL_COOLDOWN        = 21,
     SPELLMOD_DOT                    = 22,
     SPELLMOD_EFFECT3                = 23,
-    SPELLMOD_SPELL_BONUS_DAMAGE     = 24,
+    SPELLMOD_BONUS_MULTIPLIER       = 24,
     // spellmod 25
     SPELLMOD_PROC_PER_MINUTE        = 26,
-    SPELLMOD_MULTIPLE_VALUE         = 27,
+    SPELLMOD_VALUE_MULTIPLIER       = 27,
     SPELLMOD_RESIST_DISPEL_CHANCE   = 28,
     SPELLMOD_CRIT_DAMAGE_BONUS_2    = 29, //one not used spell
     SPELLMOD_SPELL_COST_REFUND_ON_FAIL = 30
@@ -266,12 +266,12 @@ enum Swing
 
 enum VictimState
 {
-    VICTIMSTATE_UNKNOWN1       = 0,
-    VICTIMSTATE_NORMAL         = 1,
+    VICTIMSTATE_INTACT         = 0, // set when attacker misses
+    VICTIMSTATE_HIT            = 1, // victim got clear/blocked hit
     VICTIMSTATE_DODGE          = 2,
     VICTIMSTATE_PARRY          = 3,
     VICTIMSTATE_INTERRUPT      = 4,
-    VICTIMSTATE_BLOCKS         = 5,
+    VICTIMSTATE_BLOCKS         = 5, // unused? not set when blocked, even on full block
     VICTIMSTATE_EVADES         = 6,
     VICTIMSTATE_IS_IMMUNE      = 7,
     VICTIMSTATE_DEFLECTS       = 8
@@ -691,7 +691,7 @@ enum MovementFlags2
     MOVEMENTFLAG2_UNK8                     = 0x00000080,
     MOVEMENTFLAG2_UNK9                     = 0x00000100,
     MOVEMENTFLAG2_UNK10                    = 0x00000200,
-    MOVEMENTFLAG2_INTERPOLATED_MOVEMENT    = 0x00000400, 
+    MOVEMENTFLAG2_INTERPOLATED_MOVEMENT    = 0x00000400,
     MOVEMENTFLAG2_INTERPOLATED_TURNING     = 0x00000800,
     MOVEMENTFLAG2_INTERPOLATED_PITCHING    = 0x00001000,
     MOVEMENTFLAG2_UNK14                    = 0x00002000,
@@ -699,7 +699,7 @@ enum MovementFlags2
     MOVEMENTFLAG2_UNK16                    = 0x00008000,
 
     // player only?
-    MOVEMENTFLAG2_INTERPOLATED = 
+    MOVEMENTFLAG2_INTERPOLATED =
         MOVEMENTFLAG2_INTERPOLATED_MOVEMENT |
         MOVEMENTFLAG2_INTERPOLATED_TURNING |
         MOVEMENTFLAG2_INTERPOLATED_PITCHING
@@ -805,7 +805,7 @@ enum MeleeHitOutcome
 struct CleanDamage
 {
     CleanDamage(uint32 mitigated, uint32 absorbed, WeaponAttackType _attackType, MeleeHitOutcome _hitOutCome) :
-    mitigated_damage(mitigated), absorbed_damage(absorbed), attackType(_attackType), hitOutCome(_hitOutCome) {}
+    absorbed_damage(absorbed), mitigated_damage(mitigated), attackType(_attackType), hitOutCome(_hitOutCome) {}
 
     uint32 absorbed_damage;
     uint32 mitigated_damage;
@@ -1211,8 +1211,17 @@ class Unit : public WorldObject
 
         uint32 GetHealth()    const { return GetUInt32Value(UNIT_FIELD_HEALTH); }
         uint32 GetMaxHealth() const { return GetUInt32Value(UNIT_FIELD_MAXHEALTH); }
+
+        inline bool IsFullHealth() const { return GetHealth() == GetMaxHealth(); }
+        inline bool HealthBelowPct(int32 pct) const { return GetHealth() * (uint64)100 < GetMaxHealth() * (uint64)pct; }
+        inline bool HealthBelowPctDamaged(int32 pct, uint32 damage) const { return (int32(GetHealth()) - damage) * (int64)100 < GetMaxHealth() * (int64)pct; }
+        inline bool HealthAbovePct(int32 pct) const { return GetHealth() * (uint64)100 > GetMaxHealth() * (uint64)pct; }
+            inline float GetHealthPct() const { return GetMaxHealth() ? 100.f * GetHealth() / GetMaxHealth() : 0.0f; }
+        inline uint32 CountPctFromMaxHealth(int32 pct) const { return uint32(float(pct) * GetMaxHealth() / 100.0f); }
+
         void SetHealth(uint32 val);
         void SetMaxHealth(uint32 val);
+        inline void SetFullHealth() { SetHealth(GetMaxHealth()); }
         int32 ModifyHealth(int32 val);
         int32 GetHealthGain(int32 dVal);
 
@@ -1284,14 +1293,14 @@ class Unit : public WorldObject
 
         bool IsMounted() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT); }
         uint32 GetMountID() const { return GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID); }
-        void Mount(uint32 mount, uint32 vehicleId=0);
+        void Mount(uint32 mount, uint32 vehicleId = 0, uint32 creatureEntry = 0);
         void Unmount();
 
         uint16 GetMaxSkillValueForLevel(Unit const* target = NULL) const { return (target ? getLevelForTarget(target) : getLevel()) * 5; }
         void DealDamageMods(Unit *pVictim, uint32 &damage, uint32* absorb);
         uint32 DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage = NULL, DamageEffectType damagetype = DIRECT_DAMAGE, SpellSchoolMask damageSchoolMask = SPELL_SCHOOL_MASK_NORMAL, SpellEntry const *spellProto = NULL, bool durabilityLoss = true);
         void Kill(Unit *pVictim, bool durabilityLoss = true);
-        int32 DealHeal(Unit *pVictim, uint32 addhealth, SpellEntry const *spellProto, bool critical = false);
+        int32 DealHeal(Unit *pVictim, uint32 addhealth);
 
         void ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVictim, uint32 procEx, uint32 amount, WeaponAttackType attType = BASE_ATTACK, SpellEntry const *procSpell = NULL, SpellEntry const * procAura = NULL);
         void ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, SpellEntry const * procSpell, uint32 damage , SpellEntry const * procAura = NULL);
@@ -1409,6 +1418,7 @@ class Unit : public WorldObject
         bool isInAccessiblePlaceFor(Creature const* c) const;
 
         void SendHealSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, uint32 OverHeal, uint32 Absorb, bool critical = false);
+        int32 HealBySpell(Unit * pVictim, SpellEntry const * spellInfo, uint32 addHealth, bool critical = false);
         void SendEnergizeSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage,Powers powertype);
         void EnergizeBySpell(Unit *pVictim, uint32 SpellID, uint32 Damage, Powers powertype);
         uint32 SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage);
@@ -1433,6 +1443,7 @@ class Unit : public WorldObject
         void SendSpellNonMeleeDamageLog(Unit *target,uint32 SpellID, uint32 Damage, SpellSchoolMask damageSchoolMask, uint32 AbsorbedDamage, uint32 Resist, bool PhysicalDamage, uint32 Blocked, bool CriticalHit = false);
         void SendPeriodicAuraLog(SpellPeriodicAuraLogInfo *pInfo);
         void SendSpellMiss(Unit *target, uint32 spellID, SpellMissInfo missInfo);
+        void SendSpellDamageImmune(Unit *target, uint32 spellId);
 
         void NearTeleportTo(float x, float y, float z, float orientation, bool casting = false);
         virtual bool SetPosition(float x, float y, float z, float ang, bool teleport = false);
@@ -1534,7 +1545,7 @@ class Unit : public WorldObject
 
         CharmInfo* GetCharmInfo() { return m_charmInfo; }
         CharmInfo* InitCharmInfo();
-        void       DeleteCharmInfo();
+        void DeleteCharmInfo();
         void UpdateCharmAI();
         //Player * GetMoverSource() const;
         Player * m_movedPlayer;
@@ -1598,6 +1609,7 @@ class Unit : public WorldObject
         void RemoveAllAuras();
         void RemoveArenaAuras(bool onleave = false);
         void RemoveAllAurasOnDeath();
+        void RemoveAllAurasRequiringDeadTarget();
         void DelayOwnedAuras(uint32 spellId, uint64 caster, int32 delaytime);
 
         void _RemoveAllAuraStatMods();
@@ -1684,7 +1696,7 @@ class Unit : public WorldObject
         // set withDelayed to true to account delayed spells as casted
         // delayed+channeled spells are always accounted as casted
         // we can skip channeled or delayed checks using flags
-        bool IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled = false, bool skipAutorepeat = false, bool isAutoshoot = false) const;
+        bool IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled = false, bool skipAutorepeat = false, bool isAutoshoot = false, bool skipInstant = true) const;
 
         // set withDelayed to true to interrupt delayed spells too
         // delayed+channeled spells are always interrupted
@@ -1851,6 +1863,7 @@ class Unit : public WorldObject
         virtual bool IsImmunedToSpellEffect(SpellEntry const* spellInfo, uint32 index) const;
                                                             // redefined in Creature
         uint32 CalcNotIgnoreDamageRedunction(uint32 damage, SpellSchoolMask damageSchoolMask);
+        static bool IsDamageReducedByArmor(SpellSchoolMask damageSchoolMask, SpellEntry const *spellInfo = NULL, uint8 effIndex = MAX_SPELL_EFFECTS);
         uint32 CalcArmorReducedDamage(Unit* pVictim, const uint32 damage, SpellEntry const *spellInfo, WeaponAttackType attackType=MAX_ATTACK);
         void CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32 *absorb, uint32 *resist, SpellEntry const *spellInfo = NULL);
         void CalcHealAbsorb(Unit *pVictim, const SpellEntry *spellProto, uint32 &healAmount, uint32 &absorb);
@@ -1955,6 +1968,7 @@ class Unit : public WorldObject
         float GetTransOffsetO() const { return m_movementInfo.t_pos.GetOrientation(); }
         uint32 GetTransTime()   const { return m_movementInfo.t_time; }
         int8 GetTransSeat()     const { return m_movementInfo.t_seat; }
+        uint64 GetTransGUID()   const;
 
         bool m_ControlledByPlayer;
 
@@ -1974,7 +1988,7 @@ class Unit : public WorldObject
 
         void RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacker);
 
-        virtual float GetFollowAngle() const { return M_PI/2; }
+        virtual float GetFollowAngle() const { return static_cast<float>(M_PI/2); }
 
         void OutDebugInfo() const;
         virtual bool isBeingLoaded() const { return false;}
@@ -2108,7 +2122,7 @@ namespace Trinity
         public:
             PowerPctOrderPred(Powers power, bool ascending = true) : m_power(power), m_ascending(ascending) {}
             bool operator() (const Unit *a, const Unit *b) const
-            { 
+            {
                 float rA = a->GetMaxPower(m_power) ? float(a->GetPower(m_power)) / float(a->GetMaxPower(m_power)) : 0.0f;
                 float rB = b->GetMaxPower(m_power) ? float(b->GetPower(m_power)) / float(b->GetMaxPower(m_power)) : 0.0f;
                 return m_ascending ? rA < rB : rA > rB;
@@ -2117,14 +2131,14 @@ namespace Trinity
             const Powers m_power;
             const bool m_ascending;
     };
-      
+
     // Binary predicate for sorting Units based on percent value of health
     class HealthPctOrderPred
     {
         public:
             HealthPctOrderPred(bool ascending = true) : m_ascending(ascending) {}
             bool operator() (const Unit *a, const Unit *b) const
-            { 
+            {
                 float rA = a->GetMaxHealth() ? float(a->GetHealth()) / float(a->GetMaxHealth()) : 0.0f;
                 float rB = b->GetMaxHealth() ? float(b->GetHealth()) / float(b->GetMaxHealth()) : 0.0f;
                 return m_ascending ? rA < rB : rA > rB;
@@ -2150,14 +2164,14 @@ inline void Unit::SendMonsterMoveByPath(Path<Elem,Node> const& path, uint32 star
     data << uint32(((GetUnitMovementFlags() & MOVEMENTFLAG_LEVITATING) || isInFlight()) ? (SPLINEFLAG_FLYING|SPLINEFLAG_WALKING) : SPLINEFLAG_WALKING);
     data << uint32(traveltime);
     data << uint32(pathSize);
-    
+
     for (uint32 i = start; i < end; ++i)
     {
         data << float(path[i].x);
         data << float(path[i].y);
         data << float(path[i].z);
     }
-    
+
     SendMessageToSet(&data, true);
 }
 #endif

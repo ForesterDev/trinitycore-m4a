@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -89,7 +90,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket & /*recv_data*/)
     p_counter = data.wpos();
     data << uint32(counter);                                // raid reset count
 
-    ResetTimeByMapDifficultyMap const& resets = sInstanceSaveManager.GetResetTimeMap();
+    ResetTimeByMapDifficultyMap const& resets = sInstanceSaveMgr.GetResetTimeMap();
     for (ResetTimeByMapDifficultyMap::const_iterator itr = resets.begin(); itr != resets.end(); ++itr)
     {
         uint32 mapid = PAIR32_LOPART(itr->first);

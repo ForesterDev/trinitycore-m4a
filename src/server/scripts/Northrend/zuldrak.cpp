@@ -29,7 +29,8 @@ enum eDrakuruShackles
     SPELL_UNLOCK_SHACKLE       = 55083,
     SPELL_FREE_RAGECLAW        = 55223,
 
-    NPC_RAGECLAW               = 29686
+    NPC_RAGECLAW               = 29686,
+    QUEST_TROLLS_IS_GONE_CRAZY = 12861,
 };
 
 class npc_drakuru_shackles : public CreatureScript
@@ -86,10 +87,17 @@ public:
         {
             if (pSpell->Id == SPELL_UNLOCK_SHACKLE)
             {
-                if (Creature *Rageclaw = Unit::GetCreature(*me, RageclawGUID))
-                    UnlockRageclaw(pCaster);
-                else
-                    me->setDeathState(JUST_DIED);
+                if (pCaster->ToPlayer()->GetQuestStatus(QUEST_TROLLS_IS_GONE_CRAZY) == QUEST_STATUS_INCOMPLETE)
+                {
+                    if (Creature* pRageclaw = Unit::GetCreature(*me, RageclawGUID))
+                    {
+                        UnlockRageclaw(pCaster);
+                        pCaster->ToPlayer()->KilledMonster(pRageclaw->GetCreatureInfo(),RageclawGUID);
+                        me->DisappearAndDie();
+                    }
+                    else
+                        me->setDeathState(JUST_DIED);
+                }
             }
         }
     };
@@ -218,6 +226,7 @@ public:
 
     bool OnGossipSelect(Player* pPlayer, Creature* /*pCreature*/, uint32 /*uiSender*/, uint32 uiAction)
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
         if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
         {
             pPlayer->CLOSE_GOSSIP_MENU();
@@ -240,7 +249,7 @@ enum eGurgthock
     QUEST_AMPHITHEATER_ANGUISH_YGGDRAS_1          = 12932,
     QUEST_AMPHITHEATER_ANGUISH_MAGNATAUR          = 12933,
     QUEST_AMPHITHEATER_ANGUISH_FROM_BEYOND        = 12934,
- 
+
     NPC_ORINOKO_TUSKBREAKER                       = 30020,
     NPC_KORRAK_BLOODRAGER                         = 30023,
     NPC_YGGDRAS                                   = 30014,
@@ -292,29 +301,29 @@ static BossAndAdd Boss[]=
 
 const Position SpawnPosition[] =
 {
-    {5754.692, -2939.46, 286.276123, 5.156380}, // stinkbeard || orinoko || korrak
-    {5762.054199, -2954.385010, 273.826955, 5.108289},  //yggdras
-    {5776.855, -2989.77979, 272.96814, 5.194} // elementals
+    {5754.692f, -2939.46f, 286.276123f, 5.156380f}, // stinkbeard || orinoko || korrak
+    {5762.054199f, -2954.385010f, 273.826955f, 5.108289f},  //yggdras
+    {5776.855f, -2989.77979f, 272.96814f, 5.194f} // elementals
 };
 
 const Position AddSpawnPosition[] =
 {
-    {5722.487, -3010.75, 312.751648, 0.478}, // caster location
-    {5724.983, -2969.89551, 286.359619, 0.478},
-    {5733.76025, -3000.34644, 286.359619, 0.478},
-    {5739.8125, -2981.524, 290.7671, 0.478}, // caster location
-    {5742.101, -2950.75586, 286.2643, 5.21},
-    {5743.305, -3011.29736, 290.7671, 0.478}, // caster location
-    {5744.417, -3025.528, 286.35965, 0.478},
-    {5763.189, -3029.67529, 290.7671, 0.478},
-    {5769.401, -2935.121, 286.335754, 5.21},
-    {5793.061, -2934.593, 286.359619, 3.53},
-    {5797.32129, -2955.26855, 290.7671, 3.53}, // caster location
-    {5813.94531, -2956.74683, 286.359619, 3.53},
-    {5816.85547, -2974.476, 290.7671, 3.53}, // caster location
-    {5820.30859, -3002.83716, 290.7671, 3.53}, // caster location
-    {5828.50244, -2981.737, 286.359619, 3.53},
-    {5828.899, -2960.15479, 312.751648, 3.53}, // caster location
+    {5722.487f, -3010.75f, 312.751648f, 0.478f}, // caster location
+    {5724.983f, -2969.89551f, 286.359619f, 0.478f},
+    {5733.76025f, -3000.34644f, 286.359619f, 0.478f},
+    {5739.8125f, -2981.524f, 290.7671f, 0.478f}, // caster location
+    {5742.101f, -2950.75586f, 286.2643f, 5.21f},
+    {5743.305f, -3011.29736f, 290.7671f, 0.478f}, // caster location
+    {5744.417f, -3025.528f, 286.35965f, 0.478f},
+    {5763.189f, -3029.67529f, 290.7671f, 0.478f},
+    {5769.401f, -2935.121f, 286.335754f, 5.21f},
+    {5793.061f, -2934.593f, 286.359619f, 3.53f},
+    {5797.32129f, -2955.26855f, 290.7671f, 3.53f}, // caster location
+    {5813.94531f, -2956.74683f, 286.359619f, 3.53f},
+    {5816.85547f, -2974.476f, 290.7671f, 3.53f}, // caster location
+    {5820.30859f, -3002.83716f, 290.7671f, 3.53f}, // caster location
+    {5828.50244f, -2981.737f, 286.359619f, 3.53f},
+    {5828.899f, -2960.15479f, 312.751648f, 3.53f}, // caster location
 };
 
 class npc_gurgthock : public CreatureScript
@@ -353,7 +362,7 @@ public:
             bRemoveFlag = false;
         }
 
-        void SetGUID(const uint64 &guid, int32 id)
+        void SetGUID(const uint64 &guid, int32 /*id*/)
         {
             uiPlayerGUID = guid;
         }
@@ -401,6 +410,7 @@ public:
             ScriptedAI::UpdateAI(uiDiff);
 
             if (bRemoveFlag)
+            {
                 if (uiRemoveFlagTimer <= uiDiff)
                 {
                     me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
@@ -408,6 +418,7 @@ public:
 
                     uiRemoveFlagTimer = 10000;
                 } else uiRemoveFlagTimer -= uiDiff;
+            }
 
             if (uiPhase)
             {
@@ -425,7 +436,7 @@ public:
                             break;
                          case 2:
                             if (Creature* pSummon = Unit::GetCreature(*me, SummonGUID))
-                                pSummon->GetMotionMaster()->MoveJump(5776.319824, -2981.005371, 273.100037, 10.0f, 20.0f);
+                                pSummon->GetMotionMaster()->MoveJump(5776.319824f, -2981.005371f, 273.100037f, 10.0f, 20.0f);
                             uiPhase = 0;
                             SummonGUID = 0;
                             break;
@@ -480,7 +491,7 @@ public:
                             }
                             break;
                         case 10:
-                            me->SummonCreature(NPC_YGGDRAS, SpawnPosition[1], TEMPSUMMON_CORPSE_DESPAWN, 1000);     
+                            me->SummonCreature(NPC_YGGDRAS, SpawnPosition[1], TEMPSUMMON_CORPSE_DESPAWN, 1000);
                             DoScriptText(EMOTE_YGGDRAS_SPAWN,me);
                             uiPhase = 0;
                             break;
@@ -511,7 +522,7 @@ public:
                                 pCreature->AI()->SetData(1,uiBossRandom);
                             uiPhase = 0;
                             break;
-                    } 
+                    }
                 }else uiTimer -= uiDiff;
             }
         }
@@ -607,7 +618,7 @@ public:
                 pWhisker->RemoveFromWorld();
         }
 
-        void MovementInform(uint32 uiType, uint32 uiId)
+        void MovementInform(uint32 uiType, uint32 /*uiId*/)
         {
             if (uiType != POINT_MOTION_TYPE)
                 return;
@@ -644,7 +655,7 @@ public:
                 uiFishyScentTimer = 20000;
             } else uiFishyScentTimer -= uiDiff;
 
-            if (!bSummoned && me->GetHealth()*100 / me->GetMaxHealth() <= 50)
+            if (!bSummoned && !HealthAbovePct(50))
             {
                 DoScriptText(SAY_CALL_FOR_HELP ,me);
                 //DoCast(me->getVictim(), SPELL_SUMMON_WHISKER); petai is not working correctly???
@@ -769,7 +780,7 @@ public:
                 uiChargeTimer = 15000;
             } else uiChargeTimer -= uiDiff;
 
-            if (!bEnrage && me->GetHealth()*100 / me->GetMaxHealth() <= 20)
+            if (!bEnrage && !HealthAbovePct(20))
             {
                 DoCast(me, SPELL_ENRAGE);
                 bEnrage = true;
@@ -824,14 +835,14 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (me->getVictim()->GetPositionZ() >= 286.276)
+            if (me->getVictim()->GetPositionZ() >= 286.276f)
             {
                 std::list<HostileReference *> t_list = me->getThreatManager().getThreatList();
                 for (std::list<HostileReference *>::const_iterator itr = t_list.begin(); itr!= t_list.end(); ++itr)
                 {
                     if (Unit* pUnit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
                     {
-                        if (pUnit->GetPositionZ() <= 286.276)
+                        if (pUnit->GetPositionZ() <= 286.276f)
                         {
                             me->getThreatManager().resetAllAggro();
                             me->AddThreat(pUnit,5.0f);
@@ -947,14 +958,14 @@ public:
 
             if (Unit* victim = me->getVictim())
             {
-                if (victim->GetPositionZ() >= 286.276)
+                if (victim->GetPositionZ() >= 286.276f)
                 {
                     std::list<HostileReference *> t_list = me->getThreatManager().getThreatList();
                     for (std::list<HostileReference *>::const_iterator itr = t_list.begin(); itr!= t_list.end(); ++itr)
                     {
                         if (Unit* pUnit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
                         {
-                            if (pUnit->GetPositionZ() <= 286.276)
+                            if (pUnit->GetPositionZ() <= 286.276f)
                             {
                                 me->getThreatManager().resetAllAggro();
                                 me->AddThreat(pUnit,5.0f);
@@ -965,8 +976,8 @@ public:
                     }
                 }
             }
-            
-            if (bThunderClap && me->GetHealth()*100 / me->GetMaxHealth() <= 10)
+
+            if (bThunderClap && !HealthAbovePct(10))
             {
                 DoCastAOE(SPELL_THUNDERCLAP);
                 bThunderClap = true;
@@ -992,7 +1003,7 @@ public:
                 uiStinkyBeardTimer = 15000;
             } else uiStinkyBeardTimer -= uiDiff;
 
-           if (!bEnrage && me->GetHealth()*100 / me->GetMaxHealth() <= 20)
+            if (!bEnrage && !HealthAbovePct(20))
             {
                 DoCast(me, SPELL_ENRAGE_STINKBEARD);
                 bEnrage = true;
@@ -1057,7 +1068,7 @@ public:
         }
 
         void SummonAdds()
-        {        
+        {
             if (!Boss[uiBossRandom].uiAdd)
                 return;
 
@@ -1071,7 +1082,7 @@ public:
                     SummonList.push_back(pSummon->GetGUID());
                 }
             }
-           
+
         }
 
         void EnterCombat(Unit* pUnit)
@@ -1082,7 +1093,7 @@ public:
                     if (Creature* pTemp = Unit::GetCreature(*me, *itr))
                     {
                         pTemp->m_CombatDistance = 100.0f; // ugly hack? we are not in a instance sorry. :(
-                        pTemp->AI()->AttackStart(pUnit); 
+                        pTemp->AI()->AttackStart(pUnit);
                     }
                 }
         }
@@ -1092,14 +1103,14 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (me->getVictim()->GetPositionZ() >= 286.276)
+            if (me->getVictim()->GetPositionZ() >= 286.276f)
             {
                 std::list<HostileReference *> t_list = me->getThreatManager().getThreatList();
                 for (std::list<HostileReference *>::const_iterator itr = t_list.begin(); itr!= t_list.end(); ++itr)
                 {
                     if (Unit* pUnit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
                     {
-                        if (pUnit->GetPositionZ() <= 286.276)
+                        if (pUnit->GetPositionZ() <= 286.276f)
                         {
                             me->getThreatManager().resetAllAggro();
                             me->AddThreat(pUnit,5.0f);
@@ -1109,7 +1120,7 @@ public:
                     }
                 }
             }
-            
+
             if (uiElementalSpellTimer <= uiDiff)
             {
                 DoCastVictim(Boss[uiBossRandom].uiSpell);
@@ -1117,7 +1128,7 @@ public:
                 uiElementalSpellTimer = urand(5000,8000);
             } else uiElementalSpellTimer -= uiDiff;
 
-            if (!bAddAttack && me->GetHealth()*100 / me->GetMaxHealth() <= 20)
+            if (!bAddAttack && !HealthAbovePct(20))
             {
                 if (!SummonList.empty())
                     for (std::list<uint64>::const_iterator itr = SummonList.begin(); itr != SummonList.end(); ++itr)
@@ -1131,7 +1142,7 @@ public:
                                 pTemp->GetMotionMaster()->MoveChase(pTemp->getVictim());
                         }
                     }
-            
+
                 bAddAttack = true;
             }
 
@@ -1192,10 +1203,10 @@ public:
         {
             if (!pWho)
                 return;
-            
+
             AttackStartNoMove(pWho);
         }
-        
+
         void SetData(uint32 uiData, uint32 uiValue)
         {
             if (uiData == 1)
@@ -1207,14 +1218,16 @@ public:
         {
             if (!UpdateVictim())
                 return;
-            
+
             if (me->GetPositionZ() >= 287.0f)
+            {
                 if (uiMissleTimer <= uiDiff)
                 {
                     DoCast(me,uiSpell); // this spell is not supported ... YET!
                     uiMissleTimer = urand(2000,7000);
 
                 } else uiMissleTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -1358,11 +1371,12 @@ public:
 
     bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
         if (uiAction == GOSSIP_ACTION_INFO_DEF +1)
         {
             pPlayer->CLOSE_GOSSIP_MENU();
             pCreature->CastSpell(pPlayer, SPELL_QUEST_CREDIT, true);
-            CAST_AI(npc_crusade_recruitAI, (pCreature->AI()))->m_uiPhase = 1;
+            CAST_AI(npc_crusade_recruit::npc_crusade_recruitAI, (pCreature->AI()))->m_uiPhase = 1;
             pCreature->SetInFront(pPlayer);
             pCreature->SendMovementFlagUpdate();
         }

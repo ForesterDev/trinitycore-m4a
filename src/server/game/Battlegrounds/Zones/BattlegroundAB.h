@@ -20,7 +20,11 @@
 #ifndef __BATTLEGROUNDAB_H
 #define __BATTLEGROUNDAB_H
 
-class BattleGround;
+#include <memory>
+#include <array>
+#include "Battleground.h"
+
+class Battleground;
 
 enum BG_AB_WorldStates
 {
@@ -135,7 +139,7 @@ enum BG_AB_Score
 };
 
 /* do NOT change the order, else wrong behaviour */
-enum BG_AB_BattleGroundNodes
+enum BG_AB_BattlegroundNodes
 {
     BG_AB_NODE_STABLES          = 0,
     BG_AB_NODE_BLACKSMITH       = 1,
@@ -232,22 +236,32 @@ struct BG_AB_BannerTimer
     uint8       teamIndex;
 };
 
-class BattleGroundABScore : public BattleGroundScore
+class BattlegroundABScore : public BattlegroundScore
 {
     public:
-        BattleGroundABScore(): BasesAssaulted(0), BasesDefended(0) {};
-        virtual ~BattleGroundABScore() {};
+        BattlegroundABScore(): BasesAssaulted(0), BasesDefended(0) {};
+        virtual ~BattlegroundABScore() {};
+
+        std::pair<std::size_t, Stat_data_type> stat_data() const
+        {
+            std::array<int32, max_stats> d;
+            auto first = d.begin(), it = first;
+            *it++ = BasesAssaulted;
+            *it++ = BasesDefended;
+            return std::make_pair(it - first, std::move(d));
+        }
+
         uint32 BasesAssaulted;
         uint32 BasesDefended;
 };
 
-class BattleGroundAB : public BattleGround
+class BattlegroundAB : public Battleground
 {
-    friend class BattleGroundMgr;
+    friend class BattlegroundMgr;
 
     public:
-        BattleGroundAB();
-        ~BattleGroundAB();
+        BattlegroundAB();
+        ~BattlegroundAB();
 
         void Update(uint32 diff);
         void AddPlayer(Player *plr);
@@ -255,9 +269,9 @@ class BattleGroundAB : public BattleGround
         virtual void StartingEventOpenDoors();
         void RemovePlayer(Player *plr,uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
-        virtual bool SetupBattleGround();
+        virtual bool SetupBattleground();
         virtual void Reset();
-        void EndBattleGround(uint32 winner);
+        void EndBattleground(uint32 winner);
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
 
         /* Scorekeeping */

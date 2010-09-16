@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "Transport.h"
 #include "MapManager.h"
@@ -31,7 +32,7 @@
 
 void MapManager::LoadTransports()
 {
-    QueryResult_AutoPtr result = WorldDatabase.Query("SELECT entry, name, period, ScriptName FROM transports");
+    QueryResult_AutoPtr result = WorldDatabase.Query("SELECT guid, entry, name, period, ScriptName FROM transports");
 
     uint32 count = 0;
 
@@ -52,14 +53,15 @@ void MapManager::LoadTransports()
         bar.step();
 
         Field *fields = result->Fetch();
-        uint32 entry = fields[0].GetUInt32();
-        std::string name = fields[1].GetCppString();
-        uint32 period = fields[2].GetUInt32();
-        uint32 scriptId = objmgr.GetScriptId(fields[3].GetString());
+        uint32 lowguid = fields[0].GetUInt32();
+        uint32 entry = fields[1].GetUInt32();
+        std::string name = fields[2].GetCppString();
+        uint32 period = fields[3].GetUInt32();
+        uint32 scriptId = sObjectMgr.GetScriptId(fields[4].GetString());
 
         Transport *t = new Transport(period, scriptId);
 
-        const GameObjectInfo *goinfo = objmgr.GetGameObjectInfo(entry);
+        const GameObjectInfo *goinfo = sObjectMgr.GetGameObjectInfo(entry);
 
         if (!goinfo)
         {
@@ -87,12 +89,14 @@ void MapManager::LoadTransports()
             continue;
         }
 
-        float x, y, z, o;
-        uint32 mapid;
-        x = t->m_WayPoints[0].x; y = t->m_WayPoints[0].y; z = t->m_WayPoints[0].z; mapid = t->m_WayPoints[0].mapid; o = 1;
+        float x = t->m_WayPoints[0].x;
+        float y = t->m_WayPoints[0].y;
+        float z = t->m_WayPoints[0].z;
+        uint32 mapid = t->m_WayPoints[0].mapid;
+        float o = 1.0f;
 
          // creates the Gameobject
-        if (!t->Create(entry, mapid, x, y, z, o, 100, 0))
+        if (!t->Create(lowguid, entry, mapid, x, y, z, o, 100, 0))
         {
             delete t;
             continue;
@@ -105,6 +109,7 @@ void MapManager::LoadTransports()
 
         //If we someday decide to use the grid to track transports, here:
         t->SetMap(sMapMgr.CreateMap(mapid, t, 0));
+        t->AddToWorld();
 
         for (TransportNPCSet::const_iterator i = m_TransportNPCMap[entry].begin(); i != m_TransportNPCMap[entry].end(); ++i)
         {
@@ -178,12 +183,28 @@ void MapManager::LoadTransportNPCs()
     sLog.outString(">> Loaded %u transport npcs", count);
 }
 
-Transport::Transport(uint32 period, uint32 script) : m_period(period), ScriptId(script), GameObject()
+Transport::Transport(uint32 period, uint32 script) : GameObject(), m_period(period), ScriptId(script)
 {
     m_updateFlag = (UPDATEFLAG_TRANSPORT | UPDATEFLAG_HIGHGUID | UPDATEFLAG_HAS_POSITION | UPDATEFLAG_ROTATION);
 }
 
-bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress, uint32 dynflags)
+Transport::~Transport()
+{
+    std::set<uint64>::iterator it2;
+    for (std::set<uint64>::iterator itr = m_NPCPassengerSet.begin(); itr != m_NPCPassengerSet.end();)
+    {
+        it2 = itr;
+        ++itr;
+        if (Creature *npc = Creature::GetCreature(*this, *it2))
+            npc->AddObjectToRemoveList();
+    }
+    m_NPCPassengerSet.clear();
+
+    m_WayPoints.clear();
+    m_passengers.clear();
+}
+
+bool Transport::Create(uint32 guidlow, uint32 entry, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress, uint32 dynflags)
 {
     Relocate(x,y,z,ang);
     // instance id and phaseMask isn't set to values different from std.
@@ -197,7 +218,7 @@ bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, 
 
     Object::_Create(guidlow, 0, HIGHGUID_MO_TRANSPORT);
 
-    GameObjectInfo const* goinfo = objmgr.GetGameObjectInfo(guidlow);
+    GameObjectInfo const* goinfo = sObjectMgr.GetGameObjectInfo(entry);
 
     if (!goinfo)
     {
@@ -226,6 +247,8 @@ bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, 
 
     SetName(goinfo->name);
 
+    SetZoneScript();
+
     return true;
 }
 
@@ -250,7 +273,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
         return false;
 
     TaxiPathNodeList const& path = sTaxiPathNodesByPath[pathid];
-    
+
     std::vector<keyFrame> keyFrames;
     int mapChange = 0;
     mapids.clear();
@@ -485,9 +508,8 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
         ++itr;
 
         if (plr->isDead() && !plr->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
-        {
-            plr->ResurrectPlayer(1.0);
-        }
+            plr->ResurrectPlayer(1.0f);
+
         plr->TeleportTo(newMapid, x, y, z, GetOrientation(), TELE_TO_NOT_LEAVE_TRANSPORT);
     }
 
@@ -506,17 +528,19 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
     }
     m_NPCPassengerSet.clear();
 
+    RemoveFromWorld();
     ResetMap();
     Map * newMap = sMapMgr.CreateMap(newMapid, this, 0);
     SetMap(newMap);
     ASSERT (GetMap());
+    AddToWorld();
 
     if (oldMap != newMap)
     {
         UpdateForMap(oldMap);
         UpdateForMap(newMap);
     }
-    
+
     for (std::set<TransportCreatureProto *>::const_iterator i = sMapMgr.m_TransportNPCMap[GetEntry()].begin(); i != sMapMgr.m_TransportNPCMap[GetEntry()].end(); ++i)
     {
         TransportCreatureProto *proto = (*i);
@@ -568,7 +592,7 @@ void Transport::Update(uint32 p_diff)
             UpdateNPCPositions(); // COME BACK MARKER
         }
 
-        sScriptMgr.OnRelocate(this, m_curr->second.mapid, m_curr->second.x, m_curr->second.y, m_curr->second.z);
+        sScriptMgr.OnRelocate(this, m_curr->first, m_curr->second.mapid, m_curr->second.x, m_curr->second.y, m_curr->second.z);
 
         m_nextNodeTime = m_curr->first;
 
@@ -621,19 +645,21 @@ void Transport::DoEventIfAny(WayPointMap::value_type const& node, bool departure
     {
         sLog.outDebug("Taxi %s event %u of node %u of %s path", departure ? "departure" : "arrival", eventid, node.first, GetName());
         GetMap()->ScriptsStart(sEventScripts, eventid, this, this);
+        EventInform(eventid);
     }
 }
 
 void Transport::BuildStartMovePacket(Map const* targetMap)
 {
-    SetByteValue(GAMEOBJECT_FLAGS ,0,41);
-    SetByteValue(GAMEOBJECT_BYTES_1, 0, GO_STATE_ACTIVE);
+    SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+    SetGoState(GO_STATE_ACTIVE);
     UpdateForMap(targetMap);
 }
 
 void Transport::BuildStopMovePacket(Map const* targetMap)
 {
-    SetByteValue(GAMEOBJECT_FLAGS ,0,40);
+    RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+    SetGoState(GO_STATE_READY);
     UpdateForMap(targetMap);
 }
 
@@ -642,7 +668,7 @@ uint32 Transport::AddNPCPassenger(uint32 tguid, uint32 entry, float x, float y, 
     Map* map = GetMap();
     Creature* pCreature = new Creature;
 
-    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), GetMap(), this->GetPhaseMask(), entry, 0, (uint32)(this->GetGOInfo()->faction), 0, 0, 0, 0))
+    if (!pCreature->Create(sObjectMgr.GenerateLowGuid(HIGHGUID_UNIT), GetMap(), GetPhaseMask(), entry, 0, GetGOInfo()->faction, 0, 0, 0, 0))
     {
         delete pCreature;
         return 0;
@@ -654,13 +680,13 @@ uint32 Transport::AddNPCPassenger(uint32 tguid, uint32 entry, float x, float y, 
     pCreature->m_movementInfo.t_pos.Relocate(x, y, z, o);
     pCreature->setActive(true);
 
-    if (anim > 0)
-        pCreature->SetUInt32Value(UNIT_NPC_EMOTESTATE,anim);
+    if (anim)
+        pCreature->SetUInt32Value(UNIT_NPC_EMOTESTATE, anim);
 
     pCreature->Relocate(
-        GetPositionX() + (x * cos(GetOrientation()) + y * sin(GetOrientation() + M_PI)),
+        GetPositionX() + (x * cos(GetOrientation()) + y * sin(GetOrientation() + float(M_PI))),
         GetPositionY() + (y * cos(GetOrientation()) + x * sin(GetOrientation())),
-        z + GetPositionZ() , 
+        z + GetPositionZ() ,
         o + GetOrientation());
 
     if(!pCreature->IsPositionValid())

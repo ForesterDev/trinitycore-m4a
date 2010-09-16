@@ -25,6 +25,7 @@
 #include "Object.h"
 #include "LootMgr.h"
 #include "ItemPrototype.h"
+#include "DatabaseEnv.h"
 
 struct SpellEntry;
 class Bag;
@@ -226,6 +227,8 @@ bool ItemCanGoIntoBag(ItemPrototype const *proto, ItemPrototype const *pBagProto
 class Item : public Object
 {
     public:
+        ~Item();
+
         static Item* CreateItem(uint32 item, uint32 count, Player const* player = NULL);
         Item* CloneItem(uint32 count, Player const* player = NULL) const;
 
@@ -244,10 +247,10 @@ class Item : public Object
         bool IsBoundAccountWide() const { return (GetProto()->Flags & ITEM_PROTO_FLAG_BIND_TO_ACCOUNT) != 0; }
         bool IsBindedNotWith(Player const* player) const;
         bool IsBoundByEnchant() const;
-        virtual void SaveToDB();
+        virtual void SaveToDB(SQLTransaction& trans);
         virtual bool LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult_AutoPtr result, uint32 entry);
-        virtual void DeleteFromDB();
-        void DeleteFromInventoryDB();
+        virtual void DeleteFromDB(SQLTransaction& trans);
+        void DeleteFromInventoryDB(SQLTransaction& trans);
         void SaveRefundDataToDB();
         void DeleteRefundDataFromDB();
 

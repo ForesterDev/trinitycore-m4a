@@ -30,7 +30,7 @@ EndContentData */
 #include "ScriptPCH.h"
 
 enum eSays
-{   
+{
     SAY_AGGRO1                     = -1540042,
     SAY_AGGRO2                     = -1540043,
     SAY_AGGRO3                     = -1540044,
@@ -55,9 +55,9 @@ enum eCreatures
 
 #define TARGET_NUM                      5
 
-float AssassEntrance[3] = {275.136,-84.29,2.3}; // y -8
-float AssassExit[3] = {184.233,-84.29,2.3}; // y -8
-float AddsEntrance[3] = {306.036,-84.29,1.93};
+float AssassEntrance[3] = {275.136f,-84.29f,2.3f}; // y -8
+float AssassExit[3] = {184.233f,-84.29f,2.3f}; // y -8
+float AddsEntrance[3] = {306.036f,-84.29f,1.93f};
 
 class boss_warchief_kargath_bladefist : public CreatureScript
 {
@@ -203,17 +203,20 @@ class boss_warchief_kargath_bladefist : public CreatureScript
                     return;
 
                 if (Assassins_Timer)
+                {
                     if (Assassins_Timer <= diff)
                     {
                         SpawnAssassin();
                         Assassins_Timer = 0;
                     }
-                    else 
+                    else
                         Assassins_Timer -= diff;
+                }
 
                 if (InBlade)
                 {
                     if (Wait_Timer)
+                    {
                         if (Wait_Timer <= diff)
                         {
                             if (target_num <= 0)
@@ -231,20 +234,22 @@ class boss_warchief_kargath_bladefist : public CreatureScript
                             {
                                 //move in bladedance
                                 float x,y,randx,randy;
-                                randx = (rand()%40);
-                                randy = (rand()%40);
+                                randx = 0.0f + rand()%40;
+                                randy = 0.0f + rand()%40;
                                 x = 210+ randx ;
                                 y = -60- randy ;
                                 me->GetMotionMaster()->MovePoint(1,x,y,me->GetPositionZ());
                                 Wait_Timer = 0;
                             }
                         }
-                        else 
+                        else
                             Wait_Timer -= diff;
+                    }
                 }
                 else
                 {
                     if (Blade_Dance_Timer)
+                    {
                         if (Blade_Dance_Timer <= diff)
                         {
                             target_num = TARGET_NUM;
@@ -253,18 +258,21 @@ class boss_warchief_kargath_bladefist : public CreatureScript
                             Blade_Dance_Timer = 0;
                             me->SetSpeed(MOVE_RUN,4);
                             return;
-                        } 
-                        else 
+                        }
+                        else
                             Blade_Dance_Timer -= diff;
+                    }
 
                     if (Charge_timer)
+                    {
                         if (Charge_timer <= diff)
                         {
                             DoCast(SelectUnit(SELECT_TARGET_RANDOM, 0), H_SPELL_CHARGE);
                             Charge_timer = 0;
                         }
-                        else 
+                        else
                             Charge_timer -= diff;
+                    }
 
                     if (Summon_Assistant_Timer <= diff)
                     {
@@ -273,20 +281,20 @@ class boss_warchief_kargath_bladefist : public CreatureScript
                             switch (urand(0,2))
                             {
                                 case 0:
-                                    me->SummonCreature(MOB_HEARTHEN_GUARD,AddsEntrance[0],AddsEntrance[1], AddsEntrance[2], 0,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,30000); 
+                                    me->SummonCreature(MOB_HEARTHEN_GUARD,AddsEntrance[0],AddsEntrance[1], AddsEntrance[2], 0,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,30000);
                                     break;
-                                case 1: 
-                                    me->SummonCreature(MOB_SHARPSHOOTER_GUARD,AddsEntrance[0],AddsEntrance[1], AddsEntrance[2], 0,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,30000); 
+                                case 1:
+                                    me->SummonCreature(MOB_SHARPSHOOTER_GUARD,AddsEntrance[0],AddsEntrance[1], AddsEntrance[2], 0,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,30000);
                                     break;
                                 case 2:
-                                    me->SummonCreature(MOB_REAVER_GUARD,AddsEntrance[0],AddsEntrance[1], AddsEntrance[2], 0,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,30000); 
+                                    me->SummonCreature(MOB_REAVER_GUARD,AddsEntrance[0],AddsEntrance[1], AddsEntrance[2], 0,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,30000);
                                     break;
                             }
                         }
                         if (urand(0,9) < 2)
                             ++summoned;
                         Summon_Assistant_Timer = urand(25000,35000);
-                    } 
+                    }
                     else
                         Summon_Assistant_Timer -= diff;
 
@@ -304,8 +312,8 @@ class boss_warchief_kargath_bladefist : public CreatureScript
                         return;
                     }
                     resetcheck_timer = 5000;
-                } 
-                else 
+                }
+                else
                     resetcheck_timer -= diff;
             }
         };

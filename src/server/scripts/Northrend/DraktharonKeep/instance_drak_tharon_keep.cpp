@@ -45,11 +45,11 @@ enum GameObjects
 class instance_drak_tharon : public InstanceMapScript
 {
 public:
-    instance_drak_tharon() : InstanceMapScript("instance_drak_tharon") { }
+    instance_drak_tharon() : InstanceMapScript("instance_drak_tharon", 600) { }
 
-    struct instance_drak_tharon_ScriptedInstance : public ScriptedInstance
+    struct instance_drak_tharon_InstanceScript : public InstanceScript
     {
-        instance_drak_tharon_ScriptedInstance(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
+        instance_drak_tharon_InstanceScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
 
         uint8 uiDredAchievCounter;
 
@@ -63,7 +63,7 @@ public:
         uint64 uiNovosCrystal3;
         uint64 uiNovosCrystal4;
 
-        uint8 m_auiEncounter[MAX_ENCOUNTER];
+        uint16 m_auiEncounter[MAX_ENCOUNTER];
 
         std::string str_data;
 
@@ -232,9 +232,9 @@ public:
         }
     };
 
-    InstanceData* GetInstanceData(InstanceMap *map) const
+    InstanceScript* GetInstanceScript(InstanceMap *map) const
     {
-        return new instance_drak_tharon_ScriptedInstance(map);
+        return new instance_drak_tharon_InstanceScript(map);
     }
 };
 

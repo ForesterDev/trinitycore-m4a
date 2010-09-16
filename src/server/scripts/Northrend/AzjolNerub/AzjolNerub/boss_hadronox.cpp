@@ -53,12 +53,12 @@ public:
     {
         boss_hadronoxAI(Creature* c) : ScriptedAI(c)
         {
-            pInstance = c->GetInstanceData();
+            pInstance = c->GetInstanceScript();
             fMaxDistance = 50.0f;
             bFirstTime = true;
         }
 
-        ScriptedInstance* pInstance;
+        InstanceScript* pInstance;
 
         uint32 uiAcidTimer;
         uint32 uiLeechTimer;
@@ -96,12 +96,7 @@ public:
             if (!Victim || !Victim->HasAura(DUNGEON_MODE(SPELL_LEECH_POISON, H_SPELL_LEECH_POISON)) || !me->isAlive())
                 return;
 
-            uint32 health = me->GetMaxHealth()/10;
-
-            if ((me->GetHealth()+health) >= me->GetMaxHealth())
-                me->SetHealth(me->GetMaxHealth());
-            else
-                me->SetHealth(me->GetHealth()+health);
+            me->ModifyHealth(int32(me->CountPctFromMaxHealth(10)));
         }
 
         void JustDied(Unit* /*Killer*/)

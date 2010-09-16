@@ -27,6 +27,7 @@ enum TrinityStrings
     LANG_SELECT_CHAR_OR_CREATURE        = 1,
     LANG_SELECT_CREATURE                = 2,
 
+
     // level 0 chat
     LANG_SYSTEMMESSAGE                  = 3,
     LANG_EVENTMESSAGE                   = 4,
@@ -869,6 +870,7 @@ enum TrinityStrings
     LANG_COMMAND_TICKETLISTCOMMENT      = 2023,
     LANG_COMMAND_TICKETLISTADDCOMMENT   = 2024,
     LANG_COMMAND_TICKETLISTAGECREATE    = 2025,
+    LANG_COMMAND_TICKETSHOWESCALATEDLIST = 2026,
 
     // Trinity strings                    5000-9999
     LANG_COMMAND_FREEZE                 = 5000,
@@ -901,7 +903,8 @@ enum TrinityStrings
     LANG_GOINFO_DISPLAYID               = 5026,
     LANG_GOINFO_NAME                    = 5027,
     LANG_GOINFO_LOOTID                  = 5028,
-    // Room for more Trinity strings      5029-9999
+    LANG_COMMAND_LOOKUP_MAX_RESULTS     = 5029,
+    // Room for more Trinity strings      5030-9999
 
     // Level requirement notifications
     LANG_SAY_REQ                        = 6604,

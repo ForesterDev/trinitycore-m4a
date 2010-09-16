@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "OutdoorPvPMgr.h"
 #include "ObjectMgr.h"
 #include "Player.h"
@@ -44,25 +45,25 @@ void OutdoorPvPMgr::InitOutdoorPvP()
     LoadTemplates();
 
     OutdoorPvP* pvp;
-    for (uint8 i = 0; i < MAX_OUTDOORPVP_TYPES; ++i)
+    for (uint8 i = 1; i < MAX_OUTDOORPVP_TYPES; ++i)
     {
         OutdoorPvPDataMap::iterator iter = m_OutdoorPvPDatas.find(OutdoorPvPTypes(i));
         if (iter == m_OutdoorPvPDatas.end())
         {
-            sLog.outErrorDb("Could not initialize OutdoorPvP object for type ID %u; no entry in database.", uint32(iter->first));
+            sLog.outErrorDb("Could not initialize OutdoorPvP object for type ID %u; no entry in database.", uint32(i));
             continue;
         }
 
         pvp = sScriptMgr.CreateOutdoorPvP(iter->second);
         if (!pvp)
         {
-            sLog.outError("Could not initialize OutdoorPvP object for type ID %u; got NULL pointer from script.", uint32(iter->first));
+            sLog.outError("Could not initialize OutdoorPvP object for type ID %u; got NULL pointer from script.", uint32(i));
             continue;
         }
 
         if (!pvp->SetupOutdoorPvP())
         {
-            sLog.outError("Could not initialize OutdoorPvP object for type ID %u; SetupOutdoorPvP failed.", uint32(iter->first));
+            sLog.outError("Could not initialize OutdoorPvP object for type ID %u; SetupOutdoorPvP failed.", uint32(i));
             delete pvp;
             continue;
         }
@@ -108,11 +109,11 @@ void OutdoorPvPMgr::LoadTemplates()
             continue;
         }
 
-        OutdoorPvPData data;
+        OutdoorPvPData* data = new OutdoorPvPData();
         OutdoorPvPTypes realTypeId = OutdoorPvPTypes(typeId);
-        data.TypeId = realTypeId;
-        data.ScriptId = objmgr.GetScriptId(fields[1].GetString());
-        m_OutdoorPvPDatas[realTypeId] = &data;
+        data->TypeId = realTypeId;
+        data->ScriptId = sObjectMgr.GetScriptId(fields[1].GetString());
+        m_OutdoorPvPDatas[realTypeId] = data;
 
         ++count;
     }

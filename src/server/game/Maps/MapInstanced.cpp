@@ -18,10 +18,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "MapInstanced.h"
 #include "ObjectMgr.h"
 #include "MapManager.h"
-#include "BattleGround.h"
+#include "Battleground.h"
 #include "VMapFactory.h"
 #include "InstanceSaveMgr.h"
 #include "World.h"
@@ -116,15 +117,15 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
     Map* map = NULL;
     uint32 NewInstanceId = 0;                       // instanceId of the resulting map
 
-    if (IsBattleGroundOrArena())
+    if (IsBattlegroundOrArena())
     {
         // instantiate or find existing bg map for player
         // the instance id is set in battlegroundid
-        NewInstanceId = player->GetBattleGroundId();
+        NewInstanceId = player->GetBattlegroundId();
         if (!NewInstanceId) return NULL;
         map = _FindMap(NewInstanceId);
         if (!map)
-            map = CreateBattleGround(NewInstanceId, player->GetBattleGround());
+            map = CreateBattleground(NewInstanceId, player->GetBattleground());
     }
     else
     {
@@ -180,7 +181,7 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save,
         sLog.outError("CreateInstance: no entry for map %d", GetId());
         ASSERT(false);
     }
-    const InstanceTemplate * iTemplate = objmgr.GetInstanceTemplate(GetId());
+    const InstanceTemplate * iTemplate = sObjectMgr.GetInstanceTemplate(GetId());
     if (!iTemplate)
     {
         sLog.outError("CreateInstance: no instance template for map %d", GetId());
@@ -188,7 +189,7 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save,
     }
 
     // some instances only have one difficulty
-    MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(GetId(),difficulty);
+    GetDownscaledMapDifficultyData(GetId(),difficulty);
 
     sLog.outDebug("MapInstanced::CreateInstance: %s map instance %d for %d created with difficulty %s", save?"":"new ", InstanceId, GetId(), difficulty?"heroic":"normal");
 
@@ -202,19 +203,24 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save,
     return map;
 }
 
-BattleGroundMap* MapInstanced::CreateBattleGround(uint32 InstanceId, BattleGround* bg)
+BattlegroundMap* MapInstanced::CreateBattleground(uint32 InstanceId, Battleground* bg)
 {
     // load/create a map
     ACE_GUARD_RETURN(ACE_Thread_Mutex, Guard, Lock, NULL);
 
-    sLog.outDebug("MapInstanced::CreateBattleGround: map bg %d for %d created.", InstanceId, GetId());
+    sLog.outDebug("MapInstanced::CreateBattleground: map bg %d for %d created.", InstanceId, GetId());
 
     PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(),bg->GetMinLevel());
 
-    uint8 spawnMode = bracketEntry ? bracketEntry->difficulty : REGULAR_DIFFICULTY;
+    uint8 spawnMode;
+    
+    if (bracketEntry)
+        spawnMode = bracketEntry->difficulty;
+    else
+        spawnMode = REGULAR_DIFFICULTY;
 
-    BattleGroundMap *map = new BattleGroundMap(GetId(), GetGridExpiry(), InstanceId, this, spawnMode);
-    ASSERT(map->IsBattleGroundOrArena());
+    BattlegroundMap *map = new BattlegroundMap(GetId(), GetGridExpiry(), InstanceId, this, spawnMode);
+    ASSERT(map->IsBattlegroundOrArena());
     map->SetBG(bg);
     bg->SetBgMap(map);
 
@@ -234,7 +240,7 @@ bool MapInstanced::DestroyInstance(InstancedMaps::iterator &itr)
 
     itr->second->UnloadAll();
     // should only unload VMaps if this is the last instance and grid unloading is enabled
-    if (m_InstancedMaps.size() <= 1 && sWorld.getConfig(CONFIG_GRID_UNLOAD))
+    if (m_InstancedMaps.size() <= 1 && sWorld.getBoolConfig(CONFIG_GRID_UNLOAD))
     {
         VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(itr->second->GetId());
         // in that case, unload grids of the base map, too

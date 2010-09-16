@@ -17,7 +17,6 @@
 #include "ScriptPCH.h"
 #include "ScriptLoader.h"
 
-#ifdef SCRIPTS
 
 //examples
 void AddSC_example_creature();
@@ -25,6 +24,23 @@ void AddSC_example_escort();
 void AddSC_example_gossip_codebox();
 void AddSC_example_misc();
 
+// spells
+void AddSC_deathknight_spell_scripts();
+void AddSC_druid_spell_scripts();
+void AddSC_generic_spell_scripts();
+void AddSC_hunter_spell_scripts();
+void AddSC_mage_spell_scripts();
+void AddSC_paladin_spell_scripts();
+void AddSC_priest_spell_scripts();
+void AddSC_rogue_spell_scripts();
+void AddSC_shaman_spell_scripts();
+void AddSC_warlock_spell_scripts();
+void AddSC_warrior_spell_scripts();
+void AddSC_quest_spell_scripts();
+void AddSC_item_spell_scripts();
+void AddSC_example_spell_scripts();
+
+#ifdef SCRIPTS
 //world
 void AddSC_areatrigger_scripts();
 void AddSC_boss_emeriss();
@@ -58,8 +74,7 @@ void AddSC_boss_magmus();
 void AddSC_boss_moira_bronzebeard();
 void AddSC_boss_tomb_of_seven();
 void AddSC_instance_blackrock_depths();
-void AddSC_blackrock_spire();                //Blackrock Spire
-void AddSC_boss_drakkisath();
+void AddSC_boss_drakkisath();                //Blackrock Spire
 void AddSC_boss_halycon();
 void AddSC_boss_highlordomokk();
 void AddSC_boss_mothersmolderweb();
@@ -71,7 +86,6 @@ void AddSC_boss_quatermasterzigris();
 void AddSC_boss_pyroguard_emberseer();
 void AddSC_boss_gyth();
 void AddSC_boss_rend_blackhand();
-void AddSC_instance_blackrock_spire();
 void AddSC_boss_razorgore();                 //Blackwing lair
 void AddSC_boss_vael();
 void AddSC_boss_broodlord();
@@ -217,6 +231,7 @@ void AddSC_silvermoon_city();
 void AddSC_silverpine_forest();
 void AddSC_stormwind_city();
 void AddSC_stranglethorn_vale();
+void AddSC_swamp_of_sorrows();
 void AddSC_tirisfal_glades();
 void AddSC_undercity();
 void AddSC_western_plaguelands();
@@ -331,6 +346,13 @@ void AddSC_boss_black_knight();
 void AddSC_boss_grand_champions();
 void AddSC_instance_trial_of_the_champion();
 void AddSC_trial_of_the_champion();
+void AddSC_boss_anubarak_trial();        //Trial of the Crusader
+void AddSC_boss_faction_champions();
+void AddSC_boss_jaraxxus();
+void AddSC_boss_northrend_beasts();
+void AddSC_boss_twin_valkyr();
+void AddSC_trial_of_the_crusader();
+void AddSC_instance_trial_of_the_crusader();
 void AddSC_boss_anubrekhan();            //Naxxramas
 void AddSC_boss_maexxna();
 void AddSC_boss_patchwerk();
@@ -375,6 +397,13 @@ void AddSC_boss_razorscale();
 void AddSC_boss_xt002();
 void AddSC_boss_kologarn();
 void AddSC_boss_assembly_of_iron();
+void AddSC_boss_freya();
+void AddSC_boss_hodir();
+void AddSC_boss_mimiron();
+void AddSC_boss_thorim();
+void AddSC_boss_general_vezax();
+void AddSC_boss_yogg_saron();
+void AddSC_boss_Algalon();
 void AddSC_ulduar_teleporter();
 void AddSC_instance_ulduar();
 void AddSC_boss_keleseth();              //Utgarde Keep
@@ -419,6 +448,13 @@ void AddSC_instance_halls_of_reflection();   // Halls of Reflection
 void AddSC_halls_of_reflection();
 void AddSC_boss_falric();
 void AddSC_boss_marwyn();
+void AddSC_boss_lord_marrowgar();       // Icecrown Citadel
+void AddSC_boss_lady_deathwhisper();
+void AddSC_boss_deathbringer_saurfang();
+void AddSC_boss_festergut();
+void AddSC_boss_professor_putricide();
+void AddSC_icecrown_citadel_teleport();
+void AddSC_instance_icecrown_citadel();
 
 void AddSC_dalaran();
 void AddSC_borean_tundra();
@@ -512,21 +548,6 @@ void AddSC_shadowmoon_valley();
 void AddSC_shattrath_city();
 void AddSC_terokkar_forest();
 void AddSC_zangarmarsh();
-void AddSC_onevents();
-
-// spells
-void AddSC_deathknight_spell_scripts();
-void AddSC_druid_spell_scripts();
-void AddSC_generic_spell_scripts();
-void AddSC_hunter_spell_scripts();
-void AddSC_mage_spell_scripts();
-void AddSC_paladin_spell_scripts();
-void AddSC_priest_spell_scripts();
-void AddSC_rogue_spell_scripts();
-void AddSC_shaman_spell_scripts();
-void AddSC_warlock_spell_scripts();
-void AddSC_warrior_spell_scripts();
-void AddSC_example_spell_scripts();
 
 // battlegrounds
 
@@ -538,13 +559,16 @@ void AddSC_outdoorpvp_si();
 void AddSC_outdoorpvp_tf();
 void AddSC_outdoorpvp_zm();
 
+// player
+void AddSC_chat_log();
+
 #endif
 
 void AddScripts()
 {
-#ifdef SCRIPTS
     AddExampleScripts();
     AddSpellScripts();
+#ifdef SCRIPTS
     AddWorldScripts();
     AddEasternKingdomsScripts();
     AddKalimdorScripts();
@@ -558,17 +582,14 @@ void AddScripts()
 
 void AddExampleScripts()
 {
-#ifdef SCRIPTS
     AddSC_example_creature();
     AddSC_example_escort();
     AddSC_example_gossip_codebox();
     AddSC_example_misc();
-#endif
 }
 
 void AddSpellScripts()
 {
-#ifdef SCRIPTS
     AddSC_deathknight_spell_scripts();
     AddSC_druid_spell_scripts();
     AddSC_generic_spell_scripts();
@@ -580,8 +601,9 @@ void AddSpellScripts()
     AddSC_shaman_spell_scripts();
     AddSC_warlock_spell_scripts();
     AddSC_warrior_spell_scripts();
+    AddSC_quest_spell_scripts();
+    AddSC_item_spell_scripts();
     AddSC_example_spell_scripts();
-#endif
 }
 
 void AddWorldScripts()
@@ -600,6 +622,7 @@ void AddWorldScripts()
     AddSC_npcs_special();
     AddSC_npc_taxi();
     AddSC_achievement_scripts();
+    AddSC_chat_log();
 #endif
 }
 
@@ -623,8 +646,7 @@ void AddEasternKingdomsScripts()
     AddSC_boss_moira_bronzebeard();
     AddSC_boss_tomb_of_seven();
     AddSC_instance_blackrock_depths();
-    AddSC_blackrock_spire();                //Blackrock Spire
-    AddSC_boss_drakkisath();
+    AddSC_boss_drakkisath();                //Blackrock Spire
     AddSC_boss_halycon();
     AddSC_boss_highlordomokk();
     AddSC_boss_mothersmolderweb();
@@ -636,7 +658,6 @@ void AddEasternKingdomsScripts()
     AddSC_boss_pyroguard_emberseer();
     AddSC_boss_gyth();
     AddSC_boss_rend_blackhand();
-    AddSC_instance_blackrock_spire();
     AddSC_boss_razorgore();                 //Blackwing lair
     AddSC_boss_vael();
     AddSC_boss_broodlord();
@@ -782,6 +803,7 @@ void AddEasternKingdomsScripts()
     AddSC_silverpine_forest();
     AddSC_stormwind_city();
     AddSC_stranglethorn_vale();
+    AddSC_swamp_of_sorrows();
     AddSC_tirisfal_glades();
     AddSC_undercity();
     AddSC_western_plaguelands();
@@ -963,7 +985,6 @@ void AddOutlandScripts()
     AddSC_shattrath_city();
     AddSC_terokkar_forest();
     AddSC_zangarmarsh();
-    AddSC_onevents();
 #endif
 }
 
@@ -987,6 +1008,13 @@ void AddNorthrendScripts()
     AddSC_boss_grand_champions();
     AddSC_instance_trial_of_the_champion();
     AddSC_trial_of_the_champion();
+    AddSC_boss_anubarak_trial();        //Trial of the Crusader
+    AddSC_boss_faction_champions();
+    AddSC_boss_jaraxxus();
+    AddSC_trial_of_the_crusader();
+    AddSC_boss_twin_valkyr();
+    AddSC_boss_northrend_beasts();
+    AddSC_instance_trial_of_the_crusader();
     AddSC_boss_krik_thir();             //Azjol-Nerub Azjol-Nerub
     AddSC_boss_hadronox();
     AddSC_boss_anub_arak();
@@ -1035,6 +1063,13 @@ void AddNorthrendScripts()
     AddSC_boss_xt002();
     AddSC_boss_assembly_of_iron();
     AddSC_boss_kologarn();
+    AddSC_boss_freya();
+    AddSC_boss_hodir();
+    AddSC_boss_mimiron();
+    AddSC_boss_thorim();
+    AddSC_boss_general_vezax();
+    AddSC_boss_yogg_saron();
+    AddSC_boss_Algalon();
     AddSC_ulduar_teleporter();
     AddSC_instance_ulduar();
     AddSC_boss_keleseth();              //Utgarde Keep
@@ -1079,6 +1114,13 @@ void AddNorthrendScripts()
     AddSC_halls_of_reflection();
     AddSC_boss_falric();
     AddSC_boss_marwyn();
+    AddSC_boss_lord_marrowgar();        // Icecrown Citadel
+    AddSC_boss_lady_deathwhisper();
+    AddSC_boss_deathbringer_saurfang();
+    AddSC_boss_festergut();
+    AddSC_boss_professor_putricide();
+    AddSC_icecrown_citadel_teleport();
+    AddSC_instance_icecrown_citadel();
 
     AddSC_dalaran();
     AddSC_borean_tundra();
@@ -1102,19 +1144,19 @@ void AddOutdoorPvPScripts()
     AddSC_outdoorpvp_si();
     AddSC_outdoorpvp_tf();
     AddSC_outdoorpvp_zm();
-#endif SCRIPTS
+#endif
 }
 
 void AddBattlegroundScripts()
 {
 #ifdef SCRIPTS
-#endif SCRIPTS
+#endif
 }
 
 #ifdef SCRIPTS
 /* This is where custom scripts' loading functions should be declared. */
 
-#endif SCRIPTS
+#endif
 
 void AddCustomScripts()
 {

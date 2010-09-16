@@ -47,13 +47,13 @@ class instance_deadmines : public InstanceMapScript
 {
     public:
         instance_deadmines()
-            : InstanceMapScript("instance_deadmines")
+            : InstanceMapScript("instance_deadmines", 36)
         {
         }
 
-        struct instance_deadmines_InstanceMapScript : public ScriptedInstance
+        struct instance_deadmines_InstanceMapScript : public InstanceScript
         {
-            instance_deadmines_InstanceMapScript(Map* pMap) : ScriptedInstance(pMap) { Initialize(); };
+            instance_deadmines_InstanceMapScript(Map* pMap) : InstanceScript(pMap) { Initialize(); };
 
             uint64 FactoryDoorGUID;
             uint64 IronCladDoorGUID;
@@ -157,7 +157,7 @@ class instance_deadmines : public InstanceMapScript
             void MoveCreatureInside(Creature* pCreature)
             {
                 pCreature->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                pCreature->GetMotionMaster()->MovePoint(0, -102.7,-655.9, pCreature->GetPositionZ());
+                pCreature->GetMotionMaster()->MovePoint(0, -102.7f,-655.9f, pCreature->GetPositionZ());
             }
 
             void ShootCannon()
@@ -251,7 +251,7 @@ class instance_deadmines : public InstanceMapScript
             }
         };
 
-        InstanceData* GetInstanceData(InstanceMap* pMap) const
+        InstanceScript* GetInstanceScript(InstanceMap* pMap) const
         {
             return new instance_deadmines_InstanceMapScript(pMap);
         }

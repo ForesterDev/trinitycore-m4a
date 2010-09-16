@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "QuestDef.h"
 #include "Player.h"
 #include "World.h"
@@ -212,5 +213,5 @@ bool Quest::IsAllowedInRaid() const
     if (IsRaidQuest())
         return true;
 
-    return sWorld.getConfig(CONFIG_QUEST_IGNORE_RAID);
+    return sWorld.getBoolConfig(CONFIG_QUEST_IGNORE_RAID);
 }

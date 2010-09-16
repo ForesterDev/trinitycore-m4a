@@ -18,8 +18,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "PointMovementGenerator.h"
-#include "Errors.h"
+#include <Debugging/Errors.h>
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "DestinationHolderImp.h"
@@ -101,6 +102,6 @@ void AssistanceMovementGenerator::Finalize(Unit &unit)
     unit.ToCreature()->SetNoCallAssistance(false);
     unit.ToCreature()->CallAssistance();
     if (unit.isAlive())
-        unit.GetMotionMaster()->MoveSeekAssistanceDistract(sWorld.getConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_DELAY));
+        unit.GetMotionMaster()->MoveSeekAssistanceDistract(sWorld.getIntConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_DELAY));
 }
 

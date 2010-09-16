@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "World.h"
@@ -146,8 +147,8 @@ bool ChatHandler::HandleSaveCommand(const char* /*args*/)
     }
 
     // save if the player has last been saved over 20 seconds ago
-    uint32 save_interval = sWorld.getConfig(CONFIG_INTERVAL_SAVE);
-    if ((save_interval == 0 || save_interval > 20*IN_MILLISECONDS && player->GetSaveTimer() <= save_interval - 20*IN_MILLISECONDS))
+    uint32 save_interval = sWorld.getIntConfig(CONFIG_INTERVAL_SAVE);
+    if (save_interval == 0 || (save_interval > 20*IN_MILLISECONDS && player->GetSaveTimer() <= save_interval - 20*IN_MILLISECONDS))
         player->SaveToDB();
 
     return true;
@@ -162,7 +163,7 @@ bool ChatHandler::HandleGMListIngameCommand(const char* /*args*/)
     for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         AccountTypes itr_sec = itr->second->GetSession()->GetSecurity();
-        if ((itr->second->isGameMaster() || (itr_sec > SEC_PLAYER && itr_sec <= sWorld.getConfig(CONFIG_GM_LEVEL_IN_GM_LIST))) &&
+        if ((itr->second->isGameMaster() || (itr_sec > SEC_PLAYER && itr_sec <= AccountTypes(sWorld.getIntConfig(CONFIG_GM_LEVEL_IN_GM_LIST)))) &&
             (!m_session || itr->second->IsVisibleGloballyFor(m_session->GetPlayer())))
         {
             if (first)
@@ -205,7 +206,7 @@ bool ChatHandler::HandleAccountPasswordCommand(const char* args)
     std::string password_new = new_pass;
     std::string password_new_c = new_pass_c;
 
-    if (!accmgr.CheckPassword(m_session->GetAccountId(), password_old))
+    if (!sAccountMgr.CheckPassword(m_session->GetAccountId(), password_old))
     {
         SendSysMessage(LANG_COMMAND_WRONGOLDPASSWORD);
         SetSentErrorMessage(true);
@@ -219,7 +220,7 @@ bool ChatHandler::HandleAccountPasswordCommand(const char* args)
         return false;
     }
 
-    AccountOpResult result = accmgr.ChangePassword(m_session->GetAccountId(), password_new);
+    AccountOpResult result = sAccountMgr.ChangePassword(m_session->GetAccountId(), password_new);
     switch(result)
     {
         case AOR_OK:
@@ -252,7 +253,7 @@ bool ChatHandler::HandleAccountAddonCommand(const char* args)
     uint32 account_id = m_session->GetAccountId();
 
     int expansion = atoi(szExp);                                    //get int anyway (0 if error)
-    if (expansion < 0 || expansion > sWorld.getConfig(CONFIG_EXPANSION))
+    if (expansion < 0 || uint8(expansion) > sWorld.getIntConfig(CONFIG_EXPANSION))
     {
         SendSysMessage(LANG_IMPROPER_VALUE);
         SetSentErrorMessage(true);

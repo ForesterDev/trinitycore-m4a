@@ -31,10 +31,14 @@
 #include <limits>
 #include <cmath>
 
+#ifdef __APPLE__
+  #define isnan(x) ( std::isnan(x) )
+#endif
+
 #define MAX_STACK_SIZE 64
 
 #ifdef _MSC_VER
-	#define isnan(x) _isnan(x)
+    #define isnan(x) _isnan(x)
 #endif
 
 using G3D::Vector3;

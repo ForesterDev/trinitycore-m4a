@@ -46,7 +46,7 @@ public:
     {
         if (IsEventActive(HALLOWEEN_EVENTID) && !pPlayer->HasAura(SPELL_TRICK_OR_TREATED))
         {
-            char* localizedEntry;
+            const char* localizedEntry;
             switch (pPlayer->GetSession()->GetSessionDbcLocale())
             {
                 case LOCALE_frFR: localizedEntry = LOCALE_TRICK_OR_TREAT_2; break;
@@ -65,7 +65,7 @@ public:
 
         if (pCreature->isInnkeeper())
         {
-            char* localizedEntry;
+            const char* localizedEntry;
             switch (pPlayer->GetSession()->GetSessionDbcLocale())
             {
                 case LOCALE_deDE: localizedEntry = LOCALE_INNKEEPER_3; break;
@@ -81,6 +81,7 @@ public:
 
     bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
         if (uiAction == GOSSIP_ACTION_INFO_DEF+HALLOWEEN_EVENTID && IsEventActive(HALLOWEEN_EVENTID) && !pPlayer->HasAura(SPELL_TRICK_OR_TREATED))
         {
             pPlayer->CastSpell(pPlayer, SPELL_TRICK_OR_TREATED, true);

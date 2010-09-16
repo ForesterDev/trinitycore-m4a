@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "Opcodes.h"
@@ -32,7 +33,7 @@
 #include "Util.h"
 #include "SpellAuras.h"
 #include "Vehicle.h"
-#include "LFG.h"
+#include "LFGMgr.h"
 
 class Aura;
 
@@ -58,6 +59,23 @@ void WorldSession::SendPartyResult(PartyOperation operation, const std::string& 
     SendPacket(&data);
 }
 
+namespace
+{
+    template<bool res>
+        WorldPacket make_group_invite_msg(const char *name)
+    {
+        WorldPacket data(SMSG_GROUP_INVITE, 10);                // guess size
+        data << uint8(res); // invited/already in group flag
+        data << name;   // max len 48
+        data << uint32(0);                                      // unk
+        data << uint8(0);                                       // count
+        //for (int i = 0; i < count; ++i)
+        //    data << uint32(0);
+        data << uint32(0);                                      // unk
+        return std::move(data);
+    }
+}
+
 void WorldSession::HandleGroupInviteOpcode(WorldPacket & recv_data)
 {
     std::string membername;
@@ -72,7 +90,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket & recv_data)
         return;
     }
 
-    Player *player = objmgr.GetPlayer(membername.c_str());
+    Player *player = sObjectMgr.GetPlayer(membername.c_str());
 
     // no player
     if (!player)
@@ -82,11 +100,11 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket & recv_data)
     }
 
     // restrict invite to GMs
-    if (!sWorld.getConfig(CONFIG_ALLOW_GM_GROUP) && !GetPlayer()->isGameMaster() && player->isGameMaster())
+    if (!sWorld.getBoolConfig(CONFIG_ALLOW_GM_GROUP) && !GetPlayer()->isGameMaster() && player->isGameMaster())
         return;
 
     // can't group with
-    if (!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP) && GetPlayer()->GetTeam() != player->GetTeam())
+    if (!sWorld.getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP) && GetPlayer()->GetTeam() != player->GetTeam())
     {
         SendPartyResult(PARTY_OP_INVITE, membername, ERR_PLAYER_WRONG_FACTION);
         return;
@@ -120,19 +138,8 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket & recv_data)
     if (group2 || player->GetGroupInvite())
     {
         SendPartyResult(PARTY_OP_INVITE, membername, ERR_ALREADY_IN_GROUP_S);
-
-        if (group2)
-        {
-            // tell the player that they were invited but it failed as they were already in a group
-            WorldPacket data(SMSG_GROUP_INVITE, 10);                // guess size
-            data << uint8(0);                                       // invited/already in group flag
-            data << GetPlayer()->GetName();                         // max len 48
-            data << uint32(0);                                      // unk
-            data << uint8(0);                                       // count
-            data << uint32(0);                                      // unk
-            player->GetSession()->SendPacket(&data);
-        }
-
+        auto msg = make_group_invite_msg<false>(GetPlayer()->GetName());
+        player->GetSession()->SendPacket(&msg);
         return;
     }
 
@@ -180,12 +187,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket & recv_data)
     }
 
     // ok, we do it
-    WorldPacket data(SMSG_GROUP_INVITE, 10);                // guess size
-    data << uint8(1);                                       // invited/already in group flag
-    data << GetPlayer()->GetName();                         // max len 48
-    data << uint32(0);                                      // unk
-    data << uint8(0);                                       // count
-    data << uint32(0);                                      // unk
+    WorldPacket data = make_group_invite_msg<true>(GetPlayer()->GetName());
     player->GetSession()->SendPacket(&data);
 
     SendLfgUpdatePlayer(LFG_UPDATETYPE_REMOVED_FROM_QUEUE);
@@ -217,7 +219,7 @@ void WorldSession::HandleGroupAcceptOpcode(WorldPacket & /*recv_data*/)
         return;
     }
 
-    Player* leader = objmgr.GetPlayer(group->GetLeaderGUID());
+    Player* leader = sObjectMgr.GetPlayer(group->GetLeaderGUID());
 
     // forming a new group, create it
     if (!group->IsCreated())
@@ -225,7 +227,7 @@ void WorldSession::HandleGroupAcceptOpcode(WorldPacket & /*recv_data*/)
         if (leader)
             group->RemoveInvite(leader);
         group->Create(group->GetLeaderGUID(), group->GetLeaderName());
-        objmgr.AddGroup(group);
+        sObjectMgr.AddGroup(group);
     }
 
     // everything's fine, do it, PLAYER'S GROUP IS SET IN ADDMEMBER!!!
@@ -249,7 +251,7 @@ void WorldSession::HandleGroupDeclineOpcode(WorldPacket & /*recv_data*/)
     if (!group) return;
 
     // remember leader if online
-    Player *leader = objmgr.GetPlayer(group->GetLeaderGUID());
+    Player *leader = sObjectMgr.GetPlayer(group->GetLeaderGUID());
 
     // uninvite, group can be deleted
     GetPlayer()->UninviteFromGroup();
@@ -266,8 +268,9 @@ void WorldSession::HandleGroupDeclineOpcode(WorldPacket & /*recv_data*/)
 void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket & recv_data)
 {
     uint64 guid;
+    std::string reason;
     recv_data >> guid;
-    recv_data.read_skip<std::string>();                     // reason
+    recv_data >> reason;
 
     //can't uninvite yourself
     if (guid == GetPlayer()->GetGUID())
@@ -289,7 +292,10 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket & recv_data)
 
     if (grp->IsMember(guid))
     {
-        Player::RemoveFromGroup(grp,guid);
+        if (grp->isLFGGroup())
+            sLFGMgr.InitBoot(grp, GUID_LOPART(GetPlayer()->GetGUID()), GUID_LOPART(guid), reason);
+        else
+            Player::RemoveFromGroup(grp,guid);
         return;
     }
 
@@ -331,7 +337,10 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket & recv_data)
 
     if (uint64 guid = grp->GetMemberGUID(membername))
     {
-        Player::RemoveFromGroup(grp,guid);
+        if (grp->isLFGGroup())
+            sLFGMgr.InitBoot(grp, GUID_LOPART(GetPlayer()->GetGUID()), GUID_LOPART(guid), "");
+        else
+            Player::RemoveFromGroup(grp,guid);
         return;
     }
 
@@ -353,7 +362,7 @@ void WorldSession::HandleGroupSetLeaderOpcode(WorldPacket & recv_data)
     uint64 guid;
     recv_data >> guid;
 
-    Player *player = objmgr.GetPlayer(guid);
+    Player *player = sObjectMgr.GetPlayer(guid);
 
     /** error handling **/
     if (!player || !group->IsLeader(GetPlayer()->GetGUID()) || player->GetGroup() != group)
@@ -366,10 +375,11 @@ void WorldSession::HandleGroupSetLeaderOpcode(WorldPacket & recv_data)
 
 void WorldSession::HandleGroupDisbandOpcode(WorldPacket & /*recv_data*/)
 {
-    if (!GetPlayer()->GetGroup())
+    Group *grp = GetPlayer()->GetGroup();
+    if (!grp)
         return;
 
-    if (_player->InBattleGround())
+    if (_player->InBattleground())
     {
         SendPartyResult(PARTY_OP_INVITE, "", ERR_INVITE_RESTRICTED);
         return;
@@ -522,7 +532,7 @@ void WorldSession::HandleGroupRaidConvertOpcode(WorldPacket & /*recv_data*/)
     if (!group)
         return;
 
-    if (_player->InBattleGround())
+    if (_player->InBattleground())
         return;
 
     /** error handling **/
@@ -546,7 +556,7 @@ void WorldSession::HandleGroupChangeSubGroupOpcode(WorldPacket & recv_data)
     uint8 groupNr;
     recv_data >> name;
     recv_data >> groupNr;
-    
+
     if (groupNr >= MAX_RAID_SUBGROUPS)
         return;
 
@@ -559,9 +569,9 @@ void WorldSession::HandleGroupChangeSubGroupOpcode(WorldPacket & recv_data)
         return;
     /********************/
 
-    Player *movedPlayer = objmgr.GetPlayer(name.c_str());
+    Player *movedPlayer = sObjectMgr.GetPlayer(name.c_str());
     if (movedPlayer)
-    {   
+    {
         //Do not allow leader to change group of player in combat
         if (movedPlayer->isInCombat())
             return;
@@ -570,7 +580,7 @@ void WorldSession::HandleGroupChangeSubGroupOpcode(WorldPacket & recv_data)
         group->ChangeMembersGroup(movedPlayer, groupNr);
     }
     else
-        group->ChangeMembersGroup(objmgr.GetPlayerGUIDByName(name.c_str()), groupNr);
+        group->ChangeMembersGroup(sObjectMgr.GetPlayerGUIDByName(name.c_str()), groupNr);
 }
 
 void WorldSession::HandleGroupAssistantLeaderOpcode(WorldPacket & recv_data)
@@ -841,7 +851,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket &recv_data)
     uint64 Guid;
     recv_data >> Guid;
 
-    Player *player = objmgr.GetPlayer(Guid);
+    Player *player = sObjectMgr.GetPlayer(Guid);
     if (!player)
     {
         WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 3+4+2);

@@ -22,8 +22,8 @@
 #define TRINITY_MAP_H
 
 #include "Define.h"
-#include "ace/RW_Thread_Mutex.h"
-#include "ace/Thread_Mutex.h"
+#include <ace/RW_Thread_Mutex.h>
+#include <ace/Thread_Mutex.h>
 
 #include "DBCStructure.h"
 #include "GridDefines.h"
@@ -32,14 +32,13 @@
 #include "SharedDefines.h"
 #include "GridRefManager.h"
 #include "MapRefManager.h"
-#include "MersenneTwister.h"
 
 #include <bitset>
 #include <list>
 
 class Unit;
 class WorldPacket;
-class InstanceData;
+class InstanceScript;
 class Group;
 class InstanceSave;
 class Object;
@@ -50,9 +49,11 @@ class CreatureGroup;
 struct ScriptInfo;
 struct ScriptAction;
 struct Position;
-class BattleGround;
+class Battleground;
 class MapInstanced;
 class InstanceMap;
+
+typedef uint32 WMO_id;
 
 //******************************************
 // Map file format defines
@@ -344,6 +345,8 @@ class Map : public GridRefManager<NGridType>
             GetZoneAndAreaIdByAreaFlag(zoneid,areaid,GetAreaFlag(x,y,z),GetId());
         }
 
+        WMO_id wmo_id(const Position &p) const;
+
         void MoveAllCreaturesInMoveList();
         void RemoveAllObjectsInRemoveList();
         virtual void RemoveAllPlayers();
@@ -369,9 +372,9 @@ class Map : public GridRefManager<NGridType>
         bool IsRaid() const { return i_mapEntry && i_mapEntry->IsRaid(); }
         bool IsRaidOrHeroicDungeon() const { return IsRaid() || i_spawnMode > DUNGEON_DIFFICULTY_NORMAL; }
         bool IsHeroic() const { return IsRaid() ? i_spawnMode >= RAID_DIFFICULTY_10MAN_HEROIC : i_spawnMode >= DUNGEON_DIFFICULTY_HEROIC; }
-        bool IsBattleGround() const { return i_mapEntry && i_mapEntry->IsBattleGround(); }
+        bool IsBattleground() const { return i_mapEntry && i_mapEntry->IsBattleground(); }
         bool IsBattleArena() const { return i_mapEntry && i_mapEntry->IsBattleArena(); }
-        bool IsBattleGroundOrArena() const { return i_mapEntry && i_mapEntry->IsBattleGroundOrArena(); }
+        bool IsBattlegroundOrArena() const { return i_mapEntry && i_mapEntry->IsBattlegroundOrArena(); }
         bool GetEntrancePos(int32 &mapid, float &x, float &y)
         {
             if (!i_mapEntry)
@@ -422,18 +425,12 @@ class Map : public GridRefManager<NGridType>
         template<class NOTIFIER> void VisitAll(const float &x, const float &y, float radius, NOTIFIER &notifier);
         template<class NOTIFIER> void VisitWorld(const float &x, const float &y, float radius, NOTIFIER &notifier);
         template<class NOTIFIER> void VisitGrid(const float &x, const float &y, float radius, NOTIFIER &notifier);
+
+        void player_zone_changed(Player &p);
+
         CreatureGroupHolderType CreatureGroupHolder;
 
         void UpdateIteratorBack(Player *player);
-
-#ifdef MAP_BASED_RAND_GEN
-        MTRand mtRand;
-        int32 irand(int32 min, int32 max)       { return int32 (mtRand.randInt(max - min)) + min; }
-        uint32 urand(uint32 min, uint32 max)    { return mtRand.randInt(max - min) + min; }
-        int32 rand32()                          { return mtRand.randInt(); }
-        double rand_norm()                      { return mtRand.randExc(); }
-        double rand_chance()                    { return mtRand.randExc(100.0); }
-#endif
 
         TempSummon *SummonCreature(uint32 entry, const Position &pos, SummonPropertiesEntry const *properties = NULL, uint32 duration = 0, Unit *summoner = NULL, uint32 vehId = 0);
         Creature* GetCreature(uint64 guid);
@@ -508,19 +505,19 @@ class Map : public GridRefManager<NGridType>
         ActiveNonPlayers::iterator m_activeNonPlayersIter;
 
     private:
-        Player* _GetScriptPlayerSourceOrTarget(Object* source, Object* target, uint32 unScriptID, const char *sCommandName) const;
-        Creature* _GetScriptCreatureSourceOrTarget(Object* source, Object* target, uint32 unScriptID, const char *sCommandName, bool bReverse = false) const;
-        Unit* _GetScriptUnit(Object* obj, bool isSource, uint32 unScriptID, const char *sCommandName) const;
-        Player* _GetScriptPlayer(Object* obj, bool isSource, uint32 unScriptID, const char *sCommandName) const;
-        Creature* _GetScriptCreature(Object* obj, bool isSource, uint32 unScriptID, const char *sCommandName) const;
-        WorldObject* _GetScriptWorldObject(Object* obj, bool isSource, uint32 unScriptID, const char *sCommandName) const;
-        void _ScriptProcessDoor(Object* source, Object* target, bool bOpen, uint32 guid, int32 nTimeToToggle, uint32 unScriptID) const;
+        Player* _GetScriptPlayerSourceOrTarget(Object* source, Object* target, const ScriptInfo* scriptInfo) const;
+        Creature* _GetScriptCreatureSourceOrTarget(Object* source, Object* target, const ScriptInfo* scriptInfo, bool bReverse = false) const;
+        Unit* _GetScriptUnit(Object* obj, bool isSource, const ScriptInfo* scriptInfo) const;
+        Player* _GetScriptPlayer(Object* obj, bool isSource, const ScriptInfo* scriptInfo) const;
+        Creature* _GetScriptCreature(Object* obj, bool isSource, const ScriptInfo* scriptInfo) const;
+        WorldObject* _GetScriptWorldObject(Object* obj, bool isSource, const ScriptInfo* scriptInfo) const;
+        void _ScriptProcessDoor(Object* source, Object* target, const ScriptInfo* scriptInfo) const;
         GameObject* _FindGameObject(WorldObject* pWorldObject, uint32 guid) const;
 
         time_t i_gridExpiry;
 
         //used for fast base_map (e.g. MapInstanced class object) search for
-        //InstanceMaps and BattleGroundMaps...
+        //InstanceMaps and BattlegroundMaps...
         Map* m_parentMap;
 
         NGridType* i_grids[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
@@ -592,7 +589,7 @@ class InstanceMap : public Map
         void CreateInstanceData(bool load);
         bool Reset(uint8 method);
         uint32 GetScriptId() { return i_script_id; }
-        InstanceData* GetInstanceData() { return i_data; }
+        InstanceScript* GetInstanceScript() { return i_data; }
         void PermBindAllPlayers(Player *player);
         void UnloadAll();
         bool CanEnter(Player* player);
@@ -606,15 +603,15 @@ class InstanceMap : public Map
     private:
         bool m_resetAfterUnload;
         bool m_unloadWhenEmpty;
-        InstanceData* i_data;
+        InstanceScript* i_data;
         uint32 i_script_id;
 };
 
-class BattleGroundMap : public Map
+class BattlegroundMap : public Map
 {
     public:
-        BattleGroundMap(uint32 id, time_t, uint32 InstanceId, Map* _parent, uint8 spawnMode);
-        ~BattleGroundMap();
+        BattlegroundMap(uint32 id, time_t, uint32 InstanceId, Map* _parent, uint8 spawnMode);
+        ~BattlegroundMap();
 
         bool Add(Player *);
         void Remove(Player *, bool);
@@ -624,10 +621,10 @@ class BattleGroundMap : public Map
         void RemoveAllPlayers();
 
         virtual void InitVisibilityDistance();
-        BattleGround* GetBG() { return m_bg; }
-        void SetBG(BattleGround* bg) { m_bg = bg; }
+        Battleground* GetBG() { return m_bg; }
+        void SetBG(Battleground* bg) { m_bg = bg; }
     private:
-        BattleGround* m_bg;
+        Battleground* m_bg;
 };
 
 /*inline

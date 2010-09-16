@@ -29,13 +29,13 @@ class instance_uldaman : public InstanceMapScript
 {
     public:
         instance_uldaman()
-            : InstanceMapScript("instance_uldaman")
+            : InstanceMapScript("instance_uldaman", 70)
         {
         }
 
-        struct instance_uldaman_InstanceMapScript : public ScriptedInstance
+        struct instance_uldaman_InstanceMapScript : public InstanceScript
         {
-            instance_uldaman_InstanceMapScript(Map* pMap) : ScriptedInstance(pMap)
+            instance_uldaman_InstanceMapScript(Map* pMap) : InstanceScript(pMap)
             {
                 Initialize();
             };
@@ -173,7 +173,7 @@ class instance_uldaman : public InstanceMapScript
                 if (!archaedas)
                     return;
 
-                if (Unit *victim = Unit::GetUnit(*archaedas, target))
+                if (Unit::GetUnit(*archaedas, target))
                 {
                     archaedas->CastSpell(archaedas, SPELL_ARCHAEDAS_AWAKEN,false);
                     whoWokeArchaedasGUID = target;
@@ -289,8 +289,8 @@ class instance_uldaman : public InstanceMapScript
                 return 0;
             } // end GetData64
         };
-        
-        InstanceData* OnGetInstanceData(InstanceMap* pMap)
+
+        InstanceScript* GetInstanceScript(InstanceMap* pMap) const
         {
             return new instance_uldaman_InstanceMapScript(pMap);
         }
@@ -298,5 +298,5 @@ class instance_uldaman : public InstanceMapScript
 
 void AddSC_instance_uldaman()
 {
-    new instance_uldaman;
+    new instance_uldaman();
 }

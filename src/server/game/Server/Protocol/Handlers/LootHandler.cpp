@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "WorldPacket.h"
 #include "Log.h"
@@ -223,7 +224,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket & /*recv_data*/)
                 Player* playerGroup = itr->getSource();
                 if (!playerGroup)
                     continue;
-                if (player->IsWithinDistInMap(playerGroup,sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE),false))
+                if (player->IsWithinDistInMap(playerGroup,sWorld.getFloatConfig(CONFIG_GROUP_XP_DISTANCE),false))
                     playersNear.push_back(playerGroup);
             }
 
@@ -333,7 +334,7 @@ void WorldSession::DoLootRelease(uint64 lguid)
                                 ReqValue = lockInfo->Skill[0];
                             float skill = float(player->GetSkillValue(SKILL_MINING))/(ReqValue+25);
                             double chance = pow(0.8*chance_rate,4*(1/double(max_amount))*double(uses));
-                            if (roll_chance_f(100*chance+skill))
+                            if (roll_chance_f((float)(100*chance+skill)))
                             {
                                 go->SetLootState(GO_READY);
                             }
@@ -352,7 +353,7 @@ void WorldSession::DoLootRelease(uint64 lguid)
             else if (go->GetGoType() == GAMEOBJECT_TYPE_FISHINGHOLE)
             {                                               // The fishing hole used once more
                 go->AddUse();                               // if the max usage is reached, will be despawned in next tick
-                if (go->GetUseCount() >= irand(go->GetGOInfo()->fishinghole.minSuccessOpens,go->GetGOInfo()->fishinghole.maxSuccessOpens))
+                if (go->GetUseCount() >= urand(go->GetGOInfo()->fishinghole.minSuccessOpens, go->GetGOInfo()->fishinghole.maxSuccessOpens))
                 {
                     go->SetLootState(GO_JUST_DEACTIVATED);
                 }

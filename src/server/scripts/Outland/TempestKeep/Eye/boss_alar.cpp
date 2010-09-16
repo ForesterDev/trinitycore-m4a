@@ -47,12 +47,12 @@ enum eSpells
 
 static float waypoint[6][3] =
 {
-    {340.15, 58.65, 17.71},
-    {388.09, 31.54, 20.18},
-    {388.18, -32.85, 20.18},
-    {340.29, -60.19, 17.72},
-    {332, 0.01, 39}, // better not use the same xy coord
-    {331, 0.01, -2.39}
+    {340.15f, 58.65f, 17.71f},
+    {388.09f, 31.54f, 20.18f},
+    {388.18f, -32.85f, 20.18f},
+    {340.29f, -60.19f, 17.72f},
+    {332.0f, 0.01f, 39.0f}, // better not use the same xy coord
+    {331.0f, 0.01f, -2.39f}
 };
 
 enum WaitEventType
@@ -82,11 +82,11 @@ class boss_alar : public CreatureScript
         {
             boss_alarAI(Creature* pCreature) : ScriptedAI(pCreature)
             {
-                pInstance = pCreature->GetInstanceData();
+                pInstance = pCreature->GetInstanceScript();
                 DefaultMoveSpeedRate = pCreature->GetSpeedRate(MOVE_RUN);
             }
 
-            ScriptedInstance *pInstance;
+            InstanceScript *pInstance;
 
             WaitEventType WaitEvent;
             uint32 WaitTimer;
@@ -219,8 +219,8 @@ class boss_alar : public CreatureScript
                 {
                     DoCast(me, SPELL_BERSERK, true);
                     Berserk_Timer = 60000;
-                } 
-                else 
+                }
+                else
                     Berserk_Timer -= diff;
 
                 if (ForceMove)
@@ -229,8 +229,8 @@ class boss_alar : public CreatureScript
                     {
                         me->GetMotionMaster()->MovePoint(0, waypoint[cur_wp][0], waypoint[cur_wp][1], waypoint[cur_wp][2]);
                         ForceTimer = 5000;
-                    } 
-                    else 
+                    }
+                    else
                         ForceTimer -= diff;
 
                 }
@@ -265,7 +265,7 @@ class boss_alar : public CreatureScript
                                 return;
                             case WE_REVIVE:
                                 me->SetUInt32Value(UNIT_FIELD_BYTES_1, UNIT_STAND_STATE_STAND);
-                                me->SetHealth(me->GetMaxHealth());
+                                me->SetFullHealth();
                                 me->SetSpeed(MOVE_RUN, DefaultMoveSpeedRate);
                                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                                 DoZoneInCombat();
@@ -290,7 +290,7 @@ class boss_alar : public CreatureScript
                                     float dist = 3.0f;
                                     if (me->IsWithinDist3d(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 5.0f))
                                         dist = 5.0f;
-                                    WaitTimer = 1000 + floor(dist / 80 * 1000.0f);
+                                    WaitTimer = 1000 + uint32(floor(dist / 80 * 1000.0f));
                                     me->GetMap()->CreatureRelocation(me, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(),0.0f);
                                     me->StopMoving();
                                     WaitEvent = WE_LAND;
@@ -319,8 +319,8 @@ class boss_alar : public CreatureScript
 
                             WaitEvent = WE_NONE;
                             WaitTimer = 0;
-                        } 
-                        else 
+                        }
+                        else
                             WaitTimer -= diff;
                     }
                     return;
@@ -363,8 +363,8 @@ class boss_alar : public CreatureScript
                         me->GetMotionMaster()->MovePoint(0, waypoint[cur_wp][0], waypoint[cur_wp][1], waypoint[cur_wp][2]);
                         WaitTimer = 0;
                         return;
-                    } 
-                    else 
+                    }
+                    else
                         Platforms_Move_Timer -= diff;
                 }
                 else
@@ -376,14 +376,14 @@ class boss_alar : public CreatureScript
                             DoCast(pTarget, SPELL_CHARGE);
                         Charge_Timer = 30000;
                     }
-                    else 
+                    else
                         Charge_Timer -= diff;
 
                     if (MeltArmor_Timer <= diff)
                     {
                         DoCast(me->getVictim(), SPELL_MELT_ARMOR);
                         MeltArmor_Timer = 60000;
-                    } 
+                    }
                     else
                         MeltArmor_Timer -= diff;
 
@@ -397,8 +397,8 @@ class boss_alar : public CreatureScript
                         WaitTimer = 0;
                         DiveBomb_Timer = 40000+rand()%5000;
                         return;
-                    } 
-                    else 
+                    }
+                    else
                         DiveBomb_Timer -= diff;
 
                     if (FlamePatch_Timer <= diff)
@@ -417,8 +417,8 @@ class boss_alar : public CreatureScript
                             }
                         }
                         FlamePatch_Timer = 30000;
-                    } 
-                    else 
+                    }
+                    else
                         FlamePatch_Timer -= diff;
                 }
 
@@ -469,23 +469,23 @@ class mob_ember_of_alar : public CreatureScript
         {
             mob_ember_of_alarAI(Creature* pCreature) : ScriptedAI(pCreature)
             {
-                pInstance = pCreature->GetInstanceData();
+                pInstance = pCreature->GetInstanceScript();
                 pCreature->SetUnitMovementFlags(MOVEMENTFLAG_LEVITATING);
                 pCreature->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, true);
             }
 
-            ScriptedInstance *pInstance;
+            InstanceScript *pInstance;
             bool toDie;
 
-            void Reset() 
+            void Reset()
             {
                 toDie = false;
             }
-            void EnterCombat(Unit * /*who*/) 
+            void EnterCombat(Unit * /*who*/)
             {
                 DoZoneInCombat();
             }
-            void EnterEvadeMode() 
+            void EnterEvadeMode()
             {
                 me->setDeathState(JUST_DIED);
             }
@@ -502,7 +502,7 @@ class mob_ember_of_alar : public CreatureScript
                     {
                         if (Unit* Alar = Unit::GetUnit((*me), pInstance->GetData64(DATA_ALAR)))
                         {
-                            int AlarHealth = Alar->GetHealth() - Alar->GetMaxHealth()*0.03;
+                            int32 AlarHealth = int32(Alar->GetHealth()) - int32(Alar->CountPctFromMaxHealth(3));
                             if (AlarHealth > 0)
                                 Alar->SetHealth(AlarHealth);
                             else

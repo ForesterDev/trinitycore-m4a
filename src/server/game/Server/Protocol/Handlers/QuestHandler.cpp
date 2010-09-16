@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "Log.h"
 #include "WorldPacket.h"
@@ -30,8 +31,8 @@
 #include "QuestDef.h"
 #include "ObjectAccessor.h"
 #include "Group.h"
-#include "BattleGround.h"
-#include "BattleGroundAV.h"
+#include "Battleground.h"
+#include "BattlegroundAV.h"
 #include "ScriptMgr.h"
 
 void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket & recv_data)
@@ -133,7 +134,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket & recv_data)
         return;
     }
 
-    Quest const* qInfo = objmgr.GetQuestTemplate(quest);
+    Quest const* qInfo = sObjectMgr.GetQuestTemplate(quest);
     if (qInfo)
     {
         // prevent cheating
@@ -214,6 +215,8 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket & recv_data)
                 case TYPEID_GAMEOBJECT:
                     sScriptMgr.OnQuestAccept(_player, ((GameObject*)pObject), qInfo);
                     break;
+                default:
+                    break;
             }
             _player->PlayerTalkClass->CloseGossip();
 
@@ -237,13 +240,13 @@ void WorldSession::HandleQuestgiverQueryQuestOpcode(WorldPacket & recv_data)
 
     // Verify that the guid is valid and is a questgiver or involved in the requested quest
     Object* pObject = ObjectAccessor::GetObjectByTypeMask(*_player, guid,TYPEMASK_UNIT|TYPEMASK_GAMEOBJECT|TYPEMASK_ITEM);
-    if (!pObject||!pObject->hasQuest(quest) && !pObject->hasInvolvedQuest(quest))
+    if (!pObject || (!pObject->hasQuest(quest) && !pObject->hasInvolvedQuest(quest)))
     {
         _player->PlayerTalkClass->CloseGossip();
         return;
     }
 
-    Quest const* pQuest = objmgr.GetQuestTemplate(quest);
+    Quest const* pQuest = sObjectMgr.GetQuestTemplate(quest);
     if (pQuest)
     {
         if (pQuest->IsAutoAccept() && _player->CanAddQuest(pQuest, true))
@@ -262,11 +265,14 @@ void WorldSession::HandleQuestgiverQueryQuestOpcode(WorldPacket & recv_data)
 
 void WorldSession::HandleQuestQueryOpcode(WorldPacket & recv_data)
 {
+    if (!_player)
+        return;
+
     uint32 quest;
     recv_data >> quest;
     sLog.outDebug("WORLD: Received CMSG_QUEST_QUERY quest = %u",quest);
 
-    Quest const *pQuest = objmgr.GetQuestTemplate(quest);
+    Quest const *pQuest = sObjectMgr.GetQuestTemplate(quest);
     if (pQuest)
     {
         _player->PlayerTalkClass->SendQuestQueryResponse(pQuest);
@@ -297,7 +303,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket & recv_data)
     if (!pObject->hasInvolvedQuest(quest))
         return;
 
-    Quest const *pQuest = objmgr.GetQuestTemplate(quest);
+    Quest const *pQuest = sObjectMgr.GetQuestTemplate(quest);
     if (pQuest)
     {
         if (_player->CanRewardQuest(pQuest, reward, true))
@@ -321,6 +327,8 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket & recv_data)
                         if (Quest const* nextquest = _player->GetNextQuest(guid ,pQuest))
                             _player->PlayerTalkClass->SendQuestGiverQuestDetails(nextquest,guid,true);
                     }
+                    break;
+                default:
                     break;
             }
         }
@@ -350,7 +358,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode(WorldPacket & recv_data)
     if (_player->GetQuestStatus(quest) != QUEST_STATUS_COMPLETE)
         return;
 
-    if (Quest const *pQuest = objmgr.GetQuestTemplate(quest))
+    if (Quest const *pQuest = sObjectMgr.GetQuestTemplate(quest))
         _player->PlayerTalkClass->SendQuestGiverOfferReward(pQuest, guid, true);
 }
 
@@ -388,7 +396,7 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
             if (!_player->TakeQuestSourceItem(quest, true))
                 return;                                     // can't un-equip some items, reject quest cancel
 
-            if (const Quest *pQuest = objmgr.GetQuestTemplate(quest))
+            if (const Quest *pQuest = sObjectMgr.GetQuestTemplate(quest))
             {
                 if (pQuest->HasFlag(QUEST_TRINITY_FLAGS_TIMED))
                     _player->RemoveTimedQuest(quest);
@@ -412,7 +420,7 @@ void WorldSession::HandleQuestConfirmAccept(WorldPacket& recv_data)
 
     sLog.outDebug("WORLD: Received CMSG_QUEST_CONFIRM_ACCEPT quest = %u", quest);
 
-    if (const Quest* pQuest = objmgr.GetQuestTemplate(quest))
+    if (const Quest* pQuest = sObjectMgr.GetQuestTemplate(quest))
     {
         if (!pQuest->HasFlag(QUEST_FLAGS_PARTY_ACCEPT))
             return;
@@ -451,14 +459,14 @@ void WorldSession::HandleQuestgiverCompleteQuest(WorldPacket& recv_data)
 
     sLog.outDebug("WORLD: Received CMSG_QUESTGIVER_COMPLETE_QUEST npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest);
 
-    Quest const *pQuest = objmgr.GetQuestTemplate(quest);
+    Quest const *pQuest = sObjectMgr.GetQuestTemplate(quest);
     if (pQuest)
     {
         // TODO: need a virtual function
-        if (GetPlayer()->InBattleGround())
-            if (BattleGround* bg = GetPlayer()->GetBattleGround())
+        if (GetPlayer()->InBattleground())
+            if (Battleground* bg = GetPlayer()->GetBattleground())
                 if (bg->GetTypeID() == BATTLEGROUND_AV)
-                    ((BattleGroundAV*)bg)->HandleQuestComplete(quest, GetPlayer());
+                    ((BattlegroundAV*)bg)->HandleQuestComplete(quest, GetPlayer());
 
         if (_player->GetQuestStatus(quest) != QUEST_STATUS_COMPLETE)
         {
@@ -489,7 +497,7 @@ void WorldSession::HandlePushQuestToParty(WorldPacket& recvPacket)
 
     sLog.outDebug("WORLD: Received CMSG_PUSHQUESTTOPARTY quest = %u", questId);
 
-    if (Quest const *pQuest = objmgr.GetQuestTemplate(questId))
+    if (Quest const *pQuest = sObjectMgr.GetQuestTemplate(questId))
     {
         if (Group* pGroup = _player->GetGroup())
         {
@@ -572,14 +580,14 @@ uint32 WorldSession::getDialogStatus(Player *pPlayer, Object* questgiver, uint32
     {
         case TYPEID_GAMEOBJECT:
         {
-            qir = &objmgr.mGOQuestInvolvedRelations;
-            qr  = &objmgr.mGOQuestRelations;
+            qir = &sObjectMgr.mGOQuestInvolvedRelations;
+            qr  = &sObjectMgr.mGOQuestRelations;
             break;
         }
         case TYPEID_UNIT:
         {
-            qir = &objmgr.mCreatureQuestInvolvedRelations;
-            qr  = &objmgr.mCreatureQuestRelations;
+            qir = &sObjectMgr.mCreatureQuestInvolvedRelations;
+            qr  = &sObjectMgr.mCreatureQuestRelations;
             break;
         }
         default:
@@ -592,7 +600,7 @@ uint32 WorldSession::getDialogStatus(Player *pPlayer, Object* questgiver, uint32
     {
         uint32 result2 = 0;
         uint32 quest_id = i->second;
-        Quest const *pQuest = objmgr.GetQuestTemplate(quest_id);
+        Quest const *pQuest = sObjectMgr.GetQuestTemplate(quest_id);
         if (!pQuest) continue;
 
         QuestStatus status = pPlayer->GetQuestStatus(quest_id);
@@ -615,7 +623,7 @@ uint32 WorldSession::getDialogStatus(Player *pPlayer, Object* questgiver, uint32
     {
         uint32 result2 = 0;
         uint32 quest_id = i->second;
-        Quest const *pQuest = objmgr.GetQuestTemplate(quest_id);
+        Quest const *pQuest = sObjectMgr.GetQuestTemplate(quest_id);
         if (!pQuest)
             continue;
 
@@ -628,7 +636,7 @@ uint32 WorldSession::getDialogStatus(Player *pPlayer, Object* questgiver, uint32
                 {
                     if (pQuest->IsAutoComplete() || (pQuest->IsRepeatable() && pPlayer->getQuestStatusMap()[quest_id].m_rewarded))
                         result2 = DIALOG_STATUS_REWARD_REP;
-                    else if (pPlayer->getLevel() <= ((pPlayer->GetQuestLevel(pQuest) == -1) ? pPlayer->getLevel() : pPlayer->GetQuestLevel(pQuest) + sWorld.getConfig(CONFIG_QUEST_LOW_LEVEL_HIDE_DIFF)))
+                    else if (pPlayer->getLevel() <= ((pPlayer->GetQuestLevel(pQuest) == -1) ? pPlayer->getLevel() : pPlayer->GetQuestLevel(pQuest) + sWorld.getIntConfig(CONFIG_QUEST_LOW_LEVEL_HIDE_DIFF)))
                     {
                         if (pQuest->HasFlag(QUEST_FLAGS_DAILY) || pQuest->HasFlag(QUEST_FLAGS_WEEKLY))
                             result2 = DIALOG_STATUS_AVAILABLE_REP;

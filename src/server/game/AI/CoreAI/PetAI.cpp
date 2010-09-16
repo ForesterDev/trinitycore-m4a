@@ -18,8 +18,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "PetAI.h"
-#include "Errors.h"
+#include <Debugging/Errors.h>
 #include "Pet.h"
 #include "Player.h"
 #include "DBCStores.h"
@@ -64,7 +65,7 @@ void PetAI::_stopAttack()
 {
     if (!me->isAlive())
     {
-        DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", me->GetGUIDLow());
+        sLog.outStaticDebug("Creature stoped attacking cuz his dead [guid=%u]", me->GetGUIDLow());
         me->GetMotionMaster()->Clear();
         me->GetMotionMaster()->MoveIdle();
         me->CombatStop();
@@ -96,7 +97,7 @@ void PetAI::UpdateAI(const uint32 diff)
     {
         if (_needToStop())
         {
-            DEBUG_LOG("Pet AI stoped attacking [guid=%u]", me->GetGUIDLow());
+            sLog.outStaticDebug("Pet AI stoped attacking [guid=%u]", me->GetGUIDLow());
             _stopAttack();
             return;
         }
@@ -212,10 +213,10 @@ void PetAI::UpdateAI(const uint32 diff)
             {
                 me->SetInFront(target);
                 if (target && target->GetTypeId() == TYPEID_PLAYER)
-          me->SendUpdateToPlayer(target->ToPlayer());
+                    me->SendUpdateToPlayer(target->ToPlayer());
 
                 if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-          me->SendUpdateToPlayer(owner->ToPlayer());
+                    me->SendUpdateToPlayer(owner->ToPlayer());
             }
 
             me->AddCreatureSpellCooldown(spell->m_spellInfo->Id);
@@ -328,9 +329,9 @@ Unit *PetAI::SelectNextTarget()
     // to owner
     if ((target = me->getAttackerForHelper()) && !_CheckTargetCC(target)) {}
     // Check owner's attackers if pet didn't have any
-    else if ((target = me->GetCharmerOrOwner()->getAttackerForHelper()) && !_CheckTargetCC(target)) {}
+    else if (me->GetCharmerOrOwner() && (target = me->GetCharmerOrOwner()->getAttackerForHelper()) && !_CheckTargetCC(target)) {}
     // 3.0.2 - Pets now start attacking their owners target in defensive mode as soon as the hunter does
-    else if ((target = me->GetCharmerOrOwner()->getVictim()) && !_CheckTargetCC(target)) {}
+    else if (me->GetCharmerOrOwner() && (target = me->GetCharmerOrOwner()->getVictim()) && !_CheckTargetCC(target)) {}
     // Default
     else return NULL;
 
@@ -479,6 +480,6 @@ bool PetAI::_CheckTargetCC(Unit *target)
 {
     if (me->GetOwnerGUID() && target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, me->GetOwnerGUID()))
         return true;
-    
+
     return false;
 }

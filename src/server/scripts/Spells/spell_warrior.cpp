@@ -28,30 +28,30 @@ enum WarriorSpells
     WARRIOR_SPELL_LAST_STAND_TRIGGERED           = 12976,
 };
 
-class spell_warr_last_stand : public SpellHandlerScript
+class spell_warr_last_stand : public SpellScriptLoader
 {
     public:
-        spell_warr_last_stand() : SpellHandlerScript("spell_warr_last_stand") { }
+        spell_warr_last_stand() : SpellScriptLoader("spell_warr_last_stand") { }
 
         class spell_warr_last_stand_SpellScript : public SpellScript
         {
-            bool Validate(SpellEntry const *spellEntry)
+            bool Validate(SpellEntry const * /*spellEntry*/)
             {
                 if (!sSpellStore.LookupEntry(WARRIOR_SPELL_LAST_STAND_TRIGGERED))
                     return false;
                 return true;
             }
 
-            void HandleDummy(SpellEffIndex effIndex)
+            void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                int32 healthModSpellBasePoints0 = int32(GetCaster()->GetMaxHealth() * 0.3);
+                int32 healthModSpellBasePoints0 = int32(GetCaster()->CountPctFromMaxHealth(30));
                 GetCaster()->CastCustomSpell(GetCaster(), WARRIOR_SPELL_LAST_STAND_TRIGGERED, &healthModSpellBasePoints0, NULL, NULL, true, NULL);
             }
 
             void Register()
             {
                 // add dummy effect spell handler to Last Stand
-                EffectHandlers += EffectHandlerFn(spell_warr_last_stand_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnEffect += SpellEffectFn(spell_warr_last_stand_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 

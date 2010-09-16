@@ -23,14 +23,17 @@
 #include "Configuration/Config.h"
 #include "Util.h"
 
+#include "Implementation/LoginDatabase.h" // For logging
+extern LoginDatabaseWorkerPool LoginDatabase;
+
 #include <stdarg.h>
 #include <stdio.h>
 
 Log::Log() :
     raLogfile(NULL), logfile(NULL), gmLogfile(NULL), charLogfile(NULL),
-    dberLogfile(NULL), chatLogfile(NULL), m_gmlog_per_account(false), 
-    m_enableLogDBLater(false), m_enableLogDB(false), m_colored(false),
-    arenaLogFile(NULL)
+    dberLogfile(NULL), chatLogfile(NULL), arenaLogFile(NULL), sqlLogFile(NULL),
+    m_gmlog_per_account(false), m_enableLogDBLater(false), 
+    m_enableLogDB(false), m_colored(false)
 {
     Initialize();
 }
@@ -64,6 +67,10 @@ Log::~Log()
     if (arenaLogFile != NULL)
         fclose(arenaLogFile);
     arenaLogFile = NULL;
+
+    if (sqlLogFile != NULL)
+        fclose(sqlLogFile);
+    sqlLogFile = NULL;
 }
 
 void Log::SetLogLevel(char *Level)
@@ -150,12 +157,12 @@ void Log::Initialize()
         }
     }
 
-    charLogfile = openLogFile("CharLogFile","CharLogTimestamp","a");
-
-    dberLogfile = openLogFile("DBErrorLogFile",NULL,"a");
-    raLogfile = openLogFile("RaLogFile",NULL,"a");
-    chatLogfile = openLogFile("ChatLogFile","ChatLogTimestamp","a");
-    arenaLogFile = openLogFile("ArenaLogFile",NULL,"a");
+    charLogfile = openLogFile("CharLogFile", "CharLogTimestamp", "a");
+    dberLogfile = openLogFile("DBErrorLogFile", NULL, "a");
+    raLogfile = openLogFile("RaLogFile", NULL, "a");
+    chatLogfile = openLogFile("ChatLogFile", "ChatLogTimestamp", "a");
+    arenaLogFile = openLogFile("ArenaLogFile", NULL,"a");
+    sqlLogFile = openLogFile("SQLDriverLogFile", NULL, "a");
 
     // Main log file settings
     m_logLevel     = sConfig.GetIntDefault("LogLevel", LOGL_NORMAL);
@@ -529,6 +536,34 @@ void Log::outArena(const char * str, ...)
     }
 }
 
+void Log::outSQLDriver(const char* str, ...)
+{
+    if (!str)
+        return;
+
+    va_list ap;
+    va_start(ap, str);
+    vutf8printf(stdout, str, &ap);
+    va_end(ap);
+
+    printf("\n");
+
+    if (sqlLogFile)
+    {
+        outTimestamp(sqlLogFile);
+
+        va_list ap;
+        va_start(ap, str);
+        vfprintf(sqlLogFile, str, ap);
+        va_end(ap);
+
+        fprintf(sqlLogFile, "\n");
+        fflush(sqlLogFile);
+    }
+
+    fflush(stdout);
+}
+
 void Log::outErrorDb(const char * err, ...)
 {
     if (!err)
@@ -690,6 +725,51 @@ void Log::outDebugInLine(const char * str, ...)
 }
 
 void Log::outDebug(const char * str, ...)
+{
+    if (!str)
+        return;
+
+    if (m_enableLogDB && m_dbLogLevel > LOGL_DETAIL)
+    {
+        va_list ap2;
+        va_start(ap2, str);
+        char nnew_str[MAX_QUERY_LEN];
+        vsnprintf(nnew_str, MAX_QUERY_LEN, str, ap2);
+        outDB(LOG_TYPE_DEBUG, nnew_str);
+        va_end(ap2);
+    }
+
+    if( m_logLevel > LOGL_DETAIL )
+    {
+        if (m_colored)
+            SetColor(true,m_colors[LOGL_DEBUG]);
+
+        va_list ap;
+        va_start(ap, str);
+        vutf8printf(stdout, str, &ap);
+        va_end(ap);
+
+        if(m_colored)
+            ResetColor(true);
+
+        printf( "\n" );
+
+        if (logfile)
+        {
+            outTimestamp(logfile);
+            va_list ap;
+            va_start(ap, str);
+            vfprintf(logfile, str, ap);
+            va_end(ap);
+
+            fprintf(logfile, "\n" );
+            fflush(logfile);
+        }
+    }
+    fflush(stdout);
+}
+
+void Log::outStaticDebug(const char * str, ...)
 {
     if (!str)
         return;

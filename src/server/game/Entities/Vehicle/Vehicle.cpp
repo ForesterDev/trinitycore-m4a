@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "Log.h"
 #include "ObjectMgr.h"
@@ -27,7 +28,7 @@
 #include "CreatureAI.h"
 #include "ZoneScript.h"
 
-Vehicle::Vehicle(Unit *unit, VehicleEntry const *vehInfo) : me(unit), m_vehicleInfo(vehInfo), m_usableSeatNum(0)
+Vehicle::Vehicle(Unit *unit, VehicleEntry const *vehInfo) : me(unit), m_vehicleInfo(vehInfo), m_usableSeatNum(0), m_bonusHP(0)
 {
     for (uint32 i = 0; i < 8; ++i)
     {
@@ -39,7 +40,7 @@ Vehicle::Vehicle(Unit *unit, VehicleEntry const *vehInfo) : me(unit), m_vehicleI
                     ++m_usableSeatNum;
             }
     }
-    
+
     // HACKY WAY, We must found a more generic way to handle this
     // Set inmunities since db ones are rewritten with player's ones
     switch (GetVehicleInfo()->m_ID)
@@ -76,6 +77,8 @@ void Vehicle::Install()
         switch (m_vehicleInfo->m_powerType)
         {
             case POWER_STEAM:
+            case POWER_BLOOD:
+            case POWER_OOZE:
                 me->setPowerType(POWER_ENERGY);
                 me->SetMaxPower(POWER_ENERGY, 100);
                 break;
@@ -115,7 +118,7 @@ void Vehicle::Install()
 
 void Vehicle::InstallAllAccessories()
 {
-    VehicleAccessoryList const* mVehicleList = objmgr.GetVehicleAccessoryList(me->GetEntry());
+    VehicleAccessoryList const* mVehicleList = sObjectMgr.GetVehicleAccessoryList(me->GetEntry());
     if (!mVehicleList)
         return;
 
@@ -187,6 +190,9 @@ void Vehicle::RemoveAllPassengers()
                 //ASSERT(!itr->second.passenger);
                 itr->second.passenger = NULL;
             }
+            // creature passengers mounted on player mounts should be despawned at dismount
+            if (GetBase()->GetTypeId() == TYPEID_PLAYER && passenger->ToCreature())
+                passenger->ToCreature()->ForcedDespawn();
         }
 }
 
@@ -303,8 +309,6 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId)
     if (seat->second.seatInfo->m_flags && !(seat->second.seatInfo->m_flags & 0x400))
         unit->addUnitState(UNIT_STAT_ONVEHICLE);
 
-    //SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
-
     unit->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT);
     VehicleSeatEntry const *veSeat = seat->second.seatInfo;
     unit->m_movementInfo.t_pos.m_positionX = veSeat->m_attachmentOffsetX;
@@ -317,8 +321,23 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId)
     if (me->GetTypeId() == TYPEID_UNIT
         && unit->GetTypeId() == TYPEID_PLAYER
         && seat->first == 0 && seat->second.seatInfo->m_flags & 0x800) // not right
+    {
         if (!me->SetCharmedBy(unit, CHARM_TYPE_VEHICLE))
             ASSERT(false);
+
+        if (VehicleScalingInfo const *scalingInfo = sObjectMgr.GetVehicleScalingInfo(m_vehicleInfo->m_ID))
+        {
+            Player *plr = unit->ToPlayer();
+            float averageItemLevel = plr->GetAverageItemLevel();
+            if (averageItemLevel < scalingInfo->baseItemLevel)
+                averageItemLevel = scalingInfo->baseItemLevel;
+            averageItemLevel -= scalingInfo->baseItemLevel;
+
+            m_bonusHP = uint32(me->GetMaxHealth() * (averageItemLevel * scalingInfo->scalingFactor));
+            me->SetMaxHealth(me->GetMaxHealth() + m_bonusHP);
+            me->SetHealth(me->GetHealth() + m_bonusHP);
+        }
+    }
 
     if (me->IsInWorld())
     {
@@ -374,7 +393,16 @@ void Vehicle::RemovePassenger(Unit *unit)
     if (me->GetTypeId() == TYPEID_UNIT
         && unit->GetTypeId() == TYPEID_PLAYER
         && seat->first == 0 && seat->second.seatInfo->m_flags & 0x800)
+    {
         me->RemoveCharmedBy(unit);
+
+        if (m_bonusHP)
+        {
+            me->SetHealth(me->GetHealth() - m_bonusHP);
+            me->SetMaxHealth(me->GetMaxHealth() - m_bonusHP);
+            m_bonusHP = 0;
+        }
+    }
 
     if (me->GetTypeId() == TYPEID_UNIT && me->ToCreature()->IsAIEnabled)
         me->ToCreature()->AI()->PassengerBoarded(unit, seat->first, false);

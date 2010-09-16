@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "SQLStorage.h"
 #include "Player.h"
@@ -37,7 +38,7 @@
 #include "ObjectMgr.h"
 #include "World.h"
 #include "Group.h"
-#include "InstanceData.h"
+#include "InstanceScript.h"
 #include "ProgressBar.h"
 
 
@@ -124,11 +125,11 @@ InstanceSave *InstanceSaveManager::GetInstanceSave(uint32 InstanceId)
 
 void InstanceSaveManager::DeleteInstanceFromDB(uint32 instanceid)
 {
-    CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("DELETE FROM instance WHERE id = '%u'", instanceid);
-    CharacterDatabase.PExecute("DELETE FROM character_instance WHERE instance = '%u'", instanceid);
-    CharacterDatabase.PExecute("DELETE FROM group_instance WHERE instance = '%u'", instanceid);
-    CharacterDatabase.CommitTransaction();
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+    trans->PAppend("DELETE FROM instance WHERE id = '%u'", instanceid);
+    trans->PAppend("DELETE FROM character_instance WHERE instance = '%u'", instanceid);
+    trans->PAppend("DELETE FROM group_instance WHERE instance = '%u'", instanceid);
+    CharacterDatabase.CommitTransaction(trans);
     // respawn times should be deleted only when the map gets unloaded
 }
 
@@ -169,7 +170,7 @@ void InstanceSave::SaveToDB()
     if (map)
     {
         ASSERT(map->IsDungeon());
-        if (InstanceData *iData = ((InstanceMap*)map)->GetInstanceData())
+        if (InstanceScript *iData = ((InstanceMap*)map)->GetInstanceScript())
         {
             data = iData->GetSaveData();
             if (!data.empty())
@@ -193,7 +194,7 @@ time_t InstanceSave::GetResetTimeForDB()
 // to cache or not to cache, that is the question
 InstanceTemplate const* InstanceSave::GetTemplate()
 {
-    return objmgr.GetInstanceTemplate(m_mapid);
+    return sObjectMgr.GetInstanceTemplate(m_mapid);
 }
 
 MapEntry const* InstanceSave::GetMapEntry()
@@ -211,15 +212,15 @@ bool InstanceSave::UnloadIfEmpty()
 {
     if (m_playerList.empty() && m_groupList.empty())
     {
-        if (!sInstanceSaveManager.lock_instLists)
-            sInstanceSaveManager.RemoveInstanceSave(GetInstanceId());
+        if (!sInstanceSaveMgr.lock_instLists)
+            sInstanceSaveMgr.RemoveInstanceSave(GetInstanceId());
         return false;
     }
     else
         return true;
 }
 
-void InstanceSaveManager::_DelHelper(DatabaseType &db, const char *fields, const char *table, const char *queryTail,...)
+void InstanceSaveManager::_DelHelper(const char *fields, const char *table, const char *queryTail,...)
 {
     Tokens fieldTokens = StrSplit(fields, ", ");
     ASSERT(fieldTokens.size() != 0);
@@ -230,7 +231,7 @@ void InstanceSaveManager::_DelHelper(DatabaseType &db, const char *fields, const
     vsnprintf(szQueryTail, MAX_QUERY_LEN, queryTail, ap);
     va_end(ap);
 
-    QueryResult_AutoPtr result = db.PQuery("SELECT %s FROM %s %s", fields, table, szQueryTail);
+    QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT %s FROM %s %s", fields, table, szQueryTail);
     if (result)
     {
         do
@@ -240,10 +241,10 @@ void InstanceSaveManager::_DelHelper(DatabaseType &db, const char *fields, const
             for (size_t i = 0; i < fieldTokens.size(); i++)
             {
                 std::string fieldValue = fields[i].GetCppString();
-                db.escape_string(fieldValue);
+                CharacterDatabase.escape_string(fieldValue);
                 ss << (i != 0 ? " AND " : "") << fieldTokens[i] << " = '" << fieldValue << "'";
             }
-            db.PExecute("DELETE FROM %s WHERE %s", table, ss.str().c_str());
+            CharacterDatabase.PExecute("DELETE FROM %s WHERE %s", table, ss.str().c_str());
         } while (result->NextRow());
     }
 }
@@ -254,18 +255,18 @@ void InstanceSaveManager::CleanupInstances()
     bar.step();
 
     // load reset times and clean expired instances
-    sInstanceSaveManager.LoadResetTimes();
+    sInstanceSaveMgr.LoadResetTimes();
 
     // clean character/group - instance binds with invalid group/characters
-    _DelHelper(CharacterDatabase, "character_instance.guid, instance", "character_instance", "LEFT JOIN characters ON character_instance.guid = characters.guid WHERE characters.guid IS NULL");
-    _DelHelper(CharacterDatabase, "group_instance.guid, instance", "group_instance", "LEFT JOIN groups ON group_instance.guid = groups.guid LEFT JOIN characters ON groups.leaderGuid = characters.guid WHERE characters.guid IS NULL OR groups.guid IS NULL");
+    _DelHelper("character_instance.guid, instance", "character_instance", "LEFT JOIN characters ON character_instance.guid = characters.guid WHERE characters.guid IS NULL");
+    _DelHelper("group_instance.guid, instance", "group_instance", "LEFT JOIN groups ON group_instance.guid = groups.guid LEFT JOIN characters ON groups.leaderGuid = characters.guid WHERE characters.guid IS NULL OR groups.guid IS NULL");
 
     // clean instances that do not have any players or groups bound to them
-    _DelHelper(CharacterDatabase, "id, map, difficulty", "instance", "LEFT JOIN character_instance ON character_instance.instance = id LEFT JOIN group_instance ON group_instance.instance = id WHERE character_instance.instance IS NULL AND group_instance.instance IS NULL");
+    _DelHelper("id, map, difficulty", "instance", "LEFT JOIN character_instance ON character_instance.instance = id LEFT JOIN group_instance ON group_instance.instance = id WHERE character_instance.instance IS NULL AND group_instance.instance IS NULL");
 
     // clean invalid instance references in other tables
-    _DelHelper(CharacterDatabase, "character_instance.guid, instance", "character_instance", "LEFT JOIN instance ON character_instance.instance = instance.id WHERE instance.id IS NULL");
-    _DelHelper(CharacterDatabase, "guid, instance", "group_instance", "LEFT JOIN instance ON group_instance.instance = instance.id WHERE instance.id IS NULL");
+    _DelHelper("character_instance.guid, instance", "character_instance", "LEFT JOIN instance ON character_instance.instance = instance.id WHERE instance.id IS NULL");
+    _DelHelper("guid, instance", "group_instance", "LEFT JOIN instance ON group_instance.instance = instance.id WHERE instance.id IS NULL");
 
     // creature_respawn and gameobject_respawn are in another database
     // first, obtain total instance set
@@ -447,7 +448,7 @@ void InstanceSaveManager::LoadResetTimes()
     }
 
     // load the global respawn times for raid/heroic instances
-    uint32 diff = sWorld.getConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR;
+    uint32 diff = sWorld.getIntConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR;
     result = CharacterDatabase.Query("SELECT mapid, difficulty, resettime FROM instance_reset");
     if (result)
     {
@@ -477,7 +478,7 @@ void InstanceSaveManager::LoadResetTimes()
 
     // clean expired instances, references to them will be deleted in CleanupInstances
     // must be done before calculating new reset times
-    _DelHelper(CharacterDatabase, "id, map, instance.difficulty", "instance", "LEFT JOIN instance_reset ON mapid = map AND instance.difficulty =  instance_reset.difficulty WHERE (instance.resettime < '"UI64FMTD"' AND instance.resettime > '0') OR (NOT instance_reset.resettime IS NULL AND instance_reset.resettime < '"UI64FMTD"')",  (uint64)now, (uint64)now);
+    _DelHelper("id, map, instance.difficulty", "instance", "LEFT JOIN instance_reset ON mapid = map AND instance.difficulty =  instance_reset.difficulty WHERE (instance.resettime < '"UI64FMTD"' AND instance.resettime > '0') OR (NOT instance_reset.resettime IS NULL AND instance_reset.resettime < '"UI64FMTD"')",  (uint64)now, (uint64)now);
 
     // calculate new global reset times for expired instances and those that have never been reset yet
     // add the global reset times to the priority queue
@@ -491,7 +492,7 @@ void InstanceSaveManager::LoadResetTimes()
             continue;
 
         // the reset_delay must be at least one day
-        uint32 period = ((mapDiff->resetTime * sWorld.getRate(RATE_INSTANCE_RESET_TIME))/DAY) * DAY;
+        uint32 period = uint32(((mapDiff->resetTime * sWorld.getRate(RATE_INSTANCE_RESET_TIME))/DAY) * DAY);
         if (period < DAY)
             period = DAY;
 
@@ -569,7 +570,7 @@ void InstanceSaveManager::Update()
         {
             // global reset/warning for a certain map
             time_t resetTime = GetResetTimeFor(event.mapid,event.difficulty);
-            _ResetOrWarnAll(event.mapid, event.difficulty, event.type != 4, resetTime - now);
+            _ResetOrWarnAll(event.mapid, event.difficulty, event.type != 4, uint32(resetTime - now));
             if (event.type != 4)
             {
                 // schedule the next warning/reset
@@ -617,7 +618,7 @@ void InstanceSaveManager::_ResetInstance(uint32 mapid, uint32 instanceId)
 
     Map* iMap = ((MapInstanced*)map)->FindMap(instanceId);
     if (iMap && iMap->IsDungeon()) ((InstanceMap*)iMap)->Reset(INSTANCE_RESET_RESPAWN_DELAY);
-    else objmgr.DeleteRespawnTimeForInstance(instanceId);   // even if map is not loaded
+    else sObjectMgr.DeleteRespawnTimeForInstance(instanceId);   // even if map is not loaded
 }
 
 void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficulty, bool warn, uint32 timeLeft)
@@ -648,16 +649,16 @@ void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficulty, b
         }
 
         // delete them from the DB, even if not loaded
-        CharacterDatabase.BeginTransaction();
-        CharacterDatabase.PExecute("DELETE FROM character_instance USING character_instance LEFT JOIN instance ON character_instance.instance = id WHERE map = '%u' and difficulty='%u'", mapid, difficulty);
-        CharacterDatabase.PExecute("DELETE FROM group_instance USING group_instance LEFT JOIN instance ON group_instance.instance = id WHERE map = '%u' and difficulty='%u'", mapid, difficulty);
-        CharacterDatabase.PExecute("DELETE FROM instance WHERE map = '%u' and difficulty='%u'", mapid, difficulty);
-        CharacterDatabase.CommitTransaction();
+        SQLTransaction trans = CharacterDatabase.BeginTransaction();
+        trans->PAppend("DELETE FROM character_instance USING character_instance LEFT JOIN instance ON character_instance.instance = id WHERE map = '%u' and difficulty='%u'", mapid, difficulty);
+        trans->PAppend("DELETE FROM group_instance USING group_instance LEFT JOIN instance ON group_instance.instance = id WHERE map = '%u' and difficulty='%u'", mapid, difficulty);
+        trans->PAppend("DELETE FROM instance WHERE map = '%u' and difficulty='%u'", mapid, difficulty);
+        CharacterDatabase.CommitTransaction(trans);
 
         // calculate the next reset time
-        uint32 diff = sWorld.getConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR;
+        uint32 diff = sWorld.getIntConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR;
 
-        uint32 period = ((mapDiff->resetTime * sWorld.getRate(RATE_INSTANCE_RESET_TIME))/DAY) * DAY;
+        uint32 period = uint32(((mapDiff->resetTime * sWorld.getRate(RATE_INSTANCE_RESET_TIME))/DAY) * DAY);
         if (period < DAY)
             period = DAY;
 

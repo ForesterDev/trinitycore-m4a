@@ -79,6 +79,15 @@ enum MailAuctionAnswers
     AUCTION_SALE_PENDING        = 6
 };
 
+enum MailShowFlags
+{
+    MAIL_SHOW_UNK0    = 0x0001,
+    MAIL_SHOW_DELETE  = 0x0002,                             // forced show delete button instead return button
+    MAIL_SHOW_AUCTION = 0x0004,                             // from old comment
+    MAIL_SHOW_UNK2    = 0x0008,                             // unknown, COD will be shown even without that flag
+    MAIL_SHOW_RETURN  = 0x0010,
+};
+
 class MailSender
 {
     public:                                                 // Constructors
@@ -128,16 +137,19 @@ class MailDraft
         uint32 GetMoney() const { return m_money; }
         uint32 GetCOD() const { return m_COD; }
         std::string const& GetBody() const { return m_body; }
+
     public:                                                 // modifiers
         MailDraft& AddItem(Item* item);
         MailDraft& AddMoney(uint32 money) { m_money = money; return *this; }
         MailDraft& AddCOD(uint32 COD) { m_COD = COD; return *this; }
+
     public:                                                 // finishers
         void SendReturnToSender(uint32 sender_acc, uint32 sender_guid, uint32 receiver_guid);
-        void SendMailTo(MailReceiver const& receiver, MailSender const& sender, MailCheckMask checked = MAIL_CHECK_MASK_NONE, uint32 deliver_delay = 0);
+        void SendMailTo(SQLTransaction& trans, MailReceiver const& receiver, MailSender const& sender, MailCheckMask checked = MAIL_CHECK_MASK_NONE, uint32 deliver_delay = 0);
+
     private:
-        void deleteIncludedItems(bool inDB = false);
-        void prepareItems(Player* receiver);                // called from SendMailTo for generate mailTemplateBase items
+        void deleteIncludedItems(SQLTransaction& trans, bool inDB = false);
+        void prepareItems(Player* receiver, SQLTransaction& trans);                // called from SendMailTo for generate mailTemplateBase items
 
         uint16      m_mailTemplateId;
         bool        m_mailTemplateItemsNeed;

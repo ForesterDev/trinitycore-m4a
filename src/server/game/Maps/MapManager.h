@@ -22,8 +22,8 @@
 #define TRINITY_MAPMANAGER_H
 
 #include "Define.h"
-#include "ace/Singleton.h"
-#include "ace/Thread_Mutex.h"
+#include <ace/Singleton.h>
+#include <ace/Thread_Mutex.h>
 #include "Common.h"
 #include "Map.h"
 #include "GridStates.h"
@@ -117,7 +117,7 @@ class MapManager
             {
                 float mod = o *-1;
                 mod = fmod(mod, 2.0f * static_cast<float>(M_PI));
-                mod = -mod + 2.0f * M_PI;
+                mod = -mod + 2.0f * static_cast<float>(M_PI);
                 return mod;
             }
             return fmod(o, 2.0f * static_cast<float>(M_PI));

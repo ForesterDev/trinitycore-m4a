@@ -16,13 +16,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "ChannelMgr.h"
 
 #include "World.h"
 
 ChannelMgr* channelMgr(uint32 team)
 {
-    if (sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
+    if (sWorld.getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
         return ACE_Singleton<AllianceChannelMgr, ACE_Null_Mutex>::instance();        // cross-faction
 
     if (team == ALLIANCE)
@@ -49,7 +50,12 @@ Channel *ChannelMgr::GetJoinChannel(std::string name, uint32 channel_id)
 
     if (channels.find(wname) == channels.end())
     {
-        Channel *nchan = new Channel(name,channel_id, team);
+        bool custom = false;
+        if (wname == L"global")
+            name = "Global";
+        else
+            custom = true;
+        Channel *nchan = new Channel(name, channel_id, team, custom);
         channels[wname] = nchan;
         return nchan;
     }
@@ -104,4 +110,14 @@ void ChannelMgr::MakeNotOnPacket(WorldPacket *data, std::string name)
 {
     data->Initialize(SMSG_CHANNEL_NOTIFY, (1+10));  // we guess size
     (*data) << (uint8)0x05 << name;
+}
+
+AllianceChannelMgr::AllianceChannelMgr()
+    : ChannelMgr(ALLIANCE)
+{
+}
+
+HordeChannelMgr::HordeChannelMgr()
+    : ChannelMgr(HORDE)
+{
 }

@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "CreatureAI.h"
 #include "CreatureAIImpl.h"
 #include "Creature.h"
@@ -126,7 +127,7 @@ void CreatureAI::MoveInLineOfSight(Unit *who)
     if (me->canStartAttack(who, false))
         AttackStart(who);
     //else if (who->getVictim() && me->IsFriendlyTo(who)
-    //    && me->IsWithinDistInMap(who, sWorld.getConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_RADIUS))
+    //    && me->IsWithinDistInMap(who, sWorld.getIntConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_RADIUS))
     //    && me->canStartAttack(who->getVictim(), true)) // TODO: if we use true, it will not attack it when it arrives
     //    me->GetMotionMaster()->MoveChase(who->getVictim());
 }

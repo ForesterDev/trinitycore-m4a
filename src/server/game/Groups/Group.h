@@ -23,7 +23,7 @@
 
 #include "GroupReference.h"
 #include "GroupRefManager.h"
-#include "BattleGround.h"
+#include "Battleground.h"
 #include "LootMgr.h"
 #include "DBCEnums.h"
 #include "Unit.h"
@@ -35,6 +35,8 @@
 #define MAXRAIDSIZE 40
 #define MAX_RAID_SUBGROUPS MAXRAIDSIZE/MAXGROUPSIZE
 #define TARGETICONCOUNT 8
+#define GROUP_MAX_LFG_KICKS 3
+#define GROUP_LFG_KICK_VOTES_NEEDED 3
 
 enum RollVote
 {
@@ -44,6 +46,13 @@ enum RollVote
     DISENCHANT        = 3,
     NOT_EMITED_YET    = 4,
     NOT_VALID         = 5
+};
+
+enum LfgDungeonStatus
+{
+    LFG_STATUS_SAVED     = 0,
+    LFG_STATUS_NOT_SAVED = 1,
+    LFG_STATUS_COMPLETE  = 2,
 };
 
 enum GroupMemberOnlineStatus
@@ -72,12 +81,12 @@ enum GroupType
     GROUPTYPE_BG     = 0x01,
     GROUPTYPE_RAID   = 0x02,
     GROUPTYPE_BGRAID = GROUPTYPE_BG | GROUPTYPE_RAID,       // mask
-    // 0x04?
-    GROUPTYPE_LFD    = 0x08,
+    GROUPTYPE_UNK1   = 0x04,
+    GROUPTYPE_LFG    = 0x08,
     // 0x10, leave/change group?, I saw this flag when leaving group and after leaving BG while in group
 };
 
-class BattleGround;
+class Battleground;
 
 enum GroupUpdateFlags
 {
@@ -158,6 +167,7 @@ class Group
             std::string name;
             uint8       group;
             uint8       flags;
+            uint8       roles;
         };
         typedef std::list<MemberSlot> MemberSlotList;
         typedef MemberSlotList::const_iterator member_citerator;
@@ -191,14 +201,43 @@ class Group
         void   SetLootThreshold(ItemQualities threshold) { m_lootThreshold = threshold; }
         void   Disband(bool hideDestroy=false);
 
+        // Dungeon Finder
+        void   SetLfgQueued(bool queued) { m_LfgQueued = queued; }
+        bool   isLfgQueued() { return m_LfgQueued; }
+        void   SetLfgStatus(uint8 status) { m_LfgStatus = status; }
+        uint8  GetLfgStatus() { return m_LfgStatus; }
+        bool   isLfgDungeonComplete() const { return m_LfgStatus == LFG_STATUS_COMPLETE; }
+        void   SetLfgDungeonEntry(uint32 dungeonEntry) { m_LfgDungeonEntry = dungeonEntry; }
+        uint32 GetLfgDungeonEntry(bool id = true)
+        {
+            if (id)
+                return (m_LfgDungeonEntry & 0x00FFFFFF);
+            else
+                return m_LfgDungeonEntry;
+        }
+        bool   isLfgKickActive() const { return m_LfgkicksActive; }
+        void   SetLfgKickActive(bool active) { m_LfgkicksActive = active; }
+        uint8  GetLfgKicks() const { return m_Lfgkicks; }
+        void   SetLfgKicks(uint8 kicks) { m_Lfgkicks = kicks; }
+        void   SetLfgRoles(uint64 guid, const uint8 roles)
+        {
+            member_witerator slot = _getMemberWSlot(guid);
+            if (slot == m_memberSlots.end())
+                return;
+
+            slot->roles = roles;
+            SendUpdate();
+        }
+
         // properties accessories
         bool IsFull() const { return (m_groupType == GROUPTYPE_NORMAL) ? (m_memberSlots.size() >= MAXGROUPSIZE) : (m_memberSlots.size() >= MAXRAIDSIZE); }
+        bool isLFGGroup()  const { return m_groupType & GROUPTYPE_LFG; }
         bool isRaidGroup() const { return m_groupType & GROUPTYPE_RAID; }
         bool isBGGroup()   const { return m_bgGroup != NULL; }
         bool IsCreated()   const { return GetMembersCount() > 0; }
         const uint64& GetLeaderGUID() const { return m_leaderGuid; }
         const uint64& GetGUID() const { return m_guid; }
-        const uint32 GetLowGUID() const { return GUID_LOPART(m_guid); }
+        uint32 GetLowGUID() const { return GUID_LOPART(m_guid); }
         const char * GetLeaderName() const { return m_leaderName.c_str(); }
         LootMethod    GetLootMethod() const { return m_lootMethod; }
         const uint64& GetLooterGuid() const { return m_looterGuid; }
@@ -267,11 +306,12 @@ class Group
             return mslot->group;
         }
 
+        void ConvertToLFG();
         // some additional raid methods
         void ConvertToRaid();
 
-        void SetBattlegroundGroup(BattleGround *bg) { m_bgGroup = bg; }
-        GroupJoinBattlegroundResult CanJoinBattleGroundQueue(BattleGround const* bgOrTemplate, BattleGroundQueueTypeId bgQueueTypeId, uint32 MinPlayerCount, uint32 MaxPlayerCount, bool isRated, uint32 arenaSlot);
+        void SetBattlegroundGroup(Battleground *bg) { m_bgGroup = bg; }
+        GroupJoinBattlegroundResult CanJoinBattlegroundQueue(Battleground const* bgOrTemplate, BattlegroundQueueTypeId bgQueueTypeId, uint32 MinPlayerCount, uint32 MaxPlayerCount, bool isRated, uint32 arenaSlot);
 
         void ChangeMembersGroup(const uint64 &guid, const uint8 &group);
         void ChangeMembersGroup(Player *player, const uint8 &group);
@@ -325,6 +365,7 @@ class Group
         /***                   LOOT SYSTEM                     ***/
         /*********************************************************/
 
+        bool isRollLootActive() const { return !RollId.empty(); }
         void SendLootStartRoll(uint32 CountDown, uint32 mapid, const Roll &r);
         void SendLootRoll(const uint64& SourceGuid, const uint64& TargetGuid, uint8 RollNumber, uint8 RollType, const Roll &r);
         void SendLootRollWon(const uint64& SourceGuid, const uint64& TargetGuid, uint8 RollNumber, uint8 RollType, const Roll &r);
@@ -449,7 +490,7 @@ class Group
         GroupType           m_groupType;
         Difficulty          m_dungeonDifficulty;
         Difficulty          m_raidDifficulty;
-        BattleGround*       m_bgGroup;
+        Battleground*       m_bgGroup;
         uint64              m_targetIcons[TARGETICONCOUNT];
         LootMethod          m_lootMethod;
         ItemQualities       m_lootThreshold;
@@ -460,5 +501,10 @@ class Group
         uint64              m_guid;
         uint32              m_counter;                      // used only in SMSG_GROUP_LIST
         uint32              m_maxEnchantingLevel;
+        bool                m_LfgQueued;
+        uint8               m_LfgStatus;
+        uint32              m_LfgDungeonEntry;
+        uint8               m_Lfgkicks;
+        bool                m_LfgkicksActive;
 };
 #endif

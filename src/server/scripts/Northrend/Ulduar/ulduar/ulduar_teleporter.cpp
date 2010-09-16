@@ -1,63 +1,44 @@
-/*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include "ScriptPCH.h"
 #include "ulduar.h"
 
-/*
-The teleporter appears to be active and stable.
-
-- Expedition Base Camp
-- Formation Grounds
-- Colossal Forge
-- Scrapyard
-- Antechamber of Ulduar
-- Shattered Walkway
-- Conservatory of Life
-*/
-
-#define BASE_CAMP    200
-#define GROUNDS      201
-#define FORGE        202
-#define SCRAPYARD    203
-#define ANTECHAMBER  204
-#define WALKWAY      205
-#define CONSERVATORY 206
-
-bool GoHello_ulduar_teleporter(Player *pPlayer, GameObject *pGO)
+enum Locations
 {
-    ScriptedInstance *pInstance = pGO->GetInstanceData();
-    if (!pInstance) return true;
+    BASE_CAMP                                   = 200,
+    GROUNDS                                     = 201,
+    FORGE                                       = 202,
+    SCRAPYARD                                   = 203,
+    ANTECHAMBER                                 = 204,
+    WALKWAY                                     = 205,
+    CONSERVATORY                                = 206,
+    SPARK_IMAGINATION                           = 207,
+    DESCENT_MADNESS                             = 208
+};
 
-    pPlayer->ADD_GOSSIP_ITEM(0, "Teleport to the Expedition Base Camp", GOSSIP_SENDER_MAIN, BASE_CAMP);
-    pPlayer->ADD_GOSSIP_ITEM(0, "Teleport to the Formation Grounds", GOSSIP_SENDER_MAIN, GROUNDS);
-    if (pInstance->GetData(TYPE_LEVIATHAN) == DONE)
+bool GoHello_ulduar_teleporter( Player *pPlayer, GameObject *pGO )
+{
+    InstanceScript *data = pPlayer->GetInstanceScript();
+    InstanceScript *pInstance = pGO->GetInstanceScript();
+    if(!pInstance | !data) return true;
+
+    pPlayer->ADD_GOSSIP_ITEM(0, "Expedition Base Camp", GOSSIP_SENDER_MAIN, BASE_CAMP);
+    //pPlayer->ADD_GOSSIP_ITEM(0, "Formation Grounds", GOSSIP_SENDER_MAIN, GROUNDS);
+    if (data->GetBossState(BOSS_LEVIATHAN) == DONE)
     {
-        pPlayer->ADD_GOSSIP_ITEM(0, "Teleport to the Colossal Forge", GOSSIP_SENDER_MAIN, FORGE);
-        if (pInstance->GetData(TYPE_XT002) == DONE)
+        pPlayer->ADD_GOSSIP_ITEM(0, "Colossal Forge", GOSSIP_SENDER_MAIN, FORGE);
+        if (data->GetBossState(BOSS_XT002) == DONE)
         {
-            pPlayer->ADD_GOSSIP_ITEM(0, "Teleport to the Scrapyard", GOSSIP_SENDER_MAIN, SCRAPYARD);
-            pPlayer->ADD_GOSSIP_ITEM(0, "Teleport to the Antechamber of Ulduar", GOSSIP_SENDER_MAIN, ANTECHAMBER);
-            if (pInstance->GetData(TYPE_KOLOGARN) == DONE)
+            pPlayer->ADD_GOSSIP_ITEM(0, "Scrapyard", GOSSIP_SENDER_MAIN, SCRAPYARD);
+            pPlayer->ADD_GOSSIP_ITEM(0, "Antechamber of Ulduar", GOSSIP_SENDER_MAIN, ANTECHAMBER);
+            if (data->GetBossState(BOSS_KOLOGARN) == DONE)
             {
-                pPlayer->ADD_GOSSIP_ITEM(0, "Teleport to the Shattered Walkway", GOSSIP_SENDER_MAIN, WALKWAY);
-                if (pInstance->GetData(TYPE_AURIAYA) == DONE)
-                    pPlayer->ADD_GOSSIP_ITEM(0, "Teleport to the Conservatory of Life", GOSSIP_SENDER_MAIN, CONSERVATORY);
+                pPlayer->ADD_GOSSIP_ITEM(0, "Shattered Walkway", GOSSIP_SENDER_MAIN, WALKWAY);
+                if (data->GetBossState(BOSS_AURIAYA) == DONE)
+                {
+                    pPlayer->ADD_GOSSIP_ITEM(0, "Conservatory of Life", GOSSIP_SENDER_MAIN, CONSERVATORY);
+                    //pPlayer->ADD_GOSSIP_ITEM(0, "Spark of Imagination", GOSSIP_SENDER_MAIN, SPARK_IMAGINATION);
+                    if (data->GetBossState(BOSS_VEZAX) == DONE)
+                        pPlayer->ADD_GOSSIP_ITEM(0, "Descent into Madness", GOSSIP_SENDER_MAIN, DESCENT_MADNESS);
+                }
             }
         }
     }
@@ -66,10 +47,10 @@ bool GoHello_ulduar_teleporter(Player *pPlayer, GameObject *pGO)
     return true;
 }
 
-bool GOSelect_ulduar_teleporter(Player *pPlayer, GameObject * /*pGO*/, uint32 sender, uint32 action)
+bool GOSelect_ulduar_teleporter( Player *pPlayer, GameObject *pGO, uint32 sender, uint32 action )
 {
-    if (sender != GOSSIP_SENDER_MAIN) return true;
-    if (!pPlayer->getAttackers().empty()) return true;
+    if(sender != GOSSIP_SENDER_MAIN) return true;
+    if(!pPlayer->getAttackers().empty()) return true;
 
     switch(action)
     {
@@ -94,6 +75,12 @@ bool GOSelect_ulduar_teleporter(Player *pPlayer, GameObject * /*pGO*/, uint32 se
     case CONSERVATORY:
         pPlayer->TeleportTo(603, 2086.27, -24.3134, 421.239, 0);
         pPlayer->CLOSE_GOSSIP_MENU(); break;
+    case SPARK_IMAGINATION:
+        pPlayer->TeleportTo(603, 2518.16, 2569.03, 412.299, 0);
+        pPlayer->CLOSE_GOSSIP_MENU(); break;
+    case DESCENT_MADNESS:
+        pPlayer->TeleportTo(603, 1854.82, -11.5608, 334.175, 0);
+        pPlayer->CLOSE_GOSSIP_MENU(); break;
     }
 
     return true;
@@ -101,10 +88,25 @@ bool GOSelect_ulduar_teleporter(Player *pPlayer, GameObject * /*pGO*/, uint32 se
 
 void AddSC_ulduar_teleporter()
 {
-    Script *newscript;
-    newscript = new Script;
-    newscript->Name = "ulduar_teleporter";
-    newscript->pGOHello = &GoHello_ulduar_teleporter;
-    newscript->pGOSelect = &GOSelect_ulduar_teleporter;
-    newscript->RegisterSelf();
+    struct Ulduar_teleporter
+        : GameObjectScript
+    {
+        Ulduar_teleporter()
+            : GameObjectScript("ulduar_teleporter")
+        {
+        }
+
+        bool OnGossipHello(Player *player, GameObject *go)
+        {
+            return GoHello_ulduar_teleporter(std::move(player), std::move(go));
+        }
+
+        bool
+            OnGossipSelect(Player *player, GameObject *go, uint32 sender, uint32 action)
+        {
+            return GOSelect_ulduar_teleporter
+                (std::move(player), std::move(go), std::move(sender), std::move(action));
+        }
+    };
+    new Ulduar_teleporter;
 }

@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "CombatAI.h"
 #include "SpellMgr.h"
 #include "Vehicle.h"
@@ -239,7 +240,7 @@ bool TurretAI::CanAIAttack(const Unit * /*who*/) const
 {
     // TODO: use one function to replace it
     if (!me->IsWithinCombatRange(me->getVictim(), me->m_CombatDistance)
-        || m_minRange && me->IsWithinCombatRange(me->getVictim(), m_minRange))
+        || (m_minRange && me->IsWithinCombatRange(me->getVictim(), m_minRange)))
         return false;
     return true;
 }
@@ -304,7 +305,7 @@ VehicleAI::VehicleAI(Creature *c) : CreatureAI(c), m_vehicle(c->GetVehicleKit())
 void VehicleAI::UpdateAI(const uint32 diff)
 {
     CheckConditions(diff);
-    
+
     if (m_DoDismiss)
     {
         if (m_DismissTimer < diff)

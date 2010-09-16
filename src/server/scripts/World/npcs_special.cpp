@@ -292,6 +292,7 @@ public:
 
     bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
         if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
         {
             pPlayer->SEND_GOSSIP_MENU(TEXT_ID_PROGRESS, pCreature->GetGUID());
@@ -380,7 +381,7 @@ public:
     bool OnQuestAccept(Player* /*pPlayer*/, Creature* pCreature, const Quest *_Quest)
     {
         if (_Quest->GetQuestId() == QUEST_CLUCK)
-            CAST_AI(npc_chicken_cluckAI, pCreature->AI())->Reset();
+            CAST_AI(npc_chicken_cluck::npc_chicken_cluckAI, pCreature->AI())->Reset();
 
         return true;
     }
@@ -388,7 +389,7 @@ public:
     bool OnQuestComplete(Player* /*pPlayer*/, Creature* pCreature, const Quest *_Quest)
     {
         if (_Quest->GetQuestId() == QUEST_CLUCK)
-            CAST_AI(npc_chicken_cluckAI, pCreature->AI())->Reset();
+            CAST_AI(npc_chicken_cluck::npc_chicken_cluckAI, pCreature->AI())->Reset();
 
         return true;
     }
@@ -500,34 +501,34 @@ struct Location
 
 static Location AllianceCoords[]=
 {
-    {-3757.38, -4533.05, 14.16, 3.62},                      // Top-far-right bunk as seen from entrance
-    {-3754.36, -4539.13, 14.16, 5.13},                      // Top-far-left bunk
-    {-3749.54, -4540.25, 14.28, 3.34},                      // Far-right bunk
-    {-3742.10, -4536.85, 14.28, 3.64},                      // Right bunk near entrance
-    {-3755.89, -4529.07, 14.05, 0.57},                      // Far-left bunk
-    {-3749.51, -4527.08, 14.07, 5.26},                      // Mid-left bunk
-    {-3746.37, -4525.35, 14.16, 5.22},                      // Left bunk near entrance
+    {-3757.38f, -4533.05f, 14.16f, 3.62f},                      // Top-far-right bunk as seen from entrance
+    {-3754.36f, -4539.13f, 14.16f, 5.13f},                      // Top-far-left bunk
+    {-3749.54f, -4540.25f, 14.28f, 3.34f},                      // Far-right bunk
+    {-3742.10f, -4536.85f, 14.28f, 3.64f},                      // Right bunk near entrance
+    {-3755.89f, -4529.07f, 14.05f, 0.57f},                      // Far-left bunk
+    {-3749.51f, -4527.08f, 14.07f, 5.26f},                      // Mid-left bunk
+    {-3746.37f, -4525.35f, 14.16f, 5.22f},                      // Left bunk near entrance
 };
 
 //alliance run to where
-#define A_RUNTOX -3742.96
-#define A_RUNTOY -4531.52
-#define A_RUNTOZ 11.91
+#define A_RUNTOX -3742.96f
+#define A_RUNTOY -4531.52f
+#define A_RUNTOZ 11.91f
 
 static Location HordeCoords[]=
 {
-    {-1013.75, -3492.59, 62.62, 4.34},                      // Left, Behind
-    {-1017.72, -3490.92, 62.62, 4.34},                      // Right, Behind
-    {-1015.77, -3497.15, 62.82, 4.34},                      // Left, Mid
-    {-1019.51, -3495.49, 62.82, 4.34},                      // Right, Mid
-    {-1017.25, -3500.85, 62.98, 4.34},                      // Left, front
-    {-1020.95, -3499.21, 62.98, 4.34}                       // Right, Front
+    {-1013.75f, -3492.59f, 62.62f, 4.34f},                      // Left, Behind
+    {-1017.72f, -3490.92f, 62.62f, 4.34f},                      // Right, Behind
+    {-1015.77f, -3497.15f, 62.82f, 4.34f},                      // Left, Mid
+    {-1019.51f, -3495.49f, 62.82f, 4.34f},                      // Right, Mid
+    {-1017.25f, -3500.85f, 62.98f, 4.34f},                      // Left, front
+    {-1020.95f, -3499.21f, 62.98f, 4.34f}                       // Right, Front
 };
 
 //horde run to where
-#define H_RUNTOX -1016.44
-#define H_RUNTOY -3508.48
-#define H_RUNTOZ 62.96
+#define H_RUNTOX -1016.44f
+#define H_RUNTOY -3508.48f
+#define H_RUNTOZ 62.96f
 
 const uint32 AllianceSoldierId[3] =
 {
@@ -634,7 +635,7 @@ public:
                 Reset();
         }
 
-        void PatientSaved(Creature* soldier, Player* pPlayer, Location* Point)
+        void PatientSaved(Creature* /*soldier*/, Player* pPlayer, Location* Point)
         {
             if (pPlayer && PlayerGUID == pPlayer->GetGUID())
             {
@@ -676,7 +677,7 @@ public:
     bool OnQuestAccept(Player* pPlayer, Creature* pCreature, Quest const *quest)
     {
         if ((quest->GetQuestId() == 6624) || (quest->GetQuestId() == 6622))
-            CAST_AI(npc_doctorAI, pCreature->AI())->BeginEvent(pPlayer);
+            CAST_AI(npc_doctor::npc_doctorAI, pCreature->AI())->BeginEvent(pPlayer);
 
         return true;
     }
@@ -723,15 +724,15 @@ public:
             {                                                   //lower max health
                 case 12923:
                 case 12938:                                     //Injured Soldier
-                    me->SetHealth(uint32(me->GetMaxHealth()*.75));
+                    me->SetHealth(me->CountPctFromMaxHealth(75));
                     break;
                 case 12924:
                 case 12936:                                     //Badly injured Soldier
-                    me->SetHealth(uint32(me->GetMaxHealth()*.50));
+                    me->SetHealth(me->CountPctFromMaxHealth(50));
                     break;
                 case 12925:
                 case 12937:                                     //Critically injured Soldier
-                    me->SetHealth(uint32(me->GetMaxHealth()*.25));
+                    me->SetHealth(me->CountPctFromMaxHealth(25));
                     break;
             }
         }
@@ -782,7 +783,7 @@ public:
             //lower HP on every world tick makes it a useful counter, not officlone though
             if (me->isAlive() && me->GetHealth() > 6)
             {
-                me->SetHealth(uint32(me->GetHealth()-5));
+                me->ModifyHealth(-5);
             }
 
             if (me->isAlive() && me->GetHealth() <= 6)
@@ -801,7 +802,7 @@ public:
         }
     };
 
-    CreatureAI *GetAI(Creature *creature)
+    CreatureAI *GetAI(Creature *creature) const
     {
         return new npc_injured_patientAI(creature);
     }
@@ -924,7 +925,7 @@ public:
 
             me->SetStandState(UNIT_STAND_STATE_KNEEL);
             //expect database to have RegenHealth=0
-            me->SetHealth(int(me->GetMaxHealth()*0.7));
+            me->SetHealth(me->CountPctFromMaxHealth(70));
         }
 
         void EnterCombat(Unit * /*who*/) {}
@@ -1116,7 +1117,7 @@ public:
         }
     };
 
-    CreatureAI *GetAI(Creature *creature)
+    CreatureAI *GetAI(Creature *creature) const
     {
         return new npc_guardianAI(creature);
     }
@@ -1156,6 +1157,7 @@ public:
 
     bool OnGossipSelect(Player* pPlayer, Creature* /*pCreature*/, uint32 /*uiSender*/, uint32 uiAction)
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
         if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
         {
             pPlayer->CLOSE_GOSSIP_MENU();
@@ -1252,6 +1254,7 @@ public:
 
     bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
         if (uiAction == GOSSIP_ACTION_TRADE)
             pPlayer->SEND_VENDORLIST(pCreature->GetGUID());
 
@@ -1283,7 +1286,7 @@ public:
         if (pCreature->isCanTrainingAndResetTalentsOf(pPlayer))
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, GOSSIP_HELLO_ROGUE1, GOSSIP_SENDER_MAIN, GOSSIP_OPTION_UNLEARNTALENTS);
 
-        if (!(pPlayer->GetSpecsCount() == 1 && pCreature->isCanTrainingAndResetTalentsOf(pPlayer) && !(pPlayer->getLevel() < sWorld.getConfig(CONFIG_MIN_DUALSPEC_LEVEL))))
+        if (!(pPlayer->GetSpecsCount() == 1 && pCreature->isCanTrainingAndResetTalentsOf(pPlayer) && !(pPlayer->getLevel() < sWorld.getIntConfig(CONFIG_MIN_DUALSPEC_LEVEL))))
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, GOSSIP_HELLO_ROGUE3, GOSSIP_SENDER_MAIN, GOSSIP_OPTION_LEARNDUALSPEC);
 
         if (pPlayer->getClass() == CLASS_ROGUE && pPlayer->getLevel() >= 24 && !pPlayer->HasItemCount(17126,1) && !pPlayer->GetQuestRewardStatus(6681))
@@ -1298,6 +1301,7 @@ public:
 
     bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
         switch(uiAction)
         {
             case GOSSIP_ACTION_INFO_DEF+1:
@@ -1312,9 +1316,9 @@ public:
                 pPlayer->SendTalentWipeConfirm(pCreature->GetGUID());
                 break;
             case GOSSIP_OPTION_LEARNDUALSPEC:
-                if (pPlayer->GetSpecsCount() == 1 && !(pPlayer->getLevel() < sWorld.getConfig(CONFIG_MIN_DUALSPEC_LEVEL)))
+                if (pPlayer->GetSpecsCount() == 1 && !(pPlayer->getLevel() < sWorld.getIntConfig(CONFIG_MIN_DUALSPEC_LEVEL)))
                 {
-                    if (pPlayer->GetMoney() < 10000000)
+                    if (!pPlayer->HasEnoughMoney(10000000))
                     {
                         pPlayer->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0, 0);
                         pPlayer->PlayerTalkClass->CloseGossip();
@@ -1448,6 +1452,7 @@ public:
 
     bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
         switch(uiSender)
         {
             case GOSSIP_SENDER_MAIN:
@@ -1684,10 +1689,11 @@ public:
             else
                 IsViper = false;
 
+            me->SetMaxHealth(uint32(107 * (me->getLevel() - 40) * 0.025f));
             //Add delta to make them not all hit the same time
             uint32 delta = (rand() % 7) * 100;
-            me->SetStatFloatValue(UNIT_FIELD_BASEATTACKTIME, Info->baseattacktime + delta);
-            me->SetStatFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER , Info->attackpower);
+            me->SetStatFloatValue(UNIT_FIELD_BASEATTACKTIME, float(Info->baseattacktime + delta));
+            me->SetStatFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER , float(Info->attackpower));
         }
 
         //Redefined for random target selection:
@@ -1843,7 +1849,7 @@ public:
         }
     };
 
-    CreatureAI *GetAI(Creature *creature)
+    CreatureAI *GetAI(Creature *creature) const
     {
         return new mob_mojoAI(creature);
     }
@@ -1904,7 +1910,7 @@ public:
     {
         npc_ebon_gargoyleAI(Creature *c) : CasterAI(c) {}
 
-        int despawnTimer;
+        uint32 despawnTimer;
 
         void InitializeAI()
         {
@@ -2170,6 +2176,7 @@ public:
 
     bool OnGossipSelect(Player* pPlayer, Creature* /*pCreature*/, uint32 /*uiSender*/, uint32 uiAction)
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
         bool roll = urand(0,1);
 
         switch(uiAction)
@@ -2177,9 +2184,9 @@ public:
             case GOSSIP_ACTION_INFO_DEF + 1: //Borean Tundra
                 pPlayer->CLOSE_GOSSIP_MENU();
                 if (roll) //At the moment we don't have chance on spell_target_position table so we hack this
-                    pPlayer->TeleportTo(571, 4305.505859, 5450.839844, 63.005806, 0.627286);
+                    pPlayer->TeleportTo(571, 4305.505859f, 5450.839844f, 63.005806f, 0.627286f);
                 else
-                    pPlayer->TeleportTo(571, 3201.936279, 5630.123535, 133.658798, 3.855272);
+                    pPlayer->TeleportTo(571, 3201.936279f, 5630.123535f, 133.658798f, 3.855272f);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 2: //Howling Fjord
                 pPlayer->CLOSE_GOSSIP_MENU();
@@ -2202,9 +2209,9 @@ public:
     }
 };
 
-/*###### 
-## npc_pet_trainer 
-######*/ 
+/*######
+## npc_pet_trainer
+######*/
 
 enum ePetTrainer
 {
@@ -2243,6 +2250,7 @@ public:
 
     bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
         switch(uiAction)
         {
             case GOSSIP_ACTION_INFO_DEF + 1:
@@ -2342,6 +2350,7 @@ public:
 
     bool OnGossipSelect(Player* pPlayer, Creature* /*pCreature*/, uint32 /*uiSender*/, uint32 uiAction)
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
         switch(uiAction)
         {
             case GOSSIP_ACTION_INFO_DEF+1:
@@ -2373,174 +2382,175 @@ public:
     }
 };
 
-/*###### 
-## npc_tabard_vendor 
-######*/ 
- 
-enum 
-{ 
-    QUEST_TRUE_MASTERS_OF_LIGHT = 9737, 
-    QUEST_THE_UNWRITTEN_PROPHECY = 9762, 
-    QUEST_INTO_THE_BREACH = 10259, 
-    QUEST_BATTLE_OF_THE_CRIMSON_WATCH = 10781, 
-    QUEST_SHARDS_OF_AHUNE = 11972, 
- 
-    ACHIEVEMENT_EXPLORE_NORTHREND = 45, 
-    ACHIEVEMENT_TWENTYFIVE_TABARDS = 1021, 
-    ACHIEVEMENT_THE_LOREMASTER_A = 1681, 
-    ACHIEVEMENT_THE_LOREMASTER_H = 1682, 
- 
-    ITEM_TABARD_OF_THE_HAND = 24344, 
-    ITEM_TABARD_OF_THE_BLOOD_KNIGHT = 25549, 
-    ITEM_TABARD_OF_THE_PROTECTOR = 28788, 
-    ITEM_OFFERING_OF_THE_SHATAR = 31408, 
-    ITEM_GREEN_TROPHY_TABARD_OF_THE_ILLIDARI = 31404, 
-    ITEM_PURPLE_TROPHY_TABARD_OF_THE_ILLIDARI = 31405, 
-    ITEM_TABARD_OF_THE_SUMMER_SKIES = 35279, 
-    ITEM_TABARD_OF_THE_SUMMER_FLAMES = 35280, 
-    ITEM_TABARD_OF_THE_ACHIEVER = 40643, 
-    ITEM_LOREMASTERS_COLORS = 43300, 
-    ITEM_TABARD_OF_THE_EXPLORER = 43348, 
- 
-    SPELL_TABARD_OF_THE_BLOOD_KNIGHT = 54974, 
-    SPELL_TABARD_OF_THE_HAND = 54976, 
-    SPELL_GREEN_TROPHY_TABARD_OF_THE_ILLIDARI = 54977, 
-    SPELL_PURPLE_TROPHY_TABARD_OF_THE_ILLIDARI = 54982, 
-    SPELL_TABARD_OF_THE_ACHIEVER = 55006, 
-    SPELL_TABARD_OF_THE_PROTECTOR = 55008, 
-    SPELL_LOREMASTERS_COLORS = 58194, 
-    SPELL_TABARD_OF_THE_EXPLORER = 58224, 
-    SPELL_TABARD_OF_SUMMER_SKIES = 62768, 
-    SPELL_TABARD_OF_SUMMER_FLAMES = 62769 
-}; 
+/*######
+## npc_tabard_vendor
+######*/
 
-#define GOSSIP_LOST_TABARD_OF_BLOOD_KNIGHT "I've lost my Tabard of Blood Knight." 
-#define GOSSIP_LOST_TABARD_OF_THE_HAND "I've lost my Tabard of the Hand." 
-#define GOSSIP_LOST_TABARD_OF_THE_PROTECTOR "I've lost my Tabard of the Protector." 
-#define GOSSIP_LOST_GREEN_TROPHY_TABARD_OF_THE_ILLIDARI "I've lost my Green Trophy Tabard of the Illidari." 
-#define GOSSIP_LOST_PURPLE_TROPHY_TABARD_OF_THE_ILLIDARI "I've lost my Purple Trophy Tabard of the Illidari." 
-#define GOSSIP_LOST_TABARD_OF_SUMMER_SKIES "I've lost my Tabard of Summer Skies." 
-#define GOSSIP_LOST_TABARD_OF_SUMMER_FLAMES "I've lost my Tabard of Summer Flames." 
-#define GOSSIP_LOST_LOREMASTERS_COLORS "I've lost my Loremaster's Colors." 
-#define GOSSIP_LOST_TABARD_OF_THE_EXPLORER "I've lost my Tabard of the Explorer." 
-#define GOSSIP_LOST_TABARD_OF_THE_ACHIEVER "I've lost my Tabard of the Achiever." 
- 
+enum
+{
+    QUEST_TRUE_MASTERS_OF_LIGHT = 9737,
+    QUEST_THE_UNWRITTEN_PROPHECY = 9762,
+    QUEST_INTO_THE_BREACH = 10259,
+    QUEST_BATTLE_OF_THE_CRIMSON_WATCH = 10781,
+    QUEST_SHARDS_OF_AHUNE = 11972,
+
+    ACHIEVEMENT_EXPLORE_NORTHREND = 45,
+    ACHIEVEMENT_TWENTYFIVE_TABARDS = 1021,
+    ACHIEVEMENT_THE_LOREMASTER_A = 1681,
+    ACHIEVEMENT_THE_LOREMASTER_H = 1682,
+
+    ITEM_TABARD_OF_THE_HAND = 24344,
+    ITEM_TABARD_OF_THE_BLOOD_KNIGHT = 25549,
+    ITEM_TABARD_OF_THE_PROTECTOR = 28788,
+    ITEM_OFFERING_OF_THE_SHATAR = 31408,
+    ITEM_GREEN_TROPHY_TABARD_OF_THE_ILLIDARI = 31404,
+    ITEM_PURPLE_TROPHY_TABARD_OF_THE_ILLIDARI = 31405,
+    ITEM_TABARD_OF_THE_SUMMER_SKIES = 35279,
+    ITEM_TABARD_OF_THE_SUMMER_FLAMES = 35280,
+    ITEM_TABARD_OF_THE_ACHIEVER = 40643,
+    ITEM_LOREMASTERS_COLORS = 43300,
+    ITEM_TABARD_OF_THE_EXPLORER = 43348,
+
+    SPELL_TABARD_OF_THE_BLOOD_KNIGHT = 54974,
+    SPELL_TABARD_OF_THE_HAND = 54976,
+    SPELL_GREEN_TROPHY_TABARD_OF_THE_ILLIDARI = 54977,
+    SPELL_PURPLE_TROPHY_TABARD_OF_THE_ILLIDARI = 54982,
+    SPELL_TABARD_OF_THE_ACHIEVER = 55006,
+    SPELL_TABARD_OF_THE_PROTECTOR = 55008,
+    SPELL_LOREMASTERS_COLORS = 58194,
+    SPELL_TABARD_OF_THE_EXPLORER = 58224,
+    SPELL_TABARD_OF_SUMMER_SKIES = 62768,
+    SPELL_TABARD_OF_SUMMER_FLAMES = 62769
+};
+
+#define GOSSIP_LOST_TABARD_OF_BLOOD_KNIGHT "I've lost my Tabard of Blood Knight."
+#define GOSSIP_LOST_TABARD_OF_THE_HAND "I've lost my Tabard of the Hand."
+#define GOSSIP_LOST_TABARD_OF_THE_PROTECTOR "I've lost my Tabard of the Protector."
+#define GOSSIP_LOST_GREEN_TROPHY_TABARD_OF_THE_ILLIDARI "I've lost my Green Trophy Tabard of the Illidari."
+#define GOSSIP_LOST_PURPLE_TROPHY_TABARD_OF_THE_ILLIDARI "I've lost my Purple Trophy Tabard of the Illidari."
+#define GOSSIP_LOST_TABARD_OF_SUMMER_SKIES "I've lost my Tabard of Summer Skies."
+#define GOSSIP_LOST_TABARD_OF_SUMMER_FLAMES "I've lost my Tabard of Summer Flames."
+#define GOSSIP_LOST_LOREMASTERS_COLORS "I've lost my Loremaster's Colors."
+#define GOSSIP_LOST_TABARD_OF_THE_EXPLORER "I've lost my Tabard of the Explorer."
+#define GOSSIP_LOST_TABARD_OF_THE_ACHIEVER "I've lost my Tabard of the Achiever."
+
 class npc_tabard_vendor : public CreatureScript
 {
 public:
     npc_tabard_vendor() : CreatureScript("npc_tabard_vendor") { }
 
-    bool OnGossipHello(Player* pPlayer, Creature* pCreature) 
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        bool m_bLostBloodKnight = false; 
-        bool m_bLostHand = false; 
-        bool m_bLostProtector = false; 
-        bool m_bLostIllidari = false; 
-        bool m_bLostSummer = false; 
-     
-        //Tabard of the Blood Knight 
-        if (pPlayer->GetQuestRewardStatus(QUEST_TRUE_MASTERS_OF_LIGHT) && !pPlayer->HasItemCount(ITEM_TABARD_OF_THE_BLOOD_KNIGHT, 1, true)) 
-            m_bLostBloodKnight = true; 
-     
-        //Tabard of the Hand 
-        if (pPlayer->GetQuestRewardStatus(QUEST_THE_UNWRITTEN_PROPHECY) && !pPlayer->HasItemCount(ITEM_TABARD_OF_THE_HAND, 1, true)) 
-            m_bLostHand = true; 
-     
-        //Tabard of the Protector 
-        if (pPlayer->GetQuestRewardStatus(QUEST_INTO_THE_BREACH) && !pPlayer->HasItemCount(ITEM_TABARD_OF_THE_PROTECTOR, 1, true)) 
-            m_bLostProtector = true; 
-     
-        //Green Trophy Tabard of the Illidari 
-        //Purple Trophy Tabard of the Illidari 
-        if (pPlayer->GetQuestRewardStatus(QUEST_BATTLE_OF_THE_CRIMSON_WATCH) && 
-            (!pPlayer->HasItemCount(ITEM_GREEN_TROPHY_TABARD_OF_THE_ILLIDARI, 1, true) && 
-            !pPlayer->HasItemCount(ITEM_PURPLE_TROPHY_TABARD_OF_THE_ILLIDARI, 1, true) && 
-            !pPlayer->HasItemCount(ITEM_OFFERING_OF_THE_SHATAR, 1, true))) 
-            m_bLostIllidari = true; 
-     
-        //Tabard of Summer Skies 
-        //Tabard of Summer Flames 
-        if (pPlayer->GetQuestRewardStatus(QUEST_SHARDS_OF_AHUNE) && 
-            !pPlayer->HasItemCount(ITEM_TABARD_OF_THE_SUMMER_SKIES, 1, true) && 
-            !pPlayer->HasItemCount(ITEM_TABARD_OF_THE_SUMMER_FLAMES, 1, true)) 
-            m_bLostSummer = true; 
-     
-        if (m_bLostBloodKnight || m_bLostHand || m_bLostProtector || m_bLostIllidari || m_bLostSummer) 
-        { 
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE); 
-     
-            if (m_bLostBloodKnight) 
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOST_TABARD_OF_BLOOD_KNIGHT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF +1); 
-     
-            if (m_bLostHand) 
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOST_TABARD_OF_THE_HAND, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF +2); 
-     
-            if (m_bLostProtector) 
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOST_TABARD_OF_THE_PROTECTOR, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3); 
-     
-            if (m_bLostIllidari) 
-            { 
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOST_GREEN_TROPHY_TABARD_OF_THE_ILLIDARI, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+4); 
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOST_PURPLE_TROPHY_TABARD_OF_THE_ILLIDARI, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+5); 
-            } 
-     
-            if (m_bLostSummer) 
-            { 
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOST_TABARD_OF_SUMMER_SKIES, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+6); 
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOST_TABARD_OF_SUMMER_FLAMES, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+7); 
-            } 
-     
-            pPlayer->SEND_GOSSIP_MENU(13583, pCreature->GetGUID()); 
-        } 
-        else 
-            pPlayer->SEND_VENDORLIST(pCreature->GetGUID()); 
-     
-        return true; 
-    } 
-     
-    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction) 
-    { 
-        switch(uiAction) 
-        { 
-            case GOSSIP_ACTION_TRADE: 
-                pPlayer->SEND_VENDORLIST(pCreature->GetGUID()); 
-                break; 
-            case GOSSIP_ACTION_INFO_DEF+1: 
-                pPlayer->CLOSE_GOSSIP_MENU(); 
-                pPlayer->CastSpell(pPlayer, SPELL_TABARD_OF_THE_BLOOD_KNIGHT, false); 
-                break; 
-            case GOSSIP_ACTION_INFO_DEF+2: 
-                pPlayer->CLOSE_GOSSIP_MENU(); 
-                pPlayer->CastSpell(pPlayer, SPELL_TABARD_OF_THE_HAND, false); 
-                break; 
-            case GOSSIP_ACTION_INFO_DEF+3: 
-                pPlayer->CLOSE_GOSSIP_MENU(); 
-                pPlayer->CastSpell(pPlayer, SPELL_TABARD_OF_THE_PROTECTOR, false); 
-                break; 
-            case GOSSIP_ACTION_INFO_DEF+4: 
-                pPlayer->CLOSE_GOSSIP_MENU(); 
-                pPlayer->CastSpell(pPlayer, SPELL_GREEN_TROPHY_TABARD_OF_THE_ILLIDARI, false); 
-                break; 
-            case GOSSIP_ACTION_INFO_DEF+5: 
-                pPlayer->CLOSE_GOSSIP_MENU(); 
-                pPlayer->CastSpell(pPlayer, SPELL_PURPLE_TROPHY_TABARD_OF_THE_ILLIDARI, false); 
-                break; 
-            case GOSSIP_ACTION_INFO_DEF+6: 
-                pPlayer->CLOSE_GOSSIP_MENU(); 
-                pPlayer->CastSpell(pPlayer, SPELL_TABARD_OF_SUMMER_SKIES, false); 
-                break; 
-            case GOSSIP_ACTION_INFO_DEF+7: 
-                pPlayer->CLOSE_GOSSIP_MENU(); 
-                pPlayer->CastSpell(pPlayer, SPELL_TABARD_OF_SUMMER_FLAMES, false); 
-                break; 
-        } 
-        return true; 
+        bool m_bLostBloodKnight = false;
+        bool m_bLostHand = false;
+        bool m_bLostProtector = false;
+        bool m_bLostIllidari = false;
+        bool m_bLostSummer = false;
+
+        //Tabard of the Blood Knight
+        if (pPlayer->GetQuestRewardStatus(QUEST_TRUE_MASTERS_OF_LIGHT) && !pPlayer->HasItemCount(ITEM_TABARD_OF_THE_BLOOD_KNIGHT, 1, true))
+            m_bLostBloodKnight = true;
+
+        //Tabard of the Hand
+        if (pPlayer->GetQuestRewardStatus(QUEST_THE_UNWRITTEN_PROPHECY) && !pPlayer->HasItemCount(ITEM_TABARD_OF_THE_HAND, 1, true))
+            m_bLostHand = true;
+
+        //Tabard of the Protector
+        if (pPlayer->GetQuestRewardStatus(QUEST_INTO_THE_BREACH) && !pPlayer->HasItemCount(ITEM_TABARD_OF_THE_PROTECTOR, 1, true))
+            m_bLostProtector = true;
+
+        //Green Trophy Tabard of the Illidari
+        //Purple Trophy Tabard of the Illidari
+        if (pPlayer->GetQuestRewardStatus(QUEST_BATTLE_OF_THE_CRIMSON_WATCH) &&
+            (!pPlayer->HasItemCount(ITEM_GREEN_TROPHY_TABARD_OF_THE_ILLIDARI, 1, true) &&
+            !pPlayer->HasItemCount(ITEM_PURPLE_TROPHY_TABARD_OF_THE_ILLIDARI, 1, true) &&
+            !pPlayer->HasItemCount(ITEM_OFFERING_OF_THE_SHATAR, 1, true)))
+            m_bLostIllidari = true;
+
+        //Tabard of Summer Skies
+        //Tabard of Summer Flames
+        if (pPlayer->GetQuestRewardStatus(QUEST_SHARDS_OF_AHUNE) &&
+            !pPlayer->HasItemCount(ITEM_TABARD_OF_THE_SUMMER_SKIES, 1, true) &&
+            !pPlayer->HasItemCount(ITEM_TABARD_OF_THE_SUMMER_FLAMES, 1, true))
+            m_bLostSummer = true;
+
+        if (m_bLostBloodKnight || m_bLostHand || m_bLostProtector || m_bLostIllidari || m_bLostSummer)
+        {
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
+
+            if (m_bLostBloodKnight)
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOST_TABARD_OF_BLOOD_KNIGHT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF +1);
+
+            if (m_bLostHand)
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOST_TABARD_OF_THE_HAND, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF +2);
+
+            if (m_bLostProtector)
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOST_TABARD_OF_THE_PROTECTOR, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+
+            if (m_bLostIllidari)
+            {
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOST_GREEN_TROPHY_TABARD_OF_THE_ILLIDARI, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+4);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOST_PURPLE_TROPHY_TABARD_OF_THE_ILLIDARI, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+5);
+            }
+
+            if (m_bLostSummer)
+            {
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOST_TABARD_OF_SUMMER_SKIES, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+6);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_LOST_TABARD_OF_SUMMER_FLAMES, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+7);
+            }
+
+            pPlayer->SEND_GOSSIP_MENU(13583, pCreature->GetGUID());
+        }
+        else
+            pPlayer->SEND_VENDORLIST(pCreature->GetGUID());
+
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+    {
+        pPlayer->PlayerTalkClass->ClearMenus();
+        switch(uiAction)
+        {
+            case GOSSIP_ACTION_TRADE:
+                pPlayer->SEND_VENDORLIST(pCreature->GetGUID());
+                break;
+            case GOSSIP_ACTION_INFO_DEF+1:
+                pPlayer->CLOSE_GOSSIP_MENU();
+                pPlayer->CastSpell(pPlayer, SPELL_TABARD_OF_THE_BLOOD_KNIGHT, false);
+                break;
+            case GOSSIP_ACTION_INFO_DEF+2:
+                pPlayer->CLOSE_GOSSIP_MENU();
+                pPlayer->CastSpell(pPlayer, SPELL_TABARD_OF_THE_HAND, false);
+                break;
+            case GOSSIP_ACTION_INFO_DEF+3:
+                pPlayer->CLOSE_GOSSIP_MENU();
+                pPlayer->CastSpell(pPlayer, SPELL_TABARD_OF_THE_PROTECTOR, false);
+                break;
+            case GOSSIP_ACTION_INFO_DEF+4:
+                pPlayer->CLOSE_GOSSIP_MENU();
+                pPlayer->CastSpell(pPlayer, SPELL_GREEN_TROPHY_TABARD_OF_THE_ILLIDARI, false);
+                break;
+            case GOSSIP_ACTION_INFO_DEF+5:
+                pPlayer->CLOSE_GOSSIP_MENU();
+                pPlayer->CastSpell(pPlayer, SPELL_PURPLE_TROPHY_TABARD_OF_THE_ILLIDARI, false);
+                break;
+            case GOSSIP_ACTION_INFO_DEF+6:
+                pPlayer->CLOSE_GOSSIP_MENU();
+                pPlayer->CastSpell(pPlayer, SPELL_TABARD_OF_SUMMER_SKIES, false);
+                break;
+            case GOSSIP_ACTION_INFO_DEF+7:
+                pPlayer->CLOSE_GOSSIP_MENU();
+                pPlayer->CastSpell(pPlayer, SPELL_TABARD_OF_SUMMER_FLAMES, false);
+                break;
+        }
+        return true;
     }
 };
 
-/*###### 
-## npc_experience 
-######*/ 
+/*######
+## npc_experience
+######*/
 
 #define EXP_COST                100000//10 00 00 copper (10golds)
 #define GOSSIP_TEXT_EXP         14736
@@ -2562,6 +2572,7 @@ public:
 
     bool OnGossipSelect(Player* pPlayer, Creature* /*pCreature*/, uint32 /*uiSender*/, uint32 uiAction)
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
         bool noXPGain = pPlayer->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN);
         bool doSwitch = false;
 
@@ -2582,7 +2593,7 @@ public:
         }
         if (doSwitch)
         {
-            if (pPlayer->GetMoney() < EXP_COST)
+            if (!pPlayer->HasEnoughMoney(EXP_COST))
                 pPlayer->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0, 0);
             else if (noXPGain)
             {
@@ -2628,7 +2639,7 @@ void AddSC_npcs_special()
     new npc_wormhole;
     new npc_pet_trainer;
     new npc_locksmith;
-    new npc_tabard_vendor; 
+    new npc_tabard_vendor;
     new npc_experience;
 }
 

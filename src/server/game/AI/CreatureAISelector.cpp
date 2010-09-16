@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "gamePCH.h"
 #include "Creature.h"
 #include "CreatureAISelector.h"
 #include "PassiveAI.h"
@@ -97,7 +98,7 @@ namespace FactorySelector
         // select NullCreatureAI if not another cases
         ainame = (ai_factory == NULL) ? "NullCreatureAI" : ai_factory->key();
 
-        DEBUG_LOG("Creature %u used AI is %s.", creature->GetGUIDLow(), ainame.c_str());
+        sLog.outStaticDebug("Creature %u used AI is %s.", creature->GetGUIDLow(), ainame.c_str());
         return (ai_factory == NULL ? new NullCreatureAI(creature) : ai_factory->Create(creature));
     }
 
@@ -110,9 +111,9 @@ namespace FactorySelector
         /* if (mv_factory == NULL)
         {
             int best_val = -1;
-            std::vector<std::string> l;
+            StringVector l;
             mv_registry.GetRegisteredItems(l);
-            for (std::vector<std::string>::iterator iter = l.begin(); iter != l.end(); ++iter)
+            for (StringVector::iterator iter = l.begin(); iter != l.end(); ++iter)
             {
             const MovementGeneratorCreator *factory = mv_registry.GetRegistryItem((*iter).c_str());
             const SelectableMovement *p = dynamic_cast<const SelectableMovement *>(factory);

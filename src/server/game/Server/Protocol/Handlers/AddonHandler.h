@@ -23,7 +23,7 @@
 
 #include "Common.h"
 #include "Config.h"
-#include "ace/Singleton.h"
+#include <ace/Singleton.h>
 #include "WorldPacket.h"
 
 class AddonHandler
@@ -31,7 +31,7 @@ class AddonHandler
     /* Construction */
     friend class ACE_Singleton<AddonHandler, ACE_Null_Mutex>;
     AddonHandler();
-    
+
     public:
         ~AddonHandler();
                                                             //build addon packet
