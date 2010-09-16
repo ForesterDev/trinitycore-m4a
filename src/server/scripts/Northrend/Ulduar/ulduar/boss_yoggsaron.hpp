@@ -11,6 +11,8 @@ class instance_ulduar;
 class Yoggsaron_AI
     : public Instance_boss_AI<instance_ulduar, BossAI>
 {
+    typedef Instance_boss_AI<instance_ulduar, BossAI> Mybase;
+
 public:
     friend struct npc_ys_thorimAI;
     friend struct npc_ys_mimironAI;

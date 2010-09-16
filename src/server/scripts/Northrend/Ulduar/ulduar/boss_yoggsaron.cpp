@@ -178,13 +178,15 @@ namespace
     struct Sara_AI
         : Instance_object_AI<instance_ulduar, ScriptedAI>
     {
+        typedef Instance_object_AI<instance_ulduar, ScriptedAI> Mybase;
+
         explicit Sara_AI(Creature *c)
-            : Instance_object_AI(c)
+            : Mybase(c)
         {
         }
 
         Sara_AI(Sara_AI &&right)
-            : Instance_object_AI(std::move(right))
+            : Mybase(std::move(right))
         {
         }
 
@@ -201,8 +203,10 @@ namespace
     struct Guardian_of_yoggsaron_AI
         : Instance_object_AI<instance_ulduar, ScriptedAI>
     {
+        typedef Instance_object_AI<instance_ulduar, ScriptedAI> Mybase;
+
         explicit Guardian_of_yoggsaron_AI(Creature *c)
-            : Instance_object_AI(c)
+            : Mybase(c)
         {
         }
 
@@ -349,8 +353,10 @@ CreatureAI* GetAI_npc_sanity_well(Creature* pCreature)
 struct npc_ys_thorimAI
     : public Instance_object_AI<instance_ulduar, ScriptedAI>
 {
+    typedef Instance_object_AI<instance_ulduar, ScriptedAI> Mybase;
+
     npc_ys_thorimAI(Creature *pCreature)
-        : Instance_object_AI(pCreature),
+        : Mybase(pCreature),
             phase(Yoggsaron_AI::PHASE_NULL)
     {
         pInstance = pCreature->GetInstanceScript();
@@ -389,8 +395,10 @@ CreatureAI* GetAI_npc_ys_thorim(Creature* pCreature)
 struct npc_ys_mimironAI
     : public Instance_object_AI<instance_ulduar, ScriptedAI>
 {
+    typedef Instance_object_AI<instance_ulduar, ScriptedAI> Mybase;
+
     npc_ys_mimironAI(Creature *pCreature)
-        : Instance_object_AI(pCreature),
+        : Mybase(pCreature),
             phase(Yoggsaron_AI::PHASE_NULL)
     {
         pInstance = pCreature->GetInstanceScript();
@@ -613,7 +621,7 @@ void AddSC_boss_yogg_saron()
 }
 
 Yoggsaron_AI::Yoggsaron_AI(Creature *c)
-    : Instance_boss_AI(c, BOSS_YOGGSARON),
+    : Mybase(c, static_cast<uint32>(BOSS_YOGGSARON)),
         voice(new Creature)
 {
     me->SetReactState(REACT_PASSIVE);

@@ -14,7 +14,8 @@ template<class Instance,
 public:
     typedef Instance Instance_type;
 
-    template<class Cty, class IDty>
+    template<class Cty,
+            class IDty>
         Instance_boss_AI(Cty &&c, IDty &&id)
         : Base_AI(std::forward<Cty>(c), std::forward<IDty>(id))
     {
