@@ -18,6 +18,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#ifndef NDEBUG
+#include <cassert>
+#endif  // NDEBUG
+
 #ifndef TRINITYCORE_ERRORS_H
 #define TRINITYCORE_ERRORS_H
 
@@ -33,6 +37,17 @@
 
 #define WPFatal( assertion, errmsg ) if( ! (assertion) ) { sLog.outError( "\n%s:%i in %s FATAL ERROR:\n  %s\n", __FILE__, __LINE__, __FUNCTION__, (char *)errmsg ); assert( #assertion &&0 ); abort(); }
 
-#define ASSERT WPAssert
+#ifdef _MSC_VER
+#define TRINITY_ASSUME __assume
+#else   // _MSC_VER
+#define TRINITY_ASSUME(expression) void()
+#endif  // _MSC_VER
+
 #endif
 
+#undef ASSERT
+#ifdef NDEBUG
+#define ASSERT(e) (TRINITY_ASSUME(e), (e) ? void() : void())
+#else   // NDEBUG
+#define ASSERT assert
+#endif  // NDEBUG
