@@ -279,46 +279,48 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
     uint32 scoreCount = 0;
     *data << uint32(scoreCount);                            // placeholder
 
-    Battleground::BattlegroundScoreMap::const_iterator itr2 = bg->GetPlayerScoresBegin();
-    for (Battleground::BattlegroundScoreMap::const_iterator itr = itr2; itr != bg->GetPlayerScoresEnd();)
+    for (Battleground::BattlegroundScoreMap::const_iterator
+            itr = bg->GetPlayerScoresBegin(), last = bg->GetPlayerScoresEnd();
+            itr != last; ++itr)
     {
-        itr2 = itr++;
-        if (!bg->IsPlayerInBattleground(itr2->first))
+        auto &guid = itr->first;
+        auto &s = *itr->second;
+        if (!bg->IsPlayerInBattleground(guid))
         {
-            sLog.outError("Player %llu has scoreboard entry for battleground %u but is not in battleground!", itr->first, bg->GetTypeID(true));
+            sLog.outError("Player %llu has scoreboard entry for battleground %u but is not "
+                    "in battleground!", guid, bg->GetTypeID(true));
             continue;
         }
-
-        *data << uint64(itr2->first);
-        *data << uint32(itr2->second->KillingBlows);
+        // should never happen
+        if (bg->GetMaxPlayers() < ++scoreCount)
+        {
+            sLog.outError("Battleground %u scoreboard has more entries (%u) than allowed players in this bg (%u)", bg->GetTypeID(true), bg->GetPlayerScoresSize(), bg->GetMaxPlayers());
+            break;
+        }
+        *data << uint64(guid);
+        *data << uint32(s.KillingBlows);
         if (type == 0)
         {
-            *data << uint32(itr2->second->HonorableKills);
-            *data << uint32(itr2->second->Deaths);
-            *data << uint32(itr2->second->BonusHonor);
+            *data << uint32(s.HonorableKills);
+            *data << uint32(s.Deaths);
+            *data << uint32(s.BonusHonor);
         }
         else
         {
-            Player *plr = sObjectMgr.GetPlayer(itr2->first);
-            uint32 team = bg->GetPlayerTeam(itr2->first);
+            Player *plr = sObjectMgr.GetPlayer(guid);
+            uint32 team = bg->GetPlayerTeam(guid);
             if (!team && plr)
                 team = plr->GetBGTeam();
             *data << uint8(team == ALLIANCE ? 1 : 0); // green or yellow
 
         }
-        *data << (int32)itr->second->DamageDone;             // damage done
-        *data << (int32)itr->second->HealingDone;            // healing done
-        auto stat_data = itr->second->stat_data();
+        *data << (int32)s.DamageDone;   // damage done
+        *data << (int32)s.HealingDone;  // healing done
+        auto stat_data = s.stat_data();
         auto count = static_cast<uint32>(stat_data.first);
         *data << count;
         for (auto it = stat_data.second.begin(); count; --count)
             *data << std::move(*it++);
-        // should never happen
-        if (++scoreCount >= bg->GetMaxPlayers() && itr != bg->GetPlayerScoresEnd())
-        {
-            sLog.outError("Battleground %u scoreboard has more entries (%u) than allowed players in this bg (%u)", bg->GetTypeID(true), bg->GetPlayerScoresSize(), bg->GetMaxPlayers());
-            break;
-        }
     }
 
     data->put(wpos, scoreCount);
