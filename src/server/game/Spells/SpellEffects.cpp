@@ -6939,13 +6939,18 @@ void Spell::EffectActivateSpec(SpellEffIndex /*effIndex*/)
     unitTarget->ToPlayer()->ActivateSpec(damage-1);  // damage is 1 or 2, spec is 0 or 1
 }
 
-void Spell::EffectPlayerNotification(SpellEffIndex /*effIndex*/)
+void Spell::EffectPlayerNotification(SpellEffIndex effIndex)
 {
     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
     switch(m_spellInfo->Id)
     {
+    case 48366 /* Warning */:
+        if (effIndex == 2)
+            unitTarget->MonsterWhisper("Return to Wintergarde or the Carrion Fields or "
+                    "your gryphon will drop you!", unitTarget->GetGUID(), true);
+        break;
         case 58730: // Restricted Flight Area
         case 58600: // Restricted Flight Area
             unitTarget->ToPlayer()->GetSession()->SendNotification(LANG_ZONE_NOFLYZONE);
