@@ -186,7 +186,7 @@ void PetAI::UpdateAI(const uint32 diff)
 
                     if (spell->CanAutoCast(Target))
                     {
-                        targetSpellStore.push_back(std::make_pair<Unit*, Spell*>(Target, spell));
+                        targetSpellStore.push_back(std::make_pair(Target, spell));
                         spellUsed = true;
                         break;
                     }
