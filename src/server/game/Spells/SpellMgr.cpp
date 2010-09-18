@@ -3112,6 +3112,28 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
     // Extra conditions -- leaving the possibility add extra conditions...
     switch(spellId)
     {
+    case 48366 /* Warning */:
+        switch (player->GetAreaId())
+        {
+        case 4177 /* Wintergarde Keep */:
+        case 4178 /* Wintergarde Mine */:
+        case 4188 /* The Carrion Fields */:
+            return false;
+        default:
+            break;
+        }
+        break;
+    case 48388 /* Call Wintergarde Gryphon */:
+        switch (player->GetAreaId())
+        {
+        case 4177 /* Wintergarde Keep */:
+        case 4178 /* Wintergarde Mine */:
+        case 4188 /* The Carrion Fields */:
+            break;
+        default:
+            return false;
+        }
+        break;
         case 58600: // No fly Zone - Dalaran
             if (!player)
                 return false;

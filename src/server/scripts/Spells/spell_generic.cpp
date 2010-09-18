@@ -87,6 +87,47 @@ public:
     }
 };
 
+namespace
+{
+    struct Purge_vehicle_control
+        : SpellScriptLoader
+    {
+        struct Purge_vehicle_control_SS
+            : SpellScript
+        {
+            typedef Purge_vehicle_control_SS Myt;
+
+            void Register()
+            {
+                OnEffect += SpellEffectFn(Myt::effect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+
+            void effect(SpellEffIndex)
+            {
+                if (auto v = GetCaster()->GetVehicleBase())
+                {
+                    auto &auras = v->GetAppliedAuras();
+                    for (auto it = auras.begin(); it != auras.end(); )
+                        if (it->second->IsPositive())
+                            v->RemoveAura(it);
+                        else
+                            ++it;
+                }
+            }
+        };
+
+        Purge_vehicle_control()
+            : SpellScriptLoader("spell_gen_purge_vehicle_control")
+        {
+        }
+
+        SpellScript *GetSpellScript() const
+        {
+            return new Purge_vehicle_control_SS;
+        }
+    };
+}
+
 class spell_gen_remove_flight_auras : public SpellScriptLoader
 {
 public:
@@ -196,6 +237,7 @@ public:
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_pet_summoned();
+    new Purge_vehicle_control;
     new spell_gen_remove_flight_auras();
     new spell_creature_permanent_feign_death();
     new spell_pvp_trinket_wotf_shared_cd();

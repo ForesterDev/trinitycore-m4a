@@ -16759,7 +16759,7 @@ void Unit::ExitVehicle()
     const AuraEffectList &modAuras = vehicleBase->GetAuraEffectsByType(SPELL_AURA_CONTROL_VEHICLE);
     for (AuraEffectList::const_iterator itr = modAuras.begin(); itr != modAuras.end(); ++itr)
     {
-        if ((*itr)->GetBase()->GetOwner() == this)
+        if ((*itr)->GetBase()->GetCasterGUID() == GetGUID())
         {
             vehicleBase->RemoveAura((*itr)->GetBase());
             break; // there should be no case that a vehicle has two auras for one owner
