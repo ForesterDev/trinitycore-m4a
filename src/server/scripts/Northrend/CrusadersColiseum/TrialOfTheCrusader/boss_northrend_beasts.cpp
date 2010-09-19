@@ -172,7 +172,8 @@ public:
             switch(pSummoned->GetEntry())
             {
                 case NPC_SNOBOLD_VASSAL:
-                    pSummoned->GetMotionMaster()->MoveJump(pTarget->GetPositionX(),pTarget->GetPositionY(),pTarget->GetPositionZ(),10.0f,20.0f);
+                    if (pTarget)
+                        pSummoned->GetMotionMaster()->MoveJump(pTarget->GetPositionX(),pTarget->GetPositionY(),pTarget->GetPositionZ(),10.0f,20.0f);
                     DoCast(me, SPELL_RISING_ANGER);
                     --m_uiSummonCount;
                     break;
