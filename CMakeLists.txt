@@ -53,9 +53,12 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_ADDITIONAL_VERSIONS
   "1.44.0"
   "1.44"
+  "1.43.0"
+  "1.43"
+  "1.42.0"
+  "1.42"
 )
-set(Boost_DEBUG TRUE)
-find_package(Boost 1.44.0 REQUIRED
+find_package(Boost 1.42.0 REQUIRED
   date_time
   signals
   thread
