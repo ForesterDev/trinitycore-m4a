@@ -56,7 +56,9 @@ set(Boost_ADDITIONAL_VERSIONS
 )
 set(Boost_DEBUG TRUE)
 find_package(Boost 1.44.0 REQUIRED
+  date_time
   signals
+  thread
 )
 find_package(PCHSupport)
 find_package(ACE REQUIRED)

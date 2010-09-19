@@ -21,6 +21,7 @@
 #ifndef _OBJECTMGR_H
 #define _OBJECTMGR_H
 
+#include <boost/thread/mutex.hpp>
 #include "Log.h"
 #include "Object.h"
 #include "Bag.h"
@@ -991,6 +992,7 @@ class ObjectMgr
         uint32 m_hiVehicleGuid;
         uint32 m_hiItemGuid;
         uint32 m_hiGoGuid;
+        boost::mutex hi_do_guid_mutex;
         uint32 m_hiDoGuid;
         uint32 m_hiCorpseGuid;
         uint32 m_hiGroupGuid;

@@ -26,6 +26,7 @@
 #include "Log.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
+#include <boost/thread/locks.hpp>
 #include "SpellMgr.h"
 #include "UpdateMask.h"
 #include "World.h"
@@ -6258,12 +6259,15 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
             }
             return m_hiCorpseGuid++;
         case HIGHGUID_DYNAMICOBJECT:
-            if (m_hiDoGuid >= 0xFFFFFFFE)
             {
-                sLog.outError("DynamicObject guid overflow!! Can't continue, shutting down server. ");
-                World::StopNow(ERROR_EXIT_CODE);
+                boost::lock_guard<boost::mutex> guard(hi_do_guid_mutex);
+                if (m_hiDoGuid >= 0xFFFFFFFE)
+                {
+                    sLog.outError("DynamicObject guid overflow!! Can't continue, shutting down server. ");
+                    World::StopNow(ERROR_EXIT_CODE);
+                }
+                return m_hiDoGuid++;
             }
-            return m_hiDoGuid++;
         case HIGHGUID_GROUP:
             if (m_hiGroupGuid >= 0xFFFFFFFE)
             {
