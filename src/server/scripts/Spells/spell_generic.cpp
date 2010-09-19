@@ -234,6 +234,137 @@ public:
     }
 };
 
+namespace
+{
+    struct Wintergarde_gryphon_commander
+        : SpellScriptLoader
+    {
+        struct Wintergarde_gryphon_commander_AS
+            : AuraScript
+        {
+            typedef Wintergarde_gryphon_commander_AS Myt;
+
+            void Register()
+            {
+                const auto &i = EFFECT_1;
+                const auto &n = SPELL_AURA_DUMMY;
+                const auto &m = AURA_EFFECT_HANDLE_REAL;
+                OnEffectApply += AuraEffectApplyFn(Myt::applied, i, n, m);
+                OnEffectRemove += AuraEffectRemoveFn(Myt::removed, i, n, m);
+            }
+
+            bool Validate(const SpellEntry *)
+            {
+                if (auto e = sSpellStore.LookupEntry(48366 /* Warning */))
+                {
+                    warning_entry() = std::move(e);
+                    return true;
+                }
+                else
+                    return false;
+            }
+
+            bool Load()
+            {
+                if (dynamic_cast<Player *>(GetUnitOwner()))
+                {
+                    warning_applied = false;
+                    return true;
+                }
+                else
+                    return false;
+            }
+
+            static const SpellEntry *&warning_entry()
+            {
+                static const SpellEntry *e;
+                return e;
+            }
+
+            static bool in_area(Player &t)
+            {
+                if (t.GetZoneId() == 65 /* Dragonblight */)
+                    switch (t.GetAreaId())
+                    {
+                    case 4177 /* Wintergarde Keep */:
+                    case 4178 /* Wintergarde Mine */:
+                    case 4188 /* The Carrion Fields */:
+                        return true;
+                    }
+                return false;
+            }
+
+            void apply_warning(Player &t)
+            {
+                if (!warning_applied)
+                {
+                    t.CastSpell(&t, warning_entry(), true);
+                    warning_applied = true;
+                }
+            }
+
+            void unapply_warning(Player &t)
+            {
+                if (warning_applied)
+                {
+                    t.RemoveAura(warning_entry()->Id);
+                    warning_applied = false;
+                }
+            }
+
+            void applied
+                (const AuraEffect *, const AuraApplication *, AuraEffectHandleModes mode)
+            {
+                auto &t = target();
+                if (in_area(t))
+                    ;
+                else
+                    apply_warning(t);
+                connection = t.connect_area([this]()
+                        {
+                            auto &t = target();
+                            if (in_area(t))
+                                unapply_warning(t);
+                            else
+                                apply_warning(t);
+                        }
+                    );
+            }
+
+            void removed
+                (const AuraEffect *, const AuraApplication *, AuraEffectHandleModes mode)
+            {
+                auto &t = target();
+                t.disconnect_area(std::move(connection));
+                unapply_warning(t);
+            }
+
+            Player &target()
+            {
+                return *static_cast<Player *>(GetUnitOwner());
+            }
+
+            const Player &target() const
+            {
+                return *static_cast<const Player *>(GetUnitOwner());
+            }
+
+            bool warning_applied;
+            Player::Area_connection connection;
+        };
+
+        Wintergarde_gryphon_commander()
+            : SpellScriptLoader("spell_gen_wintergarde_gryphon_commander")
+        {
+        }
+
+        AuraScript *GetAuraScript() const
+        {
+            return new Wintergarde_gryphon_commander_AS;
+        }
+    };
+}
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_pet_summoned();
@@ -241,4 +372,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_remove_flight_auras();
     new spell_creature_permanent_feign_death();
     new spell_pvp_trinket_wotf_shared_cd();
+    new Wintergarde_gryphon_commander;
 }

@@ -21,6 +21,8 @@
 #ifndef _PLAYER_H
 #define _PLAYER_H
 
+#include <boost/signal.hpp>
+#include <boost/signals/connection.hpp>
 #include "Common.h"
 #include "ItemPrototype.h"
 #include "Unit.h"
@@ -987,6 +989,9 @@ class Player : public Unit, public GridObject<Player>
     friend void Item::AddToUpdateQueueOf(Player *player);
     friend void Item::RemoveFromUpdateQueueOf(Player *player);
     public:
+        typedef boost::signal<void ()> Area_signal;
+        typedef boost::signals::connection Area_connection;
+
         explicit Player (WorldSession *session);
         ~Player ();
 
@@ -2396,6 +2401,16 @@ class Player : public Unit, public GridObject<Player>
 
         float GetAverageItemLevel();
 
+        Area_connection connect_area(Area_signal::slot_function_type subscriber)
+        {
+            return area_sig.connect(std::move(subscriber));
+        }
+
+        void disconnect_area(Area_connection subscriber)
+        {
+            subscriber.disconnect();
+        }
+
     protected:
         uint32 m_AreaID;
         uint32 m_regenTimerCount;
@@ -2706,6 +2721,7 @@ class Player : public Unit, public GridObject<Player>
 
         LookingForGroup m_LookingForGroup;
         WMO_id wmo_id_;
+        Area_signal area_sig;
 };
 
 void AddItemsSetItem(Player*player,Item *item);
