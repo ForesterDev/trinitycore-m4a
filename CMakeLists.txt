@@ -48,6 +48,16 @@ endif()
 include(CheckPlatform)
 
 # basic packagesearching and setup (further support will be needed, this is a preliminary release!)
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_ADDITIONAL_VERSIONS
+  "1.44.0"
+  "1.44"
+)
+set(Boost_DEBUG TRUE)
+find_package(Boost 1.44.0 REQUIRED
+  signals
+)
 find_package(PCHSupport)
 find_package(ACE REQUIRED)
 find_package(OpenSSL REQUIRED)

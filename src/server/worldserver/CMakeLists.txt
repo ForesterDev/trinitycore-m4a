@@ -8,6 +8,8 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+include_directories(${Boost_INCLUDE_DIRS})
+
 file(GLOB_RECURSE sources_CommandLine CommandLine/*.cpp CommandLine/*.h)
 file(GLOB_RECURSE sources_RemoteAccess RemoteAccess/*.cpp RemoteAccess/*.h)
 file(GLOB_RECURSE sources_TCSoap TCSoap/*.cpp TCSoap/*.h)

@@ -8,6 +8,7 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+include_directories(${Boost_INCLUDE_DIRS})
 if( USE_COREPCH )
   include_directories(${CMAKE_CURRENT_BINARY_DIR})
 endif()
@@ -208,6 +209,8 @@ include_directories(
 add_library(game STATIC ${game_STAT_SRCS})
 
 add_dependencies(game genrev)
+
+target_link_libraries(game ${Boost_LIBRARIES})
 
 # Generate precompiled header
 if( USE_COREPCH )
