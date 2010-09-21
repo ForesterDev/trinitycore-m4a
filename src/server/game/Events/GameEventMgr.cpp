@@ -198,7 +198,7 @@ void GameEventMgr::StopEvent(uint16 event_id, bool overwrite)
 void GameEventMgr::LoadFromDB()
 {
     {
-        QueryResult_AutoPtr result = WorldDatabase.Query("SELECT MAX(entry) FROM game_event");
+        QueryResult result = WorldDatabase.Query("SELECT MAX(entry) FROM game_event");
         if (!result)
         {
             sLog.outString(">> Table game_event is empty.");
@@ -213,7 +213,7 @@ void GameEventMgr::LoadFromDB()
         mGameEvent.resize(max_event_id+1);
     }
 
-    QueryResult_AutoPtr result = WorldDatabase.Query("SELECT entry,UNIX_TIMESTAMP(start_time),UNIX_TIMESTAMP(end_time),occurence,length,holiday,description,world_event FROM game_event");
+    QueryResult result = WorldDatabase.Query("SELECT entry,UNIX_TIMESTAMP(start_time),UNIX_TIMESTAMP(end_time),occurence,length,holiday,description,world_event FROM game_event");
     if (!result)
     {
         mGameEvent.clear();
@@ -1074,7 +1074,7 @@ uint32 GameEventMgr::Initialize()                           // return the next e
 
 void GameEventMgr::StartArenaSeason()
 {
-    QueryResult_AutoPtr result = WorldDatabase.PQuery("SELECT event FROM season_linked_event WHERE season = '%i'",sWorld.getIntConfig(CONFIG_ARENA_SEASON_ID));
+    QueryResult result = WorldDatabase.PQuery("SELECT event FROM season_linked_event WHERE season = '%i'",sWorld.getIntConfig(CONFIG_ARENA_SEASON_ID));
 
     if (!result)
     {
@@ -1535,23 +1535,23 @@ void GameEventMgr::UpdateEventQuests(uint16 event_id, bool activate)
     QuestRelList::iterator itr;
     for (itr = mGameEventCreatureQuests[event_id].begin(); itr != mGameEventCreatureQuests[event_id].end(); ++itr)
     {
-        QuestRelations &CreatureQuestMap = sObjectMgr.mCreatureQuestRelations;
-        if (activate)                                       // Add the pair(id,quest) to the multimap
-            CreatureQuestMap.insert(QuestRelations::value_type(itr->first, itr->second));
+        QuestRelations* CreatureQuestMap = sObjectMgr.GetCreatureQuestRelationMap();
+        if (activate)                                           // Add the pair(id,quest) to the multimap
+            CreatureQuestMap->insert(QuestRelations::value_type(itr->first, itr->second));
         else
         {
             if (!hasCreatureQuestActiveEventExcept(itr->second,event_id))
             {
                 // Remove the pair(id,quest) from the multimap
-                QuestRelations::iterator qitr = CreatureQuestMap.find(itr->first);
-                if (qitr == CreatureQuestMap.end())
+                QuestRelations::iterator qitr = CreatureQuestMap->find(itr->first);
+                if (qitr == CreatureQuestMap->end())
                     continue;
-                QuestRelations::iterator lastElement = CreatureQuestMap.upper_bound(itr->first);
+                QuestRelations::iterator lastElement = CreatureQuestMap->upper_bound(itr->first);
                 for (; qitr != lastElement; ++qitr)
                 {
                     if (qitr->second == itr->second)
                     {
-                        CreatureQuestMap.erase(qitr);           // iterator is now no more valid
+                        CreatureQuestMap->erase(qitr);          // iterator is now no more valid
                         break;                                  // but we can exit loop since the element is found
                     }
                 }
@@ -1560,23 +1560,23 @@ void GameEventMgr::UpdateEventQuests(uint16 event_id, bool activate)
     }
     for (itr = mGameEventGameObjectQuests[event_id].begin(); itr != mGameEventGameObjectQuests[event_id].end(); ++itr)
     {
-        QuestRelations &GameObjectQuestMap = sObjectMgr.mGOQuestRelations;
-        if (activate)                                       // Add the pair(id,quest) to the multimap
-            GameObjectQuestMap.insert(QuestRelations::value_type(itr->first, itr->second));
+        QuestRelations* GameObjectQuestMap = sObjectMgr.GetGOQuestRelationMap();
+        if (activate)                                           // Add the pair(id,quest) to the multimap
+            GameObjectQuestMap->insert(QuestRelations::value_type(itr->first, itr->second));
         else
         {
             if (!hasGameObjectQuestActiveEventExcept(itr->second,event_id))
             {
                 // Remove the pair(id,quest) from the multimap
-                QuestRelations::iterator qitr = GameObjectQuestMap.find(itr->first);
-                if (qitr == GameObjectQuestMap.end())
+                QuestRelations::iterator qitr = GameObjectQuestMap->find(itr->first);
+                if (qitr == GameObjectQuestMap->end())
                     continue;
-                QuestRelations::iterator lastElement = GameObjectQuestMap.upper_bound(itr->first);
+                QuestRelations::iterator lastElement = GameObjectQuestMap->upper_bound(itr->first);
                 for (; qitr != lastElement; ++qitr)
                 {
                     if (qitr->second == itr->second)
                     {
-                        GameObjectQuestMap.erase(qitr);           // iterator is now no more valid
+                        GameObjectQuestMap->erase(qitr);        // iterator is now no more valid
                         break;                                  // but we can exit loop since the element is found
                     }
                 }

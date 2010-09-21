@@ -32,7 +32,7 @@
 
 void MapManager::LoadTransports()
 {
-    QueryResult_AutoPtr result = WorldDatabase.Query("SELECT guid, entry, name, period, ScriptName FROM transports");
+    QueryResult result = WorldDatabase.Query("SELECT guid, entry, name, period, ScriptName FROM transports");
 
     uint32 count = 0;
 
@@ -145,7 +145,7 @@ void MapManager::LoadTransportNPCs()
 {
     // Spawn NPCs linked to the transport
     //                                                         0    1          2                3             4             5             6             7
-    QueryResult_AutoPtr result = WorldDatabase.PQuery("SELECT guid, npc_entry, transport_entry, TransOffsetX, TransOffsetY, TransOffsetZ, TransOffsetO, emote FROM creature_transport");
+    QueryResult result = WorldDatabase.PQuery("SELECT guid, npc_entry, transport_entry, TransOffsetX, TransOffsetY, TransOffsetZ, TransOffsetO, emote FROM creature_transport");
     uint32 count = 0;
 
     if (!result)
@@ -706,7 +706,7 @@ uint32 Transport::AddNPCPassenger(uint32 tguid, uint32 entry, float x, float y, 
         tguid = currenttguid;
     }
     else
-        currenttguid = std::max(tguid,currenttguid);
+        currenttguid = std::max(tguid, currenttguid);
 
     pCreature->SetGUIDTransport(tguid);
     sScriptMgr.OnAddCreaturePassenger(this, pCreature);

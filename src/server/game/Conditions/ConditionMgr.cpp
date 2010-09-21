@@ -167,6 +167,9 @@ bool Condition::Meets(Player * player, Unit* targetOverride)
             refId = 0;//cant have references for now
             break;
         }
+        case CONDITION_SPELL:
+            condMeets = player->HasSpell(mConditionValue1);
+            break;
         default:
             condMeets = false;
             refId = 0;
@@ -324,7 +327,7 @@ void ConditionMgr::LoadConditions(bool isReload)
     }
 
     uint32 count = 0;
-    QueryResult_AutoPtr result = WorldDatabase.Query("SELECT SourceTypeOrReferenceId, SourceGroup, SourceEntry, ElseGroup, ConditionTypeOrReference, ConditionValue1, ConditionValue2, ConditionValue3, ErrorTextId, ScriptName FROM conditions");
+    QueryResult result = WorldDatabase.Query("SELECT SourceTypeOrReferenceId, SourceGroup, SourceEntry, ElseGroup, ConditionTypeOrReference, ConditionValue1, ConditionValue2, ConditionValue3, ErrorTextId, ScriptName FROM conditions");
 
     if (!result)
     {
@@ -1216,6 +1219,18 @@ bool ConditionMgr::isConditionTypeValid(Condition* cond)
 
             if (cond->mConditionValue3)
                 sLog.outErrorDb("ItemTarget condition has useless data in value3 (%u)!", cond->mConditionValue3);
+            break;
+        }
+        case CONDITION_SPELL:
+        {
+            if (!sSpellStore.LookupEntry(cond->mConditionValue1))
+            {
+                sLog.outErrorDb("Spell condition has non existing spell (Id: %d), skipped", cond->mConditionValue1);
+                return false;
+            }
+
+            if (cond->mConditionValue2)
+                sLog.outErrorDb("Spell condition has useless data in value2 (%u)!", cond->mConditionValue2);
             break;
         }
         case CONDITION_AREAID:

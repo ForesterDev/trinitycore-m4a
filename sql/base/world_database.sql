@@ -16944,7 +16944,7 @@ INSERT INTO `spell_bonus_data` (`entry`,`direct_bonus`,`dot_bonus`,`ap_bonus`,`a
 (53000, 0.229, -1, -1, -1, 'Priest - Penance Hurt (Rank 4)'),
 (17, 0.8068, -1, -1, -1, 'Priest - Power Word: Shield'),
 (596, 0.8068, -1, -1, -1, 'Priest - Prayer of Healing'),
-(33110, 0.8068, -1, -1, -1, 'Priest - Prayer of Mending Heal Proc'),
+(33110, 0.8068, 0, 0, 0, 'Priest - Prayer of Mending Heal Proc'),
 (33619, 0, 0, 0, 0, 'Priest - Reflective Shield'),
 (139, -1, 0.376, -1, -1, 'Priest - Renew'),
 (32379, 0.4296, -1, -1, -1, 'Priest - Shadow Word: Death'),
@@ -18850,7 +18850,7 @@ INSERT INTO `spell_proc_event` (`entry`,`SchoolMask`,`SpellFamilyName`,`SpellFam
 ( 49543, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   9,  20), -- Bloodworms (Rank 3)
 ( 49208, 0x00,  15, 0x00400000, 0x00010000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Reaping (Rank 1)
 ( 49219, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000004, 0x00000000,   0,   0,   0), -- Blood-Caked Blade (Rank 1)
-( 49222, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   3), -- Bone Shield
+( 49222, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x000222A8, 0x00000000,   0,   0,   3), -- Bone Shield
 ( 49280, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   3), -- Lightning Shield (Rank 10)
 ( 49281, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   3), -- Lightning Shield (Rank 11)
 ( 49283, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x000222A8, 0x00000000,   0,   0,   3), -- Earth Shield (Rank 4)
@@ -19112,7 +19112,6 @@ INSERT INTO `spell_proc_event` (`entry`,`SchoolMask`,`SpellFamilyName`,`SpellFam
 ( 63108, 0x00,   5, 0x00000002, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Siphon Life
 ( 63158, 0x00,   5, 0x00000001, 0x000000C0, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Decimation
 ( 63156, 0x00,   5, 0x00000001, 0x000000C0, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Decimation
-( 63280, 0x00,  11, 0x20000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Glyph ofTotem of Wrath
 ( 64343, 0x00,   3, 0x00000002, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Impact
 ( 64976, 0x00,   4, 0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Juggernaut
 ( 64914, 0x00,   8, 0x00010000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Item - Rogue T8 2P Bonus

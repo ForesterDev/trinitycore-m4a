@@ -216,7 +216,7 @@ struct GuildBankEventLogEntry
     uint8  EventType;
     uint32 PlayerGuid;
     uint32 ItemOrMoney;
-    uint8  ItemStackCount;
+    uint16  ItemStackCount;
     uint8  DestTabId;
     uint64 TimeStamp;
 
@@ -328,10 +328,10 @@ class Guild
         uint32 GetMemberSize() const { return members.size(); }
         uint32 GetAccountsNumber() const { return m_accountsNumber; }
 
-        bool LoadGuildFromDB(QueryResult_AutoPtr guildDataResult);
+        bool LoadGuildFromDB(QueryResult guildDataResult);
         bool CheckGuildStructure();
-        bool LoadRanksFromDB(QueryResult_AutoPtr guildRanksResult);
-        bool LoadMembersFromDB(QueryResult_AutoPtr guildMembersResult);
+        bool LoadRanksFromDB(QueryResult guildRanksResult);
+        bool LoadMembersFromDB(QueryResult guildMembersResult);
 
         void SetMemberStats(uint64 guid);
 
@@ -424,11 +424,11 @@ class Guild
         uint32 GetBankMoneyPerDay(uint32 rankId);
         uint32 GetBankSlotPerDay(uint32 rankId, uint8 TabId);
         // rights per day
-        bool   LoadBankRightsFromDB(QueryResult_AutoPtr guildBankTabRightsResult);
+        bool   LoadBankRightsFromDB(QueryResult guildBankTabRightsResult);
         // Guild Bank Event Logs
         void   LoadGuildBankEventLogFromDB();
         void   DisplayGuildBankLogs(WorldSession *session, uint8 TabId);
-        void   LogBankEvent(SQLTransaction& trans, uint8 EventType, uint8 TabId, uint32 PlayerGuidLow, uint32 ItemOrMoney, uint8 ItemStackCount=0, uint8 DestTabId=0);
+        void   LogBankEvent(SQLTransaction& trans, uint8 EventType, uint8 TabId, uint32 PlayerGuidLow, uint32 ItemOrMoney, uint16 ItemStackCount=0, uint8 DestTabId=0);
         bool   AddGBankItemToDB(uint32 GuildId, uint32 BankTab , uint32 BankTabSlot , uint32 GUIDLow, uint32 Entry, SQLTransaction& trans);
 
     protected:

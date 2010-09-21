@@ -141,7 +141,7 @@ bool ArenaTeam::AddMember(const uint64& PlayerGuid)
     else
     {
         //                                                     0     1
-        QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT name, class FROM characters WHERE guid='%u'", GUID_LOPART(PlayerGuid));
+        QueryResult result = CharacterDatabase.PQuery("SELECT name, class FROM characters WHERE guid='%u'", GUID_LOPART(PlayerGuid));
         if (!result)
             return false;
 
@@ -156,17 +156,23 @@ bool ArenaTeam::AddMember(const uint64& PlayerGuid)
         }
     }
 
-    QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT personal_rating, matchmaker_rating FROM character_arena_stats WHERE guid='%u' AND slot='%u'", GUID_LOPART(PlayerGuid), GetSlot());
-    if (!result)
-    {
-        plPRating = 0;
-        plMMRating = 1500;
-    }
+    plMMRating = sWorld.getIntConfig(CONFIG_ARENA_START_MATCHMAKER_RATING);
+    plPRating = 0;
+
+    if (sWorld.getIntConfig(CONFIG_ARENA_START_PERSONAL_RATING) > 0)
+        plPRating = sWorld.getIntConfig(CONFIG_ARENA_START_PERSONAL_RATING);
     else
     {
-        plPRating = (*result)[0].GetUInt32();
-        plMMRating = (*result)[1].GetUInt32();
+        if (sWorld.getIntConfig(CONFIG_ARENA_SEASON_ID) < 6)
+            plPRating = 1500;
+        else
+            if (GetRating() >= low_rating_threshold)
+                plPRating = low_rating_threshold;
     }
+
+    QueryResult result = CharacterDatabase.PQuery("SELECT matchmaker_rating FROM character_arena_stats WHERE guid='%u' AND slot='%u'", GUID_LOPART(PlayerGuid), GetSlot());
+    if (result)
+        plMMRating = (*result)[0].GetUInt32();
 
     // remove all player signs from another petitions
     // this will be prevent attempt joining player to many arenateams and corrupt arena team data integrity
@@ -182,17 +188,6 @@ bool ArenaTeam::AddMember(const uint64& PlayerGuid)
     newmember.wins_week         = 0;
     newmember.personal_rating   = plPRating;
     newmember.matchmaker_rating = plMMRating;
-
-/*    if (sWorld.getIntConfig(CONFIG_ARENA_START_PERSONAL_RATING) > 0)
-        newmember.personal_rating = sWorld.getIntConfig(CONFIG_ARENA_START_PERSONAL_RATING);
-    else
-    {
-        if (sWorld.getIntConfig(CONFIG_ARENA_SEASON_ID) < 6)
-            newmember.personal_rating = 1500;
-        else
-            if (GetRating() >= low_rating_threshold)
-                newmember.personal_rating = low_rating_threshold;
-    }*/
 
     m_members.push_back(newmember);
 
@@ -211,7 +206,7 @@ bool ArenaTeam::AddMember(const uint64& PlayerGuid)
     return true;
 }
 
-bool ArenaTeam::LoadArenaTeamFromDB(QueryResult_AutoPtr arenaTeamDataResult)
+bool ArenaTeam::LoadArenaTeamFromDB(QueryResult arenaTeamDataResult)
 {
     if (!arenaTeamDataResult)
         return false;
@@ -238,7 +233,7 @@ bool ArenaTeam::LoadArenaTeamFromDB(QueryResult_AutoPtr arenaTeamDataResult)
     return true;
 }
 
-bool ArenaTeam::LoadMembersFromDB(QueryResult_AutoPtr arenaTeamMembersResult)
+bool ArenaTeam::LoadMembersFromDB(QueryResult arenaTeamMembersResult)
 {
     if (!arenaTeamMembersResult)
         return false;
@@ -266,7 +261,7 @@ bool ArenaTeam::LoadMembersFromDB(QueryResult_AutoPtr arenaTeamMembersResult)
 
         uint32 player_guid = fields[1].GetUInt32();
 
-        QueryResult_AutoPtr result = CharacterDatabase.PQuery(
+        QueryResult result = CharacterDatabase.PQuery(
             "SELECT personal_rating, matchmaker_rating FROM character_arena_stats WHERE guid = '%u' AND slot = '%u'", player_guid, GetSlot());
 
         uint32 personalrating = 0;
@@ -629,7 +624,7 @@ uint32 ArenaTeam::GetAverageMMR(Group *group) const
         matchmakerrating += itr->matchmaker_rating;
         ++player_divider;
     }
-    
+
     //- x/0 = crash
     if (player_divider == 0)
         player_divider = 1;
@@ -659,7 +654,7 @@ int32 ArenaTeam::GetRatingMod(uint32 own_rating, uint32 enemy_rating, bool won, 
     // calculate the rating modification
     // simulation on how it works. Not much info on how it really works
     float mod;
-    
+
     if (won && !calculating_mmr)
     {
         if (own_rating < low_rating_threshold)
@@ -672,10 +667,14 @@ int32 ArenaTeam::GetRatingMod(uint32 own_rating, uint32 enemy_rating, bool won, 
     else
         mod = 24.0f * (won_mod - chance);
 
-    if (won)
-        return (int32)ceil(mod);
-    else
-        return (int32)floor(mod);
+    return (int32)ceil(mod);
+}
+
+int32 ArenaTeam::GetPersonalRatingMod(int32 base_rating, uint32 own_rating, uint32 enemy_rating)
+{
+    float chance = GetChanceAgainst(own_rating, enemy_rating);
+    chance *= 2.0f;
+    return (int32)ceil(float(base_rating) * chance);
 }
 
 void ArenaTeam::FinishGame(int32 mod)
@@ -723,7 +722,7 @@ int32 ArenaTeam::LostAgainst(uint32 againstRating)
     return mod;
 }
 
-void ArenaTeam::MemberLost(Player * plr, uint32 againstMatchmakerRating)
+void ArenaTeam::MemberLost(Player * plr, uint32 againstMatchmakerRating, int32 teamratingchange)
 {
     // called for each participant of a match after losing
     for (MemberList::iterator itr = m_members.begin(); itr !=  m_members.end(); ++itr)
@@ -731,7 +730,7 @@ void ArenaTeam::MemberLost(Player * plr, uint32 againstMatchmakerRating)
         if (itr->guid == plr->GetGUID())
         {
             // update personal rating
-            int32 mod = GetRatingMod(itr->personal_rating, m_stats.rating, false);
+            int32 mod = GetPersonalRatingMod(teamratingchange, itr->personal_rating, (m_stats.rating - teamratingchange));
             itr->ModifyPersonalRating(plr, mod, GetSlot());
 
             // update matchmaker rating
@@ -749,7 +748,7 @@ void ArenaTeam::MemberLost(Player * plr, uint32 againstMatchmakerRating)
     }
 }
 
-void ArenaTeam::OfflineMemberLost(uint64 guid, uint32 againstMatchmakerRating)
+void ArenaTeam::OfflineMemberLost(uint64 guid, uint32 againstMatchmakerRating, int32 teamratingchange)
 {
     // called for offline player after ending rated arena match!
     for (MemberList::iterator itr = m_members.begin(); itr !=  m_members.end(); ++itr)
@@ -757,7 +756,7 @@ void ArenaTeam::OfflineMemberLost(uint64 guid, uint32 againstMatchmakerRating)
         if (itr->guid == guid)
         {
             // update personal rating
-            int32 mod = GetRatingMod(itr->personal_rating, m_stats.rating, false);
+            int32 mod = GetPersonalRatingMod(teamratingchange, itr->personal_rating, (m_stats.rating - teamratingchange));
             itr->ModifyPersonalRating(NULL, mod, GetSlot());
 
             // update matchmaker rating
@@ -772,7 +771,7 @@ void ArenaTeam::OfflineMemberLost(uint64 guid, uint32 againstMatchmakerRating)
     }
 }
 
-void ArenaTeam::MemberWon(Player * plr, uint32 againstMatchmakerRating)
+void ArenaTeam::MemberWon(Player * plr, uint32 againstMatchmakerRating, int32 teamratingchange)
 {
     // called for each participant after winning a match
     for (MemberList::iterator itr = m_members.begin(); itr !=  m_members.end(); ++itr)
@@ -780,8 +779,8 @@ void ArenaTeam::MemberWon(Player * plr, uint32 againstMatchmakerRating)
         if (itr->guid == plr->GetGUID())
         {
             // update personal rating
-            int32 mod = GetRatingMod(itr->personal_rating, m_stats.rating, true);
-            itr->ModifyPersonalRating(NULL, mod, GetSlot());
+            int32 mod = GetPersonalRatingMod(teamratingchange, (m_stats.rating - teamratingchange), itr->personal_rating);
+            itr->ModifyPersonalRating(plr, mod, GetSlot());
 
             // update matchmaker rating
             mod = GetRatingMod(itr->matchmaker_rating, againstMatchmakerRating, true, true);

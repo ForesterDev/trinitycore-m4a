@@ -120,7 +120,9 @@ bool WorldSession::Anti__ReportCheat(const char* Reason,float Speed,const char* 
         return false;
     }
 
-    QueryResult_AutoPtr Res=CharacterDatabase.PQuery("SELECT speed,Val1 FROM cheaters WHERE player='%s' AND reason LIKE '%s' AND Map='%u' AND last_date >= NOW()-300",Player,Reason,Map);
+    auto Res = CharacterDatabase.PQuery("SELECT speed,Val1 FROM cheaters WHERE "
+                "player='%s' AND reason LIKE '%s' AND Map='%u' AND last_date >= "
+                "NOW()-300", Player, Reason, Map);
     if(Res)
     {
         Field* Fields = Res->Fetch();
@@ -175,7 +177,8 @@ bool WorldSession::Anti__ReportCheat(const char* Reason,float Speed,const char* 
 
     if(sWorld.GetMvAnticheatBan() & 2)
     {
-        QueryResult_AutoPtr result = LoginDatabase.PQuery("SELECT last_ip FROM account WHERE id=%u", Acc);
+        auto result
+            = LoginDatabase.PQuery("SELECT last_ip FROM account WHERE id=%u", Acc);
         if(result)
         {
             Field *fields = result->Fetch();
