@@ -64,7 +64,7 @@ Channel::Channel
         //load not built in channel if saved
         std::string _name(name);
         CharacterDatabase.escape_string(_name);
-        QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT m_announce, m_moderate, m_public, m_password, BannedList FROM channels WHERE m_name = '%s' AND m_team = '%u'", _name.c_str(), m_Team);
+        QueryResult result = CharacterDatabase.PQuery("SELECT m_announce, m_moderate, m_public, m_password, BannedList FROM channels WHERE m_name = '%s' AND m_team = '%u'", _name.c_str(), m_Team);
         if (result)//load
         {
             Field *fields = result->Fetch();

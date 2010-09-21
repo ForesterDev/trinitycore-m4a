@@ -3031,6 +3031,17 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const * triggere
     m_casttime = GetSpellCastTime(m_spellInfo, this);
     //m_caster->ModSpellCastTime(m_spellInfo, m_casttime, this);
 
+    // don't allow channeled spells / spells with cast time to be casted while moving
+    // (even if they are interrupted on moving, spells with almost immediate effect get to have their effect processed before movement interrupter kicks in)
+    if ((IsChanneledSpell(m_spellInfo) || m_casttime)
+        && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->isMoving()
+        && m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT)
+    {
+        SendCastResult(SPELL_FAILED_MOVING);
+        finish(false);
+        return;
+    }
+
     // set timer base at cast time
     ReSetTimer();
 
@@ -3752,7 +3763,7 @@ void Spell::finish(bool ok)
         }
     }
 
-    if (IsMeleeAttackResetSpell())
+    if (IsAutoActionResetSpell())
     {
         bool found = false;
         Unit::AuraEffectList const& vIgnoreReset = m_caster->GetAuraEffectsByType(SPELL_AURA_IGNORE_MELEE_RESET);
@@ -3764,13 +3775,12 @@ void Spell::finish(bool ok)
                 break;
             }
         }
-        if (!found)
+        if (!found && !(m_spellInfo->AttributesEx2 & SPELL_ATTR_EX2_NOT_RESET_AUTO_ACTIONS))
         {
             m_caster->resetAttackTimer(BASE_ATTACK);
             if (m_caster->haveOffhandWeapon())
                 m_caster->resetAttackTimer(OFF_ATTACK);
-            if (!(m_spellInfo->AttributesEx2 & SPELL_ATTR_EX2_NOT_RESET_AUTOSHOT))
-                m_caster->resetAttackTimer(RANGED_ATTACK);
+            m_caster->resetAttackTimer(RANGED_ATTACK);
         }
     }
 
@@ -4193,7 +4203,7 @@ void Spell::SendLogExecute()
         data << uint32(m_spellInfo->Effect[i]);             // spell effect
 
         data.append(*m_effectExecuteData[i]);
-        
+
         delete m_effectExecuteData[i];
         m_effectExecuteData[i] = NULL;
     }
@@ -4741,7 +4751,7 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
 SpellCastResult Spell::CheckCast(bool strict)
 {
     // check death state
-    if (!m_caster->isAlive() && !(m_spellInfo->Attributes & SPELL_ATTR_PASSIVE) && !(m_spellInfo->Attributes & SPELL_ATTR_CASTABLE_WHILE_DEAD))
+    if (!m_IsTriggeredSpell && !m_caster->isAlive() && !(m_spellInfo->Attributes & SPELL_ATTR_PASSIVE) && !(m_spellInfo->Attributes & SPELL_ATTR_CASTABLE_WHILE_DEAD))
         return SPELL_FAILED_CASTER_DEAD;
 
     // check cooldowns to prevent cheating
@@ -5777,13 +5787,6 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (Player* plrCaster = m_caster->ToPlayer())
             if (!plrCaster->GetComboPoints())
                 return SPELL_FAILED_NO_COMBO_POINTS;
-
-    // don't allow channeled spells / spells with cast time to be casted while moving
-    // (even if they are interrupted on moving, spells with almost immediate effect get to have their effect processed before movement interrupter kicks in)
-    if ((IsChanneledSpell(m_spellInfo) || GetSpellCastTime(m_spellInfo, this))
-        && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->isMoving()
-        && m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT)
-        return SPELL_FAILED_MOVING;
 
     // all ok
     return SPELL_CAST_OK;

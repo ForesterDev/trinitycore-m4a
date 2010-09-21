@@ -471,7 +471,7 @@ bool Master::_StartDB()
         return false;
     }
 
-    mask = sConfig.GetIntDefault("WorldDatabase.ThreadBundleMask", MYSQL_BUNDLE_ALL);    
+    mask = sConfig.GetIntDefault("WorldDatabase.ThreadBundleMask", MYSQL_BUNDLE_ALL);
 
     ///- Initialise the world database
     if (!WorldDatabase.Open(dbstring, num_threads, MySQLThreadBundle(mask)))
@@ -520,7 +520,7 @@ bool Master::_StartDB()
         return false;
     }
 
-    mask = sConfig.GetIntDefault("LoginDatabase.ThreadBundleMask", MYSQL_BUNDLE_ALL);    
+    mask = sConfig.GetIntDefault("LoginDatabase.ThreadBundleMask", MYSQL_BUNDLE_ALL);
 
     ///- Initialise the login database
     if (!LoginDatabase.Open(dbstring, num_threads, MySQLThreadBundle(mask)))
