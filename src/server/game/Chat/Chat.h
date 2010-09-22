@@ -663,6 +663,8 @@ class ChatHandler
 
         void SetSentErrorMessage(bool val){ sentErrorMessage = val;};
     private:
+        bool cmd_gmteamdisband(const char *args);
+
         WorldSession * m_session;                           // != NULL for chat command call and NULL for CLI command
 
         // common global flag
