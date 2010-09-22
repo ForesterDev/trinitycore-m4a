@@ -793,6 +793,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "bindsight",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleBindSightCommand,           "", NULL },
         { "unbindsight",    SEC_ADMINISTRATOR,  false, &ChatHandler::HandleUnbindSightCommand,         "", NULL },
         { "playall",        SEC_GAMEMASTER,  false, &ChatHandler::HandlePlayAllCommand,             "", NULL },
+        {"gmteamdisband", SEC_GAMEMASTER, true, &ChatHandler::cmd_gmteamdisband, "", nullptr},
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
