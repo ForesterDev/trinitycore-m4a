@@ -196,6 +196,13 @@ void WorldSession::HandleLootOpcode(WorldPacket & recv_data)
     recv_data >> guid;
 
     // Check possible cheat
+    if (!IS_ITEM_GUID(guid))
+        ;
+    else
+    {
+        KickPlayer();
+        return;
+    }
     if (!_player->isAlive())
         return;
 

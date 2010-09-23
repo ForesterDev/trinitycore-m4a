@@ -222,7 +222,13 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
         pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, NULL);
         return;
     }
-
+    if (proto->Flags & ITEM_PROTO_FLAG_OPENABLE)
+        ;
+    else
+    {
+        KickPlayer();
+        return;
+    }
     // locked item
     uint32 lockId = proto->LockID;
     if (lockId)
