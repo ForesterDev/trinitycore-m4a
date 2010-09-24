@@ -129,6 +129,15 @@ enum HodirChests
     CACHE_OF_WINTER_25                          = 194308
 };
 
+namespace
+{
+    void flash_freeze(Unit &target)
+    {
+        target.CastSpell
+            (static_cast<Unit *>(nullptr), 61989 /* Flash Freeze Summon */, true);
+    }
+}
+
 struct boss_hodir_AI : public BossAI
 {
     boss_hodir_AI(Creature *pCreature) : BossAI(pCreature, BOSS_HODIR)
@@ -153,56 +162,48 @@ struct boss_hodir_AI : public BossAI
         
         // Spawn NPC Helpers
         if (Helper[0] = me->SummonCreature(NPC_FIELD_MEDIC_PENNY, 1983.75, -243.36, 432.767, 1.57, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000))
-            if (Creature *pIceBlock = me->SummonCreature(NPC_FLASH_FREEZE, Helper[0]->GetPositionX(), Helper[0]->GetPositionY(), Helper[0]->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN))
-            {
-                pIceBlock->CastSpell(Helper[0], SPELL_BLOCK_OF_ICE, true);
-                Helper[0]->AddThreat(me, 100);
-            }
+        {
+            flash_freeze(*Helper[0]);
+            Helper[0]->AddThreat(me, 100);
+        }
         if (Helper[1] = me->SummonCreature(NPC_EIVI_NIGHTFEATHER, 1999.90, -230.49, 432.767, 1.57, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000))
-            if (Creature *pIceBlock = me->SummonCreature(NPC_FLASH_FREEZE, Helper[1]->GetPositionX(), Helper[1]->GetPositionY(), Helper[1]->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN))
-            {
-                pIceBlock->CastSpell(Helper[1], SPELL_BLOCK_OF_ICE, true);
-                Helper[1]->AddThreat(me, 100);
-            }
+        {
+            flash_freeze(*Helper[1]);
+            Helper[1]->AddThreat(me, 100);
+        }
         if (Helper[2] = me->SummonCreature(NPC_ELEMENTALIST_MAHFUUN, 2010.06, -243.45, 432.767, 1.57, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000))
-            if (Creature *pIceBlock = me->SummonCreature(NPC_FLASH_FREEZE, Helper[2]->GetPositionX(), Helper[2]->GetPositionY(), Helper[2]->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN))
-            {
-                pIceBlock->CastSpell(Helper[2], SPELL_BLOCK_OF_ICE, true);
-                Helper[2]->AddThreat(me, 100);
-            }
+        {
+            flash_freeze(*Helper[2]);
+            Helper[2]->AddThreat(me, 100);
+        }
         if (Helper[3] = me->SummonCreature(NPC_MISSY_FLAMECUFFS, 2021.12, -236.65, 432.767, 1.57, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000))
-            if (Creature *pIceBlock = me->SummonCreature(NPC_FLASH_FREEZE, Helper[3]->GetPositionX(), Helper[3]->GetPositionY(), Helper[3]->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN))
-            {
-                pIceBlock->CastSpell(Helper[3], SPELL_BLOCK_OF_ICE, true);
-                Helper[3]->AddThreat(me, 100);
-            }
+        {
+            flash_freeze(*Helper[3]);
+            Helper[3]->AddThreat(me, 100);
+        }
                 
         if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
         {
             if (Helper[4] = me->SummonCreature(NPC_FIELD_MEDIC_JESSY, 1976.60, -233.53, 432.767, 1.57, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000))
-                if (Creature *pIceBlock = me->SummonCreature(NPC_FLASH_FREEZE, Helper[4]->GetPositionX(), Helper[4]->GetPositionY(), Helper[4]->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN))
-                {
-                    pIceBlock->CastSpell(Helper[4], SPELL_BLOCK_OF_ICE, true);
-                    Helper[4]->AddThreat(me, 100);
-                }            
+            {
+                flash_freeze(*Helper[4]);
+                Helper[4]->AddThreat(me, 100);
+            }            
             if (Helper[5] = me->SummonCreature(NPC_ELLIE_NIGHTFEATHER, 1992.90, -237.54, 432.767, 1.57, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000))
-                if (Creature *pIceBlock = me->SummonCreature(NPC_FLASH_FREEZE, Helper[5]->GetPositionX(), Helper[5]->GetPositionY(), Helper[5]->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN))
-                {
-                    pIceBlock->CastSpell(Helper[5], SPELL_BLOCK_OF_ICE, true);
-                    Helper[5]->AddThreat(me, 100);
-                }            
+            {
+                flash_freeze(*Helper[5]);
+                Helper[5]->AddThreat(me, 100);
+            }            
             if (Helper[6] = me->SummonCreature(NPC_ELEMENTALIST_AVUUN, 2014.18, -232.80, 432.767, 1.57, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000))
-                if (Creature *pIceBlock = me->SummonCreature(NPC_FLASH_FREEZE, Helper[6]->GetPositionX(), Helper[6]->GetPositionY(), Helper[6]->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN))
-                {
-                    pIceBlock->CastSpell(Helper[6], SPELL_BLOCK_OF_ICE, true);
-                    Helper[6]->AddThreat(me, 100);
-                }            
+            {
+                flash_freeze(*Helper[6]);
+                Helper[6]->AddThreat(me, 100);
+            }            
             if (Helper[7] = me->SummonCreature(NPC_SISSY_FLAMECUFFS, 2028.10, -244.66, 432.767, 1.57, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000))
-                if (Creature *pIceBlock = me->SummonCreature(NPC_FLASH_FREEZE, Helper[7]->GetPositionX(), Helper[7]->GetPositionY(), Helper[7]->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN))
-                {
-                    pIceBlock->CastSpell(Helper[7], SPELL_BLOCK_OF_ICE, true);
-                    Helper[7]->AddThreat(me, 100);
-                }            
+            {
+                flash_freeze(*Helper[7]);
+                Helper[7]->AddThreat(me, 100);
+            }            
         }
     }
 
@@ -606,6 +607,33 @@ CreatureAI* GetAI_mob_hodir_mage(Creature* pCreature)
     return new mob_hodir_mageAI(pCreature);
 }
 
+namespace
+{
+    struct Flash_freeze
+        : CreatureScript
+    {
+        struct Flash_freeze_AI
+            : ScriptedAI
+        {
+            Flash_freeze_AI(Creature *pCreature)
+                : ScriptedAI(std::move(pCreature))
+            {
+                me->CastSpell(static_cast<Unit *>(nullptr), SPELL_BLOCK_OF_ICE, true);
+            }
+        };
+
+        Flash_freeze()
+            : CreatureScript("mob_flash_freeze")
+        {
+        }
+
+        CreatureAI *GetAI(Creature *creature) const
+        {
+            return new Flash_freeze_AI(std::move(creature));
+        }
+    };
+}
+
 struct toasty_fireAI : public ScriptedAI
 {
     toasty_fireAI(Creature* pCreature) : ScriptedAI(pCreature)
@@ -731,7 +759,7 @@ void AddSC_boss_hodir()
         }
     };
     new Mob_hodir_mage;
-    
+    new Flash_freeze;
     struct Toasty_fire
         : CreatureScript
     {
