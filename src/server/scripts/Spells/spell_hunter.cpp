@@ -272,15 +272,13 @@ public:
             const SpellCooldowns& cm = caster->ToPlayer()->GetSpellCooldownMap();
             for (SpellCooldowns::const_iterator itr = cm.begin(); itr != cm.end();)
             {
-                SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
-
-                if (spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER &&
-                    spellInfo->Id != HUNTER_SPELL_READINESS &&
-                    spellInfo->Id != HUNTER_SPELL_BESTIAL_WRATH &&
-                    GetSpellRecoveryTime(spellInfo) > 0)
-                    caster->ToPlayer()->RemoveSpellCooldown((itr++)->first,true);
-                else
-                    ++itr;
+                auto &k = itr++->first;
+                if (const SpellEntry *spellInfo = sSpellStore.LookupEntry(k))
+                    if (spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER &&
+                        spellInfo->Id != HUNTER_SPELL_READINESS &&
+                        spellInfo->Id != HUNTER_SPELL_BESTIAL_WRATH &&
+                        GetSpellRecoveryTime(spellInfo) > 0)
+                        caster->ToPlayer()->RemoveSpellCooldown(k, true);
             }
         }
 
