@@ -292,7 +292,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
             continue;
         }
         // should never happen
-        if (bg->GetMaxPlayers() < ++scoreCount)
+        if (!(scoreCount < bg->GetMaxPlayers()))
         {
             sLog.outError("Battleground %u scoreboard has more entries (%u) than allowed players in this bg (%u)", bg->GetTypeID(true), bg->GetPlayerScoresSize(), bg->GetMaxPlayers());
             break;
@@ -321,6 +321,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
         *data << count;
         for (auto it = stat_data.second.begin(); count; --count)
             *data << std::move(*it++);
+        ++scoreCount;
     }
 
     data->put(wpos, scoreCount);
