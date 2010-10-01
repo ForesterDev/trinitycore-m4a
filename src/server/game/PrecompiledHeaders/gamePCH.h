@@ -9,6 +9,7 @@
 #include <array>
 #include <limits>
 #include <sstream>
+#include <boost/thread/locks.hpp>
 #include "WorldSocket.h"        // must be first to make ACE happy with ACE includes in it
 
 #include "Common.h"

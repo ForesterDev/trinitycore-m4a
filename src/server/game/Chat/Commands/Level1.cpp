@@ -40,7 +40,14 @@
 
 #ifdef _DEBUG_VMAPS
 #include "VMapFactory.h"
+#include "Detail/Vmap_mutex.hpp"
 #endif
+
+#ifdef _DEBUG_VMAPS
+using boost::unique_lock;
+using Detail::Vmap_mutex;
+using Detail::vmap_mutex;
+#endif  // _DEBUG_VMAPS
 
 //-----------------------Npc Commands-----------------------
 bool ChatHandler::HandleNpcSayCommand(const char* args)
@@ -235,7 +242,10 @@ bool ChatHandler::HandleGMCommand(const char* args)
         m_session->GetPlayer()->UpdateTriggerVisibility();
         #ifdef _DEBUG_VMAPS
         VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
-        vMapManager->processCommand("stoplog");
+        {
+            unique_lock<Vmap_mutex> l(vmap_mutex());
+            vMapManager->processCommand("stoplog");
+        }
         #endif
         return true;
     }
@@ -247,7 +257,10 @@ bool ChatHandler::HandleGMCommand(const char* args)
         m_session->GetPlayer()->UpdateTriggerVisibility();
         #ifdef _DEBUG_VMAPS
         VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
-        vMapManager->processCommand("startlog");
+        {
+            unique_lock<Vmap_mutex> l(vmap_mutex());
+            vMapManager->processCommand("startlog");
+        }
         #endif
         return true;
     }
