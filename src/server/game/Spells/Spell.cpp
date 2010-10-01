@@ -47,6 +47,7 @@
 #include "VMapFactory.h"
 #include "Battleground.h"
 #include "Util.h"
+#include "Detail/Vmap_mutex.hpp"
 #include "TemporarySummon.h"
 #include "Vehicle.h"
 #include "SpellAuraEffects.h"
@@ -4777,15 +4778,21 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (bg->GetStatus() == STATUS_WAIT_LEAVE)
                 return SPELL_FAILED_DONT_REPORT;
 
-    if(m_caster->GetTypeId() == TYPEID_PLAYER && VMAP::VMapFactory::createOrGetVMapManager()->isLineOfSightCalcEnabled())
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        if(m_spellInfo->Attributes & SPELL_ATTR_OUTDOORS_ONLY &&
-                !m_caster->GetMap()->IsOutdoors(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ()))
-            return SPELL_FAILED_ONLY_OUTDOORS;
+        auto &m = *VMAP::VMapFactory::createOrGetVMapManager();
+        boost::shared_lock<Detail::Vmap_mutex> l(Detail::vmap_mutex());
+        if (m.isLineOfSightCalcEnabled())
+        {
+            l.unlock();
+            if(m_spellInfo->Attributes & SPELL_ATTR_OUTDOORS_ONLY &&
+                    !m_caster->GetMap()->IsOutdoors(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ()))
+                return SPELL_FAILED_ONLY_OUTDOORS;
 
-        if(m_spellInfo->Attributes & SPELL_ATTR_INDOORS_ONLY &&
-                m_caster->GetMap()->IsOutdoors(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ()))
-            return SPELL_FAILED_ONLY_INDOORS;
+            if(m_spellInfo->Attributes & SPELL_ATTR_INDOORS_ONLY &&
+                    m_caster->GetMap()->IsOutdoors(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ()))
+                return SPELL_FAILED_ONLY_INDOORS;
+        }
     }
 
     // only check at first call, Stealth auras are already removed at second call
