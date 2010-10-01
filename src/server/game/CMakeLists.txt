@@ -32,6 +32,7 @@ file(GLOB_RECURSE sources_Chat Chat/*.cpp Chat/*.h)
 file(GLOB_RECURSE sources_Combat Combat/*.cpp Combat/*.h)
 file(GLOB_RECURSE sources_Conditions Conditions/*.cpp Conditions/*.h)
 file(GLOB_RECURSE sources_DataStores DataStores/*.cpp DataStores/*.h)
+file(GLOB_RECURSE sources_Detail Detail/*.hpp)
 file(GLOB_RECURSE sources_DungeonFinding DungeonFinding/*.cpp DungeonFinding/*.h)
 file(GLOB_RECURSE sources_Entities Entities/*.cpp Entities/*.h)
 file(GLOB_RECURSE sources_Events Events/*.cpp Events/*.h)
@@ -86,6 +87,7 @@ set(game_STAT_SRCS
   ${sources_Combat}
   ${sources_Conditions}
   ${sources_DataStores}
+  ${sources_Detail}
   ${sources_DungeonFinding}
   ${sources_Entities}
   ${sources_Events}
