@@ -75,6 +75,15 @@ public:
                 case CREATURE_DEVOURER:
                     uiDevourer = pCreature->GetGUID();
                     break;
+                case NPC_KALIRA:
+                    fix_entry(pCreature, NPC_ELANDRA);
+                    break;
+                case NPC_SYLVANAS_PART1:
+                    fix_entry(pCreature, NPC_JAINA_PART1);
+                    break;
+                case NPC_LORALEN:
+                    fix_entry(pCreature, NPC_KORELN);
+                    break;
             }
         }
 
@@ -156,6 +165,12 @@ public:
             } else OUT_LOAD_INST_DATA_FAIL;
 
             OUT_LOAD_INST_DATA_COMPLETE;
+        }
+
+        void fix_entry(Creature *const &pcreature, uint32 entry_a) const
+        {
+            if (uiTeamInInstance == ALLIANCE)
+                pcreature->UpdateEntry(std::move(entry_a), ALLIANCE);
         }
     };
 
