@@ -51,6 +51,9 @@
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 
+using boost::lock_guard;
+using boost::mutex;
+
 ScriptMapMap sQuestEndScripts;
 ScriptMapMap sQuestStartScripts;
 ScriptMapMap sSpellScripts;
@@ -6250,12 +6253,15 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
             }
             return m_hiCharGuid++;
         case HIGHGUID_GAMEOBJECT:
-            if (m_hiGoGuid >= 0x00FFFFFE)
             {
-                sLog.outError("Gameobject guid overflow!! Can't continue, shutting down server. ");
-                World::StopNow(ERROR_EXIT_CODE);
+                lock_guard<mutex> guard(hi_go_guid_mutex);
+                if (m_hiGoGuid >= 0x00FFFFFE)
+                {
+                    sLog.outError("Gameobject guid overflow!! Can't continue, shutting down server. ");
+                    World::StopNow(ERROR_EXIT_CODE);
+                }
+                return m_hiGoGuid++;
             }
-            return m_hiGoGuid++;
         case HIGHGUID_CORPSE:
             if (m_hiCorpseGuid >= 0xFFFFFFFE)
             {
@@ -6265,7 +6271,7 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
             return m_hiCorpseGuid++;
         case HIGHGUID_DYNAMICOBJECT:
             {
-                boost::lock_guard<boost::mutex> guard(hi_do_guid_mutex);
+                lock_guard<mutex> guard(hi_do_guid_mutex);
                 if (m_hiDoGuid >= 0xFFFFFFFE)
                 {
                     sLog.outError("DynamicObject guid overflow!! Can't continue, shutting down server. ");

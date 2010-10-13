@@ -1018,6 +1018,7 @@ class ObjectMgr
         uint32 m_hiPetGuid;
         uint32 m_hiVehicleGuid;
         uint32 m_hiItemGuid;
+        boost::mutex hi_go_guid_mutex;
         uint32 m_hiGoGuid;
         boost::mutex hi_do_guid_mutex;
         uint32 m_hiDoGuid;
