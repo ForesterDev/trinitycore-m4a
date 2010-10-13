@@ -29,7 +29,6 @@ enum DeathKnightSpells
     DK_SPELL_SUMMON_GARGOYLE                = 50514,
     DK_SPELL_CORPSE_EXPLOSION_TRIGGERED     = 43999,
     DISPLAY_GHOUL_CORPSE                    = 25537,
-    DK_SPELL_SCOURGE_STRIKE_TRIGGERED       = 70890,
 };
 
 // 49158 Corpse Explosion (51325, 51326, 51327, 51328)
@@ -127,24 +126,16 @@ public:
     {
         bool Validate(SpellEntry const * /*spellEntry*/)
         {
-            if (!sSpellStore.LookupEntry(DK_SPELL_SCOURGE_STRIKE_TRIGGERED))
-                return false;
             return true;
         }
 
-        void HandleDummy(SpellEffIndex /*effIndex*/)
+        bool Load()
         {
-            Unit* caster = GetCaster();
-            if (Unit* unitTarget = GetHitUnit())
-            {
-                int32 bp = (GetHitDamage() * GetEffectValue() * unitTarget->GetDiseasesByCaster(caster->GetGUID())) / 100;
-                caster->CastCustomSpell(unitTarget, DK_SPELL_SCOURGE_STRIKE_TRIGGERED, &bp, NULL, NULL, true);
-            }
+            return false;
         }
 
         void Register()
         {
-            OnEffect += SpellEffectFn(spell_dk_scourge_strike_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
         }
     };
 
