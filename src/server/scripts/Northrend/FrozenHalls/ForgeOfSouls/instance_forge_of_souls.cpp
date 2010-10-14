@@ -169,7 +169,7 @@ public:
 
         void fix_entry(Creature *const &pcreature, uint32 entry_a) const
         {
-            if (uiTeamInInstance == ALLIANCE)
+            if (uiTeamInInstance == TEAM_ALLIANCE)
                 pcreature->UpdateEntry(std::move(entry_a), ALLIANCE);
         }
     };
