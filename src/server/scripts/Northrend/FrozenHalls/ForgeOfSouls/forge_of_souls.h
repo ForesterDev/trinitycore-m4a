@@ -25,7 +25,7 @@ enum Data
     DATA_TEAM_IN_INSTANCE,
 };
 
-enum Data64
+enum
 {
     DATA_BRONJAHM,
     DATA_DEVOURER,
