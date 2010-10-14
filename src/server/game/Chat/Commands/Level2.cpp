@@ -4630,5 +4630,6 @@ bool ChatHandler::cmd_gmteamdisband(const char *args)
     }
     t->Disband(m_session);
     delete t;
+    SendSysMessage("ok");
     return true;
 }
