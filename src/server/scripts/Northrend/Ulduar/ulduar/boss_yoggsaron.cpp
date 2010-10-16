@@ -782,10 +782,7 @@ void Yoggsaron_AI::stopped()
 void Yoggsaron_AI::turn_insane(Player &target)
 {
     if (voice)
-    {
-        voice->SetPosition(target);
         DoScriptText(RAND(WHISP_INSANITY_1, WHISP_INSANITY_2), voice.get(), &target);
-    }
     me->CastSpell(&target, 63120 /* Insane */, true);
 }
 
