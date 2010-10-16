@@ -625,8 +625,9 @@ Yoggsaron_AI::Yoggsaron_AI(Creature *c)
         voice(new Creature)
 {
     me->SetReactState(REACT_PASSIVE);
-    if (voice->Create(sObjectMgr.GenerateLowGuid(HIGHGUID_UNIT), me->GetMap(), 0x0,
-                    33280 /* Voice of Yogg-Saron */, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f))
+    if (voice->Create(sObjectMgr.GenerateLowGuid(HIGHGUID_UNIT), me->GetMap(),
+                    PHASEMASK_ANYWHERE, 33280 /* Voice of Yogg-Saron */, 0, 0, 0.0f,
+                    0.0f, 0.0f, 0.0f))
         ;
     else
         voice = nullptr;
