@@ -25,11 +25,8 @@ public:
     template<class Cty>
         explicit Instance_object_AI(Cty &&c)
         : Base_AI(std::forward<Cty>(c)),
-#pragma warning(push)
-// 'this' : used in base member initializer list
-#pragma warning(disable: 4355)
-            instance_(dynamic_cast<Instance_type *>(Detail::get_instance_script(*this->me)))
-#pragma warning(pop)
+            instance_
+                (dynamic_cast<Instance_type *>(Detail::get_instance_script(*Base_AI::me)))
     {
         if (instance_)
             ;
