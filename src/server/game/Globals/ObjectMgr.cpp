@@ -51,7 +51,7 @@
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 
-using boost::lock_guard;
+using boost::unique_lock;
 using boost::mutex;
 
 ScriptMapMap sQuestEndScripts;
@@ -6225,12 +6225,16 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
             }
             return m_hiItemGuid++;
         case HIGHGUID_UNIT:
-            if (m_hiCreatureGuid >= 0x00FFFFFE)
             {
-                sLog.outError("Creature guid overflow!! Can't continue, shutting down server. ");
-                World::StopNow(ERROR_EXIT_CODE);
+                unique_lock<mutex> l(hi_creature_guid_mutex);
+                if (m_hiCreatureGuid >= 0x00FFFFFE)
+                {
+                    l.unlock();
+                    sLog.outError("Creature guid overflow!! Can't continue, shutting down server. ");
+                    World::StopNow(ERROR_EXIT_CODE);
+                }
+                return m_hiCreatureGuid++;
             }
-            return m_hiCreatureGuid++;
         case HIGHGUID_PET:
             if (m_hiPetGuid >= 0x00FFFFFE)
             {
@@ -6254,9 +6258,10 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
             return m_hiCharGuid++;
         case HIGHGUID_GAMEOBJECT:
             {
-                lock_guard<mutex> guard(hi_go_guid_mutex);
+                unique_lock<mutex> l(hi_go_guid_mutex);
                 if (m_hiGoGuid >= 0x00FFFFFE)
                 {
+                    l.unlock();
                     sLog.outError("Gameobject guid overflow!! Can't continue, shutting down server. ");
                     World::StopNow(ERROR_EXIT_CODE);
                 }
@@ -6271,9 +6276,10 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
             return m_hiCorpseGuid++;
         case HIGHGUID_DYNAMICOBJECT:
             {
-                lock_guard<mutex> guard(hi_do_guid_mutex);
+                unique_lock<mutex> l(hi_do_guid_mutex);
                 if (m_hiDoGuid >= 0xFFFFFFFE)
                 {
+                    l.unlock();
                     sLog.outError("DynamicObject guid overflow!! Can't continue, shutting down server. ");
                     World::StopNow(ERROR_EXIT_CODE);
                 }
