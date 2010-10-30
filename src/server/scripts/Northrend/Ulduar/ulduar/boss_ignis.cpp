@@ -302,6 +302,14 @@ struct boss_ignis_AI : public BossAI
         summons.Summon(summon);
     }
 
+    void SummonedCreatureDespawn(Creature *unit)
+    {
+        summons.Despawn(unit);
+        if (unit->GetEntry() == MOB_IRON_CONSTRUCT)
+            construct_list
+                .erase(std::find(construct_list.begin(), construct_list.end(), unit));
+    }
+
     void DoAction(const int32 action)
     {
         switch(action)
