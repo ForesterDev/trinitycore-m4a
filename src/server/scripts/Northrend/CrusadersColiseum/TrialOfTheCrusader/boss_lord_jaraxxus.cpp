@@ -84,7 +84,8 @@ enum BossSpells
 /*######
 ## boss_jaraxxus
 ######*/
-class boss_jaraxxus : public CreatureScript
+
+class boss_jaraxxus : public CreatureScript
 {
 public:
     boss_jaraxxus() : CreatureScript("boss_jaraxxus") { }
@@ -246,7 +247,8 @@ public:
 
 };
 
-class mob_legion_flame : public CreatureScript
+
+class mob_legion_flame : public CreatureScript
 {
 public:
     mob_legion_flame() : CreatureScript("mob_legion_flame") { }
@@ -279,7 +281,8 @@ public:
 
 };
 
-class mob_infernal_volcano : public CreatureScript
+
+class mob_infernal_volcano : public CreatureScript
 {
 public:
     mob_infernal_volcano() : CreatureScript("mob_infernal_volcano") { }
@@ -356,7 +359,8 @@ public:
 
 };
 
-class mob_fel_infernal : public CreatureScript
+
+class mob_fel_infernal : public CreatureScript
 {
 public:
     mob_fel_infernal() : CreatureScript("mob_fel_infernal") { }
@@ -410,7 +414,8 @@ public:
 
 };
 
-class mob_nether_portal : public CreatureScript
+
+class mob_nether_portal : public CreatureScript
 {
 public:
     mob_nether_portal() : CreatureScript("mob_nether_portal") { }
@@ -481,7 +486,8 @@ public:
 
 };
 
-class mob_mistress_of_pain : public CreatureScript
+
+class mob_mistress_of_pain : public CreatureScript
 {
 public:
     mob_mistress_of_pain() : CreatureScript("mob_mistress_of_pain") { }
