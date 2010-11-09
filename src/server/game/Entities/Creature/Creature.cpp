@@ -190,6 +190,7 @@ void Creature::AddToWorld()
         if (IsVehicle())
             GetVehicleKit()->Install();
     }
+    ASSERT(i_AI);
 }
 
 void Creature::RemoveFromWorld()
