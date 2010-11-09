@@ -87,7 +87,7 @@ void Pet::AddToWorld()
         GetCharmInfo()->SetIsFollowing(false);
         GetCharmInfo()->SetIsReturning(false);
     }
-
+    ASSERT(GetAI());
 }
 
 void Pet::RemoveFromWorld()
