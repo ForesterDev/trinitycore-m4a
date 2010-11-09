@@ -1,19 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "gamePCH.h"
@@ -63,15 +63,7 @@ ArenaTeam::ArenaTeam()
     m_stats.games_week    = 0;
     m_stats.games_season  = 0;
     m_stats.rank          = 0;
-    /* warning: comparison of unsigned expression >= 0 is always true
-    if (sWorld.getIntConfig(CONFIG_ARENA_START_RATING) >= 0)
-    m_stats.rating = sWorld.getIntConfig(CONFIG_ARENA_START_RATING);
-    else if (sWorld.getIntConfig(CONFIG_ARENA_SEASON_ID) >= 6)
-        m_stats.rating    = 0;
-    else
-        m_stats.rating    = 1500;
-    */
-    m_stats.rating = sWorld.getIntConfig(CONFIG_ARENA_START_RATING);
+    m_stats.rating        = sWorld.getIntConfig(CONFIG_ARENA_START_RATING);
     m_stats.wins_week     = 0;
     m_stats.wins_season   = 0;
 }
@@ -145,7 +137,7 @@ bool ArenaTeam::AddMember(const uint64& PlayerGuid)
         if (!result)
             return false;
 
-        plName = (*result)[0].GetCppString();
+        plName = (*result)[0].GetString();
         plClass = (*result)[1].GetUInt8();
 
         // check if player already in arenateam of that size
@@ -158,17 +150,13 @@ bool ArenaTeam::AddMember(const uint64& PlayerGuid)
 
     plMMRating = sWorld.getIntConfig(CONFIG_ARENA_START_MATCHMAKER_RATING);
     plPRating = 0;
-
+    
     if (sWorld.getIntConfig(CONFIG_ARENA_START_PERSONAL_RATING) > 0)
         plPRating = sWorld.getIntConfig(CONFIG_ARENA_START_PERSONAL_RATING);
-    else
-    {
-        if (sWorld.getIntConfig(CONFIG_ARENA_SEASON_ID) < 6)
-            plPRating = 1500;
-        else
-            if (GetRating() >= low_rating_threshold)
-                plPRating = low_rating_threshold;
-    }
+    else if (GetRating() >= low_rating_threshold)
+        plPRating = low_rating_threshold;
+
+    sWorld.getIntConfig(CONFIG_ARENA_START_PERSONAL_RATING);
 
     QueryResult result = CharacterDatabase.PQuery("SELECT matchmaker_rating FROM character_arena_stats WHERE guid='%u' AND slot='%u'", GUID_LOPART(PlayerGuid), GetSlot());
     if (result)
@@ -214,7 +202,7 @@ bool ArenaTeam::LoadArenaTeamFromDB(QueryResult arenaTeamDataResult)
     Field *fields = arenaTeamDataResult->Fetch();
 
     m_TeamId             = fields[0].GetUInt32();
-    m_Name               = fields[1].GetCppString();
+    m_Name               = fields[1].GetString();
     m_CaptainGuid        = MAKE_NEW_GUID(fields[2].GetUInt32(), 0, HIGHGUID_PLAYER);
     m_Type               = fields[3].GetUInt32();
     m_BackgroundColor    = fields[4].GetUInt32();
@@ -279,7 +267,7 @@ bool ArenaTeam::LoadMembersFromDB(QueryResult arenaTeamMembersResult)
         newmember.wins_week         = fields[3].GetUInt32();
         newmember.games_season      = fields[4].GetUInt32();
         newmember.wins_season       = fields[5].GetUInt32();
-        newmember.name              = fields[6].GetCppString();
+        newmember.name              = fields[6].GetString();
         newmember.Class             = fields[7].GetUInt8();
         newmember.personal_rating   = personalrating;
         newmember.matchmaker_rating = matchmakerrating;
@@ -672,6 +660,7 @@ int32 ArenaTeam::GetRatingMod(uint32 own_rating, uint32 enemy_rating, bool won, 
 
 int32 ArenaTeam::GetPersonalRatingMod(int32 base_rating, uint32 own_rating, uint32 enemy_rating)
 {
+    // max (2 * team rating gain/loss), min 0 gain/loss
     float chance = GetChanceAgainst(own_rating, enemy_rating);
     chance *= 2.0f;
     return (int32)ceil(float(base_rating) * chance);
@@ -699,6 +688,7 @@ void ArenaTeam::FinishGame(int32 mod)
 int32 ArenaTeam::WonAgainst(uint32 againstRating)
 {
     // called when the team has won
+    // own team rating versus opponents matchmaker rating
     int32 mod = GetRatingMod(m_stats.rating, againstRating, true);
 
     // modify the team stats accordingly
@@ -713,6 +703,7 @@ int32 ArenaTeam::WonAgainst(uint32 againstRating)
 int32 ArenaTeam::LostAgainst(uint32 againstRating)
 {
     // called when the team has lost
+    // own team rating versus opponents matchmaker rating
     int32 mod = GetRatingMod(m_stats.rating, againstRating, false);
 
     // modify the team stats accordingly

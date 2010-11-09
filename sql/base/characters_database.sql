@@ -489,6 +489,33 @@ LOCK TABLES `character_aura` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `character_banned`
+--
+
+DROP TABLE IF EXISTS `character_banned`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `character_banned` (
+  `guid` int(11) NOT NULL default '0' COMMENT 'Account id',
+  `bandate` bigint(40) NOT NULL default '0',
+  `unbandate` bigint(40) NOT NULL default '0',
+  `bannedby` varchar(50) NOT NULL,
+  `banreason` varchar(255) NOT NULL,
+  `active` tinyint(4) NOT NULL default '1',
+  PRIMARY KEY  (`guid`,`bandate`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Ban List';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `character_banned`
+--
+
+LOCK TABLES `character_banned` WRITE;
+/*!40000 ALTER TABLE `character_banned` DISABLE KEYS */;
+/*!40000 ALTER TABLE `character_banned` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `character_battleground_data`
 --
 
@@ -828,20 +855,20 @@ DROP TABLE IF EXISTS `character_queststatus`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_queststatus` (
-  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `quest` int(11) unsigned NOT NULL default '0' COMMENT 'Quest Identifier',
-  `status` int(11) unsigned NOT NULL default '0',
-  `rewarded` tinyint(1) unsigned NOT NULL default '0',
-  `explored` tinyint(1) unsigned NOT NULL default '0',
-  `timer` bigint(20) unsigned NOT NULL default '0',
-  `mobcount1` int(11) unsigned NOT NULL default '0',
-  `mobcount2` int(11) unsigned NOT NULL default '0',
-  `mobcount3` int(11) unsigned NOT NULL default '0',
-  `mobcount4` int(11) unsigned NOT NULL default '0',
-  `itemcount1` int(11) unsigned NOT NULL default '0',
-  `itemcount2` int(11) unsigned NOT NULL default '0',
-  `itemcount3` int(11) unsigned NOT NULL default '0',
-  `itemcount4` int(11) unsigned NOT NULL default '0',
+  `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
+  `quest` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Quest Identifier',
+  `status` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `rewarded` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `explored` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `timer` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `mobcount1` smallint(3) unsigned NOT NULL DEFAULT '0',
+  `mobcount2` smallint(3) unsigned NOT NULL DEFAULT '0',
+  `mobcount3` smallint(3) unsigned NOT NULL DEFAULT '0',
+  `mobcount4` smallint(3) unsigned NOT NULL DEFAULT '0',
+  `itemcount1` smallint(3) unsigned NOT NULL DEFAULT '0',
+  `itemcount2` smallint(3) unsigned NOT NULL DEFAULT '0',
+  `itemcount3` smallint(3) unsigned NOT NULL DEFAULT '0',
+  `itemcount4` smallint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY  (`guid`,`quest`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1506,7 +1533,7 @@ DROP TABLE IF EXISTS `guild_bank_right`;
 CREATE TABLE `guild_bank_right` (
   `guildid` int(11) unsigned NOT NULL default '0',
   `TabId` tinyint(1) unsigned NOT NULL default '0',
-  `rid` int(11) unsigned NOT NULL default '0',
+  `rid` tinyint(1) unsigned NOT NULL default '0',
   `gbright` tinyint(3) unsigned NOT NULL default '0',
   `SlotPerDay` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guildid`,`TabId`,`rid`),
@@ -1632,7 +1659,7 @@ DROP TABLE IF EXISTS `guild_rank`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `guild_rank` (
   `guildid` int(6) unsigned NOT NULL default '0',
-  `rid` int(11) unsigned NOT NULL,
+  `rid` tinyint(1) unsigned NOT NULL,
   `rname` varchar(255) NOT NULL default '',
   `rights` int(3) unsigned NOT NULL default '0',
   `BankMoneyPerDay` int(11) unsigned NOT NULL default '0',
@@ -1762,6 +1789,29 @@ CREATE TABLE `item_refund_instance` (
 LOCK TABLES `item_refund_instance` WRITE;
 /*!40000 ALTER TABLE `item_refund_instance` DISABLE KEYS */;
 /*!40000 ALTER TABLE `item_refund_instance` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `item_soulbound_trade_data`
+--
+
+DROP TABLE IF EXISTS `item_soulbound_trade_data`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `item_soulbound_trade_data` (
+  `itemGuid` int(11) unsigned NOT NULL COMMENT 'Item GUID',
+  `allowedPlayers` text NOT NULL COMMENT 'Space separated GUID list of players who can receive this item in trade',
+  PRIMARY KEY (`itemGuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Item Refund System';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `item_soulbound_trade_data`
+--
+
+LOCK TABLES `item_soulbound_trade_data` WRITE;
+/*!40000 ALTER TABLE `item_soulbound_trade_data` DISABLE KEYS */;
+/*!40000 ALTER TABLE `item_soulbound_trade_data` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1990,6 +2040,29 @@ CREATE TABLE `petition_sign` (
 LOCK TABLES `petition_sign` WRITE;
 /*!40000 ALTER TABLE `petition_sign` DISABLE KEYS */;
 /*!40000 ALTER TABLE `petition_sign` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `pool_quest_save`
+--
+
+DROP TABLE IF EXISTS `pool_quest_save`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `pool_quest_save` (
+  `pool_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `quest_id` int(10) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`pool_id`,`quest_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `pool_quest_save`
+--
+
+LOCK TABLES `pool_quest_save` WRITE;
+/*!40000 ALTER TABLE `pool_quest_save` DISABLE KEYS */;
+/*!40000 ALTER TABLE `pool_quest_save` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

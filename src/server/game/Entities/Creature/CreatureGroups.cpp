@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "gamePCH.h"
@@ -94,6 +92,21 @@ void CreatureGroupManager::LoadCreatureFormations()
         return;
     }
 
+    std::set<uint32> guidSet;
+
+    QueryResult guidResult = WorldDatabase.PQuery("SELECT guid FROM creature");
+    if (guidResult)
+    {
+        do 
+        {
+            Field *fields = guidResult->Fetch();
+            uint32 guid = fields[0].GetUInt32();
+
+            guidSet.insert(guid);
+
+        } while (guidResult->NextRow());
+    }
+
     uint64 total_records = result->GetRowCount();
     barGoLink bar(total_records);
     Field *fields;
@@ -124,16 +137,14 @@ void CreatureGroupManager::LoadCreatureFormations()
 
         // check data correctness
         {
-            QueryResult result = WorldDatabase.PQuery("SELECT guid FROM creature WHERE guid = %u", group_member->leaderGUID);
-            if (!result)
+            if (guidSet.find(group_member->leaderGUID) == guidSet.end())
             {
                 sLog.outErrorDb("creature_formations table leader guid %u incorrect (not exist)", group_member->leaderGUID);
                 delete group_member;
                 continue;
             }
 
-            result = WorldDatabase.PQuery("SELECT guid FROM creature WHERE guid = %u", memberGUID);
-            if (!result)
+            if (guidSet.find(memberGUID) == guidSet.end())
             {
                 sLog.outErrorDb("creature_formations table member guid %u incorrect (not exist)", memberGUID);
                 delete group_member;

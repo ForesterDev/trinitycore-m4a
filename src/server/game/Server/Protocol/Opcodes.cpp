@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 /** \file
@@ -775,7 +773,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x2E7*/ { "CMSG_WARDEN_DATA",                             STATUS_LOGGEDIN, &WorldSession::HandleWardenDataOpcode          },
     /*0x2E8*/ { "SMSG_GROUP_JOINED_BATTLEGROUND",               STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x2E9*/ { "MSG_BATTLEGROUND_PLAYER_POSITIONS",            STATUS_LOGGEDIN, &WorldSession::HandleBattlegroundPlayerPositionsOpcode},
-    /*0x2EA*/ { "CMSG_PET_STOP_ATTACK",                         STATUS_NEVER,    &WorldSession::Handle_NULL                     },
+    /*0x2EA*/ { "CMSG_PET_STOP_ATTACK",                         STATUS_LOGGEDIN, &WorldSession::HandlePetStopAttack             },
     /*0x2EB*/ { "SMSG_BINDER_CONFIRM",                          STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x2EC*/ { "SMSG_BATTLEGROUND_PLAYER_JOINED",              STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x2ED*/ { "SMSG_BATTLEGROUND_PLAYER_LEFT",                STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
@@ -1209,7 +1207,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x499*/ { "SMSG_PET_LEARNED_SPELL",                       STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x49A*/ { "SMSG_PET_REMOVED_SPELL",                       STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x49B*/ { "CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE",      STATUS_LOGGEDIN, &WorldSession::HandleChangeSeatsOnControlledVehicle},
-    /*0x49C*/ { "CMSG_HEARTH_AND_RESURRECT",                    STATUS_NEVER,    &WorldSession::Handle_NULL                     },
+    /*0x49C*/ { "CMSG_HEARTH_AND_RESURRECT",                    STATUS_LOGGEDIN, &WorldSession::HandleHearthAndResurrect,       },
     /*0x49D*/ { "SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA",    STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x49E*/ { "SMSG_CRITERIA_DELETED",                        STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x49F*/ { "SMSG_ACHIEVEMENT_DELETED",                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
@@ -1243,7 +1241,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x4BB*/ { "SMSG_CALENDAR_ACTION_PENDING",                 STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x4BC*/ { "SMSG_EQUIPMENT_SET_LIST",                      STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x4BD*/ { "CMSG_EQUIPMENT_SET_SAVE",                      STATUS_LOGGEDIN, &WorldSession::HandleEquipmentSetSave          },
-    /*0x4BE*/ { "CMSG_UPDATE_PROJECTILE_POSITION",              STATUS_NEVER,    &WorldSession::Handle_NULL                     },
+    /*0x4BE*/ { "CMSG_UPDATE_PROJECTILE_POSITION",              STATUS_UNHANDLED,&WorldSession::Handle_NULL                     },
     /*0x4BF*/ { "SMSG_SET_PROJECTILE_POSITION",                 STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x4C0*/ { "SMSG_TALENTS_INFO",                            STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x4C1*/ { "CMSG_LEARN_PREVIEW_TALENTS",                   STATUS_LOGGEDIN, &WorldSession::HandleLearnPreviewTalents       },

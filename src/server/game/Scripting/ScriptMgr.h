@@ -1,62 +1,71 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef SC_SCRIPTMGR_H
 #define SC_SCRIPTMGR_H
 
 #include "Common.h"
-#include "CompilerDefs.h"
-#include "DBCStructure.h"
-#include "Config.h"
-#include "ObjectMgr.h"
-#include "Battleground.h"
-#include "OutdoorPvPMgr.h"
-#include "SharedDefines.h"
-#include "Chat.h"
-#include "Weather.h"
-#include "AuctionHouseMgr.h"
-#include "ConditionMgr.h"
-#include "Vehicle.h"
-#include "Transport.h"
-#include "AchievementMgr.h"
+#include <ace/Singleton.h>
 
-class Player;
+#include "DBCStores.h"
+#include "Player.h"
+#include "SharedDefines.h"
+#include "World.h"
+#include "Weather.h"
+
+class AuctionHouseObject;
+class AuraScript;
+class Battleground;
+class BattlegroundMap;
+class Channel;
+class ChatCommand;
 class Creature;
 class CreatureAI;
-class InstanceScript;
-class SpellScript;
-class AuraScript;
-class Quest;
-class Item;
+class DynamicObject;
 class GameObject;
-class SpellCastTargets;
+class Guild;
+class GridMap;
+class Group;
+class InstanceMap;
+class InstanceScript;
+class Item;
 class Map;
-class Unit;
-class WorldObject;
-struct ItemPrototype;
-class Spell;
+class OutdoorPvP;
+class Player;
+class Quest;
 class ScriptMgr;
+class Spell;
+class SpellScript;
+class SpellCastTargets;
+class Transport;
+class Unit;
+class Vehicle;
+class WorldPacket;
 class WorldSocket;
+class WorldObject;
+
+struct AchievementCriteriaData;
+struct AuctionEntry;
+struct Condition;
+struct ItemPrototype;
+struct OutdoorPvPData;
 
 #define VISIBLE_RANGE       (166.0f)                        //MAX visible range (size of grid)
-#define DEFAULT_TEXT        "<Trinity Script Text Entry Missing!>"
 
 // Generic scripting text function.
 void DoScriptText(int32 textEntry, WorldObject* pSource, Unit *pTarget = NULL);
@@ -67,7 +76,6 @@ void DoScriptText(int32 textEntry, WorldObject* pSource, Unit *pTarget = NULL);
     MailScript
     SessionScript
     CollisionScript
-    GroupScript
     ArenaTeamScript
 
 */
@@ -562,7 +570,7 @@ class ConditionScript : public ScriptObject
         bool IsDatabaseBound() const { return true; }
 
         // Called when a single condition is checked for a player.
-        virtual bool OnConditionCheck(Condition* /*condition*/, Player* /*player*/, Unit* /*targetOverride*/) { return true; }
+        virtual bool OnConditionCheck(Condition* /*condition*/, Player* /*player*/, Unit* /*invoker*/) { return true; }
 };
 
 class VehicleScript : public ScriptObject
@@ -679,7 +687,7 @@ class PlayerScript : public ScriptObject
 
         // Called when a duel starts (after 3s countdown)
         virtual void OnDuelStart(Player* /*player1*/, Player* /*player2*/) { }
-        
+
         // Called when a duel ends
         virtual void OnDuelEnd(Player* /*winner*/, Player* /*looser*/, DuelCompleteType /*type*/) { }
 
@@ -695,7 +703,15 @@ class PlayerScript : public ScriptObject
         virtual void OnTextEmote(Player* /*player*/, uint32 /*text_emote*/, uint32 /*emoteNum*/, uint64 /*guid*/) { }
 
         // Called in Spell::cast
-        virtual void OnSpellCast(Player * /*player*/, Spell * /*spell*/, bool /*skipCheck*/) { }
+        virtual void OnSpellCast(Player* /*player*/, Spell * /*spell*/, bool /*skipCheck*/) { }
+
+        // Called when a player logs in or out
+        virtual void OnLogin(Player* /*player*/) { }
+        virtual void OnLogout(Player* /*player*/) { }
+
+        // Called when a player is created/deleted
+        virtual void OnCreate(Player* /*player*/) { }
+        virtual void OnDelete(uint64 /*guid*/) { }
 };
 
 class GuildScript : public ScriptObject
@@ -708,11 +724,33 @@ class GuildScript : public ScriptObject
 
         bool IsDatabaseBound() const { return false; }
 
-        virtual void OnAddMember(Guild* /*guild*/, Player* /*player*/, uint32& /*plRank*/) { }
+        virtual void OnAddMember(Guild* /*guild*/, Player* /*player*/, uint8& /*plRank*/) { }
         virtual void OnRemoveMember(Guild* /*guild*/, Player* /*player*/, bool /*isDisbanding*/, bool /*isKicked*/) { }
-        virtual void OnMOTDChanged(Guild* /*guild*/, std::string /*newMotd*/) { }
-        virtual void OnGInfoChanged(Guild* /*guild*/, std::string /*newGInfo*/) { }
+        virtual void OnMOTDChanged(Guild* /*guild*/, const std::string& /*newMotd*/) { }
+        virtual void OnInfoChanged(Guild* /*guild*/, const std::string& /*newInfo*/) { }
+        virtual void OnCreate(Guild* /*guild*/, Player* /*leader*/, const std::string& /*name*/) { }
         virtual void OnDisband(Guild* /*guild*/) { }
+        virtual void OnMemberWitdrawMoney(Guild* /*guild*/, Player* /*player*/, uint32& /*amount*/, bool /*isRepair*/) { }
+        virtual void OnMemberDepositMoney(Guild* /*guild*/, Player* /*player*/, uint32& /*amount*/) { }
+        virtual void OnItemMove(Guild* /*guild*/, Player* /*player*/, Item* /*pItem*/, bool /*isSrcBank*/, uint8 /*srcContainer*/, uint8 /*srcSlotId*/,
+            bool /*isDestBank*/, uint8 /*destContainer*/, uint8 /*destSlotId*/) { }
+        virtual void OnEvent(Guild* /*guild*/, uint8 /*eventType*/, uint32 /*playerGuid1*/, uint32 /*playerGuid2*/, uint8 /*newRank*/) { }
+        virtual void OnBankEvent(Guild* /*guild*/, uint8 /*eventType*/, uint8 /*tabId*/, uint32 /*playerGuid*/, uint32 /*itemOrMoney*/, uint16 /*itemStackCount*/, uint8 /*destTabId*/) { }
+};
+
+class GroupScript : public ScriptObject
+{
+protected:
+    GroupScript(const char* name);
+
+public:
+    bool IsDatabaseBound() const { return false; }
+
+    virtual void OnAddMember(Group* /*group*/, uint64 /*guid*/) { }
+    virtual void OnInviteMember(Group* /*group*/, uint64 /*guid*/) { }
+    virtual void OnRemoveMember(Group* /*group*/, uint64 /*guid*/, RemoveMethod& /*method*/) { }
+    virtual void OnChangeLeader(Group* /*group*/, uint64 /*newLeaderGuid*/, uint64 /*oldLeaderGuid*/) { }
+    virtual void OnDisband(Group* /*group*/) { }
 };
 
 // Placed here due to ScriptRegistry::AddScript dependency.
@@ -744,7 +782,7 @@ class ScriptMgr
 
         void CreateSpellScripts(uint32 spell_id, std::list<SpellScript*>& script_vector);
         void CreateAuraScripts(uint32 spell_id, std::list<AuraScript*>& script_vector);
-        void CreateSpellScriptLoaders(uint32 spell_id, std::vector<std::pair<SpellScriptLoader*, SpellScriptsMap::iterator> >& script_vector);
+        void CreateSpellScriptLoaders(uint32 spell_id, std::vector<std::pair<SpellScriptLoader*, std::multimap<uint32, uint32>::iterator> >& script_vector);
 
     public: /* ServerScript */
 
@@ -855,7 +893,7 @@ class ScriptMgr
 
     public: /* ConditionScript */
 
-        bool OnConditionCheck(Condition* condition, Player* player, Unit* targetOverride);
+        bool OnConditionCheck(Condition* condition, Player* player, Unit* invoker);
 
     public: /* VehicleScript */
 
@@ -904,14 +942,32 @@ class ScriptMgr
         void OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string msg, Channel* channel);
         void OnPlayerEmote(Player* player, uint32 emote);
         void OnPlayerTextEmote(Player* player, uint32 text_emote, uint32 emoteNum, uint64 guid);
-        void OnPlayerSpellCast(Player *player, Spell *spell, bool skipCheck);
+        void OnPlayerSpellCast(Player* player, Spell *spell, bool skipCheck);
+        void OnPlayerLogin(Player* player);
+        void OnPlayerLogout(Player* player);
+        void OnPlayerCreate(Player* player);
+        void OnPlayerDelete(uint64 guid);
 
     public: /* GuildScript */
-        void OnGuildAddMember(Guild *guild, Player *player, uint32& plRank);
+        void OnGuildAddMember(Guild *guild, Player *player, uint8& plRank);
         void OnGuildRemoveMember(Guild *guild, Player *player, bool isDisbanding, bool isKicked);
-        void OnGuildMOTDChanged(Guild *guild, std::string newMotd);
-        void OnGuildInfoChanged(Guild *guild, std::string newGInfo);
+        void OnGuildMOTDChanged(Guild *guild, const std::string& newMotd);
+        void OnGuildInfoChanged(Guild *guild, const std::string& newInfo);
+        void OnGuildCreate(Guild *guild, Player* leader, const std::string& name);
         void OnGuildDisband(Guild *guild);
+        void OnGuildMemberWitdrawMoney(Guild* guild, Player* player, uint32 &amount, bool isRepair);
+        void OnGuildMemberDepositMoney(Guild* guild, Player* player, uint32 &amount);
+        void OnGuildItemMove(Guild* guild, Player* player, Item* pItem, bool isSrcBank, uint8 srcContainer, uint8 srcSlotId, 
+            bool isDestBank, uint8 destContainer, uint8 destSlotId);
+        void OnGuildEvent(Guild* guild, uint8 eventType, uint32 playerGuid1, uint32 playerGuid2, uint8 newRank);
+        void OnGuildBankEvent(Guild* guild, uint8 eventType, uint8 tabId, uint32 playerGuid, uint32 itemOrMoney, uint16 itemStackCount, uint8 destTabId);
+
+    public: /* GroupScript */
+        void OnGroupAddMember(Group* group, uint64 guid);
+        void OnGroupInviteMember(Group* group, uint64 guid);
+        void OnGroupRemoveMember(Group* group, uint64 guid, RemoveMethod method);
+        void OnGroupChangeLeader(Group* group, uint64 newLeaderGuid, uint64 oldLeaderGuid);
+        void OnGroupDisband(Group* group);
 
     public: /* ScriptRegistry */
 
@@ -986,7 +1042,7 @@ class ScriptMgr
                         else
                         {
                             // The script uses a script name from database, but isn't assigned to anything.
-                            if (script->GetName().find("example") == std::string::npos)
+                            if (script->GetName().find("example") == std::string::npos && script->GetName().find("Smart") == std::string::npos)
                                 sLog.outErrorDb("Script named '%s' does not have a script name assigned in database.",
                                     script->GetName().c_str());
                         }

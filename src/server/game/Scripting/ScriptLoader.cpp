@@ -1,17 +1,18 @@
-/* Copyright (C) 2008 - 2010 TrinityCore <http://www.trinitycore.org>
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+/*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "ScriptPCH.h"
@@ -23,6 +24,7 @@ void AddSC_example_creature();
 void AddSC_example_escort();
 void AddSC_example_gossip_codebox();
 void AddSC_example_misc();
+void AddSC_example_commandscript();
 
 // spells
 void AddSC_deathknight_spell_scripts();
@@ -40,6 +42,8 @@ void AddSC_quest_spell_scripts();
 void AddSC_item_spell_scripts();
 void AddSC_example_spell_scripts();
 
+void AddSC_SmartSCripts();
+
 #ifdef SCRIPTS
 //world
 void AddSC_areatrigger_scripts();
@@ -55,6 +59,7 @@ void AddSC_npc_innkeeper();
 void AddSC_npcs_special();
 void AddSC_npc_taxi();
 void AddSC_achievement_scripts();
+void AddSC_dungeon_finder();
 
 //eastern kingdoms
 void AddSC_alterac_valley();                 //Alterac Valley
@@ -452,7 +457,9 @@ void AddSC_boss_lord_marrowgar();       // Icecrown Citadel
 void AddSC_boss_lady_deathwhisper();
 void AddSC_boss_deathbringer_saurfang();
 void AddSC_boss_festergut();
+void AddSC_boss_rotface();
 void AddSC_boss_professor_putricide();
+void AddSC_boss_blood_prince_council();
 void AddSC_icecrown_citadel_teleport();
 void AddSC_instance_icecrown_citadel();
 
@@ -568,6 +575,7 @@ void AddScripts()
 {
     AddExampleScripts();
     AddSpellScripts();
+    AddSC_SmartSCripts();
 #ifdef SCRIPTS
     AddWorldScripts();
     AddEasternKingdomsScripts();
@@ -586,6 +594,7 @@ void AddExampleScripts()
     AddSC_example_escort();
     AddSC_example_gossip_codebox();
     AddSC_example_misc();
+    AddSC_example_commandscript();
 }
 
 void AddSpellScripts()
@@ -623,6 +632,7 @@ void AddWorldScripts()
     AddSC_npc_taxi();
     AddSC_achievement_scripts();
     AddSC_chat_log();
+    AddSC_dungeon_finder();
 #endif
 }
 
@@ -1118,7 +1128,9 @@ void AddNorthrendScripts()
     AddSC_boss_lady_deathwhisper();
     AddSC_boss_deathbringer_saurfang();
     AddSC_boss_festergut();
+    AddSC_boss_rotface();
     AddSC_boss_professor_putricide();
+    AddSC_boss_blood_prince_council();
     AddSC_icecrown_citadel_teleport();
     AddSC_instance_icecrown_citadel();
 

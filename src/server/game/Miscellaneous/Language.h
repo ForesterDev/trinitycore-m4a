@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef __TRINITY_LANGUAGE_H
@@ -730,7 +728,9 @@ enum TrinityStrings
 
     LANG_COMMAND_CREATURETEMPLATE_NOTFOUND = 817,
     LANG_COMMAND_CREATURESTORAGE_NOTFOUND  = 818,
-    // Room for in-game strings           819-999 not used
+
+    LANG_CHANNEL_CITY                   = 819,
+    // Room for in-game strings           820-999 not used
 
     // Level 4 (CLI only commands)
     LANG_COMMAND_EXIT                   = 1000,
@@ -794,12 +794,18 @@ enum TrinityStrings
     LANG_TAXINODE_ENTRY_LIST_CHAT       = 1128,
     LANG_TAXINODE_ENTRY_LIST_CONSOLE    = 1129,
     LANG_COMMAND_EXPORT_DELETED_CHAR    = 1130,
-    // Room for more level 3              1131-1199 not used
+    LANG_BANLIST_MATCHINGCHARACTER      = 1131,
+    LANG_BANLIST_CHARACTERS             = 1132,
+    LANG_BANLIST_CHARACTERS_HEADER      = 1133,
+    // Room for more level 3              1134-1199 not used
 
     // Debug commands
     LANG_CINEMATIC_NOT_EXIST            = 1200,
     LANG_MOVIE_NOT_EXIST                = 1201,
-    // Room for more debug                1202-1299 not used
+    LANG_DEBUG_AREATRIGGER_ON           = 1202,
+    LANG_DEBUG_AREATRIGGER_OFF          = 1203,
+    LANG_DEBUG_AREATRIGGER_REACHED      = 1204,
+    // Room for more debug                1205-1299 not used
 
     // FREE IDS                           1300-9999
 

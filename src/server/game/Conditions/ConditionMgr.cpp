@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 
@@ -30,10 +28,11 @@
 #include "InstanceScript.h"
 #include "ConditionMgr.h"
 #include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 // Checks if player meets the condition
 // Can have CONDITION_SOURCE_TYPE_NONE && !mReferenceId if called from a special event (ie: eventAI)
-bool Condition::Meets(Player * player, Unit* targetOverride)
+bool Condition::Meets(Player * player, Unit* invoker)
 {
     if (!player)
     {
@@ -49,7 +48,11 @@ bool Condition::Meets(Player * player, Unit* targetOverride)
             condMeets = true;                                    // empty condition, always met
             break;
         case CONDITION_AURA:
-            condMeets = player->HasAuraEffect(mConditionValue1, mConditionValue2);
+            refId = 0;
+            if (!mConditionValue3)
+                condMeets = player->HasAuraEffect(mConditionValue1, mConditionValue2);
+            else if (Unit* target = player->GetSelectedUnit())
+                condMeets = target->HasAuraEffect(mConditionValue1, mConditionValue2);
             break;
         case CONDITION_ITEM:
             condMeets = player->HasItemCount(mConditionValue1, mConditionValue2);
@@ -93,22 +96,16 @@ bool Condition::Meets(Player * player, Unit* targetOverride)
             condMeets = (status == QUEST_STATUS_INCOMPLETE);
             break;
         }
+        case CONDITION_QUEST_COMPLETE:
+        {
+            QuestStatus status = player->GetQuestStatus(mConditionValue1);
+            condMeets = (status == QUEST_STATUS_COMPLETE && !player->GetQuestRewardStatus(mConditionValue1));
+            break;
+        }
         case CONDITION_QUEST_NONE:
         {
             QuestStatus status = player->GetQuestStatus(mConditionValue1);
             condMeets = (status == QUEST_STATUS_NONE);
-            break;
-        }
-        case CONDITION_AD_COMMISSION_AURA:
-        {
-            Unit::AuraApplicationMap const& auras = player->GetAppliedAuras();
-            for (Unit::AuraApplicationMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
-                if ((itr->second->GetBase()->GetSpellProto()->Attributes & 0x1000010) && itr->second->GetBase()->GetSpellProto()->SpellVisual[0] == 3580)
-                {
-                    condMeets = true;
-                    break;
-                }
-            condMeets = false;
             break;
         }
         case CONDITION_NO_AURA:
@@ -131,8 +128,6 @@ bool Condition::Meets(Player * player, Unit* targetOverride)
         case CONDITION_CREATURE_TARGET:
         {
             Unit* target = player->GetSelectedUnit();
-            if (targetOverride)
-                target = targetOverride;
             if (target)
                 if (Creature* cTarget = target->ToCreature())
                     if (cTarget->GetEntry() == mConditionValue1)
@@ -142,8 +137,6 @@ bool Condition::Meets(Player * player, Unit* targetOverride)
         case CONDITION_TARGET_HEALTH_BELOW_PCT:
         {
             Unit* target = player->GetSelectedUnit();
-            if (targetOverride)
-                target = targetOverride;
             if (target)
                 condMeets = !target->HealthAbovePct(mConditionValue1);
             break;
@@ -170,6 +163,46 @@ bool Condition::Meets(Player * player, Unit* targetOverride)
         case CONDITION_SPELL:
             condMeets = player->HasSpell(mConditionValue1);
             break;
+        case CONDITION_NOITEM:
+            condMeets = !player->HasItemCount(mConditionValue1, 1, mConditionValue2 ? true : false);
+            break;
+        case CONDITION_LEVEL:
+            {
+                switch (mConditionValue2)
+                {
+                    case LVL_COND_EQ:
+                        condMeets = player->getLevel() == mConditionValue1;
+                        break;
+                    case LVL_COND_HIGH:
+                        condMeets = player->getLevel() > mConditionValue1;
+                        break;
+                    case LVL_COND_LOW:
+                        condMeets = player->getLevel() < mConditionValue1;
+                        break;
+                    case LVL_COND_HIGH_EQ:
+                        condMeets = player->getLevel() >= mConditionValue1;
+                        break;
+                    case LVL_COND_LOW_EQ:
+                        condMeets = player->getLevel() <= mConditionValue1;
+                        break;
+                }
+                break;
+            }
+        case CONDITION_DRUNKENSTATE:
+            {
+                condMeets = (uint32)Player::GetDrunkenstateByValue(player->GetDrunkValue()) >= mConditionValue1;
+                break;
+            }
+        case CONDITION_NEAR_CREATURE:
+            {
+                condMeets = GetClosestCreatureWithEntry(player, mConditionValue1, (float)mConditionValue2) ? true : false;
+                break;
+            }
+        case CONDITION_NEAR_GAMEOBJECT:
+            {
+                condMeets = GetClosestGameObjectWithEntry(player, mConditionValue1, (float)mConditionValue2) ? true : false;
+                break;
+            }
         default:
             condMeets = false;
             refId = 0;
@@ -197,7 +230,7 @@ bool Condition::Meets(Player * player, Unit* targetOverride)
     if (sendErrorMsg && ErrorTextd && (!condMeets || !refMeets))//send special error from DB
         player->m_ConditionErrorMsgId = ErrorTextd;
 
-    bool script = sScriptMgr.OnConditionCheck(this, player, targetOverride); // Returns true by default.
+    bool script = sScriptMgr.OnConditionCheck(this, player, invoker); // Returns true by default.
     return condMeets && refMeets && script;
 }
 
@@ -219,7 +252,7 @@ ConditionList ConditionMgr::GetConditionReferences(uint32 refId)
     return conditions;
 }
 
-bool ConditionMgr::IsPlayerMeetToConditionList(Player* player,const ConditionList& conditions, Unit* targetOverride)
+bool ConditionMgr::IsPlayerMeetToConditionList(Player* player,const ConditionList& conditions, Unit* invoker)
 {
     std::map<uint32, bool>ElseGroupMap;
     for (ConditionList::const_iterator i = conditions.begin(); i != conditions.end(); ++i)
@@ -238,7 +271,7 @@ bool ConditionMgr::IsPlayerMeetToConditionList(Player* player,const ConditionLis
                 ConditionReferenceMap::const_iterator ref = m_ConditionReferenceMap.find((*i)->mReferenceId);
                 if (ref != m_ConditionReferenceMap.end())
                 {
-                    if(!IsPlayerMeetToConditionList(player, (*ref).second, targetOverride))
+                    if(!IsPlayerMeetToConditionList(player, (*ref).second, invoker))
                         ElseGroupMap[(*i)->mElseGroup] = false;
                 }
                 else
@@ -250,7 +283,7 @@ bool ConditionMgr::IsPlayerMeetToConditionList(Player* player,const ConditionLis
             }
             else //handle normal condition
             {
-                if (!(*i)->Meets(player, targetOverride))
+                if (!(*i)->Meets(player, invoker))
                     ElseGroupMap[(*i)->mElseGroup] = false;
             }
         }
@@ -262,7 +295,7 @@ bool ConditionMgr::IsPlayerMeetToConditionList(Player* player,const ConditionLis
     return false;
 }
 
-bool ConditionMgr::IsPlayerMeetToConditions(Player* player, ConditionList conditions, Unit* targetOverride)
+bool ConditionMgr::IsPlayerMeetToConditions(Player* player, ConditionList conditions, Unit* invoker)
 {
     if (conditions.empty())
         return true;
@@ -271,9 +304,9 @@ bool ConditionMgr::IsPlayerMeetToConditions(Player* player, ConditionList condit
         player->m_ConditionErrorMsgId = 0;
 
     sLog.outDebug("ConditionMgr::IsPlayerMeetToConditions");
-    bool result = IsPlayerMeetToConditionList(player, conditions, targetOverride);
+    bool result = IsPlayerMeetToConditionList(player, conditions, invoker);
 
-    if (player && player->m_ConditionErrorMsgId && player->GetSession())
+    if (player && player->m_ConditionErrorMsgId && player->GetSession() && !result)
             player->GetSession()->SendNotification(player->m_ConditionErrorMsgId);//m_ConditionErrorMsgId is set only if a condition was not met
 
     return result;
@@ -282,7 +315,7 @@ bool ConditionMgr::IsPlayerMeetToConditions(Player* player, ConditionList condit
 ConditionList ConditionMgr::GetConditionsForNotGroupedEntry(ConditionSourceType sType, uint32 uEntry)
 {
     ConditionList spellCond;
-    if (sType > CONDITION_SOURCE_TYPE_NONE && sType < MAX_CONDITIONSOURCETYPE)
+    if (sType > CONDITION_SOURCE_TYPE_NONE && sType < CONDITION_SOURCE_TYPE_MAX)
     {
         ConditionMap::const_iterator itr = m_ConditionMap.find(sType);
         if (itr != m_ConditionMap.end())
@@ -296,6 +329,22 @@ ConditionList ConditionMgr::GetConditionsForNotGroupedEntry(ConditionSourceType 
         }
     }
     return spellCond;
+}
+
+ConditionList ConditionMgr::GetConditionsForVehicleSpell(uint32 creatureID, uint32 spellID)
+{
+    ConditionList cond;
+    VehicleSpellConditionMap::const_iterator itr = m_VehicleSpellConditions.find(creatureID);
+    if (itr != m_VehicleSpellConditions.end())
+    {
+        ConditionTypeMap::const_iterator i = (*itr).second.find(spellID);
+        if (i != (*itr).second.end())
+        {
+            cond = (*i).second;
+            sLog.outDebug("GetConditionsForVehicleSpell: found conditions for Vehicle entry %u spell %u", creatureID, spellID);
+        }
+    }
+    return cond;
 }
 
 void ConditionMgr::LoadConditions(bool isReload)
@@ -358,7 +407,7 @@ void ConditionMgr::LoadConditions(bool isReload)
         cond->mConditionValue2           = fields[6].GetUInt32();
         cond->mConditionValue3           = fields[7].GetUInt32();
         cond->ErrorTextd                 = fields[8].GetUInt32();
-        cond->mScriptId                  = sObjectMgr.GetScriptId(fields[9].GetString());
+        cond->mScriptId                  = sObjectMgr.GetScriptId(fields[9].GetCString());
 
         if (iConditionTypeOrReference >= 0)
             cond->mConditionType = ConditionType(iConditionTypeOrReference);
@@ -471,6 +520,24 @@ void ConditionMgr::LoadConditions(bool isReload)
                 case CONDITION_SOURCE_TYPE_GOSSIP_MENU_OPTION:
                     bIsDone = addToGossipMenuItems(cond);
                     break;
+                case CONDITION_SOURCE_TYPE_VEHICLE_SPELL:
+                    {
+                        //if no list for vehicle create one
+                        if (m_VehicleSpellConditions.find(cond->mSourceGroup) == m_VehicleSpellConditions.end())
+                        {
+                            ConditionTypeMap cmap;
+                            m_VehicleSpellConditions[cond->mSourceGroup] = cmap;
+                        }
+                        //if no list for vehicle's spell create one
+                        if (m_VehicleSpellConditions[cond->mSourceGroup].find(cond->mSourceEntry) == m_VehicleSpellConditions[cond->mSourceGroup].end())
+                        {
+                            ConditionList clist;
+                            m_VehicleSpellConditions[cond->mSourceGroup][cond->mSourceEntry] = clist;
+                        }
+                        m_VehicleSpellConditions[cond->mSourceGroup][cond->mSourceEntry].push_back(cond);
+                        bIsDone = true;
+                        break;
+                    }
                 default:
                     break;
             }
@@ -569,7 +636,7 @@ bool ConditionMgr::addToGossipMenuItems(Condition* cond)
 
 bool ConditionMgr::isSourceTypeValid(Condition* cond)
 {
-    if (cond->mSourceType == CONDITION_SOURCE_TYPE_NONE || cond->mSourceType >= MAX_CONDITIONSOURCETYPE)
+    if (cond->mSourceType == CONDITION_SOURCE_TYPE_NONE || cond->mSourceType >= CONDITION_SOURCE_TYPE_MAX)
     {
         sLog.outErrorDb("Invalid ConditionSourceType %u in `condition` table, ignoring.", uint32(cond->mSourceType));
         return false;
@@ -797,7 +864,7 @@ bool ConditionMgr::isSourceTypeValid(Condition* cond)
             }
 
             bool targetfound = false;
-            for (uint8 i = 0; i < 3; ++i)
+            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             {
                 if (spellProto->EffectImplicitTargetA[i] == TARGET_UNIT_AREA_ENTRY_SRC ||
                     spellProto->EffectImplicitTargetB[i] == TARGET_UNIT_AREA_ENTRY_SRC ||
@@ -817,10 +884,17 @@ bool ConditionMgr::isSourceTypeValid(Condition* cond)
                     spellProto->EffectImplicitTargetB[i] == TARGET_UNIT_CONE_ENTRY)
                 {
                     targetfound = true;
-                    break;
+                    //break;
+                }
+                else if (cond->mConditionValue3 & (1 << i))
+                {
+                    cond->mConditionValue3 &= ~(1 << i);
+                    sLog.outErrorDb("SourceEntry %u in `condition` table does not have any implicit target TARGET_UNIT_NEARBY_ENTRY(38) or TARGET_DST_NEARBY_ENTRY (46)"
+                                    ",TARGET_UNIT_AREA_ENTRY_SRC(7), TARGET_UNIT_AREA_ENTRY_DST(8), TARGET_UNIT_CONE_ENTRY(60), TARGET_GAMEOBJECT_NEARBY_ENTRY(40)"
+                                    "TARGET_GAMEOBJECT_AREA_SRC(51), TARGET_GAMEOBJECT_AREA_DST(52) in effect %u", cond->mSourceEntry, uint32(i));
                 }
             }
-            if (!targetfound)
+            if (!targetfound && !cond->mConditionValue3) // cond->mConditionValue3 already errored up there
             {
                 sLog.outErrorDb("SourceEntry %u in `condition` table does not have any implicit target TARGET_UNIT_NEARBY_ENTRY(38) or TARGET_DST_NEARBY_ENTRY (46)"
                                 ",TARGET_UNIT_AREA_ENTRY_SRC(7), TARGET_UNIT_AREA_ENTRY_DST(8), TARGET_UNIT_CONE_ENTRY(60), TARGET_GAMEOBJECT_NEARBY_ENTRY(40)"
@@ -880,7 +954,7 @@ bool ConditionMgr::isSourceTypeValid(Condition* cond)
                         if (!conditions.empty())
                             break;
 
-                        for (int j = 0; j < 3; ++j)
+                        for (int j = 0; j < MAX_SPELL_EFFECTS; ++j)
                         {
                             if (pSpellInfo->EffectImplicitTargetA[j] == TARGET_UNIT_TARGET_ENEMY ||
                                 pSpellInfo->EffectImplicitTargetB[j] == TARGET_UNIT_TARGET_ENEMY ||
@@ -906,9 +980,45 @@ bool ConditionMgr::isSourceTypeValid(Condition* cond)
             }
             break;
         }
+        case CONDITION_SOURCE_TYPE_QUEST_ACCEPT:
+            {
+                Quest const *Quest = sObjectMgr.GetQuestTemplate(cond->mSourceEntry);
+                if (!Quest)
+                {
+                    sLog.outErrorDb("CONDITION_SOURCE_TYPE_QUEST_ACCEPT specifies non-existing quest (%u), skipped", cond->mSourceEntry);
+                    return false;
+                }
+            }
+            break;
+        case CONDITION_SOURCE_TYPE_QUEST_SHOW_MARK:
+            {
+                Quest const *Quest = sObjectMgr.GetQuestTemplate(cond->mSourceEntry);
+                if (!Quest)
+                {
+                    sLog.outErrorDb("CONDITION_SOURCE_TYPE_QUEST_SHOW_MARK specifies non-existing quest (%u), skipped", cond->mSourceEntry);
+                    return false;
+                }
+            }
+            break;
+        case CONDITION_SOURCE_TYPE_VEHICLE_SPELL:
+            {
+                if (!sCreatureStorage.LookupEntry<CreatureInfo>(cond->mSourceGroup))
+                {
+                    sLog.outErrorDb("SourceEntry %u in `condition` table, does not exist in `creature_template`, ignoring.", cond->mSourceGroup);
+                    return false;
+                }
+                SpellEntry const* spellProto = sSpellStore.LookupEntry(cond->mSourceEntry);
+                if (!spellProto)
+                {
+                    sLog.outErrorDb("SourceEntry %u in `condition` table, does not exist in `spell.dbc`, ignoring.", cond->mSourceEntry);
+                    return false;
+                }
+                break;
+            }
         case CONDITION_SOURCE_TYPE_GOSSIP_MENU:
         case CONDITION_SOURCE_TYPE_GOSSIP_MENU_OPTION:
         case CONDITION_SOURCE_TYPE_NONE:
+        default:
             break;
     }
 
@@ -916,7 +1026,7 @@ bool ConditionMgr::isSourceTypeValid(Condition* cond)
 }
 bool ConditionMgr::isConditionTypeValid(Condition* cond)
 {
-    if (cond->mConditionType == CONDITION_NONE || cond->mConditionType >= MAX_CONDITION)
+    if (cond->mConditionType == CONDITION_NONE || cond->mConditionType >= CONDITION_MAX)
     {
         sLog.outErrorDb("Invalid ConditionType %u at SourceEntry %u in `condition` table, ignoring.", uint32(cond->mConditionType),cond->mSourceEntry);
         return false;
@@ -1028,6 +1138,7 @@ bool ConditionMgr::isConditionTypeValid(Condition* cond)
         case CONDITION_QUESTREWARDED:
         case CONDITION_QUESTTAKEN:
         case CONDITION_QUEST_NONE:
+        case CONDITION_QUEST_COMPLETE:
         {
             Quest const *Quest = sObjectMgr.GetQuestTemplate(cond->mConditionValue1);
             if (!Quest)
@@ -1035,15 +1146,6 @@ bool ConditionMgr::isConditionTypeValid(Condition* cond)
                 sLog.outErrorDb("Quest condition specifies non-existing quest (%u), skipped", cond->mConditionValue1);
                 return false;
             }
-
-            if (cond->mConditionValue2)
-                sLog.outErrorDb("Quest condition has useless data in value2 (%u)!", cond->mConditionValue2);
-            break;
-        }
-        case CONDITION_AD_COMMISSION_AURA:
-        {
-            if (cond->mConditionValue1)
-                sLog.outErrorDb("Quest condition has useless data in value1 (%u)!", cond->mConditionValue1);
 
             if (cond->mConditionValue2)
                 sLog.outErrorDb("Quest condition has useless data in value2 (%u)!", cond->mConditionValue2);
@@ -1152,9 +1254,6 @@ bool ConditionMgr::isConditionTypeValid(Condition* cond)
                     break;
                 }
             }
-
-            if (cond->mConditionValue3)
-                sLog.outErrorDb("SpellTarget condition has useless data in value3 (%u)!", cond->mConditionValue3);
             break;
         }
         case CONDITION_CREATURE_TARGET:
@@ -1233,6 +1332,52 @@ bool ConditionMgr::isConditionTypeValid(Condition* cond)
                 sLog.outErrorDb("Spell condition has useless data in value2 (%u)!", cond->mConditionValue2);
             break;
         }
+        case CONDITION_NOITEM:
+        {
+            ItemPrototype const *proto = sObjectMgr.GetItemPrototype(cond->mConditionValue1);
+            if (!proto)
+            {
+                sLog.outErrorDb("NoItem condition has non existing item (%u), skipped", cond->mConditionValue1);
+                return false;
+            }
+            break;
+        }
+        case CONDITION_LEVEL:
+            {
+                if (cond->mConditionValue2 >= LVL_COND_MAX)
+                {
+                    sLog.outErrorDb("Level condition has invalid option (%u), skipped", cond->mConditionValue2);
+                    return false;
+                }
+                break;
+            }
+        case CONDITION_DRUNKENSTATE:
+            {
+                if (cond->mConditionValue1 > DRUNKEN_SMASHED)
+                {
+                    sLog.outErrorDb("DrunkState condition has invalid state (%u), skipped", cond->mConditionValue1);
+                    return false;
+                }
+                break;
+            }
+        case CONDITION_NEAR_CREATURE:
+        {
+            if (!sCreatureStorage.LookupEntry<CreatureInfo>(cond->mConditionValue1))
+            {
+                sLog.outErrorDb("NearCreature condition has non existing creature template entry (%u), skipped", cond->mConditionValue1);
+                return false;
+            }
+            break;
+        }
+        case CONDITION_NEAR_GAMEOBJECT:
+        {
+            if (!sGOStorage.LookupEntry<GameObjectInfo>(cond->mConditionValue1))
+            {
+                sLog.outErrorDb("NearGameObject condition has non existing gameobject template entry (%u), skipped", cond->mConditionValue1);
+                return false;
+            }
+            break;
+        }
         case CONDITION_AREAID:
         case CONDITION_INSTANCE_DATA:
             break;
@@ -1265,6 +1410,20 @@ void ConditionMgr::Clean()
     }
 
     m_ConditionMap.clear();
+
+    
+    for (VehicleSpellConditionMap::iterator itr = m_VehicleSpellConditions.begin(); itr != m_VehicleSpellConditions.end(); ++itr)
+    {
+        for (ConditionTypeMap::iterator it = itr->second.begin(); it != itr->second.end(); ++it)
+        {
+            for (ConditionList::const_iterator i = it->second.begin(); i != it->second.end(); ++i)
+                delete *i;
+            it->second.clear();
+        }
+        itr->second.clear();
+    }
+
+    m_VehicleSpellConditions.clear();
 
     // this is a BIG hack, feel free to fix it if you can figure out the ConditionMgr ;)
     for (std::list<Condition*>::const_iterator itr = m_AllocatedMemory.begin(); itr != m_AllocatedMemory.end(); ++itr)

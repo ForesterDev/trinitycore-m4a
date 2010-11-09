@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "gamePCH.h"
@@ -515,7 +513,7 @@ SpellSpecific GetSpellSpecific(SpellEntry const * spellInfo)
             {
                 bool food = false;
                 bool drink = false;
-                for (int i = 0; i < 3; ++i)
+                for (int i = 0; i < MAX_SPELL_EFFECTS; ++i)
                 {
                     switch(spellInfo->EffectApplyAuraName[i])
                     {
@@ -651,7 +649,7 @@ SpellSpecific GetSpellSpecific(SpellEntry const * spellInfo)
             break;
     }
 
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < MAX_SPELL_EFFECTS; ++i)
     {
         if (spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA)
         {
@@ -870,7 +868,7 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
                         if (spellTriggeredProto)
                         {
                             // non-positive targets of main spell return early
-                            for (int i = 0; i < 3; ++i)
+                            for (int i = 0; i < MAX_SPELL_EFFECTS; ++i)
                             {
                                 if (!spellTriggeredProto->Effect[i])
                                     continue;
@@ -910,7 +908,7 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
                     if (spellproto->EffectImplicitTargetA[effIndex] != TARGET_UNIT_CASTER)
                         return false;
                     // but not this if this first effect (didn't find better check)
-                    if (spellproto->Attributes & 0x4000000 && effIndex == 0)
+                    if (spellproto->Attributes & SPELL_ATTR_NEGATIVE_1 && effIndex == 0)
                         return false;
                     break;
                 case SPELL_AURA_MECHANIC_IMMUNITY:
@@ -1011,7 +1009,7 @@ bool SpellMgr::_isPositiveSpell(uint32 spellId, bool deep) const
 
     // spells with at least one negative effect are considered negative
     // some self-applied spells have negative effects but in self casting case negative check ignored.
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < MAX_SPELL_EFFECTS; ++i)
         if (!_isPositiveEffect(spellId, i, deep))
             return false;
     return true;
@@ -1173,7 +1171,7 @@ void SpellMgr::LoadSpellTargetPositions()
         }
 
         bool found = false;
-        for (int i = 0; i < 3; ++i)
+        for (int i = 0; i < MAX_SPELL_EFFECTS; ++i)
         {
             if (spellInfo->EffectImplicitTargetA[i] == TARGET_DST_DB || spellInfo->EffectImplicitTargetB[i] == TARGET_DST_DB)
             {
@@ -1211,7 +1209,7 @@ void SpellMgr::LoadSpellTargetPositions()
             continue;
 
         bool found = false;
-        for (int j = 0; j < 3; ++j)
+        for (int j = 0; j < MAX_SPELL_EFFECTS; ++j)
         {
             switch(spellInfo->EffectImplicitTargetA[j])
             {
@@ -1395,33 +1393,33 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellPr
 
     */
 
-    if (procFlags & PROC_FLAG_ON_DO_PERIODIC)
+    if (procFlags & PROC_FLAG_DONE_PERIODIC)
     {
-        if (EventProcFlag & PROC_FLAG_SUCCESSFUL_NEGATIVE_MAGIC_SPELL)
+        if (EventProcFlag & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG)
         {
             if (!(procExtra & PROC_EX_INTERNAL_DOT))
                 return false;
         }
         else if (procExtra & PROC_EX_INTERNAL_HOT)
             procExtra |= PROC_EX_INTERNAL_REQ_FAMILY;
-        else if (EventProcFlag & PROC_FLAG_SUCCESSFUL_POSITIVE_MAGIC_SPELL)
+        else if (EventProcFlag & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS)
             return false;
     }
 
-    if (procFlags & PROC_FLAG_ON_TAKE_PERIODIC)
+    if (procFlags & PROC_FLAG_TAKEN_PERIODIC)
     {
-        if (EventProcFlag & PROC_FLAG_TAKEN_NEGATIVE_MAGIC_SPELL)
+        if (EventProcFlag & PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS)
         {
             if (!(procExtra & PROC_EX_INTERNAL_DOT))
                 return false;
         }
         else if (procExtra & PROC_EX_INTERNAL_HOT)
             procExtra |= PROC_EX_INTERNAL_REQ_FAMILY;
-        else if (EventProcFlag & PROC_FLAG_TAKEN_POSITIVE_MAGIC_SPELL)
+        else if (EventProcFlag & PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_POS)
             return false;
     }
     // Trap casts are active by default
-    if (procFlags & PROC_FLAG_ON_TRAP_ACTIVATION)
+    if (procFlags & PROC_FLAG_DONE_TRAP_ACTIVATION)
         active = true;
 
     // Always trigger for this
@@ -1712,7 +1710,7 @@ bool SpellMgr::canStackSpellRanks(SpellEntry const *spellInfo)
         return false;
 
     // All stance spells. if any better way, change it.
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < MAX_SPELL_EFFECTS; ++i)
     {
         switch(spellInfo->SpellFamilyName)
         {
@@ -1928,7 +1926,7 @@ SpellEntry const* SpellMgr::SelectAuraRankForPlayerLevel(SpellEntry const* spell
         return spellInfo;
 
     bool needRankSelection = false;
-    for (int i=0; i<3; ++i)
+    for (int i = 0; i < MAX_SPELL_EFFECTS; ++i)
     {
         if (IsPositiveEffect(spellInfo->Id, i) && (
             spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA ||
@@ -2376,7 +2374,7 @@ bool SpellMgr::IsSpellValid(SpellEntry const *spellInfo, Player *pl, bool msg)
     bool need_check_reagents = false;
 
     // check effects
-    for (uint8 i = 0; i < 3; ++i)
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
     {
         switch (spellInfo->Effect[i])
         {
@@ -2440,7 +2438,7 @@ bool SpellMgr::IsSpellValid(SpellEntry const *spellInfo, Player *pl, bool msg)
 
     if (need_check_reagents)
     {
-        for (uint8 j = 0; j < 8; ++j)
+        for (uint8 j = 0; j < MAX_SPELL_REAGENTS; ++j)
         {
             if (spellInfo->Reagent[j] > 0 && !ObjectMgr::GetItemPrototype(spellInfo->Reagent[j]))
             {
@@ -2675,7 +2673,7 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const *spell
         AreaGroupEntry const* groupEntry = sAreaGroupStore.LookupEntry(spellInfo->AreaGroupId);
         while (groupEntry)
         {
-            for (uint8 i = 0; i < 6; ++i)
+            for (uint8 i = 0; i < MAX_GROUP_AREA_IDS; ++i)
                 if (groupEntry->AreaId[i] == zone_id || groupEntry->AreaId[i] == area_id)
                     found = true;
             if (found || !groupEntry->nextGroup)
@@ -2913,13 +2911,6 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
                 return DIMINISHING_POLYMORPH;
             break;
         }
-        case SPELLFAMILY_PRIEST:
-        {
-            // Vampiric Embrace
-            if ((spellproto->SpellFamilyFlags[0] & 0x4) && spellproto->SpellIconID == 150)
-                return DIMINISHING_LIMITONLY;
-            break;
-        }
         case SPELLFAMILY_DEATHKNIGHT:
         {
             // Hungering Cold (no flags)
@@ -3004,13 +2995,6 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry cons
             // Faerie Fire - limit to 40 seconds in PvP (3.1)
             if (spellproto->SpellFamilyFlags[0] & 0x400)
                 return 40 * IN_MILLISECONDS;
-            break;
-        }
-        case SPELLFAMILY_PRIEST:
-        {
-            // Vampiric Embrace - limit to 60 seconds in PvP (3.1)
-            if ((spellproto->SpellFamilyFlags[0] & 0x4) && spellproto->SpellIconID == 150)
-                return 60 * IN_MILLISECONDS;
             break;
         }
         default:
@@ -3237,7 +3221,7 @@ bool CanSpellPierceImmuneAura(SpellEntry const * pierceSpell, SpellEntry const *
     // these spells (Cyclone for example) can pierce all...
     if ((pierceSpell->AttributesEx & SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE)
         // ...but not these (Divine shield for example)
-        && !(aura && (aura->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)))
+        && !(aura && (aura->Mechanic == MECHANIC_IMMUNE_SHIELD || aura->Mechanic == MECHANIC_INVULNERABILITY)))
         return true;
 
     return false;
@@ -3632,6 +3616,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 45150:                             // Meteor Slash
         case 64422: case 64688:                 // Sonic Screech
         case 72373:                             // Shared Suffering
+        case 71904:                             // Chaos Bane
+        case 70492: case 72505:                 // Ooze Eruption
+        case 72624: case 72625:                 // Ooze Eruption
             // ONLY SPELLS WITH SPELLFAMILY_GENERIC and EFFECT_SCHOOL_DAMAGE
             mSpellCustomAttr[i] |= SPELL_ATTR_CU_SHARE_DAMAGE;
             count++;
@@ -3645,6 +3632,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 27820:                             // Mana Detonation
         //case 28062: case 39090:                 // Positive/Negative Charge
         //case 28085: case 39093:
+        case 69782: case 69796:                 // Ooze Flood
+        case 69798: case 69801:                 // Ooze Flood
+        case 69538: case 69553: case 69610:     // Ooze Combine
             mSpellCustomAttr[i] |= SPELL_ATTR_CU_EXCLUDE_SELF;
             count++;
             break;
@@ -3737,7 +3727,6 @@ void SpellMgr::LoadSpellCustomAttr()
         case 54741:    // Firestarter
         case 57761:    // Fireball!
         case 39805:    // Lightning Overload
-        case 52437:    // Sudden Death
         case 64823:    // Item - Druid T8 Balance 4P Bonus
         case 44401:
             spellInfo->procCharges = 1;
@@ -3748,8 +3737,12 @@ void SpellMgr::LoadSpellCustomAttr()
             count++;
             break;
         case 44544:    // Fingers of Frost
+            spellInfo->EffectSpellClassMask[0] = flag96(685904631, 1151048, 0);
+            count++;
+            break;
+        case 74396:    // Fingers of Frost visual buff
             spellInfo->procCharges = 2;
-            spellInfo->EffectSpellClassMask[0] = flag96(685904631,1151048,0);
+            spellInfo->StackAmount = 0;
             count++;
             break;
         case 28200:    // Ascendance (Talisman of Ascendance trinket)
@@ -3807,6 +3800,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 51735: // Ebon Plague
         case 51734:
         case 51726:
+            spellInfo->AttributesEx3 |= SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS;
             spellInfo->SpellFamilyFlags[2] = 0x10;
             count++;
             break;
@@ -3895,6 +3889,65 @@ void SpellMgr::LoadSpellCustomAttr()
             count++;
             break;
         case 63675: // Improved Devouring Plague
+            spellInfo->AttributesEx3 |= SPELL_ATTR_EX3_NO_DONE_BONUS;
+            count++;
+            break;
+        case 53241: // Marked for Death (Rank 1)
+        case 53243: // Marked for Death (Rank 2)
+        case 53244: // Marked for Death (Rank 3)
+        case 53245: // Marked for Death (Rank 4)
+        case 53246: // Marked for Death (Rank 5)
+            spellInfo->EffectSpellClassMask[0] = flag96(423937, 276955137, 2049);
+            count++;
+            break;
+        // this is here until targetAuraSpell and alike support SpellDifficulty.dbc
+        case 70459: // Ooze Eruption Search Effect
+            spellInfo->targetAuraSpell = 0;
+            count++;
+            break;
+        case 70728: // Exploit Weakness
+        case 70840: // Devious Minds
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_PET;
+            count++;
+            break;
+        case 71413: // Green Ooze Summon
+        case 71414: // Orange Ooze Summon
+            spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_DEST;
+            count++;
+            break;
+        // THIS IS HERE BECAUSE COOLDOWN ON CREATURE PROCS IS NOT IMPLEMENTED
+        case 71604: // Mutated Strength
+        case 72673: // Mutated Strength
+        case 72674: // Mutated Strength
+        case 72675: // Mutated Strength
+            spellInfo->Effect[1] = 0;
+            count++;
+            break;
+        case 70447: // Volatile Ooze Adhesive
+        case 72836: // Volatile Ooze Adhesive
+        case 72837: // Volatile Ooze Adhesive
+        case 72838: // Volatile Ooze Adhesive
+        case 70672: // Gaseous Bloat
+        case 72455: // Gaseous Bloat
+        case 72832: // Gaseous Bloat
+        case 72833: // Gaseous Bloat
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_TARGET_ENEMY;
+            spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_TARGET_ENEMY;
+            spellInfo->EffectImplicitTargetB[2] = TARGET_UNIT_TARGET_ENEMY;
+            count++;
+            break;
+        case 70911: // Unbound Plague
+        case 72854: // Unbound Plague
+        case 72855: // Unbound Plague
+        case 72856: // Unbound Plague
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_TARGET_ENEMY;
+            count++;
+            break;
+        case 71708: // Empowered Flare
+        case 72785: // Empowered Flare
+        case 72786: // Empowered Flare
+        case 72787: // Empowered Flare
             spellInfo->AttributesEx3 |= SPELL_ATTR_EX3_NO_DONE_BONUS;
             count++;
             break;

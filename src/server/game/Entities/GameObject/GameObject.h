@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef TRINITYCORE_GAMEOBJECT_H
@@ -27,12 +25,16 @@
 #include "LootMgr.h"
 #include "DatabaseEnv.h"
 
+class GameObjectAI;
+
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
 #if defined(__GNUC__)
 #pragma pack(1)
 #else
 #pragma pack(push,1)
 #endif
+
+#define MAX_GAMEOBJECT_QUEST_ITEMS 6
 
 // from `gameobject_template`
 struct GameObjectInfo
@@ -47,7 +49,7 @@ struct GameObjectInfo
     uint32  faction;
     uint32  flags;
     float   size;
-    uint32  questItems[6];
+    uint32  questItems[MAX_GAMEOBJECT_QUEST_ITEMS];
     union                                                   // different GO types have different data field
     {
         //0 GAMEOBJECT_TYPE_DOOR
@@ -118,7 +120,7 @@ struct GameObjectInfo
             uint32 serverOnly;                              //2
             uint32 large;                                   //3
             uint32 floatOnWater;                            //4
-            uint32 questID;                                 //5
+            int32 questID;                                  //5
         } _generic;
         //6 GAMEOBJECT_TYPE_TRAP
         struct
@@ -398,6 +400,7 @@ struct GameObjectInfo
             uint32 data[24];
         } raw;
     };
+    char const* AIName;
     uint32 ScriptId;
 
     // helpers
@@ -622,7 +625,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>
         void YellToZone(int32 textId, uint32 language, uint64 TargetGuid) { MonsterYellToZone(textId,language,TargetGuid); }
 
         // overwrite WorldObject function for proper name localization
-        const char* GetNameForLocaleIdx(int32 locale_idx) const;
+        const char* GetNameForLocaleIdx(LocaleConstant locale_idx) const;
 
         void SaveToDB();
         void SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask);
@@ -745,7 +748,11 @@ class GameObject : public WorldObject, public GridObject<GameObject>
 
         uint64 GetRotation() const { return m_rotation; }
         virtual uint32 GetScriptId() const { return GetGOInfo()->ScriptId; }
+        GameObjectAI* AI() const { return (GameObjectAI*)m_AI; }
+
+        std::string GetAIName() const;
     protected:
+        bool AIM_Initialize();
         uint32      m_spellId;
         time_t      m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
         uint32      m_respawnDelayTime;                     // (secs) if 0 then current GO state no dependent from timer
@@ -772,5 +779,6 @@ class GameObject : public WorldObject, public GridObject<GameObject>
         uint16 m_LootMode;                                  // bitmask, default LOOT_MODE_DEFAULT, determines what loot will be lootable
     private:
         void SwitchDoorOrButton(bool activate, bool alternative = false);
+        GameObjectAI* m_AI;
 };
 #endif

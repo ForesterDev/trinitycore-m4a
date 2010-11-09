@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 /** \file
@@ -386,13 +384,15 @@ bool AuthSocket::_HandleLogonChallenge()
         PreparedQueryResult res2 = LoginDatabase.Query(stmt);
         if (res2)
         {
+            Field* fields = res2->Fetch();
+
             ///- If the IP is 'locked', check that the player comes indeed from the correct IP address
             bool locked = false;
-            if (res2->GetUInt8(2) == 1)            // if ip is locked
+            if (fields[2].GetUInt8() == 1)            // if ip is locked
             {
-                sLog.outStaticDebug("[AuthChallenge] Account '%s' is locked to IP - '%s'", _login.c_str(), res2->GetCString(3));
+                sLog.outStaticDebug("[AuthChallenge] Account '%s' is locked to IP - '%s'", _login.c_str(), fields[3].GetCString());
                 sLog.outStaticDebug("[AuthChallenge] Player address is '%s'", ip_address.c_str());
-                if (strcmp(res2->GetCString(3), ip_address.c_str()))
+                if (strcmp(fields[3].GetCString(), ip_address.c_str()))
                 {
                     sLog.outStaticDebug("[AuthChallenge] Account IP differs");
                     pkt << (uint8) WOW_FAIL_SUSPENDED;
@@ -413,11 +413,11 @@ bool AuthSocket::_HandleLogonChallenge()
 
                 ///- If the account is banned, reject the logon attempt
                 stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_ACCBANNED);
-                stmt->setUInt32(0, res2->GetUInt32(1));
+                stmt->setUInt32(0, fields[1].GetUInt32());
                 PreparedQueryResult banresult = LoginDatabase.Query(stmt);
                 if (banresult)
                 {
-                    if (banresult->GetUInt64(0) == banresult->GetUInt64(1))
+                    if ((*banresult)[0].GetUInt64() == (*banresult)[1].GetUInt64())
                     {
                         pkt << (uint8) WOW_FAIL_BANNED;
                         sLog.outBasic("[AuthChallenge] Banned account %s tries to login!", _login.c_str());
@@ -431,11 +431,11 @@ bool AuthSocket::_HandleLogonChallenge()
                 else
                 {
                     ///- Get the password from the account table, upper it, and make the SRP6 calculation
-                    std::string rI = res2->GetString(0);
+                    std::string rI = fields[0].GetString();
 
                     ///- Don't calculate (v, s) if there are already some in the database
-                    std::string databaseV = res2->GetString(5);
-                    std::string databaseS = res2->GetString(6);
+                    std::string databaseV = fields[5].GetString();
+                    std::string databaseS = fields[6].GetString();
 
                     sLog.outDebug("database authentication values: v='%s' s='%s'", databaseV.c_str(), databaseS.c_str());
 
@@ -489,7 +489,7 @@ bool AuthSocket::_HandleLogonChallenge()
                     if (securityFlags & 0x04)                // Security token input
                         pkt << uint8(1);
 
-                    uint8 secLevel = res2->GetUInt8(4);
+                    uint8 secLevel = fields[4].GetUInt8();
                     _accountSecurityLevel = secLevel <= SEC_ADMINISTRATOR ? AccountTypes(secLevel) : SEC_ADMINISTRATOR;
 
                     _localizationName.resize(4);
@@ -659,8 +659,9 @@ bool AuthSocket::_HandleLogonProof()
     }
     else
     {
-        char data[4]= { AUTH_LOGON_PROOF, WOW_FAIL_INCORRECT_PASSWORD, 3, 0};
+        char data[4]= { AUTH_LOGON_PROOF, WOW_FAIL_UNKNOWN_ACCOUNT, 3, 0};
         socket().send(data, sizeof(data));
+
         sLog.outBasic("[AuthChallenge] account %s tried to login with wrong password!",_login.c_str ());
 
         uint32 MaxWrongPassCount = sConfig.GetIntDefault("WrongPass.MaxCount", 0);
@@ -676,7 +677,7 @@ bool AuthSocket::_HandleLogonProof()
 
             if (PreparedQueryResult loginfail = LoginDatabase.Query(stmt))
             {
-                uint32 failed_logins = loginfail->GetUInt32(1);
+                uint32 failed_logins = (*loginfail)[1].GetUInt32();
 
                 if (failed_logins >= MaxWrongPassCount)
                 {
@@ -685,7 +686,7 @@ bool AuthSocket::_HandleLogonProof()
 
                     if (WrongPassBanType)
                     {
-                        uint32 acc_id = loginfail->GetUInt32(0);
+                        uint32 acc_id = (*loginfail)[0].GetUInt32();
                         stmt = LoginDatabase.GetPreparedStatement(LOGIN_SET_ACCAUTOBANNED);
                         stmt->setUInt32(0, acc_id);
                         stmt->setUInt32(1, WrongPassBanTime);
@@ -756,7 +757,7 @@ bool AuthSocket::_HandleReconnectChallenge()
         return false;
     }
 
-    K.SetHexStr (result->GetCString(0));
+    K.SetHexStr ((*result)[0].GetCString());
 
     ///- Sending response
     ByteBuffer pkt;
@@ -834,7 +835,8 @@ bool AuthSocket::_HandleRealmList()
         return false;
     }
 
-    uint32 id = result->GetUInt32(0);
+    Field* fields = result->Fetch();
+    uint32 id = fields[0].GetUInt32();
 
     ///- Update realm list if need
     sRealmList->UpdateIfNeed();
@@ -862,7 +864,7 @@ bool AuthSocket::_HandleRealmList()
         stmt->setUInt32(1, id);
         result = LoginDatabase.Query(stmt);
         if (result)
-            AmountOfCharacters = result->GetUInt8(0);
+            AmountOfCharacters = (*result)[0].GetUInt8();
         else
             AmountOfCharacters = 0;
 

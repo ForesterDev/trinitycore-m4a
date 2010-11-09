@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "gamePCH.h"
@@ -141,7 +139,7 @@ bool ForcedDespawnDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 
 Creature::Creature(): Unit(),
 lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGroupLowGUID(0),
-m_PlayerDamageReq(0), m_lootMoney(0), m_lootRecipient(0), m_deathTimer(0), m_respawnTime(0),
+m_PlayerDamageReq(0), m_lootMoney(0), m_lootRecipient(0), m_lootRecipientGroup(0), m_corpseRemoveTime(0), m_respawnTime(0),
 m_respawnDelay(300), m_corpseDelay(60), m_respawnradius(0.0f), m_reactState(REACT_AGGRESSIVE),
 m_defaultMovementType(IDLE_MOTION_TYPE), m_DBTableGuid(0), m_equipmentId(0), m_AlreadyCallAssistance(false),
 m_AlreadySearchedAssistance(false), m_regenHealth(true), m_AI_locked(false), m_isDeadByDefault(false),
@@ -164,6 +162,7 @@ m_formation(NULL)
     m_CombatDistance = 0;//MELEE_RANGE;
 
     ResetLootMode(); // restore default loot mode
+    TriggerJustRespawned = false;
 }
 
 Creature::~Creature()
@@ -213,7 +212,7 @@ void Creature::DisappearAndDie()
     //ObjectAccessor::UpdateObjectVisibility(this);
     if (isAlive())
         setDeathState(JUST_DIED);
-    RemoveCorpse();
+    RemoveCorpse(false);
 }
 
 void Creature::SearchFormation()
@@ -230,12 +229,12 @@ void Creature::SearchFormation()
         formation_mgr.AddCreatureToGroup(frmdata->second->leaderGUID, this);
 }
 
-void Creature::RemoveCorpse()
+void Creature::RemoveCorpse(bool setSpawnTime)
 {
     if ((getDeathState() != CORPSE && !m_isDeadByDefault) || (getDeathState() != ALIVE && m_isDeadByDefault))
         return;
 
-    m_deathTimer = 0;
+    m_corpseRemoveTime = time(NULL);
     setDeathState(DEAD);
     UpdateObjectVisibility();
     loot.clear();
@@ -243,7 +242,9 @@ void Creature::RemoveCorpse()
     if (IsAIEnabled)
         AI()->CorpseRemoved(respawnDelay);
 
-    m_respawnTime = time(NULL) + m_respawnDelay;
+    // Should get removed later, just keep "compatibility" with scripts
+    if(setSpawnTime)
+        m_respawnTime = time(NULL) + respawnDelay;
 
     float x,y,z,o;
     GetRespawnCoord(x, y, z, &o);
@@ -368,17 +369,21 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data)
     else
         setFaction(cInfo->faction_A);
 
+    uint32 npcflag, unit_flags, dynamicflags;
+    ObjectMgr::ChooseCreatureFlags(cInfo, npcflag, unit_flags, dynamicflags, data);
+
     if (cInfo->flags_extra & CREATURE_FLAG_EXTRA_WORLDEVENT)
-        SetUInt32Value(UNIT_NPC_FLAGS,cInfo->npcflag | sGameEventMgr.GetNPCFlag(this));
+        SetUInt32Value(UNIT_NPC_FLAGS, npcflag | sGameEventMgr.GetNPCFlag(this));
     else
-        SetUInt32Value(UNIT_NPC_FLAGS,cInfo->npcflag);
+        SetUInt32Value(UNIT_NPC_FLAGS, npcflag);
 
     SetAttackTime(BASE_ATTACK,  cInfo->baseattacktime);
     SetAttackTime(OFF_ATTACK,   cInfo->baseattacktime);
     SetAttackTime(RANGED_ATTACK,cInfo->rangeattacktime);
 
-    SetUInt32Value(UNIT_FIELD_FLAGS,cInfo->unit_flags);
-    SetUInt32Value(UNIT_DYNAMIC_FLAGS,cInfo->dynamicflags);
+    SetUInt32Value(UNIT_FIELD_FLAGS, unit_flags);
+
+    SetUInt32Value(UNIT_DYNAMIC_FLAGS, dynamicflags);
 
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
@@ -434,6 +439,12 @@ void Creature::Update(uint32 diff)
     else
         m_GlobalCooldown -= diff;
 
+    if (IsAIEnabled && TriggerJustRespawned)
+    {
+        TriggerJustRespawned = false;
+        AI()->JustRespawned();
+    }
+
     switch(m_deathState)
     {
         case JUST_ALIVED:
@@ -486,16 +497,15 @@ void Creature::Update(uint32 diff)
                 }
                 else m_groupLootTimer -= diff;
             }
-            else if (m_deathTimer <= diff)
+            else if (m_corpseRemoveTime <= time(NULL))
             {
-                RemoveCorpse();
+                RemoveCorpse(false);
                 sLog.outStaticDebug("Removing corpse... %u ", GetUInt32Value(OBJECT_FIELD_ENTRY));
             }
             else
             {
                 // for delayed spells
                 m_Events.Update(diff);
-                m_deathTimer -= diff;
             }
 
             break;
@@ -504,14 +514,10 @@ void Creature::Update(uint32 diff)
         {
             if (m_isDeadByDefault)
             {
-                if (m_deathTimer <= diff)
+                if (m_corpseRemoveTime <= time(NULL))
                 {
-                    RemoveCorpse();
+                    RemoveCorpse(false);
                     sLog.outStaticDebug("Removing alive corpse... %u ", GetUInt32Value(OBJECT_FIELD_ENTRY));
-                }
-                else
-                {
-                    m_deathTimer -= diff;
                 }
             }
 
@@ -950,8 +956,16 @@ void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, uint3
 
 Player *Creature::GetLootRecipient() const
 {
-    if (!m_lootRecipient) return NULL;
-    else return ObjectAccessor::FindPlayer(m_lootRecipient);
+    if (!m_lootRecipient)
+        return NULL;
+    return ObjectAccessor::FindPlayer(m_lootRecipient);
+}
+
+Group *Creature::GetLootRecipientGroup() const
+{
+    if (!m_lootRecipientGroup)
+        return NULL;
+    return sObjectMgr.GetGroupByGUID(m_lootRecipientGroup);
 }
 
 void Creature::SetLootRecipient(Unit *unit)
@@ -963,6 +977,7 @@ void Creature::SetLootRecipient(Unit *unit)
     if (!unit)
     {
         m_lootRecipient = 0;
+        m_lootRecipientGroup = 0;
         RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE|UNIT_DYNFLAG_TAPPED);
         return;
     }
@@ -975,6 +990,9 @@ void Creature::SetLootRecipient(Unit *unit)
         return;
 
     m_lootRecipient = player->GetGUID();
+    if (Group *group = player->GetGroup())
+        m_lootRecipientGroup = group->GetLowGUID();
+
     SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED);
 }
 
@@ -984,17 +1002,9 @@ bool Creature::isTappedBy(Player *player) const
     if (player->GetGUID() == m_lootRecipient)
         return true;
 
-    Player* recipient = GetLootRecipient();
-    if (!recipient)
-        return false; // recipient exist but is offline. can't check any further.
-
-    Group* recipientGroup = recipient->GetGroup();
-    if (!recipientGroup)
-        return (player == recipient);
-
     Group* playerGroup = player->GetGroup();
-    if (!playerGroup || playerGroup != recipientGroup)
-        return false;
+    if (!playerGroup || playerGroup != GetLootRecipientGroup()) // if we dont have a group we arent the recipient
+        return false;                                           // if creature doesnt have group bound it means it was solo killed by someone else
 
     return true;
 }
@@ -1010,7 +1020,7 @@ void Creature::SaveToDB()
         return;
     }
 
-    SaveToDB(GetMapId(), data->spawnMask,GetPhaseMask());
+    SaveToDB(GetMapId(), data->spawnMask, GetPhaseMask());
 }
 
 void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
@@ -1021,6 +1031,9 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     CreatureData& data = sObjectMgr.NewOrExistCreatureData(m_DBTableGuid);
 
     uint32 displayId = GetNativeDisplayId();
+    uint32 npcflag = GetUInt32Value(UNIT_NPC_FLAGS);
+    uint32 unit_flags = GetUInt32Value(UNIT_FIELD_FLAGS);
+    uint32 dynamicflags = GetUInt32Value(UNIT_DYNAMIC_FLAGS);
 
     // check if it's a custom model and if not, use 0 for displayId
     CreatureInfo const *cinfo = GetCreatureInfo();
@@ -1029,6 +1042,15 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
         if (displayId == cinfo->Modelid1 || displayId == cinfo->Modelid2 ||
             displayId == cinfo->Modelid3 || displayId == cinfo->Modelid4)
             displayId = 0;
+
+        if (npcflag == cinfo->npcflag)
+            npcflag = 0;
+
+        if (unit_flags == cinfo->unit_flags)
+            unit_flags = 0;
+
+        if (dynamicflags == cinfo->dynamicflags)
+            dynamicflags = 0;
     }
 
     // data->guid = guid don't must be update at save
@@ -1052,6 +1074,9 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     data.movementType = !m_respawnradius && GetDefaultMovementType() == RANDOM_MOTION_TYPE
         ? IDLE_MOTION_TYPE : GetDefaultMovementType();
     data.spawnMask = spawnMask;
+    data.npcflag = npcflag;
+    data.unit_flags = unit_flags;
+    data.dynamicflags = dynamicflags;
 
     // updated in DB
     SQLTransaction trans = WorldDatabase.BeginTransaction();
@@ -1077,7 +1102,10 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
         << GetHealth() << ","                               //curhealth
         << GetPower(POWER_MANA) << ","                      //curmana
         << (m_isDeadByDefault ? 1 : 0) << ","               //is_dead
-        << GetDefaultMovementType() << ")";                 //default movement generator type
+        << GetDefaultMovementType() << ","                  //default movement generator type
+        << npcflag << ","
+        << unit_flags << ","
+        << dynamicflags << ")";
 
     trans->Append(ss.str().c_str());
 
@@ -1477,7 +1505,8 @@ void Creature::setDeathState(DeathState s)
 {
     if ((s == JUST_DIED && !m_isDeadByDefault)||(s == JUST_ALIVED && m_isDeadByDefault))
     {
-        m_deathTimer = m_corpseDelay*IN_MILLISECONDS;
+        m_corpseRemoveTime = time(NULL) + m_corpseDelay;
+        m_respawnTime = time(NULL) + m_respawnDelay + m_corpseDelay;
 
         // always save boss respawn time at death to prevent crash cheating
         if (sWorld.getBoolConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATELY) || isWorldBoss())
@@ -1494,7 +1523,8 @@ void Creature::setDeathState(DeathState s)
 
         if (!isPet() && GetCreatureInfo()->SkinLootId)
             if (LootTemplates_Skinning.HaveLootFor(GetCreatureInfo()->SkinLootId))
-                SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+                if (hasLootRecipient())
+                    SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
         if (HasSearchedAssistance())
         {
@@ -1566,7 +1596,7 @@ void Creature::Respawn(bool force)
             setDeathState(CORPSE);
     }
 
-    RemoveCorpse();
+    RemoveCorpse(false);
 
     if (getDeathState() == DEAD)
     {
@@ -1604,9 +1634,11 @@ void Creature::Respawn(bool force)
             SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
         }
 
+        GetMotionMaster()->InitDefault();
+
         //Call AI respawn virtual function
         if (IsAIEnabled)
-            AI()->JustRespawned();
+            TriggerJustRespawned = true;//delay event to next tick so all creatures are created on the map before processing
 
         uint32 poolid = GetDBTableGUIDLow() ? sPoolMgr.IsPartOfAPool<Creature>(GetDBTableGUIDLow()) : 0;
         if (poolid)
@@ -1632,7 +1664,7 @@ void Creature::ForcedDespawn(uint32 timeMSToDespawn)
     if (isAlive())
         setDeathState(JUST_DIED);
 
-    RemoveCorpse();
+    RemoveCorpse(false);
 }
 
 bool Creature::IsImmunedToSpell(SpellEntry const* spellInfo)
@@ -1674,7 +1706,7 @@ SpellEntry const *Creature::reachWithSpellAttack(Unit *pVictim)
         }
 
         bool bcontinue = true;
-        for (uint32 j=0; j<3; j++)
+        for (uint32 j = 0; j < MAX_SPELL_EFFECTS; j++)
         {
             if ((spellInfo->Effect[j] == SPELL_EFFECT_SCHOOL_DAMAGE)       ||
                 (spellInfo->Effect[j] == SPELL_EFFECT_INSTAKILL)            ||
@@ -1724,7 +1756,7 @@ SpellEntry const *Creature::reachWithSpellCure(Unit *pVictim)
         }
 
         bool bcontinue = true;
-        for (uint32 j=0; j<3; j++)
+        for (uint32 j = 0; j < MAX_SPELL_EFFECTS; j++)
         {
             if ((spellInfo->Effect[j] == SPELL_EFFECT_HEAL))
             {
@@ -1769,7 +1801,7 @@ bool Creature::IsVisibleInGridForPlayer(Player const* pl) const
     {
         if (GetEntry() == VISUAL_WAYPOINT)
             return false;
-        return (isAlive() || m_deathTimer > 0 || (m_isDeadByDefault && m_deathState == CORPSE));
+        return (isAlive() || m_corpseRemoveTime > time(NULL) || (m_isDeadByDefault && m_deathState == CORPSE));
     }
 
     // Dead player see creatures near own corpse
@@ -1989,10 +2021,7 @@ void Creature::SaveRespawnTime()
     if (isSummon() || !m_DBTableGuid || (m_creatureData && !m_creatureData->dbData))
         return;
 
-    if (m_respawnTime > time(NULL))                          // dead (no corpse)
-        sObjectMgr.SaveCreatureRespawnTime(m_DBTableGuid,GetInstanceId(),m_respawnTime);
-    else if (m_deathTimer > 0)                               // dead (corpse)
-        sObjectMgr.SaveCreatureRespawnTime(m_DBTableGuid,GetInstanceId(),time(NULL)+m_respawnDelay+m_deathTimer/IN_MILLISECONDS);
+    sObjectMgr.SaveCreatureRespawnTime(m_DBTableGuid,GetInstanceId(),m_respawnTime);
 }
 
 // this should not be called by petAI or
@@ -2216,10 +2245,8 @@ bool Creature::HasSpell(uint32 spellID) const
 time_t Creature::GetRespawnTimeEx() const
 {
     time_t now = time(NULL);
-    if (m_respawnTime > now)                                 // dead (no corpse)
+    if (m_respawnTime > now)
         return m_respawnTime;
-    else if (m_deathTimer > 0)                               // dead (corpse)
-        return now+m_respawnDelay+m_deathTimer/IN_MILLISECONDS;
     else
         return now;
 }
@@ -2255,20 +2282,23 @@ void Creature::AllLootRemovedFromCorpse()
 {
     if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
     {
-        uint32 nDeathTimer;
+        time_t now = time(NULL);
+        if(m_corpseRemoveTime <= now)
+            return;
 
+        float decayRate;
         CreatureInfo const *cinfo = GetCreatureInfo();
 
-        // corpse was not skinnable -> apply corpse looted timer
-        if (!cinfo || !cinfo->SkinLootId)
-            nDeathTimer = (uint32)((m_corpseDelay * IN_MILLISECONDS) * sWorld.getRate(RATE_CORPSE_DECAY_LOOTED));
-        // corpse skinnable, but without skinning flag, and then skinned, corpse will despawn next update
-        else
-            nDeathTimer = 0;
+        decayRate = sWorld.getRate(RATE_CORPSE_DECAY_LOOTED);
+        uint32 diff = uint32((m_corpseRemoveTime - now) * decayRate);
 
-        // update death timer only if looted timer is shorter
-        if (m_deathTimer > nDeathTimer)
-            m_deathTimer = nDeathTimer;
+        m_respawnTime -= diff;
+
+        // corpse skinnable, but without skinning flag, and then skinned, corpse will despawn next update
+        if (cinfo && cinfo->SkinLootId)
+            m_corpseRemoveTime = time(NULL);
+        else
+            m_corpseRemoveTime -= diff;
     }
 }
 
@@ -2383,9 +2413,9 @@ TrainerSpellData const* Creature::GetTrainerSpells() const
 }
 
 // overwrite WorldObject function for proper name localization
-const char* Creature::GetNameForLocaleIdx(int32 loc_idx) const
+const char* Creature::GetNameForLocaleIdx(LocaleConstant loc_idx) const
 {
-    if (loc_idx >= 0)
+    if (loc_idx != DEFAULT_LOCALE)
     {
         uint8 uloc_idx = uint8(loc_idx);
         CreatureLocale const *cl = sObjectMgr.GetCreatureLocale(GetEntry());
@@ -2431,4 +2461,21 @@ time_t Creature::GetLinkedCreatureRespawnTime() const
     }
 
     return 0;
+}
+
+void Creature::FarTeleportTo(Map* map, float X, float Y, float Z, float O)
+{
+    InterruptNonMeleeSpells(true);
+    CombatStop();
+    ClearComboPointHolders();
+    DeleteThreatList();
+    GetMotionMaster()->Clear(false);
+    DestroyForNearbyPlayers();
+
+    RemoveFromWorld();
+    ResetMap();
+    SetMap(map);
+    AddToWorld();
+    
+    SetPosition(X, Y, Z, O, true);
 }

@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "gamePCH.h"
@@ -190,8 +188,6 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket & recv_data)
     WorldPacket data = make_group_invite_msg<true>(GetPlayer()->GetName());
     player->GetSession()->SendPacket(&data);
 
-    SendLfgUpdatePlayer(LFG_UPDATETYPE_REMOVED_FROM_QUEUE);
-    SendLfgUpdateParty(LFG_UPDATETYPE_REMOVED_FROM_QUEUE);
     SendPartyResult(PARTY_OP_INVITE, membername, ERR_PARTY_RESULT_OK);
 }
 
@@ -234,14 +230,6 @@ void WorldSession::HandleGroupAcceptOpcode(WorldPacket & /*recv_data*/)
     if (!group->AddMember(GetPlayer()->GetGUID(), GetPlayer()->GetName()))
         return;
 
-    SendLfgUpdatePlayer(LFG_UPDATETYPE_REMOVED_FROM_QUEUE);
-    for (GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
-        if (Player *plrg = itr->getSource())
-        {
-            plrg->GetSession()->SendLfgUpdatePlayer(LFG_UPDATETYPE_CLEAR_LOCK_LIST);
-            plrg->GetSession()->SendLfgUpdateParty(LFG_UPDATETYPE_CLEAR_LOCK_LIST);
-        }
-
     group->BroadcastGroupUpdate();
 }
 
@@ -250,18 +238,18 @@ void WorldSession::HandleGroupDeclineOpcode(WorldPacket & /*recv_data*/)
     Group  *group  = GetPlayer()->GetGroupInvite();
     if (!group) return;
 
-    // remember leader if online
-    Player *leader = sObjectMgr.GetPlayer(group->GetLeaderGUID());
-
     // uninvite, group can be deleted
     GetPlayer()->UninviteFromGroup();
 
+    // remember leader if online
+    Player *leader = sObjectMgr.GetPlayer(group->GetLeaderGUID());
     if (!leader || !leader->GetSession())
         return;
 
     // report
-    WorldPacket data(SMSG_GROUP_DECLINE, 10);             // guess size
-    data << GetPlayer()->GetName();
+    std::string name = std::string(GetPlayer()->GetName());
+    WorldPacket data(SMSG_GROUP_DECLINE, name.length());
+    data << name.c_str();
     leader->GetSession()->SendPacket(&data);
 }
 
@@ -295,7 +283,7 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket & recv_data)
         if (grp->isLFGGroup())
             sLFGMgr.InitBoot(grp, GUID_LOPART(GetPlayer()->GetGUID()), GUID_LOPART(guid), reason);
         else
-            Player::RemoveFromGroup(grp,guid);
+            Player::RemoveFromGroup(grp, guid, GROUP_REMOVEMETHOD_KICK);
         return;
     }
 
@@ -340,7 +328,7 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket & recv_data)
         if (grp->isLFGGroup())
             sLFGMgr.InitBoot(grp, GUID_LOPART(GetPlayer()->GetGUID()), GUID_LOPART(guid), "");
         else
-            Player::RemoveFromGroup(grp,guid);
+            Player::RemoveFromGroup(grp, guid, GROUP_REMOVEMETHOD_KICK);
         return;
     }
 
@@ -391,7 +379,7 @@ void WorldSession::HandleGroupDisbandOpcode(WorldPacket & /*recv_data*/)
     // everything's fine, do it
     SendPartyResult(PARTY_OP_LEAVE, GetPlayer()->GetName(), ERR_PARTY_RESULT_OK);
 
-    GetPlayer()->RemoveFromGroup();
+    GetPlayer()->RemoveFromGroup(GROUP_REMOVEMETHOD_LEAVE);
 }
 
 void WorldSession::HandleLootMethodOpcode(WorldPacket & recv_data)

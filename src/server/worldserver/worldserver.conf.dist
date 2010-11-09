@@ -39,28 +39,22 @@
 #    WorldDatabase.WorkerThreads
 #    CharacterDatabase.WorkerThreads
 #        The amount of worker threads spawned to handle
-#        asynchroneous MySQL statements
+#        asynchronous (delayed) MySQL statements.
 #        Each worker thread is mirrored with its own
 #        connection to the MySQL server and their own
 #        thread on the MySQL server.
 #        Default: 1
 #
-#   LoginDatabase.ThreadBundleMask
-#   WorldDatabase.ThreadBundleMask
-#   CharacterDatabase.ThreadBundleMask
-#       Defines which runnable threads are bundled into one synchroneous
-#       connection. Runnables not specified in the mask will have their
-#       seperate connection to the MySQL server.
-#       Value is a bitmask consisting of:
-#           MYSQL_BUNDLE_NONE   = 0,     Each task will run their own MySQL connection
-#           MYSQL_BUNDLE_CLI    = 1,     Commandline interface thread
-#           MYSQL_BUNDLE_RA     = 2,     Remote admin thread
-#           MYSQL_BUNDLE_RAR    = 4,     Reactor runnable thread
-#           MYSQL_BUNDLE_WORLD  = 8,     WorldRunnable
-#           MYSQL_BUNDLE_ALL    = 15,    All bundled together
+#    LoginDatabase.SynchThreads
+#    WorldDatabase.SynchThreads
+#    CharacterDatabase.SynchThreads
+#        The amount of MySQL connections spawned to handle
+#        synchronous (blocking) MySQL statements.
+#        Default: 1, 1, 2
 #
 #    MaxPingTime
-#        Settings for maximum database-ping interval (minutes between pings)
+#        Settings for maximum database-ping interval (seconds between pings)
+#        Default: 1800 (30 minutes)
 #
 #    WorldServerPort
 #        Default WorldServerPort
@@ -79,10 +73,10 @@ CharacterDatabaseInfo = "127.0.0.1;3306;trinity;trinity;characters"
 LoginDatabase.WorkerThreads = 1
 WorldDatabase.WorkerThreads = 1
 CharacterDatabase.WorkerThreads = 1
-LoginDatabase.ThreadBundleMask = 15
-WorldDatabase.ThreadBundleMask = 15
-CharacterDatabase.ThreadBundleMask = 15
-MaxPingTime = 30
+LoginDatabase.SynchThreads = 1
+WorldDatabase.SynchThreads = 1
+CharacterDatabase.SynchThreads = 2
+MaxPingTime = 1800
 WorldServerPort = 8085
 BindIP = "0.0.0.0"
 
@@ -190,13 +184,6 @@ EAIErrorLevel = 2
 #                 0 (disable)
 #        Default: 1 (enable)
 #
-#    vmap.ignoreMapIds
-#        Map id that will be ignored by VMaps
-#         List of ids with delimiter ','
-#         If more then one id is defined and spaces are included, the string
-#         has to be enclosed by "
-#        Example: "369,0,1,530"
-#
 #    vmap.ignoreSpellIds
 #        These spells are ignored for LoS calculation
 #         List of ids with delimiter ','
@@ -281,7 +268,6 @@ PlayerSave.Stats.MinLevel = 0
 PlayerSave.Stats.SaveOnlyOnLogout = 1
 vmap.enableLOS = 1
 vmap.enableHeight = 1
-vmap.ignoreMapIds = ""
 vmap.ignoreSpellIds = "7720"
 vmap.petLOS = 1
 vmap.enableIndoorCheck = 1
@@ -1469,6 +1455,7 @@ Visibility.Notify.Period.InBGArenas   = 1000
 #    Rate.RunicPower.Income
 #    Rate.RunicPower.Loss
 #    Rate.Focus
+#    Rate.Energy
 #    Rate.Loyalty
 #        Health and power regeneration and rage income from damage.
 #        Default: 1
@@ -1487,6 +1474,10 @@ Visibility.Notify.Period.InBGArenas   = 1000
 #    Rate.Drop.Item.Referenced
 #    Rate.Drop.Money
 #        Drop rates (items by quality and money)
+#        Default: 1
+#
+#    Rate.Drop.Item.ReferencedAmount
+#        Multiplier for referenced loot
 #        Default: 1
 #
 #    Rate.Drop.Money
@@ -1655,6 +1646,7 @@ Rate.Rage.Loss = 1
 Rate.RunicPower.Income = 1
 Rate.RunicPower.Loss = 1
 Rate.Focus = 1
+Rate.Energy = 1
 Rate.Loyalty = 1
 Rate.Skill.Discovery = 1
 Rate.Drop.Item.Poor = 1
@@ -1665,6 +1657,7 @@ Rate.Drop.Item.Epic = 1
 Rate.Drop.Item.Legendary = 1
 Rate.Drop.Item.Artifact = 1
 Rate.Drop.Item.Referenced = 1
+Rate.Drop.Item.ReferencedAmount = 1
 Rate.Drop.Money = 1
 Rate.XP.Kill    = 1
 Rate.XP.Quest   = 1
@@ -1839,7 +1832,7 @@ Battleground.Random.ResetHour = 6
 #     Start personal rating on entry in team
 #     Default: 0
 #
-#    Arena.StartMatchmakerRating
+#    Arena.ArenaStartMatchmakerRating
 #     Start matchmaker rating for players
 #     Default: 1500
 #

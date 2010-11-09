@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "gamePCH.h"
@@ -50,6 +48,8 @@
 #include "ScriptMgr.h"
 #include "MapManager.h"
 #include "InstanceScript.h"
+#include "LFGMgr.h"
+#include "GameObjectAI.h"
 
 void WorldSession::HandleRepopRequestOpcode(WorldPacket & recv_data)
 {
@@ -140,21 +140,29 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket & recv_data)
     {
         if (unit)
         {
+            unit->AI()->sGossipSelectCode(_player, menuId, gossipListId, code.c_str());
             if (!sScriptMgr.OnGossipSelectCode(_player, unit, _player->PlayerTalkClass->GossipOptionSender(gossipListId), _player->PlayerTalkClass->GossipOptionAction(gossipListId), code.c_str()))
                 _player->OnGossipSelect(unit, gossipListId, menuId);
         }
         else
+        {    
+            go->AI()->GossipSelectCode(_player, menuId, gossipListId, code.c_str());
             sScriptMgr.OnGossipSelectCode(_player, go, _player->PlayerTalkClass->GossipOptionSender(gossipListId), _player->PlayerTalkClass->GossipOptionAction(gossipListId), code.c_str());
+        }
     }
     else
     {
         if (unit)
         {
+            unit->AI()->sGossipSelect(_player, menuId, gossipListId);
             if (!sScriptMgr.OnGossipSelect(_player, unit, _player->PlayerTalkClass->GossipOptionSender(gossipListId), _player->PlayerTalkClass->GossipOptionAction(gossipListId)))
                 _player->OnGossipSelect(unit, gossipListId, menuId);
         }
         else
+        {
+            go->AI()->GossipSelect(_player, menuId, gossipListId);
             sScriptMgr.OnGossipSelect(_player, go, _player->PlayerTalkClass->GossipOptionSender(gossipListId), _player->PlayerTalkClass->GossipOptionAction(gossipListId));
+        }
     }
 }
 
@@ -531,7 +539,7 @@ void WorldSession::HandleContactListOpcode(WorldPacket & recv_data)
     uint32 unk;
     recv_data >> unk;
     sLog.outDebug("unk value is %u", unk);
-    _player->GetSocial()->SendSocialList();
+    _player->GetSocial()->SendSocialList(_player);
 }
 
 void WorldSession::HandleAddFriendOpcode(WorldPacket & recv_data)
@@ -882,6 +890,9 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         }
     }
 
+    if (GetPlayer()->isDebugAreaTriggers)
+        ChatHandler(GetPlayer()).PSendSysMessage(LANG_DEBUG_AREATRIGGER_REACHED, Trigger_ID);
+
     if (sScriptMgr.OnAreaTrigger(GetPlayer(), atEntry))
         return;
 
@@ -937,7 +948,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 
     // Check if we are in LfgGroup and trying to get out the dungeon
     if (GetPlayer()->GetGroup() && GetPlayer()->GetGroup()->isLFGGroup() && GetPlayer()->GetMap()->IsDungeon() && at->target_mapId != GetPlayer()->GetMapId())
-        GetPlayer()->TeleportToBGEntryPoint();
+        sLFGMgr.TeleportPlayer(GetPlayer(), true);
     else
         GetPlayer()->TeleportTo(at->target_mapId,at->target_X,at->target_Y,at->target_Z,at->target_Orientation,TELE_TO_NOT_LEAVE_TRANSPORT);
 }
@@ -1330,13 +1341,13 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
     }
 
     Field *fields = result->Fetch();
-    std::string acc = fields[0].GetCppString();
+    std::string acc = fields[0].GetString();
     if (acc.empty())
         acc = "Unknown";
-    std::string email = fields[1].GetCppString();
+    std::string email = fields[1].GetString();
     if (email.empty())
         email = "Unknown";
-    std::string lastip = fields[2].GetCppString();
+    std::string lastip = fields[2].GetString();
     if (lastip.empty())
         lastip = "Unknown";
 
@@ -1712,4 +1723,18 @@ void WorldSession::SendSetPhaseShift(uint32 PhaseShift)
     WorldPacket data(SMSG_SET_PHASE_SHIFT, 4);
     data << uint32(PhaseShift);
     SendPacket(&data);
+}
+
+void WorldSession::HandleHearthAndResurrect(WorldPacket& /*recv_data*/)
+{
+    if (_player->isInFlight())
+        return;
+
+    AreaTableEntry const *atEntry = sAreaStore.LookupEntry(_player->GetAreaId());
+    if (!atEntry || !(atEntry->flags & AREA_FLAG_OUTDOOR_PVP2))
+        return;
+
+    _player->BuildPlayerRepop();
+    _player->ResurrectPlayer(100);
+    _player->TeleportTo(_player->m_homebindMapId, _player->m_homebindX, _player->m_homebindY, _player->m_homebindZ, _player->GetOrientation());
 }

@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "gamePCH.h"
@@ -77,7 +75,7 @@ void AddItemsSetItem(Player*player,Item *item)
 
     ++eff->item_count;
 
-    for (uint32 x=0; x<8; x++)
+    for (uint32 x = 0; x < MAX_ITEM_SET_SPELLS; x++)
     {
         if (!set->spells [x])
             continue;
@@ -85,16 +83,16 @@ void AddItemsSetItem(Player*player,Item *item)
         if (set->items_to_triggerspell[x] > eff->item_count)
             continue;
 
-        uint32 z=0;
-        for (; z<8; z++)
+        uint32 z = 0;
+        for (; z < MAX_ITEM_SET_SPELLS; z++)
             if (eff->spells[z] && eff->spells[z]->Id == set->spells[x])
                 break;
 
-        if (z < 8)
+        if (z < MAX_ITEM_SET_SPELLS)
             continue;
 
         //new spell
-        for (uint32 y=0; y<8; y++)
+        for (uint32 y = 0; y < MAX_ITEM_SET_SPELLS; y++)
         {
             if (!eff->spells[y])                             // free slot
             {
@@ -143,7 +141,7 @@ void RemoveItemsSetItem(Player*player,ItemPrototype const *proto)
 
     --eff->item_count;
 
-    for (uint32 x=0; x<8; x++)
+    for (uint32 x = 0; x < MAX_ITEM_SET_SPELLS; x++)
     {
         if (!set->spells[x])
             continue;
@@ -152,7 +150,7 @@ void RemoveItemsSetItem(Player*player,ItemPrototype const *proto)
         if (set->items_to_triggerspell[x] <= eff->item_count)
             continue;
 
-        for (uint32 z=0; z<8; z++)
+        for (uint32 z = 0; z < MAX_ITEM_SET_SPELLS; z++)
         {
             if (eff->spells[z] && eff->spells[z]->Id == set->spells[x])
             {
@@ -372,7 +370,9 @@ void Item::SaveToDB(SQLTransaction& trans)
         }break;
         case ITEM_REMOVED:
         {
-            trans->PAppend("DELETE FROM item_instance WHERE guid = '%u'", guid);
+            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_INSTANCE);
+            stmt->setUInt32(0, guid);
+            trans->Append(stmt);
             if (HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_WRAPPED))
                 trans->PAppend("DELETE FROM character_gifts WHERE item_guid = '%u'", GetGUIDLow());
             delete this;
@@ -384,7 +384,7 @@ void Item::SaveToDB(SQLTransaction& trans)
     SetState(ITEM_UNCHANGED);
 }
 
-bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult result, uint32 entry)
+bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entry)
 {
     //                                                    0                1      2         3        4      5             6                 7           8           9    10
     //result = CharacterDatabase.PQuery("SELECT creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, playedTime, text FROM item_instance WHERE guid = '%u'", guid);
@@ -401,17 +401,10 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult result, uint32
     if (!proto)
         return false;
 
-    if (!result)
-    {
-        sLog.outError("Item (GUID: %u owner: %u) not found in table `item_instance`, can't load. ", guid, GUID_LOPART(owner_guid));
-        return false;
-    }
-
     // set owner (not if item is only loaded for gbank/auction/mail
     if (owner_guid != 0)
         SetOwnerGUID(owner_guid);
 
-    Field *fields = result->Fetch();
     bool need_save = false;                                 // need explicit save data at load fixes
     SetUInt64Value(ITEM_FIELD_CREATOR, MAKE_NEW_GUID(fields[0].GetUInt32(), 0, HIGHGUID_PLAYER));
     SetUInt64Value(ITEM_FIELD_GIFTCREATOR, MAKE_NEW_GUID(fields[1].GetUInt32(), 0, HIGHGUID_PLAYER));
@@ -426,10 +419,10 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult result, uint32
         need_save = true;
     }
 
-    Tokens tokens = StrSplit(fields[4].GetCppString(), " ");
+    Tokens tokens(fields[4].GetString(), ' ', MAX_ITEM_PROTO_SPELLS);
     if (tokens.size() == MAX_ITEM_PROTO_SPELLS)
         for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
-            SetSpellCharges(i, atoi(tokens[i].c_str()));
+            SetSpellCharges(i, atoi(tokens[i]));
 
     SetUInt32Value(ITEM_FIELD_FLAGS, fields[5].GetUInt32());
     // Remove bind flag for items vs NO_BIND set
@@ -439,7 +432,8 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult result, uint32
         need_save = true;
     }
 
-    _LoadIntoDataField(fields[6].GetString(), ITEM_FIELD_ENCHANTMENT_1_1, MAX_ENCHANTMENT_SLOT * MAX_ENCHANTMENT_OFFSET);
+    std::string enchants = fields[6].GetString();
+    _LoadIntoDataField(enchants.c_str(), ITEM_FIELD_ENCHANTMENT_1_1, MAX_ENCHANTMENT_SLOT * MAX_ENCHANTMENT_OFFSET);
     SetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID, fields[7].GetInt32());
     // recalculate suffix factor
     if (GetItemRandomPropertyId() < 0)
@@ -456,7 +450,7 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult result, uint32
     }
 
     SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, fields[9].GetUInt32());
-    SetText(fields[10].GetCppString());
+    SetText(fields[10].GetString());
 
     if (need_save)                                           // normal item changed state set not work at loading
     {
@@ -474,12 +468,16 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult result, uint32
 
 void Item::DeleteFromDB(SQLTransaction& trans)
 {
-    trans->PAppend("DELETE FROM item_instance WHERE guid = '%u'",GetGUIDLow());
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_INSTANCE);
+    stmt->setUInt32(0, GetGUIDLow());
+    trans->Append(stmt);
 }
 
 void Item::DeleteFromInventoryDB(SQLTransaction& trans)
 {
-    trans->PAppend("DELETE FROM character_inventory WHERE item = '%u'",GetGUIDLow());
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_INVENTORY_ITEM);
+    stmt->setUInt32(0, GetGUIDLow());
+    trans->Append(stmt);
 }
 
 ItemPrototype const *Item::GetProto() const
@@ -741,12 +739,12 @@ bool Item::IsEquipped() const
     return !IsInBag() && m_slot < EQUIPMENT_SLOT_END;
 }
 
-bool Item::CanBeTraded(bool mail) const
+bool Item::CanBeTraded(bool mail, bool trade) const
 {
     if (m_lootGenerated)
         return false;
 
-    if ((!mail || !IsBoundAccountWide()) && IsSoulBound())
+    if ((!mail || !IsBoundAccountWide()) && (IsSoulBound() && (!HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_BOP_TRADEABLE) || !trade)))
         return false;
 
     if (IsBag() && (Player::IsBagPos(GetPos()) || !((Bag const*)this)->IsEmpty()))
@@ -914,7 +912,7 @@ void Item::ClearEnchantment(EnchantmentSlot slot)
     if (!GetEnchantmentId(slot))
         return;
 
-    for (uint8 x = 0; x < 3; ++x)
+    for (uint8 x = 0; x < MAX_ITEM_ENCHANTMENT_EFFECTS; ++x)
         SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot*MAX_ENCHANTMENT_OFFSET + x, 0);
     SetState(ITEM_CHANGED, GetOwner());
 }
@@ -1063,7 +1061,9 @@ Item* Item::CloneItem(uint32 count, Player const* player) const
     newItem->SetUInt32Value(ITEM_FIELD_GIFTCREATOR,  GetUInt32Value(ITEM_FIELD_GIFTCREATOR));
     newItem->SetUInt32Value(ITEM_FIELD_FLAGS,        GetUInt32Value(ITEM_FIELD_FLAGS));
     newItem->SetUInt32Value(ITEM_FIELD_DURATION,     GetUInt32Value(ITEM_FIELD_DURATION));
-    newItem->SetItemRandomProperties(GetItemRandomPropertyId());
+    // player CAN be NULL in which case we must not update random properties because that accesses player's item update queue
+    if (player)
+        newItem->SetItemRandomProperties(GetItemRandomPropertyId());
     return newItem;
 }
 
@@ -1076,6 +1076,10 @@ bool Item::IsBindedNotWith(Player const* player) const
     // own item
     if (GetOwnerGUID() == player->GetGUID())
         return false;
+
+    if (HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_BOP_TRADEABLE))
+        if (allowedGUIDs.find(player->GetGUIDLow()) != allowedGUIDs.end())
+            return false;
 
     // BOA item case
     if (IsBoundAccountWide())
@@ -1180,4 +1184,37 @@ uint32 Item::GetPlayedTime()
 bool Item::IsRefundExpired()
 {
     return (GetPlayedTime() > 2*HOUR);
+}
+
+void Item::SetSoulboundTradeable(AllowedLooterSet* allowedLooters, Player* currentOwner, bool apply)
+{
+    if (apply)
+    {
+        SetFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_BOP_TRADEABLE);
+        allowedGUIDs = *allowedLooters;
+    }
+    else
+    {
+        RemoveFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_BOP_TRADEABLE);
+        if (allowedGUIDs.empty())
+            return;
+
+        allowedGUIDs.clear();
+        SetState(ITEM_CHANGED, currentOwner);
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_BOP_TRADE);
+        stmt->setUInt32(0, GetGUIDLow());
+        CharacterDatabase.Execute(stmt);
+    }
+}
+
+bool Item::CheckSoulboundTradeExpire()
+{
+    // called from owner's update - GetOwner() MUST be valid
+    if (GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME) + 2*HOUR < GetOwner()->GetTotalPlayedTime())
+    {
+        SetSoulboundTradeable(NULL, GetOwner(), false);
+        return true; // remove from tradeable list
+    }
+
+    return false;
 }

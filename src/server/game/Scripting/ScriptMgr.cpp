@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "ScriptPCH.h"
@@ -23,9 +21,11 @@
 #include "DatabaseEnv.h"
 #include "DBCStores.h"
 #include "ObjectMgr.h"
+#include "OutdoorPvPMgr.h"
 #include "ProgressBar.h"
 #include "ScriptLoader.h"
 #include "ScriptSystem.h"
+#include "Transport.h"
 
 // Utility macros to refer to the script registry.
 #define SCR_REG_MAP(T) ScriptRegistry<T>::ScriptMap
@@ -181,6 +181,7 @@ ScriptMgr::~ScriptMgr()
     SCR_CLEAR(AchievementCriteriaScript);
     SCR_CLEAR(PlayerScript);
     SCR_CLEAR(GuildScript);
+    SCR_CLEAR(GroupScript);
 
     #undef SCR_CLEAR
 }
@@ -230,7 +231,7 @@ void ScriptMgr::FillSpellSummary()
         if (!pTempSpell)
             continue;
 
-        for (uint32 j = 0; j < 3; ++j)
+        for (uint32 j = 0; j < MAX_SPELL_EFFECTS; ++j)
         {
             //Spell targets self
             if (pTempSpell->EffectImplicitTargetA[j] == TARGET_UNIT_CASTER)
@@ -314,6 +315,8 @@ void ScriptMgr::CreateSpellScripts(uint32 spell_id, std::list<SpellScript *> & s
         if (!script)
             continue;
 
+        script->_Init(&tmpscript->GetName(), spell_id);
+
         script_vector.push_back(script);
     }
 }
@@ -332,6 +335,8 @@ void ScriptMgr::CreateAuraScripts(uint32 spell_id, std::list<AuraScript *> & scr
 
         if (!script)
             continue;
+
+        script->_Init(&tmpscript->GetName(), spell_id);
 
         script_vector.push_back(script);
     }
@@ -937,14 +942,14 @@ void ScriptMgr::OnAuctionExpire(AuctionHouseObject* ah, AuctionEntry* entry)
     FOREACH_SCRIPT(AuctionHouseScript)->OnAuctionExpire(ah, entry);
 }
 
-bool ScriptMgr::OnConditionCheck(Condition* condition, Player* player, Unit* targetOverride)
+bool ScriptMgr::OnConditionCheck(Condition* condition, Player* player, Unit* invoker)
 {
     ASSERT(condition);
     ASSERT(player);
-    // targetOverride can be NULL.
+    // invoker can be NULL.
 
     GET_SCRIPT_RET(ConditionScript, condition->mScriptId, tmpscript, true);
-    return tmpscript->OnConditionCheck(condition, player, targetOverride);
+    return tmpscript->OnConditionCheck(condition, player, invoker);
 }
 
 void ScriptMgr::OnInstall(Vehicle* veh)
@@ -1081,6 +1086,7 @@ bool ScriptMgr::OnCriteriaCheck(AchievementCriteriaData const* data, Player* sou
     return tmpscript->OnCheck(source, target);
 }
 
+// Player
 void ScriptMgr::OnPVPKill(Player *killer, Player *killed)
 {
     FOREACH_SCRIPT(PlayerScript)->OnPVPKill(killer, killed);
@@ -1181,7 +1187,28 @@ void ScriptMgr::OnPlayerSpellCast(Player *player, Spell *spell, bool skipCheck)
     FOREACH_SCRIPT(PlayerScript)->OnSpellCast(player, spell, skipCheck);
 }
 
-void ScriptMgr::OnGuildAddMember(Guild *guild, Player *player, uint32& plRank)
+void ScriptMgr::OnPlayerLogin(Player *player)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnLogin(player);
+}
+
+void ScriptMgr::OnPlayerLogout(Player *player)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnLogout(player);
+}
+
+void ScriptMgr::OnPlayerCreate(Player *player)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnCreate(player);
+}
+
+void ScriptMgr::OnPlayerDelete(uint64 guid)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnDelete(guid);
+}
+
+// Guild
+void ScriptMgr::OnGuildAddMember(Guild *guild, Player *player, uint8& plRank)
 {
     FOREACH_SCRIPT(GuildScript)->OnAddMember(guild, player, plRank);
 }
@@ -1191,19 +1218,81 @@ void ScriptMgr::OnGuildRemoveMember(Guild *guild, Player *player, bool isDisband
     FOREACH_SCRIPT(GuildScript)->OnRemoveMember(guild, player, isDisbanding, isKicked);
 }
 
-void ScriptMgr::OnGuildMOTDChanged(Guild *guild, std::string newMotd)
+void ScriptMgr::OnGuildMOTDChanged(Guild *guild, const std::string& newMotd)
 {
     FOREACH_SCRIPT(GuildScript)->OnMOTDChanged(guild, newMotd);
 }
 
-void ScriptMgr::OnGuildInfoChanged(Guild *guild, std::string newGInfo)
+void ScriptMgr::OnGuildInfoChanged(Guild *guild, const std::string& newInfo)
 {
-    FOREACH_SCRIPT(GuildScript)->OnGInfoChanged(guild, newGInfo);
+    FOREACH_SCRIPT(GuildScript)->OnInfoChanged(guild, newInfo);
+}
+
+void ScriptMgr::OnGuildCreate(Guild *guild, Player* leader, const std::string& name)
+{
+    FOREACH_SCRIPT(GuildScript)->OnCreate(guild, leader, name);
 }
 
 void ScriptMgr::OnGuildDisband(Guild *guild)
 {
     FOREACH_SCRIPT(GuildScript)->OnDisband(guild);
+}
+
+void ScriptMgr::OnGuildMemberWitdrawMoney(Guild* guild, Player* player, uint32 &amount, bool isRepair)
+{
+    FOREACH_SCRIPT(GuildScript)->OnMemberWitdrawMoney(guild, player, amount, isRepair);
+}
+
+void ScriptMgr::OnGuildMemberDepositMoney(Guild* guild, Player* player, uint32 &amount)
+{
+    FOREACH_SCRIPT(GuildScript)->OnMemberDepositMoney(guild, player, amount);
+}
+
+void ScriptMgr::OnGuildItemMove(Guild* guild, Player* player, Item* pItem, bool isSrcBank, uint8 srcContainer, uint8 srcSlotId, 
+            bool isDestBank, uint8 destContainer, uint8 destSlotId)
+{
+    FOREACH_SCRIPT(GuildScript)->OnItemMove(guild, player, pItem, isSrcBank, srcContainer, srcSlotId, isDestBank, destContainer, destSlotId);
+}
+
+void ScriptMgr::OnGuildEvent(Guild* guild, uint8 eventType, uint32 playerGuid1, uint32 playerGuid2, uint8 newRank)
+{
+    FOREACH_SCRIPT(GuildScript)->OnEvent(guild, eventType, playerGuid1, playerGuid2, newRank);
+}
+
+void ScriptMgr::OnGuildBankEvent(Guild* guild, uint8 eventType, uint8 tabId, uint32 playerGuid, uint32 itemOrMoney, uint16 itemStackCount, uint8 destTabId)
+{
+    FOREACH_SCRIPT(GuildScript)->OnBankEvent(guild, eventType, tabId, playerGuid, itemOrMoney, itemStackCount, destTabId);
+}
+
+// Group
+void ScriptMgr::OnGroupAddMember(Group* group, uint64 guid)
+{
+    ASSERT(group);
+    FOREACH_SCRIPT(GroupScript)->OnAddMember(group, guid);
+}
+
+void ScriptMgr::OnGroupInviteMember(Group* group, uint64 guid)
+{
+    ASSERT(group);
+    FOREACH_SCRIPT(GroupScript)->OnInviteMember(group, guid);
+}
+
+void ScriptMgr::OnGroupRemoveMember(Group* group, uint64 guid, RemoveMethod method)
+{
+    ASSERT(group);
+    FOREACH_SCRIPT(GroupScript)->OnRemoveMember(group, guid, method);
+}
+
+void ScriptMgr::OnGroupChangeLeader(Group* group, uint64 newLeaderGuid, uint64 oldLeaderGuid)
+{
+    ASSERT(group);
+    FOREACH_SCRIPT(GroupScript)->OnChangeLeader(group, newLeaderGuid, oldLeaderGuid);
+}
+
+void ScriptMgr::OnGroupDisband(Group* group)
+{
+    ASSERT(group);
+    FOREACH_SCRIPT(GroupScript)->OnDisband(group);
 }
 
 SpellScriptLoader::SpellScriptLoader(const char* name)
@@ -1353,6 +1442,12 @@ GuildScript::GuildScript(const char* name)
     ScriptMgr::ScriptRegistry<GuildScript>::AddScript(this);
 }
 
+GroupScript::GroupScript(const char* name)
+    : ScriptObject(name)
+{
+    ScriptMgr::ScriptRegistry<GroupScript>::AddScript(this);
+}
+
 // Instantiate static members of ScriptMgr::ScriptRegistry.
 template<class TScript> std::map<uint32, TScript*> ScriptMgr::ScriptRegistry<TScript>::ScriptPointerList;
 template<class TScript> uint32 ScriptMgr::ScriptRegistry<TScript>::_scriptIdCounter = 0;
@@ -1379,6 +1474,9 @@ template class ScriptMgr::ScriptRegistry<VehicleScript>;
 template class ScriptMgr::ScriptRegistry<DynamicObjectScript>;
 template class ScriptMgr::ScriptRegistry<TransportScript>;
 template class ScriptMgr::ScriptRegistry<AchievementCriteriaScript>;
+template class ScriptMgr::ScriptRegistry<PlayerScript>;
+template class ScriptMgr::ScriptRegistry<GuildScript>;
+template class ScriptMgr::ScriptRegistry<GroupScript>;
 
 // Undefine utility macros.
 #undef GET_SCRIPT_RET

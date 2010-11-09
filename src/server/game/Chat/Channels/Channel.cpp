@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "gamePCH.h"
@@ -30,10 +28,8 @@ Channel::Channel
  : m_announce(true), m_moderate(false), m_name(name), m_password(""), m_flags(0), m_channelId(channel_id), m_ownerGUID(0), m_Team(Team)
 {
     // set special flags if built-in channel
-    ChatChannelsEntry const* ch = GetChannelEntryFor(channel_id);
-    if (ch)                                                  // it's built-in channel
+    if (ChatChannelsEntry const* ch = sChatChannelsStore.LookupEntry(channel_id)) // check whether it's a built-in channel
     {
-        channel_id = ch->ChannelID;                         // built-in channel
         m_announce = false;                                 // no join/leave announces
 
         m_flags |= CHANNEL_FLAG_GENERAL;                    // for all built-in channels
@@ -60,6 +56,7 @@ Channel::Channel
     }
     else                                                    // it's custom channel
     {
+        channel_id = 0;
         m_flags |= CHANNEL_FLAG_CUSTOM;
         //load not built in channel if saved
         std::string _name(name);
@@ -72,17 +69,17 @@ Channel::Channel
             m_moderate = fields[1].GetBool();
             m_public = fields[2].GetBool();
             m_password  = fields[3].GetString();
-            const char* db_BannedList = fields[4].GetString();
+            const char* db_BannedList = fields[4].GetCString();
 
             m_IsSaved = true;
 
             if (db_BannedList)
             {
-                Tokens tokens = StrSplit(db_BannedList, " ");
+                Tokens tokens(db_BannedList, ' ');
                 Tokens::iterator iter;
                 for (iter = tokens.begin(); iter != tokens.end(); ++iter)
                 {
-                    uint64 banned_guid = atol((*iter).c_str());
+                    uint64 banned_guid = atol(*iter);
                     if (banned_guid)
                     {
                         sLog.outDebug("Channel(%s) loaded banned guid:" UI64FMTD "",name.c_str(), banned_guid);
@@ -887,7 +884,7 @@ void Channel::MakeYouLeft(WorldPacket *data)
 {
     MakeNotifyPacket(data, CHAT_YOU_LEFT_NOTICE);
     *data << uint32(GetChannelId());
-    *data << uint8(0);                                      // can be 0x00 and 0x01
+    *data << uint8(IsConstant());
 }
 
 // done 0x04
@@ -1125,7 +1122,11 @@ void Channel::JoinNotify(uint64 guid)
     data << uint8(GetFlags());
     data << uint32(GetNumPlayers());
     data << GetName();
-    SendToAll(&data);
+
+    if (IsConstant())
+        SendToAllButOne(&data, guid);
+    else
+        SendToAll(&data);
 }
 
 void Channel::LeaveNotify(uint64 guid)
@@ -1135,7 +1136,11 @@ void Channel::LeaveNotify(uint64 guid)
     data << uint8(GetFlags());
     data << uint32(GetNumPlayers());
     data << GetName();
-    SendToAll(&data);
+
+    if (IsConstant())
+        SendToAllButOne(&data, guid);
+    else
+        SendToAll(&data);
 }
 
 bool Channel::player_level_ok(const Player &p) const

@@ -31,6 +31,40 @@ enum PriestSpells
     PRIEST_SPELL_PENANCE_R1_HEAL                 = 47757,
 };
 
+class spell_pri_mana_burn : public SpellScriptLoader
+{
+    public:
+        spell_pri_mana_burn() : SpellScriptLoader("spell_pri_mana_burn") { }
+
+        class spell_pri_mana_burn_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pri_mana_burn_SpellScript)
+            bool Validate(SpellEntry const * /*spellEntry*/)
+            {
+                return true;
+            }
+
+            void HandleAfterHit()
+            {
+                Unit * unitTarget = GetHitUnit();
+                if (!unitTarget)
+                    return;
+
+                unitTarget->RemoveAurasWithMechanic((1 << MECHANIC_FEAR) | (1 << MECHANIC_POLYMORPH));
+            }
+
+            void Register()
+            {
+                AfterHit += SpellHitFn(spell_pri_mana_burn_SpellScript::HandleAfterHit);
+            }
+        };
+
+        SpellScript * GetSpellScript() const
+        {
+            return new spell_pri_mana_burn_SpellScript;
+        }
+};
+
 class spell_pri_pain_and_suffering_proc : public SpellScriptLoader
 {
     public:
@@ -39,6 +73,7 @@ class spell_pri_pain_and_suffering_proc : public SpellScriptLoader
         // 47948 Pain and Suffering (proc)
         class spell_pri_pain_and_suffering_proc_SpellScript : public SpellScript
         {
+            PrepareSpellScript(spell_pri_pain_and_suffering_proc_SpellScript)
             void HandleEffectScriptEffect(SpellEffIndex /*effIndex*/)
             {
                 // Refresh Shadow Word: Pain on target
@@ -66,6 +101,7 @@ class spell_pri_penance : public SpellScriptLoader
 
         class spell_pri_penance_SpellScript : public SpellScript
         {
+            PrepareSpellScript(spell_pri_penance_SpellScript)
             bool Validate(SpellEntry const * spellEntry)
             {
                 if (!sSpellStore.LookupEntry(PRIEST_SPELL_PENANCE_R1))
@@ -114,6 +150,7 @@ class spell_pri_penance : public SpellScriptLoader
 
 void AddSC_priest_spell_scripts()
 {
+    new spell_pri_mana_burn;
     new spell_pri_pain_and_suffering_proc;
     new spell_pri_penance;
 }

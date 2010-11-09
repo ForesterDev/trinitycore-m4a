@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "gamePCH.h"
@@ -63,6 +61,7 @@
 #include "Formulas.h"
 #include "Vehicle.h"
 #include "ScriptMgr.h"
+#include "GameObjectAI.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -2028,7 +2027,7 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
                         m_caster->CastSpell(m_caster, 36895, true);
                         break;
                     case 4:
-                    // Transform
+                        // Transform
                     {
                         if (m_caster->ToPlayer()->GetTeam() == ALLIANCE)
                             m_caster->CastSpell(m_caster, 36897, true);
@@ -2154,9 +2153,10 @@ void Spell::EffectPowerBurn(SpellEffIndex effIndex)
     // NO - Not a typo - EffectPowerBurn uses effect value multiplier - not effect damage multiplier
     float dmgMultiplier = SpellMgr::CalculateSpellEffectValueMultiplier(m_spellInfo, effIndex, m_originalCaster, this);
 
-    newDamage = int32(newDamage * dmgMultiplier);
+    // add log data before multiplication (need power amount, not damage)
+    ExecuteLogEffectTakeTargetPower(effIndex, unitTarget, powerType, newDamage, 0.0f);
 
-    ExecuteLogEffectTakeTargetPower(effIndex, unitTarget, powerType, newDamage, dmgMultiplier);
+    newDamage = int32(newDamage * dmgMultiplier);
 
     m_damage += newDamage;
 }
@@ -2653,6 +2653,8 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
     {
         if (sScriptMgr.OnGossipHello(player, gameObjTarget))
             return;
+
+        gameObjTarget->AI()->GossipHello(player);
 
         switch (gameObjTarget->GetGoType())
         {
@@ -3379,7 +3381,7 @@ void Spell::EffectAddHonor(SpellEffIndex /*effIndex*/)
     {
         //maybe we have correct honor_gain in damage already
         unitTarget->ToPlayer()->RewardHonor(NULL, 1, damage);
-        sLog.outError("SpellEffect::AddHonor (spell_id %u) rewards %u honor points (non scale) for player: %u", m_spellInfo->Id, damage, unitTarget->ToPlayer()->GetGUIDLow());
+        sLog.outDebug("SpellEffect::AddHonor (spell_id %u) rewards %u honor points (non scale) for player: %u", m_spellInfo->Id, damage, unitTarget->ToPlayer()->GetGUIDLow());
     }
 }
 
@@ -3447,6 +3449,8 @@ void Spell::EffectEnchantItemPerm(SpellEffIndex effIndex)
 
         // add new enchanting if equipped
         item_owner->ApplyEnchantment(itemTarget,PERM_ENCHANTMENT_SLOT,true);
+
+        itemTarget->SetSoulboundTradeable(NULL, item_owner, false);
     }
 }
 
@@ -3470,7 +3474,7 @@ void Spell::EffectEnchantItemPrismatic(SpellEffIndex effIndex)
     // support only enchantings with add socket in this slot
     {
         bool add_socket = false;
-        for (uint8 i = 0; i < 3; ++i)
+        for (uint8 i = 0; i < MAX_ITEM_ENCHANTMENT_EFFECTS; ++i)
         {
             if (pEnchant->type[i] == ITEM_ENCHANTMENT_TYPE_PRISMATIC_SOCKET)
             {
@@ -3506,6 +3510,8 @@ void Spell::EffectEnchantItemPrismatic(SpellEffIndex effIndex)
 
     // add new enchanting if equipped
     item_owner->ApplyEnchantment(itemTarget,PRISMATIC_ENCHANTMENT_SLOT,true);
+
+    itemTarget->SetSoulboundTradeable(NULL, item_owner, false);
 }
 
 void Spell::EffectEnchantItemTmp(SpellEffIndex effIndex)
@@ -3848,7 +3854,7 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
     // multiple weapon dmg effect workaround
     // execute only the last weapon damage
     // and handle all effects at once
-    for (uint32 j = effIndex + 1; j < 3; ++j)
+    for (uint32 j = effIndex + 1; j < MAX_SPELL_EFFECTS; ++j)
     {
         switch (m_spellInfo->Effect[j])
         {
@@ -4057,7 +4063,7 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
 
     bool normalized = false;
     float weaponDamagePercentMod = 1.0;
-    for (int j = 0; j < 3; ++j)
+    for (int j = 0; j < MAX_SPELL_EFFECTS; ++j)
     {
         switch(m_spellInfo->Effect[j])
         {
@@ -4102,7 +4108,7 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
     int32 weaponDamage = m_caster->CalculateDamage(m_attackType, normalized, true);
 
     // Sequence is important
-    for (int j = 0; j < 3; ++j)
+    for (int j = 0; j < MAX_SPELL_EFFECTS; ++j)
     {
         // We assume that a spell have at most one fixed_bonus
         // and at most one weaponDamagePercentMod
@@ -6762,11 +6768,15 @@ void Spell::EffectWMODamage(SpellEffIndex /*effIndex*/)
         if (!caster)
             return;
 
+        // Do not allow damage if hp is 0
+        if (gameObjTarget->GetGOValue()->building.health == 0)
+            return;
+
         FactionTemplateEntry const *casterft, *goft;
         casterft = caster->getFactionTemplateEntry();
         goft = sFactionTemplateStore.LookupEntry(gameObjTarget->GetUInt32Value(GAMEOBJECT_FACTION));
-        // Do not allow to damage GO's of friendly factions (ie: Wintergrasp Walls)
-        if (casterft && goft && !casterft->IsFriendlyTo(*goft))
+        // Do not allow to damage GO's of friendly factions (ie: Wintergrasp Walls/Ulduar Storm Beacons)
+        if ((casterft && goft && !casterft->IsFriendlyTo(*goft)) || !goft)
         {
             gameObjTarget->TakenDamage(uint32(damage), caster);
             WorldPacket data(SMSG_DESTRUCTIBLE_BUILDING_DAMAGE, 8+8+8+4+4);

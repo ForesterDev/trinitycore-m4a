@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef _OBJECTMGR_H
@@ -89,19 +87,223 @@ enum ScriptsType
     SCRIPTS_LAST
 };
 
+enum eScriptFlags
+{
+    // Talk Flags
+    SF_TALK_USE_PLAYER          = 0x1,
+
+    // Emote flags
+    SF_EMOTE_USE_STATE          = 0x1,
+
+    // TeleportTo flags
+    SF_TELEPORT_USE_CREATURE    = 0x1,
+
+    // KillCredit flags
+    SF_KILLCREDIT_REWARD_GROUP  = 0x1,
+
+    // RemoveAura flags
+    SF_REMOVEAURA_REVERSE       = 0x1,
+
+    // CastSpell flags
+    SF_CASTSPELL_SOURCE_TO_TARGET = 0,
+    SF_CASTSPELL_SOURCE_TO_SOURCE = 1,
+    SF_CASTSPELL_TARGET_TO_TARGET = 2,
+    SF_CASTSPELL_TARGET_TO_SOURCE = 3,
+    SF_CASTSPELL_SEARCH_CREATURE  = 4,
+    SF_CASTSPELL_TRIGGERED      = 0x1,
+
+    // PlaySound flags
+    SF_PLAYSOUND_TARGET_PLAYER  = 0x1,
+    SF_PLAYSOUND_DISTANCE_SOUND = 0x2,
+
+    // Orientation flags
+    SF_ORIENTATION_FACE_TARGET  = 0x1,
+};
+
 struct ScriptInfo
 {
+    ScriptsType type;
     uint32 id;
     uint32 delay;
     ScriptCommands command;
-    uint32 datalong;
-    uint32 datalong2;
-    int32  dataint;
-    float x;
-    float y;
-    float z;
-    float o;
-    ScriptsType type;
+
+    union
+    {
+        struct
+        {
+            uint32 nData[3];
+            float  fData[4];
+        } Raw;
+
+        struct                      // SCRIPT_COMMAND_TALK (0)
+        {
+            uint32 ChatType;        // datalong
+            uint32 Flags;           // datalong2
+            int32  TextID;          // dataint
+        } Talk;
+
+        struct                      // SCRIPT_COMMAND_EMOTE (1)
+        {
+            uint32 EmoteID;         // datalong
+            uint32 Flags;           // datalong2
+        } Emote;
+
+        struct                      // SCRIPT_COMMAND_FIELD_SET (2)
+        {
+            uint32 FieldID;         // datalong
+            uint32 FieldValue;      // datalong2
+        } FieldSet;
+
+        struct                      // SCRIPT_COMMAND_MOVE_TO (3)
+        {
+            uint32 Unused1;         // datalong
+            uint32 TravelTime;      // datalong2
+            int32  Unused2;         // dataint
+
+            float DestX;
+            float DestY;
+            float DestZ;
+        } MoveTo;
+
+        struct                      // SCRIPT_COMMAND_FLAG_SET (4)
+                                    // SCRIPT_COMMAND_FLAG_REMOVE (5)
+        {
+            uint32 FieldID;         // datalong
+            uint32 FieldValue;      // datalong2
+        } FlagToggle;
+
+        struct                      // SCRIPT_COMMAND_TELEPORT_TO (6)
+        {
+            uint32 MapID;           // datalong
+            uint32 Flags;           // datalong2
+            int32  Unused1;         // dataint
+
+            float DestX;
+            float DestY;
+            float DestZ;
+            float Orientation;
+        } TeleportTo;
+
+        struct                      // SCRIPT_COMMAND_QUEST_EXPLORED (7)
+        {
+            uint32 QuestID;         // datalong
+            uint32 Distance;        // datalong2
+        } QuestExplored;
+
+        struct                      // SCRIPT_COMMAND_KILL_CREDIT (8)
+        {
+            uint32 CreatureEntry;   // datalong
+            uint32 Flags;           // datalong2
+        } KillCredit;
+
+        struct                      // SCRIPT_COMMAND_RESPAWN_GAMEOBJECT (9)
+        {
+            uint32 GOGuid;          // datalong
+            uint32 DespawnDelay;    // datalong2
+        } RespawnGameobject;
+
+        struct                      // SCRIPT_COMMAND_TEMP_SUMMON_CREATURE (10)
+        {
+            uint32 CreatureEntry;   // datalong
+            uint32 DespawnDelay;    // datalong2
+            int32  Unused1;         // dataint
+
+            float PosX;
+            float PosY;
+            float PosZ;
+            float Orientation;
+        } TempSummonCreature;
+
+        struct                      // SCRIPT_COMMAND_CLOSE_DOOR (12)
+                                    // SCRIPT_COMMAND_OPEN_DOOR (11)
+        {
+            uint32 GOGuid;          // datalong
+            uint32 ResetDelay;      // datalong2
+        } ToggleDoor;
+
+                                    // SCRIPT_COMMAND_ACTIVATE_OBJECT (13)
+
+        struct                      // SCRIPT_COMMAND_REMOVE_AURA (14)
+        {
+            uint32 SpellID;         // datalong
+            uint32 Flags;           // datalong2
+        } RemoveAura;
+
+        struct                      // SCRIPT_COMMAND_CAST_SPELL (15)
+        {
+            uint32 SpellID;         // datalong
+            uint32 Flags;           // datalong2
+            int32  CreatureEntry;   // dataint
+
+            float SearchRadius;
+        } CastSpell;
+
+        struct                      // SCRIPT_COMMAND_PLAY_SOUND (16)
+        {
+            uint32 SoundID;         // datalong
+            uint32 Flags;           // datalong2
+        } PlaySound;
+
+        struct                      // SCRIPT_COMMAND_CREATE_ITEM (17)
+        {
+            uint32 ItemEntry;       // datalong
+            uint32 Amount;          // datalong2
+        } CreateItem;
+
+        struct                      // SCRIPT_COMMAND_DESPAWN_SELF (18)
+        {
+            uint32 DespawnDelay;    // datalong
+        } DespawnSelf;
+
+        struct                      // SCRIPT_COMMAND_LOAD_PATH (20)
+        {
+            uint32 PathID;          // datalong
+            uint32 IsRepeatable;    // datalong2
+        } LoadPath;
+
+        struct                      // SCRIPT_COMMAND_CALLSCRIPT_TO_UNIT (21)
+        {
+            uint32 CreatureEntry;   // datalong
+            uint32 ScriptID;        // datalong2
+            uint32 ScriptType;      // dataint
+        } CallScript;
+
+        struct                      // SCRIPT_COMMAND_KILL (22)
+        {
+            uint32 Unused1;         // datalong
+            uint32 Unused2;         // datalong2
+            int32  RemoveCorpse;    // dataint
+        } Kill;
+
+        struct                      // SCRIPT_COMMAND_ORIENTATION (30)
+        {
+            uint32 Flags;           // datalong
+            uint32 Unused1;         // datalong2
+            int32  Unused2;         // dataint
+
+            float Unused3;
+            float Unused4;
+            float Unused5;
+            float Orientation;
+        } Orientation;
+
+        struct                      // SCRIPT_COMMAND_EQUIP (31)
+        {
+            uint32 EquipmentID;     // datalong
+        } Equip;
+
+        struct                      // SCRIPT_COMMAND_MODEL (32)
+        {
+            uint32 ModelID;         // datalong
+        } Model;
+
+                                    // SCRIPT_COMMAND_CLOSE_GOSSIP (33)
+
+        struct                      // SCRIPT_COMMAND_PLAYMOVIE (34)
+        {
+            uint32 MovieID;         // datalong
+        } PlayMovie;
+    };
 
     std::string GetDebugInfo() const;
 };
@@ -175,7 +377,7 @@ typedef UNORDERED_MAP<uint64/*(instance,guid) pair*/,time_t> RespawnTimes;
 
 struct TrinityStringLocale
 {
-    StringVector Content;                       // 0 -> default, i -> i-1 locale index
+    StringVector Content;
 };
 
 typedef std::map<uint32,uint32> CreatureLinkedRespawnMap;
@@ -372,7 +574,7 @@ class ObjectMgr
 
         typedef std::set<Group *> GroupSet;
 
-        typedef UNORDERED_MAP<uint32, Guild *> GuildMap;
+        typedef std::vector <Guild *> GuildMap;
 
         typedef UNORDERED_MAP<uint32, ArenaTeam*> ArenaTeamMap;
 
@@ -409,11 +611,11 @@ class ObjectMgr
         void RemoveGroup(Group* group) { mGroupSet.erase(group); }
 
         Guild* GetGuildByLeader(uint64 const&guid) const;
-        Guild* GetGuildById(uint32 GuildId) const;
+        Guild* GetGuildById(uint32 guildId) const;
         Guild* GetGuildByName(const std::string& guildname) const;
-        std::string GetGuildNameById(uint32 GuildId) const;
-        void AddGuild(Guild* guild);
-        void RemoveGuild(uint32 Id);
+        std::string GetGuildNameById(uint32 guildId) const;
+        void AddGuild(Guild* pGuild);
+        void RemoveGuild(uint32 guildId);
 
         ArenaTeam* GetArenaTeamById(uint32 arenateamid) const;
         ArenaTeam* GetArenaTeamByName(const std::string& arenateamname) const;
@@ -427,6 +629,7 @@ class ObjectMgr
         CreatureModelInfo const *GetCreatureModelInfo(uint32 modelid);
         CreatureModelInfo const* GetCreatureModelRandomGender(uint32 display_id);
         uint32 ChooseDisplayId(uint32 team, const CreatureInfo *cinfo, const CreatureData *data = NULL);
+        static void ChooseCreatureFlags(const CreatureInfo *cinfo, uint32& npcflag, uint32& unit_flags, uint32& dynamicflags, const CreatureData *data = NULL);
         EquipmentInfo const *GetEquipmentInfo(uint32 entry);
         static CreatureDataAddon const *GetCreatureAddon(uint32 lowguid)
         {
@@ -864,10 +1067,10 @@ class ObjectMgr
             if (itr == mTrinityStringLocaleMap.end()) return NULL;
             return &itr->second;
         }
-        const char *GetTrinityString(int32 entry, int locale_idx) const;
+        const char *GetTrinityString(int32 entry, LocaleConstant locale_idx) const;
         const char *GetTrinityStringForDBCLocale(int32 entry) const { return GetTrinityString(entry,DBCLocaleIndex); }
-        int32 GetDBCLocaleIndex() const { return DBCLocaleIndex; }
-        void SetDBCLocaleIndex(uint32 lang) { DBCLocaleIndex = GetIndexForLocale(LocaleConstant(lang)); }
+        LocaleConstant GetDBCLocaleIndex() const { return DBCLocaleIndex; }
+        void SetDBCLocaleIndex(LocaleConstant locale) { DBCLocaleIndex = locale; }
 
         void AddCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid, uint32 instance);
         void DeleteCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid);
@@ -905,9 +1108,6 @@ class ObjectMgr
         static bool IsValidCharterName(const std::string& name);
 
         static bool CheckDeclinedNames(std::wstring mainpart, DeclinedName const& names);
-
-        int GetIndexForLocale(LocaleConstant loc);
-        LocaleConstant GetLocaleForIndex(int i);
 
         GameTele const* GetGameTele(uint32 id) const
         {
@@ -954,8 +1154,6 @@ class ObjectMgr
         ScriptNameMap &GetScriptNames() { return m_scriptNames; }
         const char * GetScriptName(uint32 id) { return id < m_scriptNames.size() ? m_scriptNames[id].c_str() : ""; }
         uint32 GetScriptId(const char *name);
-
-        int GetOrNewIndexForLocale(LocaleConstant loc);
 
         SpellClickInfoMapBounds GetSpellClickInfoMapBounds(uint32 creature_id) const
         {
@@ -1083,14 +1281,14 @@ class ObjectMgr
         typedef             std::vector<LocaleConstant> LocalForIndex;
         LocalForIndex        m_LocalForIndex;
 
-        int DBCLocaleIndex;
+        LocaleConstant DBCLocaleIndex;
 
     private:
         void LoadScripts(ScriptsType type);
         void CheckScripts(ScriptsType type, std::set<int32>& ids);
         void LoadCreatureAddons(SQLStorage& creatureaddons, char const* entryName, char const* comment);
         void ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* table, char const* guidEntryStr);
-        void LoadQuestRelationsHelper(QuestRelations& map,char const* table);
+        void LoadQuestRelationsHelper(QuestRelations& map, std::string table, bool starter, bool go);
         void PlayerCreateInfoAddItemHelper(uint32 race_, uint32 class_, uint32 itemId, int32 count);
 
         MailLevelRewardMap m_mailLevelRewardMap;

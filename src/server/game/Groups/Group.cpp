@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "gamePCH.h"
@@ -35,7 +33,6 @@
 #include "InstanceSaveMgr.h"
 #include "MapInstanced.h"
 #include "Util.h"
-#include "LFGMgr.h"
 
 Group::Group()
 {
@@ -123,7 +120,8 @@ bool Group::Create(const uint64 &guid, const char * name)
         // store group in database
         SQLTransaction trans = CharacterDatabase.BeginTransaction();
         trans->PAppend("DELETE FROM groups WHERE guid ='%u'", lowguid);
-        trans->PAppend("DELETE FROM group_member WHERE guid ='%u'", lowguid);
+        trans->PAppend("DELETE FROM group_member WHERE guid = %u OR memberGuid = %u", lowguid, GUID_LOPART(guid));
+        trans->PAppend("INSERT INTO group_member (guid, memberGuid, subgroup) VALUES (%u, %u, 0)", lowguid, GUID_LOPART(guid));
         trans->PAppend("INSERT INTO groups (guid,leaderGuid,lootMethod,looterGuid,lootThreshold,icon1,icon2,icon3,icon4,icon5,icon6,icon7,icon8,groupType,difficulty,raiddifficulty) "
             "VALUES ('%u','%u','%u','%u','%u','" UI64FMTD "','" UI64FMTD "','" UI64FMTD "','" UI64FMTD "','" UI64FMTD "','" UI64FMTD "','" UI64FMTD "','" UI64FMTD "','%u','%u','%u')",
             lowguid, GUID_LOPART(m_leaderGuid), uint32(m_lootMethod),
@@ -257,6 +255,8 @@ bool Group::AddInvite(Player *player)
 
     player->SetGroupInvite(this);
 
+    sScriptMgr.OnGroupInviteMember(this, player->GetGUID());
+
     return true;
 }
 
@@ -272,16 +272,19 @@ bool Group::AddLeaderInvite(Player *player)
 
 uint32 Group::RemoveInvite(Player *player)
 {
-    m_invitees.erase(player);
-
-    player->SetGroupInvite(NULL);
+    if (player)
+    {
+        m_invitees.erase(player);
+        player->SetGroupInvite(NULL);
+    }
     return GetMembersCount();
 }
 
 void Group::RemoveAllInvites()
 {
     for (InvitesList::iterator itr=m_invitees.begin(); itr != m_invitees.end(); ++itr)
-        (*itr)->SetGroupInvite(NULL);
+        if (*itr)
+            (*itr)->SetGroupInvite(NULL);
 
     m_invitees.clear();
 }
@@ -290,7 +293,7 @@ Player* Group::GetInvited(const uint64& guid) const
 {
     for (InvitesList::const_iterator itr = m_invitees.begin(); itr != m_invitees.end(); ++itr)
     {
-        if ((*itr)->GetGUID() == guid)
+        if ((*itr) && (*itr)->GetGUID() == guid)
             return (*itr);
     }
     return NULL;
@@ -300,7 +303,7 @@ Player* Group::GetInvited(const std::string& name) const
 {
     for (InvitesList::const_iterator itr = m_invitees.begin(); itr != m_invitees.end(); ++itr)
     {
-        if ((*itr)->GetName() == name)
+        if ((*itr) && (*itr)->GetName() == name)
             return (*itr);
     }
     return NULL;
@@ -308,18 +311,15 @@ Player* Group::GetInvited(const std::string& name) const
 
 bool Group::AddMember(const uint64 &guid, const char* name)
 {
-    if (isLfgQueued())
-        sLFGMgr.Leave(NULL, this);
-
     if (!_addMember(guid, name))
         return false;
 
     SendUpdate();
+    sScriptMgr.OnGroupAddMember(this, guid);
 
     Player *player = sObjectMgr.GetPlayer(guid);
     if (player)
     {
-        sLFGMgr.Leave(player);
         if (!IsLeader(player->GetGUID()) && !isBGGroup())
         {
             // reset the new member's instances, unless he is currently in one of them
@@ -359,13 +359,10 @@ uint32 Group::RemoveMember(const uint64 &guid, const RemoveMethod &method)
 {
     BroadcastGroupUpdate();
 
-    if (isLfgQueued())
-        sLFGMgr.Leave(NULL, this);
-    else if (isLFGGroup() && !isLfgDungeonComplete())
-        sLFGMgr.OfferContinue(this);
+    sScriptMgr.OnGroupRemoveMember(this, guid, method);
 
-    // remove member and change leader (if need) only if strong more 2 members _before_ member remove
-    if (GetMembersCount() > (isBGGroup() ? 1u : 2u))           // in BG group case allow 1 members group
+    // remove member and change leader (if need) only if strong more 2 members _before_ member remove (BG allow 1 member group)
+    if (GetMembersCount() > (isBGGroup() ? 1u : 2u))
     {
         bool leaderChanged = _removeMember(guid);
 
@@ -383,15 +380,9 @@ uint32 Group::RemoveMember(const uint64 &guid, const RemoveMethod &method)
                 player->GetSession()->SendPacket(&data);
             }
 
-            player->GetSession()->SendLfgUpdateParty(LFG_UPDATETYPE_LEADER);
-            if (isLFGGroup() && player->GetMap()->IsDungeon())
-                player->TeleportToBGEntryPoint();
-
             //we already removed player from group and in player->GetGroup() is his original group!
             if (Group* group = player->GetGroup())
-            {
                 group->SendUpdate();
-            }
             else
             {
                 data.Initialize(SMSG_GROUP_LIST, 1+1+1+1+8+4+4+8);
@@ -437,8 +428,9 @@ void Group::ChangeLeader(const uint64 &guid)
 
 void Group::Disband(bool hideDestroy /* = false */)
 {
-    Player *player;
+    sScriptMgr.OnGroupDisband(this);
 
+    Player *player;
     for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
     {
         player = sObjectMgr.GetPlayer(citr->guid);
@@ -456,11 +448,6 @@ void Group::Disband(bool hideDestroy /* = false */)
                 player->SetOriginalGroup(NULL);
             else
                 player->SetGroup(NULL);
-
-            if (isLFGGroup() && player->GetMap()->IsDungeon())
-                player->TeleportToBGEntryPoint();
-            player->GetSession()->SendLfgUpdateParty(LFG_UPDATETYPE_GROUP_DISBAND);
-            player->GetSession()->SendLfgUpdateParty(LFG_UPDATETYPE_LEADER);
         }
 
         // quest related GO state dependent from raid membership
@@ -659,6 +646,7 @@ void Group::GroupLoot(Loot *loot, WorldObject* pLootedObject)
                 {
                     if (member->IsWithinDistInMap(pLootedObject,sWorld.getFloatConfig(CONFIG_GROUP_XP_DISTANCE),false))
                     {
+
                         r->totalPlayersRolling++;
 
                         if (member->GetPassOnGroupLoot())
@@ -668,9 +656,7 @@ void Group::GroupLoot(Loot *loot, WorldObject* pLootedObject)
                             // can't broadcast the pass now. need to wait until all rolling players are known.
                         }
                         else
-                        {
                             r->playerVote[member->GetGUID()] = NOT_EMITED_YET;
-                        }
                     }
                 }
             }
@@ -717,7 +703,7 @@ void Group::GroupLoot(Loot *loot, WorldObject* pLootedObject)
                 delete r;
         }
         else
-            i->is_underthreshold=1;
+            i->is_underthreshold = true;
     }
 }
 
@@ -744,7 +730,8 @@ void Group::NeedBeforeGreed(Loot *loot, WorldObject* pLootedObject)
                 if (!playerToRoll || !playerToRoll->GetSession())
                     continue;
 
-                if (playerToRoll->CanUseItem(item) == EQUIP_ERR_OK && i->AllowedForPlayer(playerToRoll))
+                bool allowedForPlayer = i->AllowedForPlayer(playerToRoll);
+                if (playerToRoll->CanUseItem(item) == EQUIP_ERR_OK && allowedForPlayer)
                 {
                     if (playerToRoll->IsWithinDistInMap(pLootedObject,sWorld.getFloatConfig(CONFIG_GROUP_XP_DISTANCE),false))
                     {
@@ -802,7 +789,7 @@ void Group::NeedBeforeGreed(Loot *loot, WorldObject* pLootedObject)
                 delete r;
         }
         else
-            i->is_underthreshold=1;
+            i->is_underthreshold = true;
     }
 }
 
@@ -943,7 +930,8 @@ void Group::CountTheRoll(Rolls::iterator rollI, uint32 NumberOfPlayers)
                     item->is_looted = true;
                     roll->getLoot()->NotifyItemRemoved(roll->itemSlot);
                     roll->getLoot()->unlootedCount--;
-                    player->StoreNewItem(dest, roll->itemid, true, item->randomPropertyId);
+                    AllowedLooterSet* looters = item->GetAllowedLooters();
+                    player->StoreNewItem(dest, roll->itemid, true, item->randomPropertyId, (looters->size() > 1) ? looters : NULL);
                 }
                 else
                 {
@@ -995,7 +983,8 @@ void Group::CountTheRoll(Rolls::iterator rollI, uint32 NumberOfPlayers)
                         item->is_looted = true;
                         roll->getLoot()->NotifyItemRemoved(roll->itemSlot);
                         roll->getLoot()->unlootedCount--;
-                        player->StoreNewItem(dest, roll->itemid, true, item->randomPropertyId);
+                        AllowedLooterSet* looters = item->GetAllowedLooters();
+                        player->StoreNewItem(dest, roll->itemid, true, item->randomPropertyId, (looters->size() > 1) ? looters : NULL);
                     }
                     else
                     {
@@ -1104,14 +1093,12 @@ void Group::SendUpdate()
         data << uint8(m_groupType);                         // group type (flags in 3.3)
         data << uint8(citr->group);
         data << uint8(citr->flags);
+        data << uint8(citr->roles);
         if (isLFGGroup())
         {
-            data << uint8(1);
             data << uint8(m_LfgStatus);
             data << uint32(m_LfgDungeonEntry);
         }
-        else
-            data << uint8(isBGGroup() ? 1 : 0);             // 2.0.x, isBattlegroundGroup?
 
         data << uint64(m_guid);
         data << uint32(m_counter++);                        // 3.3, value increases every time this packet gets sent
@@ -1293,8 +1280,6 @@ bool Group::_removeMember(const uint64 &guid)
                 player->SetOriginalGroup(NULL);
             else
                 player->SetGroup(NULL);
-
-            player->GetSession()->SendLfgUpdateParty(LFG_UPDATETYPE_LEADER);
         }
     }
 
@@ -1325,6 +1310,8 @@ void Group::_setLeader(const uint64 &guid)
     member_witerator slot = _getMemberWSlot(guid);
     if (slot == m_memberSlots.end())
         return;
+
+    sScriptMgr.OnGroupChangeLeader(this, m_leaderGuid, guid);
 
     if (!isBGGroup())
     {
