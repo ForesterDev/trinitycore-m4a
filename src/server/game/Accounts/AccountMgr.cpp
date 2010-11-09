@@ -1,38 +1,31 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "gamePCH.h"
 #include "DatabaseEnv.h"
-
-
 #include "AccountMgr.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "Util.h"
 #include <Cryptography/SHA1.h>
 
-AccountMgr::AccountMgr()
-{}
-
-AccountMgr::~AccountMgr()
-{}
+AccountMgr::AccountMgr() {}
+AccountMgr::~AccountMgr() {}
 
 AccountOpResult AccountMgr::CreateAccount(std::string username, std::string password)
 {
@@ -184,7 +177,7 @@ bool AccountMgr::GetName(uint32 acc_id, std::string &name)
     QueryResult result = LoginDatabase.PQuery("SELECT username FROM account WHERE id = '%u'", acc_id);
     if (result)
     {
-        name = (*result)[0].GetCppString();
+        name = (*result)[0].GetString();
         return true;
     }
 
@@ -227,12 +220,12 @@ bool AccountMgr::normalizeString(std::string& utf8str)
     size_t wstr_len = MAX_ACCOUNT_STR;
     if (!Utf8toWStr(utf8str,wstr_buf,wstr_len))
         return false;
-#ifdef _MSC_VER
-#pragma warning(disable: 4996)
-#endif
+#ifndef _MSC_VER
     std::transform(&wstr_buf[0], wstr_buf+wstr_len, &wstr_buf[0], wcharToUpperOnlyLatin);
-#ifdef _MSC_VER
-#pragma warning(default: 4996)
+#else
+	std::transform(&wstr_buf[0], wstr_buf + wstr_len,
+			stdext::make_unchecked_array_iterator(&wstr_buf[0]),
+			wcharToUpperOnlyLatin);
 #endif
 
     return WStrToUtf8(wstr_buf,wstr_len,utf8str);

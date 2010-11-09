@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "gamePCH.h"
@@ -36,8 +34,8 @@
 #include "Pet.h"
 #include "BattlegroundMgr.h"
 #include "Battleground.h"
-#include "Guild.h"
 #include "ScriptMgr.h"
+#include "CreatureAI.h"
 
 enum StableResultCode
 {
@@ -347,6 +345,7 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket & recv_data)
         _player->PrepareGossipMenu(unit, unit->GetCreatureInfo()->GossipMenuId, true);
         _player->SendPreparedGossip(unit);
     }
+    unit->AI()->sGossipHello(_player);
 }
 
 /*void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket & recv_data)
@@ -883,31 +882,13 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket & recv_data)
         sLog.outDebug("ITEM: Repair item, itemGUID = %u, npcGUID = %u", GUID_LOPART(itemGUID), GUID_LOPART(npcGUID));
 
         Item* item = _player->GetItemByGuid(itemGUID);
-
         if (item)
-            TotalCost= _player->DurabilityRepair(item->GetPos(),true,discountMod,guildBank>0?true:false);
+            TotalCost = _player->DurabilityRepair(item->GetPos(), true, discountMod, guildBank);
     }
     else
     {
         sLog.outDebug("ITEM: Repair all items, npcGUID = %u", GUID_LOPART(npcGUID));
-
-        TotalCost = _player->DurabilityRepairAll(true,discountMod,guildBank>0?true:false);
-    }
-    if (guildBank)
-    {
-        uint32 GuildId = _player->GetGuildId();
-        if (!GuildId)
-            return;
-        Guild *pGuild = sObjectMgr.GetGuildById(GuildId);
-        if (!pGuild)
-            return;
-
-        //- TODO: Fix poor function call design
-        SQLTransaction trans = CharacterDatabase.BeginTransaction();
-        pGuild->LogBankEvent(trans, GUILD_BANK_LOG_REPAIR_MONEY, 0, _player->GetGUIDLow(), TotalCost);
-        CharacterDatabase.CommitTransaction(trans);
-
-        pGuild->SendMoneyInfo(this, _player->GetGUIDLow());
+        TotalCost = _player->DurabilityRepairAll(true, discountMod, guildBank);
     }
 }
 

@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "gamePCH.h"
@@ -59,16 +57,16 @@ Quest::Quest(Field * questRecord)
     SrcItemId = questRecord[31].GetUInt32();
     SrcItemCount = questRecord[32].GetUInt32();
     SrcSpell = questRecord[33].GetUInt32();
-    Title = questRecord[34].GetCppString();
-    Details = questRecord[35].GetCppString();
-    Objectives = questRecord[36].GetCppString();
-    OfferRewardText = questRecord[37].GetCppString();
-    RequestItemsText = questRecord[38].GetCppString();
-    EndText = questRecord[39].GetCppString();
-    CompletedText = questRecord[40].GetCppString();
+    Title = questRecord[34].GetString();
+    Details = questRecord[35].GetString();
+    Objectives = questRecord[36].GetString();
+    OfferRewardText = questRecord[37].GetString();
+    RequestItemsText = questRecord[38].GetString();
+    EndText = questRecord[39].GetString();
+    CompletedText = questRecord[40].GetString();
 
     for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
-        ObjectiveText[i] = questRecord[41+i].GetCppString();
+        ObjectiveText[i] = questRecord[41+i].GetString();
 
     for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
         ReqItemId[i] = questRecord[45+i].GetUInt32();
@@ -112,7 +110,7 @@ Quest::Quest(Field * questRecord)
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
         RewRepValue[i] = questRecord[107+i].GetInt32();
 
-    RewHonorableKills = questRecord[112].GetUInt32();
+    RewHonorAddition = questRecord[112].GetUInt32();
     RewHonorMultiplier = questRecord[113].GetFloat();
     RewOrReqMoney = questRecord[114].GetInt32();
     RewMoneyMaxLevel = questRecord[115].GetUInt32();

@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "sharedPCH.h"
@@ -88,24 +86,38 @@ double rand_chance(void)
 }
 #endif
 
-Tokens StrSplit(const std::string &src, const std::string &sep)
+Tokens::Tokens(const std::string &src, const char sep, uint32 vectorReserve)
 {
-    Tokens r;
-    std::string s;
-    for (std::string::const_iterator i = src.begin(); i != src.end(); i++)
+    m_str = new char[src.length() + 1];
+    memcpy(m_str, src.c_str(), src.length() + 1);
+
+    if (vectorReserve)
+        reserve(vectorReserve);
+
+    char* posold = m_str;
+    char* posnew = m_str;
+
+    for (;;)
     {
-        if (sep.find(*i) != std::string::npos)
+        if (*posnew == sep)
         {
-            if (s.length()) r.push_back(s);
-            s = "";
+            push_back(posold);
+            posold = posnew + 1;
+
+            *posnew = 0x00;
         }
-        else
+        else if (*posnew == 0x00)
         {
-            s += *i;
+            // Hack like, but the old code accepted these kind of broken strings,
+            // so changing it would break other things
+            if (posold != posnew)
+                push_back(posold);
+
+            break;
         }
+
+        ++posnew;
     }
-    if (s.length()) r.push_back(s);
-    return r;
 }
 
 void stripLineInvisibleChars(std::string &str)
@@ -329,8 +341,11 @@ bool WStrToUtf8(wchar_t* wstr, size_t size, std::string& utf8str)
         std::string utf8str2;
         utf8str2.resize(size*4);                            // allocate for most long case
 
-        char* oend = utf8::utf16to8(wstr,wstr+size,&utf8str2[0]);
-        utf8str2.resize(oend-(&utf8str2[0]));               // remove unused tail
+        if (size)
+        {
+            char* oend = utf8::utf16to8(wstr,wstr+size,&utf8str2[0]);
+            utf8str2.resize(oend-(&utf8str2[0]));               // remove unused tail
+        }
         utf8str = utf8str2;
     }
     catch(std::exception)
@@ -349,8 +364,11 @@ bool WStrToUtf8(std::wstring wstr, std::string& utf8str)
         std::string utf8str2;
         utf8str2.resize(wstr.size()*4);                     // allocate for most long case
 
-        char* oend = utf8::utf16to8(wstr.c_str(),wstr.c_str()+wstr.size(),&utf8str2[0]);
-        utf8str2.resize(oend-(&utf8str2[0]));                // remove unused tail
+        if (wstr.size())
+        {
+            char* oend = utf8::utf16to8(wstr.c_str(),wstr.c_str()+wstr.size(),&utf8str2[0]);
+            utf8str2.resize(oend-(&utf8str2[0]));                // remove unused tail
+        }
         utf8str = utf8str2;
     }
     catch(std::exception)
@@ -477,7 +495,7 @@ void vutf8printf(FILE *out, const char *str, va_list* ap)
     Utf8toWStr(temp_buf, temp_len, wtemp_buf, wtemp_len);
 
     CharToOemBuffW(&wtemp_buf[0], &temp_buf[0], wtemp_len+1);
-    fputs(temp_buf, out);
+    fprintf(out, "%s", temp_buf);
 #else
     vfprintf(out, str, *ap);
 #endif

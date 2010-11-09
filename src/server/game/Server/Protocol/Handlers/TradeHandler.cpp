@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "gamePCH.h"
@@ -56,6 +54,7 @@ void WorldSession::SendTradeStatus(TradeStatus status)
             data << uint32(0);
             break;
         case TRADE_STATUS_ONLY_CONJURED:
+        case TRADE_STATUS_NOT_ELIGIBLE:
             data.Initialize(SMSG_TRADE_STATUS, 4+1);
             data << uint32(status);
             data << uint8(0);
@@ -161,6 +160,9 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
                         trader->GetName(), trader->GetSession()->GetAccountId());
                 }
 
+                // adjust time (depends on /played)
+                if (myItems[i]->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_BOP_TRADEABLE))
+                    myItems[i]->SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, trader->GetTotalPlayedTime()-(_player->GetTotalPlayedTime()-myItems[i]->GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME)));
                 // store
                 trader->MoveItemToInventory(traderDst, myItems[i], true, true);
             }
@@ -176,6 +178,9 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
                         _player->GetName(), _player->GetSession()->GetAccountId());
                 }
 
+                // adjust time (depends on /played)
+                if (hisItems[i]->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_BOP_TRADEABLE))
+                    hisItems[i]->SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, _player->GetTotalPlayedTime()-(trader->GetTotalPlayedTime()-hisItems[i]->GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME)));
                 // store
                 _player->MoveItemToInventory(playerDst, hisItems[i], true, true);
             }
@@ -292,20 +297,32 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
     {
         if (Item* item = my_trade->GetItem(TradeSlots(i)))
         {
-            if (!item->CanBeTraded())
+            if (!item->CanBeTraded(false, true))
             {
                 SendTradeStatus(TRADE_STATUS_TRADE_CANCELED);
+                return;
+            }
+            if (item->IsBindedNotWith(trader))
+            {
+                SendTradeStatus(TRADE_STATUS_NOT_ELIGIBLE);
+                SendTradeStatus(TRADE_STATUS_CLOSE_WINDOW/*TRADE_STATUS_TRADE_CANCELED*/);
                 return;
             }
         }
 
         if (Item* item = his_trade->GetItem(TradeSlots(i)))
         {
-            if (!item->CanBeTraded())
+            if (!item->CanBeTraded(false, true))
             {
                 SendTradeStatus(TRADE_STATUS_TRADE_CANCELED);
                 return;
             }
+            //if (item->IsBindedNotWith(_player))   // dont mark as invalid when his item isnt good (not exploitable because if item is invalid trade will fail anyway later on the same check)
+            //{
+            //    SendTradeStatus(TRADE_STATUS_NOT_ELIGIBLE);
+            //    his_trade->SetAccepted(false, true);
+            //    return;
+            //}
         }
     }
 
@@ -675,7 +692,7 @@ void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
 
     // check cheating, can't fail with correct client operations
     Item* item = _player->GetItemByPos(bag, slot);
-    if (!item || (tradeSlot != TRADE_SLOT_NONTRADED && !item->CanBeTraded()))
+    if (!item || (tradeSlot != TRADE_SLOT_NONTRADED && !item->CanBeTraded(false, true)))
     {
         SendTradeStatus(TRADE_STATUS_TRADE_CANCELED);
         return;

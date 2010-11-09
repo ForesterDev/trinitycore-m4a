@@ -35,6 +35,7 @@ enum MageSpells
     SPELL_MAGE_GLYPH_OF_ETERNAL_WATER            = 70937,
     SPELL_MAGE_SUMMON_WATER_ELEMENTAL_PERMANENT  = 70908,
     SPELL_MAGE_SUMMON_WATER_ELEMENTAL_TEMPORARY  = 70907,
+    SPELL_MAGE_GLYPH_OF_BLAST_WAVE               = 62126,
 };
 
 class spell_mage_cold_snap : public SpellScriptLoader
@@ -44,6 +45,7 @@ class spell_mage_cold_snap : public SpellScriptLoader
 
         class spell_mage_cold_snap_SpellScript : public SpellScript
         {
+            PrepareSpellScript(spell_mage_cold_snap_SpellScript)
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 Unit *caster = GetCaster();
@@ -88,6 +90,7 @@ class spell_mage_polymorph_cast_visual : public SpellScriptLoader
 
         class spell_mage_polymorph_cast_visual_SpellScript : public SpellScript
         {
+            PrepareSpellScript(spell_mage_polymorph_cast_visual_SpellScript)
             static const uint32 spell_list[6];
 
             bool Validate(SpellEntry const * /*spellEntry*/)
@@ -136,6 +139,7 @@ class spell_mage_summon_water_elemental : public SpellScriptLoader
 
         class spell_mage_summon_water_elemental_SpellScript : public SpellScript
         {
+            PrepareSpellScript(spell_mage_summon_water_elemental_SpellScript)
             bool Validate(SpellEntry const * /*spellEntry*/)
             {
                 if (!sSpellStore.LookupEntry(SPELL_MAGE_GLYPH_OF_ETERNAL_WATER))
@@ -172,9 +176,43 @@ class spell_mage_summon_water_elemental : public SpellScriptLoader
         }
 };
 
+class spell_mage_blast_wave : public SpellScriptLoader
+{
+    public:
+        spell_mage_blast_wave() : SpellScriptLoader("spell_mage_blast_wave") { }
+
+        class spell_mage_blast_wave_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_mage_blast_wave_SpellScript)
+            bool Validate(SpellEntry const * /*spellEntry*/)
+            {
+                if (!sSpellStore.LookupEntry(SPELL_MAGE_GLYPH_OF_BLAST_WAVE))
+                    return false;
+                return true;
+            }
+
+            void HandleKnockBack(SpellEffIndex effIndex)
+            {
+                if (GetCaster()->HasAura(SPELL_MAGE_GLYPH_OF_BLAST_WAVE))
+                    PreventHitDefaultEffect(effIndex);
+            }
+
+            void Register()
+            {
+                OnEffect += SpellEffectFn(spell_mage_blast_wave_SpellScript::HandleKnockBack, EFFECT_2, SPELL_EFFECT_KNOCK_BACK);
+            }
+        };
+
+        SpellScript * GetSpellScript() const
+        {
+            return new spell_mage_blast_wave_SpellScript();
+        }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_cold_snap;
     new spell_mage_polymorph_cast_visual;
     new spell_mage_summon_water_elemental;
+    new spell_mage_blast_wave;
 }

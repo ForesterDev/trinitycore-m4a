@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "gamePCH.h"
@@ -241,7 +239,7 @@ void PlayerMenu::SendTalking(uint32 textID)
 
     if (!pGossip)
     {
-        for (uint32 i = 0; i < 8; ++i)
+        for (uint32 i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
         {
             data << float(0);
             data << "Greetings $N";
@@ -257,8 +255,8 @@ void PlayerMenu::SendTalking(uint32 textID)
     }
     else
     {
-        std::string Text_0[8], Text_1[8];
-        for (int i = 0; i < 8; ++i)
+        std::string Text_0[MAX_LOCALES], Text_1[MAX_LOCALES];
+        for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
         {
             Text_0[i] = pGossip->Options[i].Text_0;
             Text_1[i] = pGossip->Options[i].Text_1;
@@ -268,14 +266,14 @@ void PlayerMenu::SendTalking(uint32 textID)
         {
             if (NpcTextLocale const *nl = sObjectMgr.GetNpcTextLocale(textID))
             {
-                for (int i = 0; i < 8; ++i)
+                for (int i = 0; i < MAX_LOCALES; ++i)
                 {
                     sObjectMgr.GetLocaleString(nl->Text_0[i], loc_idx, Text_0[i]);
                     sObjectMgr.GetLocaleString(nl->Text_1[i], loc_idx, Text_1[i]);
                 }
             }
         }
-        for (int i = 0; i < 8; ++i)
+        for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
         {
             data << pGossip->Options[i].Probability;
 
@@ -291,7 +289,7 @@ void PlayerMenu::SendTalking(uint32 textID)
 
             data << pGossip->Options[i].Language;
 
-            for (int j = 0; j < 3; ++j)
+            for (int j = 0; j < MAX_GOSSIP_TEXT_EMOTES; ++j)
             {
                 data << pGossip->Options[i].Emotes[j]._Delay;
                 data << pGossip->Options[i].Emotes[j]._Emote;
@@ -307,7 +305,7 @@ void PlayerMenu::SendTalking(char const * title, char const * text)
 {
     WorldPacket data(SMSG_NPC_TEXT_UPDATE, 50);           // guess size
     data << uint32(0);
-    for (uint32 i = 0; i < 8; ++i)
+    for (uint32 i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
     {
         data << float(0);
         data << title;
@@ -504,7 +502,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const *pQuest, uint64 npcGUID,
     }
 
     // rewarded honor points. Multiply with 10 to satisfy client
-    data << 10 * Trinity::Honor::hk_honor_at_level(pSession->GetPlayer()->getLevel(), pQuest->GetRewHonorableKills());
+    data << 10 * Trinity::Honor::hk_honor_at_level(pSession->GetPlayer()->getLevel(), pQuest->GetRewHonorMultiplier());
     data << float(0);                                       // new 3.3.0, honor multiplier?
     data << uint32(pQuest->GetRewSpell());                  // reward spell, this spell will display (icon) (casted if RewSpellCast == 0)
     data << int32(pQuest->GetRewSpellCast());               // casted spell
@@ -591,7 +589,7 @@ void PlayerMenu::SendQuestQueryResponse(Quest const *pQuest)
     data << int32(pQuest->GetRewSpellCast());               // casted spell
 
     // rewarded honor points
-    data << Trinity::Honor::hk_honor_at_level(pSession->GetPlayer()->getLevel(), pQuest->GetRewHonorableKills());
+    data << Trinity::Honor::hk_honor_at_level(pSession->GetPlayer()->getLevel(), pQuest->GetRewHonorMultiplier());
     data << float(0);                                       // new reward honor (multipled by ~62 at client side)
     data << uint32(pQuest->GetSrcItemId());                 // source item id
     data << uint32(pQuest->GetFlags() & 0xFFFF);            // quest flags
@@ -747,7 +745,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, uint64 npcGUID, 
     data << uint32(pQuest->XPValue(pSession->GetPlayer())*sWorld.getRate(RATE_XP_QUEST));
 
     // rewarded honor points. Multiply with 10 to satisfy client
-    data << 10 * Trinity::Honor::hk_honor_at_level(pSession->GetPlayer()->getLevel(), pQuest->GetRewHonorableKills());
+    data << 10 * Trinity::Honor::hk_honor_at_level(pSession->GetPlayer()->getLevel(), pQuest->GetRewHonorMultiplier());
     data << float(0);                                       // unk, honor multiplier?
     data << uint32(0x08);                                   // unused by client?
     data << uint32(pQuest->GetRewSpell());                  // reward spell, this spell will display (icon) (casted if RewSpellCast == 0)

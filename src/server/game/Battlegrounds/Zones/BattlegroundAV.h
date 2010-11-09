@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef __BATTLEGROUNDAV_H
@@ -987,19 +985,19 @@ const float BG_AV_CreaturePos[AV_CPLACE_MAX][4] = {
 enum BG_AV_CreatureIds
 {
 
-    AV_NPC_A_GRAVEDEFENSE0 = 0,     // stormpike Defender
-    AV_NPC_A_GRAVEDEFENSE1 = 1,     // seasoned defender
-    AV_NPC_A_GRAVEDEFENSE2 = 2,     // veteran defender
-    AV_NPC_A_GRAVEDEFENSE3 = 3,     // champion defender
-    AV_NPC_A_TOWERDEFENSE  = 4,     // stormpike bowman
+    AV_NPC_A_TOWERDEFENSE  = 0,     // stormpike bowman
+    AV_NPC_A_GRAVEDEFENSE0 = 1,     // stormpike Defender
+    AV_NPC_A_GRAVEDEFENSE1 = 2,     // seasoned defender
+    AV_NPC_A_GRAVEDEFENSE2 = 3,     // veteran defender
+    AV_NPC_A_GRAVEDEFENSE3 = 4,     // champion defender
     AV_NPC_A_CAPTAIN       = 5,     // balinda
     AV_NPC_A_BOSS          = 6,     // vanndar
 
-    AV_NPC_H_GRAVEDEFENSE0 = 7,     // frostwolf guardian
-    AV_NPC_H_GRAVEDEFENSE1 = 8,     // seasoned guardian
-    AV_NPC_H_GRAVEDEFENSE2 = 9,     // veteran guardian
-    AV_NPC_H_GRAVEDEFENSE3 = 10,    // champion guardian
-    AV_NPC_H_TOWERDEFENSE  = 11,    // frostwolf bowman
+    AV_NPC_H_TOWERDEFENSE  = 7,     // frostwolf bowman
+    AV_NPC_H_GRAVEDEFENSE0 = 8,     // frostwolf guardian
+    AV_NPC_H_GRAVEDEFENSE1 = 9,     // seasoned guardian
+    AV_NPC_H_GRAVEDEFENSE2 = 10,    // veteran guardian
+    AV_NPC_H_GRAVEDEFENSE3 = 11,    // champion guardian
     AV_NPC_H_CAPTAIN       = 12,    // galvangar
     AV_NPC_H_BOSS          = 13,    // drek thar
 

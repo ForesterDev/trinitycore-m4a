@@ -145,7 +145,7 @@ include_directories(
 
 add_library(scripts STATIC ${scripts_STAT_SRCS})
 
-add_dependencies(scripts genrev)
+add_dependencies(scripts revision.h)
 
 target_link_libraries(scripts ${Boost_LIBRARIES} game)
 

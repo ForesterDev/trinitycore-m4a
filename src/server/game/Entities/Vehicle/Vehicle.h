@@ -1,19 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef __TRINITY_VEHICLE_H
@@ -29,9 +29,30 @@ enum PowerType
 {
     POWER_STEAM     = 61,
     POWER_PYRITE    = 41,
+    POWER_HEAT      = 101,
     POWER_OOZE      = 121,
-    POWER_BLOOD     = 141
+    POWER_BLOOD     = 141,
+    POWER_WRATH     = 142
 };
+
+enum VehicleFlags
+{
+    VEHICLE_FLAG_ADJUST_AIM_ANGLE   = 0x00000400,           // Lua_IsVehicleAimAngleAdjustable
+    VEHICLE_FLAG_ADJUST_AIM_POWER   = 0x00000800,           // Lua_IsVehicleAimPowerAdjustable
+    VEHICLE_FLAG_CUSTOM_PITCH       = 0x00000040,           // If set use pitchMin and pitchMax from DBC, otherwise pitchMin = -pi/2, pitchMax = pi/2
+};
+
+enum VehicleSeatFlags
+{
+    VEHICLE_SEAT_FLAG_HIDE_PASSENGER        = 0x00000200,           // Passenger is hidden
+    VEHICLE_SEAT_FLAG_UNK11                 = 0x00000400,
+    VEHICLE_SEAT_FLAG_CAN_CONTROL           = 0x00000800,           // Lua_UnitInVehicleControlSeat
+    VEHICLE_SEAT_FLAG_CAN_ATTACK            = 0x00004000,           // Can attack, cast spells and use items from vehicle?
+    VEHICLE_SEAT_FLAG_USABLE                = 0x02000000,           // Lua_CanExitVehicle
+    VEHICLE_SEAT_FLAG_CAN_SWITCH            = 0x04000000,           // Lua_CanSwitchVehicleSeats
+    VEHICLE_SEAT_FLAG_CAN_CAST              = 0x20000000,           // Lua_UnitHasVehicleUI
+};
+  
 
 struct VehicleSeat
 {
@@ -71,7 +92,7 @@ class Vehicle
         void Uninstall();
         void Reset();
         void Die();
-        void InstallAllAccessories();
+        void InstallAllAccessories(uint32 entry);
 
         Unit *GetBase() const { return me; }
         VehicleEntry const *GetVehicleInfo() { return m_vehicleInfo; }

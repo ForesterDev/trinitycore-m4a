@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "gamePCH.h"
@@ -820,7 +818,7 @@ bool ChatHandler::HandleGameObjectNearCommand(const char* args)
             if (!gInfo)
                 continue;
 
-            PSendSysMessage(LANG_GO_LIST_CHAT, guid, guid, gInfo->name, x, y, z, mapid);
+            PSendSysMessage(LANG_GO_LIST_CHAT, guid, entry, guid, gInfo->name, x, y, z, mapid);
 
             ++count;
         } while (result->NextRow());
@@ -973,22 +971,8 @@ bool ChatHandler::HandleNpcAddCommand(const char* args)
     {
         uint32 tguid = chr->GetTransport()->AddNPCPassenger(0, id, chr->GetTransOffsetX(), chr->GetTransOffsetY(), chr->GetTransOffsetZ(), chr->GetTransOffsetO());
         if (tguid > 0)
-        {
             WorldDatabase.PQuery("INSERT INTO creature_transport (guid, npc_entry, transport_entry,  TransOffsetX, TransOffsetY, TransOffsetZ, TransOffsetO) values (%u, %u, %f, %f, %f, %f, %u)", tguid, id, chr->GetTransport()->GetEntry(), chr->GetTransOffsetX(), chr->GetTransOffsetY(), chr->GetTransOffsetZ(), chr->GetTransOffsetO());
 
-            TransportCreatureProto *transportCreatureProto = new TransportCreatureProto;
-            transportCreatureProto->guid = tguid;
-            transportCreatureProto->npc_entry = id;
-            uint32 transportEntry = chr->GetTransport()->GetEntry();
-            transportCreatureProto->TransOffsetX = chr->GetTransOffsetX();
-            transportCreatureProto->TransOffsetY = chr->GetTransOffsetY();
-            transportCreatureProto->TransOffsetZ = chr->GetTransOffsetZ();
-            transportCreatureProto->TransOffsetO = chr->GetTransOffsetO();
-            transportCreatureProto->emote = 0;
-
-            sMapMgr.m_TransportNPCMap[transportEntry].insert(transportCreatureProto);
-            sMapMgr.m_TransportNPCs.insert(transportCreatureProto);
-        }
         return true;
     }
 
@@ -2216,17 +2200,17 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
     if (result)
     {
         Field* fields = result->Fetch();
-        username = fields[0].GetCppString();
+        username = fields[0].GetString();
         security = fields[1].GetUInt32();
-        email = fields[2].GetCppString();
+        email = fields[2].GetString();
 
         if (email.empty())
             email = "-";
 
         if (!m_session || m_session->GetSecurity() >= AccountTypes(security))
         {
-            last_ip = fields[3].GetCppString();
-            last_login = fields[4].GetCppString();
+            last_ip = fields[3].GetString();
+            last_login = fields[4].GetString();
         }
         else
         {
@@ -2534,7 +2518,7 @@ bool ChatHandler::HandleWpEventCommand(const char* args)
             a4 = fields[2].GetUInt32();
             a5 = fields[3].GetUInt32();
             a6 = fields[4].GetUInt32();
-            a7 = fields[5].GetString();
+            a7 = fields[5].GetCString();
             a8 = fields[6].GetFloat();
             a9 = fields[7].GetFloat();
             a10 = fields[8].GetFloat();
@@ -3051,7 +3035,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             {
                 wpCreature->SetDisplayId(target->GetDisplayId());
                 wpCreature->SetFloatValue(OBJECT_FIELD_SCALE_X, 0.5);
-                wpCreature->SetLevel(point > MAX_LEVEL ? MAX_LEVEL : point);
+                wpCreature->SetLevel(point > STRONG_MAX_LEVEL ? STRONG_MAX_LEVEL : point);
             }
         }
         while (result->NextRow());
@@ -3755,7 +3739,7 @@ bool ChatHandler::HandleLearnAllRecipesCommand(const char* args)
         if (!Utf8FitTo(name, wnamepart))
         {
             loc = 0;
-            for (; loc < MAX_LOCALE; ++loc)
+            for (; loc < TOTAL_LOCALES; ++loc)
             {
                 if (loc == GetSessionDbcLocale())
                     continue;
@@ -3769,7 +3753,7 @@ bool ChatHandler::HandleLearnAllRecipesCommand(const char* args)
             }
         }
 
-        if (loc < MAX_LOCALE)
+        if (loc < TOTAL_LOCALES)
         {
             targetSkillInfo = skillInfo;
             break;
@@ -3862,7 +3846,7 @@ bool ChatHandler::LookupPlayerSearchCommand(QueryResult result, int32 limit)
 
         Field* fields = result->Fetch();
         uint32 acc_id = fields[0].GetUInt32();
-        std::string acc_name = fields[1].GetCppString();
+        std::string acc_name = fields[1].GetString();
 
         QueryResult chars = CharacterDatabase.PQuery("SELECT guid,name FROM characters WHERE account = '%u'", acc_id);
         if (chars)
@@ -3876,7 +3860,7 @@ bool ChatHandler::LookupPlayerSearchCommand(QueryResult result, int32 limit)
             {
                 Field* charfields = chars->Fetch();
                 guid = charfields[0].GetUInt64();
-                name = charfields[1].GetCppString();
+                name = charfields[1].GetString();
 
                 PSendSysMessage(LANG_LOOKUP_PLAYER_CHARACTER,name.c_str(),guid);
                 ++i;
@@ -4325,7 +4309,7 @@ bool ChatHandler::HandleLookupTitleCommand(const char* args)
             if (!Utf8FitTo(name, wnamepart))
             {
                 loc = 0;
-                for (; loc < MAX_LOCALE; ++loc)
+                for (; loc < TOTAL_LOCALES; ++loc)
                 {
                     if (loc == GetSessionDbcLocale())
                         continue;
@@ -4339,7 +4323,7 @@ bool ChatHandler::HandleLookupTitleCommand(const char* args)
                 }
             }
 
-            if (loc < MAX_LOCALE)
+            if (loc < TOTAL_LOCALES)
             {
                 if (maxResults && counter == maxResults)
                 {
@@ -4516,6 +4500,9 @@ bool ChatHandler::HandleTitlesSetMaskCommand(const char* args)
 
 bool ChatHandler::HandleCharacterTitlesCommand(const char* args)
 {
+    if (!*args)
+        return false;
+
     Player* target;
     if (!extractPlayerTarget((char*)args,&target))
         return false;

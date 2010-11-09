@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 /// \addtogroup realmd Realm Daemon
@@ -315,7 +313,7 @@ extern int main(int argc, char **argv)
         {
             loopCounter = 0;
             sLog.outDetail("Ping MySQL to keep connection alive");
-            LoginDatabase.Query("SELECT 1 FROM realmlist");
+            LoginDatabase.KeepAlive();
         }
 #ifdef _WIN32
         if (m_ServiceStatus == 0) stopEvent = true;
@@ -340,15 +338,22 @@ bool StartDB()
         return false;
     }
 
-    uint8 num_threads = sConfig.GetIntDefault("LoginDatabase.WorkerThreads", 1);
-    if (num_threads < 1 || num_threads > 32)
+    uint8 worker_threads = sConfig.GetIntDefault("LoginDatabase.WorkerThreads", 1);
+    if (worker_threads < 1 || worker_threads > 32)
     {
         sLog.outError("Improper value specified for LoginDatabase.WorkerThreads, defaulting to 1.");
-        num_threads = 1;
+        worker_threads = 1;
     }
 
-    //- Authserver has singlethreaded synchronous DB access, hence MYSQL_BUNDLE_ALL
-    if (!LoginDatabase.Open(dbstring.c_str(), num_threads, MYSQL_BUNDLE_ALL))
+    uint8 synch_threads = sConfig.GetIntDefault("LoginDatabase.SynchThreads", 1);
+    if (synch_threads < 1 || synch_threads > 32)
+    {
+        sLog.outError("Improper value specified for LoginDatabase.SynchThreads, defaulting to 1.");
+        synch_threads = 1;
+    }
+
+    /// NOTE: While authserver is singlethreaded you should keep synch_threads == 1. Increasing it is just silly since only 1 will be used ever.
+    if (!LoginDatabase.Open(dbstring.c_str(), worker_threads, synch_threads))
     {
         sLog.outError("Cannot connect to database");
         return false;

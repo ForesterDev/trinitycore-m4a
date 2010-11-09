@@ -1,27 +1,25 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "gamePCH.h"
 #include "Common.h"
 #include "QuestDef.h"
-#include "GameObject.h"
+#include "GameObjectAI.h"
 #include "ObjectMgr.h"
 #include "PoolMgr.h"
 #include "SpellMgr.h"
@@ -41,8 +39,9 @@
 #include "OutdoorPvPMgr.h"
 #include "BattlegroundAV.h"
 #include "ScriptMgr.h"
+#include "CreatureAISelector.h"
 
-GameObject::GameObject() : WorldObject(), m_goValue(new GameObjectValue)
+GameObject::GameObject() : WorldObject(), m_goValue(new GameObjectValue), m_AI(NULL)
 {
     m_objectType |= TYPEMASK_GAMEOBJECT;
     m_objectTypeId = TYPEID_GAMEOBJECT;
@@ -75,6 +74,20 @@ GameObject::~GameObject()
     delete m_goValue;
     //if (m_uint32Values)                                      // field array can be not exist if GameOBject not loaded
     //    CleanupsBeforeDelete();
+}
+
+bool GameObject::AIM_Initialize()
+{
+
+    m_AI = FactorySelector::SelectGameObjectAI(this);
+    if (!m_AI) return false;
+    m_AI->InitializeAI();
+    return true;
+}
+
+std::string GameObject::GetAIName() const
+{
+    return ObjectMgr::GetGameObjectInfo(GetEntry())->AIName;
 }
 
 void GameObject::CleanupsBeforeDelete(bool /*finalCleanup*/)
@@ -227,6 +240,13 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMa
 
 void GameObject::Update(uint32 diff)
 {
+    if(!AI())
+    {
+        if (!AIM_Initialize())
+            sLog.outError("Could not initialize GameObjectAI");
+    } else
+        AI()->UpdateAI(diff);
+
     if (IS_MO_TRANSPORT(GetGUID()))
     {
         //((Transport*)this)->Update(p_time);
@@ -534,7 +554,6 @@ void GameObject::Update(uint32 diff)
             break;
         }
     }
-
     sScriptMgr.OnGameObjectUpdate(this, diff);
 }
 
@@ -855,6 +874,9 @@ void GameObject::Respawn()
 
 bool GameObject::ActivateToQuest(Player *pTarget) const
 {
+    if (pTarget->HasQuestForGO(GetEntry()))
+        return true;
+
     if (!sObjectMgr.IsGameObjectForQuests(GetEntry()))
         return false;
 
@@ -875,9 +897,15 @@ bool GameObject::ActivateToQuest(Player *pTarget) const
             }
             break;
         }
+        case GAMEOBJECT_TYPE_GENERIC:
+        {
+            if (GetGOInfo()->_generic.questID == -1 || pTarget->GetQuestStatus(GetGOInfo()->_generic.questID) == QUEST_STATUS_INCOMPLETE)
+                return true;
+            break;
+        }
         case GAMEOBJECT_TYPE_GOOBER:
         {
-            if (pTarget->GetQuestStatus(GetGOInfo()->goober.questId) == QUEST_STATUS_INCOMPLETE || GetGOInfo()->goober.questId == -1)
+            if (GetGOInfo()->goober.questId == -1 || pTarget->GetQuestStatus(GetGOInfo()->goober.questId) == QUEST_STATUS_INCOMPLETE)
                 return true;
             break;
         }
@@ -1566,7 +1594,7 @@ void GameObject::CastSpell(Unit* target, uint32 spellId)
         return;
 
     bool self = false;
-    for (uint8 i = 0; i < 3; ++i)
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
     {
         if (spellInfo->EffectImplicitTargetA[i] == TARGET_UNIT_CASTER)
         {
@@ -1711,9 +1739,9 @@ void GameObject::EventInform(uint32 eventId)
 }
 
 // overwrite WorldObject function for proper name localization
-const char* GameObject::GetNameForLocaleIdx(int32 loc_idx) const
+const char* GameObject::GetNameForLocaleIdx(LocaleConstant loc_idx) const
 {
-    if (loc_idx >= 0)
+    if (loc_idx != DEFAULT_LOCALE)
     {
         uint8 uloc_idx = uint8(loc_idx);
         if (GameObjectLocale const *cl = sObjectMgr.GetGameObjectLocale(GetEntry()))

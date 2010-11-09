@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef TRINITY_SHAREDDEFINES_H
@@ -333,7 +331,7 @@ const uint32 ItemQualityColors[MAX_ITEM_QUALITY] = {
 #define SPELL_ATTR_EX2_UNK1                       0x00000002            // 1 ? many triggered spells have this flag
 #define SPELL_ATTR_EX2_CANT_REFLECTED             0x00000004            // 2 ? used for detect can or not spell reflected
 #define SPELL_ATTR_EX2_UNK3                       0x00000008            // 3
-#define SPELL_ATTR_EX2_UNK4                       0x00000010            // 4
+#define SPELL_ATTR_EX2_ALWAYS_APPLY_MODIFIERS     0x00000010            // 4 ? spell modifiers are applied dynamically (even if aura is not passive)
 #define SPELL_ATTR_EX2_AUTOREPEAT_FLAG            0x00000020            // 5
 #define SPELL_ATTR_EX2_UNK6                       0x00000040            // 6
 #define SPELL_ATTR_EX2_UNK7                       0x00000080            // 7
@@ -402,7 +400,7 @@ const uint32 ItemQualityColors[MAX_ITEM_QUALITY] = {
 #define SPELL_ATTR_EX4_UNK4                       0x00000010            // 4 This will no longer cause guards to attack on use??
 #define SPELL_ATTR_EX4_UNK5                       0x00000020            // 5
 #define SPELL_ATTR_EX4_NOT_STEALABLE              0x00000040            // 6 although such auras might be dispellable, they cannot be stolen
-#define SPELL_ATTR_EX4_UNK7                       0x00000080            // 7
+#define SPELL_ATTR_EX4_TRIGGERED                  0x00000080            // 7 spells forced to be triggered
 #define SPELL_ATTR_EX4_FIXED_DAMAGE               0x00000100            // 8 decimate, share damage?
 #define SPELL_ATTR_EX4_UNK9                       0x00000200            // 9
 #define SPELL_ATTR_EX4_SPELL_VS_EXTEND_COST       0x00000400            // 10 Rogue Shiv have this flag
@@ -497,7 +495,7 @@ const uint32 ItemQualityColors[MAX_ITEM_QUALITY] = {
 #define SPELL_ATTR_EX7_UNK0                       0x00000001            // 0  Shaman's new spells (Call of the ...), Feign Death.
 #define SPELL_ATTR_EX7_UNK1                       0x00000002            // 1  Not set in 3.2.2a.
 #define SPELL_ATTR_EX7_REACTIVATE_AT_RESURRECT    0x00000004            // 2  Paladin's auras and 65607 only.
-#define SPELL_ATTR_EX7_UNK3                       0x00000008            // 3  Only 43574 test spell.
+#define SPELL_ATTR_EX7_DISABLED_CLIENT_SIDE       0x00000008            // 3  used only by client to disable spells client-side. some sort of special player flag (0x40000) bypasses that restriction
 #define SPELL_ATTR_EX7_UNK4                       0x00000010            // 4  Only 66109 test spell.
 #define SPELL_ATTR_EX7_SUMMON_PLAYER_TOTEM        0x00000020            // 5  Only Shaman player totems.
 #define SPELL_ATTR_EX7_UNK6                       0x00000040            // 6  Dark Surge, Surge of Light, Burning Breath triggers (boss spells).
@@ -1006,10 +1004,10 @@ enum AuraState
     AURA_STATE_DEADLY_POISON                = 16,           //   T |
     AURA_STATE_ENRAGE                       = 17,           // C   |
     AURA_STATE_BLEEDING                     = 18,           //    T|
-    //AURA_STATE_UNKNOWN19                  = 19,           //     | not used
+    AURA_STATE_UNKNOWN19                    = 19,           //     |
     //AURA_STATE_UNKNOWN20                  = 20,           //  c  | only (45317 Suicide)
     //AURA_STATE_UNKNOWN21                  = 21,           //     | not used
-    //AURA_STATE_UNKNOWN22                  = 22,           // C  t| varius spells (63884, 50240)
+    AURA_STATE_UNKNOWN22                    = 22,           // C  t| varius spells (63884, 50240)
     AURA_STATE_HEALTH_ABOVE_75_PERCENT      = 23,           // C   |
 };
 
@@ -1312,6 +1310,14 @@ enum GameObjectFlags
     GO_FLAG_TRIGGERED       = 0x00000040,                   //typically, summoned objects. Triggered by spell or other events
     GO_FLAG_DAMAGED         = 0x00000200,
     GO_FLAG_DESTROYED       = 0x00000400,
+};
+
+enum GameObjectDynamicLowFlags
+{
+    GO_DYNFLAG_LO_ACTIVATE          = 0x01,                 // enables interaction with GO
+    GO_DYNFLAG_LO_ANIMATE           = 0x02,                 // possibly more distinct animation of GO
+    GO_DYNFLAG_LO_NO_INTERACT       = 0x04,                 // appears to disable interaction (not fully verified)
+    GO_DYNFLAG_LO_SPARKLE           = 0x08,                 // makes GO sparkle
 };
 
 enum TextEmotes
@@ -2012,7 +2018,7 @@ enum CreatureTypeFlags
     CREATURE_TYPEFLAGS_MININGLOOT       = 0x000200,         // Can be looted by miner
     CREATURE_TYPEFLAGS_UNK11            = 0x000400,
     CREATURE_TYPEFLAGS_UNK12            = 0x000800,         // ? Related to mounts in some way. If mounted, fight mounted, mount appear as independant when rider dies?
-    CREATURE_TYPEFLAGS_UNK13            = 0x001000,         // ? Can aid any player in combat if in range?
+    CREATURE_TYPEFLAGS_AID_PLAYERS      = 0x001000,         // ? Can aid any player in combat if in range?
     CREATURE_TYPEFLAGS_UNK14            = 0x002000,
     CREATURE_TYPEFLAGS_UNK15            = 0x004000,         // ? Possibly not in use
     CREATURE_TYPEFLAGS_ENGINEERLOOT     = 0x008000,         // Can be looted by engineer
@@ -2499,14 +2505,8 @@ enum PetDiet
 
 #define CHAIN_SPELL_JUMP_RADIUS 10
 
-// Max values for Guild & Guild Bank
-#define GUILD_BANK_MAX_TABS         6                       // send by client for money log also
-#define GUILD_BANK_MAX_SLOTS        98
-#define GUILD_BANK_MAX_LOGS         25
-#define GUILD_BANK_MONEY_LOGS_TAB   100                     // used for money log in DB
+#define GUILD_BANKLOG_MAX_RECORDS   25
 #define GUILD_EVENTLOG_MAX_RECORDS  100
-#define GUILD_RANKS_MIN_COUNT       5
-#define GUILD_RANKS_MAX_COUNT       10
 
 enum AiReaction
 {
@@ -2814,7 +2814,8 @@ enum TradeStatus
     TRADE_STATUS_YOU_LOGOUT     = 19,
     TRADE_STATUS_TARGET_LOGOUT  = 20,
     TRADE_STATUS_TRIAL_ACCOUNT  = 21,                       // Trial accounts can not perform that action
-    TRADE_STATUS_ONLY_CONJURED  = 22                        // You can only trade conjured items... (cross realm BG related).
+    TRADE_STATUS_ONLY_CONJURED  = 22,                       // You can only trade conjured items... (cross realm BG related).
+    TRADE_STATUS_NOT_ELIGIBLE   = 23                        // Related to trading soulbound loot items
 };
 
 enum XPColorChar

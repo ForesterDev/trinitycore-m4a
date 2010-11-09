@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 /** \file
@@ -43,7 +41,6 @@
 #include "SocialMgr.h"
 #include "zlib.h"
 #include "ScriptMgr.h"
-#include "LFGMgr.h"
 #include "Transport.h"
 
 /// WorldSession constructor
@@ -53,7 +50,7 @@ _security(sec), _accountId(id), m_expansion(expansion), _logoutTime(0),
 m_inQueue(false), m_playerLoading(false), m_playerLogout(false),
 m_playerRecentlyLogout(false), m_playerSave(false),
 m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)),
-m_sessionDbLocaleIndex(sObjectMgr.GetIndexForLocale(locale)),
+m_sessionDbLocaleIndex(locale),
 m_latency(0), m_TutorialsChanged(false), recruiterId(recruiter)
 {
     if (sock)
@@ -227,9 +224,7 @@ bool WorldSession::Update(uint32 diff)
                         break;
                     case STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT:
                         if (!_player && !m_playerRecentlyLogout)
-                        {
                             LogUnexpectedOpcode(packet, "the player has not logged in yet and not recently logout");
-                        }
                         else
                         {
                             // not expected _player or must checked in packet hanlder
@@ -271,11 +266,14 @@ bool WorldSession::Update(uint32 diff)
                             LogUnprocessedTail(packet);
                         break;
                     case STATUS_NEVER:
-                        /*
                         sLog.outError("SESSION: received not allowed opcode %s (0x%.4X)",
                             LookupOpcodeName(packet->GetOpcode()),
                             packet->GetOpcode());
-                        */
+                        break;
+                    case STATUS_UNHANDLED:
+                        sLog.outDebug("SESSION: received not handled opcode %s (0x%.4X)",
+                            LookupOpcodeName(packet->GetOpcode()),
+                            packet->GetOpcode());
                         break;
                 }
             }
@@ -326,11 +324,6 @@ void WorldSession::LogoutPlayer(bool Save)
 
     if (_player)
     {
-        sLFGMgr.Leave(_player);
-        GetPlayer()->GetSession()->SendLfgUpdateParty(LFG_UPDATETYPE_REMOVED_FROM_QUEUE);
-        GetPlayer()->GetSession()->SendLfgUpdatePlayer(LFG_UPDATETYPE_REMOVED_FROM_QUEUE);
-        GetPlayer()->GetSession()->SendLfgUpdateSearch(false);
-
         if (uint64 lguid = GetPlayer()->GetLootGUID())
             DoLootRelease(lguid);
 
@@ -412,14 +405,8 @@ void WorldSession::LogoutPlayer(bool Save)
             HandleMoveWorldportAckOpcode();
 
         ///- If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
-        Guild *guild = sObjectMgr.GetGuildById(_player->GetGuildId());
-        if (guild)
-        {
-            guild->SetMemberStats(_player->GetGUID());
-            guild->UpdateLogoutTime(_player->GetGUID());
-
-            guild->BroadcastEvent(GE_SIGNED_OFF, _player->GetGUID(), 1, _player->GetName(), "", "");
-        }
+        if (Guild *pGuild = sObjectMgr.GetGuildById(_player->GetGuildId()))
+            pGuild->HandleMemberLogout(this);
 
         ///- Remove pet
         _player->RemovePet(NULL,PET_SAVE_AS_CURRENT, true);
@@ -460,6 +447,9 @@ void WorldSession::LogoutPlayer(bool Save)
         ///- Broadcast a logout message to the player's friends
         sSocialMgr.SendFriendStatus(_player, FRIEND_OFFLINE, _player->GetGUIDLow(), true);
         sSocialMgr.RemovePlayerSocial (_player->GetGUIDLow ());
+
+        // Call script hook before deletion
+        sScriptMgr.OnPlayerLogout(GetPlayer());
 
         ///- Remove the player from the world
         // the player may not be in the world when logging out
@@ -583,13 +573,12 @@ void WorldSession::SendAuthWaitQue(uint32 position)
 
 void WorldSession::LoadGlobalAccountData()
 {
-    LoadAccountData(
-        CharacterDatabase.PQuery("SELECT type, time, data FROM account_data WHERE account='%u'", GetAccountId()),
-        GLOBAL_CACHE_MASK
-);
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_LOAD_ACCOUNT_DATA);
+    stmt->setUInt32(0, GetAccountId());
+    LoadAccountData(CharacterDatabase.Query(stmt), GLOBAL_CACHE_MASK);
 }
 
-void WorldSession::LoadAccountData(QueryResult result, uint32 mask)
+void WorldSession::LoadAccountData(PreparedQueryResult result, uint32 mask)
 {
     for (uint32 i = 0; i < NUM_ACCOUNT_DATA_TYPES; ++i)
         if (mask & (1 << i))
@@ -600,8 +589,7 @@ void WorldSession::LoadAccountData(QueryResult result, uint32 mask)
 
     do
     {
-        Field *fields = result->Fetch();
-
+        Field* fields = result->Fetch();
         uint32 type = fields[0].GetUInt32();
         if (type >= NUM_ACCOUNT_DATA_TYPES)
         {
@@ -618,9 +606,10 @@ void WorldSession::LoadAccountData(QueryResult result, uint32 mask)
         }
 
         m_accountData[type].Time = fields[1].GetUInt32();
-        m_accountData[type].Data = fields[2].GetCppString();
+        m_accountData[type].Data = fields[2].GetString();
 
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 }
 
 void WorldSession::SetAccountData(AccountDataType type, time_t time_, std::string data)
@@ -666,7 +655,7 @@ void WorldSession::SendAccountDataTimes(uint32 mask)
 
 void WorldSession::LoadTutorialsData()
 {
-    for (int aX = 0 ; aX < 8 ; ++aX)
+    for (int aX = 0 ; aX < MAX_CHARACTER_TUTORIAL_VALUES ; ++aX)
         m_Tutorials[ aX ] = 0;
 
     QueryResult result = CharacterDatabase.PQuery("SELECT tut0,tut1,tut2,tut3,tut4,tut5,tut6,tut7 FROM character_tutorial WHERE account = '%u'", GetAccountId());
@@ -677,7 +666,7 @@ void WorldSession::LoadTutorialsData()
         {
             Field *fields = result->Fetch();
 
-            for (int iI = 0; iI < 8; ++iI)
+            for (int iI = 0; iI < MAX_CHARACTER_TUTORIAL_VALUES; ++iI)
                 m_Tutorials[iI] = fields[iI].GetUInt32();
         }
         while (result->NextRow());
@@ -687,8 +676,8 @@ void WorldSession::LoadTutorialsData()
 
 void WorldSession::SendTutorialsData()
 {
-    WorldPacket data(SMSG_TUTORIAL_FLAGS, 4*8);
-    for (uint32 i = 0; i < 8; ++i)
+    WorldPacket data(SMSG_TUTORIAL_FLAGS, 4 * MAX_CHARACTER_TUTORIAL_VALUES);
+    for (uint32 i = 0; i < MAX_CHARACTER_TUTORIAL_VALUES; ++i)
         data << m_Tutorials[i];
     SendPacket(&data);
 }

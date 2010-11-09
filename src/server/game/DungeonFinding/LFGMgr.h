@@ -1,19 +1,18 @@
 /*
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef _LFGMGR_H
@@ -28,15 +27,17 @@ class Player;
 
 enum LFGenum
 {
-    LFG_TIME_ROLECHECK       = 2*MINUTE,
-    LFG_TIME_BOOT            = 2*MINUTE,
-    LFG_TIME_PROPOSAL        = 2*MINUTE,
-    LFG_TANKS_NEEDED         = 1,
-    LFG_HEALERS_NEEDED       = 1,
-    LFG_DPS_NEEDED           = 3,
-    LFG_QUEUEUPDATE_INTERVAL = 15000,
-    LFG_SPELL_COOLDOWN       = 71328,
-    LFG_SPELL_DESERTER       = 71041,
+    LFG_TIME_ROLECHECK         = 2*MINUTE,
+    LFG_TIME_BOOT              = 2*MINUTE,
+    LFG_TIME_PROPOSAL          = 2*MINUTE,
+    LFG_TIME_JOIN_WARNING      = 1*IN_MILLISECONDS,
+    LFG_TANKS_NEEDED           = 1,
+    LFG_HEALERS_NEEDED         = 1,
+    LFG_DPS_NEEDED             = 3,
+    LFG_QUEUEUPDATE_INTERVAL   = 15*IN_MILLISECONDS,
+    LFG_SPELL_DUNGEON_COOLDOWN = 71328,
+    LFG_SPELL_DUNGEON_DESERTER = 71041,
+    LFG_SPELL_LUCK_OF_THE_DRAW = 72221,
 };
 
 enum LfgType
@@ -74,7 +75,7 @@ enum LfgLockStatusType
 
 enum LfgTeleportError
 {
-    //LFG_TELEPORTERROR_UNK1           = 0,                 // No reaction
+    LFG_TELEPORTERROR_OK               = 0,                 // Internal use
     LFG_TELEPORTERROR_PLAYER_DEAD      = 1,
     LFG_TELEPORTERROR_FALLING          = 2,
     //LFG_TELEPORTERROR_UNK2           = 3,                 // You can't do that right now
@@ -227,7 +228,6 @@ struct LfgPlayerBoot
 
 typedef std::set<Player*> PlayerSet;
 typedef std::set<LfgLockStatus*> LfgLockStatusSet;
-typedef std::vector<LfgProposal*> LfgProposalList;
 typedef std::map<uint32, LfgLockStatusSet*> LfgLockStatusMap;
 typedef std::map<uint64, LfgQueueInfo*> LfgQueueInfoMap;
 typedef std::map<uint32, LfgRoleCheck*> LfgRoleCheckMap;
@@ -235,7 +235,7 @@ typedef std::map<uint32, LfgProposal*> LfgProposalMap;
 typedef std::map<uint32, LfgPlayerBoot*> LfgPlayerBootMap;
 typedef std::multimap<uint32, LfgReward const*> LfgRewardMap;
 typedef std::pair<LfgRewardMap::const_iterator, LfgRewardMap::const_iterator> LfgRewardMapBounds;
-typedef std::list<Player *> LfgPlayerList;
+typedef std::list<Player*> LfgPlayerList;
 typedef std::set<uint64> LfgGuidSet;
 typedef std::map<std::string, LfgAnswer> LfgCompatibleMap;
 
@@ -247,55 +247,51 @@ class LFGMgr
         LFGMgr();
         ~LFGMgr();
 
-        void Join(Player *plr);
-        void Leave(Player *plr, Group *grp = NULL);
-        void OfferContinue(Group *grp);
-        void TeleportPlayer(Player *plr, bool out);
+        void Join(Player* plr);
+        void Leave(Player* plr, Group* grp = NULL);
+        void OfferContinue(Group* grp);
+        void TeleportPlayer(Player* plr, bool out, bool fromOpcode = false);
         void UpdateProposal(uint32 proposalId, uint32 lowGuid, bool accept);
-        void UpdateBoot(Player *plr, bool accept);
-        void UpdateRoleCheck(Group *grp, Player *plr = NULL);
+        void UpdateBoot(Player* plr, bool accept);
+        void UpdateRoleCheck(Group* grp, Player* plr = NULL);
         void Update(uint32 diff);
 
         bool isRandomDungeon(uint32 dungeonId);
-        void InitBoot(Group *grp, uint32 plowGuid, uint32 vlowGuid, std::string reason);
+        void InitBoot(Group* grp, uint32 plowGuid, uint32 vlowGuid, std::string reason);
 
         void LoadDungeonEncounters();
         void LoadRewards();
         void RewardDungeonDoneFor(const uint32 dungeonId, Player* player);
-        uint32 GetDungeonIdForAchievement(uint32 achievementId)
-        {
-            std::map<uint32, uint32>::iterator itr = m_EncountersByAchievement.find(achievementId);
-            if (itr != m_EncountersByAchievement.end())
-                return itr->second;
+        uint32 GetDungeonIdForAchievement(uint32 achievementId);
 
-            return 0;
-        };
-
-        LfgLockStatusMap* GetPartyLockStatusDungeons(Player *plr, LfgDungeonSet *dungeons = NULL);
+        LfgLockStatusMap* GetPartyLockStatusDungeons(Player* plr, LfgDungeonSet* dungeons = NULL);
         LfgDungeonSet* GetRandomDungeons(uint8 level, uint8 expansion);
-        LfgLockStatusSet* GetPlayerLockStatusDungeons(Player *plr, LfgDungeonSet *dungeons = NULL, bool useEntry = true);
+        LfgLockStatusSet* GetPlayerLockStatusDungeons(Player* plr, LfgDungeonSet* dungeons = NULL, bool useEntry = true);
         LfgReward const* GetRandomDungeonReward(uint32 dungeon, uint8 level);
+
+        bool isJoining(uint64 guid);
 
     private:
         void Cleaner();
         void AddGuidToNewQueue(uint64 guid);
-        void AddToQueue(uint64 guid, LfgRolesMap *roles, LfgDungeonSet *dungeons);
+        void AddToQueue(uint64 guid, LfgRolesMap* roles, LfgDungeonSet* dungeons);
 
         bool RemoveFromQueue(uint64 guid);
         void RemoveProposal(LfgProposalMap::iterator itProposal, LfgUpdateType type);
 
-        void FindNewGroups(LfgGuidList &check, LfgGuidList all, LfgProposalList *proposals);
+        LfgProposal* FindNewGroups(LfgGuidList check, LfgGuidList all);
 
         bool CheckGroupRoles(LfgRolesMap &groles, bool removeLeaderFlag = true);
-        bool CheckCompatibility(LfgGuidList check, LfgProposalList *proposals);
-        LfgDungeonSet* CheckCompatibleDungeons(LfgDungeonMap *dungeonsMap, PlayerSet *players);
-        LfgLockStatusMap *CheckCompatibleDungeons(LfgDungeonSet *dungeons, PlayerSet *players, bool returnLockMap = true);
+        bool CheckCompatibility(LfgGuidList check, LfgProposal*& pProposal);
+        LfgDungeonSet* CheckCompatibleDungeons(LfgDungeonMap* dungeonsMap, PlayerSet* players);
+        LfgLockStatusMap* CheckCompatibleDungeons(LfgDungeonSet* dungeons, PlayerSet* players, bool returnLockMap = true);
         void SetCompatibles(std::string concatenatedGuids, bool compatibles);
         LfgAnswer GetCompatibles(std::string concatenatedGuids);
         void RemoveFromCompatibles(uint64 guid);
         std::string ConcatenateGuids(LfgGuidList check);
+        std::string ConcatenateDungeons(LfgDungeonSet* dungeons);
 
-        LfgLockStatusMap* GetGroupLockStatusDungeons(PlayerSet *pPlayers, LfgDungeonSet *dungeons, bool useEntry = true);
+        LfgLockStatusMap* GetGroupLockStatusDungeons(PlayerSet* pPlayers, LfgDungeonSet* dungeons, bool useEntry = true);
         LfgDungeonSet* GetDungeonsByRandom(uint32 randomdungeon);
         LfgDungeonSet* GetAllDungeons();
         uint8 GetDungeonGroupType(uint32 dungeon);

@@ -1,22 +1,20 @@
 /*
-* Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
-*
-* Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 2 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "gamePCH.h"
 #include "Common.h"
@@ -61,6 +59,8 @@
 #include "WeatherMgr.h"
 #include "ScriptMgr.h"
 #include "LFGMgr.h"
+#include "CreatureTextMgr.h"
+#include "SmartAI.h"
 
 //reload commands
 bool ChatHandler::HandleReloadAllCommand(const char*)
@@ -325,21 +325,21 @@ bool ChatHandler::HandleReloadCreatureTemplateCommand(const char* args)
     const_cast<CreatureInfo*>(cInfo)->Modelid3 = fields[7].GetUInt32();
     const_cast<CreatureInfo*>(cInfo)->Modelid4 = fields[8].GetUInt32();
     size_t len = 0;
-    if (const char* temp = fields[9].GetString())
+    if (const char* temp = fields[9].GetCString())
     {
         delete[] cInfo->Name;
         len = strlen(temp)+1;
         const_cast<CreatureInfo*>(cInfo)->Name = new char[len];
         strncpy(cInfo->Name, temp, len);
     }
-    if (const char* temp = fields[10].GetString())
+    if (const char* temp = fields[10].GetCString())
     {
         delete[] cInfo->SubName;
         len = strlen(temp)+1;
         const_cast<CreatureInfo*>(cInfo)->SubName = new char[len];
         strncpy(cInfo->SubName, temp, len);
     }
-    if (const char* temp = fields[11].GetString())
+    if (const char* temp = fields[11].GetCString())
     {
         delete[] cInfo->IconName;
         len = strlen(temp)+1;
@@ -398,7 +398,7 @@ bool ChatHandler::HandleReloadCreatureTemplateCommand(const char* args)
     const_cast<CreatureInfo*>(cInfo)->VehicleId = fields[61].GetUInt32();
     const_cast<CreatureInfo*>(cInfo)->mingold = fields[62].GetUInt32();
     const_cast<CreatureInfo*>(cInfo)->maxgold = fields[63].GetUInt32();
-    if (const char* temp = fields[64].GetString())
+    if (const char* temp = fields[64].GetCString())
     {
         delete[] cInfo->AIName;
         len = strlen(temp)+1;
@@ -422,7 +422,7 @@ bool ChatHandler::HandleReloadCreatureTemplateCommand(const char* args)
     const_cast<CreatureInfo*>(cInfo)->equipmentId = fields[79].GetUInt32();
     const_cast<CreatureInfo*>(cInfo)->MechanicImmuneMask = fields[80].GetUInt32();
     const_cast<CreatureInfo*>(cInfo)->flags_extra = fields[81].GetUInt32();
-    const_cast<CreatureInfo*>(cInfo)->ScriptID = sObjectMgr.GetScriptId(fields[82].GetString());
+    const_cast<CreatureInfo*>(cInfo)->ScriptID = sObjectMgr.GetScriptId(fields[82].GetCString());
 
     sObjectMgr.CheckCreatureTemplate(cInfo);
 
@@ -1171,6 +1171,22 @@ bool ChatHandler::HandleReloadConditions(const char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleReloadCreatureText(const char* /*args*/)
+{
+    sLog.outString("Re-Loading Creature Texts...");
+    sCreatureTextMgr.LoadCreatureTexts();
+    SendGlobalGMSysMessage("Creature Texts reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadSmartScripts(const char* /*args*/)
+{
+    sLog.outString("Re-Loading Smart Scripts...");
+    sSmartScriptMgr.LoadSmartAIFromDB();
+    SendGlobalGMSysMessage("Smart Scripts reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleAccountSetGmLevelCommand(const char *args)
 {
     if (!*args)
@@ -1405,6 +1421,34 @@ bool ChatHandler::HandleSetSkillCommand(const char *args)
 
     target->SetSkill(skill, target->GetSkillStep(skill), level, max);
     PSendSysMessage(LANG_SET_SKILL, skill, sl->name[GetSessionDbcLocale()], tNameLink.c_str(), level, max);
+
+    return true;
+}
+
+bool ChatHandler::HandleAchievementAddCommand(const char *args)
+{
+    if (!*args)
+        return false;
+
+    uint32 achievementId = atoi((char*)args);
+    if (!achievementId)
+    {
+        if (char* cId = extractKeyFromLink((char*)args, "Hachievement"))
+            achievementId = atoi(cId);
+        if (!achievementId)
+            return false;
+    }
+
+    Player* target = getSelectedPlayer();
+    if (!target)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    if (AchievementEntry const* pAE = GetAchievementStore()->LookupEntry(achievementId))
+        target->CompletedAchievement(pAE, true);
 
     return true;
 }
@@ -2622,7 +2666,7 @@ bool ChatHandler::HandleListItemCommand(const char *args)
             uint32 item_slot = fields[2].GetUInt32();
             uint32 owner_guid = fields[3].GetUInt32();
             uint32 owner_acc = fields[4].GetUInt32();
-            std::string owner_name = fields[5].GetCppString();
+            std::string owner_name = fields[5].GetString();
 
             char const* item_pos = 0;
             if (Player::IsEquipmentPos(item_bag,item_slot))
@@ -2673,9 +2717,9 @@ bool ChatHandler::HandleListItemCommand(const char *args)
             uint32 item_s           = fields[1].GetUInt32();
             uint32 item_r           = fields[2].GetUInt32();
             uint32 item_s_acc       = fields[3].GetUInt32();
-            std::string item_s_name = fields[4].GetCppString();
+            std::string item_s_name = fields[4].GetString();
             uint32 item_r_acc       = fields[5].GetUInt32();
-            std::string item_r_name = fields[6].GetCppString();
+            std::string item_r_name = fields[6].GetString();
 
             char const* item_pos = "[in mail]";
 
@@ -2716,7 +2760,7 @@ bool ChatHandler::HandleListItemCommand(const char *args)
             uint32 item_guid       = fields[0].GetUInt32();
             uint32 owner           = fields[1].GetUInt32();
             uint32 owner_acc       = fields[2].GetUInt32();
-            std::string owner_name = fields[3].GetCppString();
+            std::string owner_name = fields[3].GetString();
 
             char const* item_pos = "[in auction]";
 
@@ -2743,7 +2787,7 @@ bool ChatHandler::HandleListItemCommand(const char *args)
             Field *fields = result->Fetch();
             uint32 item_guid = fields[0].GetUInt32();
             uint32 guild_guid = fields[1].GetUInt32();
-            std::string guild_name = fields[2].GetCppString();
+            std::string guild_name = fields[2].GetString();
 
             char const* item_pos = "[in guild bank]";
 
@@ -2812,11 +2856,11 @@ bool ChatHandler::HandleListObjectCommand(const char *args)
     if (m_session)
     {
         Player* pl = m_session->GetPlayer();
-        result = WorldDatabase.PQuery("SELECT guid, position_x, position_y, position_z, map, (POW(position_x - '%f', 2) + POW(position_y - '%f', 2) + POW(position_z - '%f', 2)) AS order_ FROM gameobject WHERE id = '%u' ORDER BY order_ ASC LIMIT %u",
+        result = WorldDatabase.PQuery("SELECT guid, position_x, position_y, position_z, map, id, (POW(position_x - '%f', 2) + POW(position_y - '%f', 2) + POW(position_z - '%f', 2)) AS order_ FROM gameobject WHERE id = '%u' ORDER BY order_ ASC LIMIT %u",
             pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(),go_id,uint32(count));
     }
     else
-        result = WorldDatabase.PQuery("SELECT guid, position_x, position_y, position_z, map FROM gameobject WHERE id = '%u' LIMIT %u",
+        result = WorldDatabase.PQuery("SELECT guid, position_x, position_y, position_z, map, id FROM gameobject WHERE id = '%u' LIMIT %u",
             go_id,uint32(count));
 
     if (result)
@@ -2829,9 +2873,10 @@ bool ChatHandler::HandleListObjectCommand(const char *args)
             float y = fields[2].GetFloat();
             float z = fields[3].GetFloat();
             int mapid = fields[4].GetUInt16();
+            uint32 entry = fields[5].GetUInt32();
 
             if (m_session)
-                PSendSysMessage(LANG_GO_LIST_CHAT, guid, guid, gInfo->name, x, y, z, mapid);
+                PSendSysMessage(LANG_GO_LIST_CHAT, guid, entry, guid, gInfo->name, x, y, z, mapid);
             else
                 PSendSysMessage(LANG_GO_LIST_CONSOLE, guid, gInfo->name, x, y, z, mapid);
         } while (result->NextRow());
@@ -3088,7 +3133,7 @@ bool ChatHandler::HandleLookupItemSetCommand(const char *args)
             if (!Utf8FitTo(name, wnamepart))
             {
                 loc = 0;
-                for (; loc < MAX_LOCALE; ++loc)
+                for (; loc < TOTAL_LOCALES; ++loc)
                 {
                     if (loc == GetSessionDbcLocale())
                         continue;
@@ -3102,7 +3147,7 @@ bool ChatHandler::HandleLookupItemSetCommand(const char *args)
                 }
             }
 
-            if (loc < MAX_LOCALE)
+            if (loc < TOTAL_LOCALES)
             {
                 if (maxResults && count++ == maxResults)
                 {
@@ -3161,7 +3206,7 @@ bool ChatHandler::HandleLookupSkillCommand(const char *args)
             if (!Utf8FitTo(name, wnamepart))
             {
                 loc = 0;
-                for (; loc < MAX_LOCALE; ++loc)
+                for (; loc < TOTAL_LOCALES; ++loc)
                 {
                     if (loc == GetSessionDbcLocale())
                         continue;
@@ -3175,7 +3220,7 @@ bool ChatHandler::HandleLookupSkillCommand(const char *args)
                 }
             }
 
-            if (loc < MAX_LOCALE)
+            if (loc < TOTAL_LOCALES)
             {
                 if (maxResults && count++ == maxResults)
                 {
@@ -3248,7 +3293,7 @@ bool ChatHandler::HandleLookupSpellCommand(const char *args)
             if (!Utf8FitTo(name, wnamepart))
             {
                 loc = 0;
-                for (; loc < MAX_LOCALE; ++loc)
+                for (; loc < TOTAL_LOCALES; ++loc)
                 {
                     if (loc == GetSessionDbcLocale())
                         continue;
@@ -3262,7 +3307,7 @@ bool ChatHandler::HandleLookupSpellCommand(const char *args)
                 }
             }
 
-            if (loc < MAX_LOCALE)
+            if (loc < TOTAL_LOCALES)
             {
                 if (maxResults && count++ == maxResults)
                 {
@@ -3646,7 +3691,7 @@ bool ChatHandler::HandleLookupFactionCommand(const char *args)
             if (!Utf8FitTo(name, wnamepart))
             {
                 loc = 0;
-                for (; loc < MAX_LOCALE; ++loc)
+                for (; loc < TOTAL_LOCALES; ++loc)
                 {
                     if (loc == GetSessionDbcLocale())
                         continue;
@@ -3660,7 +3705,7 @@ bool ChatHandler::HandleLookupFactionCommand(const char *args)
                 }
             }
 
-            if (loc < MAX_LOCALE)
+            if (loc < TOTAL_LOCALES)
             {
                 if (maxResults && count++ == maxResults)
                 {
@@ -3744,7 +3789,7 @@ bool ChatHandler::HandleLookupTaxiNodeCommand(const char * args)
             if (!Utf8FitTo(name, wnamepart))
             {
                 loc = 0;
-                for (; loc < MAX_LOCALE; ++loc)
+                for (; loc < TOTAL_LOCALES; ++loc)
                 {
                     if (loc == GetSessionDbcLocale())
                         continue;
@@ -3758,7 +3803,7 @@ bool ChatHandler::HandleLookupTaxiNodeCommand(const char * args)
                 }
             }
 
-            if (loc < MAX_LOCALE)
+            if (loc < TOTAL_LOCALES)
             {
                 if (maxResults && count++ == maxResults)
                 {
@@ -3815,7 +3860,7 @@ bool ChatHandler::HandleLookupMapCommand(const char *args)
             if (!Utf8FitTo(name, wnamepart))
             {
                 loc = LOCALE_enUS;
-                for (; loc < MAX_LOCALE; loc++)
+                for (; loc < TOTAL_LOCALES; loc++)
                 {
                     if (m_session && loc == m_session->GetSessionDbcLocale())
                         continue;
@@ -3829,7 +3874,7 @@ bool ChatHandler::HandleLookupMapCommand(const char *args)
                 }
             }
 
-            if (loc < MAX_LOCALE)
+            if (loc < TOTAL_LOCALES)
             {
                 // send map in "id - [name][Continent][Instance/Battleground/Arena][Raid reset time:][Heroic reset time:][Mountable]" format
                 std::ostringstream ss;
@@ -3961,10 +4006,7 @@ bool ChatHandler::HandleGuildInviteCommand(const char *args)
         return false;
 
     // player's guild membership checked in AddMember before add
-    if (!targetGuild->AddMember (target_guid,targetGuild->GetLowestRank ()))
-        return false;
-
-    return true;
+    return targetGuild->AddMember(target_guid);
 }
 
 bool ChatHandler::HandleGuildUninviteCommand(const char *args)
@@ -3983,7 +4025,7 @@ bool ChatHandler::HandleGuildUninviteCommand(const char *args)
     if (!targetGuild)
         return false;
 
-    targetGuild->DelMember (target_guid, false, true);
+    targetGuild->DeleteMember(target_guid, false, true);
     return true;
 }
 
@@ -4010,11 +4052,7 @@ bool ChatHandler::HandleGuildRankCommand(const char *args)
         return false;
 
     uint32 newrank = uint32 (atoi (rankStr));
-    if (newrank > targetGuild->GetLowestRank ())
-        return false;
-
-    targetGuild->ChangeRank (target_guid,newrank);
-    return true;
+    return targetGuild->ChangeMemberRank(target_guid, newrank);
 }
 
 bool ChatHandler::HandleGuildDeleteCommand(const char *args)
@@ -5602,9 +5640,58 @@ bool ChatHandler::HandleBanAccountCommand(const char *args)
     return HandleBanHelper(BAN_ACCOUNT,args);
 }
 
-bool ChatHandler::HandleBanCharacterCommand(const char *args)
+bool ChatHandler::HandleBanAccountByCharCommand(const char *args)
 {
     return HandleBanHelper(BAN_CHARACTER,args);
+}
+
+bool ChatHandler::HandleBanCharacterCommand(const char *args)
+{
+    if (!*args)
+        return false;
+
+    char* cname = strtok((char*)args, " ");
+    if (!cname)
+        return false;
+
+    std::string name = cname;
+
+    char* duration = strtok(NULL," ");
+    if (!duration || !atoi(duration))
+        return false;
+
+   char* reason = strtok(NULL,"");
+    if (!reason)
+        return false;
+
+    if (!normalizePlayerName(name))
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    switch (sWorld.BanCharacter(name, duration, reason, m_session ? m_session->GetPlayerName() : ""))
+    {
+        case BAN_SUCCESS:
+        {
+            if (atoi(duration) > 0)
+                PSendSysMessage(LANG_BAN_YOUBANNED, name.c_str(), secsToTimeString(TimeStringToSecs(duration), true).c_str(), reason);
+            else
+                PSendSysMessage(LANG_BAN_YOUPERMBANNED, name.c_str(), reason);
+            break;
+        }
+        case BAN_NOTFOUND:
+        {
+            PSendSysMessage(LANG_BAN_NOTFOUND, "character", name.c_str());
+            SetSentErrorMessage(true);
+            return false;
+        }
+        default:
+            break;
+    }
+
+    return true;
 }
 
 bool ChatHandler::HandleBanIPCommand(const char *args)
@@ -5687,17 +5774,45 @@ bool ChatHandler::HandleBanHelper(BanMode mode, const char *args)
 
 bool ChatHandler::HandleUnBanAccountCommand(const char *args)
 {
-    return HandleUnBanHelper(BAN_ACCOUNT,args);
+    return HandleUnBanHelper(BAN_ACCOUNT, args);
+}
+
+bool ChatHandler::HandleUnBanAccountByCharCommand(const char *args)
+{
+    return HandleUnBanHelper(BAN_CHARACTER, args);
 }
 
 bool ChatHandler::HandleUnBanCharacterCommand(const char *args)
 {
-    return HandleUnBanHelper(BAN_CHARACTER,args);
+    if (!*args)
+        return false;
+
+    char* cname = strtok((char*)args, " ");
+    if (!cname)
+        return false;
+
+    std::string name = cname;
+
+    if (!normalizePlayerName(name))
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    if (!sWorld.RemoveBanCharacter(name))
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    return true;
 }
 
 bool ChatHandler::HandleUnBanIPCommand(const char *args)
 {
-    return HandleUnBanHelper(BAN_IP,args);
+    return HandleUnBanHelper(BAN_IP, args);
 }
 
 bool ChatHandler::HandleUnBanHelper(BanMode mode, const char *args)
@@ -5772,21 +5887,52 @@ bool ChatHandler::HandleBanInfoAccountCommand(const char *args)
 
 bool ChatHandler::HandleBanInfoCharacterCommand(const char *args)
 {
-    Player* target;
-    uint64 target_guid;
-    if (!extractPlayerTarget((char*)args,&target,&target_guid))
+    if (!*args)
         return false;
 
-    uint32 accountid = target ? target->GetSession()->GetAccountId() : sObjectMgr.GetPlayerAccountIdByGUID(target_guid);
+    Player* target = sObjectMgr.GetPlayer(args);
+    uint32 target_guid = 0;
+    std::string name(args);
 
-    std::string accountname;
-    if (!sAccountMgr.GetName(accountid,accountname))
+    if (!target)
     {
-        PSendSysMessage(LANG_BANINFO_NOCHARACTER);
-        return true;
-    }
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_GET_GUID_BY_NAME);
+        stmt->setString(0, name);
+        PreparedQueryResult resultCharacter = CharacterDatabase.Query(stmt);
 
-    return HandleBanInfoHelper(accountid,accountname.c_str());
+        if (!resultCharacter)
+        {
+            PSendSysMessage(LANG_BANINFO_NOCHARACTER);
+            return false;
+        }
+
+        target_guid = (*resultCharacter)[0].GetUInt32();
+    }
+    else
+        target_guid = target->GetGUIDLow();
+
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_GET_BANINFO);
+    stmt->setUInt32(0, target_guid);
+    PreparedQueryResult result = CharacterDatabase.Query(stmt);
+    if (!result)
+        return true;
+
+    PSendSysMessage(LANG_BANINFO_BANHISTORY, name.c_str());
+    do
+    {
+        Field* fields = result->Fetch();
+        time_t unbandate = time_t(fields[3].GetUInt64());
+        bool active = false;
+        if (fields[2].GetUInt8() && (!fields[1].GetUInt64() || unbandate >= time(NULL)))
+            active = true;
+        bool permanent = (fields[1].GetUInt64() == uint64(0));
+        std::string bantime = permanent ? GetTrinityString(LANG_BANINFO_INFINITE) : secsToTimeString(fields[1].GetUInt64(), true);
+        PSendSysMessage(LANG_BANINFO_HISTORYENTRY,
+            fields[0].GetCString(), bantime.c_str(), active ? GetTrinityString(LANG_BANINFO_YES) : GetTrinityString(LANG_BANINFO_NO), fields[4].GetCString(), fields[5].GetCString());
+    }
+    while (result->NextRow());
+
+    return true;
 }
 
 bool ChatHandler::HandleBanInfoHelper(uint32 accountid, char const* accountname)
@@ -5798,7 +5944,7 @@ bool ChatHandler::HandleBanInfoHelper(uint32 accountid, char const* accountname)
         return true;
     }
 
-    PSendSysMessage(LANG_BANINFO_BANHISTORY,accountname);
+    PSendSysMessage(LANG_BANINFO_BANHISTORY, accountname);
     do
     {
         Field* fields = result->Fetch();
@@ -5810,8 +5956,8 @@ bool ChatHandler::HandleBanInfoHelper(uint32 accountid, char const* accountname)
         bool permanent = (fields[1].GetUInt64() == (uint64)0);
         std::string bantime = permanent ? GetTrinityString(LANG_BANINFO_INFINITE) : secsToTimeString(fields[1].GetUInt64(), true);
         PSendSysMessage(LANG_BANINFO_HISTORYENTRY,
-            fields[0].GetString(), bantime.c_str(), active ? GetTrinityString(LANG_BANINFO_YES):GetTrinityString(LANG_BANINFO_NO), fields[4].GetString(), fields[5].GetString());
-    }while (result->NextRow());
+            fields[0].GetCString(), bantime.c_str(), active ? GetTrinityString(LANG_BANINFO_YES) : GetTrinityString(LANG_BANINFO_NO), fields[4].GetCString(), fields[5].GetCString());
+    } while (result->NextRow());
 
     return true;
 }
@@ -5841,30 +5987,96 @@ bool ChatHandler::HandleBanInfoIPCommand(const char *args)
     Field *fields = result->Fetch();
     bool permanent = !fields[6].GetUInt64();
     PSendSysMessage(LANG_BANINFO_IPENTRY,
-        fields[0].GetString(), fields[1].GetString(), permanent ? GetTrinityString(LANG_BANINFO_NEVER):fields[2].GetString(),
-        permanent ? GetTrinityString(LANG_BANINFO_INFINITE):secsToTimeString(fields[3].GetUInt64(), true).c_str(), fields[4].GetString(), fields[5].GetString());
+        fields[0].GetCString(), fields[1].GetCString(), permanent ? GetTrinityString(LANG_BANINFO_NEVER) : fields[2].GetCString(),
+        permanent ? GetTrinityString(LANG_BANINFO_INFINITE) : secsToTimeString(fields[3].GetUInt64(), true).c_str(), fields[4].GetCString(), fields[5].GetCString());
 
     return true;
 }
 
 bool ChatHandler::HandleBanListCharacterCommand(const char *args)
 {
-    LoginDatabase.Execute("DELETE FROM ip_banned WHERE unbandate <= UNIX_TIMESTAMP() AND unbandate<>bandate");
+    if (!*args)
+        return false;
 
-    char* cFilter = strtok ((char*)args, " ");
+    char* cFilter = strtok((char*)args, " ");
     if (!cFilter)
         return false;
 
-    std::string filter = cFilter;
-    LoginDatabase.escape_string(filter);
-    QueryResult result = CharacterDatabase.PQuery("SELECT account FROM characters WHERE name "_LIKE_" "_CONCAT3_("'%%'","'%s'","'%%'"),filter.c_str());
+    std::string filter(cFilter);
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_GET_GUID_BY_NAME_FILTER);
+    stmt->setString(0, filter.c_str());
+    PreparedQueryResult result = CharacterDatabase.Query(stmt);
     if (!result)
     {
         PSendSysMessage(LANG_BANLIST_NOCHARACTER);
         return true;
     }
 
-    return HandleBanListHelper(result);
+    PSendSysMessage(LANG_BANLIST_MATCHINGCHARACTER);
+
+    // Chat short output
+    if (m_session)
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+            PreparedStatement* stmt2 = CharacterDatabase.GetPreparedStatement(CHAR_GET_BANNED_NAME);
+            stmt2->setUInt32(0, fields[0].GetUInt32());
+            PreparedQueryResult banresult = CharacterDatabase.Query(stmt2);
+            if (banresult)
+                PSendSysMessage("%s", (*banresult)[0].GetCString());
+        }
+        while (result->NextRow());
+    }
+    // Console wide output
+    else
+    {
+        SendSysMessage(LANG_BANLIST_CHARACTERS);
+        SendSysMessage(" =============================================================================== ");
+        SendSysMessage(LANG_BANLIST_CHARACTERS_HEADER);
+        do
+        {
+            SendSysMessage("-------------------------------------------------------------------------------");
+
+            Field* fields = result->Fetch();
+
+            std::string char_name = fields[1].GetString();
+
+            PreparedStatement* stmt2 = CharacterDatabase.GetPreparedStatement(CHAR_GET_BANINFO_LIST);
+            stmt2->setUInt32(0, fields[0].GetUInt32());
+            PreparedQueryResult banInfo = CharacterDatabase.Query(stmt2);
+            if (banInfo)
+            {
+                Field* banFields = banInfo->Fetch();
+                do
+                {
+                    time_t t_ban = banFields[0].GetUInt64();
+                    tm* aTm_ban = localtime(&t_ban);
+
+                    if (banFields[0].GetUInt64() == banFields[1].GetUInt64())
+                    {
+                        PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|   permanent  |%-15.15s|%-15.15s|",
+                            char_name.c_str(), aTm_ban->tm_year%100, aTm_ban->tm_mon+1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
+                            banFields[2].GetCString(), banFields[3].GetCString());
+                    }
+                    else
+                    {
+                        time_t t_unban = banFields[1].GetUInt64();
+                        tm* aTm_unban = localtime(&t_unban);
+                        PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|%02d-%02d-%02d %02d:%02d|%-15.15s|%-15.15s|",
+                            char_name.c_str(), aTm_ban->tm_year%100, aTm_ban->tm_mon+1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
+                            aTm_unban->tm_year%100, aTm_unban->tm_mon+1, aTm_unban->tm_mday, aTm_unban->tm_hour, aTm_unban->tm_min,
+                            banFields[2].GetCString(), banFields[3].GetCString());
+                    }
+                }
+                while (banInfo->NextRow());
+            }
+        }
+        while (result->NextRow());
+        SendSysMessage(" =============================================================================== ");
+    }
+
+    return true;
 }
 
 bool ChatHandler::HandleBanListAccountCommand(const char *args)
@@ -5914,7 +6126,7 @@ bool ChatHandler::HandleBanListHelper(QueryResult result)
             if (banresult)
             {
                 Field* fields2 = banresult->Fetch();
-                PSendSysMessage("%s",fields2[0].GetString());
+                PSendSysMessage("%s", fields2[0].GetCString());
             }
         } while (result->NextRow());
     }
@@ -5934,7 +6146,7 @@ bool ChatHandler::HandleBanListHelper(QueryResult result)
 
             // "account" case, name can be get in same query
             if (result->GetFieldCount() > 1)
-                account_name = fields[1].GetCppString();
+                account_name = fields[1].GetString();
             // "character" case, name need extract from another DB
             else
                 sAccountMgr.GetName (account_id,account_name);
@@ -5952,8 +6164,8 @@ bool ChatHandler::HandleBanListHelper(QueryResult result)
                     if (fields2[0].GetUInt64() == fields2[1].GetUInt64())
                     {
                         PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|   permanent  |%-15.15s|%-15.15s|",
-                            account_name.c_str(),aTm_ban->tm_year%100, aTm_ban->tm_mon+1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
-                            fields2[2].GetString(),fields2[3].GetString());
+                            account_name.c_str(), aTm_ban->tm_year%100, aTm_ban->tm_mon+1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
+                            fields2[2].GetCString(), fields2[3].GetCString());
                     }
                     else
                     {
@@ -5962,9 +6174,9 @@ bool ChatHandler::HandleBanListHelper(QueryResult result)
                         PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|%02d-%02d-%02d %02d:%02d|%-15.15s|%-15.15s|",
                             account_name.c_str(),aTm_ban->tm_year%100, aTm_ban->tm_mon+1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
                             aTm_unban->tm_year%100, aTm_unban->tm_mon+1, aTm_unban->tm_mday, aTm_unban->tm_hour, aTm_unban->tm_min,
-                            fields2[2].GetString(),fields2[3].GetString());
+                            fields2[2].GetCString(), fields2[3].GetCString());
                     }
-                }while (banInfo->NextRow());
+                } while (banInfo->NextRow());
             }
         }while (result->NextRow());
         SendSysMessage(" ===============================================================================");
@@ -6008,7 +6220,7 @@ bool ChatHandler::HandleBanListIPCommand(const char *args)
         do
         {
             Field* fields = result->Fetch();
-            PSendSysMessage("%s",fields[0].GetString());
+            PSendSysMessage("%s", fields[0].GetCString());
         } while (result->NextRow());
     }
     // Console wide output
@@ -6026,17 +6238,17 @@ bool ChatHandler::HandleBanListIPCommand(const char *args)
             if (fields[1].GetUInt64() == fields[2].GetUInt64())
             {
                 PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|   permanent  |%-15.15s|%-15.15s|",
-                    fields[0].GetString(), aTm_ban->tm_year%100, aTm_ban->tm_mon+1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
-                    fields[3].GetString(), fields[4].GetString());
+                    fields[0].GetCString(), aTm_ban->tm_year%100, aTm_ban->tm_mon+1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
+                    fields[3].GetCString(), fields[4].GetCString());
             }
             else
             {
                 time_t t_unban = fields[2].GetUInt64();
                 tm* aTm_unban = localtime(&t_unban);
                 PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|%02d-%02d-%02d %02d:%02d|%-15.15s|%-15.15s|",
-                    fields[0].GetString(), aTm_ban->tm_year%100, aTm_ban->tm_mon+1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
+                    fields[0].GetCString(), aTm_ban->tm_year%100, aTm_ban->tm_mon+1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
                     aTm_unban->tm_year%100, aTm_unban->tm_mon+1, aTm_unban->tm_mday, aTm_unban->tm_hour, aTm_unban->tm_min,
-                    fields[3].GetString(), fields[4].GetString());
+                    fields[3].GetCString(), fields[4].GetCString());
             }
         }while (result->NextRow());
         SendSysMessage(" ===============================================================================");
@@ -6716,10 +6928,10 @@ bool ChatHandler::HandleInstanceUnbindCommand(const char *args)
     if (pDiff)
         diff = atoi(pDiff);
     uint16 counter = 0;
-    int16 MapId = 0;
+    uint16 MapId = 0;
 
     if (strcmp(pMap, "all"))
-        if (!(MapId = atoi(pMap)))
+        if (!(MapId = uint16(atoi(pMap))))
             return false;
 
     for(uint8 i = 0; i < MAX_DIFFICULTY; ++i)
@@ -6792,8 +7004,9 @@ bool ChatHandler::HandleGMListFullCommand(const char* /*args*/)
         do
         {
             Field *fields = result->Fetch();
-            PSendSysMessage("|%15s|%6s|", fields[0].GetString(),fields[1].GetString());
-        }while (result->NextRow());
+            PSendSysMessage("|%15s|%6s|", fields[0].GetCString(),fields[1].GetCString());
+        }
+        while (result->NextRow());
 
         PSendSysMessage(" ======================== ");
     }
@@ -7349,7 +7562,7 @@ bool ChatHandler::HandleListFreezeCommand(const char * /*args*/)
     do
     {
         Field *fields = result->Fetch();
-        std::string fplayers = fields[0].GetCppString();
+        std::string fplayers = fields[0].GetString();
         PSendSysMessage(LANG_COMMAND_FROZEN_PLAYERS,fplayers.c_str());
     } while (result->NextRow());
 

@@ -1,7 +1,7 @@
 # output generic information about the core and buildtype chosen
 
 message("")
-message("* TrinityCore revision   : ${HG_REVISION}")
+message("* TrinityCore revision   : ${rev_id_str} (${rev_hash_str})")
 if( UNIX )
   message("* Build binaries in      : ${CMAKE_BUILD_TYPE} mode")
 endif()
@@ -38,12 +38,6 @@ else()
   message("* Build map/vmap tools   : No  (default)")
 endif()
 
-if( WITH_SQL )
-  message("* Install SQL-files      : Yes")
-else()
-  message("* Install SQL-files      : No  (default)")
-endif()
-
 if( USE_COREPCH )
   message("* Build core w/PCH       : Yes (default)")
 else()
@@ -76,6 +70,13 @@ else()
   message("* Use coreside debug     : No  (default)")
 endif()
 
+if( WITH_SQLDEBUG )
+  message("* Use SQL-query logging  : Yes")
+  add_definitions(-DSQLQUERY_LOG)
+else()
+  message("* Use SQL-query logging  : No  (default)")
+endif()
+
 if( WIN32 )
   if( USE_MYSQL_SOURCES )
     message("* Use MySQL sourcetree   : Yes (default)")
@@ -83,5 +84,11 @@ if( WIN32 )
     message("* Use MySQL sourcetree   : No")
   endif()
 endif( WIN32 )
+
+if( WITH_SQL )
+  message("* Install SQL-files      : Yes")
+else()
+  message("* Install SQL-files      : No  (default)")
+endif()
 
 message("")

@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "gamePCH.h"
@@ -90,7 +88,7 @@ void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult result)
 
     Field *fields = result->Fetch();
     uint32 guid      = fields[0].GetUInt32();
-    std::string name = fields[1].GetCppString();
+    std::string name = fields[1].GetString();
     uint8 pRace = 0, pGender = 0, pClass = 0;
     if (name == "")
         name         = GetTrinityString(LANG_NON_EXIST_CHARACTER);
@@ -111,11 +109,11 @@ void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult result)
     data << uint8(pClass);                                  // class
 
     // if the first declined name field (5) is empty, the rest must be too
-    if (sWorld.getBoolConfig(CONFIG_DECLINED_NAMES_USED) && fields[5].GetCppString() != "")
+    if (sWorld.getBoolConfig(CONFIG_DECLINED_NAMES_USED) && fields[5].GetString() != "")
     {
         data << uint8(1);                                   // is declined
         for (int i = 5; i < MAX_DECLINED_NAME_CASES+5; ++i)
-            data << fields[i].GetCppString();
+            data << fields[i].GetString();
     }
     else
         data << uint8(0);                                   // is not declined
@@ -196,7 +194,7 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket & recv_data)
         data << float(ci->ModHealth);                       // dmg/hp modifier
         data << float(ci->ModMana);                         // dmg/mana modifier
         data << uint8(ci->RacialLeader);
-        for (uint32 i = 0; i < 6; ++i)
+        for (uint32 i = 0; i < MAX_CREATURE_QUEST_ITEMS; ++i)
             data << uint32(ci->questItems[i]);              // itemId[6], quest drop
         data << uint32(ci->movementId);                     // CreatureMovementInfo.dbc
         SendPacket(&data);
@@ -253,7 +251,7 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket & recv_data)
         data << info->unk1;                                 // 2.0.3, string
         data.append(info->raw.data, 24);
         data << float(info->size);                          // go size
-        for (uint32 i = 0; i < 6; ++i)
+        for (uint32 i = 0; i < MAX_GAMEOBJECT_QUEST_ITEMS; ++i)
             data << uint32(info->questItems[i]);              // itemId[6], quest drop
         SendPacket(&data);
         sLog.outDebug("WORLD: Sent SMSG_GAMEOBJECT_QUERY_RESPONSE");
@@ -339,7 +337,7 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket & recv_data)
 
     if (!pGossip)
     {
-        for (uint32 i = 0; i < 8; ++i)
+        for (uint32 i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
         {
             data << float(0);
             data << "[Missing gossip text!]";
@@ -351,8 +349,8 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket & recv_data)
     }
     else
     {
-        std::string Text_0[8], Text_1[8];
-        for (int i = 0; i < 8; ++i)
+        std::string Text_0[MAX_LOCALES], Text_1[MAX_LOCALES];
+        for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
         {
             Text_0[i]=pGossip->Options[i].Text_0;
             Text_1[i]=pGossip->Options[i].Text_1;
@@ -363,7 +361,7 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket & recv_data)
         {
             if (NpcTextLocale const *nl = sObjectMgr.GetNpcTextLocale(textID))
             {
-                for (int i = 0; i < 8; ++i)
+                for (int i = 0; i < MAX_LOCALES; ++i)
                 {
                     sObjectMgr.GetLocaleString(nl->Text_0[i], loc_idx, Text_0[i]);
                     sObjectMgr.GetLocaleString(nl->Text_1[i], loc_idx, Text_1[i]);
@@ -371,7 +369,7 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket & recv_data)
             }
         }
 
-        for (int i = 0; i < 8; ++i)
+        for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
         {
             data << pGossip->Options[i].Probability;
 
@@ -387,7 +385,7 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket & recv_data)
 
             data << pGossip->Options[i].Language;
 
-            for (int j = 0; j < 3; ++j)
+            for (int j = 0; j < MAX_GOSSIP_TEXT_EMOTES; ++j)
             {
                 data << pGossip->Options[i].Emotes[j]._Delay;
                 data << pGossip->Options[i].Emotes[j]._Emote;

@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef _PLAYER_H
@@ -791,7 +789,8 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADWEKLYQUESTSTATUS     = 26,
     PLAYER_LOGIN_QUERY_LOADRANDOMBG             = 27,
     PLAYER_LOGIN_QUERY_LOADARENASTATS           = 28,
-    MAX_PLAYER_LOGIN_QUERY                      = 29
+    PLAYER_LOGIN_QUERY_LOADBANNED               = 29,
+    MAX_PLAYER_LOGIN_QUERY                      = 30
 };
 
 enum PlayerDelayedOperations
@@ -1210,7 +1209,7 @@ class Player : public Unit, public GridObject<Player>
         bool HasItemTotemCategory(uint32 TotemCategory) const;
         uint8 CanUseItem(ItemPrototype const *pItem) const;
         uint8 CanUseAmmo(uint32 item) const;
-        Item* StoreNewItem(ItemPosCountVec const& pos, uint32 item, bool update,int32 randomPropertyId = 0);
+        Item* StoreNewItem(ItemPosCountVec const& pos, uint32 item, bool update, int32 randomPropertyId = 0, AllowedLooterSet* allowedLooters = NULL);
         Item* StoreItem(ItemPosCountVec const& pos, Item *pItem, bool update);
         Item* EquipNewItem(uint16 pos, uint32 item, bool update);
         Item* EquipItem(uint16 pos, Item *pItem, bool update);
@@ -1284,13 +1283,15 @@ class Player : public Unit, public GridObject<Player>
         void TradeCancel(bool sendback);
 
         void UpdateEnchantTime(uint32 time);
-        void UpdateItemDuration(uint32 time, bool realtimeonly=false);
+        void UpdateSoulboundTradeItems();
+        void RemoveTradeableItem(Item* item);
+        void UpdateItemDuration(uint32 time, bool realtimeonly = false);
         void AddEnchantmentDurations(Item *item);
         void RemoveEnchantmentDurations(Item *item);
         void RemoveArenaEnchantments(EnchantmentSlot slot);
-        void AddEnchantmentDuration(Item *item,EnchantmentSlot slot,uint32 duration);
-        void ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool apply_dur = true, bool ignore_condition = false);
-        void ApplyEnchantment(Item *item,bool apply);
+        void AddEnchantmentDuration(Item *item, EnchantmentSlot slot, uint32 duration);
+        void ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool apply_dur = true, bool ignore_condition = false);
+        void ApplyEnchantment(Item *item, bool apply);
         void UpdateSkillEnchantments(uint16 skill_id, uint16 curr_value, uint16 new_value);
         void SendEnchantmentDurations();
         void BuildEnchantmentsInfoData(WorldPacket *data);
@@ -1345,6 +1346,7 @@ class Player : public Unit, public GridObject<Player>
         bool SatisfyQuestRace(Quest const* qInfo, bool msg);
         bool SatisfyQuestReputation(Quest const* qInfo, bool msg);
         bool SatisfyQuestStatus(Quest const* qInfo, bool msg);
+        bool SatisfyQuestConditions(Quest const* qInfo, bool msg);
         bool SatisfyQuestTimed(Quest const* qInfo, bool msg);
         bool SatisfyQuestExclusiveGroup(Quest const* qInfo, bool msg);
         bool SatisfyQuestNextChain(Quest const* qInfo, bool msg);
@@ -1396,7 +1398,7 @@ class Player : public Unit, public GridObject<Player>
                 SetUInt32Value(PLAYER_QUEST_LOG_1_1 + MAX_QUEST_OFFSET * slot2 + i, temp1);
             }
         }
-        uint32 GetReqKillOrCastCurrentCount(uint32 quest_id, int32 entry);
+        uint16 GetReqKillOrCastCurrentCount(uint32 quest_id, int32 entry);
         void AreaExploredOrEventHappens(uint32 questId);
         void GroupEventHappens(uint32 questId, WorldObject const* pEventObject);
         void ItemAddedQuestCheck(uint32 entry, uint32 count);
@@ -1420,8 +1422,8 @@ class Player : public Unit, public GridObject<Player>
         void SendCanTakeQuestResponse(uint32 msg);
         void SendQuestConfirmAccept(Quest const* pQuest, Player* pReceiver);
         void SendPushToPartyResponse(Player *pPlayer, uint32 msg);
-        void SendQuestUpdateAddItem(Quest const* pQuest, uint32 item_idx, uint32 count);
-        void SendQuestUpdateAddCreatureOrGo(Quest const* pQuest, uint64 guid, uint32 creatureOrGO_idx, uint32 old_count, uint32 add_count);
+        void SendQuestUpdateAddItem(Quest const* pQuest, uint32 item_idx, uint16 count);
+        void SendQuestUpdateAddCreatureOrGo(Quest const* pQuest, uint64 guid, uint32 creatureOrGO_idx, uint16 old_count, uint16 add_count);
 
         uint64 GetDivider() { return m_divider; }
         void SetDivider(uint64 guid) { m_divider = guid; }
@@ -1652,9 +1654,9 @@ class Player : public Unit, public GridObject<Player>
         void SendClearCooldown(uint32 spell_id, Unit* target);
 
         void RemoveCategoryCooldown(uint32 cat);
-        void RemoveArenaSpellCooldowns();
+        void RemoveArenaSpellCooldowns(bool removeActivePetCooldowns = false);
         void RemoveAllSpellCooldown();
-        void _LoadSpellCooldowns(QueryResult result);
+        void _LoadSpellCooldowns(PreparedQueryResult result);
         void _SaveSpellCooldowns(SQLTransaction& trans);
         void SetLastPotionId(uint32 item_id) { m_lastPotionId = item_id; }
         void UpdatePotionCooldown(Spell* spell = NULL);
@@ -1679,11 +1681,11 @@ class Player : public Unit, public GridObject<Player>
         bool isRessurectRequested() const { return m_resurrectGUID != 0; }
         void ResurectUsingRequestData();
 
-        int getCinematic()
+        uint8 getCinematic()
         {
             return m_cinematic;
         }
-        void setCinematic(int cine)
+        void setCinematic(uint8 cine)
         {
             m_cinematic = cine;
         }
@@ -1732,17 +1734,17 @@ class Player : public Unit, public GridObject<Player>
         bool IsInSameGroupWith(Player const* p) const;
         bool IsInSameRaidWith(Player const* p) const { return p == this || (GetGroup() != NULL && GetGroup() == p->GetGroup()); }
         void UninviteFromGroup();
-        static void RemoveFromGroup(Group* group, uint64 guid);
-        void RemoveFromGroup() { RemoveFromGroup(GetGroup(),GetGUID()); }
+        static void RemoveFromGroup(Group* group, uint64 guid, RemoveMethod method = GROUP_REMOVEMETHOD_DEFAULT);
+        void RemoveFromGroup(RemoveMethod method = GROUP_REMOVEMETHOD_DEFAULT) { RemoveFromGroup(GetGroup(),GetGUID(), method); }
         void SendUpdateToOutOfRangeGroupMembers();
 
         void SetInGuild(uint32 GuildId) { SetUInt32Value(PLAYER_GUILDID, GuildId); }
-        void SetRank(uint32 rankId){ SetUInt32Value(PLAYER_GUILDRANK, rankId); }
+        void SetRank(uint8 rankId) { SetUInt32Value(PLAYER_GUILDRANK, rankId); }
+        uint8 GetRank() { return uint8(GetUInt32Value(PLAYER_GUILDRANK)); }
         void SetGuildIdInvited(uint32 GuildId) { m_GuildIdInvited = GuildId; }
         uint32 GetGuildId() { return GetUInt32Value(PLAYER_GUILDID);  }
         static uint32 GetGuildIdFromDB(uint64 guid);
-        uint32 GetRank(){ return GetUInt32Value(PLAYER_GUILDRANK); }
-        static uint32 GetRankFromDB(uint64 guid);
+        static uint8 GetRankFromDB(uint64 guid);
         int GetGuildIdInvited() { return m_GuildIdInvited; }
         static void RemovePetitionsAndSigns(uint64 guid, uint32 type);
 
@@ -1902,6 +1904,8 @@ class Player : public Unit, public GridObject<Player>
         }
 
         void SetMovement(PlayerMovementType pType);
+
+        bool CanJoinConstantChannelInZone(ChatChannelsEntry const* channel, AreaTableEntry const* zone);
 
         void JoinedChannel(Channel *c);
         void LeftChannel(Channel *c);
@@ -2278,16 +2282,19 @@ class Player : public Unit, public GridObject<Player>
         void RemoveAtLoginFlag(AtLoginFlags f, bool in_db_also = false);
 
         // Dungeon Finder
-        bool isLfgDungeonDone(const uint32 entry) { return m_LookingForGroup.donerandomDungeons.find(entry) != m_LookingForGroup.donerandomDungeons.end(); }
         LfgDungeonSet *GetLfgDungeons() { return &m_LookingForGroup.applyDungeons; }
-        LfgDungeonSet *GetLfgDungeonsDone() { return &m_LookingForGroup.donerandomDungeons; }
-        void SetLfgDungeonDone(const uint32 entry) { m_LookingForGroup.donerandomDungeons.insert(entry); }
         std::string GetLfgComment() { return m_LookingForGroup.comment; }
         void SetLfgComment(std::string _comment) { m_LookingForGroup.comment = _comment; }
         uint8 GetLfgRoles() { return m_LookingForGroup.roles; }
         void SetLfgRoles(uint8 _roles) { m_LookingForGroup.roles = _roles; }
         bool GetLfgUpdate() { return m_LookingForGroup.update; }
         void SetLfgUpdate(bool update) { m_LookingForGroup.update = update; }
+        LfgState GetLfgState() { return m_LookingForGroup.state; }
+        void SetLfgState(LfgState state) { m_LookingForGroup.state = state; }
+        bool isUsingLfg() { return GetLfgState() != LFG_STATE_NONE; }
+
+        typedef std::set<uint32> DFQuestsDoneList;
+        DFQuestsDoneList m_DFQuests;
 
         // Temporarily removed pet cache
         uint32 GetTemporaryUnsummonedPetNumber() const { return m_temporaryUnsummonedPetNumber; }
@@ -2387,7 +2394,7 @@ class Player : public Unit, public GridObject<Player>
         AchievementMgr& GetAchievementMgr() { return m_achievementMgr; }
         AchievementMgr const& GetAchievementMgr() const { return m_achievementMgr; }
         void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1 = 0, uint32 miscvalue2 = 0, Unit *unit = NULL, uint32 time = 0);
-        void CompletedAchievement(AchievementEntry const* entry);
+        void CompletedAchievement(AchievementEntry const* entry, bool ignoreGMAllowAchievementConfig = false);
 
         bool HasTitle(uint32 bitIndex);
         bool HasTitle(CharTitlesEntry const* title) { return HasTitle(title->bit_index); }
@@ -2401,6 +2408,7 @@ class Player : public Unit, public GridObject<Player>
         Spell * m_spellModTakingSpell;
 
         float GetAverageItemLevel();
+        bool isDebugAreaTriggers;
 
         Area_connection connect_area(Area_signal::slot_function_type subscriber)
         {
@@ -2452,30 +2460,30 @@ class Player : public Unit, public GridObject<Player>
         /***                   LOAD SYSTEM                     ***/
         /*********************************************************/
 
-        void _LoadActions(QueryResult result);
-        void _LoadAuras(QueryResult result, uint32 timediff);
+        void _LoadActions(PreparedQueryResult result);
+        void _LoadAuras(PreparedQueryResult result, uint32 timediff);
         void _LoadGlyphAuras();
-        void _LoadBoundInstances(QueryResult result);
-        void _LoadInventory(QueryResult result, uint32 timediff);
-        void _LoadMailInit(QueryResult resultUnread, QueryResult resultDelivery);
+        void _LoadBoundInstances(PreparedQueryResult result);
+        void _LoadInventory(PreparedQueryResult result, uint32 timediff);
+        void _LoadMailInit(PreparedQueryResult resultUnread, PreparedQueryResult resultDelivery);
         void _LoadMail();
         void _LoadMailedItems(Mail *mail);
-        void _LoadQuestStatus(QueryResult result);
-        void _LoadDailyQuestStatus(QueryResult result);
-        void _LoadWeeklyQuestStatus(QueryResult result);
-        void _LoadRandomBGStatus(QueryResult result);
-        void _LoadGroup(QueryResult result);
-        void _LoadSkills(QueryResult result);
-        void _LoadSpells(QueryResult result);
-        void _LoadFriendList(QueryResult result);
-        bool _LoadHomeBind(QueryResult result);
-        void _LoadDeclinedNames(QueryResult result);
-        void _LoadArenaTeamInfo(QueryResult result);
-        void _LoadArenaStatsInfo(QueryResult result);
-        void _LoadEquipmentSets(QueryResult result);
-        void _LoadBGData(QueryResult result);
-        void _LoadGlyphs(QueryResult result);
-        void _LoadTalents(QueryResult result);
+        void _LoadQuestStatus(PreparedQueryResult result);
+        void _LoadDailyQuestStatus(PreparedQueryResult result);
+        void _LoadWeeklyQuestStatus(PreparedQueryResult result);
+        void _LoadRandomBGStatus(PreparedQueryResult result);
+        void _LoadGroup(PreparedQueryResult result);
+        void _LoadSkills(PreparedQueryResult result);
+        void _LoadSpells(PreparedQueryResult result);
+        void _LoadFriendList(PreparedQueryResult result);
+        bool _LoadHomeBind(PreparedQueryResult result);
+        void _LoadDeclinedNames(PreparedQueryResult result);
+        void _LoadArenaTeamInfo(PreparedQueryResult result);
+        void _LoadArenaStatsInfo(PreparedQueryResult result);
+        void _LoadEquipmentSets(PreparedQueryResult result);
+        void _LoadBGData(PreparedQueryResult result);
+        void _LoadGlyphs(PreparedQueryResult result);
+        void _LoadTalents(PreparedQueryResult result);
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
@@ -2570,6 +2578,7 @@ class Player : public Unit, public GridObject<Player>
 
         EnchantDurationList m_enchantDuration;
         ItemDurationList m_itemDuration;
+        ItemDurationList m_itemSoulboundTradeable;
 
         void ResetTimeSync();
         void SendTimeSync();
@@ -2584,7 +2593,7 @@ class Player : public Unit, public GridObject<Player>
         typedef std::list<Channel*> JoinedChannelsList;
         JoinedChannelsList m_channels;
 
-        int m_cinematic;
+        uint8 m_cinematic;
 
         TradeData* m_trade;
 

@@ -1,19 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "gamePCH.h"
@@ -49,7 +49,7 @@ namespace Trinity
         public:
             AchievementChatBuilder(Player const& pl, ChatMsg msgtype, int32 textId, uint32 ach_id)
                 : i_player(pl), i_msgtype(msgtype), i_textId(textId), i_achievementId(ach_id) {}
-            void operator()(WorldPacket& data, int32 loc_idx)
+            void operator()(WorldPacket& data, LocaleConstant loc_idx)
             {
                 char const* text = sObjectMgr.GetTrinityString(i_textId,loc_idx);
 
@@ -556,14 +556,13 @@ void AchievementMgr::SaveToDB(SQLTransaction& trans)
     }
 }
 
-void AchievementMgr::LoadFromDB(QueryResult achievementResult, QueryResult criteriaResult)
+void AchievementMgr::LoadFromDB(PreparedQueryResult achievementResult, PreparedQueryResult criteriaResult)
 {
     if (achievementResult)
     {
         do
         {
-            Field *fields = achievementResult->Fetch();
-
+            Field* fields = achievementResult->Fetch();
             uint32 achievement_id = fields[0].GetUInt32();
 
             // don't must happen: cleanup at server startup in sAchievementMgr.LoadCompletedAchievements()
@@ -573,15 +572,15 @@ void AchievementMgr::LoadFromDB(QueryResult achievementResult, QueryResult crite
             CompletedAchievementData& ca = m_completedAchievements[achievement_id];
             ca.date = time_t(fields[1].GetUInt64());
             ca.changed = false;
-        } while (achievementResult->NextRow());
+        }
+        while (achievementResult->NextRow());
     }
 
     if (criteriaResult)
     {
         do
         {
-            Field *fields = criteriaResult->Fetch();
-
+            Field* fields = criteriaResult->Fetch();
             uint32 id      = fields[0].GetUInt32();
             uint32 counter = fields[1].GetUInt32();
             time_t date    = time_t(fields[2].GetUInt64());
@@ -602,9 +601,9 @@ void AchievementMgr::LoadFromDB(QueryResult achievementResult, QueryResult crite
             progress.counter = counter;
             progress.date    = date;
             progress.changed = false;
-        } while (criteriaResult->NextRow());
+        }
+        while (criteriaResult->NextRow());
     }
-
 }
 
 void AchievementMgr::SendAchievementEarned(AchievementEntry const* achievement)
@@ -1134,7 +1133,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     continue;
 
                 // additional requirements
-                if (achievementCriteria->additionalRequrements[0].additionalRequirement_type == ACHIEVEMENT_CRITERIA_CONDITION_NO_LOOSE)
+                if (achievementCriteria->additionalRequrements[0].additionalRequirement_type == ACHIEVEMENT_CRITERIA_CONDITION_NO_LOSE)
                 {
                     // those requirements couldn't be found in the dbc
                     AchievementCriteriaDataSet const* data = sAchievementMgr.GetCriteriaDataSet(achievementCriteria);
@@ -1905,11 +1904,11 @@ void AchievementMgr::RemoveTimedAchievement(AchievementCriteriaTimedTypes type, 
     }
 }
 
-void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
+void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement, bool ignoreGMAllowAchievementConfig)
 {
     sLog.outDetail("AchievementMgr::CompletedAchievement(%u)", achievement->ID);
 
-    if (!sWorld.getBoolConfig(CONFIG_GM_ALLOW_ACHIEVEMENT_GAINS) && m_player->GetSession()->GetSecurity() > SEC_PLAYER)
+    if (!sWorld.getBoolConfig(CONFIG_GM_ALLOW_ACHIEVEMENT_GAINS) && m_player->GetSession()->GetSecurity() > SEC_PLAYER && !ignoreGMAllowAchievementConfig)
         return;
 
     if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER || HasAchieved(achievement))
@@ -2134,7 +2133,7 @@ void AchievementGlobalMgr::LoadAchievementCriteriaData()
         }
 
         uint32 dataType = fields[1].GetUInt32();
-        const char* scriptName = fields[4].GetString();
+        const char* scriptName = fields[4].GetCString();
         uint32 scriptId = 0;
         if (strcmp(scriptName, "")) // not empty
         {
@@ -2201,7 +2200,7 @@ void AchievementGlobalMgr::LoadAchievementCriteriaData()
             case ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL:      // any cases
                 break;
             case ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA: // need skip generic cases
-                if (criteria->additionalRequrements[0].additionalRequirement_type != ACHIEVEMENT_CRITERIA_CONDITION_NO_LOOSE)
+                if (criteria->additionalRequrements[0].additionalRequirement_type != ACHIEVEMENT_CRITERIA_CONDITION_NO_LOSE)
                     continue;
                 break;
             case ACHIEVEMENT_CRITERIA_TYPE_EQUIP_EPIC_ITEM: // any cases
@@ -2317,8 +2316,8 @@ void AchievementGlobalMgr::LoadRewards()
         reward.titleId[1] = fields[2].GetUInt32();
         reward.itemId     = fields[3].GetUInt32();
         reward.sender     = fields[4].GetUInt32();
-        reward.subject    = fields[5].GetCppString();
-        reward.text       = fields[6].GetCppString();
+        reward.subject    = fields[5].GetString();
+        reward.text       = fields[6].GetString();
 
         // must be title or mail at least
         if (!reward.titleId[0] && !reward.titleId[1] && !reward.sender)
@@ -2424,13 +2423,13 @@ void AchievementGlobalMgr::LoadRewardLocales()
 
         AchievementRewardLocale& data = m_achievementRewardLocales[entry];
 
-        for (int i = 1; i < MAX_LOCALE; ++i)
+        for (int i = 1; i < TOTAL_LOCALES; ++i)
         {
             LocaleConstant locale = (LocaleConstant) i;
-            std::string str = fields[1 + 2 * (i - 1)].GetCppString();
+            std::string str = fields[1 + 2 * (i - 1)].GetString();
             sObjectMgr.AddLocaleString(str, locale, data.subject);
 
-            str = fields[1 + 2 * (i - 1) + 1].GetCppString();
+            str = fields[1 + 2 * (i - 1) + 1].GetString();
             sObjectMgr.AddLocaleString(str, locale, data.text);
         }
     } while (result->NextRow());

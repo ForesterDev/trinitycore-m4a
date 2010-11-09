@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 /// \addtogroup Trinityd
@@ -213,7 +211,7 @@ bool ChatHandler::GetDeletedCharacterInfoList(DeletedInfoList& foundList, std::s
             DeletedInfo info;
 
             info.lowguid    = fields[0].GetUInt32();
-            info.name       = fields[1].GetCppString();
+            info.name       = fields[1].GetString();
             info.accountId  = fields[2].GetUInt32();
 
             // account name will be empty for not existed account
@@ -563,7 +561,7 @@ bool ChatHandler::HandleAccountOnlineListCommand(const char* /*args*/)
     do
     {
         Field *fieldsDB = resultDB->Fetch();
-        std::string name = fieldsDB[0].GetCppString();
+        std::string name = fieldsDB[0].GetString();
         uint32 account = fieldsDB[1].GetUInt32();
 
         ///- Get the username, last IP and GM level of each account
@@ -578,7 +576,7 @@ bool ChatHandler::HandleAccountOnlineListCommand(const char* /*args*/)
         {
             Field *fieldsLogin = resultLogin->Fetch();
             PSendSysMessage(LANG_ACCOUNT_LIST_LINE,
-                fieldsLogin[0].GetString(),name.c_str(),fieldsLogin[1].GetString(),fieldsDB[2].GetInt32(),fieldsDB[3].GetInt32(),fieldsLogin[3].GetUInt32(),fieldsLogin[2].GetUInt32());
+                fieldsLogin[0].GetCString(),name.c_str(),fieldsLogin[1].GetCString(),fieldsDB[2].GetInt32(),fieldsDB[3].GetInt32(),fieldsLogin[3].GetUInt32(),fieldsLogin[2].GetUInt32());
         }
         else
             PSendSysMessage(LANG_ACCOUNT_LIST_ERROR,name.c_str());

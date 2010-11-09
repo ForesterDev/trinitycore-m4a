@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "gamePCH.h"
@@ -45,10 +43,9 @@ uint64 TicketMgr::GenerateGMTicketId()
 void TicketMgr::LoadGMTickets()
 {
     if (!m_GMTicketList.empty())
-    {
         for (GmTicketList::const_iterator itr = m_GMTicketList.begin(); itr != m_GMTicketList.end(); ++itr)
             delete *itr;
-    }
+
     m_GMTicketList.clear();
     m_GMticketid = 0;
     m_openTickets = 0;
@@ -65,7 +62,7 @@ void TicketMgr::LoadGMTickets()
     }
 
     uint16 count = 0;
-    barGoLink bar ((*result).GetRowCount());
+    barGoLink bar(result->GetRowCount());
     GM_Ticket *ticket;
     do
     {
@@ -73,8 +70,8 @@ void TicketMgr::LoadGMTickets()
         ticket = new GM_Ticket;
         ticket->guid = fields[0].GetUInt64();
         ticket->playerGuid = fields[1].GetUInt64();
-        ticket->name = fields[2].GetCppString();
-        ticket->message = fields[3].GetCppString();
+        ticket->name = fields[2].GetString();
+        ticket->message = fields[3].GetString();
         ticket->createtime = fields[4].GetUInt64();
         ticket->map = fields[5].GetUInt32();
         ticket->pos_x = fields[6].GetFloat();
@@ -86,7 +83,7 @@ void TicketMgr::LoadGMTickets()
             m_openTickets++;
 
         ticket->assignedToGM = fields[11].GetUInt64();
-        ticket->comment = fields[12].GetCppString();
+        ticket->comment = fields[12].GetString();
         ticket->completed = fields[13].GetBool();
         ticket->escalated = fields[14].GetUInt8();
         ticket->viewed = fields[15].GetBool();
@@ -94,7 +91,6 @@ void TicketMgr::LoadGMTickets()
         bar.step();
 
         m_GMTicketList.push_back(ticket);
-
     } while (result->NextRow());
 
     result = CharacterDatabase.Query("SELECT MAX(guid) from gm_tickets");

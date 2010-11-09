@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef TRINITY_CONDITIONMGR_H
@@ -30,7 +28,7 @@ class LootTemplate;
 enum ConditionType
 {                                                           // value1           value2      value3
     CONDITION_NONE                  = 0,                    // 0                0           0                  always true
-    CONDITION_AURA                  = 1,                    // spell_id         effindex    +referenceID       true if has aura of spell_id with effect effindex
+    CONDITION_AURA                  = 1,                    // spell_id         effindex    use target?        true if player (or target, if value3) has aura of spell_id with effect effindex
     CONDITION_ITEM                  = 2,                    // item_id          count       +referenceID       true if has #count of item_ids
     CONDITION_ITEM_EQUIPPED         = 3,                    // item_id          0           +referenceID       true if has item_id equipped
     CONDITION_ZONEID                = 4,                    // zone_id          0           +referenceID       true if in zone_id
@@ -39,7 +37,7 @@ enum ConditionType
     CONDITION_SKILL                 = 7,                    // skill_id         skill_value +referenceID       true if has skill_value for skill_id
     CONDITION_QUESTREWARDED         = 8,                    // quest_id         0           +referenceID       true if quest_id was rewarded before
     CONDITION_QUESTTAKEN            = 9,                    // quest_id         0,          +referenceID       true while quest active
-    CONDITION_AD_COMMISSION_AURA    = 10,                   // 0                0,          +referenceID       true while one from AD commission aura active
+    CONDITION_DRUNKENSTATE          = 10,                   // DrunkenState     0,          +referenceID       true if player is drunk enough
     CONDITION_NO_AURA               = 11,                   // spell_id         effindex    +referenceID       true if does not have aura of spell_id with effect effindex
     CONDITION_ACTIVE_EVENT          = 12,                   // event_id         0           +referenceID       true if event is active
     CONDITION_INSTANCE_DATA         = 13,                   // entry            data        +referenceID       true if data is set in current instance
@@ -54,10 +52,24 @@ enum ConditionType
     CONDITION_MAPID                 = 22,                   // map_id           0           +referenceID       true if in map_id
     CONDITION_AREAID                = 23,                   // area_id          0           +referenceID       true if in area_id
     CONDITION_ITEM_TARGET           = 24,                   // ItemRequiredTargetType,  TargetEntry,    0
-    CONDITION_SPELL                 = 25                    // spell_id         0           +referenceID       true if knows spell
+    CONDITION_SPELL                 = 25,                   // spell_id         0           +referenceID       true if knows spell
+    CONDITION_NOITEM                = 26,                   // item_id          bank        +referenceID       true if player does not have any of the item (if 'bank' is set it searches in bank slots too)
+    CONDITION_LEVEL                 = 27,                   // level            opt         +referenceID       true if player's level is equal to param1 (param2 can modify the statement)
+    CONDITION_QUEST_COMPLETE        = 28,                   // quest_id         0           +referenceID       true if player has quest_id with all objectives complete, but not yet rewarded
+    CONDITION_NEAR_CREATURE         = 29,                   // creature entry   distance    +referenceID       true if there is a creature of entry in range
+    CONDITION_NEAR_GAMEOBJECT       = 30,                   // gameobject entry distance    +referenceID       true if there is a gameobject of entry in range
+    CONDITION_MAX                   = 31                    // MAX
 };
 
-#define MAX_CONDITION                 25                    // maximum value in ConditionType enum
+enum LevelConditionType
+{
+    LVL_COND_EQ = 0,
+    LVL_COND_HIGH = 1,
+    LVL_COND_LOW = 2,
+    LVL_COND_HIGH_EQ = 3,
+    LVL_COND_LOW_EQ = 4,
+    LVL_COND_MAX = 5,
+};
 
 enum ConditionSourceType
 {
@@ -79,10 +91,12 @@ enum ConditionSourceType
     CONDITION_SOURCE_TYPE_GOSSIP_MENU_OPTION             = 15,//DONE
     CONDITION_SOURCE_TYPE_CREATURE_TEMPLATE_VEHICLE      = 16,//DONE
     CONDITION_SOURCE_TYPE_SPELL                          = 17,//DONE
-    CONDITION_SOURCE_TYPE_ITEM_REQUIRED_TARGET           = 18//DONE
+    CONDITION_SOURCE_TYPE_ITEM_REQUIRED_TARGET           = 18,//DONE
+    CONDITION_SOURCE_TYPE_QUEST_ACCEPT                   = 19,//DONE
+    CONDITION_SOURCE_TYPE_QUEST_SHOW_MARK                = 20,//DONE
+    CONDITION_SOURCE_TYPE_VEHICLE_SPELL                  = 21,//DONE
+    CONDITION_SOURCE_TYPE_MAX                            = 22//MAX
 };
-
-#define MAX_CONDITIONSOURCETYPE                            19
 
 struct Condition
 {
@@ -113,13 +127,14 @@ struct Condition
         mScriptId           = 0;
     }
 
-    bool Meets(Player * player, Unit* targetOverride = NULL);
+    bool Meets(Player * player, Unit* invoker = NULL);
     bool isLoaded() { return mConditionType > CONDITION_NONE || mReferenceId; }
 };
 
 typedef std::list<Condition*> ConditionList;
 typedef std::map<uint32, ConditionList > ConditionTypeMap;
-typedef std::map<ConditionSourceType, ConditionTypeMap > ConditionMap;//used for all conditions, except references
+typedef std::map<ConditionSourceType, ConditionTypeMap > ConditionMap;
+typedef std::map<uint32, ConditionTypeMap > VehicleSpellConditionMap;
 
 typedef std::map<uint32, ConditionList > ConditionReferenceMap;//only used for references
 
@@ -135,13 +150,15 @@ class ConditionMgr
         bool isConditionTypeValid(Condition* cond);
         ConditionList GetConditionReferences(uint32 refId);
 
-        bool IsPlayerMeetToConditions(Player* player, ConditionList conditions, Unit* targetOverride = NULL);
+        bool IsPlayerMeetToConditions(Player* player, ConditionList conditions, Unit* invoker = NULL);
         ConditionList GetConditionsForNotGroupedEntry(ConditionSourceType sType, uint32 uEntry);
+        ConditionList GetConditionsForVehicleSpell(uint32 creatureID, uint32 spellID);
 
     protected:
 
-        ConditionMap            m_ConditionMap;
-        ConditionReferenceMap   m_ConditionReferenceMap;
+        ConditionMap                m_ConditionMap;
+        ConditionReferenceMap       m_ConditionReferenceMap;
+        VehicleSpellConditionMap    m_VehicleSpellConditions;
 
     private:
 
@@ -149,7 +166,7 @@ class ConditionMgr
         bool addToLootTemplate(Condition* cond, LootTemplate* loot);
         bool addToGossipMenus(Condition* cond);
         bool addToGossipMenuItems(Condition* cond);
-        bool IsPlayerMeetToConditionList(Player* player,const ConditionList& conditions, Unit* targetOverride = NULL);
+        bool IsPlayerMeetToConditionList(Player* player,const ConditionList& conditions, Unit* invoker = NULL);
 
         bool isGroupable(ConditionSourceType sourceType)
         {
@@ -166,7 +183,8 @@ class ConditionMgr
                     sourceType == CONDITION_SOURCE_TYPE_SKINNING_LOOT_TEMPLATE ||
                     sourceType == CONDITION_SOURCE_TYPE_SPELL_LOOT_TEMPLATE ||
                     sourceType == CONDITION_SOURCE_TYPE_GOSSIP_MENU ||
-                    sourceType == CONDITION_SOURCE_TYPE_GOSSIP_MENU_OPTION);
+                    sourceType == CONDITION_SOURCE_TYPE_GOSSIP_MENU_OPTION ||
+                    sourceType == CONDITION_SOURCE_TYPE_VEHICLE_SPELL);
         }
 
         void Clean(); // free up resources

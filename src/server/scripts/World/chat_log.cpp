@@ -1,19 +1,18 @@
 /*
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "ScriptPCH.h"
@@ -72,6 +71,18 @@ public:
                         player->GetName(), group ? group->GetLeaderName() : "<unknown>", msg.c_str());
                 break;
 
+            case CHAT_MSG_PARTY_LEADER:
+                if (sWorld.getBoolConfig(CONFIG_CHATLOG_PARTY))
+                    sLog.outChat("[PARTY] Leader %s tells group: %s",
+                        player->GetName(), msg.c_str());
+                break;
+
+            case CHAT_MSG_RAID:
+                if (sWorld.getBoolConfig(CONFIG_CHATLOG_RAID))
+                    sLog.outChat("[RAID] Player %s tells raid with leader %s: %s",
+                        player->GetName(), group ? group->GetLeaderName() : "<unknown>", msg.c_str());
+                break;
+
             case CHAT_MSG_RAID_LEADER:
                 if (sWorld.getBoolConfig(CONFIG_CHATLOG_RAID))
                     sLog.outChat("[RAID] Leader player %s tells raid: %s",
@@ -84,28 +95,16 @@ public:
                         player->GetName(), msg.c_str());
                 break;
 
-            case CHAT_MSG_PARTY_LEADER:
-                if (sWorld.getBoolConfig(CONFIG_CHATLOG_PARTY))
-                    sLog.outChat("[PARTY] Leader %s tells group: %s",
-                        player->GetName(), msg.c_str());
-                break;
-
-            case CHAT_MSG_BATTLEGROUND_LEADER:
-                if (sWorld.getBoolConfig(CONFIG_CHATLOG_BGROUND))
-                    sLog.outChat("[RAID] Leader player %s tells battleground: %s",
-                        player->GetName(), msg.c_str());
-                break;
-
-            case CHAT_MSG_RAID:
-                if (sWorld.getBoolConfig(CONFIG_CHATLOG_RAID))
-                    sLog.outChat("[RAID] Player %s tells raid with leader %s: %s",
-                        player->GetName(), group ? group->GetLeaderName() : "<unknown>", msg.c_str());
-                break;
-
             case CHAT_MSG_BATTLEGROUND:
                 if (sWorld.getBoolConfig(CONFIG_CHATLOG_BGROUND))
                     sLog.outChat("[BATTLEGROUND] Player %s tells battleground with leader %s: %s",
                         player->GetName(), group ? group->GetLeaderName() : "<unknown>", msg.c_str());
+                break;
+
+            case CHAT_MSG_BATTLEGROUND_LEADER:
+                if (sWorld.getBoolConfig(CONFIG_CHATLOG_BGROUND))
+                    sLog.outChat("[BATTLEGROUND] Leader player %s tells battleground: %s",
+                        player->GetName(), msg.c_str());
                 break;
         }
     }

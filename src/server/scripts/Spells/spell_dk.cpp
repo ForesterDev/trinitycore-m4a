@@ -39,6 +39,7 @@ public:
 
     class spell_dk_corpse_explosion_SpellScript : public SpellScript
     {
+        PrepareSpellScript(spell_dk_corpse_explosion_SpellScript)
         bool Validate(SpellEntry const * /*spellEntry*/)
         {
             if (!sSpellStore.LookupEntry(DK_SPELL_CORPSE_EXPLOSION_TRIGGERED))
@@ -85,6 +86,7 @@ public:
 
     class spell_dk_runic_power_feed_SpellScript : public SpellScript
     {
+        PrepareSpellScript(spell_dk_runic_power_feed_SpellScript)
         bool Validate(SpellEntry const * /*spellEntry*/)
         {
             if (!sSpellStore.LookupEntry(DK_SPELL_SUMMON_GARGOYLE))
@@ -124,6 +126,7 @@ public:
 
     class spell_dk_scourge_strike_SpellScript : public SpellScript
     {
+        PrepareSpellScript(spell_dk_scourge_strike_SpellScript)
         bool Validate(SpellEntry const * /*spellEntry*/)
         {
             return true;

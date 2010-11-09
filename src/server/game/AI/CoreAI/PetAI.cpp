@@ -1,21 +1,19 @@
 /*
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "gamePCH.h"
@@ -43,6 +41,7 @@ PetAI::PetAI(Creature *c) : CreatureAI(c), i_tracker(TIME_INTERVAL_LOOK)
 {
     m_AllySet.clear();
     UpdateAllies();
+    targetHasCC = false;
 }
 
 void PetAI::EnterEvadeMode()
@@ -55,7 +54,7 @@ bool PetAI::_needToStop()
     if (me->isCharmed() && me->getVictim() == me->GetCharmer())
         return true;
 
-    if (_CheckTargetCC(me->getVictim()) != targetHasCC)
+    if (_CheckTargetCC(me->getVictim()) && !targetHasCC)
         return true;
 
     return !me->canAttack(me->getVictim());
@@ -97,10 +96,11 @@ void PetAI::UpdateAI(const uint32 diff)
     {
         if (_needToStop())
         {
-            sLog.outStaticDebug("Pet AI stoped attacking [guid=%u]", me->GetGUIDLow());
+            sLog.outStaticDebug("Pet AI stopped attacking [guid=%u]", me->GetGUIDLow());
             _stopAttack();
             return;
         }
+        targetHasCC = _CheckTargetCC(me->getVictim());
 
         DoMeleeAttackIfReady();
     }
@@ -108,7 +108,9 @@ void PetAI::UpdateAI(const uint32 diff)
     {
         Unit *nextTarget = SelectNextTarget();
 
-        if (nextTarget)
+        if (me->HasReactState(REACT_PASSIVE))
+            _stopAttack();
+        else if (nextTarget)
             AttackStart(nextTarget);
         else
             HandleReturnMovement();
@@ -299,19 +301,9 @@ void PetAI::AttackStart(Unit *target)
     if (!_CanAttack(target))
         return;
 
-    if (_CheckTargetCC(target))
-        targetHasCC = true;
+    targetHasCC = _CheckTargetCC(target);
 
-    // We can attack, should we chase or not?
-    if (me->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
-        DoAttack(target,true); // FOLLOW, attack with chase
-    else
-    {
-        if (me->GetCharmInfo()->IsCommandAttack())
-            DoAttack(target,true); // STAY or FOLLOW, player clicked "attack" so attack with chase
-        else
-            DoAttack(target,false); // STAY, target in range, attack not clicked so attack without chase
-    }
+    DoAttack(target, true);
 }
 
 Unit *PetAI::SelectNextTarget()
@@ -478,7 +470,7 @@ bool PetAI::_CanAttack(Unit *target)
 
 bool PetAI::_CheckTargetCC(Unit *target)
 {
-    if (me->GetOwnerGUID() && target->HasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, me->GetOwnerGUID()))
+    if (me->GetCharmerOrOwnerGUID() && target->HasNegativeAuraWithAttribute(SPELL_ATTR_BREAKABLE_BY_DAMAGE, me->GetCharmerOrOwnerGUID()))
         return true;
 
     return false;
