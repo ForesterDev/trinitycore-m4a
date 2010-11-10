@@ -24,31 +24,34 @@
  *  - improve script of Rimefang
  */
 
-enum Yells
+namespace
 {
-    SAY_AMBUSH_1                                = -1658050,
-    SAY_AMBUSH_2                                = -1658051,
-    SAY_GAUNTLET_START                          = -1658052,
-    SAY_INTRO_1                                 = -1658053,
-    SAY_INTRO_2                                 = -1658054,
+    enum Yells
+    {
+        SAY_AMBUSH_1                                = -1658050,
+        SAY_AMBUSH_2                                = -1658051,
+        SAY_GAUNTLET_START                          = -1658052,
+        SAY_INTRO_1                                 = -1658053,
+        SAY_INTRO_2                                 = -1658054,
 
-    SAY_AGGRO                                   = -1658055,
-    SAY_SLAY_1                                  = -1658056,
-    SAY_SLAY_2                                  = -1658057,
-    SAY_DEATH                                   = -1658058,
-    SAY_MARK_RIMEFANG_1                         = -1658059,
-    SAY_MARK_RIMEFANG_2                         = -1658060,
-    SAY_DARK_MIGHT_1                            = -1658061,
-    SAY_DARK_MIGHT_2                            = -1658062,
+        SAY_AGGRO                                   = -1658055,
+        SAY_SLAY_1                                  = -1658056,
+        SAY_SLAY_2                                  = -1658057,
+        SAY_DEATH                                   = -1658058,
+        SAY_MARK_RIMEFANG_1                         = -1658059,
+        SAY_MARK_RIMEFANG_2                         = -1658060,
+        SAY_DARK_MIGHT_1                            = -1658061,
+        SAY_DARK_MIGHT_2                            = -1658062,
 
-    SAY_GORKUN_OUTRO_1                          = -1658063,
-    SAY_GORKUN_OUTRO_2                          = -1658064,
-    SAY_JAYNA_OUTRO_3                           = -1658065,
-    SAY_SYLVANAS_OUTRO_3                        = -1658066,
-    SAY_JAYNA_OUTRO_4                           = -1658067,
-    SAY_SYLVANAS_OUTRO_4                        = -1658068,
-    SAY_JAYNA_OUTRO_5                           = -1658069,
-};
+        SAY_GORKUN_OUTRO_1                          = -1658063,
+        SAY_GORKUN_OUTRO_2                          = -1658064,
+        SAY_JAYNA_OUTRO_3                           = -1658065,
+        SAY_SYLVANAS_OUTRO_3                        = -1658066,
+        SAY_JAYNA_OUTRO_4                           = -1658067,
+        SAY_SYLVANAS_OUTRO_4                        = -1658068,
+        SAY_JAYNA_OUTRO_5                           = -1658069,
+    };
+}
 
 enum Spells
 {
