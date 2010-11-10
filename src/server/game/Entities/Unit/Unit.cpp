@@ -15707,8 +15707,8 @@ void Unit::RemoveCharmedBy(Unit *charmer)
         if (type != CHARM_TYPE_VEHICLE)//Vehicles' AI is never modified
         {
             this->ToCreature()->AIM_Initialize();
-
-            if (this->ToCreature()->AI() && charmer && charmer->isAlive())
+            ASSERT(this->ToCreature()->AI());
+            if (charmer && charmer->isAlive())
                 this->ToCreature()->AI()->AttackStart(charmer);
         }
     }
