@@ -934,7 +934,11 @@ bool Map::CreatureCellRelocation(Creature *c, Cell new_cell)
 
         RemoveFromGrid(c,getNGrid(old_cell.GridX(), old_cell.GridY()),old_cell);
         EnsureGridCreated(GridPair(new_cell.GridX(), new_cell.GridY()));
-        AddToGrid(c,getNGrid(new_cell.GridX(), new_cell.GridY()),new_cell);
+        {
+            auto grid = getNGrid(new_cell.GridX(), new_cell.GridY());
+            ASSERT(grid);
+            AddToGrid(c, std::move(grid), new_cell);
+        }
 
         return true;
     }
