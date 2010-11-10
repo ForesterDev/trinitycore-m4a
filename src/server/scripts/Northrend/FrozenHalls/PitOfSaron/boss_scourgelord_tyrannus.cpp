@@ -319,18 +319,21 @@ class spell_tyrannus_overlord_brand : public SpellScriptLoader
 
             void OnApply(AuraEffect const* /*aurEff*/, AuraApplication const* aurApp, AuraEffectHandleModes /*mode*/)
             {
+                affected = false;
                 if (aurApp->GetTarget()->GetTypeId() != TYPEID_PLAYER)
                     return;
-
                 oldAI = aurApp->GetTarget()->GetAI();
                 aurApp->GetTarget()->SetAI(new player_overlord_brandAI(aurApp->GetTarget()->ToPlayer()));
                 aurApp->GetTarget()->GetAI()->SetGUID(GetCasterGUID());
                 oldAIState = aurApp->GetTarget()->IsAIEnabled;
                 aurApp->GetTarget()->IsAIEnabled = true;
+                affected = true;
             }
 
             void OnRemove(AuraEffect const* /*aurEff*/, AuraApplication const* aurApp, AuraEffectHandleModes /*mode*/)
             {
+                if (!affected)
+                    return;
                 delete aurApp->GetTarget()->GetAI();
                 aurApp->GetTarget()->SetAI(oldAI);
                 aurApp->GetTarget()->IsAIEnabled = oldAIState;
@@ -342,6 +345,7 @@ class spell_tyrannus_overlord_brand : public SpellScriptLoader
                 OnEffectRemove += AuraEffectRemoveFn(spell_tyrannus_overlord_brand_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
             }
 
+            bool affected;
             UnitAI* oldAI;
             bool oldAIState;
         };
