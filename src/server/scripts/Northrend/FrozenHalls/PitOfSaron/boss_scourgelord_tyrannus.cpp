@@ -282,30 +282,39 @@ class player_overlord_brandAI : public PlayerAI
     public:
         player_overlord_brandAI(Player* pPlayer) : PlayerAI(pPlayer)
         {
-            tyrannus = NULL;
+            tyrannus_guid = uint64();
         }
 
         void SetGUID(const uint64& guid, int32 /*type*/)
         {
-            tyrannus = ObjectAccessor::GetCreature(*me, guid);
-            if (!tyrannus)
-                me->IsAIEnabled = false;
+            tyrannus_guid = guid;
         }
 
         void DamageDealt(Unit* /*victim*/, uint32& damage, DamageEffectType /*damageType*/)
         {
+            auto tyrannus = this->tyrannus();
+            if (!tyrannus)
+                return;
             me->CastCustomSpell(SPELL_OVERLORD_BRAND_DAMAGE, SPELLVALUE_BASE_POINT0, damage, tyrannus->getVictim(), true, NULL, NULL, tyrannus->GetGUID());
         }
 
         void HealDone(Unit* /*target*/, uint32& addHealth)
         {
+            auto tyrannus = this->tyrannus();
+            if (!tyrannus)
+                return;
             me->CastCustomSpell(SPELL_OVERLORD_BRAND_HEAL, SPELLVALUE_BASE_POINT0, int32(addHealth*5.5f), tyrannus, true, NULL, NULL, tyrannus->GetGUID());
         }
 
         void UpdateAI(const uint32 diff) { }
 
     private:
-        Creature* tyrannus;
+        Creature *tyrannus()
+        {
+            return ObjectAccessor::GetCreature(*me, tyrannus_guid);
+        }
+
+        uint64 tyrannus_guid;
 };
 
 class spell_tyrannus_overlord_brand : public SpellScriptLoader
@@ -317,26 +326,41 @@ class spell_tyrannus_overlord_brand : public SpellScriptLoader
         {
             PrepareAuraScript(spell_tyrannus_overlord_brand_AuraScript);
 
+        public:
+            spell_tyrannus_overlord_brand_AuraScript()
+                : affected(nullptr)
+            {
+            }
+
+            ~spell_tyrannus_overlord_brand_AuraScript()
+            {
+                if (affected)
+                    remove();
+            }
+
             void OnApply(AuraEffect const* /*aurEff*/, AuraApplication const* aurApp, AuraEffectHandleModes /*mode*/)
             {
-                affected = false;
-                if (aurApp->GetTarget()->GetTypeId() != TYPEID_PLAYER)
+                if (affected)
+                    remove();
+                auto p = aurApp->GetTarget()->ToPlayer();
+                if (!p)
                     return;
-                oldAI = aurApp->GetTarget()->GetAI();
-                aurApp->GetTarget()->SetAI(new player_overlord_brandAI(aurApp->GetTarget()->ToPlayer()));
-                aurApp->GetTarget()->GetAI()->SetGUID(GetCasterGUID());
-                oldAIState = aurApp->GetTarget()->IsAIEnabled;
-                aurApp->GetTarget()->IsAIEnabled = true;
-                affected = true;
+                oldAI = p->GetAI();
+                p->SetAI(new player_overlord_brandAI(p));
+                p->GetAI()->SetGUID(GetCasterGUID());
+                oldAIState = p->IsAIEnabled;
+                p->IsAIEnabled = true;
+                affected = p;
             }
 
             void OnRemove(AuraEffect const* /*aurEff*/, AuraApplication const* aurApp, AuraEffectHandleModes /*mode*/)
             {
                 if (!affected)
                     return;
-                delete aurApp->GetTarget()->GetAI();
-                aurApp->GetTarget()->SetAI(oldAI);
-                aurApp->GetTarget()->IsAIEnabled = oldAIState;
+                auto p = aurApp->GetTarget()->ToPlayer();
+                if (!(p == affected))
+                    return;
+                remove();
             }
 
             void Register()
@@ -345,7 +369,15 @@ class spell_tyrannus_overlord_brand : public SpellScriptLoader
                 OnEffectRemove += AuraEffectRemoveFn(spell_tyrannus_overlord_brand_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
             }
 
-            bool affected;
+            void remove()
+            {
+                delete affected->GetAI();
+                affected->SetAI(oldAI);
+                affected->IsAIEnabled = oldAIState;
+                affected = nullptr;
+            }
+
+            Player *affected;
             UnitAI* oldAI;
             bool oldAIState;
         };
