@@ -1799,7 +1799,9 @@ uint8 Player::chatTag() const
     // 0x4 - gm
     // 0x2 - dnd
     // 0x1 - afk
-    if (isGMChat())
+    if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DEVELOPER))
+        return 0x10;
+    else if (isGMChat())
         return 4;
     else if (isDND())
         return 3;
@@ -16541,7 +16543,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     m_resetTalentsTime = time_t(fields[25].GetUInt64());
 
     // reserve some flags
-    uint32 old_safe_flags = GetUInt32Value(PLAYER_FLAGS) & (PLAYER_FLAGS_HIDE_CLOAK | PLAYER_FLAGS_HIDE_HELM);
+    uint32 old_safe_flags = GetUInt32Value(PLAYER_FLAGS) & (PLAYER_FLAGS_HIDE_CLOAK
+            | PLAYER_FLAGS_HIDE_HELM | PLAYER_FLAGS_DEVELOPER);
 
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM))
         SetUInt32Value(PLAYER_FLAGS, 0 | old_safe_flags);
