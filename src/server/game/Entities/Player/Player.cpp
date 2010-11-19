@@ -69,6 +69,8 @@
 #include "WeatherMgr.h"
 #include <cmath>
 
+using std::ostringstream;
+
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
 #define PLAYER_SKILL_INDEX(x)       (PLAYER_SKILL_INFO_1_1 + ((x)*3))
@@ -250,7 +252,7 @@ std::string PlayerTaxi::SaveTaxiDestinationsToString()
     if (m_TaxiDestinations.empty())
         return "";
 
-    std::ostringstream ss;
+    ostringstream ss;
 
     for (size_t i=0; i < m_TaxiDestinations.size(); ++i)
         ss << m_TaxiDestinations[i] << " ";
@@ -271,7 +273,7 @@ uint32 PlayerTaxi::GetCurrentTaxiPath() const
     return path;
 }
 
-std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi)
+ostringstream &operator<<(ostringstream &ss, const PlayerTaxi &taxi)
 {
     ss << "'";
     for (uint8 i = 0; i < TaxiMaskSize; ++i)
@@ -3221,11 +3223,16 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
     if (!spellInfo)
     {
-        // do character spell book cleanup (all characters)
+        // do character spell book cleanup
         if (!IsInWorld() && !learning)                       // spell load case
         {
-            sLog.outError("Player::addSpell: Non-existed in SpellStore spell #%u request, deleting for all characters in `character_spell`.",spell_id);
-            CharacterDatabase.PExecute("DELETE FROM character_spell WHERE spell = '%u'",spell_id);
+            sLog.outError("Player::addSpell: Non-existed in SpellStore spell #%u request, "
+                    "deleting.", spell_id);
+            ostringstream s;
+            s << "DELETE FROM character_spell WHERE guid="
+                << static_cast<unsigned long>(GetGUIDLow()) << " AND spell = '"
+                << static_cast<unsigned long>(spell_id) << '\'';
+            CharacterDatabase.Execute(s.str().c_str());
         }
         else
             sLog.outError("Player::addSpell: Non-existed in SpellStore spell #%u request.",spell_id);
@@ -3235,11 +3242,16 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
 
     if (!SpellMgr::IsSpellValid(spellInfo,this,false))
     {
-        // do character spell book cleanup (all characters)
+        // do character spell book cleanup
         if (!IsInWorld() && !learning)                       // spell load case
         {
-            sLog.outError("Player::addSpell: Broken spell #%u learning not allowed, deleting for all characters in `character_spell`.",spell_id);
-            CharacterDatabase.PExecute("DELETE FROM character_spell WHERE spell = '%u'",spell_id);
+            sLog.outError("Player::addSpell: Broken spell #%u learning not allowed, "
+                    "deleting.", spell_id);
+            ostringstream s;
+            s << "DELETE FROM character_spell WHERE guid="
+                << static_cast<unsigned long>(GetGUIDLow()) << " AND spell = '"
+                << static_cast<unsigned long>(spell_id) << '\'';
+            CharacterDatabase.Execute(s.str().c_str());
         }
         else
             sLog.outError("Player::addSpell: Broken spell #%u learning not allowed.",spell_id);
@@ -4019,7 +4031,7 @@ void Player::_SaveSpellCooldowns(SQLTransaction& trans)
     time_t infTime = curTime + infinityCooldownDelayCheck;
 
     bool first_round = true;
-    std::ostringstream ss;
+    ostringstream ss;
 
     // remove outdated and save active
     for (SpellCooldowns::iterator itr = m_spellCooldowns.begin(); itr != m_spellCooldowns.end();)
@@ -11657,7 +11669,7 @@ Item* Player::StoreNewItem(ItemPosCountVec const& dest, uint32 item, bool update
             m_itemSoulboundTradeable.push_back(pItem);
 
             // save data
-            std::ostringstream ss;
+            ostringstream ss;
             for (AllowedLooterSet::iterator itr = allowedLooters->begin(); itr != allowedLooters->end(); ++itr)
                 ss << *itr << " ";
 
@@ -17949,7 +17961,7 @@ void Player::SaveToDB()
     std::string sql_name = m_name;
     CharacterDatabase.escape_string(sql_name);
 
-    std::ostringstream ss;
+    ostringstream ss;
     ss << "REPLACE INTO characters (guid,account,name,race,class,gender,level,xp,money,playerBytes,playerBytes2,playerFlags,"
         "map, instance_id, instance_mode_mask, position_x, position_y, position_z, orientation, "
         "taximask, online, cinematic, "
@@ -18505,7 +18517,7 @@ void Player::_SaveStats(SQLTransaction& trans)
         return;
 
     trans->PAppend("DELETE FROM character_stats WHERE guid = '%u'", GetGUIDLow());
-    std::ostringstream ss;
+    ostringstream ss;
     ss << "INSERT INTO character_stats (guid, maxhealth, maxpower1, maxpower2, maxpower3, maxpower4, maxpower5, maxpower6, maxpower7, "
         "strength, agility, stamina, intellect, spirit, armor, resHoly, resFire, resNature, resFrost, resShadow, resArcane, "
         "blockPct, dodgePct, parryPct, critPct, rangedCritPct, spellCritPct, attackPower, rangedAttackPower, spellPower) VALUES ("
@@ -18600,7 +18612,7 @@ void Player::SendAttackSwingNotInRange()
 
 void Player::SavePositionInDB(uint32 mapid, float x,float y,float z,float o,uint32 zone,uint64 guid)
 {
-    std::ostringstream ss;
+    ostringstream ss;
     ss << "UPDATE characters SET position_x='"<<x<<"',position_y='"<<y
         << "',position_z='"<<z<<"',orientation='"<<o<<"',map='"<<mapid
         << "',zone='"<<zone<<"',trans_x='0',trans_y='0',trans_z='0',"
