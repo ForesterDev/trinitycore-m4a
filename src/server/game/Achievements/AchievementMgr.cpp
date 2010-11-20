@@ -2269,12 +2269,7 @@ void AchievementGlobalMgr::LoadCompletedAchievements()
 
         uint32 achievement_id = fields[0].GetUInt32();
         if (!sAchievementStore.LookupEntry(achievement_id))
-        {
-            // we will remove not existed achievement for all characters
-            sLog.outError("Non-existing achievement %u data removed from table `character_achievement`.",achievement_id);
-            CharacterDatabase.PExecute("DELETE FROM character_achievement WHERE achievement = %u",achievement_id);
             continue;
-        }
 
         m_allCompletedAchievements.insert(achievement_id);
     } while (result->NextRow());
