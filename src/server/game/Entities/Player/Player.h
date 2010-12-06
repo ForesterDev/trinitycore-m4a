@@ -488,7 +488,8 @@ enum PlayerExtraFlags
     PLAYER_EXTRA_HAS_310_FLYER      = 0x0040,               // Marks if player already has 310% speed flying mount
 
     // other states
-    PLAYER_EXTRA_PVP_DEATH          = 0x0100                // store PvP death status until corpse creating.
+    PLAYER_EXTRA_PVP_DEATH = 0x0100,   // store PvP death status until corpse creating.
+    PLAYER_EXTRA_hide_armor = 0x80000000,
 };
 
 // 2^n values

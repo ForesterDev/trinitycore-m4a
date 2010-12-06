@@ -4952,14 +4952,15 @@ void Player::CreateCorpse()
     uint32 _cfi;
     for (uint8 i = 0; i < EQUIPMENT_SLOT_END; i++)
     {
-        if (m_items[i])
-        {
-            iDisplayID = m_items[i]->GetProto()->DisplayInfoID;
-            iIventoryType = m_items[i]->GetProto()->InventoryType;
+        if (GetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + 2 * i))
+            if (m_items[i])
+            {
+                iDisplayID = m_items[i]->GetProto()->DisplayInfoID;
+                iIventoryType = m_items[i]->GetProto()->InventoryType;
 
-            _cfi =  iDisplayID | (iIventoryType << 24);
-            corpse->SetUInt32Value(CORPSE_FIELD_ITEM + i, _cfi);
-        }
+                _cfi =  iDisplayID | (iIventoryType << 24);
+                corpse->SetUInt32Value(CORPSE_FIELD_ITEM + i, _cfi);
+            }
     }
 
     // we do not need to save corpses for BG/arenas
@@ -11959,7 +11960,10 @@ void Player::QuickEquipItem(uint16 pos, Item *pItem)
 
 void Player::SetVisibleItemSlot(uint8 slot, Item *pItem)
 {
-    if (pItem)
+    if (!(m_ExtraFlags & PLAYER_EXTRA_hide_armor
+                && !(slot == EQUIPMENT_SLOT_MAINHAND
+                    || slot == EQUIPMENT_SLOT_OFFHAND
+                    || slot == EQUIPMENT_SLOT_RANGED)) && pItem)
     {
         SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + (slot * 2), pItem->GetEntry());
         SetUInt16Value(PLAYER_VISIBLE_ITEM_1_ENCHANTMENT + (slot * 2), 0, pItem->GetEnchantmentId(PERM_ENCHANTMENT_SLOT));
@@ -16563,7 +16567,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     m_taxi.LoadTaxiMask(fields[17].GetCString());            // must be before InitTaxiNodesForLevel
 
-    uint32 extraflags = fields[31].GetUInt32();
+    m_ExtraFlags = fields[31].GetUInt32();
 
     m_stableSlots = fields[32].GetUInt8();
     if (m_stableSlots > MAX_PET_STABLES)
@@ -16729,7 +16733,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
             case 0:                      break;             // disable
             case 1: SetGameMaster(true); break;             // enable
             case 2:                                         // save state
-                if (extraflags & PLAYER_EXTRA_GM_ON)
+                if (m_ExtraFlags & PLAYER_EXTRA_GM_ON)
                     SetGameMaster(true);
                 break;
         }
@@ -16740,7 +16744,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
             case 0: SetGMVisible(false); break;             // invisible
             case 1:                      break;             // visible
             case 2:                                         // save state
-                if (extraflags & PLAYER_EXTRA_GM_INVISIBLE)
+                if (m_ExtraFlags & PLAYER_EXTRA_GM_INVISIBLE)
                     SetGMVisible(false);
                 break;
         }
@@ -16751,7 +16755,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
             case 0:                        break;           // disable
             case 1: SetAcceptTicket(true); break;           // enable
             case 2:                                         // save state
-            if (extraflags & PLAYER_EXTRA_GM_ACCEPT_TICKETS)
+            if (m_ExtraFlags & PLAYER_EXTRA_GM_ACCEPT_TICKETS)
                 SetAcceptTicket(true);
             break;
         }*/
@@ -16762,7 +16766,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
             case 0:                  break;                 // disable
             case 1: SetGMChat(true); break;                 // enable
             case 2:                                         // save state
-                if (extraflags & PLAYER_EXTRA_GM_CHAT)
+                if (m_ExtraFlags & PLAYER_EXTRA_GM_CHAT)
                     SetGMChat(true);
                 break;
         }
@@ -16773,7 +16777,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
             case 0:                          break;         // disable
             case 1: SetAcceptWhispers(true); break;         // enable
             case 2:                                         // save state
-                if (extraflags & PLAYER_EXTRA_ACCEPT_WHISPERS)
+                if (m_ExtraFlags & PLAYER_EXTRA_ACCEPT_WHISPERS)
                     SetAcceptWhispers(true);
                 break;
         }
