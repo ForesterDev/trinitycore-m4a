@@ -1065,7 +1065,7 @@ void AuraEffect::Update(uint32 diff, Unit * caster)
                 {
                     auto &t = *targetItr;
                     const auto &m = m_base->GetApplicationMap();
-                    auto &a = m.find(t->GetGUID());
+                    const auto &a = m.find(t->GetGUID());
                     if (a != m.end())
                         if (a->second->HasEffect(m_effIndex))
                             PeriodicTick(t, caster);
