@@ -1062,7 +1062,14 @@ void AuraEffect::Update(uint32 diff, Unit * caster)
             if (!caster || !caster->hasUnitState(UNIT_STAT_ISOLATED))
             {
                 for (UnitList::iterator targetItr = effectTargets.begin(); targetItr != effectTargets.end(); ++targetItr)
-                    PeriodicTick(*targetItr, caster);
+                {
+                    auto &t = *targetItr;
+                    const auto &m = m_base->GetApplicationMap();
+                    auto &a = m.find(t->GetGUID());
+                    if (a != m.end())
+                        if (a->second->HasEffect(m_effIndex))
+                            PeriodicTick(t, caster);
+                }
             }
         }
     }
