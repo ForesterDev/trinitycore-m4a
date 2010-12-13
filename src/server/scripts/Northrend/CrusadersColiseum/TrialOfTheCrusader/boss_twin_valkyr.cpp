@@ -31,20 +31,23 @@ EndScriptData */
 #include "ScriptPCH.h"
 #include "trial_of_the_crusader.h"
 
-enum Yells
+namespace
 {
-    SAY_AGGRO           = -1649040,
-    SAY_DEATH           = -1649041,
-    SAY_BERSERK         = -1649042,
-    EMOTE_SHIELD        = -1649043,
-    SAY_SHIELD          = -1649044,
-    SAY_KILL1           = -1649045,
-    SAY_KILL2           = -1649046,
-    EMOTE_LIGHT_VORTEX  = -1649047,
-    SAY_LIGHT_VORTEX    = -1649048,
-    EMOTE_DARK_VORTEX   = -1649049,
-    SAY_DARK_VORTEX     = -1649050,
-};
+    enum Yells
+    {
+        SAY_AGGRO           = -1649040,
+        SAY_DEATH           = -1649041,
+        SAY_BERSERK         = -1649042,
+        EMOTE_SHIELD        = -1649043,
+        SAY_SHIELD          = -1649044,
+        SAY_KILL1           = -1649045,
+        SAY_KILL2           = -1649046,
+        EMOTE_LIGHT_VORTEX  = -1649047,
+        SAY_LIGHT_VORTEX    = -1649048,
+        EMOTE_DARK_VORTEX   = -1649049,
+        SAY_DARK_VORTEX     = -1649050,
+    };
+}
 
 enum Equipment
 {
