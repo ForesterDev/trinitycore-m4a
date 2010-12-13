@@ -3006,7 +3006,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const * triggere
         m_needComboPoints = false;
 
     SpellCastResult result = CheckCast(true);
-    if (result != SPELL_CAST_OK && !IsAutoRepeat())          //always cast autorepeat dummy for triggering
+    if (result != SPELL_CAST_OK)
     {
         if (triggeredByAura && !triggeredByAura->GetBase()->IsPassive())
         {
