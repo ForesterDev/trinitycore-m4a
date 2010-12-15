@@ -1413,6 +1413,7 @@ void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
 
     recv_data >> time;                                      // time in m.sec.
     recv_data >> mapid;
+    recv_data.read_skip<std::uint64_t>();
     recv_data >> PositionX;
     recv_data >> PositionY;
     recv_data >> PositionZ;
