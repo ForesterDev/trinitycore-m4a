@@ -2369,16 +2369,36 @@ void AuraEffect::TriggerSpell(Unit * target, Unit * caster) const
             case 65920:
             case 65922:
             case 65923:
-                if (caster->HasAura(66193))
                 {
-                    if (Unit *permafrostCaster = caster->GetAura(66193)->GetCaster())
-                        if (Creature *permafrostCasterAsCreature = permafrostCaster->ToCreature())
-                            permafrostCasterAsCreature->ForcedDespawn(3000);
+                    int id;
+                    switch (caster->GetMap()->GetDifficulty())
+                    {
+                    case RAID_DIFFICULTY_10MAN_NORMAL:
+                        id = 66193 /* Permafrost */;
+                        break;
+                    case RAID_DIFFICULTY_25MAN_NORMAL:
+                        id = 67855 /* Permafrost */;
+                        break;
+                    case RAID_DIFFICULTY_10MAN_HEROIC:
+                        id = 67856 /* Permafrost */;
+                        break;
+                    case RAID_DIFFICULTY_25MAN_HEROIC:
+                        id = 67857 /* Permafrost */;
+                        break;
+                    default:
+                        ASSERT(false);
+                    }
+                    if (caster->HasAura(id))
+                    {
+                        if (Unit *permafrostCaster = caster->GetAura(id)->GetCaster())
+                            if (Creature *permafrostCasterAsCreature = permafrostCaster->ToCreature())
+                                permafrostCasterAsCreature->ForcedDespawn(3000);
 
-                    caster->CastSpell(caster, 66181, false);
-                    caster->RemoveAllAuras();
-                    if (Creature *casterAsCreature = caster->ToCreature())
-                        casterAsCreature->DisappearAndDie();
+                        caster->CastSpell(caster, 66181, false);
+                        caster->RemoveAllAuras();
+                        if (Creature *casterAsCreature = caster->ToCreature())
+                            casterAsCreature->DisappearAndDie();
+                    }
                 }
                 break;
             // Mana Tide
