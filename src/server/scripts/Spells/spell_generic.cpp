@@ -292,7 +292,7 @@ public:
             if (Unit* pTarget = aurApp->GetTarget())
                 if (Unit* pCaster = GetCaster())
                 {
-                    int32 lifeLeeched = pTarget->CountPctFromMaxHealth(aurEff->GetAmount());
+                    int32 lifeLeeched = (pTarget->GetHealth() * aurEff->GetAmount() + 50) / 100;
                     if (lifeLeeched < 250)
                         lifeLeeched = 250;
                     // Damage
