@@ -540,7 +540,8 @@ public:
                 }
                 else
                 {
-                    if (!me->HasAura(SPELL_PERMAFROST))
+                    if (!me->HasAura(RAID_MODE<int>(SPELL_PERMAFROST, 67855 /* Permafrost */,
+                                67856 /* Permafrost */, 67857 /* Permafrost */)))
                     {
                         if (!me->IsNonMeleeSpellCasted(false, true, true))
                         {
