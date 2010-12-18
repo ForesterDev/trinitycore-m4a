@@ -389,15 +389,23 @@ struct boss_twin_baseAI : public ScriptedAI
 
         if (m_uiSpikeTimer <= uiDiff)
         {
-            DoCastVictim(m_uiSpikeSpellId);
-            m_uiSpikeTimer = 20*IN_MILLISECONDS;
+            m_uiTouchTimer = 0;
+            if (!me->IsNonMeleeSpellCasted(false, false, true))
+            {
+                DoCastVictim(m_uiSpikeSpellId);
+                m_uiSpikeTimer = 20*IN_MILLISECONDS;
+            }
         } m_uiSpikeTimer -= uiDiff;
 
         if (IsHeroic() && m_uiTouchTimer <= uiDiff)
         {
-            me->CastCustomSpell(m_uiTouchSpellId, SPELLVALUE_MAX_TARGETS, 1, nullptr, false)
-                ;
-            m_uiTouchTimer = urand(10,15)*IN_MILLISECONDS;
+            m_uiTouchTimer = 0;
+            if (!me->IsNonMeleeSpellCasted(false, false, true))
+            {
+                me->CastCustomSpell(m_uiTouchSpellId, SPELLVALUE_MAX_TARGETS, 1, nullptr, false)
+                    ;
+                m_uiTouchTimer = urand(10,15)*IN_MILLISECONDS;
+            }
         } m_uiTouchTimer -= uiDiff;
 
         if (m_uiColorballsTimer <= uiDiff)
