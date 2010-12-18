@@ -60,44 +60,47 @@ enum Equipment
     EQUIP_DONE           = EQUIP_NO_CHANGE,
 };
 
-enum Summons
+namespace
 {
-    NPC_DARK_ESSENCE     = 34567,
-    NPC_LIGHT_ESSENCE    = 34568,
+    enum Summons
+    {
+        NPC_DARK_ESSENCE     = 34567,
+        NPC_LIGHT_ESSENCE    = 34568,
 
-    NPC_UNLEASHED_DARK   = 34628,
-    NPC_UNLEASHED_LIGHT  = 34630,
-};
+        NPC_UNLEASHED_DARK   = 34628,
+        NPC_UNLEASHED_LIGHT  = 34630,
+    };
 
-enum BossSpells
-{
-    SPELL_LIGHT_TWIN_SPIKE      = 66075,
-    SPELL_LIGHT_SURGE           = 65766,
-    SPELL_LIGHT_SHIELD          = 65858,
-    SPELL_LIGHT_TWIN_PACT       = 65876,
-    SPELL_LIGHT_VORTEX          = 66046,
-    SPELL_LIGHT_TOUCH           = 67297,
+    enum BossSpells
+    {
+        SPELL_LIGHT_TWIN_SPIKE      = 66075,
+        SPELL_LIGHT_SURGE           = 65766,
+        SPELL_LIGHT_SHIELD          = 65858,
+        SPELL_LIGHT_TWIN_PACT       = 65876,
+        SPELL_LIGHT_VORTEX          = 66046,
+        SPELL_LIGHT_TOUCH           = 67297,
 
-    SPELL_DARK_TWIN_SPIKE       = 66069,
-    SPELL_DARK_SURGE            = 65768,
-    SPELL_DARK_SHIELD           = 65874,
-    SPELL_DARK_TWIN_PACT        = 65875,
-    SPELL_DARK_VORTEX           = 66058,
-    SPELL_DARK_TOUCH            = 67282,
+        SPELL_DARK_TWIN_SPIKE       = 66069,
+        SPELL_DARK_SURGE            = 65768,
+        SPELL_DARK_SHIELD           = 65874,
+        SPELL_DARK_TWIN_PACT        = 65875,
+        SPELL_DARK_VORTEX           = 66058,
+        SPELL_DARK_TOUCH            = 67282,
 
-    SPELL_TWIN_POWER            = 65916,
-    SPELL_LIGHT_ESSENCE         = 65686,
-    SPELL_DARK_ESSENCE          = 65684,
-    SPELL_BERSERK               = 64238,
-    SPELL_NONE                  = 0,
+        SPELL_TWIN_POWER            = 65916,
+        SPELL_LIGHT_ESSENCE         = 65686,
+        SPELL_DARK_ESSENCE          = 65684,
+        SPELL_BERSERK               = 64238,
+        SPELL_NONE                  = 0,
 
-    SPELL_EMPOWERED_DARK        = 67215,
-    SPELL_EMPOWERED_LIGHT       = 67218,
+        SPELL_EMPOWERED_DARK        = 67215,
+        SPELL_EMPOWERED_LIGHT       = 67218,
 
-    SPELL_UNLEASHED_DARK        = 65808,
-    SPELL_UNLEASHED_LIGHT       = 65795,
-    //PowerUp 67604
-};
+        SPELL_UNLEASHED_DARK        = 65808,
+        SPELL_UNLEASHED_LIGHT       = 65795,
+        //PowerUp 67604
+    };
+}
 
 enum Actions
 {
