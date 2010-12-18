@@ -32,6 +32,7 @@ EndScriptData */
 // FrostSph - often they are casting Permafrost a little above the ground
 
 #include "ScriptPCH.h"
+#include <Spell.h>
 #include "trial_of_the_crusader.h"
 
 enum Yells
@@ -529,6 +530,7 @@ public:
 
             if ((m_uiSubmergeTimer <= uiDiff) && HealthBelowPct(80))
             {
+                m_uiSubmergeTimer = 0;
                 bool ok = false;
                 if (me->HasAura(SPELL_SUBMERGE_EFFECT))
                 {
@@ -543,18 +545,24 @@ public:
                     if (!me->HasAura(RAID_MODE<int>(SPELL_PERMAFROST, 67855 /* Permafrost */,
                                 67856 /* Permafrost */, 67857 /* Permafrost */)))
                     {
+                        std::unique_ptr<Spell> s(new Spell
+                                (me, sSpellStore.LookupEntry(SPELL_SUBMERGE_EFFECT), false));
                         if (!me->IsNonMeleeSpellCasted(false, true, true))
-                        {
-                            DoCast(me,SPELL_SUBMERGE_EFFECT);
-                            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_OOC_NOT_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
-                            me->CombatStop();
-                            ok = true;
-                        }
+                            if (s->CheckCast(true) == SPELL_CAST_OK)
+                            {
+                                SpellCastTargets t;
+                                s->prepare(&t);
+                                s.release();
+                                me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_OOC_NOT_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
+                                me->CombatStop();
+                                ok = true;
+                            }
                     }
                     else
                         ok = true;
                 }
-                m_uiSubmergeTimer = ok ? 20 * IN_MILLISECONDS : 0;
+                if (ok)
+                    m_uiSubmergeTimer = 20 * IN_MILLISECONDS;
             } else m_uiSubmergeTimer -= uiDiff;
 
             DoMeleeAttackIfReady();
