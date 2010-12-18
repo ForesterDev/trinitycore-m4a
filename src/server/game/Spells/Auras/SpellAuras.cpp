@@ -36,6 +36,8 @@
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 
+using Trinity::UnitListSearcher;
+
 AuraApplication::AuraApplication(Unit * target, Unit * caster, Aura * aura, uint8 effMask):
 m_target(target), m_base(aura), m_slot(MAX_AURAS), m_flags(AFLAG_NONE),
 m_effectsToApply(effMask), m_removeMode(AURA_REMOVE_NONE), m_needClientUpdate(false)
@@ -1839,14 +1841,16 @@ void UnitAura::FillTargetMap(std::map<Unit *, uint8> & targets, Unit * caster)
                     {
                         targetList.push_back(GetUnitOwner());
                         Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius);
-                        Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(GetUnitOwner(), targetList, u_check);
+                        UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck>
+                            searcher(GetUnitOwner(), targetList, u_check);
                         GetUnitOwner()->VisitNearbyObject(radius, searcher);
                         break;
                     }
                     case SPELL_EFFECT_APPLY_AREA_AURA_ENEMY:
                     {
                         Trinity::AnyAoETargetUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius); // No GetCharmer in searcher
-                        Trinity::UnitListSearcher<Trinity::AnyAoETargetUnitInObjectRangeCheck> searcher(GetUnitOwner(), targetList, u_check);
+                        UnitListSearcher<Trinity::AnyAoETargetUnitInObjectRangeCheck>
+                            searcher(GetUnitOwner(), targetList, u_check);
                         GetUnitOwner()->VisitNearbyObject(radius, searcher);
                         break;
                     }
@@ -1904,16 +1908,36 @@ void DynObjAura::FillTargetMap(std::map<Unit *, uint8> & targets, Unit * /*caste
             || GetSpellProto()->EffectImplicitTargetB[effIndex] == TARGET_UNIT_AREA_ALLY_DST)
         {
             Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(GetDynobjOwner(), dynObjOwnerCaster, radius);
-            Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(GetDynobjOwner(), targetList, u_check);
+            UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck>
+                searcher(GetDynobjOwner(), targetList, u_check);
             GetDynobjOwner()->VisitNearbyObject(radius, searcher);
         }
         else
         {
             Trinity::AnyAoETargetUnitInObjectRangeCheck u_check(GetDynobjOwner(), dynObjOwnerCaster, radius);
-            Trinity::UnitListSearcher<Trinity::AnyAoETargetUnitInObjectRangeCheck> searcher(GetDynobjOwner(), targetList, u_check);
+            UnitListSearcher<Trinity::AnyAoETargetUnitInObjectRangeCheck>
+                searcher(GetDynobjOwner(), targetList, u_check);
             GetDynobjOwner()->VisitNearbyObject(radius, searcher);
         }
-
+        if (GetSpellProto()->EffectImplicitTargetB[effIndex] == TARGET_UNIT_AREA_ENTRY_DST)
+        {
+            int e = 0;
+            switch (GetSpellProto()->Id)
+            {
+            case 66193 /* Permafrost */:
+            case 67855 /* Permafrost */:
+            case 67856 /* Permafrost */:
+            case 67857 /* Permafrost */:
+                e = 34660 /* Anub'arak */;
+                break;
+            }
+            if (e)
+            {
+                Trinity::AllCreaturesOfEntryInRange c(GetDynobjOwner(), e, radius);
+                UnitListSearcher<decltype(c)> s(GetDynobjOwner(), targetList, c);
+                GetDynobjOwner()->VisitNearbyObject(radius, s);
+            }
+        }
         for (UnitList::iterator itr = targetList.begin(); itr!= targetList.end();++itr)
         {
             std::map<Unit *, uint8>::iterator existing = targets.find(*itr);
