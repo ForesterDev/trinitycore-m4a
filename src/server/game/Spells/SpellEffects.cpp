@@ -1422,7 +1422,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 // Improved Death Strike
                 if (AuraEffect const * aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 2751, 0))
                     bp = int32(bp * (m_caster->CalculateSpellDamage(m_caster, aurEff->GetSpellProto(), 2) + 100.0f) / 100.0f);
-                m_caster->CastCustomSpell(m_caster, 45470, &bp, NULL, NULL, false);
+                m_caster->CastCustomSpell(m_caster, 45470, &bp, NULL, NULL, true);
                 return;
             }
             // Death Coil
