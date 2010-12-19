@@ -4756,7 +4756,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     if (!unitTarget || unitTarget->getClass() != CLASS_DEATH_KNIGHT)
                         return;
                     // triggered spell is stored in m_spellInfo->EffectBasePoints[0]
-                    unitTarget->CastSpell(unitTarget, damage, false);
+                    unitTarget->CastSpell(unitTarget, damage, true);
                     break;
                 }
                 case 53110: // Devour Humanoid
