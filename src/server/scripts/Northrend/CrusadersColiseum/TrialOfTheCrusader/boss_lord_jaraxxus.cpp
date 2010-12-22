@@ -62,25 +62,28 @@ enum Summons
     NPC_MISTRESS_OF_PAIN = 34826,
 };
 
-enum BossSpells
+namespace
 {
-    SPELL_NETHER_POWER          = 67108,
-    SPELL_INFERNAL              = 66258,
-    SPELL_INFERNAL_ERUPTION     = 66255,
-    SPELL_FEL_FIREBALL          = 66532,
-    SPELL_FEL_LIGHTING          = 66528,
-    SPELL_INCINERATE_FLESH      = 66237,
-    SPELL_BURNING_INFERNO       = 66242,
-    SPELL_NETHER_PORTAL         = 66263,
-    SPELL_LEGION_FLAME          = 66197,
-    SPELL_LEGION_FLAME_EFFECT   = 66201,
-    SPELL_SHIVAN_SLASH          = 67098,
-    SPELL_SPINNING_STRIKE       = 66316,
-    SPELL_MISTRESS_KISS         = 67077,
-    SPELL_FEL_INFERNO           = 67047,
-    SPELL_FEL_STREAK            = 66494,
-    SPELL_BERSERK               = 64238,
-};
+    enum BossSpells
+    {
+        SPELL_NETHER_POWER          = 67108,
+        SPELL_INFERNAL              = 66258,
+        SPELL_INFERNAL_ERUPTION     = 66255,
+        SPELL_FEL_FIREBALL          = 66532,
+        SPELL_FEL_LIGHTING          = 66528,
+        SPELL_INCINERATE_FLESH      = 66237,
+        SPELL_BURNING_INFERNO       = 66242,
+        SPELL_NETHER_PORTAL         = 66263,
+        SPELL_LEGION_FLAME          = 66197,
+        SPELL_LEGION_FLAME_EFFECT   = 66201,
+        SPELL_SHIVAN_SLASH          = 67098,
+        SPELL_SPINNING_STRIKE       = 66316,
+        SPELL_MISTRESS_KISS         = 67077,
+        SPELL_FEL_INFERNO           = 67047,
+        SPELL_FEL_STREAK            = 66494,
+        SPELL_BERSERK               = 64238,
+    };
+}
 
 /*######
 ## boss_jaraxxus
