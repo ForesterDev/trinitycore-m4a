@@ -685,75 +685,76 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             pVictim->ToPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_DAMAGE_RECEIVED, damage);
 
         pVictim->ModifyHealth(- (int32)damage);
-
-        if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
-            pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE, spellProto ? spellProto->Id : 0);
-
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
+        if (damagetype != NODAMAGE)
         {
-            if (spellProto && IsDamageToThreatSpell(spellProto))
-                pVictim->AddThreat(this, damage * 2.0f, damageSchoolMask, spellProto);
-            else
-                pVictim->AddThreat(this, (float)damage, damageSchoolMask, spellProto);
-        }
-        else                                                // victim is a player
-        {
-            // random durability for items (HIT TAKEN)
-            if (roll_chance_f(sWorld.getRate(RATE_DURABILITY_LOSS_DAMAGE)))
+            if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
+                pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE, spellProto ? spellProto->Id : 0);
+
+            if (pVictim->GetTypeId() != TYPEID_PLAYER)
             {
-                EquipmentSlots slot = EquipmentSlots(urand(0,EQUIPMENT_SLOT_END-1));
-                pVictim->ToPlayer()->DurabilityPointLossForEquipSlot(slot);
+                if (spellProto && IsDamageToThreatSpell(spellProto))
+                    pVictim->AddThreat(this, damage * 2.0f, damageSchoolMask, spellProto);
+                else
+                    pVictim->AddThreat(this, (float)damage, damageSchoolMask, spellProto);
             }
-        }
-
-        // Rage from damage received
-        if (this != pVictim && pVictim->getPowerType() == POWER_RAGE)
-        {
-            uint32 rage_damage = damage + (cleanDamage ? cleanDamage->absorbed_damage : 0);
-            pVictim->RewardRage(rage_damage, 0, false);
-        }
-
-        if (GetTypeId() == TYPEID_PLAYER)
-        {
-            // random durability for items (HIT DONE)
-            if (roll_chance_f(sWorld.getRate(RATE_DURABILITY_LOSS_DAMAGE)))
+            else                                                // victim is a player
             {
-                EquipmentSlots slot = EquipmentSlots(urand(0,EQUIPMENT_SLOT_END-1));
-                this->ToPlayer()->DurabilityPointLossForEquipSlot(slot);
-            }
-        }
-
-        if (damagetype != NODAMAGE && damage)
-        {
-            if (pVictim != this && pVictim->GetTypeId() == TYPEID_PLAYER) // does not support creature push_back
-            {
-                if (damagetype != DOT)
+                // random durability for items (HIT TAKEN)
+                if (roll_chance_f(sWorld.getRate(RATE_DURABILITY_LOSS_DAMAGE)))
                 {
-                    if (Spell* spell = pVictim->m_currentSpells[CURRENT_GENERIC_SPELL])
+                    EquipmentSlots slot = EquipmentSlots(urand(0,EQUIPMENT_SLOT_END-1));
+                    pVictim->ToPlayer()->DurabilityPointLossForEquipSlot(slot);
+                }
+            }
+
+            // Rage from damage received
+            if (this != pVictim && pVictim->getPowerType() == POWER_RAGE)
+            {
+                uint32 rage_damage = damage + (cleanDamage ? cleanDamage->absorbed_damage : 0);
+                pVictim->RewardRage(rage_damage, 0, false);
+            }
+
+            if (GetTypeId() == TYPEID_PLAYER)
+            {
+                // random durability for items (HIT DONE)
+                if (roll_chance_f(sWorld.getRate(RATE_DURABILITY_LOSS_DAMAGE)))
+                {
+                    EquipmentSlots slot = EquipmentSlots(urand(0,EQUIPMENT_SLOT_END-1));
+                    this->ToPlayer()->DurabilityPointLossForEquipSlot(slot);
+                }
+            }
+
+            if (damage)
+            {
+                if (pVictim != this && pVictim->GetTypeId() == TYPEID_PLAYER) // does not support creature push_back
+                {
+                    if (damagetype != DOT)
                     {
-                        if (spell->getState() == SPELL_STATE_PREPARING)
+                        if (Spell* spell = pVictim->m_currentSpells[CURRENT_GENERIC_SPELL])
                         {
-                            uint32 interruptFlags = spell->m_spellInfo->InterruptFlags;
-                            if (interruptFlags & SPELL_INTERRUPT_FLAG_ABORT_ON_DMG)
-                                pVictim->InterruptNonMeleeSpells(false);
-                            else if (interruptFlags & SPELL_INTERRUPT_FLAG_PUSH_BACK)
-                                spell->Delayed();
+                            if (spell->getState() == SPELL_STATE_PREPARING)
+                            {
+                                uint32 interruptFlags = spell->m_spellInfo->InterruptFlags;
+                                if (interruptFlags & SPELL_INTERRUPT_FLAG_ABORT_ON_DMG)
+                                    pVictim->InterruptNonMeleeSpells(false);
+                                else if (interruptFlags & SPELL_INTERRUPT_FLAG_PUSH_BACK)
+                                    spell->Delayed();
+                            }
+                        }
+                    }
+
+                    if (Spell* spell = pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL])
+                    {
+                        if (spell->getState() == SPELL_STATE_CASTING)
+                        {
+                            uint32 channelInterruptFlags = spell->m_spellInfo->ChannelInterruptFlags;
+                            if (((channelInterruptFlags & CHANNEL_FLAG_DELAY) != 0) && (damagetype != DOT))
+                                spell->DelayedChannel();
                         }
                     }
                 }
-
-                if (Spell* spell = pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL])
-                {
-                    if (spell->getState() == SPELL_STATE_CASTING)
-                    {
-                        uint32 channelInterruptFlags = spell->m_spellInfo->ChannelInterruptFlags;
-                        if (((channelInterruptFlags & CHANNEL_FLAG_DELAY) != 0) && (damagetype != DOT))
-                            spell->DelayedChannel();
-                    }
-                }
             }
         }
-
         // last damage from duel opponent
         if (duel_hasEnded)
         {
