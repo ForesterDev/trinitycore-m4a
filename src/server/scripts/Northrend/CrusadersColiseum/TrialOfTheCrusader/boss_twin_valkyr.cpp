@@ -26,7 +26,6 @@ EndScriptData */
 // Known bugs:
 //    - They should be floating but they aren't respecting the floor =(
 //    - Lacks the powering up effect that leads to Empowering
-//    - There's a workaround for the shared life effect
 
 #include "ScriptPCH.h"
 #include "trial_of_the_crusader.h"
@@ -119,6 +118,9 @@ struct boss_twin_baseAI : public ScriptedAI
     {
         m_pInstance = (InstanceScript*)pCreature->GetInstanceScript();
         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_HEALING_PCT, true);
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_HEALING_RECEIVED, true);
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_SCHOOL_HEAL_ABSORB, true);
     }
 
     InstanceScript* m_pInstance;
@@ -138,9 +140,6 @@ struct boss_twin_baseAI : public ScriptedAI
     uint32 m_uiSisterNpcId;
     uint32 m_uiColorballNpcId;
     uint32 m_uiEssenceNpcId;
-    uint32 m_uiMyEssenceSpellId;
-    uint32 m_uiOtherEssenceSpellId;
-    uint32 m_uiEmpoweredWeaknessSpellId;
     uint32 m_uiSurgeSpellId;
     uint32 m_uiVortexSpellId;
     uint32 m_uiShieldSpellId;
@@ -172,10 +171,7 @@ struct boss_twin_baseAI : public ScriptedAI
     void JustReachedHome()
     {
         if (m_pInstance)
-        {
             m_pInstance->SetData(TYPE_VALKIRIES, FAIL);
-            m_pInstance->SetData(DATA_HEALTH_TWIN_SHARED, me->GetMaxHealth());
-        }
         me->ForcedDespawn();
     }
 
@@ -242,37 +238,6 @@ struct boss_twin_baseAI : public ScriptedAI
         Summons.Despawn(pSummoned);
     }
 
-    void DamageTaken(Unit* pDoneBy, uint32 &uiDamage)
-    {
-        if (!me || !me->isAlive())
-            return;
-
-        if (pDoneBy->GetGUID() == me->GetGUID())
-            return;
-
-        if (pDoneBy->GetTypeId() == TYPEID_PLAYER)
-        {
-            if (pDoneBy->HasAura(m_uiOtherEssenceSpellId))
-                uiDamage += uiDamage/2;
-            if (pDoneBy->HasAura(m_uiEmpoweredWeaknessSpellId))
-                uiDamage += uiDamage;
-            else
-                if (pDoneBy->HasAura(m_uiMyEssenceSpellId))
-                    uiDamage /= 2;
-        }
-
-        if (m_pInstance)
-            m_pInstance->SetData(DATA_HEALTH_TWIN_SHARED, me->GetHealth() >= uiDamage ? me->GetHealth() - uiDamage : 0);
-    }
-
-    void SpellHit(Unit* caster, const SpellEntry* spell)
-    {
-        if (caster->ToCreature() == me)
-            if (spell->Effect[0] == 136) //Effect Heal
-                if (m_pInstance)
-                    m_pInstance->SetData(DATA_HEALTH_TWIN_SHARED, me->GetHealth() + me->CountPctFromMaxHealth(spell->EffectBasePoints[0]));
-    }
-
     void SummonColorballs(uint8 quantity)
     {
         float x0 = ToCCommonLoc[1].GetPositionX(), y0 = ToCCommonLoc[1].GetPositionY(), r = 47.0f;
@@ -293,7 +258,6 @@ struct boss_twin_baseAI : public ScriptedAI
         DoScriptText(SAY_DEATH,me);
         if (m_pInstance)
         {
-            m_pInstance->SetData(DATA_HEALTH_TWIN_SHARED, 0);
             if (Creature* pSister = GetSister())
             {
                 if (!pSister->isAlive())
@@ -317,10 +281,7 @@ struct boss_twin_baseAI : public ScriptedAI
     {
         me->SetInCombatWithZone();
         if (m_pInstance)
-        {
             m_pInstance->SetData(TYPE_VALKIRIES, IN_PROGRESS);
-            m_pInstance->SetData(DATA_HEALTH_TWIN_SHARED, me->GetMaxHealth());
-        }
         if (me->isAlive())
         {
             me->SummonCreature(m_uiEssenceNpcId, EssenceLocation[0].GetPositionX(), EssenceLocation[0].GetPositionY(), EssenceLocation[0].GetPositionZ());
@@ -348,12 +309,6 @@ struct boss_twin_baseAI : public ScriptedAI
     {
         if (!m_pInstance || !UpdateVictim())
             return;
-
-        if (m_pInstance->GetData(DATA_HEALTH_TWIN_SHARED) != 0)
-            me->SetHealth(m_pInstance->GetData(DATA_HEALTH_TWIN_SHARED));
-        else
-            me->SetHealth(1);
-
         switch (m_uiStage)
         {
             case 0:
@@ -378,7 +333,7 @@ struct boss_twin_baseAI : public ScriptedAI
                     DoScriptText(EMOTE_SHIELD,me);
                     DoScriptText(SAY_SHIELD,me);
                     DoCast(me,m_uiShieldSpellId);
-                    DoCast(me,m_uiTwinPactSpellId);
+                    DoCastAOE(m_uiTwinPactSpellId);
                     m_uiStage = 0;
                     m_uiSpecialAbilityTimer = MINUTE*IN_MILLISECONDS;
                 } m_uiSpecialAbilityTimer -= uiDiff;
@@ -450,7 +405,11 @@ public:
 
     struct boss_fjolaAI : public boss_twin_baseAI
     {
-        boss_fjolaAI(Creature* pCreature) : boss_twin_baseAI(pCreature) {}
+        boss_fjolaAI(Creature *pCreature)
+            : boss_twin_baseAI(pCreature)
+        {
+            me->ModifyAuraState(AURA_STATE_UNKNOWN22, true);
+        }
 
         void Reset() {
             boss_twin_baseAI::Reset();
@@ -461,9 +420,6 @@ public:
             m_uiSisterNpcId = NPC_DARKBANE;
             m_uiColorballNpcId = NPC_UNLEASHED_LIGHT;
             m_uiEssenceNpcId = NPC_LIGHT_ESSENCE;
-            m_uiMyEssenceSpellId = SPELL_LIGHT_ESSENCE;
-            m_uiOtherEssenceSpellId = SPELL_DARK_ESSENCE;
-            m_uiEmpoweredWeaknessSpellId = SPELL_EMPOWERED_DARK;
             m_uiSurgeSpellId = SPELL_LIGHT_SURGE;
             m_uiVortexSpellId = SPELL_LIGHT_VORTEX;
             m_uiShieldSpellId = SPELL_LIGHT_SHIELD;
@@ -510,7 +466,11 @@ public:
 
     struct boss_eydisAI : public boss_twin_baseAI
     {
-        boss_eydisAI(Creature* pCreature) : boss_twin_baseAI(pCreature) {}
+        boss_eydisAI(Creature *pCreature)
+            : boss_twin_baseAI(pCreature)
+        {
+            me->ModifyAuraState(AURA_STATE_UNKNOWN19, true);
+        }
 
         void Reset() {
             boss_twin_baseAI::Reset();
@@ -521,9 +481,6 @@ public:
             m_uiSisterNpcId = NPC_LIGHTBANE;
             m_uiColorballNpcId = NPC_UNLEASHED_DARK;
             m_uiEssenceNpcId = NPC_DARK_ESSENCE;
-            m_uiMyEssenceSpellId = SPELL_DARK_ESSENCE;
-            m_uiOtherEssenceSpellId = SPELL_LIGHT_ESSENCE;
-            m_uiEmpoweredWeaknessSpellId = SPELL_EMPOWERED_LIGHT;
             m_uiSurgeSpellId = SPELL_DARK_SURGE;
             m_uiVortexSpellId = SPELL_DARK_VORTEX;
             m_uiShieldSpellId = SPELL_DARK_SHIELD;
