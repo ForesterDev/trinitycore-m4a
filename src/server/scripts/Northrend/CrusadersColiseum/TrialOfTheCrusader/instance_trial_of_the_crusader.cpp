@@ -47,8 +47,6 @@ public:
         uint32 m_uiNorthrendBeasts;
         std::string m_strInstData;
         bool   m_bNeedSave;
-
-        uint32 m_uiDataDamageTwin;
         uint32 m_uiFjolaCasting;
         uint32 m_uiEydisCasting;
 
@@ -94,8 +92,6 @@ public:
             m_uiEvent = 0;
 
             m_uiTributeChestGUID = 0;
-            m_uiDataDamageTwin = 0;
-
             m_uiMainGateDoorGUID = 0;
             m_uiEastPortcullisGUID = 0;
             m_uiWebDoorGUID = 0;
@@ -333,8 +329,6 @@ public:
                             break;
                     }
                     break;
-                case DATA_HEALTH_TWIN_SHARED:     m_uiDataDamageTwin = uiData; uiData = NOT_STARTED; break;
-
                 //Achievements
                 case DATA_SNOBOLD_COUNT:
                     if (uiData == INCREASE)
@@ -515,7 +509,6 @@ public:
                             break;
                     };
                     return m_uiEventNPCId;
-                case DATA_HEALTH_TWIN_SHARED: return m_uiDataDamageTwin;
             }
             return 0;
         }
