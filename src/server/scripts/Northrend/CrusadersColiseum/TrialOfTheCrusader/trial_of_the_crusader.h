@@ -153,7 +153,7 @@ enum eAnnouncerMessages
     MSG_ANUBARAK               = 724006,
 };
 
-enum eCreature
+enum
 {
     NPC_BARRENT                 = 34816,
     NPC_TIRION                  = 34996,
