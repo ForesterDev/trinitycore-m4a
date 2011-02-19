@@ -27,6 +27,7 @@ EndScriptData */
 // Some visuals aren't appearing right sometimes
 // Mistress of Pain - Isn't working as a vehicle yet
 //                  - SPELL_SPINNING_STRIKE not working
+// Infernal Volcano doesn't spawn third infernal in normal difficulty
 
 #include "ScriptPCH.h"
 #include "trial_of_the_crusader.h"
@@ -56,7 +57,6 @@ enum Equipment
 enum Summons
 {
     NPC_LEGION_FLAME     = 34784,
-    NPC_INFERNAL_VOLCANO = 34813,
     NPC_FEL_INFERNAL     = 34815,
     NPC_NETHER_PORTAL    = 34825,
     NPC_MISTRESS_OF_PAIN = 34826,
@@ -181,11 +181,14 @@ public:
 
             if (m_uiSummonInfernalEruptionTimer <= uiDiff)
             {
-                DoScriptText(EMOTE_INFERNAL_ERUPTION,me);
-                DoScriptText(SAY_INFERNAL_ERUPTION,me);
-                uint8 i = urand(2,3);
-                me->SummonCreature(NPC_INFERNAL_VOLCANO,JaraxxusLoc[i].GetPositionX(),JaraxxusLoc[i].GetPositionY(),JaraxxusLoc[i].GetPositionZ(),TEMPSUMMON_CORPSE_DESPAWN);
-                m_uiSummonInfernalEruptionTimer = 2*MINUTE*IN_MILLISECONDS;
+                m_uiSummonInfernalEruptionTimer = 0;
+                if (!me->IsNonMeleeSpellCasted(false, false, true))
+                {
+                    DoScriptText(EMOTE_INFERNAL_ERUPTION,me);
+                    DoScriptText(SAY_INFERNAL_ERUPTION,me);
+                    DoCastAOE(66258 /* Infernal Eruption */);
+                    m_uiSummonInfernalEruptionTimer = 2*MINUTE*IN_MILLISECONDS;
+                }
             } else m_uiSummonInfernalEruptionTimer -= uiDiff;
 
             if (m_uiSummonNetherPortalTimer <= uiDiff)
@@ -289,66 +292,55 @@ public:
 
     struct mob_infernal_volcanoAI : public Scripted_NoMovementAI
     {
-        mob_infernal_volcanoAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature), Summons(me)
+        mob_infernal_volcanoAI(Creature *pCreature)
+        : Scripted_NoMovementAI(pCreature)
         {
+            if (!dynamic_cast<TempSummon *>(base().me))
+                throw std::runtime_error("bad infernal volcano");
             m_pInstance = (InstanceScript*)pCreature->GetInstanceScript();
+            me().SetCorpseDelay(0);
+            DoCastAOE(66252 /* Infernal Eruption */);
             Reset();
+        }
+
+        Scripted_NoMovementAI &base()
+        {
+            return *this;
+        }
+
+        TempSummon &me()
+        {
+            return *static_cast<TempSummon *>(base().me);
         }
 
         InstanceScript* m_pInstance;
 
-        SummonList Summons;
-
-        uint8 m_Count;
-        uint8 m_CountMax;
-        uint32 m_Timer;
-
         void Reset()
         {
-            me->SetReactState(REACT_PASSIVE);
-            m_Count = 0;
+            me().SetReactState(REACT_PASSIVE);
             if (!IsHeroic())
-            {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
-                m_CountMax = 3;
-                m_Timer = 15*IN_MILLISECONDS;
-            }
+                me().SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
             else
-            {
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
-                m_CountMax = 0;
-                m_Timer = 0;
-            }
-            Summons.DespawnAll();
+                me().RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
         }
 
         void JustSummoned(Creature* pSummoned)
         {
-            Summons.Summon(pSummoned);
+            if (auto p = dynamic_cast<Creature *>(me().GetSummoner()))
+                if (p->IsAIEnabled)
+                    p->AI()->JustSummoned(pSummoned);
             pSummoned->SetCorpseDelay(0);
         }
 
-        void JustDied(Unit* /*pKiller*/)
+        void SummonedCreatureDespawn(Creature *unit)
         {
-            me->ForcedDespawn();
+            if (auto p = dynamic_cast<Creature *>(me().GetSummoner()))
+                if (p->IsAIEnabled)
+                    p->AI()->SummonedCreatureDespawn(unit);
         }
 
         void UpdateAI(const uint32 uiDiff)
         {
-            if (m_Timer <= uiDiff)
-            {
-                if (m_CountMax && m_CountMax == m_Count)
-                    me->ForcedDespawn();
-                else
-                {
-                    DoCast(SPELL_INFERNAL_ERUPTION);
-                    ++m_Count;
-                }
-                m_Timer = 5*IN_MILLISECONDS;
-            } else m_Timer -= uiDiff;
-
-            if (!UpdateVictim())
-                return;
         }
     };
 
