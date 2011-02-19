@@ -493,7 +493,7 @@ Spell::Spell(Unit *Caster, const SpellEntry *info, bool triggered,
 
     m_spellState = SPELL_STATE_NULL;
 
-    m_IsTriggeredSpell = bool(triggered || (info->AttributesEx4 & SPELL_ATTR_EX4_TRIGGERED));
+    m_IsTriggeredSpell = triggered;
     m_CastItem = NULL;
 
     unitTarget = NULL;
