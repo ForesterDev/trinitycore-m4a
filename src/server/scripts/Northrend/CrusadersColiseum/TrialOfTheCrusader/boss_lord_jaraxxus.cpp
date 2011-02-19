@@ -228,7 +228,7 @@ public:
 
             if (m_uiLegionFlameTimer <= uiDiff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM,1))
+                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                 {
                     DoScriptText(EMOTE_LEGION_FLAME,me,pTarget);
                     DoCast(pTarget,SPELL_LEGION_FLAME);
