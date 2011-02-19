@@ -130,8 +130,8 @@ public:
             m_uiIncinerateFleshTimer = urand(20*IN_MILLISECONDS,25*IN_MILLISECONDS);
             m_uiNetherPowerTimer = 40*IN_MILLISECONDS;
             m_uiLegionFlameTimer = 30*IN_MILLISECONDS;
-            m_uiSummonNetherPortalTimer = 1*MINUTE*IN_MILLISECONDS;
-            m_uiSummonInfernalEruptionTimer = 2*MINUTE*IN_MILLISECONDS;
+            m_uiSummonNetherPortalTimer = 20 * IN_MILLISECONDS;
+            m_uiSummonInfernalEruptionTimer = 80 * IN_MILLISECONDS;
             Summons.DespawnAll();
         }
 
