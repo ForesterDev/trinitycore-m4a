@@ -104,6 +104,7 @@ public:
         boss_jaraxxusAI(Creature* pCreature) : ScriptedAI(pCreature), Summons(me)
         {
             m_pInstance = (InstanceScript*)pCreature->GetInstanceScript();
+            me->SetReactState(REACT_PASSIVE);
             Reset();
         }
 
