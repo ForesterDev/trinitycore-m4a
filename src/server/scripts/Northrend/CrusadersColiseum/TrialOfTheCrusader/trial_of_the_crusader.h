@@ -63,14 +63,6 @@ const Position ToCCommonLoc[]=
     {565.816956f, 195.477921f, 395.136810f, 0}, // 16
 };
 
-const Position JaraxxusLoc[]=
-{
-    {508.104767f, 138.247345f, 395.128052f, 0}, // 0 - Fizzlebang start location
-    {548.610596f, 139.807800f, 394.321838f, 0}, // 1 - fizzlebang end
-    {581.854187f, 138.0f, 394.319f, 0},         // 2 - Portal Right
-    {550.558838f, 138.0f, 394.319f, 0},         // 3 - Portal Left
-};
-
 const Position FactionChampionLoc[]=
 {
     {514.231f,105.569f,418.234f, 0},               //  0 - Horde Initial Pos 0

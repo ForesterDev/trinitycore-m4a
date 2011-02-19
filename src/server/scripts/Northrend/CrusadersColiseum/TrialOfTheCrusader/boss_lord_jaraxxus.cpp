@@ -27,6 +27,7 @@ EndScriptData */
 // Some visuals aren't appearing right sometimes
 // Mistress of Pain - Isn't working as a vehicle yet
 //                  - SPELL_SPINNING_STRIKE not working
+// Nether Portal doesn't spawn mistress in normal difficulty
 // Infernal Volcano doesn't spawn third infernal in normal difficulty
 
 #include "ScriptPCH.h"
@@ -58,7 +59,6 @@ enum Summons
 {
     NPC_LEGION_FLAME     = 34784,
     NPC_FEL_INFERNAL     = 34815,
-    NPC_NETHER_PORTAL    = 34825,
     NPC_MISTRESS_OF_PAIN = 34826,
 };
 
@@ -193,11 +193,14 @@ public:
 
             if (m_uiSummonNetherPortalTimer <= uiDiff)
             {
-                DoScriptText(EMOTE_NETHER_PORTAL,me);
-                DoScriptText(SAY_NETHER_PORTAL,me);
-                uint8 i = urand(2,3);
-                me->SummonCreature(NPC_NETHER_PORTAL,JaraxxusLoc[i].GetPositionX(),JaraxxusLoc[i].GetPositionY(),JaraxxusLoc[i].GetPositionZ(),TEMPSUMMON_CORPSE_DESPAWN);
-                m_uiSummonNetherPortalTimer = 2*MINUTE*IN_MILLISECONDS;
+                m_uiSummonNetherPortalTimer = 0;
+                if (!me->IsNonMeleeSpellCasted(false, false, true))
+                {
+                    DoScriptText(EMOTE_NETHER_PORTAL,me);
+                    DoScriptText(SAY_NETHER_PORTAL,me);
+                    DoCastAOE(66269 /* Nether Portal */);
+                    m_uiSummonNetherPortalTimer = 2*MINUTE*IN_MILLISECONDS;
+                }
             } else m_uiSummonNetherPortalTimer -= uiDiff;
 
             if (m_uiFelFireballTimer <= uiDiff)
