@@ -215,7 +215,7 @@ public:
 
             if (m_uiIncinerateFleshTimer <= uiDiff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM,1))
+                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                 {
                     DoScriptText(EMOTE_INCINERATE,me,pTarget);
                     DoScriptText(SAY_INCINERATE,me);
