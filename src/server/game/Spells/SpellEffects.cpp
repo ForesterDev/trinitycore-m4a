@@ -4845,6 +4845,13 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         m_caster->CastSpell(m_caster, 63919, true);
                     return;
                 }
+                case 67009 /* Nether Power */:
+                    if (effIndex == 0)
+                        if (auto entry = sSpellStore.LookupEntry(damage))
+                            if (auto final = sSpellMgr.GetSpellForDifficultyFromSpell(entry, m_caster))
+                                if (unitTarget)
+                                    m_caster->SetAuraStack(final->Id, unitTarget, final->StackAmount);
+                    break;
                 case 71342:                                     // Big Love Rocket
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
