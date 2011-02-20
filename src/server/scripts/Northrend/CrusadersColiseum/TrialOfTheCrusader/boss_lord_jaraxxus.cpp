@@ -214,7 +214,10 @@ public:
 
             if (m_uiFelLightningTimer <= uiDiff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, -5.0f, true);
+                if (!pTarget)
+                    pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true);
+                if (pTarget)
                     DoCast(pTarget,SPELL_FEL_LIGHTING);
                 m_uiFelLightningTimer = urand(10*IN_MILLISECONDS,15*IN_MILLISECONDS);
             } else m_uiFelLightningTimer -= uiDiff;
