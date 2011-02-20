@@ -440,6 +440,8 @@ public:
                         case 666:
                         case 1010:
                         case 1180:
+                        case 1181:
+                        case 1182:
                         case 2000:
                         case 2030:
                         case 3000:
@@ -502,6 +504,7 @@ public:
                         case 1142:
                         case 1144:
                         case 1150:
+                        case 1160:
                             m_uiEventNPCId = NPC_FIZZLEBANG;
                             break;
                         default:

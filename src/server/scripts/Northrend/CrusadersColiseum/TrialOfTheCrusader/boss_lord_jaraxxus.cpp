@@ -104,7 +104,6 @@ public:
         boss_jaraxxusAI(Creature* pCreature) : ScriptedAI(pCreature), Summons(me)
         {
             m_pInstance = (InstanceScript*)pCreature->GetInstanceScript();
-            me->SetReactState(REACT_PASSIVE);
             Reset();
         }
 
@@ -168,10 +167,15 @@ public:
 
         void EnterCombat(Unit* /*pWho*/)
         {
-            me->SetInCombatWithZone();
-            if (m_pInstance)
-                m_pInstance->SetData(TYPE_JARAXXUS, IN_PROGRESS);
-            DoScriptText(SAY_AGGRO,me);
+            if (me->GetReactState() == REACT_PASSIVE)
+                me->CombatStop();
+            else
+            {
+                me->SetInCombatWithZone();
+                if (m_pInstance)
+                    m_pInstance->SetData(TYPE_JARAXXUS, IN_PROGRESS);
+                DoScriptText(SAY_AGGRO,me);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff)

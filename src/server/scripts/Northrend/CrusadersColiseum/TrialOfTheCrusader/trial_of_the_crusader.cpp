@@ -363,14 +363,8 @@ class npc_fizzlebang_toc : public CreatureScript
 
             void JustDied(Unit* pKiller)
             {
-                DoScriptText(SAY_STAGE_1_06, me, pKiller);
                 m_pInstance->SetData(TYPE_EVENT, 1180);
-                if (Creature* pTemp = Unit::GetCreature(*me,m_pInstance->GetData64(NPC_JARAXXUS)))
-                {
-                    pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    pTemp->SetReactState(REACT_AGGRESSIVE);
-                    pTemp->SetInCombatWithZone();
-                }
+                m_pInstance->SetData(TYPE_EVENT_TIMER, 4000);
             }
 
             void Reset()
@@ -471,7 +465,7 @@ class npc_fizzlebang_toc : public CreatureScript
                             break;
                         case 1142:
                             if (Creature* pTemp = Unit::GetCreature(*me,m_pInstance->GetData64(NPC_JARAXXUS)))
-                                pTemp->SetUInt64Value(UNIT_FIELD_TARGET, me->GetGUID());
+                                pTemp->SetFacing(pTemp->GetAngle(me));
                             if (Creature* pTrigger = Unit::GetCreature(*me,m_uiTriggerGUID))
                                 pTrigger->ForcedDespawn();
                             if (Creature* pPortal = Unit::GetCreature(*me,m_uiPortalGUID))
@@ -486,20 +480,20 @@ class npc_fizzlebang_toc : public CreatureScript
                             m_uiUpdateTimer = 5000;
                             break;
                         case 1150:
+                            DoScriptText(SAY_STAGE_1_06, me, nullptr);
+                            m_pInstance->SetData(TYPE_EVENT, 1160);
+                            m_uiUpdateTimer = 1000;
+                            break;
+                        case 1160:
+                            m_uiUpdateTimer = 0;
                             if (Creature* pTemp = Unit::GetCreature(*me,m_pInstance->GetData64(NPC_JARAXXUS)))
-                            {
                                 //1-shot Fizzlebang
                                 pTemp->CastSpell(me,67888,false);
-                                me->SetInCombatWith(pTemp);
-                                pTemp->AddThreat(me, 1000.0f);
-                                pTemp->AI()->AttackStart(me);
-                            }
-                            m_pInstance->SetData(TYPE_EVENT, 1160);
-                            m_uiUpdateTimer = 3000;
                             break;
                     }
                 } else m_uiUpdateTimer -= uiDiff;
-                m_pInstance->SetData(TYPE_EVENT_TIMER, m_uiUpdateTimer);
+                if (me->isAlive())
+                    m_pInstance->SetData(TYPE_EVENT_TIMER, m_uiUpdateTimer);
             }
         };
 
@@ -674,7 +668,25 @@ class npc_tirion_toc : public CreatureScript
                             m_pInstance->SetData(TYPE_EVENT,0);
                             break;
                         case 1180:
+                            if (auto p = Unit::GetCreature(*me, m_pInstance->GetData64(NPC_JARAXXUS)))
+                            {
+                                p->SetFacing(p->GetAngle(me));
+                                m_pInstance->SetData(TYPE_EVENT, 1181);
+                                m_uiUpdateTimer = 1000;
+                            }
+                            break;
+                        case 1181:
                             DoScriptText(SAY_STAGE_1_07, me);
+                            m_uiUpdateTimer = 6000;
+                            m_pInstance->SetData(TYPE_EVENT, 1182);
+                            break;
+                        case 1182:
+                            if (auto p = Unit::GetCreature(*me, m_pInstance->GetData64(NPC_JARAXXUS)))
+                            {
+                                p->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                                p->SetReactState(REACT_AGGRESSIVE);
+                                p->SetInCombatWithZone();
+                            }
                             m_uiUpdateTimer = 3000;
                             m_pInstance->SetData(TYPE_EVENT,0);
                             break;
