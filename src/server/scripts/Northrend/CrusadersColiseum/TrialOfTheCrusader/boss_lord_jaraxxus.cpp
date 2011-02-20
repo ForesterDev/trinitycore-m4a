@@ -66,7 +66,6 @@ namespace
 {
     enum BossSpells
     {
-        SPELL_NETHER_POWER          = 67108,
         SPELL_INFERNAL              = 66258,
         SPELL_INFERNAL_ERUPTION     = 66255,
         SPELL_FEL_FIREBALL          = 66532,
@@ -127,7 +126,7 @@ public:
             m_uiFelFireballTimer = 5*IN_MILLISECONDS;
             m_uiFelLightningTimer = urand(10*IN_MILLISECONDS,15*IN_MILLISECONDS);
             m_uiIncinerateFleshTimer = urand(20*IN_MILLISECONDS,25*IN_MILLISECONDS);
-            m_uiNetherPowerTimer = 40*IN_MILLISECONDS;
+            m_uiNetherPowerTimer = urand(0 * IN_MILLISECONDS, 55 * IN_MILLISECONDS);
             m_uiLegionFlameTimer = 30*IN_MILLISECONDS;
             m_uiSummonNetherPortalTimer = 20 * IN_MILLISECONDS;
             m_uiSummonInfernalEruptionTimer = 80 * IN_MILLISECONDS;
@@ -233,8 +232,12 @@ public:
 
             if (m_uiNetherPowerTimer <= uiDiff)
             {
-                DoCast(me,SPELL_NETHER_POWER);
-                m_uiNetherPowerTimer = 40*IN_MILLISECONDS;
+                m_uiNetherPowerTimer = 0;
+                if (!me->IsNonMeleeSpellCasted(false, false, true))
+                {
+                    DoCastAOE(67009 /* Nether Power */);
+                    m_uiNetherPowerTimer = urand(42 * IN_MILLISECONDS, 60 * IN_MILLISECONDS);
+                }
             } else m_uiNetherPowerTimer -= uiDiff;
 
             if (m_uiLegionFlameTimer <= uiDiff)
