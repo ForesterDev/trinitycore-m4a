@@ -5883,7 +5883,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                             sLog.outError("Unit::HandleDummyAuraProc: non handled spell id: %u (IG)",dummySpell->Id);
                             return false;
                     }
-                    basepoints0 = int32((damage * p + 50) / 100);
+                    basepoints0 = int32((damage * (p / 2) + 50) / 100);
                     triggered_spell_id = 12654;
                     basepoints0 += pVictim->GetRemainingDotDamage(GetGUID(), triggered_spell_id);
                     break;
