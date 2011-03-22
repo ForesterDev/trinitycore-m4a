@@ -19384,8 +19384,18 @@ void Player::RemoveSpellMods(Spell * spell)
 
             // remove from list
             spell->m_appliedMods.erase(iterMod);
-
-            if (mod->ownerAura->DropCharge())
+            auto &aura = *mod->ownerAura;
+            bool removed = false;
+            if (aura.GetCharges())
+            {
+                aura.SetCharges(mod->charges == -1 ? 0 : static_cast<uint8>(std::min<int16>(mod->charges, std::numeric_limits<uint8>::max())));
+                if (!aura.GetCharges())
+                {
+                    aura.Remove(AURA_REMOVE_BY_EXPIRE);
+                    removed = true;
+                }
+            }
+            if (removed)
                 itr = m_spellMods[i].begin();
         }
     }
