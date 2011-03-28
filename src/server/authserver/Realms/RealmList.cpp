@@ -20,6 +20,7 @@
     \ingroup realmd
 */
 
+#include "authPCH.h"
 #include "Common.h"
 #include "RealmList.h"
 #include "Database/DatabaseEnv.h"

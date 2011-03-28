@@ -19,6 +19,8 @@
 #ifndef __BATTLEGROUNDWS_H
 #define __BATTLEGROUNDWS_H
 
+#include <memory>
+#include <array>
 #include "Battleground.h"
 
 enum BG_WS_TimerOrScore
@@ -151,6 +153,16 @@ class BattlegroundWGScore : public BattlegroundScore
     public:
         BattlegroundWGScore() : FlagCaptures(0), FlagReturns(0) {};
         virtual ~BattlegroundWGScore() {};
+
+        std::pair<std::size_t, Stat_data_type> stat_data() const
+        {
+            std::array<int32, max_stats> d;
+            auto first = d.begin(), it = first;
+            *it++ = FlagCaptures;
+            *it++ = FlagReturns;
+            return std::make_pair(it - first, std::move(d));
+        }
+
         uint32 FlagCaptures;
         uint32 FlagReturns;
 };

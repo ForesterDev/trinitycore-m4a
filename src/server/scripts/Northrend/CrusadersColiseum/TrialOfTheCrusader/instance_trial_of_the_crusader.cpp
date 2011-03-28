@@ -48,8 +48,6 @@ public:
         uint32 m_uiNorthrendBeasts;
         std::string m_strInstData;
         bool   m_bNeedSave;
-
-        uint32 m_uiDataDamageTwin;
         uint32 m_uiFjolaCasting;
         uint32 m_uiEydisCasting;
 
@@ -95,8 +93,6 @@ public:
             m_uiEvent = 0;
 
             m_uiTributeChestGUID = 0;
-            m_uiDataDamageTwin = 0;
-
             m_uiMainGateDoorGUID = 0;
             m_uiEastPortcullisGUID = 0;
             m_uiWebDoorGUID = 0;
@@ -334,8 +330,6 @@ public:
                             break;
                     }
                     break;
-                case DATA_HEALTH_TWIN_SHARED:     m_uiDataDamageTwin = uiData; uiData = NOT_STARTED; break;
-
                 //Achievements
                 case DATA_SNOBOLD_COUNT:
                     if (uiData == INCREASE)
@@ -447,6 +441,8 @@ public:
                         case 666:
                         case 1010:
                         case 1180:
+                        case 1181:
+                        case 1182:
                         case 2000:
                         case 2030:
                         case 3000:
@@ -509,6 +505,7 @@ public:
                         case 1142:
                         case 1144:
                         case 1150:
+                        case 1160:
                             m_uiEventNPCId = NPC_FIZZLEBANG;
                             break;
                         default:
@@ -516,7 +513,6 @@ public:
                             break;
                     };
                     return m_uiEventNPCId;
-                case DATA_HEALTH_TWIN_SHARED: return m_uiDataDamageTwin;
             }
             return 0;
         }

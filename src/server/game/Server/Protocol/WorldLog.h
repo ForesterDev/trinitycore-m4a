@@ -25,7 +25,7 @@
 
 #include "Common.h"
 #include <ace/Singleton.h>
-#include "Errors.h"
+#include <Debugging/Errors.h>
 
 #include <stdarg.h>
 

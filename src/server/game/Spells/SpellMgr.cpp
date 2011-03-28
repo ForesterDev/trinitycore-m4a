@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "SpellMgr.h"
 #include "ObjectMgr.h"
 #include "SpellAuras.h"
@@ -3073,6 +3074,17 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
     // Extra conditions -- leaving the possibility add extra conditions...
     switch(spellId)
     {
+    case 48388 /* Call Wintergarde Gryphon */:
+        switch (player->GetAreaId())
+        {
+        case 4177 /* Wintergarde Keep */:
+        case 4178 /* Wintergarde Mine */:
+        case 4188 /* The Carrion Fields */:
+            break;
+        default:
+            return false;
+        }
+        break;
         case 58600: // No fly Zone - Dalaran
             if (!player)
                 return false;
@@ -3618,6 +3630,10 @@ void SpellMgr::LoadSpellCustomAttr()
         case 39365: // Thundering Storm
         case 41071: // Raise Dead (HACK)
         case 52124: // Sky Darkener Assault
+        case 63018: // Searing Light (HACK)
+        case 65121: // Searing Light (HACK)
+        case 63024: // Gravity Bomb (HACK)
+        case 64234: // Gravity Bomb (HACK)
         case 42442: // Vengeance Landing Cannonfire
         case 45863: // Cosmetic - Incinerate to Random Target
         case 25425: // Shoot

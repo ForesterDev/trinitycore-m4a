@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "DBCStores.h"
 #include "WorldPacket.h"
@@ -220,7 +221,13 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
         pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, NULL);
         return;
     }
-
+    if (proto->Flags & ITEM_PROTO_FLAG_OPENABLE)
+        ;
+    else
+    {
+        KickPlayer();
+        return;
+    }
     // Verify that the bag is an actual bag or wrapped item that can be used "normally"
     if(!(proto->Flags & ITEM_PROTO_FLAG_OPENABLE) && !pItem->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_WRAPPED))
     {
@@ -354,11 +361,14 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     {
         // not have spell in spellbook or spell passive and not casted by client
         if (!mover->ToPlayer()->HasActiveSpell (spellId) || IsPassiveSpell(spellId))
-        {
-            //cheater? kick? ban?
-            recvPacket.rfinish(); // prevent spam at ignore packet
-            return;
-        }
+            if (spellId == 68398)
+                ;
+            else
+            {
+                //cheater? kick? ban?
+                recvPacket.rfinish(); // prevent spam at ignore packet
+                return;
+            }
     }
     else
     {
@@ -636,11 +646,16 @@ void WorldSession::HandleMirrrorImageDataRequest(WorldPacket & recv_data)
         // Display items in visible slots
         for (EquipmentSlots const* itr = &ItemSlots[0]; *itr != EQUIPMENT_SLOT_END; ++itr)
         {
-            if (*itr == EQUIPMENT_SLOT_HEAD && pCreator->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM))
+            auto &es = *itr;
+            if (es == EQUIPMENT_SLOT_HEAD
+                    && pCreator->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM))
                 data << uint32(0);
-            else if (*itr == EQUIPMENT_SLOT_BACK && pCreator->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
+            else if (es == EQUIPMENT_SLOT_BACK
+                    && pCreator->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
                 data << uint32(0);
-            else if (Item const *item = pCreator->GetItemByPos(INVENTORY_SLOT_BAG_0, *itr))
+            else if (const Item *item =
+                    pCreator->GetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + 2 * es)
+                    ? pCreator->GetItemByPos(INVENTORY_SLOT_BAG_0, es) : nullptr)
                 data << uint32(item->GetProto()->DisplayInfoID);
             else
                 data << uint32(0);

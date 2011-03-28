@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "sharedPCH.h"
 #include "AuthCrypt.h"
 #include "Cryptography/HMACSHA1.h"
 #include "Logging/Log.h"

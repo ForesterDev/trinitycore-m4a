@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "sharedPCH.h"
 #include "MySQLConnection.h"
 #include "QueryHolder.h"
 #include "PreparedStatement.h"

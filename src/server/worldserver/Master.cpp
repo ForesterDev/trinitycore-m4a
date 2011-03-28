@@ -20,6 +20,7 @@
     \ingroup Trinityd
 */
 
+#include "worldPCH.h"
 #include <ace/Sig_Handler.h>
 
 #include "Common.h"
@@ -41,7 +42,7 @@
 #include "Timer.h"
 #include "Util.h"
 
-#include "BigNumber.h"
+#include <Cryptography/BigNumber.h>
 
 #ifdef _WIN32
 #include "ServiceWin32.h"
