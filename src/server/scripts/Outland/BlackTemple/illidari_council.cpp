@@ -155,7 +155,7 @@ public:
                 Council[1] = pInstance->GetData64(DATA_VERASDARKSHADOW);
                 Council[2] = pInstance->GetData64(DATA_LADYMALANDE);
                 Council[3] = pInstance->GetData64(DATA_HIGHNETHERMANCERZEREVOR);
-            } else sLog.outError(ERROR_INST_DATA);
+            } else sLog->outError(ERROR_INST_DATA);
         }
 
         void EnterCombat(Unit* /*who*/) {}
@@ -401,7 +401,7 @@ struct boss_illidari_councilAI : public ScriptedAI
         }
         else
         {
-            sLog.outError(ERROR_INST_DATA);
+            sLog->outError(ERROR_INST_DATA);
             EnterEvadeMode();
             return;
         }
@@ -449,7 +449,7 @@ struct boss_illidari_councilAI : public ScriptedAI
     {
         if (!pInstance)
         {
-            sLog.outError(ERROR_INST_DATA);
+            sLog->outError(ERROR_INST_DATA);
             return;
         }
 
@@ -802,7 +802,7 @@ public:
             AppearEnvenomTimer = 150000;
 
             HasVanished = false;
-            me->SetVisibility(VISIBILITY_ON);
+            me->SetVisible(true);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         }
 
@@ -842,7 +842,7 @@ public:
                         VanishTimer = 30000;
                         AppearEnvenomTimer= 28000;
                         HasVanished = true;
-                        me->SetVisibility(VISIBILITY_OFF);
+                        me->SetVisible(false);
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                         DoResetThreat();
                                                                 // Chase a unit. Check before DoMeleeAttackIfReady prevents from attacking
@@ -872,7 +872,7 @@ public:
                 {
                     me->GetMotionMaster()->Clear();
                     me->GetMotionMaster()->MoveChase(me->getVictim());
-                    me->SetVisibility(VISIBILITY_ON);
+                    me->SetVisible(true);
                     AppearEnvenomTimer = 6000;
                 } else AppearEnvenomTimer -= diff;
             }

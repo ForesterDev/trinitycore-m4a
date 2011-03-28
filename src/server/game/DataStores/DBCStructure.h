@@ -822,10 +822,10 @@ struct FactionEntry
     int32       BaseRepValue[4];                            // 10-13    m_reputationBase
     uint32      ReputationFlags[4];                         // 14-17    m_reputationFlags
     uint32      team;                                       // 18       m_parentFactionID
-    //float     unk1;                                       // 19
-    //float     unk2;                                       // 20
-    //uint32    unk3                                        // 21
-    //uint32    unk4;                                       // 22
+    float       spilloverRateIn;                            // 19       Faction gains incoming rep * spilloverRateIn
+    float       spilloverRateOut;                           // 20       Faction outputs rep * spilloverRateOut as spillover reputation
+    uint32      spilloverMaxRankIn;                         // 21       The highest rank the faction will profit from incoming spillover
+    //uint32    spilloverRank_unk;                          // 22       It does not seem to be the max standing at which a faction outputs spillover ...so no idea
     char*       name[16];                                   // 23-38    m_name_lang
                                                             // 39 string flags
     //char*     description[16];                            // 40-55    m_description_lang
@@ -1230,6 +1230,15 @@ struct MovieEntry
     //uint32      unk2;                                     // 2 always 100
 };
 
+#define MAX_OVERRIDE_SPELL 10
+
+struct OverrideSpellDataEntry
+{
+    uint32      id;                                         // 0
+    uint32      spellId[MAX_OVERRIDE_SPELL];                // 1-10
+    //uint32      unk0;                                     // 11
+};
+
 struct PvPDifficultyEntry
 {
     //uint32      id;                                       // 0        m_ID
@@ -1610,8 +1619,8 @@ struct SpellShapeshiftEntry
     int32  creatureType;                                    // 20 <= 0 humanoid, other normal creature types
     //uint32 unk1;                                          // 21 unused
     uint32 attackSpeed;                                     // 22
-    //uint32 modelID;                                       // 23 unused, alliance modelid (where horde case?)
-    //uint32 unk2;                                          // 24 unused
+    uint32 modelID_A;                                       // 23 alliance modelid
+    uint32 modelID_H;                                       // 24 horde modelid (only one form)
     //uint32 unk3;                                          // 25 unused
     //uint32 unk4;                                          // 26 unused
     uint32 stanceSpell[MAX_SHAPESHIFT_SPELLS];                                  // 27 - 34 unused

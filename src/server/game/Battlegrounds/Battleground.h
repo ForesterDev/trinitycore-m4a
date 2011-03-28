@@ -144,8 +144,8 @@ enum BattlegroundRandomRewards
     BG_REWARD_WINNER_ARENA_FIRST    = 25,
     BG_REWARD_WINNER_HONOR_LAST     = 15,
     BG_REWARD_WINNER_ARENA_LAST     = 0,
-    BG_REWARD_LOOSER_HONOR_FIRST    = 5,
-    BG_REWARD_LOOSER_HONOR_LAST     = 5
+    BG_REWARD_LOSER_HONOR_FIRST    = 5,
+    BG_REWARD_LOSER_HONOR_LAST     = 5
 };
 
 const uint32 Buff_Entries[3] = { BG_OBJECTID_SPEEDBUFF_ENTRY, BG_OBJECTID_REGENBUFF_ENTRY, BG_OBJECTID_BERSERKERBUFF_ENTRY };
@@ -327,6 +327,7 @@ enum BGHonorMode
 };
 
 #define BG_AWARD_ARENA_POINTS_MIN_LEVEL 71
+#define ARENA_TIMELIMIT_POINTS_LOSS    -16
 
 /*
 This class is used to:
@@ -389,7 +390,7 @@ class Battleground
         uint32 GetScriptId() const          { return ScriptId; }
         uint32 GetBattlemasterEntry() const;
         uint32 GetBonusHonorFromKill(uint32 kills) const;
-        bool IsRandom() { return m_IsRandom; }
+        bool IsRandom() const { return m_IsRandom; }
 
         // Set methods:
         void SetName(char const* Name)      { m_Name = Name; }
@@ -530,6 +531,7 @@ class Battleground
         int32 GetArenaTeamRatingChangeForTeam(uint32 Team) const    { return m_ArenaTeamRatingChanges[GetTeamIndexByTeamId(Team)]; }
         void SetArenaMatchmakerRating(uint32 Team, uint32 MMR){ m_ArenaTeamMMR[GetTeamIndexByTeamId(Team)] = MMR; }
         uint32 GetArenaMatchmakerRating(uint32 Team)                { return m_ArenaTeamMMR[GetTeamIndexByTeamId(Team)]; }
+        void CheckArenaAfterTimerConditions();
         void CheckArenaWinConditions();
         void UpdateArenaWorldState();
 
@@ -584,9 +586,9 @@ class Battleground
         virtual bool HandlePlayerUnderMap(Player * /*plr*/) { return false; }
 
         // since arenas can be AvA or Hvh, we have to get the "temporary" team of a player
-        uint32 GetPlayerTeam(uint64 guid);
-        uint32 GetOtherTeam(uint32 teamId);
-        bool IsPlayerInBattleground(uint64 guid);
+        uint32 GetPlayerTeam(uint64 guid) const;
+        uint32 GetOtherTeam(uint32 teamId) const;
+        bool IsPlayerInBattleground(uint64 guid) const;
 
         void SetDeleteThis() {m_SetDeleteThis = true;}
 
@@ -632,6 +634,7 @@ class Battleground
         BattlegroundStatus m_Status;
         uint32 m_ClientInstanceID;                          //the instance-id which is sent to the client and without any other internal use
         uint32 m_StartTime;
+        uint32 m_ResetStatTimer;
         int32 m_EndTime;                                    // it is set to 120000 when bg is ending and it decreases itself
         uint32 m_LastResurrectTime;
         BattlegroundBracketId m_BracketId;

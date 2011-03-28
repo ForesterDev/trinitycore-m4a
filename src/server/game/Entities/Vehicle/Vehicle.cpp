@@ -115,12 +115,12 @@ void Vehicle::Install()
     Reset();
 
     if (GetBase()->GetTypeId() == TYPEID_UNIT)
-        sScriptMgr.OnInstall(this);
+        sScriptMgr->OnInstall(this);
 }
 
 void Vehicle::InstallAllAccessories(uint32 entry)
 {
-    VehicleAccessoryList const* mVehicleList = sObjectMgr.GetVehicleAccessoryList(entry);
+    VehicleAccessoryList const* mVehicleList = sObjectMgr->GetVehicleAccessoryList(entry);
     if (!mVehicleList)
         return;
 
@@ -130,7 +130,7 @@ void Vehicle::InstallAllAccessories(uint32 entry)
 
 void Vehicle::Uninstall()
 {
-    sLog.outDebug("Vehicle::Uninstall %u", me->GetEntry());
+    sLog->outDebug("Vehicle::Uninstall %u", me->GetEntry());
     for (SeatMap::iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
         if (Unit *passenger = itr->second.passenger)
             if (passenger->HasUnitTypeMask(UNIT_MASK_ACCESSORY))
@@ -139,12 +139,12 @@ void Vehicle::Uninstall()
     RemoveAllPassengers();
 
     if (GetBase()->GetTypeId() == TYPEID_UNIT)
-        sScriptMgr.OnUninstall(this);
+        sScriptMgr->OnUninstall(this);
 }
 
 void Vehicle::Die()
 {
-    sLog.outDebug("Vehicle::Die %u", me->GetEntry());
+    sLog->outDebug("Vehicle::Die %u", me->GetEntry());
     for (SeatMap::iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
         if (Unit *passenger = itr->second.passenger)
             if (passenger->HasUnitTypeMask(UNIT_MASK_ACCESSORY))
@@ -153,12 +153,12 @@ void Vehicle::Die()
     RemoveAllPassengers();
 
     if (GetBase()->GetTypeId() == TYPEID_UNIT)
-        sScriptMgr.OnDie(this);
+        sScriptMgr->OnDie(this);
 }
 
 void Vehicle::Reset()
 {
-    sLog.outDebug("Vehicle::Reset");
+    sLog->outDebug("Vehicle::Reset");
     if (me->GetTypeId() == TYPEID_PLAYER)
     {
         if (m_usableSeatNum)
@@ -172,26 +172,26 @@ void Vehicle::Reset()
     }
 
     if (GetBase()->GetTypeId() == TYPEID_UNIT)
-        sScriptMgr.OnReset(this);
+        sScriptMgr->OnReset(this);
 }
 
 void Vehicle::RemoveAllPassengers()
 {
-    sLog.outDebug("Vehicle::RemoveAllPassengers");
+    sLog->outDebug("Vehicle::RemoveAllPassengers");
     for (SeatMap::iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
         if (Unit *passenger = itr->second.passenger)
         {
             if (passenger->IsVehicle())
                 passenger->GetVehicleKit()->RemoveAllPassengers();
             if (passenger->GetVehicle() != this)
-                sLog.outCrash("Vehicle %u has invalid passenger %u.", me->GetEntry(), passenger->GetEntry());
+                sLog->outCrash("Vehicle %u has invalid passenger %u.", me->GetEntry(), passenger->GetEntry());
             passenger->ExitVehicle();
             if (itr->second.passenger)
             {
-                sLog.outCrash("Vehicle %u cannot remove passenger %u. %u is still on vehicle.", me->GetEntry(), passenger->GetEntry(), itr->second.passenger->GetEntry());
-                //ASSERT(!itr->second.passenger);
+                sLog->outCrash("Vehicle %u cannot remove passenger %u. %u is still on vehicle.", me->GetEntry(), passenger->GetEntry(), itr->second.passenger->GetEntry());
                 itr->second.passenger = NULL;
             }
+
             // creature passengers mounted on player mounts should be despawned at dismount
             if (GetBase()->GetTypeId() == TYPEID_PLAYER && passenger->ToCreature())
                 passenger->ToCreature()->ForcedDespawn();
@@ -201,14 +201,16 @@ void Vehicle::RemoveAllPassengers()
 bool Vehicle::HasEmptySeat(int8 seatId) const
 {
     SeatMap::const_iterator seat = m_Seats.find(seatId);
-    if (seat == m_Seats.end()) return false;
+    if (seat == m_Seats.end())
+        return false;
     return !seat->second.passenger;
 }
 
 Unit *Vehicle::GetPassenger(int8 seatId) const
 {
     SeatMap::const_iterator seat = m_Seats.find(seatId);
-    if (seat == m_Seats.end()) return NULL;
+    if (seat == m_Seats.end())
+        return NULL;
     return seat->second.passenger;
 }
 
@@ -230,6 +232,7 @@ int8 Vehicle::GetNextEmptySeat(int8 seatId, bool next) const
                 seat = m_Seats.end();
             --seat;
         }
+
         if (seat->first == seatId)
             return -1; // no available seat
     }
@@ -251,17 +254,17 @@ void Vehicle::InstallAccessory(uint32 entry, int8 seatId, bool minion)
         passenger->ExitVehicle(); // this should not happen
     }
 
-    //TODO: accessory should be minion
     if (Creature *accessory = me->SummonCreature(entry, *me, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
     {
         if (minion)
             accessory->AddUnitTypeMask(UNIT_MASK_ACCESSORY);
+
         accessory->EnterVehicle(this, seatId);
         // This is not good, we have to send update twice
         accessory->SendMovementFlagUpdate();
 
         if (GetBase()->GetTypeId() == TYPEID_UNIT)
-            sScriptMgr.OnInstallAccessory(this, accessory);
+            sScriptMgr->OnInstallAccessory(this, accessory);
     }
 }
 
@@ -292,7 +295,7 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId)
         ASSERT(!seat->second.passenger);
     }
 
-    sLog.outDebug("Unit %s enter vehicle entry %u id %u dbguid %u seat %d", unit->GetName(), me->GetEntry(), m_vehicleInfo->m_ID, me->GetGUIDLow(), (int32)seat->first);
+    sLog->outDebug("Unit %s enter vehicle entry %u id %u dbguid %u seat %d", unit->GetName(), me->GetEntry(), m_vehicleInfo->m_ID, me->GetGUIDLow(), (int32)seat->first);
 
     seat->second.passenger = unit;
     if (seat->second.seatInfo->IsUsable())
@@ -309,7 +312,7 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId)
     }
 
     if (seat->second.seatInfo->m_flags && !(seat->second.seatInfo->m_flags & VEHICLE_SEAT_FLAG_UNK11))
-        unit->addUnitState(UNIT_STAT_ONVEHICLE);
+        unit->AddUnitState(UNIT_STAT_ONVEHICLE);
 
     unit->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT);
     VehicleSeatEntry const *veSeat = seat->second.seatInfo;
@@ -327,7 +330,7 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId)
         if (!me->SetCharmedBy(unit, CHARM_TYPE_VEHICLE))
             ASSERT(false);
 
-        if (VehicleScalingInfo const *scalingInfo = sObjectMgr.GetVehicleScalingInfo(m_vehicleInfo->m_ID))
+        if (VehicleScalingInfo const *scalingInfo = sObjectMgr->GetVehicleScalingInfo(m_vehicleInfo->m_ID))
         {
             Player *plr = unit->ToPlayer();
             float averageItemLevel = plr->GetAverageItemLevel();
@@ -358,7 +361,7 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId)
     unit->UpdateObjectVisibility(false);
 
     if (GetBase()->GetTypeId() == TYPEID_UNIT)
-        sScriptMgr.OnAddPassenger(this, unit, seatId);
+        sScriptMgr->OnAddPassenger(this, unit, seatId);
 
     return true;
 }
@@ -375,7 +378,7 @@ void Vehicle::RemovePassenger(Unit *unit)
 
     ASSERT(seat != m_Seats.end());
 
-    sLog.outDebug("Unit %s exit vehicle entry %u id %u dbguid %u seat %d", unit->GetName(), me->GetEntry(), m_vehicleInfo->m_ID, me->GetGUIDLow(), (int32)seat->first);
+    sLog->outDebug("Unit %s exit vehicle entry %u id %u dbguid %u seat %d", unit->GetName(), me->GetEntry(), m_vehicleInfo->m_ID, me->GetGUIDLow(), (int32)seat->first);
 
     seat->second.passenger = NULL;
     if (seat->second.seatInfo->IsUsable())
@@ -390,9 +393,7 @@ void Vehicle::RemovePassenger(Unit *unit)
         ++m_usableSeatNum;
     }
 
-    unit->clearUnitState(UNIT_STAT_ONVEHICLE);
-
-    //SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+    unit->ClearUnitState(UNIT_STAT_ONVEHICLE);
 
     if (me->GetTypeId() == TYPEID_UNIT
         && unit->GetTypeId() == TYPEID_PLAYER
@@ -413,10 +414,10 @@ void Vehicle::RemovePassenger(Unit *unit)
 
     // only for flyable vehicles
     if (unit->HasUnitMovementFlag(MOVEMENTFLAG_FLYING))
-        me->CastSpell(unit, 45472, true);                           // Parachute
+        me->CastSpell(unit, VEHICLE_SPELL_PARACHUTE, true);
 
     if (GetBase()->GetTypeId() == TYPEID_UNIT)
-        sScriptMgr.OnRemovePassenger(this, unit);
+        sScriptMgr->OnRemovePassenger(this, unit);
 }
 
 void Vehicle::RelocatePassengers(float x, float y, float z, float ang)
@@ -439,7 +440,7 @@ void Vehicle::RelocatePassengers(float x, float y, float z, float ang)
 
 void Vehicle::Dismiss()
 {
-    sLog.outDebug("Vehicle::Dismiss %u", me->GetEntry());
+    sLog->outDebug("Vehicle::Dismiss %u", me->GetEntry());
     Uninstall();
     me->SendObjectDeSpawnAnim(me->GetGUID());
     me->CombatStop();

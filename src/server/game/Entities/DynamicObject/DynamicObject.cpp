@@ -51,7 +51,7 @@ void DynamicObject::AddToWorld()
     ///- Register the dynamicObject for guid lookup
     if (!IsInWorld())
     {
-        sObjectAccessor.AddObject(this);
+        sObjectAccessor->AddObject(this);
         WorldObject::AddToWorld();
     }
 }
@@ -70,11 +70,11 @@ void DynamicObject::RemoveFromWorld()
             }
             else
             {
-                sLog.outCrash("DynamicObject::RemoveFromWorld cannot find viewpoint owner");
+                sLog->outCrash("DynamicObject::RemoveFromWorld cannot find viewpoint owner");
             }
         }
         WorldObject::RemoveFromWorld();
-        sObjectAccessor.RemoveObject(this);
+        sObjectAccessor->RemoveObject(this);
     }
 }
 
@@ -84,7 +84,7 @@ bool DynamicObject::Create(uint32 guidlow, Unit *caster, uint32 spellId, const P
     Relocate(pos);
     if (!IsPositionValid())
     {
-        sLog.outError("DynamicObject (spell %u) not created. Suggested coordinates isn't valid (X: %f Y: %f)",spellId,GetPositionX(),GetPositionY());
+        sLog->outError("DynamicObject (spell %u) not created. Suggested coordinates isn't valid (X: %f Y: %f)",spellId,GetPositionX(),GetPositionY());
         return false;
     }
 
@@ -149,7 +149,7 @@ void DynamicObject::Update(uint32 p_time)
         Delete();
     }
     else
-        sScriptMgr.OnDynamicObjectUpdate(this, p_time);
+        sScriptMgr->OnDynamicObjectUpdate(this, p_time);
 }
 
 void DynamicObject::Delete()
@@ -179,12 +179,6 @@ void DynamicObject::SetDuration(int32 newDuration)
 void DynamicObject::Delay(int32 delaytime)
 {
     SetDuration(GetDuration() - delaytime);
-}
-
-bool DynamicObject::isVisibleForInState(Player const* u, bool inVisibleList) const
-{
-    return IsInWorld() && u->IsInWorld()
-        && (IsWithinDistInMap(u->m_seer,World::GetMaxVisibleDistanceForObject()+(inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false));
 }
 
 void DynamicObject::destroy()

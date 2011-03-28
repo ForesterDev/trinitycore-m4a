@@ -100,7 +100,7 @@ public:
             float x, y, z;
             me->GetPosition(x, y, z);
             me->SummonGameObject(GO_BIRTH, x, y, z, 0, 0, 0, 0, 0, 0);
-            me->SetVisibility(VISIBILITY_OFF);
+            me->SetVisible(false);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetReactState(REACT_PASSIVE);
 
@@ -228,7 +228,7 @@ public:
 
             events.Update(diff);
 
-            if ((phase != PHASE_BIRTH && !UpdateCombatState()) || !CheckInRoom())
+            if ((phase != PHASE_BIRTH && !UpdateVictim()) || !CheckInRoom())
                 return;
 
             if (CanTheHundredClub)
@@ -344,7 +344,7 @@ public:
                             EnterPhaseGround();
                             return;
                         case EVENT_BIRTH:
-                            me->SetVisibility(VISIBILITY_ON);
+                            me->SetVisible(true);
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                             me->SetReactState(REACT_AGGRESSIVE);
                             return;

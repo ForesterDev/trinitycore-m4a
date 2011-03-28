@@ -62,72 +62,72 @@ if( UNIX )
   endif( MYSQL_CONFIG )
 endif( UNIX )
 
-if( NOT MYSQL_INCLUDE_DIR )
-  find_path(MYSQL_INCLUDE_DIR
-    NAMES
-      mysql.h
-    PATHS
-      ${MYSQL_ADD_INCLUDE_PATH}
-      /usr/include
-      /usr/include/mysql
-      /usr/local/include
-      /usr/local/include/mysql
-      /usr/local/mysql/include
-      "C:/Program Files/MySQL/include"
-      "C:/Program Files/MySQL/MySQL Server 5.0/include"
-      "C:/Program Files/MySQL/MySQL Server 5.1/include"
-      "C:/MySQL/include"
-      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 5.0;Location]/include"
-      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 5.1;Location]/include"
-      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 5.0;Location]/include"
-      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 5.1;Location]/include"
-      "$ENV{ProgramFiles}/MySQL/*/include"
-      "$ENV{SystemDrive}/MySQL/*/include"
-      "c:/msys/local/include"
-    DOC
-      "Specify the directory containing mysql.h."
-  )
-endif( NOT MYSQL_INCLUDE_DIR )
+find_path(MYSQL_INCLUDE_DIR
+  NAMES
+    mysql.h
+  PATHS
+    ${MYSQL_ADD_INCLUDE_PATH}
+    /usr/include
+    /usr/include/mysql
+    /usr/local/include
+    /usr/local/include/mysql
+    /usr/local/mysql/include
+    "C:/Program Files/MySQL/include"
+    "C:/Program Files/MySQL/MySQL Server 5.0/include"
+    "C:/Program Files/MySQL/MySQL Server 5.1/include"
+    "C:/MySQL/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 5.0;Location]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 5.1;Location]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 5.5;Location]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 5.0;Location]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 5.1;Location]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 5.5;Location]/include"
+    "$ENV{ProgramFiles}/MySQL/*/include"
+    "$ENV{SystemDrive}/MySQL/*/include"
+    "c:/msys/local/include"
+  DOC
+    "Specify the directory containing mysql.h."
+)
 
-if( NOT MYSQL_LIBRARY )
-  if( UNIX )
-    foreach(LIB ${MYSQL_ADD_LIBRARIES})
-      find_library( MYSQL_LIBRARY 
-        NAMES
-          mysql libmysql ${LIB}
-        PATHS
-          ${MYSQL_ADD_LIBRARIES_PATH}
-          /usr/lib
-          /usr/lib/mysql
-          /usr/local/lib
-          /usr/local/lib/mysql
-          /usr/local/mysql/lib
-        DOC "Specify the location of the mysql library here."
-      )
-    endforeach(LIB ${MYSQL_ADD_LIBRARY})
-  endif( UNIX )
-
-  if( WIN32 )
+if( UNIX )
+  foreach(LIB ${MYSQL_ADD_LIBRARIES})
     find_library( MYSQL_LIBRARY 
       NAMES
-        libmysql
+        mysql libmysql ${LIB}
       PATHS
         ${MYSQL_ADD_LIBRARIES_PATH}
-        "C:/Program Files/MySQL/lib"
-        "C:/Program Files/MySQL/MySQL Server 5.0/lib/opt"
-        "C:/Program Files/MySQL/MySQL Server 5.1/lib/opt"
-        "C:/MySQL/lib/debug"
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 5.0;Location]/lib/opt"
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 5.1;Location]/lib/opt"
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 5.0;Location]/lib/opt"
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 5.1;Location]/lib/opt"
-        "$ENV{ProgramFiles}/MySQL/*/lib/opt"
-        "$ENV{SystemDrive}/MySQL/*/lib/opt"
-        "c:/msys/local/include"
+        /usr/lib
+        /usr/lib/mysql
+        /usr/local/lib
+        /usr/local/lib/mysql
+        /usr/local/mysql/lib
       DOC "Specify the location of the mysql library here."
     )
-  endif( WIN32 )
-endif( NOT MYSQL_LIBRARY )
+  endforeach(LIB ${MYSQL_ADD_LIBRARY})
+endif( UNIX )
+
+if( WIN32 )
+  find_library( MYSQL_LIBRARY 
+    NAMES
+      libmysql
+    PATHS
+      ${MYSQL_ADD_LIBRARIES_PATH}
+      "C:/Program Files/MySQL/lib"
+      "C:/Program Files/MySQL/MySQL Server 5.0/lib/opt"
+      "C:/Program Files/MySQL/MySQL Server 5.1/lib/opt"
+      "C:/MySQL/lib/debug"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 5.0;Location]/lib/opt"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 5.1;Location]/lib/opt"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 5.5;Location]/lib"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 5.0;Location]/lib/opt"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 5.1;Location]/lib/opt"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 5.5;Location]/lib"
+      "$ENV{ProgramFiles}/MySQL/*/lib/opt"
+      "$ENV{SystemDrive}/MySQL/*/lib/opt"
+      "c:/msys/local/include"
+    DOC "Specify the location of the mysql library here."
+  )
+endif( WIN32 )
 
 # On Windows you typically don't need to include any extra libraries
 # to build MYSQL stuff.

@@ -377,7 +377,7 @@ struct boss_freyaAI : public BossAI
         if (events.GetTimer() > 360000)
             events.CancelEvent(EVENT_SUMMON_ALLIES);
             
-        if (me->hasUnitState(UNIT_STAT_CASTING))
+        if (me->HasUnitState(UNIT_STAT_CASTING))
             return;
 
         while(uint32 eventId = events.ExecuteEvent())
@@ -796,7 +796,7 @@ struct boss_elder_stonebarkAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff)
     {
-        if(!UpdateVictim() || me->hasUnitState(UNIT_STAT_CASTING))
+        if(!UpdateVictim() || me->HasUnitState(UNIT_STAT_CASTING))
             return;
 
         if(uiGroundTremorTimer <= 0)
@@ -995,7 +995,7 @@ struct creature_ancient_conservatorAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff)
     {
-        if(!UpdateVictim() || (me->hasUnitState(UNIT_STAT_CASTING)))
+        if(!UpdateVictim() || (me->HasUnitState(UNIT_STAT_CASTING)))
             return;
 
         if(uiNaturesFuryTimer <= 0)
@@ -1082,7 +1082,7 @@ struct creature_storm_lasherAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff)
     {
-        if(!UpdateVictim() || (me->hasUnitState(UNIT_STAT_CASTING)))
+        if(!UpdateVictim() || (me->HasUnitState(UNIT_STAT_CASTING)))
             return;
             
         if(uiLightningLashTimer <= 0)

@@ -223,7 +223,7 @@ struct boss_mimironAI : public BossAI
         _Reset();
         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_USESTANDING);
-        me->SetVisibility(VISIBILITY_ON);
+        me->SetVisible(true);
         me->ExitVehicle();
         me->GetMotionMaster()->MoveTargetedHome();
         if (pInstance)
@@ -463,7 +463,7 @@ struct boss_mimironAI : public BossAI
                         if (Creature *pVX_001 = Creature::GetCreature((*me), pInstance->GetData64(DATA_VX_001)))
                         {
                             pInstance->SetData(DATA_MIMIRON_ELEVATOR, GO_STATE_ACTIVE_ALTERNATIVE);
-                            pVX_001->SetVisibility(VISIBILITY_ON);
+                            pVX_001->SetVisible(true);
                             if (Creature* Rocket1 = me->SummonCreature(34050, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
                                 Rocket1->EnterVehicle(pVX_001->GetVehicleKit(), 5);
                             if (Creature* Rocket2 = me->SummonCreature(34050, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
@@ -534,7 +534,7 @@ struct boss_mimironAI : public BossAI
                     me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_STAND);
                     if (pInstance)
                         if (Creature *pAerialUnit = Creature::GetCreature((*me), pInstance->GetData64(DATA_AERIAL_UNIT)))
-                            pAerialUnit->SetVisibility(VISIBILITY_ON);
+                            pAerialUnit->SetVisible(true);
                     JumpToNextStep(5000);
                     break;
                 case 4:
@@ -549,7 +549,7 @@ struct boss_mimironAI : public BossAI
                     break;
                 case 6:
                     me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_STAND);
-                    me->SetVisibility(VISIBILITY_OFF);
+                    me->SetVisible(false);
                     if (pInstance)
                         if (Creature *pAerialUnit = Creature::GetCreature((*me), pInstance->GetData64(DATA_AERIAL_UNIT)))
                         {
@@ -574,7 +574,7 @@ struct boss_mimironAI : public BossAI
                 case 1:
                     if (pInstance)
                     {
-                        me->SetVisibility(VISIBILITY_ON);
+                        me->SetVisible(true);
                         if (Creature *pLeviathan = Creature::GetCreature((*me), pInstance->GetData64(DATA_LEVIATHAN_MK_II)))
                            pLeviathan->GetMotionMaster()->MovePoint(0, 2744.65, 2569.46, 364.397);
                         if (Creature *pVX_001 = Creature::GetCreature((*me), pInstance->GetData64(DATA_VX_001)))
@@ -810,7 +810,7 @@ struct boss_leviathan_mkAI : public BossAI
 
         events.Update(diff);
 
-        if (me->hasUnitState(UNIT_STAT_CASTING))
+        if (me->HasUnitState(UNIT_STAT_CASTING))
             return;
 
         if (phase == PHASE_LEVIATHAN_SOLO || phase == PHASE_LEVIATHAN_ASSEMBLED)
@@ -966,7 +966,7 @@ struct boss_vx_001AI : public BossAI
         events.Reset();
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
         me->SetReactState(REACT_PASSIVE);
-        me->SetVisibility(VISIBILITY_OFF);
+        me->SetVisible(false);
         me->SetStandState(UNIT_STAND_STATE_STAND);
         me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_STAND);
         me->RemoveAllAuras();
@@ -1075,7 +1075,7 @@ struct boss_vx_001AI : public BossAI
 
         events.Update(diff);
 
-        if (me->hasUnitState(UNIT_STAT_CASTING))
+        if (me->HasUnitState(UNIT_STAT_CASTING))
             return;
 
         if (phase == PHASE_VX001_SOLO || phase == PHASE_VX001_ASSEMBLED)
@@ -1172,7 +1172,7 @@ struct boss_aerial_unitAI : public BossAI
         events.Reset();
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
         me->SetReactState(REACT_PASSIVE);
-        me->SetVisibility(VISIBILITY_OFF);
+        me->SetVisible(false);
         me->SetStandState(UNIT_STAND_STATE_STAND);
         me->RemoveAllAuras();
         me->SetFlying(true);
@@ -1252,7 +1252,7 @@ struct boss_aerial_unitAI : public BossAI
 
         events.Update(diff);
 
-        if (me->hasUnitState(UNIT_STAT_CASTING))
+        if (me->HasUnitState(UNIT_STAT_CASTING))
             return;
 
         if (phase == PHASE_AERIAL_SOLO || phase == PHASE_AERIAL_ASSEMBLED)

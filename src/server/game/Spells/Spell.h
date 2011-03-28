@@ -320,6 +320,7 @@ class Spell
         void EffectDualWield(SpellEffIndex effIndex);
         void EffectPickPocket(SpellEffIndex effIndex);
         void EffectAddFarsight(SpellEffIndex effIndex);
+        void EffectUntrainTalents(SpellEffIndex effIndex);
         void EffectHealMechanical(SpellEffIndex effIndex);
         void EffectJump(SpellEffIndex effIndex);
         void EffectJumpDest(SpellEffIndex effIndex);
@@ -400,6 +401,7 @@ class Spell
         void EffectRedirectThreat(SpellEffIndex effIndex);
         void EffectWMODamage(SpellEffIndex effIndex);
         void EffectWMORepair(SpellEffIndex effIndex);
+        void EffectWMOChange(SpellEffIndex effIndex);
         void EffectActivateRune(SpellEffIndex effIndex);
         void EffectCreateTamedPet(SpellEffIndex effIndex);
         void EffectDiscoverTaxi(SpellEffIndex effIndex);
@@ -511,7 +513,7 @@ class Spell
         void ReSetTimer() { m_timer = m_casttime > 0 ? m_casttime : 0; }
         bool IsNextMeleeSwingSpell() const
         {
-            return m_spellInfo->Attributes & SPELL_ATTR_ON_NEXT_SWING;
+            return m_spellInfo->Attributes & SPELL_ATTR0_ON_NEXT_SWING;
         }
         bool IsTriggered() const {return m_IsTriggeredSpell;};
         bool IsChannelActive() const { return m_caster->GetUInt32Value(UNIT_CHANNEL_SPELL) != 0; }
@@ -583,6 +585,8 @@ class Spell
         bool m_referencedFromCurrentSpell;                  // mark as references to prevent deleted and access by dead pointers
         bool m_executedCurrently;                           // mark as executed to prevent deleted and access by dead pointers
         bool m_needComboPoints;
+        uint8 m_applyMultiplierMask;
+        float m_damageMultipliers[3];
 
         // Current targets, to be used in SpellEffects (MUST BE USED ONLY IN SPELL EFFECTS)
         Unit* unitTarget;
@@ -835,7 +839,7 @@ namespace Trinity
             {
                 Unit *target = (Unit*)itr->getSource();
 
-                if (!target->InSamePhase(i_source))
+                if (!i_source->canSeeOrDetect(target, true))
                     continue;
 
                 switch (i_TargetType)

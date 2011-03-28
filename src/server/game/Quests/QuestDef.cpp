@@ -203,7 +203,7 @@ int32  Quest::GetRewOrReqMoney() const
     if (RewOrReqMoney <= 0)
         return RewOrReqMoney;
 
-    return int32(RewOrReqMoney * sWorld.getRate(RATE_DROP_MONEY));
+    return int32(RewOrReqMoney * sWorld->getRate(RATE_DROP_MONEY));
 }
 
 bool Quest::IsAllowedInRaid() const
@@ -211,5 +211,5 @@ bool Quest::IsAllowedInRaid() const
     if (IsRaidQuest())
         return true;
 
-    return sWorld.getBoolConfig(CONFIG_QUEST_IGNORE_RAID);
+    return sWorld->getBoolConfig(CONFIG_QUEST_IGNORE_RAID);
 }

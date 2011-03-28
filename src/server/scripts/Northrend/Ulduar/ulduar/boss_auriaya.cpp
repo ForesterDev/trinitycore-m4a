@@ -158,7 +158,7 @@ struct boss_auriaya_AI : public BossAI
 
         events.Update(diff);
 
-        if (me->hasUnitState(UNIT_STAT_CASTING))
+        if (me->HasUnitState(UNIT_STAT_CASTING))
             return;
 
         while(uint32 eventId = events.ExecuteEvent())

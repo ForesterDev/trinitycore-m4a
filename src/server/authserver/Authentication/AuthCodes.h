@@ -74,6 +74,7 @@ enum LoginResult
 //3.1.3 build 9947
 //3.1.3 build 10146 Chinese build
 //3.2.2a build 10505
+//3.3.0 build 10571
 //3.3.0a build 11159
 //3.3.2 build 11403
 //3.3.3a build 11723

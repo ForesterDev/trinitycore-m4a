@@ -44,6 +44,24 @@ void AddSC_example_spell_scripts();
 
 void AddSC_SmartSCripts();
 
+//Commands
+void AddSC_account_commandscript();
+void AddSC_achievement_commandscript();
+void AddSC_debug_commandscript();
+void AddSC_event_commandscript();
+void AddSC_gm_commandscript();
+void AddSC_go_commandscript();
+void AddSC_gobject_commandscript();
+void AddSC_honor_commandscript();
+void AddSC_learn_commandscript();
+void AddSC_modify_commandscript();
+void AddSC_npc_commandscript();
+void AddSC_quest_commandscript();
+void AddSC_reload_commandscript();
+void AddSC_tele_commandscript();
+void AddSC_titles_commandscript();
+void AddSC_wp_commandscript();
+
 #ifdef SCRIPTS
 //world
 void AddSC_areatrigger_scripts();
@@ -59,7 +77,6 @@ void AddSC_npc_innkeeper();
 void AddSC_npcs_special();
 void AddSC_npc_taxi();
 void AddSC_achievement_scripts();
-void AddSC_dungeon_finder();
 
 //eastern kingdoms
 void AddSC_alterac_valley();                 //Alterac Valley
@@ -460,6 +477,7 @@ void AddSC_boss_festergut();
 void AddSC_boss_rotface();
 void AddSC_boss_professor_putricide();
 void AddSC_boss_blood_prince_council();
+void AddSC_boss_blood_queen_lana_thel();
 void AddSC_icecrown_citadel_teleport();
 void AddSC_instance_icecrown_citadel();
 
@@ -576,6 +594,7 @@ void AddScripts()
     AddExampleScripts();
     AddSpellScripts();
     AddSC_SmartSCripts();
+    AddCommandScripts();
 #ifdef SCRIPTS
     AddWorldScripts();
     AddEasternKingdomsScripts();
@@ -615,6 +634,26 @@ void AddSpellScripts()
     AddSC_example_spell_scripts();
 }
 
+void AddCommandScripts()
+{
+    AddSC_account_commandscript();
+    AddSC_achievement_commandscript();
+    AddSC_debug_commandscript();
+    AddSC_event_commandscript();
+    AddSC_gm_commandscript();
+    AddSC_go_commandscript();
+    AddSC_gobject_commandscript();
+    AddSC_honor_commandscript();
+    AddSC_learn_commandscript();
+    AddSC_modify_commandscript();
+    AddSC_npc_commandscript();
+    AddSC_quest_commandscript();
+    AddSC_reload_commandscript();
+    AddSC_tele_commandscript();
+    AddSC_titles_commandscript();
+    AddSC_wp_commandscript();
+}
+
 void AddWorldScripts()
 {
 #ifdef SCRIPTS
@@ -632,7 +671,6 @@ void AddWorldScripts()
     AddSC_npc_taxi();
     AddSC_achievement_scripts();
     AddSC_chat_log();
-    AddSC_dungeon_finder();
 #endif
 }
 
@@ -1131,6 +1169,7 @@ void AddNorthrendScripts()
     AddSC_boss_rotface();
     AddSC_boss_professor_putricide();
     AddSC_boss_blood_prince_council();
+    AddSC_boss_blood_queen_lana_thel();
     AddSC_icecrown_citadel_teleport();
     AddSC_instance_icecrown_citadel();
 

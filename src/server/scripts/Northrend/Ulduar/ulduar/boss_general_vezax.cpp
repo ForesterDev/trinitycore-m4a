@@ -178,7 +178,7 @@ struct boss_general_vezaxAI : public BossAI
 
         events.Update(diff);
 
-        if (me->hasUnitState(UNIT_STAT_CASTING))
+        if (me->HasUnitState(UNIT_STAT_CASTING))
             return;
 
         while(uint32 eventId = events.ExecuteEvent())

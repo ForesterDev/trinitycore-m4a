@@ -112,20 +112,18 @@ public:
 
         void HandleEffectPeriodic(AuraEffect const * /*aurEff*/, AuraApplication const * aurApp)
         {
-            if (Unit* pTarget = aurApp->GetTarget())
+            Unit* pTarget = aurApp->GetTarget();
+            Unit* pVictim = pTarget->getVictim();
+            if (pVictim && (pTarget->GetHealthPct() > pVictim->GetHealthPct()))
             {
-                Unit* pVictim = pTarget->getVictim();
-                if (pVictim && (pTarget->GetHealthPct() > pVictim->GetHealthPct()))
+                if (!pTarget->HasAura(ROGUE_SPELL_PREY_ON_THE_WEAK))
                 {
-                    if (!pTarget->HasAura(ROGUE_SPELL_PREY_ON_THE_WEAK))
-                    {
-                        int32 bp = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), 0);
-                        pTarget->CastCustomSpell(pTarget, ROGUE_SPELL_PREY_ON_THE_WEAK, &bp, 0, 0, true);
-                    }
+                    int32 bp = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), 0);
+                    pTarget->CastCustomSpell(pTarget, ROGUE_SPELL_PREY_ON_THE_WEAK, &bp, 0, 0, true);
                 }
-                else
-                    pTarget->RemoveAurasDueToSpell(ROGUE_SPELL_PREY_ON_THE_WEAK);
             }
+            else
+                pTarget->RemoveAurasDueToSpell(ROGUE_SPELL_PREY_ON_THE_WEAK);
         }
 
         void Register()
@@ -243,7 +241,7 @@ class spell_rog_deadly_poison : public SpellScriptLoader
                         SpellEntry const *spellInfo = sSpellStore.LookupEntry(pEnchant->spellid[s]);
                         if (!spellInfo)
                         {
-                            sLog.outError("Player::CastItemCombatSpell Enchant %i, cast unknown spell %i", pEnchant->ID, pEnchant->spellid[s]);
+                            sLog->outError("Player::CastItemCombatSpell Enchant %i, cast unknown spell %i", pEnchant->ID, pEnchant->spellid[s]);
                             continue;
                         }
 

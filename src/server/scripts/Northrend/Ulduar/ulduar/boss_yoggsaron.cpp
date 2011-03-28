@@ -261,25 +261,25 @@ bool GossipSelect_keeper_image(Player* pPlayer, Creature* pCreature, uint32 uiSe
             DoScriptText(SAY_FREYA_HELP, pCreature);
             pCreature->CastSpell(pCreature, SPELL_KEEPER_ACTIVE, true);
             if (Creature *pFreya = pCreature->GetCreature(*pCreature, pInstance->GetData64(DATA_YS_FREYA)))
-                pFreya->SetVisibility(VISIBILITY_ON);
+                pFreya->SetVisible(true);
             break;
         case NPC_IMAGE_OF_THORIM:
             DoScriptText(SAY_THORIM_HELP, pCreature);
             pCreature->CastSpell(pCreature, SPELL_KEEPER_ACTIVE, true);
             if (Creature *pThorim = pCreature->GetCreature(*pCreature, pInstance->GetData64(DATA_YS_THORIM)))
-                pThorim->SetVisibility(VISIBILITY_ON);
+                pThorim->SetVisible(true);
             break;
         case NPC_IMAGE_OF_MIMIRON:
             DoScriptText(SAY_MIMIRON_HELP, pCreature);
             pCreature->CastSpell(pCreature, SPELL_KEEPER_ACTIVE, true);
             if (Creature *pMimiron = pCreature->GetCreature(*pCreature, pInstance->GetData64(DATA_YS_MIMIRON)))
-                pMimiron->SetVisibility(VISIBILITY_ON);
+                pMimiron->SetVisible(true);
             break;
         case NPC_IMAGE_OF_HODIR:
             DoScriptText(SAY_HODIR_HELP, pCreature);
             pCreature->CastSpell(pCreature, SPELL_KEEPER_ACTIVE, true);
             if (Creature *pHodir = pCreature->GetCreature(*pCreature, pInstance->GetData64(DATA_YS_HODIR)))
-                pHodir->SetVisibility(VISIBILITY_ON);
+                pHodir->SetVisible(true);
             break;
     }
     return true;
@@ -297,7 +297,7 @@ struct npc_ys_freyaAI : public ScriptedAI
     {
         pInstance = pCreature->GetInstanceScript();
         me->SetReactState(REACT_PASSIVE);
-        me->SetVisibility(VISIBILITY_OFF);
+        me->SetVisible(false);
     }
 
     InstanceScript *pInstance;
@@ -364,7 +364,7 @@ struct npc_ys_thorimAI
             if (auto ai = dynamic_cast<Yoggsaron_AI *>(ys->AI()))
                 phase = ai->phase;
         me->SetReactState(REACT_PASSIVE);
-        me->SetVisibility(VISIBILITY_OFF);
+        me->SetVisible(false);
     }
 
     InstanceScript *pInstance;
@@ -379,7 +379,7 @@ struct npc_ys_thorimAI
     
     void UpdateAI(const uint32 uiDiff)
     {
-        if (!UpdateVictim() || me->hasUnitState(UNIT_STAT_CASTING))
+        if (!UpdateVictim() || me->HasUnitState(UNIT_STAT_CASTING))
             return;
             
         if (!me->HasAura(SPELL_TITANIC_STORM) && phase == Yoggsaron_AI::PHASE_3)
@@ -406,7 +406,7 @@ struct npc_ys_mimironAI
             if (auto ai = dynamic_cast<Yoggsaron_AI *>(ys->AI()))
                 phase = ai->phase;
         me->SetReactState(REACT_PASSIVE);
-        me->SetVisibility(VISIBILITY_OFF);
+        me->SetVisible(false);
     }
 
     InstanceScript *pInstance;
@@ -449,7 +449,7 @@ struct npc_ys_hodirAI : public ScriptedAI
     {
         pInstance = pCreature->GetInstanceScript();
         me->SetReactState(REACT_PASSIVE);
-        me->SetVisibility(VISIBILITY_OFF);
+        me->SetVisible(false);
     }
 
     InstanceScript *pInstance;
@@ -625,9 +625,7 @@ Yoggsaron_AI::Yoggsaron_AI(Creature *c)
         voice(new Creature)
 {
     me->SetReactState(REACT_PASSIVE);
-    if (voice->Create(sObjectMgr.GenerateLowGuid(HIGHGUID_UNIT), me->GetMap(),
-                    PHASEMASK_ANYWHERE, 33280 /* Voice of Yogg-Saron */, 0, 0, 0.0f,
-                    0.0f, 0.0f, 0.0f))
+    if (voice->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), me->GetMap(), PHASEMASK_ANYWHERE, 33280 /* Voice of Yogg-Saron */, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f))
         ;
     else
         voice = nullptr;
@@ -707,7 +705,7 @@ void Yoggsaron_AI::UpdateAI(uint32 diff)
 
 void Yoggsaron_AI::Reset()
 {
-    me->SetVisibility(VISIBILITY_OFF);
+    me->SetVisible(false);
     set_phase(PHASE_NULL);
     stopped();
     BossAI::Reset();
@@ -717,7 +715,7 @@ void Yoggsaron_AI::Reset()
     {
         sara->setFaction(35);
         sara->GetMotionMaster()->MoveTargetedHome();
-        sara->SetVisibility(VISIBILITY_ON);
+        sara->SetVisible(true);
     }
     {
         auto p = in.ominous_clouds();

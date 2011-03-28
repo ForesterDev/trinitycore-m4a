@@ -299,14 +299,11 @@ public:
             if (DispelTimer <= diff)
             {
                 Unit *pTarget = NULL;
-                bool friendly = false;
 
                 if (urand(0,1))
                     pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true);
                 else
                 {
-                    friendly = true;
-
                     if (urand(0,1))
                         pTarget = me;
                     else
@@ -515,7 +512,7 @@ public:
             Eviscerate_Timer = 6000;
             Wait_Timer = 5000;
             InVanish = false;
-            me->SetVisibility(VISIBILITY_ON);
+            me->SetVisible(true);
 
             boss_priestess_lackey_commonAI::Reset();
         }
@@ -549,7 +546,7 @@ public:
                 {
                     DoCast(me->getVictim(), SPELL_BACKSTAB, true);
                     DoCast(me->getVictim(), SPELL_KIDNEY_SHOT, true);
-                    me->SetVisibility(VISIBILITY_ON);       // ...? Hacklike
+                    me->SetVisible(true);       // ...? Hacklike
                     InVanish = false;
                 } else Wait_Timer -= diff;
             }

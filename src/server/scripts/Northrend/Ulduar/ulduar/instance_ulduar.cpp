@@ -168,33 +168,33 @@ void instance_ulduar::OnCreatureCreate(Creature *pCreature, bool add)
         case 33241: uiFreyaImage = pCreature->GetGUID();
         {
             InstanceScript *data = pCreature->GetInstanceScript();
-            pCreature->SetVisibility(VISIBILITY_OFF);
+            pCreature->SetVisible(false);
             if (data && data->GetBossState(BOSS_VEZAX) == DONE)
-                pCreature->SetVisibility(VISIBILITY_ON);
+                pCreature->SetVisible(true);
         }
         return;
         case 33242: uiThorimImage = pCreature->GetGUID();
         {
             InstanceScript *data = pCreature->GetInstanceScript();
-            pCreature->SetVisibility(VISIBILITY_OFF);
+            pCreature->SetVisible(false);
             if (data && data->GetBossState(BOSS_VEZAX) == DONE)
-                pCreature->SetVisibility(VISIBILITY_ON);
+                pCreature->SetVisible(true);
         }
         return;
         case 33244: uiMimironImage = pCreature->GetGUID();
         {
             InstanceScript *data = pCreature->GetInstanceScript();
-            pCreature->SetVisibility(VISIBILITY_OFF);
+            pCreature->SetVisible(false);
             if (data && data->GetBossState(BOSS_VEZAX) == DONE)
-                pCreature->SetVisibility(VISIBILITY_ON);
+                pCreature->SetVisible(true);
         }            
         return;
         case 33213: uiHodirImage = pCreature->GetGUID();
         {
             InstanceScript *data = pCreature->GetInstanceScript();
-            pCreature->SetVisibility(VISIBILITY_OFF);
+            pCreature->SetVisible(false);
             if (data && data->GetBossState(BOSS_VEZAX) == DONE)
-                pCreature->SetVisibility(VISIBILITY_ON);
+                pCreature->SetVisible(true);
         }
         return;
     }
@@ -371,13 +371,13 @@ bool instance_ulduar::SetBossState(uint32 id, EncounterState state)
             {
                 // Keeper's Images
                 if (Creature* pFreya = instance->GetCreature(uiFreyaImage))
-                    pFreya->SetVisibility(VISIBILITY_ON);
+                    pFreya->SetVisible(true);
                 if (Creature* pThorim = instance->GetCreature(uiThorimImage))
-                    pThorim->SetVisibility(VISIBILITY_ON);
+                    pThorim->SetVisible(true);
                 if (Creature* pMimiron = instance->GetCreature(uiMimironImage))
-                    pMimiron->SetVisibility(VISIBILITY_ON);
+                    pMimiron->SetVisible(true);
                 if (Creature* pHodir = instance->GetCreature(uiHodirImage))
-                    pHodir->SetVisibility(VISIBILITY_ON);
+                    pHodir->SetVisible(true);
             }
             break;
     }

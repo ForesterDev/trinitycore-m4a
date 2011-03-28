@@ -329,7 +329,7 @@ struct boss_thorimAI : public BossAI
         events.Update(diff);
         EncounterTime += diff;
 
-        if (me->hasUnitState(UNIT_STAT_CASTING))
+        if (me->HasUnitState(UNIT_STAT_CASTING))
             return;
             
         if (phase == PHASE_1)
@@ -496,7 +496,7 @@ struct mob_pre_phaseAI : public ScriptedAI
         if (!UpdateVictim())
             return;
             
-        if (me->hasUnitState(UNIT_STAT_CASTING))
+        if (me->HasUnitState(UNIT_STAT_CASTING))
             return;
             
         if (PrimaryTimer <= uiDiff)
@@ -610,7 +610,7 @@ struct mob_arena_phaseAI : public ScriptedAI
             return;
         }
             
-        if (me->hasUnitState(UNIT_STAT_CASTING))
+        if (me->HasUnitState(UNIT_STAT_CASTING))
             return;
             
         if (PrimaryTimer <= uiDiff)
@@ -690,7 +690,7 @@ struct mob_runic_colossusAI : public ScriptedAI
         if (!UpdateVictim())
             return;
             
-        if (me->hasUnitState(UNIT_STAT_CASTING))
+        if (me->HasUnitState(UNIT_STAT_CASTING))
             return;
             
         if (BarrierTimer <= uiDiff)
@@ -781,7 +781,7 @@ struct mob_rune_giantAI : public ScriptedAI
         if (!UpdateVictim())
             return;
             
-        if (me->hasUnitState(UNIT_STAT_CASTING))
+        if (me->HasUnitState(UNIT_STAT_CASTING))
             return;
             
         if (StompTimer <= uiDiff)
@@ -914,7 +914,7 @@ struct npc_sifAI : public ScriptedAI
         if (!UpdateVictim())
             return;
             
-        if (me->hasUnitState(UNIT_STAT_CASTING))
+        if (me->HasUnitState(UNIT_STAT_CASTING))
             return;
             
         if (VolleyTimer <= uiDiff)

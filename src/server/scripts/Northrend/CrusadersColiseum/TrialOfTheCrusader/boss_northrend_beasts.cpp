@@ -171,30 +171,26 @@ public:
             m_pInstance->SetData(TYPE_NORTHREND_BEASTS,GORMOK_IN_PROGRESS);
         }
 
-        void JustSummoned(Creature* pSummoned)
+        void JustSummoned(Creature* summon)
         {
-            Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM,0);
-            switch(pSummoned->GetEntry())
+            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
             {
-                case NPC_SNOBOLD_VASSAL:
-                    if (pTarget)
-                        pSummoned->GetMotionMaster()->MoveJump(pTarget->GetPositionX(),pTarget->GetPositionY(),pTarget->GetPositionZ(),10.0f,20.0f);
+                if (summon->GetEntry() == NPC_SNOBOLD_VASSAL)
+                {
+                    summon->GetMotionMaster()->MoveJump(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 10.0f, 20.0f);
                     DoCast(me, SPELL_RISING_ANGER);
                     --m_uiSummonCount;
-                    break;
+                }
+                summon->AI()->AttackStart(target);
             }
-            pSummoned->AI()->AttackStart(pTarget);
-            Summons.Summon(pSummoned);
+            Summons.Summon(summon);
         }
 
-        void SummonedCreatureDespawn(Creature* pSummoned)
+        void SummonedCreatureDespawn(Creature* summon)
         {
-            switch(pSummoned->GetEntry())
-            {
-                case NPC_SNOBOLD_VASSAL:
-                    if (pSummoned->isAlive()) ++m_uiSummonCount;
-                    break;
-            }
+            if (summon->GetEntry() == NPC_SNOBOLD_VASSAL)
+                if (summon->isAlive())
+                    ++m_uiSummonCount;
         }
 
         void UpdateAI(const uint32 uiDiff)
@@ -466,6 +462,7 @@ struct boss_jormungarAI : public ScriptedAI
                 case 4:
                     m_uiStage = 5;
                     m_uiSubmergeTimer = 5*IN_MILLISECONDS;
+                    break;
                 default:
                     m_uiStage = 7;
             }

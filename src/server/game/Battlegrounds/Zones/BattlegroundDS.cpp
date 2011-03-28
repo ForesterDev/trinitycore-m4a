@@ -48,6 +48,16 @@ BattlegroundDS::~BattlegroundDS()
 void BattlegroundDS::Update(uint32 diff)
 {
     Battleground::Update(diff);
+
+    if (GetStatus() == STATUS_IN_PROGRESS)
+    {
+        if (GetStartTime() >= 47*MINUTE*IN_MILLISECONDS)    // after 47 minutes without one team losing, the arena closes with no winner and no rating change
+        {
+            UpdateArenaWorldState();
+            CheckArenaAfterTimerConditions();
+        }
+    }
+
     if (getWaterFallTimer() < diff)
     {
         if (isWaterFallActive())
@@ -117,7 +127,7 @@ void BattlegroundDS::HandleKillPlayer(Player* player, Player* killer)
 
     if (!killer)
     {
-        sLog.outError("BattlegroundDS: Killer player not found");
+        sLog->outError("BattlegroundDS: Killer player not found");
         return;
     }
 
@@ -138,7 +148,7 @@ void BattlegroundDS::HandleAreaTrigger(Player *Source, uint32 Trigger)
         case 5348:
             break;
         default:
-            sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
+            sLog->outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
             Source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", Trigger);
             break;
     }
@@ -175,7 +185,7 @@ bool BattlegroundDS::SetupBattleground()
         || !AddObject(BG_DS_OBJECT_BUFF_1, BG_DS_OBJECT_TYPE_BUFF_1, 1291.7f, 813.424f, 7.11472f, 4.64562f, 0, 0, 0.730314f, -0.683111f, 120)
         || !AddObject(BG_DS_OBJECT_BUFF_2, BG_DS_OBJECT_TYPE_BUFF_2, 1291.7f, 768.911f, 7.11472f, 1.55194f, 0, 0, 0.700409f, 0.713742f, 120))
     {
-        sLog.outErrorDb("BatteGroundDS: Failed to spawn some object!");
+        sLog->outErrorDb("BatteGroundDS: Failed to spawn some object!");
         return false;
     }
 

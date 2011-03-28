@@ -722,7 +722,7 @@ struct mole_machine_triggerAI : public ScriptedAI
     {
         m_pInstance = pCreature->GetInstanceScript();
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_PACIFIED);
-        me->SetVisibility(VISIBILITY_OFF);
+        me->SetVisible(false);
     }
 
     InstanceScript *m_pInstance;

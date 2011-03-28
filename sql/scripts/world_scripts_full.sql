@@ -121,6 +121,7 @@ UPDATE `item_template` SET `ScriptName`='item_disgusting_jar' WHERE `entry` IN(4
 UPDATE `item_template` SET `ScriptName`='item_harvesters_gift' WHERE `entry`=39253;
 UPDATE `item_template` SET `ScriptName`='item_petrov_cluster_bombs' WHERE `entry`=33098;
 UPDATE `item_template` SET `ScriptName`='item_Trident_of_Nazjan' WHERE `entry`=35850;
+UPDATE `item_template` SET `ScriptName`='item_captured_frog' WHERE `entry`=53510;
 
 /* NPC (usually creatures to be found in more than one specific zone) */
 UPDATE `creature_template` SET `ScriptName`='npc_air_force_bots' WHERE `entry` IN (2614,2615,21974,21993,21996,21997,21999,22001,22002,22003,22063,22065,22066,22068,22069,22070,22071,22078,22079,22080,22086,22087,22088,22090,22124,22125,22126);
@@ -447,7 +448,7 @@ UPDATE `creature_template` SET `ScriptName`='npc_valiance_keep_cannoneer' WHERE 
 UPDATE `creature_template` SET `ScriptName`='npc_warmage_coldarra' WHERE `entry` IN (27173,27904,27906);
 UPDATE `creature_template` SET `ScriptName`='npc_valiance_keep_cannoneer' WHERE `entry`=25306;
 UPDATE `creature_template` SET `ScriptName`= 'npc_seaforium_depth_charge' WHERE `entry`=25401;
-
+UPDATE `creature_template` SET `ScriptName`='npc_hidden_cultist' WHERE `entry` IN (25828,25248,25827);
 
 /* BURNING STEPPES */
 UPDATE `creature_template` SET `ScriptName`='npc_ragged_john' WHERE `entry`=9563;
@@ -611,7 +612,7 @@ UPDATE `creature_template` SET `ScriptName`='npc_restless_apparition' WHERE `ent
 UPDATE `creature_template` SET `ScriptName`='npc_private_hendel' WHERE `entry`=4966;
 UPDATE `creature_template` SET `ScriptName`='npc_zelfrax' WHERE `entry`=23864;
 UPDATE `creature_template` SET `ScriptName`='npc_stinky' WHERE `entry`=4880;
-
+UPDATE `creature_template` SET `ScriptName`='npc_theramore_guard' WHERE `entry`=4979;
 /* EASTERN PLAGUELANDS */
 UPDATE `creature_template` SET `ScriptName`='mobs_ghoul_flayer' WHERE `entry` IN (8530,8531,8532);
 UPDATE `creature_template` SET `ScriptName`='npc_augustus_the_touched' WHERE `entry`=12384;
@@ -674,6 +675,8 @@ UPDATE `creature_template` SET `ScriptName`='npc_outhouse_bunny' WHERE `entry`=2
 UPDATE `creature_template` SET `ScriptName`='npc_tallhorn_stag' WHERE `entry`=26363;
 UPDATE `creature_template` SET `ScriptName`='npc_amberpine_woodsman' WHERE `entry`=27293;
 UPDATE `creature_template` SET `ScriptName`='npc_wounded_skirmisher' WHERE `entry`=27463;
+UPDATE `creature_template` SET `ScriptName`='npc_lightning_sentry' WHERE `entry`=26407;
+UPDATE `creature_template` SET `ScriptName`='npc_venture_co_straggler',`AIName`='' WHERE `entry`=27570;
 
 /* DRAK'THARON KEEP */
 UPDATE `instance_template` SET `script`='instance_drak_tharon' WHERE `map`=600;
@@ -728,7 +731,6 @@ UPDATE `creature_template` SET `ScriptName`='boss_loken' WHERE `entry`=28923;
 /* Volkhan */
 UPDATE `creature_template` SET `ScriptName`='boss_volkhan' WHERE `entry`=28587;
 UPDATE `creature_template` SET `ScriptName`='mob_molten_golem' WHERE `entry`=28695;
-UPDATE `creature_template` SET `ScriptName`='npc_volkhan_anvil' WHERE `entry`=28823;
 /* Ionar */
 UPDATE `creature_template` SET `ScriptName`='boss_ionar' WHERE `entry`=28546;
 UPDATE `creature_template` SET `ScriptName`='mob_spark_of_ionar' WHERE `entry`=28926;
@@ -818,6 +820,7 @@ UPDATE `creature_template` SET `ScriptName`='npc_rinji' WHERE `entry`=7780;
 UPDATE `creature_template` SET `ScriptName`='npc_plaguehound_tracker' WHERE `entry`=24156;
 UPDATE `creature_template` SET `ScriptName`='npc_razael_and_lyana' WHERE `entry` IN (23778,23998);
 UPDATE `creature_template` SET `ScriptName`='npc_apothecary_hanes' WHERE `entry`=23784;
+UPDATE `creature_template` SET `ScriptName`='npc_daegarn' WHERE `entry`=24151;
 
 /* ICECROWN */
 UPDATE `creature_template` SET `ScriptName`='npc_arete' WHERE `entry`=29344;
@@ -833,7 +836,7 @@ UPDATE `instance_template` SET `script`='instance_icecrown_citadel' WHERE `map`=
 UPDATE `gameobject_template` SET `ScriptName`='icecrown_citadel_teleport' WHERE `entry` IN (202223,202235,202242,202243,202244,202245,202246);
 UPDATE `creature_template` SET `ScriptName`='boss_lord_marrowgar' WHERE `entry`=36612;
 UPDATE `creature_template` SET `ScriptName`='npc_coldflame' WHERE `entry`=36672;
-UPDATE `creature_template` SET `ScriptName`='npc_bone_spike' WHERE `entry`=36619;
+UPDATE `creature_template` SET `ScriptName`='npc_bone_spike' WHERE `entry` IN (36619,38711,38712);
 UPDATE `creature_template` SET `ScriptName`='boss_lady_deathwhisper' WHERE `entry`=36855;
 UPDATE `creature_template` SET `ScriptName`='npc_cult_fanatic' WHERE `entry` IN (37890,38009,38135);
 UPDATE `creature_template` SET `ScriptName`='npc_cult_adherent' WHERE `entry` IN(37949,38010,38136);
@@ -858,6 +861,7 @@ UPDATE `creature_template` SET `ScriptName`='npc_blood_queen_lana_thel' WHERE `e
 UPDATE `creature_template` SET `ScriptName`='npc_kinetic_bomb' WHERE `entry`=38454;
 UPDATE `creature_template` SET `ScriptName`='npc_dark_nucleus' WHERE `entry`=38369;
 UPDATE `creature_template` SET `ScriptName`='npc_ball_of_flame' WHERE `entry` IN (38332,38451);
+UPDATE `creature_template` SET `ScriptName`='boss_blood_queen_lana_thel' WHERE `entry`=37955;
 
 /* IRONFORGE */
 UPDATE `creature_template` SET `ScriptName`='npc_royal_historian_archesonus' WHERE `entry`=8879;
@@ -1056,7 +1060,6 @@ UPDATE `instance_template` SET `script`='instance_onyxias_lair' WHERE `map`=249;
 UPDATE `creature_template` SET `ScriptName`='boss_onyxia' WHERE `entry`=10184;
 
 /* ORGRIMMAR */
-UPDATE `creature_template` SET `ScriptName`='npc_neeru_fireblade' WHERE `entry`=3216;
 UPDATE `creature_template` SET `ScriptName`='npc_shenthul' WHERE `entry`=3401;
 UPDATE `creature_template` SET `ScriptName`='npc_thrall_warchief' WHERE `entry`=4949;
 
@@ -1522,6 +1525,7 @@ UPDATE `creature_template` SET `ScriptName`='boss_runemaster_molgeim' WHERE `ent
 UPDATE `creature_template` SET `ScriptName`='boss_stormcaller_brundir' WHERE `entry`=32857;
 UPDATE `creature_template` SET `ScriptName`='mob_lightning_elemental' WHERE `entry`=32958;
 UPDATE `creature_template` SET `ScriptName`='mob_rune_of_summoning' WHERE `entry`=33051;
+UPDATE `creature_template` SET `ScriptName`= 'mob_rune_of_power' WHERE entry = 33705;
 UPDATE `creature_template` SET `ScriptName`='boss_kologarn' WHERE `entry`=32930;
 UPDATE `creature_template` SET `ScriptName`='boss_algalon' WHERE `entry`=32871;
 UPDATE `creature_template` SET `ScriptName`='mob_collapsing_star' WHERE `entry`=32955;
@@ -1748,7 +1752,7 @@ UPDATE `outdoorpvp_template` SET `ScriptName`='outdoorpvp_si' WHERE `TypeId`=5;
 UPDATE `outdoorpvp_template` SET `ScriptName`='outdoorpvp_ep' WHERE `TypeId`=6;
 
 /* ACHIEVEMENTS */
-DELETE FROM `achievement_criteria_data` WHERE `criteria_id` IN (3693,6641,6642,6643,6644,3804,3805,3806,3807,3808,3809,3810,3811,3812,3813,1234,1239,5605,5606,12778,13036,13035,13037,12977,12967,12986,12982) AND `type` IN (0,11);
+DELETE FROM `achievement_criteria_data` WHERE `criteria_id` IN (3693,6641,6642,6643,6644,3804,3805,3806,3807,3808,3809,3810,3811,3812,3813,1234,1239,5605,5606,12778,13036,13035,13037,12977,12967,12986,12982,12780,13012,13011,13013) AND `type` IN (0,11);
 INSERT INTO `achievement_criteria_data` (`criteria_id`,`type`,`value1`,`value2`,`ScriptName`) VALUES
 (3693,11,0,0, 'achievement_storm_glory'),
 (6641,11,0,0, 'achievement_school_of_hard_knocks'),
@@ -1776,6 +1780,10 @@ INSERT INTO `achievement_criteria_data` (`criteria_id`,`type`,`value1`,`value2`,
 (12977,11,0,0, 'achievement_flu_shot_shortage'),
 (12967,11,0,0, 'achievement_flu_shot_shortage'),
 (12986,11,0,0, 'achievement_flu_shot_shortage'),
-(12982,11,0,0, 'achievement_flu_shot_shortage');
+(12982,11,0,0, 'achievement_flu_shot_shortage'),
+(12780,11,0,0, 'achievement_once_bitten_twice_shy_n'),
+(13012,11,0,0, 'achievement_once_bitten_twice_shy_n'),
+(13011,11,0,0, 'achievement_once_bitten_twice_shy_v'),
+(13013,11,0,0, 'achievement_once_bitten_twice_shy_v');
 
 /* EOF */

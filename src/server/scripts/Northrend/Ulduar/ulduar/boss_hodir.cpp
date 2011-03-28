@@ -266,7 +266,7 @@ struct boss_hodir_AI : public BossAI
 
         events.Update(diff);
         
-        if (me->hasUnitState(UNIT_STAT_CASTING))
+        if (me->HasUnitState(UNIT_STAT_CASTING))
             return;
                     
         if (uiCheckIntenseColdTimer < diff && !bMoreThanTwoIntenseCold)

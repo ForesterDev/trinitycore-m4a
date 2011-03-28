@@ -49,6 +49,15 @@ void BattlegroundRV::Update(uint32 diff)
 {
     Battleground::Update(diff);
 
+    if (GetStatus() == STATUS_IN_PROGRESS)
+    {
+        if (GetStartTime() >= 47*MINUTE*IN_MILLISECONDS)    // after 47 minutes without one team losing, the arena closes with no winner and no rating change
+        {
+            UpdateArenaWorldState();
+            CheckArenaAfterTimerConditions();
+        }
+    }
+
     if (getTimer() < diff)
     {
         uint32 i;
@@ -141,7 +150,7 @@ void BattlegroundRV::HandleKillPlayer(Player *player, Player *killer)
 
     if (!killer)
     {
-        sLog.outError("BattlegroundRV: Killer player not found");
+        sLog->outError("BattlegroundRV: Killer player not found");
         return;
     }
 
@@ -171,7 +180,7 @@ void BattlegroundRV::HandleAreaTrigger(Player *Source, uint32 Trigger)
         case 5226:
             break;
         default:
-            sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
+            sLog->outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
             Source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", Trigger);
             break;
     }
@@ -226,7 +235,7 @@ bool BattlegroundRV::SetupBattleground()
 */
 )
     {
-        sLog.outErrorDb("BatteGroundRV: Failed to spawn some object!");
+        sLog->outErrorDb("BatteGroundRV: Failed to spawn some object!");
         return false;
     }
     return true;

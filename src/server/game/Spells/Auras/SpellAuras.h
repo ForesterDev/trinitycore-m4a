@@ -138,8 +138,7 @@ class Aura
 
         bool IsRemovedOnShapeLost(Unit *target) const
         {
-            return GetCasterGUID() == target->GetGUID() && m_spellProto->Stances
-                    && !(m_spellProto->AttributesEx2 & SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT);
+            return GetCasterGUID() == target->GetGUID() && m_spellProto->Stances && !(m_spellProto->AttributesEx2 & SPELL_ATTR2_NOT_NEED_SHAPESHIFT);
         }
 
         bool CanBeSaved() const;

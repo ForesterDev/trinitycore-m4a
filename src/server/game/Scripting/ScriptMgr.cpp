@@ -22,7 +22,6 @@
 #include "DBCStores.h"
 #include "ObjectMgr.h"
 #include "OutdoorPvPMgr.h"
-#include "ProgressBar.h"
 #include "ScriptLoader.h"
 #include "ScriptSystem.h"
 #include "Transport.h"
@@ -61,25 +60,25 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
 {
     if (!pSource)
     {
-        sLog.outError("TSCR: DoScriptText entry %i, invalid Source pointer.", iTextEntry);
+        sLog->outError("TSCR: DoScriptText entry %i, invalid Source pointer.", iTextEntry);
         return;
     }
 
     if (iTextEntry >= 0)
     {
-        sLog.outError("TSCR: DoScriptText with source entry %u (TypeId=%u, guid=%u) attempts to process text entry %i, but text entry must be negative.", pSource->GetEntry(), pSource->GetTypeId(), pSource->GetGUIDLow(), iTextEntry);
+        sLog->outError("TSCR: DoScriptText with source entry %u (TypeId=%u, guid=%u) attempts to process text entry %i, but text entry must be negative.", pSource->GetEntry(), pSource->GetTypeId(), pSource->GetGUIDLow(), iTextEntry);
         return;
     }
 
-    const StringTextData* pData = sScriptSystemMgr.GetTextData(iTextEntry);
+    const StringTextData* pData = sScriptSystemMgr->GetTextData(iTextEntry);
 
     if (!pData)
     {
-        sLog.outError("TSCR: DoScriptText with source entry %u (TypeId=%u, guid=%u) could not find text entry %i.", pSource->GetEntry(), pSource->GetTypeId(), pSource->GetGUIDLow(), iTextEntry);
+        sLog->outError("TSCR: DoScriptText with source entry %u (TypeId=%u, guid=%u) could not find text entry %i.", pSource->GetEntry(), pSource->GetTypeId(), pSource->GetGUIDLow(), iTextEntry);
         return;
     }
 
-    sLog.outDebug("TSCR: DoScriptText: text entry=%i, Sound=%u, Type=%u, Language=%u, Emote=%u", iTextEntry, pData->uiSoundId, pData->uiType, pData->uiLanguage, pData->uiEmote);
+    sLog->outDebug("TSCR: DoScriptText: text entry=%i, Sound=%u, Type=%u, Language=%u, Emote=%u", iTextEntry, pData->uiSoundId, pData->uiType, pData->uiLanguage, pData->uiEmote);
 
     if (pData->uiSoundId)
     {
@@ -96,7 +95,7 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
                 break;
             }
         else
-            sLog.outError("TSCR: DoScriptText entry %i tried to process invalid sound id %u.", iTextEntry, pData->uiSoundId);
+            sLog->outError("TSCR: DoScriptText entry %i tried to process invalid sound id %u.", iTextEntry, pData->uiSoundId);
     }
 
     if (pData->uiEmote)
@@ -104,7 +103,7 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
         if (pSource->GetTypeId() == TYPEID_UNIT || pSource->GetTypeId() == TYPEID_PLAYER)
             ((Unit*)pSource)->HandleEmoteCommand(pData->uiEmote);
         else
-            sLog.outError("TSCR: DoScriptText entry %i tried to process emote for invalid TypeId (%u).", iTextEntry, pSource->GetTypeId());
+            sLog->outError("TSCR: DoScriptText entry %i tried to process emote for invalid TypeId (%u).", iTextEntry, pSource->GetTypeId());
     }
 
     switch (pData->uiType)
@@ -126,7 +125,7 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
             if (pTarget && pTarget->GetTypeId() == TYPEID_PLAYER)
                 pSource->MonsterWhisper(iTextEntry, pTarget->GetGUID());
             else
-                sLog.outError("TSCR: DoScriptText entry %i cannot whisper without target unit (TYPEID_PLAYER).", iTextEntry);
+                sLog->outError("TSCR: DoScriptText entry %i cannot whisper without target unit (TYPEID_PLAYER).", iTextEntry);
 
             break;
         }
@@ -135,7 +134,7 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
             if (pTarget && pTarget->GetTypeId() == TYPEID_PLAYER)
                 pSource->MonsterWhisper(iTextEntry, pTarget->GetGUID(), true);
             else
-                sLog.outError("TSCR: DoScriptText entry %i cannot whisper without target unit (TYPEID_PLAYER).", iTextEntry);
+                sLog->outError("TSCR: DoScriptText entry %i cannot whisper without target unit (TYPEID_PLAYER).", iTextEntry);
 
             break;
         }
@@ -188,25 +187,25 @@ ScriptMgr::~ScriptMgr()
 
 void ScriptMgr::Initialize()
 {
+    uint32 oldMSTime = getMSTime();
+
     LoadDatabase();
 
-    sLog.outString("Loading C++ scripts");
-    barGoLink bar(1);
-    bar.step();
-    sLog.outString();
-
+    sLog->outString("Loading C++ scripts");
+    
     FillSpellSummary();
     AddScripts();
 
-    sLog.outString(">> Loaded %u C++ scripts", GetScriptCount());
+    sLog->outString(">> Loaded %u C++ scripts in %u ms", GetScriptCount(), GetMSTimeDiffToNow(oldMSTime));
+    sLog->outString();
 }
 
 void ScriptMgr::LoadDatabase()
 {
-    sScriptSystemMgr.LoadVersion();
-    sScriptSystemMgr.LoadScriptTexts();
-    sScriptSystemMgr.LoadScriptTextsCustom();
-    sScriptSystemMgr.LoadScriptWaypoints();
+    sScriptSystemMgr->LoadVersion();
+    sScriptSystemMgr->LoadScriptTexts();
+    sScriptSystemMgr->LoadScriptTextsCustom();
+    sScriptSystemMgr->LoadScriptWaypoints();
 }
 
 struct TSpellSummary
@@ -302,7 +301,7 @@ void ScriptMgr::FillSpellSummary()
 
 void ScriptMgr::CreateSpellScripts(uint32 spell_id, std::list<SpellScript *> & script_vector)
 {
-    SpellScriptsBounds bounds = sObjectMgr.GetSpellScriptsBounds(spell_id);
+    SpellScriptsBounds bounds = sObjectMgr->GetSpellScriptsBounds(spell_id);
 
     for (SpellScriptsMap::iterator itr = bounds.first; itr != bounds.second; ++itr)
     {
@@ -323,7 +322,7 @@ void ScriptMgr::CreateSpellScripts(uint32 spell_id, std::list<SpellScript *> & s
 
 void ScriptMgr::CreateAuraScripts(uint32 spell_id, std::list<AuraScript *> & script_vector)
 {
-    SpellScriptsBounds bounds = sObjectMgr.GetSpellScriptsBounds(spell_id);
+    SpellScriptsBounds bounds = sObjectMgr->GetSpellScriptsBounds(spell_id);
 
     for (SpellScriptsMap::iterator itr = bounds.first; itr != bounds.second; ++itr)
     {
@@ -344,7 +343,7 @@ void ScriptMgr::CreateAuraScripts(uint32 spell_id, std::list<AuraScript *> & scr
 
 void ScriptMgr::CreateSpellScriptLoaders(uint32 spell_id, std::vector<std::pair<SpellScriptLoader *, SpellScriptsMap::iterator> > & script_vector)
 {
-    SpellScriptsBounds bounds = sObjectMgr.GetSpellScriptsBounds(spell_id);
+    SpellScriptsBounds bounds = sObjectMgr->GetSpellScriptsBounds(spell_id);
     script_vector.reserve(std::distance(bounds.first, bounds.second));
 
     for (SpellScriptsMap::iterator itr = bounds.first; itr != bounds.second; ++itr)
@@ -432,14 +431,9 @@ void ScriptMgr::OnWorldUpdate(uint32 diff)
     FOREACH_SCRIPT(WorldScript)->OnUpdate(NULL, diff);
 }
 
-void ScriptMgr::OnHonorCalculation(float& honor, uint8 level, uint32 count)
+void ScriptMgr::OnHonorCalculation(float& honor, uint8 level, float multiplier)
 {
-    FOREACH_SCRIPT(FormulaScript)->OnHonorCalculation(honor, level, count);
-}
-
-void ScriptMgr::OnHonorCalculation(uint32& honor, uint8 level, uint32 count)
-{
-    FOREACH_SCRIPT(FormulaScript)->OnHonorCalculation(honor, level, count);
+    FOREACH_SCRIPT(FormulaScript)->OnHonorCalculation(honor, level, multiplier);
 }
 
 void ScriptMgr::OnGrayLevelCalculation(uint8& grayLevel, uint8 playerLevel)
@@ -1142,32 +1136,32 @@ void ScriptMgr::OnPlayerDuelStart(Player *player1, Player *player2)
     FOREACH_SCRIPT(PlayerScript)->OnDuelStart(player1, player2);
 }
 
-void ScriptMgr::OnPlayerDuelEnd(Player *winner, Player *looser, DuelCompleteType type)
+void ScriptMgr::OnPlayerDuelEnd(Player *winner, Player *loser, DuelCompleteType type)
 {
-    FOREACH_SCRIPT(PlayerScript)->OnDuelEnd(winner, looser, type);
+    FOREACH_SCRIPT(PlayerScript)->OnDuelEnd(winner, loser, type);
 }
 
-void ScriptMgr::OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string msg)
+void ScriptMgr::OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string& msg)
 {
     FOREACH_SCRIPT(PlayerScript)->OnChat(player, type, lang, msg);
 }
 
-void ScriptMgr::OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string msg, Player* receiver)
+void ScriptMgr::OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string& msg, Player* receiver)
 {
     FOREACH_SCRIPT(PlayerScript)->OnChat(player, type, lang, msg, receiver);
 }
 
-void ScriptMgr::OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string msg, Group* group)
+void ScriptMgr::OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string& msg, Group* group)
 {
     FOREACH_SCRIPT(PlayerScript)->OnChat(player, type, lang, msg, group);
 }
 
-void ScriptMgr::OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string msg, Guild* guild)
+void ScriptMgr::OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string& msg, Guild* guild)
 {
     FOREACH_SCRIPT(PlayerScript)->OnChat(player, type, lang, msg, guild);
 }
 
-void ScriptMgr::OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string msg, Channel* channel)
+void ScriptMgr::OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string& msg, Channel* channel)
 {
     FOREACH_SCRIPT(PlayerScript)->OnChat(player, type, lang, msg, channel);
 }
@@ -1205,6 +1199,11 @@ void ScriptMgr::OnPlayerCreate(Player *player)
 void ScriptMgr::OnPlayerDelete(uint64 guid)
 {
     FOREACH_SCRIPT(PlayerScript)->OnDelete(guid);
+}
+
+void ScriptMgr::OnPlayerBindToInstance(Player* player, Difficulty difficulty, uint32 mapid, bool permanent)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnBindToInstance(player, difficulty, mapid, permanent);
 }
 
 // Guild
@@ -1248,7 +1247,7 @@ void ScriptMgr::OnGuildMemberDepositMoney(Guild* guild, Player* player, uint32 &
     FOREACH_SCRIPT(GuildScript)->OnMemberDepositMoney(guild, player, amount);
 }
 
-void ScriptMgr::OnGuildItemMove(Guild* guild, Player* player, Item* pItem, bool isSrcBank, uint8 srcContainer, uint8 srcSlotId, 
+void ScriptMgr::OnGuildItemMove(Guild* guild, Player* player, Item* pItem, bool isSrcBank, uint8 srcContainer, uint8 srcSlotId,
             bool isDestBank, uint8 destContainer, uint8 destSlotId)
 {
     FOREACH_SCRIPT(GuildScript)->OnItemMove(guild, player, pItem, isSrcBank, srcContainer, srcSlotId, isDestBank, destContainer, destSlotId);
@@ -1277,10 +1276,10 @@ void ScriptMgr::OnGroupInviteMember(Group* group, uint64 guid)
     FOREACH_SCRIPT(GroupScript)->OnInviteMember(group, guid);
 }
 
-void ScriptMgr::OnGroupRemoveMember(Group* group, uint64 guid, RemoveMethod method)
+void ScriptMgr::OnGroupRemoveMember(Group* group, uint64 guid, RemoveMethod method, uint64 kicker, const char* reason)
 {
     ASSERT(group);
-    FOREACH_SCRIPT(GroupScript)->OnRemoveMember(group, guid, method);
+    FOREACH_SCRIPT(GroupScript)->OnRemoveMember(group, guid, method, kicker, reason);
 }
 
 void ScriptMgr::OnGroupChangeLeader(Group* group, uint64 newLeaderGuid, uint64 oldLeaderGuid)
@@ -1323,7 +1322,7 @@ WorldMapScript::WorldMapScript(const char* name, uint32 mapId)
     : ScriptObject(name), MapScript<Map>(mapId)
 {
     if (GetEntry() && !GetEntry()->IsContinent())
-        sLog.outError("WorldMapScript for map %u is invalid.", mapId);
+        sLog->outError("WorldMapScript for map %u is invalid.", mapId);
 
     ScriptMgr::ScriptRegistry<WorldMapScript>::AddScript(this);
 }
@@ -1332,7 +1331,7 @@ InstanceMapScript::InstanceMapScript(const char* name, uint32 mapId)
     : ScriptObject(name), MapScript<InstanceMap>(mapId)
 {
     if (GetEntry() && !GetEntry()->IsDungeon())
-        sLog.outError("InstanceMapScript for map %u is invalid.", mapId);
+        sLog->outError("InstanceMapScript for map %u is invalid.", mapId);
 
     ScriptMgr::ScriptRegistry<InstanceMapScript>::AddScript(this);
 }
@@ -1341,7 +1340,7 @@ BattlegroundMapScript::BattlegroundMapScript(const char* name, uint32 mapId)
     : ScriptObject(name), MapScript<BattlegroundMap>(mapId)
 {
     if (GetEntry() && !GetEntry()->IsBattleground())
-        sLog.outError("BattlegroundMapScript for map %u is invalid.", mapId);
+        sLog->outError("BattlegroundMapScript for map %u is invalid.", mapId);
 
     ScriptMgr::ScriptRegistry<BattlegroundMapScript>::AddScript(this);
 }
