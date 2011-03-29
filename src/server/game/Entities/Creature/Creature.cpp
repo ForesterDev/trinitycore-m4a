@@ -812,22 +812,22 @@ bool Creature::Create(uint32 guidlow, Map *map, uint32 phaseMask, uint32 Entry, 
             AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
         }
         LastUsedScriptID = GetCreatureInfo()->ScriptID;
-    }
 
-    // TODO: Replace with spell, handle from DB
-    if (isSpiritHealer())
-    {
-        m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_GHOST);
-        m_serverSideVisibilityDetect.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_GHOST);
-    }
-    else if(isSpiritGuide())
-    {
-        m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_GHOST | GHOST_VISIBILITY_ALIVE);
-        m_serverSideVisibilityDetect.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_GHOST | GHOST_VISIBILITY_ALIVE);
-    }
+        // TODO: Replace with spell, handle from DB
+        if (isSpiritHealer())
+        {
+            m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_GHOST);
+            m_serverSideVisibilityDetect.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_GHOST);
+        }
+        else if(isSpiritGuide())
+        {
+            m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_GHOST | GHOST_VISIBILITY_ALIVE);
+            m_serverSideVisibilityDetect.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_GHOST | GHOST_VISIBILITY_ALIVE);
+        }
 
-    if (Entry == VISUAL_WAYPOINT)
-        SetVisible(false);
+        if (Entry == VISUAL_WAYPOINT)
+            SetVisible(false);
+    }
 
     return bResult;
 }
