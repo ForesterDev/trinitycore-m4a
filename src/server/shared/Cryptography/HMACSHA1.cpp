@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "sharedPCH.h"
 #include "HMACSHA1.h"
 #include "BigNumber.h"
 
@@ -49,7 +50,7 @@ void HmacHash::Finalize()
 {
     uint32 length = 0;
     HMAC_Final(&m_ctx, (uint8*)m_digest, &length);
-    ASSERT(length == SHA_DIGEST_LENGTH)
+    ASSERT(length == SHA_DIGEST_LENGTH);
 }
 
 uint8 *HmacHash::ComputeHash(BigNumber *bn)

@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "InstanceScript.h"
 #include "DatabaseEnv.h"
 #include "Map.h"
@@ -24,6 +25,15 @@
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "Log.h"
+
+void InstanceScript::Load(const char *data)
+{
+    if (data)
+    {
+        std::istringstream tmp(data);
+        LoadBossState(tmp);
+    }
+}
 
 void InstanceScript::SaveToDB()
 {
@@ -220,22 +230,6 @@ bool InstanceScript::SetBossState(uint32 id, EncounterState state)
         return true;
     }
     return false;
-}
-
-std::string InstanceScript::LoadBossState(const char * data)
-{
-    if (!data)
-        return NULL;
-    std::istringstream loadStream(data);
-    uint32 buff;
-    uint32 bossId = 0;
-    for (std::vector<BossInfo>::iterator i = bosses.begin(); i != bosses.end(); ++i, ++bossId)
-    {
-        loadStream >> buff;
-        if (buff < TO_BE_DECIDED)
-            SetBossState(bossId, (EncounterState)buff);
-    }
-    return loadStream.str();
 }
 
 std::string InstanceScript::GetBossSaveData()

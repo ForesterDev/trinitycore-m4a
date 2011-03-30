@@ -22,6 +22,7 @@ Comment: All event related commands
 Category: commandscripts
 EndScriptData */
 
+#include "ScriptPCH.h"
 #include "ScriptMgr.h"
 #include "GameEventMgr.h"
 #include "Chat.h"

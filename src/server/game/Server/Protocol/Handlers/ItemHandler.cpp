@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -909,9 +910,16 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
     Item *pItem = _player->GetItemByPos(srcbag, srcslot);
     if (!pItem)
         return;
-
+    uint8 msg = _player->CanUnequipItem(pItem->GetPos(), false);
+    if (msg == EQUIP_ERR_OK)
+        ;
+    else
+    {
+        _player->SendEquipError(msg, pItem);
+        return;
+    }
     ItemPosCountVec dest;
-    uint8 msg = _player->CanBankItem(NULL_BAG, NULL_SLOT, dest, pItem, false);
+    msg = _player->CanBankItem(NULL_BAG, NULL_SLOT, dest, pItem, false);
     if (msg != EQUIP_ERR_OK)
     {
         _player->SendEquipError(msg, pItem, NULL);

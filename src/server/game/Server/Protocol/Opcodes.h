@@ -1336,9 +1336,9 @@ enum Opcodes
     UMSG_UNKNOWN_1299                               = 0x513, // not found
     SMSG_UNKNOWN_1300                               = 0x514, // SMSG
     SMSG_UNKNOWN_1301                               = 0x515, // event 0x204 (opens dungeon finder, probably for outdoor bosses)
-    SMSG_UNKNOWN_1302                               = 0x516, // something with player movement (move event 58?)
-    CMSG_UNKNOWN_1303                               = 0x517, // something with player movement (move event 58?)
-    SMSG_UNKNOWN_1304                               = 0x518, // something with player movement (move event 58?), speed packet
+    SMSG_UNKNOWN_1302                               = 0x516, // something with player movement (move event 58)
+    CMSG_UNKNOWN_1303                               = 0x517, // something with player movement (move event 58)
+    SMSG_UNKNOWN_1304                               = 0x518, // something with player movement (move event 58), speed packet
     UMSG_UNKNOWN_1305                               = 0x519, // not found
     UMSG_UNKNOWN_1306                               = 0x51A, // not found
     CMSG_COMMENTATOR_SKIRMISH_QUEUE_COMMAND         = 0x51B, // lua: CommentatorSetSkirmishMatchmakingMode/CommentatorRequestSkirmishQueueData/CommentatorRequestSkirmishMode/CommentatorStartSkirmishMatch

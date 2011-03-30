@@ -6,6 +6,18 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 #set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 if(PLATFORM EQUAL 64)
+
+
+
+
+
+
+
+
+
+
+
+
   # This definition is necessary to work around a bug with Intellisense described
   # here: http://tinyurl.com/2cb428.  Syntax highlighting is important for proper
   # debugger functionality.
@@ -16,6 +28,7 @@ if(PLATFORM EQUAL 64)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
   message(STATUS "MSVC: Enabled extended object-support for debug-compiles")
 else()
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
   # mark 32 bit executables large address aware so they can use > 2GB address space
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LARGEADDRESSAWARE")
   message(STATUS "MSVC: Enabled large address awareness")

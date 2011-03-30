@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ScriptPCH.h"
 #include "OutdoorPvPHP.h"
 #include "OutdoorPvP.h"
 #include "OutdoorPvPMgr.h"

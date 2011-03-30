@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Player.h"
 #include "ObjectMgr.h"
 #include "World.h"
@@ -1092,6 +1093,7 @@ void Battleground::StartBattleground()
 
 void Battleground::AddPlayer(Player *plr)
 {
+    ASSERT(m_Players.size() < max_battleground_players);
     // remove afk from player
     if (plr->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK))
         plr->ToggleAFK();

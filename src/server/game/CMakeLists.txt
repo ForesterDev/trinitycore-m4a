@@ -8,6 +8,7 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+include_directories(${Boost_INCLUDE_DIRS})
 if( USE_COREPCH )
   include_directories(${CMAKE_CURRENT_BINARY_DIR})
 endif()
@@ -15,7 +16,15 @@ endif()
 file(GLOB_RECURSE sources_Accounts Accounts/*.cpp Accounts/*.h)
 file(GLOB_RECURSE sources_Achievements Achievements/*.cpp Achievements/*.h)
 file(GLOB_RECURSE sources_Addons Addons/*.cpp Addons/*.h)
-file(GLOB_RECURSE sources_AI AI/*.cpp AI/*.h)
+file(GLOB_RECURSE sources_AI AI/*.cpp AI/*.h AI/*.hpp)
+file(GLOB EXCLUDED_SOURCES
+  AI/ScriptedAI/ScriptedCreature.cpp
+  AI/ScriptedAI/ScriptedEscortAI.cpp
+  AI/ScriptedAI/ScriptedFollowerAI.cpp
+  AI/ScriptedAI/ScriptedGuardAI.cpp
+  AI/ScriptedAI/ScriptedSimpleAI.cpp)
+list(REMOVE_ITEM sources_AI ${EXCLUDED_SOURCES})
+unset(EXCLUDED_SOURCES)
 file(GLOB_RECURSE sources_AuctionHouse AuctionHouse/*.cpp AuctionHouse/*.h)
 file(GLOB_RECURSE sources_Battlegrounds Battlegrounds/*.cpp Battlegrounds/*.h)
 file(GLOB_RECURSE sources_Calendar Calendar/*.cpp Calendar/*.h)
@@ -23,6 +32,7 @@ file(GLOB_RECURSE sources_Chat Chat/*.cpp Chat/*.h)
 file(GLOB_RECURSE sources_Combat Combat/*.cpp Combat/*.h)
 file(GLOB_RECURSE sources_Conditions Conditions/*.cpp Conditions/*.h)
 file(GLOB_RECURSE sources_DataStores DataStores/*.cpp DataStores/*.h)
+file(GLOB_RECURSE sources_Detail Detail/*.hpp)
 file(GLOB_RECURSE sources_DungeonFinding DungeonFinding/*.cpp DungeonFinding/*.h)
 file(GLOB_RECURSE sources_Entities Entities/*.cpp Entities/*.h)
 file(GLOB_RECURSE sources_Events Events/*.cpp Events/*.h)
@@ -41,6 +51,12 @@ file(GLOB_RECURSE sources_Pools Pools/*.cpp Pools/*.h)
 file(GLOB_RECURSE sources_Quests Quests/*.cpp Quests/*.h)
 file(GLOB_RECURSE sources_Reputation Reputation/*.cpp Reputation/*.h)
 file(GLOB_RECURSE sources_Scripting Scripting/*.cpp Scripting/*.h)
+file(GLOB EXCLUDED_SOURCES
+  Scripting/ScriptLoader.cpp
+  Scripting/ScriptMgr.cpp
+  Scripting/ScriptSystem.cpp)
+list(REMOVE_ITEM sources_Scripting ${EXCLUDED_SOURCES})
+unset(EXCLUDED_SOURCES)
 file(GLOB_RECURSE sources_Server Server/*.cpp Server/*.h)
 file(GLOB_RECURSE sources_Skills Skills/*.cpp Skills/*.h)
 file(GLOB_RECURSE sources_Spells Spells/*.cpp Spells/*.h)
@@ -72,6 +88,7 @@ set(game_STAT_SRCS
   ${sources_Combat}
   ${sources_Conditions}
   ${sources_DataStores}
+  ${sources_Detail}
   ${sources_DungeonFinding}
   ${sources_Entities}
   ${sources_Events}
@@ -189,7 +206,6 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/Tickets
   ${CMAKE_CURRENT_SOURCE_DIR}/Weather
   ${CMAKE_CURRENT_SOURCE_DIR}/World
-  ${CMAKE_SOURCE_DIR}/src/server/scripts/PrecompiledHeaders
   ${ACE_INCLUDE_DIR}
   ${MYSQL_INCLUDE_DIR}
   ${OPENSSL_INCLUDE_DIR}
@@ -199,11 +215,14 @@ add_library(game STATIC ${game_STAT_SRCS})
 
 add_dependencies(game revision.h)
 
+target_link_libraries(game ${Boost_LIBRARIES})
+
 # Generate precompiled header
 if( USE_COREPCH )
   if(CMAKE_COMPILER_IS_GNUCXX)
     add_precompiled_header(game ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/gamePCH.h)
   elseif(MSVC)
-    add_native_precompiled_header(game ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/gamePCH)
+    set_precompiled_header(game "gamePCH.h"
+      "${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/gamePCH.cpp")
   endif()
 endif()

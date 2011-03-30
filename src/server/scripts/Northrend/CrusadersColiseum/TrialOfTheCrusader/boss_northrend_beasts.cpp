@@ -32,19 +32,22 @@ EndScriptData */
 #include "ScriptPCH.h"
 #include "trial_of_the_crusader.h"
 
-enum Yells
+namespace
 {
-    //Gormok
-    SAY_SNOBOLLED        = -1649000,
-    //Acidmaw & Dreadscale
-    SAY_SUBMERGE         = -1649010,
-    SAY_EMERGE           = -1649011,
-    SAY_BERSERK          = -1649012,
-    //Icehowl
-    SAY_TRAMPLE_STARE    = -1649020,
-    SAY_TRAMPLE_FAIL     = -1649021,
-    SAY_TRAMPLE_START    = -1649022,
-};
+    enum Yells
+    {
+        //Gormok
+        SAY_SNOBOLLED        = -1649000,
+        //Acidmaw & Dreadscale
+        SAY_SUBMERGE         = -1649010,
+        SAY_EMERGE           = -1649011,
+        SAY_BERSERK          = -1649012,
+        //Icehowl
+        SAY_TRAMPLE_STARE    = -1649020,
+        SAY_TRAMPLE_FAIL     = -1649021,
+        SAY_TRAMPLE_START    = -1649022,
+    };
+}
 
 enum Equipment
 {
@@ -364,6 +367,11 @@ struct boss_jormungarAI : public ScriptedAI
         m_pInstance = (InstanceScript*)pCreature->GetInstanceScript();
     }
 
+    void done()
+    {
+        m_pInstance->SetData(TYPE_NORTHREND_BEASTS, SNAKES_DONE);
+    }
+
     InstanceScript* m_pInstance;
 
     uint32 m_uiSisterID;
@@ -404,10 +412,12 @@ struct boss_jormungarAI : public ScriptedAI
             if (Creature* pSister = Unit::GetCreature((*me),m_pInstance->GetData64(m_uiSisterID)))
             {
                 if (!pSister->isAlive())
-                    m_pInstance->SetData(TYPE_NORTHREND_BEASTS, SNAKES_DONE);
+                    done();
                 else
                     m_pInstance->SetData(TYPE_NORTHREND_BEASTS, SNAKES_SPECIAL);
             }
+            else
+                done();
         }
     }
 

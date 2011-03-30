@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "UpdateMask.h"
 #include "Opcodes.h"
@@ -38,6 +39,11 @@ DynamicObject::DynamicObject() : WorldObject()
 
     m_aura = 0;
     m_duration = 0;
+}
+
+DynamicObject::~DynamicObject()
+{
+    destroy();
 }
 
 void DynamicObject::AddToWorld()
@@ -148,15 +154,7 @@ void DynamicObject::Update(uint32 p_time)
 
 void DynamicObject::Delete()
 {
-    if (m_aura)
-    {
-        // dynObj may be removed in Aura::Remove - we cannot delete there
-        // so recheck aura here
-        if (!m_aura->IsRemoved())
-            m_aura->_Remove(AURA_REMOVE_BY_DEFAULT);
-        delete m_aura;
-        m_aura = NULL;
-    }
+    destroy();
     SendObjectDeSpawnAnim(GetGUID());
     RemoveFromWorld();
     AddObjectToRemoveList();
@@ -181,4 +179,17 @@ void DynamicObject::SetDuration(int32 newDuration)
 void DynamicObject::Delay(int32 delaytime)
 {
     SetDuration(GetDuration() - delaytime);
+}
+
+void DynamicObject::destroy()
+{
+    if (m_aura)
+    {
+        // dynObj may be removed in Aura::Remove - we cannot delete there
+        // so recheck aura here
+        if (!m_aura->IsRemoved())
+            m_aura->_Remove(AURA_REMOVE_BY_DEFAULT);
+        delete m_aura;
+        m_aura = NULL;
+    }
 }

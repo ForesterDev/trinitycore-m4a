@@ -16,8 +16,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "sharedPCH.h"
 #include "Threading.h"
-#include "Errors.h"
+#include "Debugging/Errors.h"
 #include <ace/OS_NS_unistd.h>
 #include <ace/Sched_Params.h>
 #include <vector>

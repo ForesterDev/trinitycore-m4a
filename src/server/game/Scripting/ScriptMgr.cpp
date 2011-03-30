@@ -83,7 +83,17 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
     if (pData->uiSoundId)
     {
         if (GetSoundEntriesStore()->LookupEntry(pData->uiSoundId))
-            pSource->SendPlaySound(pData->uiSoundId, false);
+            switch (pData->uiType)
+            {
+            default:
+                pSource->SendPlaySound(pData->uiSoundId, false);
+                break;
+            case CHAT_TYPE_WHISPER:
+            case CHAT_TYPE_BOSS_WHISPER:
+                if (auto p = dynamic_cast<Player *>(pTarget))
+                    pSource->PlayDirectSound(pData->uiSoundId, p);
+                break;
+            }
         else
             sLog->outError("TSCR: DoScriptText entry %i tried to process invalid sound id %u.", iTextEntry, pData->uiSoundId);
     }
