@@ -25,6 +25,8 @@ EndScriptData */
 #include "ScriptPCH.h"
 #include "ulduar.h"
 
+using std::move;
+
 enum Yells
 {
     SAY_AGGRO                                   = -1603220,
@@ -306,8 +308,11 @@ struct boss_ignis_AI : public BossAI
     {
         summons.Despawn(unit);
         if (unit->GetEntry() == MOB_IRON_CONSTRUCT)
-            construct_list
-                .erase(std::find(construct_list.begin(), construct_list.end(), unit));
+        {
+            auto p = std::find(construct_list.begin(), construct_list.end(), unit);
+            if (p != construct_list.end())
+                construct_list.erase(move(p));
+        }
     }
 
     void DoAction(const int32 action)
@@ -438,7 +443,7 @@ void AddSC_boss_ignis()
 
         CreatureAI *GetAI(Creature *creature) const
         {
-            return GetAI_boss_ignis(std::move(creature));
+            return GetAI_boss_ignis(move(creature));
         }
     };
     new Boss_ignis;
@@ -453,7 +458,7 @@ void AddSC_boss_ignis()
 
         CreatureAI *GetAI(Creature *creature) const
         {
-            return GetAI_mob_iron_construct(std::move(creature));
+            return GetAI_mob_iron_construct(move(creature));
         }
     };
     new Mob_iron_construct;
@@ -468,7 +473,7 @@ void AddSC_boss_ignis()
 
         CreatureAI *GetAI(Creature *creature) const
         {
-            return GetAI_mob_scorch_ground(std::move(creature));
+            return GetAI_mob_scorch_ground(move(creature));
         }
     };
     new Mob_scorch_ground;
