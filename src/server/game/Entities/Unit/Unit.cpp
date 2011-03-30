@@ -11621,8 +11621,6 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
     for (AuraEffectList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
         if (spellProto)
         {
-            AuraEffectList const &mModDamagePercentDone = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
-            for (AuraEffectList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
                 if ((*i)->GetMiscValue() & GetSpellSchoolMask(spellProto))
                 {
                     if ((*i)->GetSpellProto()->EquippedItemClass == -1)
