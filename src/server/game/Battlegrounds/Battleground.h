@@ -36,11 +36,6 @@ class BattlegroundMap;
 struct PvPDifficultyEntry;
 struct WorldSafeLocsEntry;
 
-enum
-{
-    max_battleground_players = 80
-};
-
 enum BattlegroundSounds
 {
     SOUND_HORDE_WINS                = 8454,
