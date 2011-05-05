@@ -176,9 +176,9 @@ enum DeprogrammingData
     POINT_DESPAWN           = 384721,
 };
 
-#define NPC_DARNAVAN RAID_MODE<uint32>(NPC_DARNAVAN_10,NPC_DARNAVAN_25,NPC_DARNAVAN_10,NPC_DARNAVAN_25)
-#define NPC_DARNAVAN_CREDIT RAID_MODE<uint32>(NPC_DARNAVAN_CREDIT_10,NPC_DARNAVAN_CREDIT_25,NPC_DARNAVAN_CREDIT_10,NPC_DARNAVAN_CREDIT_25)
-#define QUEST_DEPROGRAMMING RAID_MODE<uint32>(QUEST_DEPROGRAMMING_10,QUEST_DEPROGRAMMING_25,QUEST_DEPROGRAMMING_10,QUEST_DEPROGRAMMING_25)
+#define NPC_DARNAVAN RAID_MODE<uint32>(NPC_DARNAVAN_10, NPC_DARNAVAN_25, NPC_DARNAVAN_10, NPC_DARNAVAN_25)
+#define NPC_DARNAVAN_CREDIT RAID_MODE<uint32>(NPC_DARNAVAN_CREDIT_10, NPC_DARNAVAN_CREDIT_25, NPC_DARNAVAN_CREDIT_10, NPC_DARNAVAN_CREDIT_25)
+#define QUEST_DEPROGRAMMING RAID_MODE<uint32>(QUEST_DEPROGRAMMING_10, QUEST_DEPROGRAMMING_25, QUEST_DEPROGRAMMING_10, QUEST_DEPROGRAMMING_25)
 
 static const uint32 addEntries[2] = {NPC_CULT_FANATIC, NPC_CULT_ADHERENT};
 
@@ -218,14 +218,6 @@ class boss_lady_deathwhisper : public CreatureScript
             {
                 introDone = false;
                 dominateMindCount = RAID_MODE<uint8>(0, 1, 1, 3);
-            }
-
-            void InitializeAI()
-            {
-                if (!instance || static_cast<InstanceMap*>(me->GetMap())->GetScriptId() != GetScriptId(ICCScriptName))
-                    me->IsAIEnabled = false;
-                else if (!me->isDead())
-                    Reset();
             }
 
             void Reset()
@@ -529,7 +521,7 @@ class boss_lady_deathwhisper : public CreatureScript
                     _SummonAdd(addEntries[addIndexOther], addSpawnPos[addIndexOther*3]);
                     _SummonAdd(addEntries[addIndex], addSpawnPos[addIndexOther*3+1]);
                     _SummonAdd(addEntries[addIndexOther], addSpawnPos[addIndexOther*3+2]);
-                    _SummonAdd(addEntries[urand(0,1)], addSpawnPos[6]);
+                    _SummonAdd(addEntries[urand(0, 1)], addSpawnPos[6]);
                 }
                 ++addWaveCounter;
             }
@@ -545,7 +537,7 @@ class boss_lady_deathwhisper : public CreatureScript
                     _SummonAdd(addEntries[addIndex], addSpawnPos[addIndex*3+2]);
                 }
                 else
-                    _SummonAdd(addEntries[urand(0,1)], addSpawnPos[6]);
+                    _SummonAdd(addEntries[urand(0, 1)], addSpawnPos[6]);
                 ++addWaveCounter;
             }
 
@@ -628,7 +620,7 @@ class boss_lady_deathwhisper : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new boss_lady_deathwhisperAI(creature);
+            return GetIcecrownCitadelAI<boss_lady_deathwhisperAI>(creature);
         }
 };
 
@@ -707,7 +699,7 @@ class npc_cult_fanatic : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new npc_cult_fanaticAI(creature);
+            return GetIcecrownCitadelAI<npc_cult_fanaticAI>(creature);
         }
 };
 
@@ -793,7 +785,7 @@ class npc_cult_adherent : public CreatureScript
 
         CreatureAI* GetAI(Creature* pCreature) const
         {
-            return new npc_cult_adherentAI(pCreature);
+            return GetIcecrownCitadelAI<npc_cult_adherentAI>(pCreature);
         }
 };
 
@@ -833,7 +825,7 @@ class npc_vengeful_shade : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new npc_vengeful_shadeAI(creature);
+            return GetIcecrownCitadelAI<npc_vengeful_shadeAI>(creature);
         }
 };
 
@@ -953,7 +945,7 @@ class npc_darnavan : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new npc_darnavanAI(creature);
+            return GetIcecrownCitadelAI<npc_darnavanAI>(creature);
         }
 };
 
