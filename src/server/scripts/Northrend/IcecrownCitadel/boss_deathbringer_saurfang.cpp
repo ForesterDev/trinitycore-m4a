@@ -114,7 +114,7 @@ enum Spells
 };
 
 // Helper to get id of the aura on different modes (HasAura(baseId) wont work)
-#define BOILING_BLOOD_HELPER RAID_MODE<int32>(72385,72441,72442,72443)
+#define BOILING_BLOOD_HELPER RAID_MODE<int32>(72385, 72441, 72442, 72443)
 
 enum Events
 {
@@ -246,14 +246,6 @@ class boss_deathbringer_saurfang : public CreatureScript
                 ASSERT(creature->GetVehicleKit()); // we dont actually use it, just check if exists
                 introDone = false;
                 fallenChampionCount = 0;
-            }
-
-            void InitializeAI()
-            {
-                if (!instance || static_cast<InstanceMap*>(me->GetMap())->GetScriptId() != GetScriptId(ICCScriptName))
-                    me->IsAIEnabled = false;
-                else if (!me->isDead())
-                    Reset();
             }
 
             void Reset()
@@ -550,7 +542,7 @@ class boss_deathbringer_saurfang : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new boss_deathbringer_saurfangAI(creature);
+            return GetIcecrownCitadelAI<boss_deathbringer_saurfangAI>(creature);
         }
 };
 
@@ -592,11 +584,8 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
                         Talk(SAY_INTRO_HORDE_1);
                         events.SetPhase(PHASE_INTRO_H);
                         events.ScheduleEvent(EVENT_INTRO_HORDE_3, 18500, 0, PHASE_INTRO_H);
-                        if (instance)
-                        {
-                            deathbringerSaurfangGUID = instance->GetData64(DATA_DEATHBRINGER_SAURFANG);
-                            instance->HandleGameObject(instance->GetData64(GO_SAURFANG_S_DOOR), true);
-                        }
+                        deathbringerSaurfangGUID = instance->GetData64(DATA_DEATHBRINGER_SAURFANG);
+                        instance->HandleGameObject(instance->GetData64(GO_SAURFANG_S_DOOR), true);
                         if (Creature* deathbringer = ObjectAccessor::GetCreature(*me, deathbringerSaurfangGUID))
                             deathbringer->AI()->DoAction(PHASE_INTRO_H);
                         break;
@@ -721,7 +710,7 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
                                 float x, y, z;
                                 deathbringer->GetClosePoint(x, y, z, deathbringer->GetObjectSize());
                                 me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                                me->GetMotionMaster()->MovePoint(POINT_CORPSE ,x, y, z);
+                                me->GetMotionMaster()->MovePoint(POINT_CORPSE , x, y, z);
                             }
                             break;
                         case EVENT_OUTRO_HORDE_5:   // move
@@ -769,7 +758,7 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new npc_high_overlord_saurfangAI(creature);
+            return GetIcecrownCitadelAI<npc_high_overlord_saurfangAI>(creature);
         }
 };
 
@@ -810,11 +799,8 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                         me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         Talk(SAY_INTRO_ALLIANCE_1);
                         events.ScheduleEvent(EVENT_INTRO_ALLIANCE_4, 2500+17500+9500, 0, PHASE_INTRO_A);
-                        if (instance)
-                        {
-                            deathbringerSaurfangGUID = instance->GetData64(DATA_DEATHBRINGER_SAURFANG);
-                            instance->HandleGameObject(instance->GetData64(GO_SAURFANG_S_DOOR), true);
-                        }
+                        deathbringerSaurfangGUID = instance->GetData64(DATA_DEATHBRINGER_SAURFANG);
+                        instance->HandleGameObject(instance->GetData64(GO_SAURFANG_S_DOOR), true);
                         if (Creature* deathbringer = ObjectAccessor::GetCreature(*me, deathbringerSaurfangGUID))
                             deathbringer->AI()->DoAction(PHASE_INTRO_A);
                         break;
@@ -923,7 +909,7 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new npc_muradin_bronzebeard_iccAI(creature);
+            return GetIcecrownCitadelAI<npc_muradin_bronzebeard_iccAI>(creature);
         }
 };
 
@@ -968,7 +954,7 @@ class npc_saurfang_event : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new npc_saurfang_eventAI(creature);
+            return GetIcecrownCitadelAI<npc_saurfang_eventAI>(creature);
         }
 };
 

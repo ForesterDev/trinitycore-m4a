@@ -78,9 +78,9 @@ static const uint32 vampireAuras[3][MAX_DIFFICULTY] =
     {70877, 71474, 70877, 71474},
 };
 
-#define ESSENCE_OF_BLOOD_QUEEN     RAID_MODE<uint32>(70867,71473,71532,71533)
-#define ESSENCE_OF_BLOOD_QUEEN_PLR RAID_MODE<uint32>(70879,71525,71530,71531)
-#define FRENZIED_BLOODTHIRST       RAID_MODE<uint32>(70877,71474,70877,71474)
+#define ESSENCE_OF_BLOOD_QUEEN     RAID_MODE<uint32>(70867, 71473, 71532, 71533)
+#define ESSENCE_OF_BLOOD_QUEEN_PLR RAID_MODE<uint32>(70879, 71525, 71530, 71531)
+#define FRENZIED_BLOODTHIRST       RAID_MODE<uint32>(70877, 71474, 70877, 71474)
 
 enum Events
 {
@@ -130,14 +130,6 @@ class boss_blood_queen_lana_thel : public CreatureScript
         {
             boss_blood_queen_lana_thelAI(Creature* creature) : BossAI(creature, DATA_BLOOD_QUEEN_LANA_THEL)
             {
-            }
-
-            void InitializeAI()
-            {
-                if (!instance || static_cast<InstanceMap*>(me->GetMap())->GetScriptId() != GetScriptId(ICCScriptName))
-                    me->IsAIEnabled = false;
-                else if (!me->isDead())
-                    Reset();
             }
 
             void Reset()
@@ -472,7 +464,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new boss_blood_queen_lana_thelAI(creature);
+            return GetIcecrownCitadelAI<boss_blood_queen_lana_thelAI>(creature);
         }
 };
 

@@ -61,7 +61,7 @@ enum Spells
     SPELL_DECIMATE                          = 71123,
 };
 
-#define MUTATED_INFECTION RAID_MODE<int32>(69674,71224,73022,73023)
+#define MUTATED_INFECTION RAID_MODE<int32>(69674, 71224, 73022, 73023)
 
 enum Events
 {
@@ -86,14 +86,6 @@ class boss_rotface : public CreatureScript
             {
                 infectionStage = 0;
                 infectionCooldown = 14000;
-            }
-
-            void InitializeAI()
-            {
-                if (!instance || static_cast<InstanceMap*>(me->GetMap())->GetScriptId() != GetScriptId(ICCScriptName))
-                    me->IsAIEnabled = false;
-                else if (!me->isDead())
-                    Reset();
             }
 
             void Reset()
@@ -237,7 +229,7 @@ class boss_rotface : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new boss_rotfaceAI(creature);
+            return GetIcecrownCitadelAI<boss_rotfaceAI>(creature);
         }
 };
 
@@ -287,7 +279,7 @@ class npc_little_ooze : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new npc_little_oozeAI(creature);
+            return GetIcecrownCitadelAI<npc_little_oozeAI>(creature);
         }
 };
 
@@ -298,7 +290,7 @@ class npc_big_ooze : public CreatureScript
 
         struct npc_big_oozeAI : public ScriptedAI
         {
-            npc_big_oozeAI(Creature* creature) : ScriptedAI(creature)
+            npc_big_oozeAI(Creature* creature) : ScriptedAI(creature), instance(creature->GetInstanceScript())
             {
             }
 
@@ -311,16 +303,14 @@ class npc_big_ooze : public CreatureScript
                 DoCast(me, SPELL_GREEN_ABOMINATION_HITTIN__YA_PROC, true);
                 events.ScheduleEvent(EVENT_STICKY_OOZE, 5000);
                 // register in Rotface's summons - not summoned with Rotface as owner
-                if (InstanceScript* instance = me->GetInstanceScript())
-                    if (Creature* rotface = Unit::GetCreature(*me, instance->GetData64(DATA_ROTFACE)))
-                        rotface->AI()->JustSummoned(me);
+                if (Creature* rotface = Unit::GetCreature(*me, instance->GetData64(DATA_ROTFACE)))
+                    rotface->AI()->JustSummoned(me);
             }
 
             void JustDied(Unit* /*killer*/)
             {
-                if (InstanceScript* instance = me->GetInstanceScript())
-                    if (Creature* rotface = Unit::GetCreature(*me, instance->GetData64(DATA_ROTFACE)))
-                        rotface->AI()->SummonedCreatureDespawn(me);
+                if (Creature* rotface = Unit::GetCreature(*me, instance->GetData64(DATA_ROTFACE)))
+                    rotface->AI()->SummonedCreatureDespawn(me);
                 me->DespawnOrUnsummon();
             }
 
@@ -355,11 +345,12 @@ class npc_big_ooze : public CreatureScript
 
         private:
             EventMap events;
+            InstanceScript* instance;
         };
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new npc_big_oozeAI(creature);
+            return GetIcecrownCitadelAI<npc_big_oozeAI>(creature);
         }
 };
 
@@ -414,8 +405,7 @@ class npc_precious_icc : public CreatureScript
 
             void JustDied(Unit* /*who*/)
             {
-                uint64 rotfaceGUID = instance ? instance->GetData64(DATA_ROTFACE) : 0;
-                if (Creature* rotface = Unit::GetCreature(*me, rotfaceGUID))
+                if (Creature* rotface = Unit::GetCreature(*me, instance->GetData64(DATA_ROTFACE)))
                     if (rotface->isAlive())
                         rotface->AI()->Talk(SAY_PRECIOUS_DIES);
             }
@@ -427,7 +417,7 @@ class npc_precious_icc : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new npc_precious_iccAI(creature);
+            return GetIcecrownCitadelAI<npc_precious_iccAI>(creature);
         }
 };
 
@@ -444,6 +434,7 @@ class spell_rotface_ooze_flood : public SpellScriptLoader
             {
                 if (!GetHitUnit())
                     return;
+
                 std::list<Creature*> list;
                 GetHitUnit()->GetCreatureListWithEntryInGrid(list, GetHitUnit()->GetEntry(), 12.5f);
                 list.sort(Trinity::ObjectDistanceOrderPred(GetHitUnit()));
@@ -454,7 +445,11 @@ class spell_rotface_ooze_flood : public SpellScriptLoader
             {
                 // get 2 targets except 2 nearest
                 targetList.sort(Trinity::ObjectDistanceOrderPred(GetCaster()));
-                targetList.resize(4);
+
+                // .resize() runs pop_back();
+                if (targetList.size() > 4)
+                    targetList.resize(4);
+
                 while (targetList.size() > 2)
                     targetList.pop_front();
             }
