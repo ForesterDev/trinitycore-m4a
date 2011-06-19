@@ -1,5 +1,5 @@
  /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -99,9 +99,6 @@ public:
 
 };
 
-
-
-
 /*######
 ## npc_deathstalker_erland
 ######*/
@@ -173,7 +170,7 @@ public:
 
         void EnterCombat(Unit* who)
         {
-            DoScriptText(RAND(SAY_AGGRO_1,SAY_AGGRO_2), me, who);
+            DoScriptText(RAND(SAY_AGGRO_1, SAY_AGGRO_2), me, who);
         }
     };
 
@@ -196,7 +193,6 @@ public:
     }
 
 };
-
 
 /*######
 ## pyrewood_ambush
@@ -383,8 +379,6 @@ public:
     };
 
 };
-
-
 
 /*######
 ## AddSC

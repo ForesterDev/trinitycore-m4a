@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -90,7 +90,7 @@ public:
         {
             _EnterCombat();
             Enraged = false;
-            DoScriptText(RAND(SAY_AGGRO_1,SAY_AGGRO_2), me);
+            DoScriptText(RAND(SAY_AGGRO_1, SAY_AGGRO_2), me);
             events.ScheduleEvent(EVENT_HATEFUL, 1200);
             events.ScheduleEvent(EVENT_BERSERK, 360000);
 
@@ -119,15 +119,17 @@ public:
                         for (; i != me->getThreatManager().getThreatList().end(); ++i)
                         {
                             Unit *pTarget = (*i)->getTarget();
-                            if (pTarget->isAlive() && pTarget->GetHealth() > MostHP && me->IsWithinMeleeRange(pTarget))
+                            if (pTarget->isAlive() && pTarget != me->getVictim() && pTarget->GetHealth() > MostHP && me->IsWithinMeleeRange(pTarget))
                             {
                                 MostHP = pTarget->GetHealth();
                                 pMostHPTarget = pTarget;
                             }
                         }
 
-                        if (pMostHPTarget)
-                            DoCast(pMostHPTarget, RAID_MODE(SPELL_HATEFUL_STRIKE,H_SPELL_HATEFUL_STRIKE), true);
+                        if (!pMostHPTarget)
+                            pMostHPTarget = me->getVictim();
+
+                        DoCast(pMostHPTarget, RAID_MODE(SPELL_HATEFUL_STRIKE, H_SPELL_HATEFUL_STRIKE), true);
 
                         events.ScheduleEvent(EVENT_HATEFUL, 1200);
                         break;
@@ -156,7 +158,6 @@ public:
     };
 
 };
-
 
 void AddSC_boss_patchwerk()
 {

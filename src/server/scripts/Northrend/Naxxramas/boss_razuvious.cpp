@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -32,14 +32,14 @@
 //8860 death - An honorable... death...
 //8947 - Aggro Mixed? - ?
 
-#define SOUND_AGGRO     RAND(8852,8853,8854)
-#define SOUND_SLAY      RAND(8861,8863)
-#define SOUND_COMMND    RAND(8855,8856,8858,8859,8861)
+#define SOUND_AGGRO     RAND(8852, 8853, 8854)
+#define SOUND_SLAY      RAND(8861, 8863)
+#define SOUND_COMMND    RAND(8855, 8856, 8858, 8859, 8861)
 #define SOUND_DEATH     8860
 #define SOUND_AGGROMIX  8847
 
 #define SPELL_UNBALANCING_STRIKE    26613
-#define SPELL_DISRUPTING_SHOUT      RAID_MODE(29107,55543)
+#define SPELL_DISRUPTING_SHOUT      RAID_MODE(29107, 55543)
 #define SPELL_JAGGED_KNIFE          55550
 #define SPELL_HOPELESS              29125
 
@@ -134,7 +134,6 @@ public:
     };
 
 };
-
 
 void AddSC_boss_razuvious()
 {

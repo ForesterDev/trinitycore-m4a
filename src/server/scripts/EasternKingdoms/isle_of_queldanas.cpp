@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -71,7 +71,7 @@ public:
             {
                 if (Timer <= diff)
                 {
-                    uint32 i = urand(1,2);
+                    uint32 i = urand(1, 2);
                     if (i == 1)
                         DoScriptText(SAY_CONVERTED_1, me);
                     else

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -121,7 +121,7 @@ public:
             if (spellId)
                 caster->CastCustomSpell(unitTarget, spellId, &basePoint, 0, 0, true);
             if (spellId == HUNTER_SPELL_CHIMERA_SHOT_SCORPID && caster->ToPlayer()) // Scorpid Sting - Add 1 minute cooldown
-                caster->ToPlayer()->AddSpellCooldown(spellId,0,uint32(time(NULL) + 60));
+                caster->ToPlayer()->AddSpellCooldown(spellId, 0, uint32(time(NULL) + 60));
         }
 
         void Register()
@@ -281,7 +281,7 @@ public:
                     spellInfo->Id != HUNTER_SPELL_READINESS &&
                     spellInfo->Id != HUNTER_SPELL_BESTIAL_WRATH &&
                     GetSpellRecoveryTime(spellInfo) > 0)
-                    caster->ToPlayer()->RemoveSpellCooldown((itr++)->first,true);
+                    caster->ToPlayer()->RemoveSpellCooldown((itr++)->first, true);
                 else
                     ++itr;
             }
@@ -357,14 +357,14 @@ public:
             return true;
         }
 
-        void HandlePeriodic(AuraEffect const * aurEff, AuraApplication const * aurApp)
+        void HandlePeriodic(AuraEffect const * aurEff)
         {
             PreventDefaultAction();
             if (aurEff->GetAmount() > 0)
                 return;
 
             uint32 spellId = SPELL_SNIPER_TRAINING_BUFF_R1 + GetId() - SPELL_SNIPER_TRAINING_R1;
-            Unit * pTarget = aurApp->GetTarget();
+            Unit * pTarget = GetTarget();
             if (!pTarget->HasAura(spellId))
             {
                 SpellEntry const * triggeredSpellInfo = sSpellStore.LookupEntry(spellId);

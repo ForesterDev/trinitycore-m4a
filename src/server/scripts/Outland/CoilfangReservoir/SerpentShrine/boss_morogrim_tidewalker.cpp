@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -137,7 +137,7 @@ public:
 
         void KilledUnit(Unit * /*victim*/)
         {
-            DoScriptText(RAND(SAY_SLAY1,SAY_SLAY2,SAY_SLAY3), me);
+            DoScriptText(RAND(SAY_SLAY1, SAY_SLAY2, SAY_SLAY3), me);
         }
 
         void JustDied(Unit * /*victim*/)
@@ -183,11 +183,11 @@ public:
                 }
                 else
                 {
-                    DoScriptText(RAND(SAY_SUMMON1,SAY_SUMMON2), me);
+                    DoScriptText(RAND(SAY_SUMMON1, SAY_SUMMON2), me);
 
                     for (uint8 i = 0; i < 10; ++i)
                     {
-                        Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
+                        Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0);
                         Creature* Murloc = me->SummonCreature(NPC_TIDEWALKER_LURKER, MurlocCords[i][0], MurlocCords[i][1], MurlocCords[i][2], MurlocCords[i][3], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
                         if (pTarget && Murloc)
                             Murloc->AI()->AttackStart(pTarget);
@@ -234,7 +234,7 @@ public:
                         }
                     }
 
-                    DoScriptText(RAND(SAY_SUMMON_BUBL1,SAY_SUMMON_BUBL2), me);
+                    DoScriptText(RAND(SAY_SUMMON_BUBL1, SAY_SUMMON_BUBL2), me);
 
                     DoScriptText(EMOTE_WATERY_GRAVE, me);
                     WateryGrave_Timer = 30000;
@@ -337,7 +337,7 @@ public:
                     DoCast(me->getVictim(), SPELL_GLOBULE_EXPLOSION);
 
                     //despawn
-                    me->ForcedDespawn();
+                    me->DespawnOrUnsummon();
                     return;
                 }
                 Check_Timer = 500;
@@ -348,7 +348,6 @@ public:
     };
 
 };
-
 
 void AddSC_boss_morogrim_tidewalker()
 {

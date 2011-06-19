@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -108,7 +108,7 @@ void BattlegroundBE::HandleKillPlayer(Player *player, Player *killer)
         return;
     }
 
-    Battleground::HandleKillPlayer(player,killer);
+    Battleground::HandleKillPlayer(player, killer);
 
     UpdateArenaWorldState();
     CheckArenaWinConditions();
@@ -116,7 +116,7 @@ void BattlegroundBE::HandleKillPlayer(Player *player, Player *killer)
 
 bool BattlegroundBE::HandlePlayerUnderMap(Player *player)
 {
-    player->TeleportTo(GetMapId(),6238.930176f,262.963470f,0.889519f,player->GetOrientation(),false);
+    player->TeleportTo(GetMapId(), 6238.930176f, 262.963470f, 0.889519f, player->GetOrientation(), false);
     return true;
 }
 
@@ -143,7 +143,7 @@ void BattlegroundBE::HandleAreaTrigger(Player *Source, uint32 Trigger)
     }
 
     //if (buff_guid)
-    //    HandleTriggerBuff(buff_guid,Source);
+    //    HandleTriggerBuff(buff_guid, Source);
 }
 
 void BattlegroundBE::FillInitialWorldStates(WorldPacket &data)
@@ -184,7 +184,7 @@ void BattlegroundBE::UpdatePlayerScore(Player* Source, uint32 type, uint32 value
         return;
 
     //there is nothing special in this score
-    Battleground::UpdatePlayerScore(Source,type,value, doAddHonor);
+    Battleground::UpdatePlayerScore(Source, type, value, doAddHonor);
 
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -41,7 +41,7 @@ WorldLog::~WorldLog()
 /// Open the log file (if specified so in the configuration file)
 void WorldLog::Initialize()
 {
-    std::string logsDir = sConfig->GetStringDefault("LogsDir","");
+    std::string logsDir = sConfig->GetStringDefault("LogsDir", "");
 
     if (!logsDir.empty())
     {

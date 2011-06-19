@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -149,8 +149,6 @@ public:
 
 };
 
-
-
 /*######
 ## npc_rinji
 ######*/
@@ -252,7 +250,7 @@ public:
                     return;
 
                 //only if attacked and escorter is not in combat?
-                DoScriptText(RAND(SAY_RIN_HELP_1,SAY_RIN_HELP_2), me);
+                DoScriptText(RAND(SAY_RIN_HELP_1, SAY_RIN_HELP_2), me);
             }
         }
 
@@ -333,7 +331,7 @@ public:
                         }
                         else
                         {
-                            me->ForcedDespawn();
+                            me->DespawnOrUnsummon();
                             return;
                         }
                     }
@@ -349,8 +347,6 @@ public:
     };
 
 };
-
-
 
 void AddSC_hinterlands()
 {

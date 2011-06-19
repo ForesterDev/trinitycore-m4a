@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,13 +18,13 @@
 #include "ScriptPCH.h"
 #include "naxxramas.h"
 
-#define SAY_AGGRO           RAND(-1533109,-1533110,-1533111)
+#define SAY_AGGRO           RAND(-1533109, -1533110, -1533111)
 #define SAY_SLAY            -1533112
-#define SAY_TAUNT           RAND(-1533113,-1533114,-1533115,-1533116,-1533117)
+#define SAY_TAUNT           RAND(-1533113, -1533114, -1533115, -1533116, -1533117)
 #define SAY_DEATH           -1533118
 
 #define SPELL_SPELL_DISRUPTION  29310
-#define SPELL_DECREPIT_FEVER    RAID_MODE(29998,55011)
+#define SPELL_DECREPIT_FEVER    RAID_MODE(29998, 55011)
 #define SPELL_PLAGUE_CLOUD      29350
 
 enum Events
@@ -146,7 +146,6 @@ public:
     };
 
 };
-
 
 void AddSC_boss_heigan()
 {

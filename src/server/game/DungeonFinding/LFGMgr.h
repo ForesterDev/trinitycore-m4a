@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -115,7 +115,6 @@ enum LfgAnswer
     LFG_ANSWER_AGREE                             = 1
 };
 
-
 // Forward declaration (just to have all typedef together)
 struct LfgReward;
 struct LfgLockStatus;
@@ -210,7 +209,6 @@ struct LfgProposalPlayer
     uint32 groupLowGuid;                                   ///< Original group guid (Low guid) 0 if no original group
 };
 
-
 /// Stores group data related to proposal to join
 struct LfgProposal
 {
@@ -262,10 +260,8 @@ class LFGMgr
         void Update(uint32 diff);
 
         // Reward
-        void LoadDungeonEncounters();
         void LoadRewards();
         void RewardDungeonDoneFor(const uint32 dungeonId, Player* player);
-        uint32 GetDungeonIdForAchievement(uint32 achievementId);
         LfgReward const* GetRandomDungeonReward(uint32 dungeon, uint8 level);
 
         // Queue
@@ -348,7 +344,6 @@ class LFGMgr
         LfgDungeonMap m_CachedDungeonMap;                  ///< Stores all dungeons by groupType
         // Reward System
         LfgRewardMap m_RewardMap;                          ///< Stores rewards for random dungeons
-        std::map<uint32, uint32> m_EncountersByAchievement;///< Stores dungeon ids associated with achievements (for rewards)
         // Queue
         LfgQueueInfoMap m_QueueInfoMap;                    ///< Queued groups
         LfgGuidListMap m_currentQueue;                     ///< Ordered list. Used to find groups

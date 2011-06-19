@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -56,8 +56,8 @@ public:
         ai->Spell[0].First_Cast       = 10000;
         ai->Spell[0].Cast_Target_Type = CAST_HOSTILE_TARGET;
 
-        uint32 RandDebuff = RAND(SPELL_GROUND_STOMP,SPELL_ANCIENT_DREAD,SPELL_CAUTERIZING_FLAMES,
-                                 SPELL_WITHERING_HEAT,SPELL_ANCIENT_DESPAIR,SPELL_ANCIENT_HYSTERIA);
+        uint32 RandDebuff = RAND(SPELL_GROUND_STOMP, SPELL_ANCIENT_DREAD, SPELL_CAUTERIZING_FLAMES,
+                                 SPELL_WITHERING_HEAT, SPELL_ANCIENT_DESPAIR, SPELL_ANCIENT_HYSTERIA);
 
         ai->Spell[1].Enabled          = true;
         ai->Spell[1].Spell_Id         = RandDebuff;

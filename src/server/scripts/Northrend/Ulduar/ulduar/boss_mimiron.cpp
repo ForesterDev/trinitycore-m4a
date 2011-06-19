@@ -367,7 +367,7 @@ struct boss_mimironAI : public BossAI
                                     if (pAerialUnit->getStandState() == UNIT_STAND_STATE_DEAD)
                                     {
                                         if (Unit* pTarget = me->SelectNearestTarget())
-                                            pTarget->ToPlayer()->RewardPlayerAndGroupAtKill(pLeviathan);
+                                            pTarget->ToPlayer()->RewardPlayerAndGroupAtKill(pLeviathan, false);
                                         pLeviathan->DisappearAndDie();
                                         pVX_001->DisappearAndDie();
                                         pAerialUnit->DisappearAndDie();
@@ -394,19 +394,19 @@ struct boss_mimironAI : public BossAI
                 case 2:
                     if (pInstance)
                         if (Creature *pLeviathan = Creature::GetCreature((*me), pInstance->GetData64(DATA_LEVIATHAN_MK_II)))
-                            me->EnterVehicle(pLeviathan->GetVehicleKit(), 4);
+                            me->EnterVehicle(pLeviathan, 4);
                     JumpToNextStep(2000);
                     break;
                 case 3:
                     if (pInstance)
                         if (Creature *pLeviathan = Creature::GetCreature((*me), pInstance->GetData64(DATA_LEVIATHAN_MK_II)))
-                            me->EnterVehicle(pLeviathan->GetVehicleKit(), 2);
+                            me->EnterVehicle(pLeviathan, 2);
                     JumpToNextStep(2000);
                     break;
                 case 4:
                     if (pInstance)
                         if (Creature *pLeviathan = Creature::GetCreature((*me), pInstance->GetData64(DATA_LEVIATHAN_MK_II)))
-                            me->EnterVehicle(pLeviathan->GetVehicleKit(), 5);
+                            me->EnterVehicle(pLeviathan, 5);
                     me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_STAND);
                     JumpToNextStep(2500);
                     break;
@@ -418,7 +418,7 @@ struct boss_mimironAI : public BossAI
                 case 6:
                     if (pInstance)
                         if (Creature *pLeviathan = Creature::GetCreature((*me), pInstance->GetData64(DATA_LEVIATHAN_MK_II)))
-                            me->EnterVehicle(pLeviathan->GetVehicleKit(), 6);
+                            me->EnterVehicle(pLeviathan, 6);
                     JumpToNextStep(2000);
                     break;
                 case 7:
@@ -450,7 +450,7 @@ struct boss_mimironAI : public BossAI
                 case 2:
                     if (pInstance)
                         if (Creature *pLeviathan = Creature::GetCreature((*me), pInstance->GetData64(DATA_LEVIATHAN_MK_II)))
-                            me->EnterVehicle(pLeviathan->GetVehicleKit(), 1);
+                            me->EnterVehicle(pLeviathan, 1);
                     JumpToNextStep(2000);
                     break;
                 case 3:
@@ -465,16 +465,16 @@ struct boss_mimironAI : public BossAI
                             pInstance->SetData(DATA_MIMIRON_ELEVATOR, GO_STATE_ACTIVE_ALTERNATIVE);
                             pVX_001->SetVisible(true);
                             if (Creature* Rocket1 = me->SummonCreature(34050, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
-                                Rocket1->EnterVehicle(pVX_001->GetVehicleKit(), 5);
+                                Rocket1->EnterVehicle(pVX_001, 5);
                             if (Creature* Rocket2 = me->SummonCreature(34050, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
-                                Rocket2->EnterVehicle(pVX_001->GetVehicleKit(), 6);
+                                Rocket2->EnterVehicle(pVX_001, 6);
                         }
                     JumpToNextStep(8000);
                     break;
                 case 5:
                     if (pInstance)
                         if (Creature *pVX_001 = Creature::GetCreature((*me), pInstance->GetData64(DATA_VX_001)))
-                            me->EnterVehicle(pVX_001->GetVehicleKit(), 0);
+                            me->EnterVehicle(pVX_001, 0);
                     JumpToNextStep(3500);
                     break;
                 case 6:
@@ -485,7 +485,7 @@ struct boss_mimironAI : public BossAI
                 case 7:
                     if (pInstance)
                         if (Creature *pVX_001 = Creature::GetCreature((*me), pInstance->GetData64(DATA_VX_001)))
-                            me->EnterVehicle(pVX_001->GetVehicleKit(), 1);
+                            me->EnterVehicle(pVX_001, 1);
                     me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_SIT);
                     JumpToNextStep(2000);
                     break;
@@ -521,7 +521,7 @@ struct boss_mimironAI : public BossAI
                 case 1:
                     if (pInstance)
                         if (Creature *pVX_001 = Creature::GetCreature((*me), pInstance->GetData64(DATA_VX_001)))
-                            me->EnterVehicle(pVX_001->GetVehicleKit(), 4);
+                            me->EnterVehicle(pVX_001, 4);
                     me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_STAND);
                     JumpToNextStep(2500);
                     break;
@@ -579,7 +579,7 @@ struct boss_mimironAI : public BossAI
                            pLeviathan->GetMotionMaster()->MovePoint(0, 2744.65, 2569.46, 364.397);
                         if (Creature *pVX_001 = Creature::GetCreature((*me), pInstance->GetData64(DATA_VX_001)))
                         {
-                            me->EnterVehicle(pVX_001->GetVehicleKit(), 1);
+                            me->EnterVehicle(pVX_001->GetVehicleKit()->GetBase(), 1);
                             me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_STAND);
                             DoScriptText(SAY_AERIAL_DEATH, me);
                         }
@@ -593,7 +593,7 @@ struct boss_mimironAI : public BossAI
                             {
                                 pVX_001->SetStandState(UNIT_STAND_STATE_STAND);
                                 pVX_001->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CUSTOM_SPELL_01);
-                                pVX_001->EnterVehicle(pLeviathan->GetVehicleKit(), 7);
+                                pVX_001->EnterVehicle(pLeviathan->GetVehicleKit()->GetBase(), 7);
                             }
                     JumpToNextStep(2000);
                     break;
@@ -603,7 +603,7 @@ struct boss_mimironAI : public BossAI
                             if (Creature *pAerialUnit = Creature::GetCreature((*me), pInstance->GetData64(DATA_AERIAL_UNIT)))
                             {
                                 pAerialUnit->SetFlying(false);
-                                pAerialUnit->EnterVehicle(pVX_001->GetVehicleKit(), 3);
+                                pAerialUnit->EnterVehicle(pVX_001->GetVehicleKit()->GetBase(), 3);
                                 DoScriptText(SAY_V07TRON_ACTIVATE, me);
                             }
                     JumpToNextStep(10000);
@@ -888,7 +888,7 @@ struct boss_leviathan_mk_turretAI : public ScriptedAI
 
         if (uiNapalmShell <= diff)
         {
-            if (Unit *pTarget = SelectUnit(SELECT_TARGET_FARTHEST, 0))
+            if (Unit *pTarget = SelectTarget(SELECT_TARGET_FARTHEST, 0))
                 DoCast(pTarget, RAID_MODE(SPELL_NAPALM_SHELL_10, SPELL_NAPALM_SHELL_25));
             uiNapalmShell = urand(10000, 15000);
         }
@@ -1278,7 +1278,7 @@ struct boss_aerial_unitAI : public BossAI
                         {
                             if (me->getVictim()->IsWithinDist3d(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 35))
                                 DoCastVictim(RAID_MODE(SPELL_PLASMA_BALL_10, SPELL_PLASMA_BALL_25));
-                            else if (Unit *pTarget = SelectUnit(SELECT_TARGET_NEAREST, 0))
+                            else if (Unit *pTarget = SelectTarget(SELECT_TARGET_NEAREST, 0))
                                 DoCast(pTarget, RAID_MODE(SPELL_PLASMA_BALL_10, SPELL_PLASMA_BALL_25));
                         }
                         events.RescheduleEvent(EVENT_PLASMA_BALL, 2000);

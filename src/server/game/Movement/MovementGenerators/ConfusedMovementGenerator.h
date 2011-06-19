@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -40,7 +40,7 @@ class ConfusedMovementGenerator
         bool GetDestination(float &x, float &y, float &z) const
         {
             if (i_destinationHolder.HasArrived()) return false;
-            i_destinationHolder.GetDestination(x,y,z);
+            i_destinationHolder.GetDestination(x, y, z);
             return true;
         }
 
@@ -53,5 +53,4 @@ class ConfusedMovementGenerator
         uint32 i_nextMove;
 };
 #endif
-
 

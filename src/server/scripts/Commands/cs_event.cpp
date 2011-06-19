@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -65,9 +65,9 @@ public:
             GameEventData const& eventData = events[event_id];
 
             if (handler->GetSession())
-                handler->PSendSysMessage(LANG_EVENT_ENTRY_LIST_CHAT,event_id,event_id,eventData.description.c_str(),active);
+                handler->PSendSysMessage(LANG_EVENT_ENTRY_LIST_CHAT, event_id, event_id, eventData.description.c_str(), active);
             else
-                handler->PSendSysMessage(LANG_EVENT_ENTRY_LIST_CONSOLE,event_id,eventData.description.c_str(),active);
+                handler->PSendSysMessage(LANG_EVENT_ENTRY_LIST_CONSOLE, event_id, eventData.description.c_str(), active);
 
             ++counter;
         }
@@ -85,7 +85,7 @@ public:
             return false;
 
         // id or [name] Shift-click form |color|Hgameevent:id|h[name]|h|r
-        char* cId =  handler->extractKeyFromLink((char*)args,"Hgameevent");
+        char* cId =  handler->extractKeyFromLink((char*)args, "Hgameevent");
         if (!cId)
             return false;
 
@@ -122,8 +122,8 @@ public:
         std::string occurenceStr = secsToTimeString(eventData.occurence * MINUTE);
         std::string lengthStr = secsToTimeString(eventData.length * MINUTE);
 
-        handler->PSendSysMessage(LANG_EVENT_INFO,event_id,eventData.description.c_str(),activeStr,
-            startTimeStr.c_str(),endTimeStr.c_str(),occurenceStr.c_str(),lengthStr.c_str(),
+        handler->PSendSysMessage(LANG_EVENT_INFO, event_id, eventData.description.c_str(), activeStr,
+            startTimeStr.c_str(), endTimeStr.c_str(), occurenceStr.c_str(), lengthStr.c_str(),
             nextStr.c_str());
         return true;
     }
@@ -134,7 +134,7 @@ public:
             return false;
 
         // id or [name] Shift-click form |color|Hgameevent:id|h[name]|h|r
-        char* cId =  handler->extractKeyFromLink((char*)args,"Hgameevent");
+        char* cId =  handler->extractKeyFromLink((char*)args, "Hgameevent");
         if (!cId)
             return false;
 
@@ -160,12 +160,12 @@ public:
         GameEventMgr::ActiveEvents const& activeEvents = sGameEventMgr->GetActiveEventList();
         if (activeEvents.find(event_id) != activeEvents.end())
         {
-            handler->PSendSysMessage(LANG_EVENT_ALREADY_ACTIVE,event_id);
+            handler->PSendSysMessage(LANG_EVENT_ALREADY_ACTIVE, event_id);
             handler->SetSentErrorMessage(true);
             return false;
         }
 
-        sGameEventMgr->StartEvent(event_id,true);
+        sGameEventMgr->StartEvent(event_id, true);
         return true;
     }
 
@@ -175,7 +175,7 @@ public:
             return false;
 
         // id or [name] Shift-click form |color|Hgameevent:id|h[name]|h|r
-        char* cId =  handler->extractKeyFromLink((char*)args,"Hgameevent");
+        char* cId =  handler->extractKeyFromLink((char*)args, "Hgameevent");
         if (!cId)
             return false;
 
@@ -202,12 +202,12 @@ public:
 
         if (activeEvents.find(event_id) == activeEvents.end())
         {
-            handler->PSendSysMessage(LANG_EVENT_NOT_ACTIVE,event_id);
+            handler->PSendSysMessage(LANG_EVENT_NOT_ACTIVE, event_id);
             handler->SetSentErrorMessage(true);
             return false;
         }
 
-        sGameEventMgr->StopEvent(event_id,true);
+        sGameEventMgr->StopEvent(event_id, true);
         return true;
     }
 };

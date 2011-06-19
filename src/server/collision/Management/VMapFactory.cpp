@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -32,7 +32,7 @@ namespace VMAP
             char lc = str[str.length()-1];
             if(lc == '\r' || lc == '\n' || lc == ' ' || lc == '"' || lc == '\'')
             {
-                str = str.substr(0,str.length()-1);
+                str = str.substr(0, str.length()-1);
             }
             else
             {
@@ -44,7 +44,7 @@ namespace VMAP
             char lc = str[0];
             if(lc == ' ' || lc == '"' || lc == '\'')
             {
-                str = str.substr(1,str.length()-1);
+                str = str.substr(1, str.length()-1);
             }
             else
             {

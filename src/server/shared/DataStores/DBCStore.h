@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -117,9 +117,9 @@ class DBCStorage
             }
             char * sqlDataTable;
             fieldCount = dbc.GetCols();
-            m_dataTable = (T*)dbc.AutoProduceData(fmt,nCount,(char**&)indexTable, sqlRecordCount, sqlHighestIndex, sqlDataTable);
+            m_dataTable = (T*)dbc.AutoProduceData(fmt, nCount, (char**&)indexTable, sqlRecordCount, sqlHighestIndex, sqlDataTable);
 
-            m_stringPoolList.push_back(dbc.AutoProduceStrings(fmt,(char*)m_dataTable));
+            m_stringPoolList.push_back(dbc.AutoProduceStrings(fmt, (char*)m_dataTable));
 
             // Insert sql data into arrays
             if (result)
@@ -236,7 +236,7 @@ class DBCStorage
             if(!dbc.Load(fn, fmt))
                 return false;
 
-            m_stringPoolList.push_back(dbc.AutoProduceStrings(fmt,(char*)m_dataTable));
+            m_stringPoolList.push_back(dbc.AutoProduceStrings(fmt, (char*)m_dataTable));
 
             return true;
         }

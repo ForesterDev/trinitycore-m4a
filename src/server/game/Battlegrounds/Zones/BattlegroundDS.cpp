@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -131,7 +131,7 @@ void BattlegroundDS::HandleKillPlayer(Player* player, Player* killer)
         return;
     }
 
-    Battleground::HandleKillPlayer(player,killer);
+    Battleground::HandleKillPlayer(player, killer);
 
     UpdateArenaWorldState();
     CheckArenaWinConditions();
@@ -171,7 +171,6 @@ void BattlegroundDS::Reset()
     //call parent's class reset
     Battleground::Reset();
 }
-
 
 bool BattlegroundDS::SetupBattleground()
 {

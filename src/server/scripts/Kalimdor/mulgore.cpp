@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -66,7 +66,6 @@ public:
     }
 
 };
-
 
 /*#####
 # npc_kyle_frenzied
@@ -161,7 +160,7 @@ public:
                     switch(uiEventPhase)
                     {
                         case 1:
-                            if (Unit* pUnit = Unit::GetUnit(*me,uiPlayerGUID))
+                            if (Unit* pUnit = Unit::GetUnit(*me, uiPlayerGUID))
                             {
                                 if (GameObject* pGo = pUnit->GetGameObject(SPELL_LUNCH))
                                 {
@@ -199,7 +198,6 @@ public:
     };
 
 };
-
 
 /*#####
 # npc_plains_vision
@@ -314,7 +312,6 @@ public:
     };
 
 };
-
 
 /*#####
 #

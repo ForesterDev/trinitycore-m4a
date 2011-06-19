@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -49,7 +49,7 @@ public:
 
     struct instance_drak_tharon_InstanceScript : public InstanceScript
     {
-        instance_drak_tharon_InstanceScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
+        instance_drak_tharon_InstanceScript(Map* pMap) : InstanceScript(pMap) {}
 
         uint8 uiDredAchievCounter;
 
@@ -211,7 +211,7 @@ public:
             OUT_LOAD_INST_DATA(in);
 
             char dataHead1, dataHead2;
-            uint16 data0,data1,data2,data3;
+            uint16 data0, data1, data2, data3;
 
             std::istringstream loadStream(in);
             loadStream >> dataHead1 >> dataHead2 >> data0 >> data1 >> data2 >> data3;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -61,7 +61,7 @@ HomeMovementGenerator<Creature>::_setTargetLocation(Creature & owner)
 
     uint32 travel_time = i_destinationHolder.SetDestination(traveller, x, y, z);
     modifyTravelTime(travel_time);
-    owner.ClearUnitState(UNIT_STAT_ALL_STATE & ~UNIT_STAT_EVADE);
+    owner.ClearUnitState(uint32(UNIT_STAT_ALL_STATE & ~UNIT_STAT_EVADE));
 }
 
 bool
@@ -77,7 +77,7 @@ HomeMovementGenerator<Creature>::Update(Creature &owner, const uint32& time_diff
         // restore orientation of not moving creature at returning to home
         if (owner.GetDefaultMovementType() == IDLE_MOTION_TYPE)
         {
-            //sLog->outDebug("Entering HomeMovement::GetDestination(z,y,z)");
+            //sLog->outDebug("Entering HomeMovement::GetDestination(z, y, z)");
             owner.SetOrientation(ori);
             WorldPacket packet;
             owner.BuildHeartBeatMsg(&packet);
@@ -94,5 +94,4 @@ HomeMovementGenerator<Creature>::Update(Creature &owner, const uint32& time_diff
 
     return true;
 }
-
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -86,8 +86,8 @@ class npc_forest_frog : public CreatureScript
 
                     if (cEntry) me->UpdateEntry(cEntry);
 
-                    if (cEntry == 24408) pInstance->SetData(TYPE_RAND_VENDOR_1,DONE);
-                    if (cEntry == 24409) pInstance->SetData(TYPE_RAND_VENDOR_2,DONE);
+                    if (cEntry == 24408) pInstance->SetData(TYPE_RAND_VENDOR_1, DONE);
+                    if (cEntry == 24409) pInstance->SetData(TYPE_RAND_VENDOR_2, DONE);
                 }
             }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -140,7 +140,7 @@ public:
         if (handler->needReportToTarget(target))
             (ChatHandler(target)).PSendSysMessage(LANG_YOURS_MANA_CHANGED, handler->GetNameLink().c_str(), mana, manam);
 
-        target->SetMaxPower(POWER_MANA,manam);
+        target->SetMaxPower(POWER_MANA, manam);
         target->SetPower(POWER_MANA, mana);
 
         return true;
@@ -189,10 +189,10 @@ public:
         if (handler->needReportToTarget(target))
             (ChatHandler(target)).PSendSysMessage(LANG_YOURS_ENERGY_CHANGED, handler->GetNameLink().c_str(), energy/10, energym/10);
 
-        target->SetMaxPower(POWER_ENERGY,energym);
+        target->SetMaxPower(POWER_ENERGY, energym);
         target->SetPower(POWER_ENERGY, energy);
 
-        sLog->outDetail(handler->GetTrinityString(LANG_CURRENT_ENERGY),target->GetMaxPower(POWER_ENERGY));
+        sLog->outDetail(handler->GetTrinityString(LANG_CURRENT_ENERGY), target->GetMaxPower(POWER_ENERGY));
 
         return true;
     }
@@ -240,7 +240,7 @@ public:
         if (handler->needReportToTarget(target))
             (ChatHandler(target)).PSendSysMessage(LANG_YOURS_RAGE_CHANGED, handler->GetNameLink().c_str(), rage/10, ragem/10);
 
-        target->SetMaxPower(POWER_RAGE,ragem);
+        target->SetMaxPower(POWER_RAGE, ragem);
         target->SetPower(POWER_RAGE, rage);
 
         return true;
@@ -274,7 +274,7 @@ public:
         if (handler->needReportToTarget(target))
             (ChatHandler(target)).PSendSysMessage(LANG_YOURS_RUNIC_POWER_CHANGED, handler->GetNameLink().c_str(), rune/10, runem/10);
 
-        target->SetMaxPower(POWER_RUNIC_POWER,runem);
+        target->SetMaxPower(POWER_RUNIC_POWER, runem);
         target->SetPower(POWER_RUNIC_POWER, rune);
 
         return true;
@@ -286,7 +286,7 @@ public:
         if (!*args)
             return false;
 
-        char* pfactionid = handler->extractKeyFromLink((char*)args,"Hfaction");
+        char* pfactionid = handler->extractKeyFromLink((char*)args, "Hfaction");
 
         Creature* target = handler->getSelectedCreature();
         if (!target)
@@ -304,7 +304,7 @@ public:
                 uint32 flag      = target->GetUInt32Value(UNIT_FIELD_FLAGS);
                 uint32 npcflag   = target->GetUInt32Value(UNIT_NPC_FLAGS);
                 uint32 dyflag    = target->GetUInt32Value(UNIT_DYNAMIC_FLAGS);
-                handler->PSendSysMessage(LANG_CURRENT_FACTION,target->GetGUIDLow(),factionid,flag,npcflag,dyflag);
+                handler->PSendSysMessage(LANG_CURRENT_FACTION, target->GetGUIDLow(), factionid, flag, npcflag, dyflag);
             }
             return true;
         }
@@ -348,12 +348,12 @@ public:
             return false;
         }
 
-        handler->PSendSysMessage(LANG_YOU_CHANGE_FACTION, target->GetGUIDLow(),factionid,flag,npcflag,dyflag);
+        handler->PSendSysMessage(LANG_YOU_CHANGE_FACTION, target->GetGUIDLow(), factionid, flag, npcflag, dyflag);
 
         target->setFaction(factionid);
-        target->SetUInt32Value(UNIT_FIELD_FLAGS,flag);
-        target->SetUInt32Value(UNIT_NPC_FLAGS,npcflag);
-        target->SetUInt32Value(UNIT_DYNAMIC_FLAGS,dyflag);
+        target->SetUInt32Value(UNIT_FIELD_FLAGS, flag);
+        target->SetUInt32Value(UNIT_NPC_FLAGS, npcflag);
+        target->SetUInt32Value(UNIT_DYNAMIC_FLAGS, dyflag);
 
         return true;
     }
@@ -489,7 +489,7 @@ public:
 
         if (target->isInFlight())
         {
-            handler->PSendSysMessage(LANG_CHAR_IN_FLIGHT,targetNameLink.c_str());
+            handler->PSendSysMessage(LANG_CHAR_IN_FLIGHT, targetNameLink.c_str());
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -498,11 +498,11 @@ public:
         if (handler->needReportToTarget(target))
             (ChatHandler(target)).PSendSysMessage(LANG_YOURS_ASPEED_CHANGED, handler->GetNameLink().c_str(), ASpeed);
 
-        target->SetSpeed(MOVE_WALK,    ASpeed,true);
-        target->SetSpeed(MOVE_RUN,     ASpeed,true);
-        target->SetSpeed(MOVE_SWIM,    ASpeed,true);
-        //target->SetSpeed(MOVE_TURN,    ASpeed,true);
-        target->SetSpeed(MOVE_FLIGHT,     ASpeed,true);
+        target->SetSpeed(MOVE_WALK,    ASpeed, true);
+        target->SetSpeed(MOVE_RUN,     ASpeed, true);
+        target->SetSpeed(MOVE_SWIM,    ASpeed, true);
+        //target->SetSpeed(MOVE_TURN,    ASpeed, true);
+        target->SetSpeed(MOVE_FLIGHT,     ASpeed, true);
         return true;
     }
 
@@ -537,7 +537,7 @@ public:
 
         if (target->isInFlight())
         {
-            handler->PSendSysMessage(LANG_CHAR_IN_FLIGHT,targetNameLink.c_str());
+            handler->PSendSysMessage(LANG_CHAR_IN_FLIGHT, targetNameLink.c_str());
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -546,7 +546,7 @@ public:
         if (handler->needReportToTarget(target))
             (ChatHandler(target)).PSendSysMessage(LANG_YOURS_SPEED_CHANGED, handler->GetNameLink().c_str(), Speed);
 
-        target->SetSpeed(MOVE_RUN,Speed,true);
+        target->SetSpeed(MOVE_RUN, Speed, true);
 
         return true;
     }
@@ -582,7 +582,7 @@ public:
 
         if (target->isInFlight())
         {
-            handler->PSendSysMessage(LANG_CHAR_IN_FLIGHT,targetNameLink.c_str());
+            handler->PSendSysMessage(LANG_CHAR_IN_FLIGHT, targetNameLink.c_str());
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -591,7 +591,7 @@ public:
         if (handler->needReportToTarget(target))
             (ChatHandler(target)).PSendSysMessage(LANG_YOURS_SWIM_SPEED_CHANGED, handler->GetNameLink().c_str(), Swim);
 
-        target->SetSpeed(MOVE_SWIM,Swim,true);
+        target->SetSpeed(MOVE_SWIM, Swim, true);
 
         return true;
     }
@@ -627,7 +627,7 @@ public:
 
         if (target->isInFlight())
         {
-            handler->PSendSysMessage(LANG_CHAR_IN_FLIGHT,targetNameLink.c_str());
+            handler->PSendSysMessage(LANG_CHAR_IN_FLIGHT, targetNameLink.c_str());
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -636,7 +636,7 @@ public:
         if (handler->needReportToTarget(target))
             (ChatHandler(target)).PSendSysMessage(LANG_YOURS_BACK_SPEED_CHANGED, handler->GetNameLink().c_str(), BSpeed);
 
-        target->SetSpeed(MOVE_RUN_BACK,BSpeed,true);
+        target->SetSpeed(MOVE_RUN_BACK, BSpeed, true);
 
         return true;
     }
@@ -672,12 +672,12 @@ public:
         if (handler->needReportToTarget(target))
             (ChatHandler(target)).PSendSysMessage(LANG_YOURS_FLY_SPEED_CHANGED, handler->GetNameLink().c_str(), FSpeed);
 
-        target->SetSpeed(MOVE_FLIGHT,FSpeed,true);
+        target->SetSpeed(MOVE_FLIGHT, FSpeed, true);
 
         return true;
     }
 
-    //Edit Player Scale
+    //Edit Player or Creature Scale
     static bool HandleModifyScaleCommand(ChatHandler* handler, const char* args)
     {
         if (!*args)
@@ -691,21 +691,24 @@ public:
             return false;
         }
 
-        Player* target = handler->getSelectedPlayer();
+        Unit* target = handler->getSelectedUnit();
         if (!target)
         {
-            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
+            handler->SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
             handler->SetSentErrorMessage(true);
             return false;
         }
 
-        // check online security
-        if (handler->HasLowerSecurity(target, 0))
-            return false;
+        if (target->GetTypeId()==TYPEID_PLAYER)
+        {
+            // check online security
+            if (handler->HasLowerSecurity((Player*)target, 0))
+                return false;
 
-        handler->PSendSysMessage(LANG_YOU_CHANGE_SIZE, Scale, handler->GetNameLink(target).c_str());
-        if (handler->needReportToTarget(target))
-            (ChatHandler(target)).PSendSysMessage(LANG_YOURS_SIZE_CHANGED, handler->GetNameLink().c_str(), Scale);
+            handler->PSendSysMessage(LANG_YOU_CHANGE_SIZE, Scale, handler->GetNameLink((Player*)target).c_str());
+            if (handler->needReportToTarget((Player*)target))
+                (ChatHandler((Player*)target)).PSendSysMessage(LANG_YOURS_SIZE_CHANGED, handler->GetNameLink().c_str(), Scale);
+        }
 
         target->SetFloatValue(OBJECT_FIELD_SCALE_X, Scale);
 
@@ -1149,7 +1152,7 @@ public:
         if (handler->HasLowerSecurity(target, 0))
             return false;
 
-        char* factionTxt = handler->extractKeyFromLink((char*)args,"Hfaction");
+        char* factionTxt = handler->extractKeyFromLink((char*)args, "Hfaction");
         if (!factionTxt)
             return false;
 
@@ -1165,7 +1168,7 @@ public:
         {
             std::string rankStr = rankTxt;
             std::wstring wrankStr;
-            if (!Utf8toWStr(rankStr,wrankStr))
+            if (!Utf8toWStr(rankStr, wrankStr))
                 return false;
             wstrToLower(wrankStr);
 
@@ -1178,12 +1181,12 @@ public:
                     continue;
 
                 std::wstring wrank;
-                if (!Utf8toWStr(rank,wrank))
+                if (!Utf8toWStr(rank, wrank))
                     continue;
 
                 wstrToLower(wrank);
 
-                if (wrank.substr(0,wrankStr.size()) == wrankStr)
+                if (wrank.substr(0, wrankStr.size()) == wrankStr)
                 {
                     char *deltaTxt = strtok(NULL, " ");
                     if (deltaTxt)
@@ -1225,7 +1228,7 @@ public:
             return false;
         }
 
-        target->GetReputationMgr().SetReputation(factionEntry,amount);
+        target->GetReputationMgr().SetReputation(factionEntry, amount);
         handler->PSendSysMessage(LANG_COMMAND_MODIFY_REP, factionEntry->name[handler->GetSessionDbcLocale()], factionId,
             handler->GetNameLink(target).c_str(), target->GetReputationMgr().GetReputation(factionEntry));
         return true;
@@ -1268,7 +1271,7 @@ public:
         else if (target->GetTypeId() == TYPEID_PLAYER && handler->HasLowerSecurity(target->ToPlayer(), 0))
             return false;
 
-        target->SetPhaseMask(phasemask,true);
+        target->SetPhaseMask(phasemask, true);
 
         return true;
     }

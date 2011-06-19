@@ -303,7 +303,7 @@ struct boss_steelbreakerAI : public ScriptedAI
                 break;
                 case EVENT_STATIC_DISRUPTION:
                 {
-                    if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                    if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         DoCast(pTarget, SPELL_STATIC_DISRUPTION);
                     events.ScheduleEvent(EVENT_STATIC_DISRUPTION, 20000 + (rand()%20)*1000);
                 }
@@ -456,7 +456,7 @@ struct boss_runemaster_molgeimAI : public ScriptedAI
                 case EVENT_RUNE_OF_DEATH:
                 {
                     DoScriptText(SAY_MOLGEIM_RUNE_DEATH, me);
-                    if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                    if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         DoCast(pTarget, SPELL_RUNE_OF_DEATH);
                     events.ScheduleEvent(EVENT_RUNE_OF_DEATH, 30000);
                 }
@@ -464,7 +464,7 @@ struct boss_runemaster_molgeimAI : public ScriptedAI
                 case EVENT_RUNE_OF_SUMMONING:
                 {
                     DoScriptText(SAY_MOLGEIM_SUMMON, me);
-                    if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                    if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         DoCast(pTarget, SPELL_RUNE_OF_SUMMONING);
                     events.ScheduleEvent(EVENT_RUNE_OF_SUMMONING, urand(40000, 50000));
                 }
@@ -597,7 +597,7 @@ struct boss_stormcaller_brundirAI : public ScriptedAI
                     DoCast(SPELL_BERSERK);
                 break;
                 case EVENT_CHAIN_LIGHTNING:
-                    if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                    if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         DoCast(pTarget, SPELL_CHAIN_LIGHTNING);
                     events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, urand(4000, 6000));
                 break;
@@ -627,7 +627,7 @@ struct boss_stormcaller_brundirAI : public ScriptedAI
                     events.ScheduleEvent(EVENT_LIGHTNING_TENDRILS, 90000);
                 break;
                 case EVENT_FLIGHT:
-                    if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                    if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         me->GetMotionMaster()->MovePoint(0, pTarget->GetPositionX(), pTarget->GetPositionY(), 440);
                     events.ScheduleEvent(EVENT_FLIGHT, 6000);
                 break;

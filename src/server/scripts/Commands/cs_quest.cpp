@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -61,7 +61,7 @@ public:
 
         // .addquest #entry'
         // number or [name] Shift-click form |color|Hquest:quest_id:quest_level|h[name]|h|r
-        char* cId = handler->extractKeyFromLink((char*)args,"Hquest");
+        char* cId = handler->extractKeyFromLink((char*)args, "Hquest");
         if (!cId)
             return false;
 
@@ -71,24 +71,20 @@ public:
 
         if (!pQuest)
         {
-            handler->PSendSysMessage(LANG_COMMAND_QUEST_NOTFOUND,entry);
+            handler->PSendSysMessage(LANG_COMMAND_QUEST_NOTFOUND, entry);
             handler->SetSentErrorMessage(true);
             return false;
         }
 
         // check item starting quest (it can work incorrectly if added without item in inventory)
-        for (uint32 id = 0; id < sItemStorage.MaxEntry; id++)
-        {
-            ItemPrototype const *pProto = sItemStorage.LookupEntry<ItemPrototype>(id);
-            if (!pProto)
-                continue;
+        ItemTemplateContainer const* itc = sObjectMgr->GetItemTemplateStore();
+        ItemTemplateContainer::const_iterator result = find_if(itc->begin(), itc->end(), Finder<uint32, ItemTemplate>(entry, &ItemTemplate::StartQuest));
 
-            if (pProto->StartQuest == entry)
-            {
-                handler->PSendSysMessage(LANG_COMMAND_QUEST_STARTFROMITEM, entry, pProto->ItemId);
-                handler->SetSentErrorMessage(true);
-                return false;
-            }
+        if (result != itc->end())
+        {
+            handler->PSendSysMessage(LANG_COMMAND_QUEST_STARTFROMITEM, entry, result->second.ItemId);
+            handler->SetSentErrorMessage(true);
+            return false;
         }
 
         // ok, normal (creature/GO starting) quest
@@ -115,7 +111,7 @@ public:
 
         // .removequest #entry'
         // number or [name] Shift-click form |color|Hquest:quest_id:quest_level|h[name]|h|r
-        char* cId = handler->extractKeyFromLink((char*)args,"Hquest");
+        char* cId = handler->extractKeyFromLink((char*)args, "Hquest");
         if (!cId)
             return false;
 
@@ -136,18 +132,15 @@ public:
             uint32 quest = player->GetQuestSlotQuestId(slot);
             if (quest == entry)
             {
-                player->SetQuestSlot(slot,0);
+                player->SetQuestSlot(slot, 0);
 
                 // we ignore unequippable quest items in this case, its' still be equipped
                 player->TakeQuestSourceItem(quest, false);
             }
         }
 
-        // set quest status to not started (will updated in DB at next save)
-        player->SetQuestStatus(entry, QUEST_STATUS_NONE);
-
-        // reset rewarded for restart repeatable quest
-        player->getQuestStatusMap()[entry].m_rewarded = false;
+        player->RemoveActiveQuest(entry);
+        player->RemoveRewardedQuest(entry);
 
         handler->SendSysMessage(LANG_COMMAND_QUEST_REMOVED);
         return true;
@@ -165,7 +158,7 @@ public:
 
         // .quest complete #entry
         // number or [name] Shift-click form |color|Hquest:quest_id:quest_level|h[name]|h|r
-        char* cId = handler->extractKeyFromLink((char*)args,"Hquest");
+        char* cId = handler->extractKeyFromLink((char*)args, "Hquest");
         if (!cId)
             return false;
 
@@ -189,14 +182,14 @@ public:
             if (!id || !count)
                 continue;
 
-            uint32 curItemCount = player->GetItemCount(id,true);
+            uint32 curItemCount = player->GetItemCount(id, true);
 
             ItemPosCountVec dest;
             uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, id, count-curItemCount);
             if (msg == EQUIP_ERR_OK)
             {
                 Item* item = player->StoreNewItem(dest, id, true);
-                player->SendNewItem(item,count-curItemCount,true,false);
+                player->SendNewItem(item, count-curItemCount, true, false);
             }
         }
 
@@ -209,18 +202,18 @@ public:
             if (uint32 spell_id = pQuest->ReqSpell[i])
             {
                 for (uint16 z = 0; z < creaturecount; ++z)
-                    player->CastedCreatureOrGO(creature,0,spell_id);
+                    player->CastedCreatureOrGO(creature, 0, spell_id);
             }
             else if (creature > 0)
             {
-                if (CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creature))
+                if (CreatureTemplate const* cInfo = sObjectMgr->GetCreatureTemplate(creature))
                     for (uint16 z = 0; z < creaturecount; ++z)
-                        player->KilledMonster(cInfo,0);
+                        player->KilledMonster(cInfo, 0);
             }
             else if (creature < 0)
             {
                 for (uint16 z = 0; z < creaturecount; ++z)
-                    player->CastedCreatureOrGO(creature,0,0);
+                    player->CastedCreatureOrGO(creature, 0, 0);
             }
         }
 
@@ -231,7 +224,7 @@ public:
             uint32 curRep = player->GetReputationMgr().GetReputation(repFaction);
             if (curRep < repValue)
                 if (FactionEntry const *factionEntry = sFactionStore.LookupEntry(repFaction))
-                    player->GetReputationMgr().SetReputation(factionEntry,repValue);
+                    player->GetReputationMgr().SetReputation(factionEntry, repValue);
         }
 
         // If the quest requires a SECOND reputation to complete
@@ -241,7 +234,7 @@ public:
             uint32 curRep = player->GetReputationMgr().GetReputation(repFaction);
             if (curRep < repValue2)
                 if (FactionEntry const *factionEntry = sFactionStore.LookupEntry(repFaction))
-                    player->GetReputationMgr().SetReputation(factionEntry,repValue2);
+                    player->GetReputationMgr().SetReputation(factionEntry, repValue2);
         }
 
         // If the quest requires money

@@ -112,10 +112,12 @@ enum KologarnChests
 
 struct boss_kologarnAI : public BossAI
 {
-    boss_kologarnAI(Creature *pCreature) : BossAI(pCreature, BOSS_KOLOGARN), vehicle(me->GetVehicleKit()),
-        left(false), right(false)
+    boss_kologarnAI(Creature *pCreature)
+    : BossAI(pCreature, BOSS_KOLOGARN),
+        left(false),
+        right(false)
     {
-        ASSERT(vehicle);
+        ASSERT(me->GetVehicleKit());
         pInstance = pCreature->GetInstanceScript();
         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
@@ -127,7 +129,6 @@ struct boss_kologarnAI : public BossAI
 
     InstanceScript *pInstance;
 
-    Vehicle *vehicle;
     bool left, right;
     bool Gripped;
     bool emerged;
@@ -218,12 +219,12 @@ struct boss_kologarnAI : public BossAI
         if (RightArm = me->GetCreature(*me, pInstance->GetData64(DATA_RIGHT_ARM)))
         {
             RightArm->Respawn(true);
-            RightArm->EnterVehicle(vehicle, 1);
+            RightArm->EnterVehicle(me, 1);
         }
         if (LeftArm = me->GetCreature(*me, pInstance->GetData64(DATA_LEFT_ARM)))
         {
             LeftArm->Respawn(true);
-            LeftArm->EnterVehicle(vehicle, 0);
+            LeftArm->EnterVehicle(me, 0);
         }
         _Reset();
     }
@@ -307,7 +308,7 @@ struct boss_kologarnAI : public BossAI
                 if (RightArm = me->GetCreature(*me, pInstance->GetData64(DATA_RIGHT_ARM)))
                 {
                     RightArm->Respawn(true);
-                    RightArm->EnterVehicle(vehicle, 1);
+                    RightArm->EnterVehicle(me, 1);
                     DoCast(me, SPELL_ARM_RESPAWN, true);
                     me->MonsterTextEmote(EMOTE_RIGHT, 0, true);
                 }
@@ -317,7 +318,7 @@ struct boss_kologarnAI : public BossAI
                 if (LeftArm = me->GetCreature(*me, pInstance->GetData64(DATA_LEFT_ARM)))
                 {
                     LeftArm->Respawn(true);
-                    LeftArm->EnterVehicle(vehicle, 0);
+                    LeftArm->EnterVehicle(me, 0);
                     DoCast(me, SPELL_ARM_RESPAWN, true);
                     me->MonsterTextEmote(EMOTE_LEFT, 0, true);
                 }

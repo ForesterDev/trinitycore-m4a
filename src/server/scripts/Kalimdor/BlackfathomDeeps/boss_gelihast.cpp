@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -46,7 +46,7 @@ public:
 
         void Reset()
         {
-            uiNetTimer = urand(2000,4000);
+            uiNetTimer = urand(2000, 4000);
             if (pInstance)
                 pInstance->SetData(TYPE_GELIHAST, NOT_STARTED);
         }
@@ -71,7 +71,7 @@ public:
             if (uiNetTimer < diff)
             {
                 DoCastVictim(SPELL_NET);
-                uiNetTimer = urand(4000,7000);
+                uiNetTimer = urand(4000, 7000);
             } else uiNetTimer -= diff;
 
             DoMeleeAttackIfReady();
@@ -79,7 +79,6 @@ public:
     };
 
 };
-
 
 void AddSC_boss_gelihast()
 {

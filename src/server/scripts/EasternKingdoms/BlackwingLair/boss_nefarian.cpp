@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -112,7 +112,7 @@ public:
 
         void EnterCombat(Unit * who)
         {
-            DoScriptText(RAND(SAY_XHEALTH,SAY_AGGRO,SAY_SHADOWFLAME), me);
+            DoScriptText(RAND(SAY_XHEALTH, SAY_AGGRO, SAY_SHADOWFLAME), me);
 
             DoCast(who, SPELL_SHADOWFLAME_INITIAL);
             DoZoneInCombat();
@@ -123,7 +123,7 @@ public:
             if (DespawnTimer <= diff)
             {
                 if (!UpdateVictim())
-                    me->ForcedDespawn();
+                    me->DespawnOrUnsummon();
                 DespawnTimer = 5000;
             } else DespawnTimer -= diff;
 
@@ -174,7 +174,7 @@ public:
                 //On official it is based on what classes are currently on the hostil list
                 //but we can't do that yet so just randomly call one
 
-                switch (urand(0,8))
+                switch (urand(0, 8))
                 {
                     case 0:
                         DoScriptText(SAY_MAGE, me);

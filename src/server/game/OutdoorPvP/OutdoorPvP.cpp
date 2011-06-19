@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -118,10 +118,10 @@ bool OPvPCapturePoint::AddCreature(uint32 type, uint32 entry, uint32 team, uint3
 
 bool OPvPCapturePoint::SetCapturePointData(uint32 entry, uint32 map, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3)
 {
-    sLog->outDebug("Creating capture point %u", entry);
+    sLog->outDebug(LOG_FILTER_OUTDOORPVP, "Creating capture point %u", entry);
 
     // check info existence
-    GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(entry);
+    GameObjectTemplate const* goinfo = sObjectMgr->GetGameObjectTemplate(entry);
     if (!goinfo || goinfo->type != GAMEOBJECT_TYPE_CAPTURE_POINT)
     {
         sLog->outError("OutdoorPvP: GO %u is not capture point!", entry);
@@ -145,7 +145,7 @@ bool OPvPCapturePoint::DelCreature(uint32 type)
 {
     if (!m_Creatures[type])
     {
-        sLog->outDebug("opvp creature type %u was already deleted",type);
+        sLog->outDebug(LOG_FILTER_OUTDOORPVP, "opvp creature type %u was already deleted", type);
         return false;
     }
 
@@ -156,7 +156,7 @@ bool OPvPCapturePoint::DelCreature(uint32 type)
         m_Creatures[type] = 0;
         return false;
     }
-    sLog->outDebug("deleting opvp creature type %u",type);
+    sLog->outDebug(LOG_FILTER_OUTDOORPVP, "deleting opvp creature type %u", type);
     uint32 guid = cr->GetDBTableGUIDLow();
     // Don't save respawn time
     cr->SetRespawnTime(0);
@@ -165,9 +165,12 @@ bool OPvPCapturePoint::DelCreature(uint32 type)
     // beats me why this is needed, but with the recent removal "cleanup" some creatures stay in the map if "properly" deleted
     // so this is a big fat workaround, if AddObjectToRemoveList and DoDelayedMovesAndRemoves worked correctly, this wouldn't be needed
     //if (Map * map = sMapMgr->FindMap(cr->GetMapId()))
-    //    map->Remove(cr,false);
+    //    map->Remove(cr, false);
     // delete respawn time for this creature
-    CharacterDatabase.PExecute("DELETE FROM creature_respawn WHERE guid = '%u'", guid);
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CREATURE_RESPAWN_BY_GUID);
+    stmt->setUInt32(0, guid);
+    CharacterDatabase.Execute(stmt);
+
     cr->AddObjectToRemoveList();
     sObjectMgr->DeleteCreatureData(guid);
     m_CreatureTypes[m_Creatures[type]] = 0;
@@ -211,9 +214,9 @@ bool OPvPCapturePoint::DelCapturePoint()
 
 void OPvPCapturePoint::DeleteSpawns()
 {
-    for (std::map<uint32,uint64>::iterator i = m_Objects.begin(); i != m_Objects.end(); ++i)
+    for (std::map<uint32, uint64>::iterator i = m_Objects.begin(); i != m_Objects.end(); ++i)
         DelObject(i->first);
-    for (std::map<uint32,uint64>::iterator i = m_Creatures.begin(); i != m_Creatures.end(); ++i)
+    for (std::map<uint32, uint64>::iterator i = m_Creatures.begin(); i != m_Creatures.end(); ++i)
         DelCreature(i->first);
     DelCapturePoint();
 }
@@ -251,7 +254,7 @@ void OutdoorPvP::HandlePlayerLeaveZone(Player * plr, uint32 /*zone*/)
     if (!plr->GetSession()->PlayerLogout())
         SendRemoveWorldStates(plr);
     m_players[plr->GetTeamId()].erase(plr);
-    sLog->outDebug("Player %s left an outdoorpvp zone", plr->GetName());
+    sLog->outDebug(LOG_FILTER_OUTDOORPVP, "Player %s left an outdoorpvp zone", plr->GetName());
 }
 
 void OutdoorPvP::HandlePlayerResurrects(Player * /*plr*/, uint32 /*zone*/)
@@ -403,12 +406,12 @@ void OPvPCapturePoint::SendUpdateWorldState(uint32 field, uint32 value)
         // send to all players present in the area
         for (PlayerSet::iterator itr = m_activePlayers[team].begin(); itr != m_activePlayers[team].end(); ++itr)
         {
-            (*itr)->SendUpdateWorldState(field,value);
+            (*itr)->SendUpdateWorldState(field, value);
         }
     }
 }
 
-void OPvPCapturePoint::SendObjectiveComplete(uint32 id,uint64 guid)
+void OPvPCapturePoint::SendObjectiveComplete(uint32 id, uint64 guid)
 {
     uint32 team;
     switch(m_State)
@@ -478,7 +481,7 @@ bool OPvPCapturePoint::IsInsideObjective(Player *plr) const
 bool OutdoorPvP::HandleCustomSpell(Player *plr, uint32 spellId, GameObject * go)
 {
     for (OPvPCapturePointMap::iterator itr = m_capturePoints.begin(); itr != m_capturePoints.end(); ++itr)
-        if (itr->second->HandleCustomSpell(plr,spellId,go))
+        if (itr->second->HandleCustomSpell(plr, spellId, go))
             return true;
 
     return false;
@@ -494,7 +497,7 @@ bool OPvPCapturePoint::HandleCustomSpell(Player *plr, uint32 /*spellId*/, GameOb
 bool OutdoorPvP::HandleOpenGo(Player *plr, uint64 guid)
 {
     for (OPvPCapturePointMap::iterator itr = m_capturePoints.begin(); itr != m_capturePoints.end(); ++itr)
-        if (itr->second->HandleOpenGo(plr,guid) >= 0)
+        if (itr->second->HandleOpenGo(plr, guid) >= 0)
             return true;
 
     return false;
@@ -544,7 +547,7 @@ bool OPvPCapturePoint::HandleDropFlag(Player * /*plr*/, uint32 /*id*/)
 
 int32 OPvPCapturePoint::HandleOpenGo(Player * /*plr*/, uint64 guid)
 {
-    std::map<uint64,uint32>::iterator itr = m_ObjectTypes.find(guid);
+    std::map<uint64, uint32>::iterator itr = m_ObjectTypes.find(guid);
     if (itr != m_ObjectTypes.end())
     {
         return itr->second;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -52,7 +52,7 @@ public:
 
     struct instance_black_temple_InstanceMapScript : public InstanceScript
     {
-        instance_black_temple_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
+        instance_black_temple_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {}
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string str_data;
@@ -136,7 +136,7 @@ public:
                 }
             }
 
-            sLog->outDebug("TSCR: Instance Black Temple: GetPlayerInMap, but PlayerList is empty!");
+            sLog->outDebug(LOG_FILTER_TSCR, "TSCR: Instance Black Temple: GetPlayerInMap, but PlayerList is empty!");
             return NULL;
         }
 
@@ -164,24 +164,24 @@ public:
             switch(go->GetEntry())
             {
             case 185483: NajentusGate = go->GetGUID();// Gate past Naj'entus (at the entrance to Supermoose's courtyards)
-                if (m_auiEncounter[0] == DONE)HandleGameObject(NULL,true,go);break;
+                if (m_auiEncounter[0] == DONE)HandleGameObject(0, true, go);break;
             case 185882: MainTempleDoors = go->GetGUID();// Main Temple Doors - right past Supermoose (Supremus)
-                if (m_auiEncounter[1] == DONE)HandleGameObject(NULL,true,go);break;
+                if (m_auiEncounter[1] == DONE)HandleGameObject(0, true, go);break;
             case 185478: ShadeOfAkamaDoor = go->GetGUID();break;
             case 185480: CommonDoor = go->GetGUID();
-                if (m_auiEncounter[3] == DONE)HandleGameObject(NULL,true,go);break;
+                if (m_auiEncounter[3] == DONE)HandleGameObject(0, true, go);break;
             case 186153: TeronDoor = go->GetGUID();
-                if (m_auiEncounter[3] == DONE)HandleGameObject(NULL,true,go);break;
+                if (m_auiEncounter[3] == DONE)HandleGameObject(0, true, go);break;
             case 185892: GuurtogDoor = go->GetGUID();
-                if (m_auiEncounter[4] == DONE)HandleGameObject(NULL,true,go);break;
+                if (m_auiEncounter[4] == DONE)HandleGameObject(0, true, go);break;
             case 185479: TempleDoor = go->GetGUID();
-                if (m_auiEncounter[5] == DONE)HandleGameObject(NULL,true,go);break;
+                if (m_auiEncounter[5] == DONE)HandleGameObject(0, true, go);break;
             case 185482: MotherDoor = go->GetGUID();
-                if (m_auiEncounter[6] == DONE)HandleGameObject(NULL,true,go);break;
+                if (m_auiEncounter[6] == DONE)HandleGameObject(0, true, go);break;
             case 185481: CouncilDoor = go->GetGUID();
-                if (m_auiEncounter[7] == DONE)HandleGameObject(NULL,true,go);break;
+                if (m_auiEncounter[7] == DONE)HandleGameObject(0, true, go);break;
             case 186152: SimpleDoor = go->GetGUID();
-                if (m_auiEncounter[7] == DONE)HandleGameObject(NULL,true,go);break;
+                if (m_auiEncounter[7] == DONE)HandleGameObject(0, true, go);break;
             case 185905: IllidanGate = go->GetGUID(); break; // Gate leading to Temple Summit
             case 186261: IllidanDoor[0] = go->GetGUID(); break; // Right door at Temple Summit
             case 186262: IllidanDoor[1] = go->GetGUID(); break; // Left door at Temple Summit
@@ -343,7 +343,6 @@ public:
     };
 
 };
-
 
 void AddSC_instance_black_temple()
 {

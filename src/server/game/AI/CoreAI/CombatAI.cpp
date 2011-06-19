@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -20,6 +20,7 @@
 #include "CombatAI.h"
 #include "SpellMgr.h"
 #include "Vehicle.h"
+#include "ObjectAccessor.h"
 
 int AggressorAI::Permissible(const Creature *creature)
 {
@@ -269,7 +270,7 @@ AOEAI::AOEAI(Creature *c) : CreatureAI(c)
     me->SetVisible(true);//visible to see all spell anims
     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);//can't be targeted
     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);//can't be damaged
-    me->SetDisplayId(11686);//invisible model,around a size of a player
+    me->SetDisplayId(11686);//invisible model, around a size of a player
 }
 
 bool AOEAI::CanAIAttack(const Unit * /*who*/) const
@@ -284,7 +285,7 @@ void AOEAI::AttackStart(Unit * /*who*/)
 void AOEAI::UpdateAI(const uint32 /*diff*/)
 {
     if (!me->HasAura(me->m_spells[0]))
-        me->CastSpell(me, me->m_spells[0],false);
+        me->CastSpell(me, me->m_spells[0], false);
 }
 
 //////////////
@@ -298,7 +299,6 @@ VehicleAI::VehicleAI(Creature *c) : CreatureAI(c), m_vehicle(c->GetVehicleKit())
     m_DismissTimer = VEHICLE_DISMISS_TIME;
 }
 
-
 //NOTE: VehicleAI::UpdateAI runs even while the vehicle is mounted
 void VehicleAI::UpdateAI(const uint32 diff)
 {
@@ -310,7 +310,7 @@ void VehicleAI::UpdateAI(const uint32 diff)
         {
             m_DoDismiss = false;
             me->SetVisible(false);
-            me->ForcedDespawn();
+            me->DespawnOrUnsummon();
         }else m_DismissTimer -= diff;
     }
 }
@@ -318,8 +318,6 @@ void VehicleAI::UpdateAI(const uint32 diff)
 void VehicleAI::Reset()
 {
     me->SetVisible(true);
-
-    m_vehicle->Reset();
 }
 
 void VehicleAI::OnCharmed(bool apply)
@@ -340,9 +338,7 @@ void VehicleAI::LoadConditions()
 {
     conditions = sConditionMgr->GetConditionsForNotGroupedEntry(CONDITION_SOURCE_TYPE_CREATURE_TEMPLATE_VEHICLE, me->GetEntry());
     if (!conditions.empty())
-    {
-        sLog->outDebug("VehicleAI::LoadConditions: loaded %u conditions", uint32(conditions.size()));
-    }
+        sLog->outDebug(LOG_FILTER_CONDITIONSYS, "VehicleAI::LoadConditions: loaded %u conditions", uint32(conditions.size()));
 }
 
 void VehicleAI::CheckConditions(const uint32 diff)
@@ -352,7 +348,7 @@ void VehicleAI::CheckConditions(const uint32 diff)
         if (!conditions.empty())
         {
             for (SeatMap::iterator itr = m_vehicle->m_Seats.begin(); itr != m_vehicle->m_Seats.end(); ++itr)
-                if (Unit *passenger = itr->second.passenger)
+                if (Unit* passenger = ObjectAccessor::GetUnit(*m_vehicle->GetBase(), itr->second.passenger))
                 {
                     if (Player* plr = passenger->ToPlayer())
                     {

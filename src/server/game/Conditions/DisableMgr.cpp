@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -44,7 +44,7 @@ void DisableMgr::LoadDisables()
 
     m_DisableMap.clear();
 
-    QueryResult result = WorldDatabase.Query("SELECT sourceType,entry,flags,params_0,params_1 FROM disables");
+    QueryResult result = WorldDatabase.Query("SELECT sourceType, entry, flags, params_0, params_1 FROM disables");
 
     uint32 total_count = 0;
 
@@ -54,7 +54,6 @@ void DisableMgr::LoadDisables()
         sLog->outString();
         return;
     }
-
 
     Field* fields;
     do

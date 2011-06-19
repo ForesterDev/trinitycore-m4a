@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -109,7 +109,7 @@ public:
             uiStaticOverloadTimer = urand(5*IN_MILLISECONDS, 6*IN_MILLISECONDS);
             uiBallLightningTimer = urand(10*IN_MILLISECONDS, 11*IN_MILLISECONDS);
 
-            uiDisperseHealth = 45 + urand(0,10);
+            uiDisperseHealth = 45 + urand(0, 10);
 
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE);
 
@@ -140,7 +140,7 @@ public:
 
         void KilledUnit(Unit * /*victim*/)
         {
-            DoScriptText(RAND(SAY_SLAY_1,SAY_SLAY_2,SAY_SLAY_3), me);
+            DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2, SAY_SLAY_3), me);
         }
 
         void SpellHit(Unit* /*caster*/, const SpellEntry* spell)
@@ -180,7 +180,7 @@ public:
                         pSpark->GetMotionMaster()->MovePoint(DATA_POINT_CALLBACK, pos);
                     }
                     else
-                        pSpark->ForcedDespawn();
+                        pSpark->DespawnOrUnsummon();
                 }
             }
         }
@@ -197,9 +197,9 @@ public:
             {
                 lSparkList.Summon(pSummoned);
 
-                pSummoned->CastSpell(pSummoned, DUNGEON_MODE(SPELL_SPARK_VISUAL_TRIGGER,H_SPELL_SPARK_VISUAL_TRIGGER), true);
+                pSummoned->CastSpell(pSummoned, DUNGEON_MODE(SPELL_SPARK_VISUAL_TRIGGER, H_SPELL_SPARK_VISUAL_TRIGGER), true);
 
-                Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
+                Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0);
                 if (pTarget)
                 {
                     pSummoned->SetInCombatWith(pTarget);
@@ -257,7 +257,7 @@ public:
 
             if (uiStaticOverloadTimer <= uiDiff)
             {
-                if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     DoCast(pTarget, SPELL_STATIC_OVERLOAD);
 
                 uiStaticOverloadTimer = urand(5*IN_MILLISECONDS, 6*IN_MILLISECONDS);
@@ -278,7 +278,7 @@ public:
             {
                 bHasDispersed = true;
 
-                DoScriptText(RAND(SAY_SPLIT_1,SAY_SPLIT_2), me);
+                DoScriptText(RAND(SAY_SPLIT_1, SAY_SPLIT_2), me);
 
                 if (me->IsNonMeleeSpellCasted(false))
                     me->InterruptNonMeleeSpells(false);
@@ -291,8 +291,6 @@ public:
     };
 
 };
-
-
 
 /*######
 ## mob_spark_of_ionar
@@ -331,7 +329,7 @@ public:
                 return;
 
             if (uiPointId == DATA_POINT_CALLBACK)
-                me->ForcedDespawn();
+                me->DespawnOrUnsummon();
         }
 
         void DamageTaken(Unit * /*pDoneBy*/, uint32 &uiDamage)
@@ -344,7 +342,7 @@ public:
             // Despawn if the encounter is not running
             if (pInstance && pInstance->GetData(TYPE_IONAR) != IN_PROGRESS)
             {
-                me->ForcedDespawn();
+                me->DespawnOrUnsummon();
                 return;
             }
 
@@ -367,7 +365,7 @@ public:
                         }
                     }
                     else
-                        me->ForcedDespawn();
+                        me->DespawnOrUnsummon();
                 }
                 uiCheckTimer = 2*IN_MILLISECONDS;
             }
@@ -379,7 +377,6 @@ public:
     };
 
 };
-
 
 void AddSC_boss_ionar()
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -188,8 +188,6 @@ public:
 
 };
 
-
-
 /*######
 ## npc_defias_traitor
 ######*/
@@ -248,22 +246,20 @@ public:
                     DoScriptText(SAY_END, me, pPlayer);
                     {
                         if (pPlayer)
-                            pPlayer->GroupEventHappens(QUEST_DEFIAS_BROTHERHOOD,me);
+                            pPlayer->GroupEventHappens(QUEST_DEFIAS_BROTHERHOOD, me);
                     }
                     break;
             }
         }
         void EnterCombat(Unit* who)
         {
-            DoScriptText(RAND(SAY_AGGRO_1,SAY_AGGRO_2), me, who);
+            DoScriptText(RAND(SAY_AGGRO_1, SAY_AGGRO_2), me, who);
         }
 
         void Reset() {}
     };
 
 };
-
-
 
 void AddSC_westfall()
 {

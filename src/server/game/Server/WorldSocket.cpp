@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -49,7 +49,7 @@
 #if defined(__GNUC__)
 #pragma pack(1)
 #else
-#pragma pack(push,1)
+#pragma pack(push, 1)
 #endif
 
 struct ServerPktHeader
@@ -62,7 +62,7 @@ struct ServerPktHeader
         uint8 headerIndex=0;
         if (isLargePacket())
         {
-            sLog->outDebug("initializing large server to client packet. Size: %u, cmd: %u", size, cmd);
+            sLog->outDebug(LOG_FILTER_NETWORKIO, "initializing large server to client packet. Size: %u, cmd: %u", size, cmd);
             header[headerIndex++] = 0x80|(0xFF &(size>>16));
         }
         header[headerIndex++] = 0xFF &(size>>8);
@@ -207,7 +207,7 @@ int WorldSocket::SendPacket (const WorldPacket& pct)
         if (!pct.empty())
             mb->copy((const char*)pct.contents(), pct.size());
 
-        if (msg_queue()->enqueue_tail(mb,(ACE_Time_Value*)&ACE_Time_Value::zero) == -1)
+        if (msg_queue()->enqueue_tail(mb, (ACE_Time_Value*)&ACE_Time_Value::zero) == -1)
         {
             sLog->outError("WorldSocket::SendPacket enqueue_tail failed");
             mb->release();
@@ -310,7 +310,7 @@ int WorldSocket::handle_input (ACE_HANDLE)
             if ((errno == EWOULDBLOCK) ||
                 (errno == EAGAIN))
             {
-                return Update();                           // interesting line ,isn't it ?
+                return Update();                           // interesting line , isn't it ?
             }
 
             sLog->outStaticDebug("WorldSocket::handle_input: Peer error closing connection errno = %s", ACE_OS::strerror (errno));
@@ -460,6 +460,7 @@ int WorldSocket::handle_close (ACE_HANDLE h, ACE_Reactor_Mask)
         m_Session = NULL;
     }
 
+    reactor()->remove_handler(this, ACE_Event_Handler::DONT_CALL | ACE_Event_Handler::ALL_EVENTS_MASK);
     return 0;
 }
 
@@ -494,8 +495,12 @@ int WorldSocket::handle_input_header (void)
 
     if ((header.size < 4) || (header.size > 10240) || (header.cmd  > 10240))
     {
-        sLog->outError ("WorldSocket::handle_input_header: client sent malformed packet size = %d , cmd = %d",
-                       header.size, header.cmd);
+        Player *_player = m_Session ? m_Session->GetPlayer() : NULL;
+        sLog->outError ("WorldSocket::handle_input_header(): client (account: %u, char [GUID: %u, name: %s]) sent malformed packet (size: %d , cmd: %d)",
+            m_Session ? m_Session->GetAccountId() : 0,
+            _player ? _player->GetGUIDLow() : 0,
+            _player ? _player->GetName() : "<none>",
+            header.size, header.cmd);
 
         errno = EINVAL;
         return -1;
@@ -594,7 +599,7 @@ int WorldSocket::handle_input_missing_data (void)
 
         // Its possible on some error situations that this happens
         // for example on closing when epoll receives more chunked data and stuff
-        // hope this is not hack ,as proper m_RecvWPct is asserted around
+        // hope this is not hack , as proper m_RecvWPct is asserted around
         if (!m_RecvWPct)
         {
             sLog->outError ("Forcing close on input m_RecvWPct = NULL");
@@ -717,7 +722,7 @@ int WorldSocket::ProcessIncoming (WorldPacket* new_pct)
                 sScriptMgr->OnPacketReceive(this, WorldPacket(*new_pct));
                 return HandleAuthSession (*new_pct);
             case CMSG_KEEP_ALIVE:
-                sLog->outStaticDebug ("CMSG_KEEP_ALIVE ,size: " UI64FMTD, uint64(new_pct->size()));
+                sLog->outStaticDebug ("CMSG_KEEP_ALIVE , size: " UI64FMTD, uint64(new_pct->size()));
                 sScriptMgr->OnPacketReceive(this, WorldPacket(*new_pct));
                 if (m_Session)
                     m_Session->ResetTimeOutTime();
@@ -732,7 +737,7 @@ int WorldSocket::ProcessIncoming (WorldPacket* new_pct)
                     // Catches people idling on the login screen and any lingering ingame connections.
                     m_Session->ResetTimeOutTime();
 
-                    // OK ,give the packet to WorldSession
+                    // OK , give the packet to WorldSession
                     aptr.release();
                     // WARNINIG here we call it with locks held.
                     // Its possible to cause deadlock if QueuePacket calls back
@@ -753,7 +758,7 @@ int WorldSocket::ProcessIncoming (WorldPacket* new_pct)
                 opcode, GetRemoteAddress().c_str(), m_Session?m_Session->GetAccountId():-1);
         if (sLog->IsOutDebug())
         {
-            sLog->outDebug("Dumping error causing packet:");
+            sLog->outDebug(LOG_FILTER_NETWORKIO, "Dumping error causing packet:");
             new_pct->hexlike();
         }
 
@@ -860,7 +865,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
     const char* sStr = s.AsHexStr();                       //Must be freed by OPENSSL_free()
     const char* vStr = v.AsHexStr();                       //Must be freed by OPENSSL_free()
 
-    sLog->outStaticDebug ("WorldSocket::HandleAuthSession: (s,v) check s: %s v: %s",
+    sLog->outStaticDebug ("WorldSocket::HandleAuthSession: (s, v) check s: %s v: %s",
                 sStr,
                 vStr);
 
@@ -934,7 +939,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
 
     // Check locked state for server
     AccountTypes allowedAccountType = sWorld->GetPlayerSecurityLimit();
-    sLog->outDebug("Allowed Level: %u Player Level %u", allowedAccountType, AccountTypes(security));
+    sLog->outDebug(LOG_FILTER_NETWORKIO, "Allowed Level: %u Player Level %u", allowedAccountType, AccountTypes(security));
     if (allowedAccountType > SEC_PLAYER && AccountTypes(security) < allowedAccountType)
     {
         WorldPacket Packet (SMSG_AUTH_RESPONSE, 1);
@@ -1034,9 +1039,12 @@ int WorldSocket::HandlePing (WorldPacket& recvPacket)
 
                 if (m_Session && m_Session->GetSecurity() == SEC_PLAYER)
                 {
-                    sLog->outError  ("WorldSocket::HandlePing: Player kicked for "
-                                    "over-speed pings address = %s",
-                                    GetRemoteAddress().c_str());
+                    Player* _player = m_Session->GetPlayer();
+                    sLog->outError("WorldSocket::HandlePing: Player (account: %u, GUID: %u, name: %s) kicked for over-speed pings (address: %s)",
+                        m_Session->GetAccountId(),
+                        _player ? _player->GetGUIDLow() : 0,
+                        _player ? _player->GetName() : "<none>",
+                        GetRemoteAddress().c_str());
 
                     return -1;
                 }
@@ -1055,7 +1063,7 @@ int WorldSocket::HandlePing (WorldPacket& recvPacket)
         else
         {
             sLog->outError ("WorldSocket::HandlePing: peer sent CMSG_PING, "
-                            "but is not authenticated or got recently kicked,"
+                            "but is not authenticated or got recently kicked, "
                             " address = %s",
                             GetRemoteAddress().c_str());
              return -1;

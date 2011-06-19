@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -60,7 +60,7 @@ struct Traveller
 template<class T>
 inline uint32 Traveller<T>::GetTotalTrevelTimeTo(float x, float y, float z)
 {
-    float dist = GetMoveDestinationTo(x,y,z);
+    float dist = GetMoveDestinationTo(x, y, z);
     float speed = Speed();
     if (speed < 0.0f)
         return 0xfffffffe;  // almost infinity-unit should stop

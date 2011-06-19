@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -35,13 +35,12 @@ void CreatureAI::OnCharmed(bool /*apply*/)
 AISpellInfoType * UnitAI::AISpellInfo;
  AISpellInfoType * GetAISpellInfo(uint32 i) { return &CreatureAI::AISpellInfo[i]; }
 
-
 void CreatureAI::Talk(uint8 id, uint64 WhisperGuid)
 {
     sCreatureTextMgr->SendChat(me, id, WhisperGuid);
 }
 
-void CreatureAI::DoZoneInCombat(Creature* creature)
+void CreatureAI::DoZoneInCombat(Creature* creature /*= NULL*/)
 {
     if (!creature)
         creature = me;
@@ -141,7 +140,7 @@ void CreatureAI::EnterEvadeMode()
     if (!_EnterEvadeMode())
         return;
 
-    sLog->outDebug("Creature %u enters evade mode.", me->GetEntry());
+    sLog->outDebug(LOG_FILTER_UNITS, "Creature %u enters evade mode.", me->GetEntry());
 
     if (!me->GetVehicle()) // otherwise me will be in evade mode forever
     {
@@ -157,7 +156,7 @@ void CreatureAI::EnterEvadeMode()
     Reset();
 
     if (me->IsVehicle()) // use the same sequence of addtoworld, aireset may remove all summons!
-        me->GetVehicleKit()->Reset();
+        me->GetVehicleKit()->Reset(true);
 }
 
 /*void CreatureAI::AttackedBy(Unit* attacker)

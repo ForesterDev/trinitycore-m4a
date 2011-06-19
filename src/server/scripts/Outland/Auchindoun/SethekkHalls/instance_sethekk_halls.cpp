@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -44,7 +44,7 @@ public:
 
     struct instance_sethekk_halls_InstanceMapScript : public InstanceScript
     {
-        instance_sethekk_halls_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
+        instance_sethekk_halls_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {}
 
         uint32 AnzuEncounter;
         uint64 m_uiIkissDoorGUID;
@@ -78,7 +78,7 @@ public:
             {
                 case DATA_IKISSDOOREVENT:
                     if (data == DONE)
-                        DoUseDoorOrButton(m_uiIkissDoorGUID,DAY*IN_MILLISECONDS);
+                        DoUseDoorOrButton(m_uiIkissDoorGUID, DAY*IN_MILLISECONDS);
                     break;
                 case TYPE_ANZU_ENCOUNTER:
                     AnzuEncounter = data;
@@ -88,7 +88,6 @@ public:
     };
 
 };
-
 
 void AddSC_instance_sethekk_halls()
 {

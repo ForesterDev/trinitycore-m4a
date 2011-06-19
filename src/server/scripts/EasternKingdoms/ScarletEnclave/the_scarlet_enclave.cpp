@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -77,7 +77,7 @@ public:
                         FlyBackTimer = 500;
                         break;
                     case 1:
-                        plr->GetClosePoint(x,y,z, me->GetObjectSize());
+                        plr->GetClosePoint(x, y, z, me->GetObjectSize());
                         z += 2.5; x -= 2; y -= 1.5;
                         me->GetMotionMaster()->MovePoint(0, x, y, z);
                         me->SetUInt64Value(UNIT_FIELD_TARGET, plr->GetGUID());
@@ -110,7 +110,6 @@ public:
     };
 
 };
-
 
 void AddSC_the_scarlet_enclave()
 {

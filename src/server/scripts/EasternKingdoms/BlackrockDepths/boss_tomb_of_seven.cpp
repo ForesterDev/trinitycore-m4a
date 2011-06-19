@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -74,7 +74,7 @@ public:
                 if (InstanceScript* pInstance = pCreature->GetInstanceScript())
                 {
                     //are 5 minutes expected? go template may have data to despawn when used at quest
-                    pInstance->DoRespawnGameObject(pInstance->GetData64(DATA_GO_CHALICE),MINUTE*5);
+                    pInstance->DoRespawnGameObject(pInstance->GetData64(DATA_GO_CHALICE), MINUTE*5);
                 }
                 break;
         }
@@ -94,7 +94,6 @@ public:
     }
 
 };
-
 
 enum DoomrelSpells
 {
@@ -130,7 +129,7 @@ public:
                 pCreature->AI()->AttackStart(pPlayer);
                 InstanceScript* pInstance = pCreature->GetInstanceScript();
                 if (pInstance)
-                    pInstance->SetData64(DATA_EVENSTARTER,pPlayer->GetGUID());
+                    pInstance->SetData64(DATA_EVENSTARTER, pPlayer->GetGUID());
                 break;
         }
         return true;

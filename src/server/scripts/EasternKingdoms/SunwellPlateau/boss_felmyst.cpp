@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -187,7 +187,7 @@ public:
 
         void KilledUnit(Unit* /*victim*/)
         {
-            DoScriptText(RAND(YELL_KILL1,YELL_KILL2), me);
+            DoScriptText(RAND(YELL_KILL1, YELL_KILL2), me);
         }
 
         void JustRespawned()
@@ -436,20 +436,20 @@ public:
                         break;
                     case EVENT_CLEAVE:
                         DoCast(me->getVictim(), SPELL_CLEAVE, false);
-                        events.ScheduleEvent(EVENT_CLEAVE, urand(5000,10000));
+                        events.ScheduleEvent(EVENT_CLEAVE, urand(5000, 10000));
                         break;
                     case EVENT_CORROSION:
                         DoCast(me->getVictim(), SPELL_CORROSION, false);
-                        events.ScheduleEvent(EVENT_CORROSION, urand(20000,30000));
+                        events.ScheduleEvent(EVENT_CORROSION, urand(20000, 30000));
                         break;
                     case EVENT_GAS_NOVA:
                         DoCast(me, SPELL_GAS_NOVA, false);
-                        events.ScheduleEvent(EVENT_GAS_NOVA, urand(20000,25000));
+                        events.ScheduleEvent(EVENT_GAS_NOVA, urand(20000, 25000));
                         break;
                     case EVENT_ENCAPSULATE:
                         if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 150, true))
                             DoCast(pTarget, SPELL_ENCAPSULATE_CHANNEL, false);
-                        events.ScheduleEvent(EVENT_ENCAPSULATE, urand(25000,30000));
+                        events.ScheduleEvent(EVENT_ENCAPSULATE, urand(25000, 30000));
                         break;
                     case EVENT_FLIGHT:
                         EnterPhase(PHASE_FLIGHT);
@@ -582,9 +582,6 @@ public:
     };
 
 };
-
-
-
 
 void AddSC_boss_felmyst()
 {

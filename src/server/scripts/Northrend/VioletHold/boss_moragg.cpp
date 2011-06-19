@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -127,14 +127,13 @@ public:
                 else if (pInstance->GetData(DATA_WAVE_COUNT) == 12)
                 {
                     pInstance->SetData(DATA_2ND_BOSS_EVENT, DONE);
-                    pInstance->SetData(DATA_WAVE_COUNT,13);
+                    pInstance->SetData(DATA_WAVE_COUNT, 13);
                 }
             }
         }
     };
 
 };
-
 
 void AddSC_boss_moragg()
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -48,7 +48,7 @@ public:
 
     struct instance_ruins_of_ahn_qiraj_InstanceMapScript : public InstanceScript
     {
-        instance_ruins_of_ahn_qiraj_InstanceMapScript(Map* pMap) : InstanceScript(pMap) { Initialize(); }
+        instance_ruins_of_ahn_qiraj_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {}
 
         uint64 uiKurinaxx;
         uint64 uiRajaxx;
@@ -211,7 +211,6 @@ public:
     };
 
 };
-
 
 void AddSC_instance_ruins_of_ahnqiraj()
 {

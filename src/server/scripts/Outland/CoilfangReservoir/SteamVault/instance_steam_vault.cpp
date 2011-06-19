@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -51,10 +51,10 @@ public:
             return false;
 
         if (go->GetEntry() == ACCESS_PANEL_HYDRO && (pInstance->GetData(TYPE_HYDROMANCER_THESPIA) == DONE || pInstance->GetData(TYPE_HYDROMANCER_THESPIA) == SPECIAL))
-            pInstance->SetData(TYPE_HYDROMANCER_THESPIA,SPECIAL);
+            pInstance->SetData(TYPE_HYDROMANCER_THESPIA, SPECIAL);
 
         if (go->GetEntry() == ACCESS_PANEL_MEK && (pInstance->GetData(TYPE_MEKGINEER_STEAMRIGGER) == DONE || pInstance->GetData(TYPE_MEKGINEER_STEAMRIGGER) == SPECIAL))
-            pInstance->SetData(TYPE_MEKGINEER_STEAMRIGGER,SPECIAL);
+            pInstance->SetData(TYPE_MEKGINEER_STEAMRIGGER, SPECIAL);
 
         return true;
     }
@@ -73,7 +73,7 @@ public:
 
     struct instance_steam_vault_InstanceMapScript : public InstanceScript
     {
-        instance_steam_vault_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
+        instance_steam_vault_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {}
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
 
@@ -138,7 +138,7 @@ public:
                         if (GetData(TYPE_MEKGINEER_STEAMRIGGER) == SPECIAL)
                             HandleGameObject(MainChambersDoor, true);
 
-                        sLog->outDebug("TSCR: Instance Steamvault: Access panel used.");
+                        sLog->outDebug(LOG_FILTER_TSCR, "TSCR: Instance Steamvault: Access panel used.");
                     }
                     m_auiEncounter[0] = data;
                     break;
@@ -150,7 +150,7 @@ public:
                         if (GetData(TYPE_HYDROMANCER_THESPIA) == SPECIAL)
                             HandleGameObject(MainChambersDoor, true);
 
-                        sLog->outDebug("TSCR: Instance Steamvault: Access panel used.");
+                        sLog->outDebug(LOG_FILTER_TSCR, "TSCR: Instance Steamvault: Access panel used.");
                     }
                     m_auiEncounter[1] = data;
                     break;
@@ -229,7 +229,6 @@ public:
     };
 
 };
-
 
 void AddSC_instance_steam_vault()
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -48,7 +48,7 @@ public:
 
         void Reset()
         {
-            uiPoisonCloudTimer = urand(5000,9000);
+            uiPoisonCloudTimer = urand(5000, 9000);
             bIsEnraged = false;
             if (pInstance)
                 pInstance->SetData(TYPE_AKU_MAI, NOT_STARTED);
@@ -74,12 +74,12 @@ public:
             if (uiPoisonCloudTimer < diff)
             {
                 DoCastVictim(SPELL_POISON_CLOUD);
-                uiPoisonCloudTimer = urand(25000,50000);
+                uiPoisonCloudTimer = urand(25000, 50000);
             } else uiPoisonCloudTimer -= diff;
 
             if (!bIsEnraged && HealthBelowPct(30))
             {
-                DoCast(me,SPELL_FRENZIED_RAGE);
+                DoCast(me, SPELL_FRENZIED_RAGE);
                 bIsEnraged = true;
             }
 
@@ -88,7 +88,6 @@ public:
     };
 
 };
-
 
 void AddSC_boss_aku_mai()
 {

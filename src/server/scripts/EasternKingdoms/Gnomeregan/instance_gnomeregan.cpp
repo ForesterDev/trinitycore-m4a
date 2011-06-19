@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -34,8 +34,7 @@ public:
     {
         instance_gnomeregan_InstanceMapScript(Map* pMap) : InstanceScript(pMap)
         {
-            Initialize();
-        };
+        }
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
 
@@ -91,12 +90,12 @@ public:
                 case GO_CAVE_IN_LEFT:
                     uiCaveInLeftGUID = go->GetGUID();
                     if (m_auiEncounter[0] == DONE || m_auiEncounter[0] == NOT_STARTED)
-                        HandleGameObject(NULL,false,go);
+                        HandleGameObject(0, false, go);
                     break;
                 case GO_CAVE_IN_RIGHT:
                     uiCaveInRightGUID = go->GetGUID();
                     if (m_auiEncounter[0] == DONE || m_auiEncounter[0] == NOT_STARTED)
-                        HandleGameObject(NULL,false,go);
+                        HandleGameObject(0, false, go);
                     break;
             }
         }
@@ -136,7 +135,6 @@ public:
     };
 
 };
-
 
 void AddSC_instance_gnomeregan()
 {

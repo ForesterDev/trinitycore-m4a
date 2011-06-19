@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 
 /* Script Data Start
 SDName: Boss epoch
@@ -124,7 +123,7 @@ public:
 
             if (uiTimeWarpTimer < diff)
             {
-                DoScriptText(RAND(SAY_TIME_WARP_1,SAY_TIME_WARP_2,SAY_TIME_WARP_3), me);
+                DoScriptText(RAND(SAY_TIME_WARP_1, SAY_TIME_WARP_2, SAY_TIME_WARP_3), me);
                 DoCastAOE(SPELL_TIME_WARP);
                 uiTimeWarpTimer = 25300;
             } else uiTimeWarpTimer -= diff;
@@ -145,12 +144,11 @@ public:
             if (victim == me)
                 return;
 
-            DoScriptText(RAND(SAY_SLAY_1,SAY_SLAY_2,SAY_SLAY_3), me);
+            DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2, SAY_SLAY_3), me);
         }
     };
 
 };
-
 
 void AddSC_boss_epoch()
 {

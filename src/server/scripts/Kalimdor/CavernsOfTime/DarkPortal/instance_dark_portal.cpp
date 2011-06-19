@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -75,7 +75,6 @@ public:
     {
         instance_dark_portal_InstanceMapScript(Map* pMap) : InstanceScript(pMap)
         {
-            Initialize();
         }
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
@@ -112,7 +111,7 @@ public:
 
         void InitWorldState(bool Enable = true)
         {
-            DoUpdateWorldState(WORLD_STATE_BM,Enable ? 1 : 0);
+            DoUpdateWorldState(WORLD_STATE_BM, Enable ? 1 : 0);
             DoUpdateWorldState(WORLD_STATE_BM_SHIELD, 100);
             DoUpdateWorldState(WORLD_STATE_BM_RIFT, 0);
         }
@@ -131,7 +130,7 @@ public:
             if (GetData(TYPE_MEDIVH) == IN_PROGRESS)
                 return;
 
-            pPlayer->SendUpdateWorldState(WORLD_STATE_BM,0);
+            pPlayer->SendUpdateWorldState(WORLD_STATE_BM, 0);
         }
 
         void OnCreatureCreate(Creature* creature)
@@ -194,7 +193,7 @@ public:
                 {
                     if (data == IN_PROGRESS)
                     {
-                        sLog->outDebug("TSCR: Instance Dark Portal: Starting event.");
+                        sLog->outDebug(LOG_FILTER_TSCR, "TSCR: Instance Dark Portal: Starting event.");
                         InitWorldState();
                         m_auiEncounter[1] = IN_PROGRESS;
                         NextPortal_Timer = 15000;
@@ -203,7 +202,7 @@ public:
                     if (data == DONE)
                     {
                         //this may be completed further out in the post-event
-                        sLog->outDebug("TSCR: Instance Dark Portal: Event completed.");
+                        sLog->outDebug(LOG_FILTER_TSCR, "TSCR: Instance Dark Portal: Event completed.");
                         Map::PlayerList const& players = instance->GetPlayers();
 
                         if (!players.isEmpty())
@@ -268,7 +267,7 @@ public:
             if (entry == RIFT_BOSS)
                 entry = RandRiftBoss();
 
-            sLog->outDebug("TSCR: Instance Dark Portal: Summoning rift boss entry %u.",entry);
+            sLog->outDebug(LOG_FILTER_TSCR, "TSCR: Instance Dark Portal: Summoning rift boss entry %u.", entry);
 
             Position pos;
             me->GetRandomNearPosition(pos, 10.0f);
@@ -279,7 +278,7 @@ public:
             if (Creature* summon = me->SummonCreature(entry, pos, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 600000))
                 return summon;
 
-            sLog->outDebug("TSCR: Instance Dark Portal: What just happened there? No boss, no loot, no fun...");
+            sLog->outDebug(LOG_FILTER_TSCR, "TSCR: Instance Dark Portal: What just happened there? No boss, no loot, no fun...");
             return NULL;
         }
 
@@ -287,18 +286,18 @@ public:
         {
             if (Creature* pMedivh = instance->GetCreature(MedivhGUID))
             {
-                uint8 tmp = urand(0,2);
+                uint8 tmp = urand(0, 2);
 
                 if (tmp >= CurrentRiftId)
                     ++tmp;
 
-                sLog->outDebug("TSCR: Instance Dark Portal: Creating Time Rift at locationId %i (old locationId was %u).",tmp,CurrentRiftId);
+                sLog->outDebug(LOG_FILTER_TSCR, "TSCR: Instance Dark Portal: Creating Time Rift at locationId %i (old locationId was %u).", tmp, CurrentRiftId);
 
                 CurrentRiftId = tmp;
 
                 Creature* pTemp = pMedivh->SummonCreature(C_TIME_RIFT,
-                    PortalLocation[tmp][0],PortalLocation[tmp][1],PortalLocation[tmp][2],PortalLocation[tmp][3],
-                    TEMPSUMMON_CORPSE_DESPAWN,0);
+                    PortalLocation[tmp][0], PortalLocation[tmp][1], PortalLocation[tmp][2], PortalLocation[tmp][3],
+                    TEMPSUMMON_CORPSE_DESPAWN, 0);
                 if (pTemp)
                 {
                     pTemp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -307,11 +306,11 @@ public:
                     if (Creature* pBoss = SummonedPortalBoss(pTemp))
                     {
                         if (pBoss->GetEntry() == C_AEONUS)
-                            pBoss->AddThreat(pMedivh,0.0f);
+                            pBoss->AddThreat(pMedivh, 0.0f);
                         else
                         {
-                            pBoss->AddThreat(pTemp,0.0f);
-                            pTemp->CastSpell(pBoss,SPELL_RIFT_CHANNEL,false);
+                            pBoss->AddThreat(pTemp, 0.0f);
+                            pTemp->CastSpell(pBoss, SPELL_RIFT_CHANNEL, false);
                         }
                     }
                 }
@@ -346,7 +345,6 @@ public:
     };
 
 };
-
 
 void AddSC_instance_dark_portal()
 {

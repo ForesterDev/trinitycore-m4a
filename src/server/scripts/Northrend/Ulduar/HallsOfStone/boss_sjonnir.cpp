@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -186,7 +186,7 @@ public:
             {
                 uint32 uiSummonPipe = rand()%2;
                 me->SummonCreature(uiEncounterTimer > DATA_TIME_BEFORE_OOZE ? CREATURE_MALFORMED_OOZE :
-                                           RAND(CREATURE_FORGED_IRON_DWARF,CREATURE_FORGED_IRON_TROGG),
+                                           RAND(CREATURE_FORGED_IRON_DWARF, CREATURE_FORGED_IRON_TROGG),
                                            PipeLocations[uiSummonPipe].x, PipeLocations[uiSummonPipe].y, PipeLocations[uiSummonPipe].z, 0.0f,
                                            TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
                 uiSummonTimer = 20000;
@@ -231,7 +231,7 @@ public:
         {
             if (victim == me)
                 return;
-            DoScriptText(RAND(SAY_SLAY_1,SAY_SLAY_2,SAY_SLAY_3), me);
+            DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2, SAY_SLAY_3), me);
         }
 
         void KilledIronSludge()
@@ -241,7 +241,6 @@ public:
     };
 
 };
-
 
 class mob_malformed_ooze : public CreatureScript
 {
@@ -286,7 +285,6 @@ public:
 
 };
 
-
 class mob_iron_sludge : public CreatureScript
 {
 public:
@@ -315,7 +313,6 @@ public:
     };
 
 };
-
 
 void AddSC_boss_sjonnir()
 {

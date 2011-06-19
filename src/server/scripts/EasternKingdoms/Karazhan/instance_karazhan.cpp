@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -55,7 +55,7 @@ public:
 
     struct instance_karazhan_InstanceMapScript : public InstanceScript
     {
-        instance_karazhan_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {Initialize();}
+        instance_karazhan_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {}
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string strSaveData;
@@ -84,7 +84,7 @@ public:
             memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
             // 1 - OZ, 2 - HOOD, 3 - RAJ, this never gets altered.
-            m_uiOperaEvent      = urand(1,3);
+            m_uiOperaEvent      = urand(1, 3);
             m_uiOzDeathCount    = 0;
 
             m_uiCurtainGUID         = 0;
@@ -138,14 +138,18 @@ public:
                     break;
                 case TYPE_MAIDEN:               m_auiEncounter[2] = uiData; break;
                 case TYPE_OPTIONAL_BOSS:        m_auiEncounter[3] = uiData; break;
-                case TYPE_OPERA:                m_auiEncounter[4] = uiData; break;
+                case TYPE_OPERA:
+                    m_auiEncounter[4] = uiData;
+                    if (uiData == DONE)
+                        UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, 16812, NULL);
+                    break;
                 case TYPE_CURATOR:              m_auiEncounter[5] = uiData; break;
                 case TYPE_ARAN:                 m_auiEncounter[6] = uiData; break;
                 case TYPE_TERESTIAN:            m_auiEncounter[7] = uiData; break;
                 case TYPE_NETHERSPITE:          m_auiEncounter[8] = uiData; break;
                 case TYPE_CHESS:
                     if (uiData == DONE)
-                        DoRespawnGameObject(DustCoveredChest,DAY);
+                        DoRespawnGameObject(DustCoveredChest, DAY);
                     m_auiEncounter[9]  = uiData;
                     break;
                 case TYPE_MALCHEZZAR:           m_auiEncounter[10] = uiData; break;
@@ -305,7 +309,6 @@ public:
     };
 
 };
-
 
 void AddSC_instance_karazhan()
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -28,7 +28,6 @@ template<> struct BoundsTrait<VMAP::GroupModel>
 {
     static void getBounds(const VMAP::GroupModel& obj, G3D::AABox& out) { out = obj.GetBound(); }
 };
-
 
 namespace VMAP
 {
@@ -151,10 +150,12 @@ namespace VMAP
     {
         float tx_f = (pos.x - iCorner.x)/LIQUID_TILE_SIZE;
         uint32 tx = uint32(tx_f);
-        if (tx >= iTilesX) return false;
+        if (tx_f < 0.0f || tx >= iTilesX)
+            return false;
         float ty_f = (pos.y - iCorner.y)/LIQUID_TILE_SIZE;
         uint32 ty = uint32(ty_f);
-        if (ty >= iTilesY) return false;
+        if (ty_f < 0.0f || ty >= iTilesY)
+            return false;
 
         // check if tile shall be used for liquid level
         // checking for 0x08 *might* be enough, but disabled tiles always are 0x?F:
@@ -304,11 +305,12 @@ namespace VMAP
     {
         char chunk[8];
         bool result = true;
-        uint32 chunkSize, count;
+        uint32 chunkSize = 0;
+        uint32 count = 0;
         triangles.clear();
         vertices.clear();
         delete iLiquid;
-        iLiquid = 0;
+        iLiquid = NULL;
 
         if (result && fread(&iBound, sizeof(G3D::AABox), 1, rf) != 1) result = false;
         if (result && fread(&iMogpFlags, sizeof(uint32), 1, rf) != 1) result = false;
@@ -455,7 +457,7 @@ namespace VMAP
                         }
 #ifdef VMAP_DEBUG
                         const GroupModel &gm = prims[entry];
-                        printf("%10u %8X %7.3f,%7.3f,%7.3f | %7.3f,%7.3f,%7.3f | z=%f, p_z=%f\n", gm.GetWmoID(), gm.GetMogpFlags(),
+                        printf("%10u %8X %7.3f, %7.3f, %7.3f | %7.3f, %7.3f, %7.3f | z=%f, p_z=%f\n", gm.GetWmoID(), gm.GetMogpFlags(),
                         gm.GetBound().low().x, gm.GetBound().low().y, gm.GetBound().low().z,
                         gm.GetBound().high().x, gm.GetBound().high().y, gm.GetBound().high().z, group_Z, point.z);
 #endif
@@ -506,7 +508,7 @@ namespace VMAP
 
         bool result = true;
         uint32 chunkSize, count;
-        result = fwrite(VMAP_MAGIC,1,8,wf) == 8;
+        result = fwrite(VMAP_MAGIC, 1, 8, wf) == 8;
         if (result && fwrite("WMOD", 1, 4, wf) != 4) result = false;
         chunkSize = sizeof(uint32) + sizeof(uint32);
         if (result && fwrite(&chunkSize, sizeof(uint32), 1, wf) != 1) result = false;
@@ -539,7 +541,8 @@ namespace VMAP
             return false;
 
         bool result = true;
-        uint32 chunkSize, count;
+        uint32 chunkSize = 0;
+        uint32 count = 0;
         char chunk[8];                          // Ignore the added magic header
         if (!readChunk(rf, chunk, VMAP_MAGIC, 8)) result = false;
 

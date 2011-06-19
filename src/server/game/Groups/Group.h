@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -25,6 +25,7 @@
 #include "LootMgr.h"
 #include "QueryResult.h"
 #include "SharedDefines.h"
+#include "Player.h"
 
 class Creature;
 class GroupReference;
@@ -73,6 +74,12 @@ enum GroupMemberFlags
     MEMBER_FLAG_MAINASSIST  = 0x04,
 };
 
+enum GroupMemberAssignment
+{
+    GROUP_ASSIGN_MAINTANK   = 0,
+    GROUP_ASSIGN_MAINASSIST = 1,
+};
+
 enum GroupType
 {
     GROUPTYPE_NORMAL = 0x00,
@@ -112,7 +119,7 @@ enum GroupUpdateFlags
 };
 
 #define GROUP_UPDATE_FLAGS_COUNT          20
-                                                                // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13,14,15,16,17,18,19
+                                                                // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
 static const uint8 GroupUpdateLength[GROUP_UPDATE_FLAGS_COUNT] = { 0, 2, 2, 2, 1, 2, 2, 2, 2, 4, 8, 8, 1, 2, 2, 2, 1, 2, 2, 8};
 
 class Roll : public LootValidatorRef
@@ -176,15 +183,15 @@ class Group
         ~Group();
 
         // group manipulation methods
-        bool   Create(const uint64 &guid, const char * name);
-        bool   LoadGroupFromDB(const uint32 &guid, QueryResult result, bool loadMembers = true);
-        bool   LoadMemberFromDB(uint32 guidLow, uint8 memberFlags, uint8 subgroup, uint8 roles);
+        bool   Create(Player *leader);
+        void   LoadGroupFromDB(Field *field);
+        void   LoadMemberFromDB(uint32 guidLow, uint8 memberFlags, uint8 subgroup, uint8 roles);
         bool   AddInvite(Player *player);
         void   RemoveInvite(Player *player);
         void   RemoveAllInvites();
         bool   AddLeaderInvite(Player *player);
-        bool   AddMember(const uint64 &guid, const char* name);
-        uint32 RemoveMember(const uint64 &guid, const RemoveMethod &method = GROUP_REMOVEMETHOD_DEFAULT, uint64 kicker = 0, const char* reason = NULL);
+        bool   AddMember(Player *player);
+        bool   RemoveMember(const uint64 &guid, const RemoveMethod &method = GROUP_REMOVEMETHOD_DEFAULT, uint64 kicker = 0, const char* reason = NULL);
         void   ChangeLeader(const uint64 &guid);
         void   SetLootMethod(LootMethod method);
         void   SetLooterGuid(const uint64 &guid);
@@ -207,6 +214,8 @@ class Group
         const uint64& GetLooterGuid() const;
         ItemQualities GetLootThreshold() const;
 
+        uint32 GetDbStoreId() { return m_dbStoreId; };
+
         // member manipulation methods
         bool IsMember(const uint64& guid) const;
         bool IsLeader(const uint64& guid) const;
@@ -224,7 +233,6 @@ class Group
         MemberSlotList const& GetMemberSlots() const;
         GroupReference* GetFirstMember();
         uint32 GetMembersCount() const;
-        void GetDataForXPAtKill(Unit const* victim, uint32& count,uint32& sum_level, Player* & member_with_max_level, Player* & not_gray_member_with_max_level);
         uint8 GetMemberGroup(uint64 guid) const;
 
         void ConvertToLFG();
@@ -235,10 +243,9 @@ class Group
 
         void ChangeMembersGroup(const uint64 &guid, const uint8 &group);
         void ChangeMembersGroup(Player *player, const uint8 &group);
-        void SetAssistant(uint64 guid, const bool &apply);
-        void SetMainTank(uint64 guid, const bool &apply);
-        void SetMainAssistant(uint64 guid, const bool &apply);
         void SetTargetIcon(uint8 id, uint64 whoGuid, uint64 targetGuid);
+        void SetGroupMemberFlag(uint64 guid, const bool &apply, GroupMemberFlags flag);
+        void RemoveUniqueGroupMemberFlag(GroupMemberFlags flag);
 
         Difficulty GetDifficulty(bool isRaid) const;
         Difficulty GetDungeonDifficulty() const;
@@ -294,18 +301,7 @@ class Group
         void BroadcastGroupUpdate(void);
 
     protected:
-        bool _addMember(const uint64 &guid, const char* name);
-        bool _addMember(const uint64 &guid, const char* name, uint8 group);
-        bool _removeMember(const uint64 &guid);             // returns true if leader has changed
-        void _setLeader(const uint64 &guid);
-
-        void _removeRolls(const uint64 &guid);
-
         bool _setMembersGroup(const uint64 &guid, const uint8 &group);
-        bool _setAssistantFlag(const uint64 &guid, const bool &apply);
-        bool _setMainTank(const uint64 &guid, const bool &apply);
-        bool _setMainAssistant(const uint64 &guid, const bool &apply);
-
         void _homebindIfInstance(Player *player);
 
         void _initRaidSubGroupsCounter();
@@ -313,7 +309,6 @@ class Group
         member_witerator _getMemberWSlot(uint64 Guid);
         void SubGroupCounterIncrease(uint8 subgroup);
         void SubGroupCounterDecrease(uint8 subgroup);
-        void RemoveUniqueGroupMemberFlag(GroupMemberFlags flag);
         void ToggleGroupMemberFlag(member_witerator slot, uint8 flag, bool apply);
 
         MemberSlotList      m_memberSlots;
@@ -335,5 +330,6 @@ class Group
         uint64              m_guid;
         uint32              m_counter;                      // used only in SMSG_GROUP_LIST
         uint32              m_maxEnchantingLevel;
+        uint32              m_dbStoreId;                    // Represents the ID used in database (Can be reused by other groups if group was disbanded)
 };
 #endif

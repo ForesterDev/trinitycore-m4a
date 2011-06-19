@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -172,7 +172,7 @@ public:
 
         void KilledUnit(Unit* /*pVictim*/)
         {
-            DoScriptText(RAND(SAY_SLAY_1,SAY_SLAY_2,SAY_SLAY_3), me);
+            DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2, SAY_SLAY_3), me);
         }
 
         void DespawnGolem()
@@ -185,7 +185,7 @@ public:
                 if (Creature* pTemp = Unit::GetCreature(*me, *itr))
                 {
                     if (pTemp->isAlive())
-                        pTemp->ForcedDespawn();
+                        pTemp->DespawnOrUnsummon();
                 }
             }
 
@@ -217,7 +217,7 @@ public:
             {
                 m_lGolemGUIDList.push_back(pSummoned->GetGUID());
 
-                if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0.0f, 0.0f);
 
                 // Why healing when just summoned?
@@ -263,7 +263,7 @@ public:
                 if (m_uiShatteringStomp_Timer <= uiDiff)
                 {
                     // Should he stomp even if he has no brittle golem to shatter?
-                    DoScriptText(RAND(SAY_STOMP_1,SAY_STOMP_2), me);
+                    DoScriptText(RAND(SAY_STOMP_1, SAY_STOMP_2), me);
 
                     DoCast(me, SPELL_SHATTERING_STOMP_N);
 
@@ -297,7 +297,7 @@ public:
                 if (me->IsNonMeleeSpellCasted(false))
                     me->InterruptNonMeleeSpells(false);
 
-                DoScriptText(RAND(SAY_FORGE_1,SAY_FORGE_2), me);
+                DoScriptText(RAND(SAY_FORGE_1, SAY_FORGE_2), me);
 
                 m_bHasTemper = true;
 
@@ -334,7 +334,7 @@ public:
                     // 4 - Wait for delay to expire
                     if (m_uiDelay_Timer <= uiDiff)
                     {
-                        if (Unit* pTarget = SelectUnit(SELECT_TARGET_TOPAGGRO, 0))
+                        if (Unit* pTarget = SelectTarget(SELECT_TARGET_TOPAGGRO, 0))
                         {
                             me->SetReactState(REACT_AGGRESSIVE);
                             me->SetInCombatWith(pTarget);
@@ -432,7 +432,7 @@ public:
             // This is the dummy effect of the spells
             if (pSpell->Id == SPELL_SHATTER_N || pSpell->Id == SPELL_SHATTER_H)
                 if (me->GetEntry() == NPC_BRITTLE_GOLEM)
-                    me->ForcedDespawn();
+                    me->DespawnOrUnsummon();
         }
 
         void UpdateAI(const uint32 uiDiff)

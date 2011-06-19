@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -100,6 +100,7 @@ enum QuestStatus
     QUEST_STATUS_INCOMPLETE     = 3,
     //QUEST_STATUS_AVAILABLE      = 4,
     QUEST_STATUS_FAILED         = 5,
+    QUEST_STATUS_REWARDED       = 6,        // Not used in DB
     MAX_QUEST_STATUS
 };
 
@@ -252,6 +253,7 @@ class Quest
         bool   IsRaidQuest() const { return Type == QUEST_TYPE_RAID || Type == QUEST_TYPE_RAID_10 || Type == QUEST_TYPE_RAID_25; }
         bool   IsAllowedInRaid() const;
         bool   IsDFQuest() const { return QuestFlags & QUEST_TRINITY_FLAGS_DF_QUEST; }
+        uint32 CalculateHonorGain(uint8 level) const;
 
         // multiple values
         std::string ObjectiveText[QUEST_OBJECTIVES_COUNT];
@@ -351,30 +353,18 @@ class Quest
         uint32 QuestCompleteScript;
 };
 
-enum QuestUpdateState
-{
-    QUEST_UNCHANGED = 0,
-    QUEST_CHANGED = 1,
-    QUEST_NEW = 2
-};
-
 struct QuestStatusData
 {
-    QuestStatusData()
-        : m_status(QUEST_STATUS_NONE),m_rewarded(false),
-        m_explored(false), m_timer(0), uState(QUEST_NEW)
+    QuestStatusData(): m_status(QUEST_STATUS_NONE), m_explored(false), m_timer(0)
     {
         memset(m_itemcount, 0, QUEST_ITEM_OBJECTIVES_COUNT * sizeof(uint16));
         memset(m_creatureOrGOcount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint16));
     }
 
     QuestStatus m_status;
-    bool m_rewarded;
     bool m_explored;
     uint32 m_timer;
-    QuestUpdateState uState;
-
-    uint16 m_itemcount[ QUEST_ITEM_OBJECTIVES_COUNT ];
-    uint16 m_creatureOrGOcount[ QUEST_OBJECTIVES_COUNT ];
+    uint16 m_itemcount[QUEST_ITEM_OBJECTIVES_COUNT];
+    uint16 m_creatureOrGOcount[QUEST_OBJECTIVES_COUNT];
 };
 #endif

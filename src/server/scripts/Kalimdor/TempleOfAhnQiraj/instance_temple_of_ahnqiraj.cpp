@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -38,7 +38,7 @@ public:
 
     struct instance_temple_of_ahnqiraj_InstanceMapScript : public InstanceScript
     {
-        instance_temple_of_ahnqiraj_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
+        instance_temple_of_ahnqiraj_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {}
 
         //If Vem is dead...
         bool IsBossDied[3];
@@ -163,7 +163,6 @@ public:
     };
 
 };
-
 
 void AddSC_instance_temple_of_ahnqiraj()
 {

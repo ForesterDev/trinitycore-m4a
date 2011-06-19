@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -32,7 +32,7 @@ class ChannelMgr
 {
     public:
         uint32 team;
-        typedef std::map<std::wstring,Channel*> ChannelMap;
+        typedef std::map<std::wstring, Channel*> ChannelMap;
 
         explicit ChannelMgr(uint32 team)
             : team(std::move(team))

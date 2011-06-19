@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -50,7 +50,7 @@ namespace Trinity
     //
     //    template<class SPECIFIC_TYPE, class T> size_t Count(const ContainerMapList<TypeList<SPECIFIC_TYPE, T> >&elements, SPECIFIC_TYPE* fake)
     //    {
-    //        return Count(elements._elements,fake);
+    //        return Count(elements._elements, fake);
     //    }
     //
     //    template<class SPECIFIC_TYPE, class H, class T> size_t Count(const ContainerMapList<TypeList<H, T> >&elements, SPECIFIC_TYPE* fake)
@@ -77,8 +77,8 @@ namespace Trinity
 
     template<class SPECIFIC_TYPE, class H, class T> CountedPtr<SPECIFIC_TYPE>& Find(ContainerMapList<TypeList<H, T> >&elements, OBJECT_HANDLE hdl, CountedPtr<SPECIFIC_TYPE>* fake)
     {
-        CountedPtr<SPECIFIC_TYPE> &t = Find(elements._elements, hdl,fake);
-        return (!t ? Find(elements._TailElements, hdl,fake) : t);
+        CountedPtr<SPECIFIC_TYPE> &t = Find(elements._elements, hdl, fake);
+        return (!t ? Find(elements._TailElements, hdl, fake) : t);
     }
 
     // const find functions
@@ -100,9 +100,9 @@ namespace Trinity
 
     template<class SPECIFIC_TYPE, class H, class T> CountedPtr<SPECIFIC_TYPE>& Find(const ContainerMapList<TypeList<H, T> >&elements, OBJECT_HANDLE hdl, CountedPtr<SPECIFIC_TYPE>* fake)
     {
-        CountedPtr<SPECIFIC_TYPE> &t = Find(elements._elements, hdl,fake);
+        CountedPtr<SPECIFIC_TYPE> &t = Find(elements._elements, hdl, fake);
         if(!t)
-            t = Find(elements._TailElement, hdl,fake);
+            t = Find(elements._TailElement, hdl, fake);
 
         return t;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -82,7 +82,7 @@ public:
         void Reset()
         {
             uiCrystalfireBreathTimer = 14*IN_MILLISECONDS;
-            uiCrystalChainsCrystalizeTimer = DUNGEON_MODE(30*IN_MILLISECONDS,11*IN_MILLISECONDS);
+            uiCrystalChainsCrystalizeTimer = DUNGEON_MODE(30*IN_MILLISECONDS, 11*IN_MILLISECONDS);
             uiTailSweepTimer = 5*IN_MILLISECONDS;
             bEnrage = false;
 
@@ -214,7 +214,7 @@ public:
                     DoCast(me, SPELL_CRYSTALIZE);
                 else if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     DoCast(pTarget, SPELL_CRYSTAL_CHAINS);
-                uiCrystalChainsCrystalizeTimer = DUNGEON_MODE(30*IN_MILLISECONDS,11*IN_MILLISECONDS);
+                uiCrystalChainsCrystalizeTimer = DUNGEON_MODE(30*IN_MILLISECONDS, 11*IN_MILLISECONDS);
             } else uiCrystalChainsCrystalizeTimer -= diff;
 
             DoMeleeAttackIfReady();
@@ -222,7 +222,6 @@ public:
     };
 
 };
-
 
 class containment_sphere : public GameObjectScript
 {

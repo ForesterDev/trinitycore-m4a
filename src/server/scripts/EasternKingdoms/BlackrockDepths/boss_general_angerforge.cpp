@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -67,13 +67,13 @@ public:
 
         void SummonAdds(Unit* victim)
         {
-            if (Creature *SummonedAdd = DoSpawnCreature(8901, float(irand(-14,14)), float(irand(-14,14)), 0, 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 120000))
+            if (Creature *SummonedAdd = DoSpawnCreature(8901, float(irand(-14, 14)), float(irand(-14, 14)), 0, 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 120000))
                 SummonedAdd->AI()->AttackStart(victim);
         }
 
         void SummonMedics(Unit* victim)
         {
-            if (Creature *SummonedMedic = DoSpawnCreature(8894, float(irand(-9,9)), float(irand(-9,9)), 0, 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 120000))
+            if (Creature *SummonedMedic = DoSpawnCreature(8894, float(irand(-9, 9)), float(irand(-9, 9)), 0, 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 120000))
                 SummonedMedic->AI()->AttackStart(victim);
         }
 

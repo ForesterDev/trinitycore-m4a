@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -38,9 +38,9 @@
 
 #ifdef _WIN32
 #include "ServiceWin32.h"
-char serviceName[] = "TrinityCore";
-char serviceLongName[] = "Trinity core service";
-char serviceDescription[] = "Massive Network Game Object Server";
+char serviceName[] = "worldserver";
+char serviceLongName[] = "TrinityCore world service";
+char serviceDescription[] = "TrinityCore World of Warcraft emulator world service";
 /*
  * -1 - not in service mode
  *  0 - stopped
@@ -67,22 +67,20 @@ void usage(const char *prog)
         "    -s install               install service\n\r"
         "    -s uninstall             uninstall service\n\r"
         #endif
-        ,prog);
+        , prog);
 }
 
 /// Launch the Trinity server
 extern int main(int argc, char **argv)
 {
-    ACE::init();
-
     ///- Command line parsing to get the configuration file name
     char const* cfg_file = _TRINITY_CORE_CONFIG;
-    int c=1;
+    int c = 1;
     while( c < argc )
     {
-        if( strcmp(argv[c],"-c") == 0)
+        if (strcmp(argv[c], "-c") == 0)
         {
-            if( ++c >= argc )
+            if (++c >= argc)
             {
                 sLog->outError("Runtime-Error: -c option requires an input argument");
                 usage(argv[0]);
@@ -96,34 +94,34 @@ extern int main(int argc, char **argv)
         ////////////
         //Services//
         ////////////
-        if( strcmp(argv[c],"-s") == 0)
+        if (strcmp(argv[c], "-s") == 0)
         {
-            if( ++c >= argc )
+            if (++c >= argc)
             {
                 sLog->outError("Runtime-Error: -s option requires an input argument");
                 usage(argv[0]);
                 return 1;
             }
-            if( strcmp(argv[c],"install") == 0)
+            if (strcmp(argv[c], "install") == 0)
             {
                 if (WinServiceInstall())
                     sLog->outString("Installing service");
                 return 1;
             }
-            else if( strcmp(argv[c],"uninstall") == 0)
+            else if (strcmp(argv[c], "uninstall") == 0)
             {
-                if(WinServiceUninstall())
+                if (WinServiceUninstall())
                     sLog->outString("Uninstalling service");
                 return 1;
             }
             else
             {
-                sLog->outError("Runtime-Error: unsupported option %s",argv[c]);
+                sLog->outError("Runtime-Error: unsupported option %s", argv[c]);
                 usage(argv[0]);
                 return 1;
             }
         }
-        if( strcmp(argv[c],"--service") == 0)
+        if (strcmp(argv[c], "--service") == 0)
         {
             WinServiceRun();
         }
@@ -151,8 +149,6 @@ extern int main(int argc, char **argv)
     // 0 - normal shutdown
     // 1 - shutdown at error
     // 2 - restart command used, this code can be used by restarter for restart Trinityd
-
-    ACE::fini();
 
     return ret;
 }

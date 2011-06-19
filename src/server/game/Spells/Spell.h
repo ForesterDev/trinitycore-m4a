@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -428,7 +428,7 @@ class Spell
         void TakePower();
         void TakeAmmo();
 
-        void TakeRunePower();
+        void TakeRunePower(bool didHit);
         void TakeReagents();
         void TakeCastItem();
 
@@ -471,7 +471,7 @@ class Spell
         void CheckSrc() { if (!m_targets.HasSrc()) m_targets.setSrc(*m_caster); }
         void CheckDst() { if (!m_targets.HasDst()) m_targets.setDst(*m_caster); }
 
-        static void  SendCastResult(Player* caster, SpellEntry const* spellInfo, uint8 cast_count, SpellCastResult result);
+        static void SendCastResult(Player* caster, SpellEntry const* spellInfo, uint8 cast_count, SpellCastResult result, SpellCustomErrors customError = SPELL_CUSTOM_ERROR_NONE);
         void SendCastResult(SpellCastResult result);
         void SendSpellStart();
         void SendSpellGo();
@@ -493,7 +493,7 @@ class Spell
         void SendResurrectRequest(Player* target);
         void SendPlaySpellVisual(uint32 SpellID);
 
-        void HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i);
+        void HandleEffects(Unit *pUnitTarget, Item *pItemTarget, GameObject *pGOTarget, uint32 i);
         void HandleThreatSpells(uint32 spellId);
 
         const SpellEntry * const m_spellInfo;
@@ -504,6 +504,7 @@ class Spell
         uint32 m_preCastSpell;
         SpellCastTargets m_targets;
         int8 m_comboPointGain;
+        SpellCustomErrors m_customError;
 
         UsedSpellMods m_appliedMods;
 
@@ -544,6 +545,9 @@ class Spell
 
         void SetSpellValue(SpellValueMod mod, int32 value);
     protected:
+        bool HasGlobalCooldown();
+        void TriggerGlobalCooldown();
+        void CancelGlobalCooldown();
 
         void SendLoot(uint64 guid, LootType loottype);
 
@@ -607,17 +611,17 @@ class Spell
         int32 m_damage;           // Damge   in effects count here
         int32 m_healing;          // Healing in effects count here
 
-        //******************************************
+        // ******************************************
         // Spell trigger system
-        //******************************************
+        // ******************************************
         uint32 m_procAttacker;                // Attacker trigger flags
         uint32 m_procVictim;                  // Victim   trigger flags
         uint32 m_procEx;
         void   prepareDataForTriggerSystem(AuraEffect const * triggeredByAura);
 
-        //*****************************************
+        // *****************************************
         // Spell target subsystem
-        //*****************************************
+        // *****************************************
         // Targets store structures and data
         struct TargetInfo
         {
@@ -685,11 +689,13 @@ class Spell
 
         // Scripting system
         void LoadScripts();
+        SpellCastResult CallScriptCheckCastHandlers();
         void PrepareScriptHitHandlers();
         bool CallScriptEffectHandlers(SpellEffIndex effIndex);
         void CallScriptBeforeHitHandlers();
         void CallScriptOnHitHandlers();
         void CallScriptAfterHitHandlers();
+        void CallScriptAfterUnitTargetSelectHandlers(std::list<Unit*>& unitTargets, SpellEffIndex effIndex);
         std::list<SpellScript *> m_loadedScripts;
 
         // effect helpers
@@ -824,17 +830,20 @@ namespace Trinity
         uint32 i_entry;
         const Position * const i_pos;
         bool i_requireDeadTarget;
+        SpellEntry const * i_spellProto;
 
         SpellNotifierCreatureAndPlayer(Unit *source, std::list<Unit*> &data, float radius, SpellNotifyPushType type,
-            SpellTargets TargetType = SPELL_TARGETS_ENEMY, const Position *pos = NULL, uint32 entry = 0, bool requireDeadTarget = false)
+            SpellTargets TargetType = SPELL_TARGETS_ENEMY, const Position *pos = NULL, uint32 entry = 0, SpellEntry const * spellProto = NULL)
             : i_data(&data), i_push_type(type), i_radius(radius), i_TargetType(TargetType),
-            i_source(source), i_entry(entry), i_pos(pos), i_requireDeadTarget(requireDeadTarget)
+            i_source(source), i_entry(entry), i_pos(pos), i_spellProto(spellProto)
         {
             ASSERT(i_source);
         }
 
-        template<class T> inline void Visit(GridRefManager<T>  &m)
+        template<class T> inline void Visit(GridRefManager<T>& m)
         {
+            i_requireDeadTarget = i_spellProto ? bool(i_spellProto->AttributesEx3 & SPELL_ATTR3_REQUIRE_DEAD_TARGET) : false;
+
             for (typename GridRefManager<T>::iterator itr = m.begin(); itr != m.end(); ++itr)
             {
                 Unit *target = (Unit*)itr->getSource();
@@ -847,7 +856,7 @@ namespace Trinity
                     case SPELL_TARGETS_ENEMY:
                         if (target->isTotem())
                             continue;
-                        if (!target->isAttackableByAOE(i_requireDeadTarget))
+                        if (!target->isAttackableByAOE(i_spellProto))
                             continue;
                         if (i_source->IsControlledByPlayer())
                         {

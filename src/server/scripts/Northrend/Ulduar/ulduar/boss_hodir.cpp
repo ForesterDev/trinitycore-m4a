@@ -182,7 +182,7 @@ struct boss_hodir_AI : public BossAI
             Helper[3]->AddThreat(me, 100);
         }
                 
-        if (getDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
+        if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
         {
             if (Helper[4] = me->SummonCreature(NPC_FIELD_MEDIC_JESSY, 1976.60, -233.53, 432.767, 1.57, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000))
             {

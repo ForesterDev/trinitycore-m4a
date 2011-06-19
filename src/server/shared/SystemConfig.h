@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -34,12 +34,11 @@
 
 #if PLATFORM == PLATFORM_WINDOWS
 # ifdef _WIN64
-#  define _FULLVERSION _PACKAGENAME "Rev: " _REVISION " " _BUILD_DIRECTIVE " Hash: " _HASH " (Win64, " _ENDIAN_STRING ")"
+#  define _FULLVERSION _PACKAGENAME "Hash: " _HASH " (Win64, "_BUILD_DIRECTIVE " (" _ENDIAN_STRING "))"
 # else
-#  define _FULLVERSION _PACKAGENAME "Rev: " _REVISION " " _BUILD_DIRECTIVE " Hash: " _HASH " (Win32, " _ENDIAN_STRING ")"
+#  define _FULLVERSION _PACKAGENAME "Hash: " _HASH " (Win32, " _BUILD_DIRECTIVE " (" _ENDIAN_STRING "))"
 # endif
 #else
-#  define _FULLVERSION _PACKAGENAME "Rev: " _REVISION " " _BUILD_DIRECTIVE " Hash: " _HASH " (Unix, " _ENDIAN_STRING ")"
+#  define _FULLVERSION _PACKAGENAME "Hash: " _HASH " (Unix, " _BUILD_DIRECTIVE " (" _ENDIAN_STRING "))"
 #endif
 #endif
-

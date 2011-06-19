@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -28,8 +28,8 @@ class LoginDatabaseConnection : public MySQLConnection
         LoginDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo) {}
         LoginDatabaseConnection(ACE_Activation_Queue* q, MySQLConnectionInfo& connInfo) : MySQLConnection(q, connInfo) {}
 
-        //- Loads databasetype specific prepared statements
-        bool Open();
+        //- Loads database type specific prepared statements
+        void DoPrepareStatements();
 };
 
 typedef DatabaseWorkerPool<LoginDatabaseConnection> LoginDatabaseWorkerPool;
@@ -62,6 +62,8 @@ enum LoginDatabaseStatements
     LOGIN_SET_IP_NOT_BANNED,
     LOGIN_SET_ACCOUNT_BANNED,
     LOGIN_SET_ACCOUNT_NOT_BANNED,
+    LOGIN_DEL_REALMCHARACTERS,
+    LOGIN_ADD_REALMCHARACTERS,
 
     MAX_LOGINDATABASE_STATEMENTS,
 };

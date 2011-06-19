@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -22,7 +22,7 @@
 void BIH::buildHierarchy(std::vector<uint32> &tempTree, buildData &dat, BuildStats &stats)
 {
     // create space for the first node
-    tempTree.push_back(3 << 30); // dummy leaf
+    tempTree.push_back(uint32(3 << 30)); // dummy leaf
     tempTree.insert(tempTree.end(), 2, 0);
     //tempTree.add(0);
 
@@ -128,7 +128,7 @@ void BIH::subdivide(int left, int right, std::vector<uint32> &tempTree, buildDat
         if (right == rightOrig)
         {
             // all left
-            if (prevAxis == axis && prevSplit == split) {
+            if (prevAxis == axis && G3D::fuzzyEq(prevSplit, split)) {
                 // we are stuck here - create a leaf
                 stats.updateLeaf(depth, right - left + 1);
                 createNode(tempTree, nodeIndex, left, right);
@@ -147,7 +147,7 @@ void BIH::subdivide(int left, int right, std::vector<uint32> &tempTree, buildDat
         else if (left > right)
         {
             // all right
-            if (prevAxis == axis && prevSplit == split) {
+            if (prevAxis == axis && G3D::fuzzyEq(prevSplit, split)) {
                 // we are stuck here - create a leaf
                 stats.updateLeaf(depth, right - left + 1);
                 createNode(tempTree, nodeIndex, left, right);

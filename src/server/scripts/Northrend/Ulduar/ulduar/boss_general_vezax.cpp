@@ -186,7 +186,7 @@ struct boss_general_vezaxAI : public BossAI
             switch(eventId)
             {
                 case EVENT_SHADOW_CRASH:
-                    if (Unit *pTarget = SelectUnit(SELECT_TARGET_FARTHEST, 0))
+                    if (Unit *pTarget = SelectTarget(SELECT_TARGET_FARTHEST, 0))
                         if (!pTarget->IsWithinDist(me, 15))
                             DoCast(pTarget, SPELL_SHADOW_CRASH);
                     events.ScheduleEvent(EVENT_SHADOW_CRASH, urand(6000, 10000));
@@ -202,7 +202,7 @@ struct boss_general_vezaxAI : public BossAI
                     events.ScheduleEvent(EVENT_DARKNESS, urand(60000, 70000));
                     break;
                 case EVENT_MARK:
-                    if (Unit *pTarget = SelectUnit(SELECT_TARGET_FARTHEST, 0))
+                    if (Unit *pTarget = SelectTarget(SELECT_TARGET_FARTHEST, 0))
                         DoCast(pTarget, SPELL_MARK_OF_THE_FACELESS);
                     events.ScheduleEvent(EVENT_MARK, urand(35000, 40000));
                     break;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -42,7 +42,7 @@ class Pool                                                  // for Pool of Pool 
 };
 
 typedef std::set<uint32> ActivePoolObjects;
-typedef std::map<uint32,uint32> ActivePoolPools;
+typedef std::map<uint32, uint32> ActivePoolPools;
 
 class ActivePoolData
 {

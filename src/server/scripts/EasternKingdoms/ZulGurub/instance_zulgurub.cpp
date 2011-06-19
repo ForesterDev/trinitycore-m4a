@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -36,7 +36,7 @@ class instance_zulgurub : public InstanceMapScript
 
         struct instance_zulgurub_InstanceMapScript : public InstanceScript
         {
-            instance_zulgurub_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
+            instance_zulgurub_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {}
 
             //If all High Priest bosses were killed. Lorkhan, Zath and Ohgan are added too.
             uint32 m_auiEncounter[MAX_ENCOUNTERS];

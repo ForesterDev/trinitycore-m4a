@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -70,12 +70,12 @@ public:
         void JustDied(Unit* /*Killer*/)
         {
             if (pInstance)
-                pInstance->SetData(TYPE_NERUB,IN_PROGRESS);
+                pInstance->SetData(TYPE_NERUB, IN_PROGRESS);
         }
 
         void RaiseUndeadScarab(Unit* pVictim)
         {
-            if (Creature* pUndeadScarab = DoSpawnCreature(10876, float(irand(-9,9)), float(irand(-9,9)), 0, 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 180000))
+            if (Creature* pUndeadScarab = DoSpawnCreature(10876, float(irand(-9, 9)), float(irand(-9, 9)), 0, 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 180000))
                 if (pUndeadScarab->AI())
                     pUndeadScarab->AI()->AttackStart(pVictim);
         }
@@ -95,7 +95,7 @@ public:
             //PierceArmor
             if (PierceArmor_Timer <= diff)
             {
-                if (urand(0,3) < 2)
+                if (urand(0, 3) < 2)
                     DoCast(me->getVictim(), SPELL_PIERCEARMOR);
                 PierceArmor_Timer = 35000;
             } else PierceArmor_Timer -= diff;

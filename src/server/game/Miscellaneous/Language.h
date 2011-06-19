@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -24,7 +24,6 @@ enum TrinityStrings
     // for chat commands
     LANG_SELECT_CHAR_OR_CREATURE        = 1,
     LANG_SELECT_CREATURE                = 2,
-
 
     // level 0 chat
     LANG_SYSTEMMESSAGE                  = 3,
@@ -513,7 +512,7 @@ enum TrinityStrings
 
     LANG_PINFO_ACCOUNT                  = 548,
     LANG_PINFO_LEVEL                    = 549,
-    LANG_PINFO_NO_REP                   = 550,
+    LANG_PINFO_MUTE_BAN                 = 550,
 
     LANG_YOU_SET_EXPLORE_ALL            = 551,
     LANG_YOU_SET_EXPLORE_NOTHING        = 552,
@@ -811,7 +810,31 @@ enum TrinityStrings
     LANG_DEBUG_AREATRIGGER_REACHED      = 1204,
     // Room for more debug                1205-1299 not used
 
-    // FREE IDS                           1300-9999
+    // Isle of Conquest
+    LANG_BG_IC_START_TWO_MINUTES        = 1205,
+    LANG_BG_IC_START_ONE_MINUTE         = 1206,
+    LANG_BG_IC_START_HALF_MINUTE        = 1207,
+    LANG_BG_IC_HAS_BEGUN                = 1208,
+    LANG_BG_IC_ALLIANCE_KEEP            = 1209,
+    LANG_BG_IC_HORDE_KEEP               = 1210,
+    LANG_BG_IC_TEAM_WINS                = 1211,
+    LANG_BG_IC_WEST_GATE_DESTROYED      = 1212,
+    LANG_BG_IC_EAST_GATE_DESTROYED      = 1213,
+    LANG_BG_IC_SOUTH_GATE_DESTROYED     = 1214,
+    LANG_BG_IC_NORTH_GATE_DESTROYED     = 1215,
+    LANG_BG_IC_TEAM_ASSAULTED_NODE_1    = 1216,
+    LANG_BG_IC_TEAM_DEFENDED_NODE       = 1217,
+    LANG_BG_IC_TEAM_ASSAULTED_NODE_2    = 1218,
+    LANG_BG_IC_TEAM_HAS_TAKEN_NODE      = 1219,
+    LANG_BG_IC_WORKSHOP                 = 1220,
+    LANG_BG_IC_DOCKS                    = 1221,
+    LANG_BG_IC_REFINERY                 = 1222,
+    LANG_BG_IC_QUARRY                   = 1223,
+    LANG_BG_IC_HANGAR                   = 1224,
+    LANG_BG_IC_ALLIANCE                 = 1225,
+    LANG_BG_IC_HORDE                    = 1226,
+
+    // FREE IDS                           1228-9999
 
     // AV
     LANG_BG_AV_ALLY                     = 1300,
@@ -927,7 +950,6 @@ enum TrinityStrings
     LANG_MAIL_SENDER_REQ                = 6611,
     LANG_MAIL_RECEIVER_REQ              = 6612,
 
-
     // Used for GM Announcements
     LANG_GM_BROADCAST                    = 6613,
     LANG_GM_NOTIFY                       = 6614,
@@ -1007,20 +1029,20 @@ enum TrinityStrings
     LANG_BG_SA_START_ONE_MINUTE             = 10057,
     LANG_BG_SA_START_HALF_MINUTE            = 10058,
     LANG_BG_SA_HAS_BEGUN                    = 10059,
-    LANG_BG_SA_IS_UNDER_ATTACK              = 10060,//The %s is under attack!
-    LANG_BG_SA_WAS_DESTROYED                = 10061,//The %s was destroyed!
-    LANG_BG_SA_ROUND_ONE_END                = 10062,//Round 1 - finished!
-    LANG_BG_SA_ALLIANCE_CAPTURED_RELIC      = 10063,//The Alliance captured the titan portal!
-    LANG_BG_SA_HORDE_CAPTURED_RELIC         = 10064,//The Horde captured the titan portal!
-    LANG_BG_SA_ROUND_TWO_ONE_MINUTE         = 10065,//Round 2 of the Battle for the Strand of the Ancients begins in 1 minute.
-    LANG_BG_SA_ROUND_TWO_START_HALF_MINUTE  = 10066,//Round 2 begins in 30 seconds. Prepare yourselves!
-    LANG_BG_SA_CHAMBER_BREACHED             = 10067,//The chamber has been breached! The titan relic is vulnerable!
-    LANG_BG_SA_A_GY_SOUTH                   = 10068,//The Alliance captured the South Graveyard!
-    LANG_BG_SA_A_GY_WEST                    = 10069,//The Alliance captured the West Graveyard!
-    LANG_BG_SA_A_GY_EAST                    = 10070,//The Alliance captured the East Graveyard!
-    LANG_BG_SA_H_GY_SOUTH                   = 10071,//The Horde captured the South Graveyard!
-    LANG_BG_SA_H_GY_WEST                    = 10072,//The Horde captured the West Graveyard!
-    LANG_BG_SA_H_GY_EAST                    = 10073,//The Horde captured the East Graveyard!
+    LANG_BG_SA_IS_UNDER_ATTACK              = 10060, //The %s is under attack!
+    LANG_BG_SA_WAS_DESTROYED                = 10061, //The %s was destroyed!
+    LANG_BG_SA_ROUND_ONE_END                = 10062, //Round 1 - finished!
+    LANG_BG_SA_ALLIANCE_CAPTURED_RELIC      = 10063, //The Alliance captured the titan portal!
+    LANG_BG_SA_HORDE_CAPTURED_RELIC         = 10064, //The Horde captured the titan portal!
+    LANG_BG_SA_ROUND_TWO_ONE_MINUTE         = 10065, //Round 2 of the Battle for the Strand of the Ancients begins in 1 minute.
+    LANG_BG_SA_ROUND_TWO_START_HALF_MINUTE  = 10066, //Round 2 begins in 30 seconds. Prepare yourselves!
+    LANG_BG_SA_CHAMBER_BREACHED             = 10067, //The chamber has been breached! The titan relic is vulnerable!
+    LANG_BG_SA_A_GY_SOUTH                   = 10068, //The Alliance captured the South Graveyard!
+    LANG_BG_SA_A_GY_WEST                    = 10069, //The Alliance captured the West Graveyard!
+    LANG_BG_SA_A_GY_EAST                    = 10070, //The Alliance captured the East Graveyard!
+    LANG_BG_SA_H_GY_SOUTH                   = 10071, //The Horde captured the South Graveyard!
+    LANG_BG_SA_H_GY_WEST                    = 10072, //The Horde captured the West Graveyard!
+    LANG_BG_SA_H_GY_EAST                    = 10073, //The Horde captured the East Graveyard!
 
     // Use for custom patches             11000-11999
     LANG_AUTO_BROADCAST                 = 11000,

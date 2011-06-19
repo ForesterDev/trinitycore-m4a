@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,7 +17,6 @@
 
 #include "ScriptPCH.h"
 #include "ScriptLoader.h"
-
 
 //examples
 void AddSC_example_creature();
@@ -108,6 +107,7 @@ void AddSC_boss_quatermasterzigris();
 void AddSC_boss_pyroguard_emberseer();
 void AddSC_boss_gyth();
 void AddSC_boss_rend_blackhand();
+void AddSC_instance_blackrock_spire();
 void AddSC_boss_razorgore();                 //Blackwing lair
 void AddSC_boss_vael();
 void AddSC_boss_broodlord();
@@ -237,10 +237,8 @@ void AddSC_arathi_highlands();
 void AddSC_blasted_lands();
 void AddSC_boss_kruul();
 void AddSC_burning_steppes();
-void AddSC_dun_morogh();
 void AddSC_duskwood();
 void AddSC_eastern_plaguelands();
-void AddSC_elwynn_forest();
 void AddSC_eversong_woods();
 void AddSC_ghostlands();
 void AddSC_hinterlands();
@@ -398,8 +396,12 @@ void AddSC_boss_keristrasza();
 void AddSC_instance_nexus();
 void AddSC_boss_drakos();                //The Nexus The Oculus
 void AddSC_boss_urom();
+void AddSC_boss_varos();
+void AddSC_boss_eregos();
 void AddSC_instance_oculus();
 void AddSC_oculus();
+void AddSC_boss_malygos();              // The Nexus: Eye of Eternity
+void AddSC_instance_eye_of_eternity();
 void AddSC_boss_sartharion();            //Obsidian Sanctum
 void AddSC_instance_obsidian_sanctum();
 void AddSC_boss_bjarngrim();             //Ulduar Halls of Lightning
@@ -478,8 +480,10 @@ void AddSC_boss_rotface();
 void AddSC_boss_professor_putricide();
 void AddSC_boss_blood_prince_council();
 void AddSC_boss_blood_queen_lana_thel();
+void AddSC_boss_sindragosa();
 void AddSC_icecrown_citadel_teleport();
 void AddSC_instance_icecrown_citadel();
+void AddSC_icecrown_citadel();
 
 void AddSC_dalaran();
 void AddSC_borean_tundra();
@@ -491,6 +495,7 @@ void AddSC_sholazar_basin();
 void AddSC_storm_peaks();
 void AddSC_zuldrak();
 void AddSC_crystalsong_forest();
+void AddSC_isle_of_conquest();
 
 //outland
 void AddSC_boss_exarch_maladaar();           //Auchindoun Auchenai Crypts
@@ -706,6 +711,7 @@ void AddEasternKingdomsScripts()
     AddSC_boss_pyroguard_emberseer();
     AddSC_boss_gyth();
     AddSC_boss_rend_blackhand();
+    AddSC_instance_blackrock_spire();
     AddSC_boss_razorgore();                 //Blackwing lair
     AddSC_boss_vael();
     AddSC_boss_broodlord();
@@ -835,10 +841,8 @@ void AddEasternKingdomsScripts()
     AddSC_blasted_lands();
     AddSC_boss_kruul();
     AddSC_burning_steppes();
-    AddSC_dun_morogh();
     AddSC_duskwood();
     AddSC_eastern_plaguelands();
-    AddSC_elwynn_forest();
     AddSC_eversong_woods();
     AddSC_ghostlands();
     AddSC_hinterlands();
@@ -1090,8 +1094,12 @@ void AddNorthrendScripts()
     AddSC_instance_nexus();
     AddSC_boss_drakos();                //The Nexus The Oculus
     AddSC_boss_urom();
+    AddSC_boss_varos();
+    AddSC_boss_eregos();
     AddSC_instance_oculus();
     AddSC_oculus();
+    AddSC_boss_malygos();              // The Nexus: Eye of Eternity
+    AddSC_instance_eye_of_eternity();
     AddSC_boss_sartharion();            //Obsidian Sanctum
     AddSC_instance_obsidian_sanctum();
     AddSC_boss_bjarngrim();             //Ulduar Halls of Lightning
@@ -1109,6 +1117,7 @@ void AddNorthrendScripts()
     AddSC_boss_ignis();
     AddSC_boss_razorscale();
     AddSC_boss_xt002();
+    AddSC_boss_general_vezax();
     AddSC_boss_assembly_of_iron();
     AddSC_boss_kologarn();
     AddSC_boss_freya();
@@ -1170,8 +1179,10 @@ void AddNorthrendScripts()
     AddSC_boss_professor_putricide();
     AddSC_boss_blood_prince_council();
     AddSC_boss_blood_queen_lana_thel();
+    AddSC_boss_sindragosa();
     AddSC_icecrown_citadel_teleport();
     AddSC_instance_icecrown_citadel();
+    AddSC_icecrown_citadel();
 
     AddSC_dalaran();
     AddSC_borean_tundra();
@@ -1183,6 +1194,7 @@ void AddNorthrendScripts()
     AddSC_storm_peaks();
     AddSC_zuldrak();
     AddSC_crystalsong_forest();
+    AddSC_isle_of_conquest();
 #endif
 }
 

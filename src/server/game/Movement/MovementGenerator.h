@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -79,9 +79,9 @@ class MovementGeneratorMedium : public MovementGenerator
         bool Update(T &u, const uint32 &time_diff);
 };
 
-struct SelectableMovement : public FactoryHolder<MovementGenerator,MovementGeneratorType>
+struct SelectableMovement : public FactoryHolder<MovementGenerator, MovementGeneratorType>
 {
-    SelectableMovement(MovementGeneratorType mgt) : FactoryHolder<MovementGenerator,MovementGeneratorType>(mgt) {}
+    SelectableMovement(MovementGeneratorType mgt) : FactoryHolder<MovementGenerator, MovementGeneratorType>(mgt) {}
 };
 
 template<class REAL_MOVEMENT>
@@ -92,9 +92,8 @@ struct MovementGeneratorFactory : public SelectableMovement
     MovementGenerator* Create(void *) const;
 };
 
-typedef FactoryHolder<MovementGenerator,MovementGeneratorType> MovementGeneratorCreator;
-typedef FactoryHolder<MovementGenerator,MovementGeneratorType>::FactoryHolderRegistry MovementGeneratorRegistry;
-typedef FactoryHolder<MovementGenerator,MovementGeneratorType>::FactoryHolderRepository MovementGeneratorRepository;
+typedef FactoryHolder<MovementGenerator, MovementGeneratorType> MovementGeneratorCreator;
+typedef FactoryHolder<MovementGenerator, MovementGeneratorType>::FactoryHolderRegistry MovementGeneratorRegistry;
+typedef FactoryHolder<MovementGenerator, MovementGeneratorType>::FactoryHolderRepository MovementGeneratorRepository;
 #endif
-
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -200,7 +200,7 @@ WaypointMovementGenerator<Creature>::Update(Creature &unit, const uint32 &diff)
                 i_nextMoveTime.Reset(node->delay);
 
             //note: disable "start" for mtmap
-            if (node->event_id && urand(0,99) < node->event_chance)
+            if (node->event_id && urand(0, 99) < node->event_chance)
                 unit.GetMap()->ScriptsStart(sWaypointScripts, node->event_id, &unit, NULL/*, false*/);
 
             i_destinationHolder.ResetTravelTime();
@@ -282,13 +282,13 @@ bool FlightPathMovementGenerator::Update(Player &player, const uint32 &diff)
             i_destinationHolder.ResetUpdate(FLIGHT_TRAVEL_UPDATE);
             if (i_destinationHolder.HasArrived())
             {
-                DoEventIfAny(player,(*i_path)[i_currentNode], false);
+                DoEventIfAny(player, (*i_path)[i_currentNode], false);
 
                 uint32 curMap = (*i_path)[i_currentNode].mapid;
                 ++i_currentNode;
                 if (MovementInProgress())
                 {
-                    DoEventIfAny(player,(*i_path)[i_currentNode], true);
+                    DoEventIfAny(player, (*i_path)[i_currentNode], true);
 
                     sLog->outStaticDebug("loading node %u for player %s", i_currentNode, player.GetName());
                     if ((*i_path)[i_currentNode].mapid == curMap)
@@ -363,11 +363,10 @@ void FlightPathMovementGenerator::DoEventIfAny(Player& player, TaxiPathNodeEntry
 {
     if (uint32 eventid = departure ? node.departureEventID : node.arrivalEventID)
     {
-        sLog->outDebug("Taxi %s event %u of node %u of path %u for player %s", departure ? "departure" : "arrival", eventid, node.index, node.path, player.GetName());
+        sLog->outDebug(LOG_FILTER_MAPSCRIPTS, "Taxi %s event %u of node %u of path %u for player %s", departure ? "departure" : "arrival", eventid, node.index, node.path, player.GetName());
         player.GetMap()->ScriptsStart(sEventScripts, eventid, &player, &player);
     }
 }
-
 
 
 //
@@ -695,5 +694,4 @@ int GetFCost(int to, int num, int parentNum, float *gcost)
     return (int)(gc + hc);
 }
 #endif                                                      //__PATHFINDING__
-
 

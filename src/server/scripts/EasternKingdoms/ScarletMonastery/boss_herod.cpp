@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -118,7 +118,6 @@ public:
 
 };
 
-
 class mob_scarlet_trainee : public CreatureScript
 {
 public:
@@ -133,7 +132,7 @@ public:
     {
         mob_scarlet_traineeAI(Creature *c) : npc_escortAI(c)
         {
-            Start_Timer = urand(1000,6000);
+            Start_Timer = urand(1000, 6000);
         }
 
         uint32 Start_Timer;
@@ -148,7 +147,7 @@ public:
             {
                 if (Start_Timer <= diff)
                 {
-                    Start(true,true);
+                    Start(true, true);
                     Start_Timer = 0;
                 } else Start_Timer -= diff;
             }
@@ -158,7 +157,6 @@ public:
     };
 
 };
-
 
 void AddSC_boss_herod()
 {

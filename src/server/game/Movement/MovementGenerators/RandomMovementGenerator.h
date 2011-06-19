@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -37,9 +37,9 @@ class RandomMovementGenerator
         void Reset(T &);
         bool Update(T &, const uint32 &);
         bool GetDestination(float &x, float &y, float &z) const;
-        void UpdateMapPosition(uint32 mapid, float &x ,float &y, float &z)
+        void UpdateMapPosition(uint32 mapid, float &x , float &y, float &z)
         {
-            i_destinationHolder.GetLocationNow(mapid, x,y,z);
+            i_destinationHolder.GetLocationNow(mapid, x, y, z);
         }
         MovementGeneratorType GetMovementGeneratorType() { return RANDOM_MOTION_TYPE; }
     private:
@@ -50,5 +50,4 @@ class RandomMovementGenerator
         uint32 i_nextMove;
 };
 #endif
-
 
