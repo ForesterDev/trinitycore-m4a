@@ -1,466 +1,481 @@
 /*
- * Copyright (C) 2008 - 2009 Trinity <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "ScriptPCH.h"
-#include "instance_ulduar.hpp"
 #include "ulduar.h"
-#include "boss_yoggsaron.hpp"
 
-const DoorData doorData[] =
+static const DoorData doorData[] =
 {
-    {194416,    BOSS_LEVIATHAN, DOOR_TYPE_ROOM,     0},
-    {194905,    BOSS_LEVIATHAN, DOOR_TYPE_PASSAGE,  0},
-    {194631,    BOSS_XT002,     DOOR_TYPE_ROOM,     0},
-    {194554,    BOSS_ASSEMBLY,  DOOR_TYPE_ROOM,     0},
-    {194556,    BOSS_ASSEMBLY,  DOOR_TYPE_PASSAGE,  0},
-    {194553,    BOSS_KOLOGARN,  DOOR_TYPE_ROOM,     0},
-    {194441,    BOSS_HODIR,     DOOR_TYPE_PASSAGE,  0},
-    {194634,    BOSS_HODIR,     DOOR_TYPE_PASSAGE,  0},
-    {194442,    BOSS_HODIR,     DOOR_TYPE_ROOM,     0},
-    {194559,    BOSS_THORIM,    DOOR_TYPE_ROOM,     0},
-    {194774,    BOSS_MIMIRON,   DOOR_TYPE_ROOM,     0},
-    {194775,    BOSS_MIMIRON,   DOOR_TYPE_ROOM,     0},
-    {194776,    BOSS_MIMIRON,   DOOR_TYPE_ROOM,     0},
-    {194750,    BOSS_VEZAX,     DOOR_TYPE_PASSAGE,  0},
-    {0,         0,              DOOR_TYPE_ROOM,     0}, // EOF
+    {GO_LEVIATHAN_DOOR, TYPE_LEVIATHAN, DOOR_TYPE_ROOM,     BOUNDARY_S},
+    {0,                 0,              DOOR_TYPE_ROOM,     BOUNDARY_NONE}
 };
 
-enum eGameObjects
+class instance_ulduar : public InstanceMapScript
 {
-    GO_Leviathan_DOOR       = 194630,
-    GO_Kologarn_BRIDGE      = 194232,
-    GO_Hodir_Rare_CHEST     = 194200,
-    GO_Runic_DOOR           = 194557,
-    GO_Stone_DOOR           = 194558,
-    GO_Thorim_LEVER         = 194264,
-    GO_Mimiron_TRAM         = 194675,
-    GO_Mimiron_ELEVATOR     = 194749,
-    GO_Keepers_DOOR         = 194255
-};
+public:
+    instance_ulduar() : InstanceMapScript("instance_ulduar", 603) { }
 
-instance_ulduar::instance_ulduar(Map *pMap)
-    : InstanceScript(pMap),
-        pLeviathanDoor(),
-        HodirRareChest(),
-        MimironElevator(),
-        sara_(nullptr),
-        yoggsaron_(nullptr),
-        ys_mimiron_(nullptr),
-        ys_thorim_(nullptr),
-        yoggsaron_door_(nullptr)
-{
-    ominous_clouds_.reserve(12);
-    SetBossNumber(MAX_BOSS_NUMBER);
-    LoadDoorData(doorData);
-}
-
-void instance_ulduar::OnGameObjectCreate(GameObject *pGo, bool add)
-{
-    AddDoor(pGo, add);
-    switch(pGo->GetEntry())
+    InstanceScript* GetInstanceScript(InstanceMap* pMap) const
     {
-        case GO_Leviathan_DOOR: pLeviathanDoor = add ? pGo : NULL; break;
-        case 194773 /* Doodad_UL_Ulduar_doors01 */:
-            yoggsaron_door_ = add ? pGo : nullptr;
-            break;
-        case GO_Kologarn_BRIDGE: uiKologarnBridge = pGo->GetGUID(); HandleGameObject(NULL, true, pGo); break;
-        case GO_Hodir_Rare_CHEST: HodirRareChest = add ? pGo : NULL; break;
-        case GO_Runic_DOOR: pRunicDoor = add ? pGo : NULL; break;
-        case GO_Stone_DOOR: pStoneDoor = add ? pGo : NULL; break;
-        case GO_Thorim_LEVER: pThorimLever = add ? pGo : NULL; break;
-        case GO_Mimiron_TRAM: MimironTram = add ? pGo : NULL; break;
-        case GO_Mimiron_ELEVATOR: MimironElevator = add ? pGo : NULL; break;
-        case GO_Keepers_DOOR: KeepersGateGUID = pGo->GetGUID();
-        {
-            InstanceScript *data = pGo->GetInstanceScript();
-            pGo->RemoveFlag(GAMEOBJECT_FLAGS,GO_FLAG_LOCKED);
-            if (data)
-                for (uint32 i = BOSS_MIMIRON; i < BOSS_VEZAX; ++i)
-                    if (data->GetBossState(i) != DONE)
-                        pGo->SetFlag(GAMEOBJECT_FLAGS,GO_FLAG_LOCKED);
-            break;
-        }
+        return new instance_ulduar_InstanceMapScript(pMap);
     }
-}
 
-void instance_ulduar::OnCreatureCreate(Creature *pCreature, bool add)
-{
-    Map::PlayerList const &players = instance->GetPlayers();
-    uint32 TeamInInstance = 0;
-
-    if (!players.isEmpty())
-        if (Player* pPlayer = players.begin()->getSource())
-            TeamInInstance = pPlayer->GetTeam();
-        
-    switch(pCreature->GetEntry())
+    struct instance_ulduar_InstanceMapScript : public InstanceScript
     {
-        case 33113: uiLeviathan = pCreature->GetGUID(); return;
-        case 33134 /* Sara */:
-            sara_ = add ? pCreature : nullptr;
-            return;
-        case 33288 /* Yogg-Saron */:
-            yoggsaron_ = add ? pCreature : nullptr;
-            return;
-        case 33292 /* Ominous Cloud */:
-            if (add)
+        instance_ulduar_InstanceMapScript(InstanceMap* map) : InstanceScript(map) {}
+
+        uint32 uiEncounter[MAX_ENCOUNTER];
+        std::string m_strInstData;
+
+        uint64 uiLeviathanGUID;
+        uint64 uiIgnisGUID;
+        uint64 uiRazorscaleGUID;
+        uint64 uiRazorscaleController;
+        uint64 uiRazorHarpoonGUIDs[4];
+        uint64 uiExpCommanderGUID;
+        uint64 uiXT002GUID;
+        uint64 uiAssemblyGUIDs[3];
+        uint64 uiKologarnGUID;
+        uint64 uiLeftArmGUID;
+        uint64 uiRightArmGUID;
+        uint64 uiAuriayaGUID;
+        uint64 uiMimironGUID;
+        uint64 uiHodirGUID;
+        uint64 uiThorimGUID;
+        uint64 uiFreyaGUID;
+        uint64 uiVezaxGUID;
+        uint64 uiYoggSaronGUID;
+        uint64 uiAlgalonGUID;
+        uint64 uiLeviathanGateGUID;
+        uint64 uiVezaxDoorGUID;
+
+        uint64 uiKologarnChestGUID;
+        uint64 uiKologarnBridgeGUID;
+        uint64 uiKologarnDoorGUID;
+        uint64 uiThorimChestGUID;
+        uint64 uiHodirChestGUID;
+        uint64 uiFreyaChestGUID;
+
+        std::set<uint64> mRubbleSpawns;
+
+        void Initialize()
+        {
+            SetBossNumber(MAX_ENCOUNTER);
+            LoadDoorData(doorData);
+            uiIgnisGUID             = 0;
+            uiRazorscaleGUID        = 0;
+            uiRazorscaleController  = 0;
+            uiExpCommanderGUID      = 0;
+            uiXT002GUID             = 0;
+            uiKologarnGUID          = 0;
+            uiLeftArmGUID           = 0;
+            uiRightArmGUID          = 0;
+            uiAuriayaGUID           = 0;
+            uiMimironGUID           = 0;
+            uiHodirGUID             = 0;
+            uiThorimGUID            = 0;
+            uiFreyaGUID             = 0;
+            uiVezaxGUID             = 0;
+            uiYoggSaronGUID         = 0;
+            uiAlgalonGUID           = 0;
+            uiKologarnChestGUID     = 0;
+            uiKologarnBridgeGUID    = 0;
+            uiKologarnChestGUID     = 0;
+            uiThorimChestGUID       = 0;
+            uiHodirChestGUID        = 0;
+            uiFreyaChestGUID        = 0;
+            uiLeviathanGateGUID     = 0;
+            uiVezaxDoorGUID         = 0;
+
+            memset(uiEncounter, 0, sizeof(uiEncounter));
+            memset(uiAssemblyGUIDs, 0, sizeof(uiAssemblyGUIDs));
+            memset(uiRazorHarpoonGUIDs, 0, sizeof(uiRazorHarpoonGUIDs));
+        }
+
+        bool IsEncounterInProgress() const
+        {
+            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             {
-                pCreature->SetReactState(REACT_PASSIVE);
-                pCreature->CastSpell
-                    (static_cast<Unit *>(nullptr), 63084 /* Ominous Cloud Visual */, true);
-                ominous_clouds_.push_back(pCreature);
+                if (uiEncounter[i] == IN_PROGRESS)
+                    return true;
             }
-            else
-                ominous_clouds_.erase
-                    (std::find(ominous_clouds_.begin(), ominous_clouds_.end(), pCreature));
-            return;
-        case 33686: uiNorgannon = pCreature->GetGUID(); return;
-        case 33118: uiIgnis = pCreature->GetGUID(); return;
-        case 33186: uiRazorscale = pCreature->GetGUID(); return;
-        case 33210: uiExpCommander = pCreature->GetGUID(); return;
-        case 33293: uiXT002 = pCreature->GetGUID(); return;
-        case 32867: uiSteelbreaker = pCreature->GetGUID(); return;
-        case 32927: uiMolgeim = pCreature->GetGUID(); return;
-        case 32857: uiBrundir = pCreature->GetGUID(); return;
-        case 32930: uiKologarn = pCreature->GetGUID(); return;
-        case 32934: uiRightArm = pCreature->GetGUID(); return;
-        case 32933: uiLeftArm = pCreature->GetGUID(); return;
-        case 33515: uiAuriaya = pCreature->GetGUID(); return;
-        case 32915: uiBrightleaf = pCreature->GetGUID(); return;
-        case 32913: uiIronbranch = pCreature->GetGUID(); return;
-        case 32914: uiStonebark = pCreature->GetGUID(); return;
-        case 32906: uiFreya = pCreature->GetGUID(); return;
-        case 32865: uiThorim = pCreature->GetGUID(); return;
-        case 32872: uiRunicColossus = pCreature->GetGUID(); return;
-        case 32873: uiRuneGiant = pCreature->GetGUID(); return;
-        case 33350: uiMimiron = pCreature->GetGUID(); return;
-        case 33432: uiLeviathanMKII = pCreature->GetGUID(); return;
-        case 33651: uiVX001 = pCreature->GetGUID(); return;
-        case 33670: uiAerialUnit = pCreature->GetGUID(); return;
-        case 34068: uiMagneticCore = pCreature->GetGUID(); return;
-        case 33271: uiVezax = pCreature->GetGUID(); return;
-        case 33410: uiFreyaYS = pCreature->GetGUID(); return;
-        case 33413:
-            uiThorimYS = pCreature->GetGUID();
-            ys_thorim_ = add ? pCreature : nullptr;
-            return;
-        case 33412:
-            uiMimironYS = pCreature->GetGUID();
-            ys_mimiron_ = add ? pCreature : nullptr;
-            return;
-        case 33411: uiHodirYS = pCreature->GetGUID(); return;
-            
-        // Keeper's Images
-        case 33241: uiFreyaImage = pCreature->GetGUID();
-        {
-            InstanceScript *data = pCreature->GetInstanceScript();
-            pCreature->SetVisible(false);
-            if (data && data->GetBossState(BOSS_VEZAX) == DONE)
-                pCreature->SetVisible(true);
-        }
-        return;
-        case 33242: uiThorimImage = pCreature->GetGUID();
-        {
-            InstanceScript *data = pCreature->GetInstanceScript();
-            pCreature->SetVisible(false);
-            if (data && data->GetBossState(BOSS_VEZAX) == DONE)
-                pCreature->SetVisible(true);
-        }
-        return;
-        case 33244: uiMimironImage = pCreature->GetGUID();
-        {
-            InstanceScript *data = pCreature->GetInstanceScript();
-            pCreature->SetVisible(false);
-            if (data && data->GetBossState(BOSS_VEZAX) == DONE)
-                pCreature->SetVisible(true);
-        }            
-        return;
-        case 33213: uiHodirImage = pCreature->GetGUID();
-        {
-            InstanceScript *data = pCreature->GetInstanceScript();
-            pCreature->SetVisible(false);
-            if (data && data->GetBossState(BOSS_VEZAX) == DONE)
-                pCreature->SetVisible(true);
-        }
-        return;
-    }
 
-    // Hodir: Alliance npcs are spawned by default
-    if (TeamInInstance == HORDE)
-        switch(pCreature->GetEntry())
-        {
-            case 33325: pCreature->UpdateEntry(32941, HORDE); return;
-            case 32901: pCreature->UpdateEntry(33333, HORDE); return;
-            case 33328: pCreature->UpdateEntry(33332, HORDE); return;
-            case 32900: pCreature->UpdateEntry(32950, HORDE); return;
-            case 32893: pCreature->UpdateEntry(33331, HORDE); return;
-            case 33327: pCreature->UpdateEntry(32946, HORDE); return;
-            case 32897: pCreature->UpdateEntry(32948, HORDE); return;
-            case 33326: pCreature->UpdateEntry(33330, HORDE); return;
-            case 32908: pCreature->UpdateEntry(32907, HORDE); return;
-            case 32885: pCreature->UpdateEntry(32883, HORDE); return;
+            return false;
         }
-}
 
-uint64 instance_ulduar::GetData64(uint32 id)
-{
-    switch(id)
-    {
-        case DATA_LEVIATHAN:
-            return uiLeviathan;
-        case DATA_NORGANNON:
-            return uiNorgannon;
-        case DATA_IGNIS:
-            return uiIgnis;
-        case DATA_RAZORSCALE:
-            return uiRazorscale;
-        case DATA_EXP_COMMANDER:
-            return uiExpCommander;
-        case DATA_XT002:
-            return uiXT002;
-        case DATA_STEELBREAKER:
-            return uiSteelbreaker;
-        case DATA_MOLGEIM:
-            return uiMolgeim;
-        case DATA_BRUNDIR:
-            return uiBrundir;
-        case DATA_KOLOGARN:
-            return uiKologarn;
-        case DATA_RIGHT_ARM:
-            return uiRightArm;
-        case DATA_LEFT_ARM:
-            return uiLeftArm;
-        case DATA_AURIAYA:
-            return uiAuriaya;
-        case DATA_BRIGHTLEAF:
-            return uiBrightleaf;
-        case DATA_IRONBRANCH:
-            return uiIronbranch;
-        case DATA_STONEBARK:
-            return uiStonebark;
-        case DATA_FREYA:
-            return uiFreya;
-        case DATA_THORIM:
-            return uiThorim;
-        case DATA_RUNIC_COLOSSUS:
-            return uiRunicColossus;
-        case DATA_RUNE_GIANT:
-            return uiRuneGiant;
-        case DATA_MIMIRON:
-            return uiMimiron;
-        case DATA_LEVIATHAN_MK_II:
-            return uiLeviathanMKII;
-        case DATA_VX_001:
-            return uiVX001;
-        case DATA_AERIAL_UNIT:
-            return uiAerialUnit;
-        case DATA_MAGNETIC_CORE:
-            return uiMagneticCore;
-        case DATA_VEZAX:
-            return uiVezax;
-        case DATA_YS_FREYA:
-            return uiFreyaYS;
-        case DATA_YS_THORIM:
-            return uiThorimYS;
-        case DATA_YS_MIMIRON:
-            return uiMimironYS;
-        case DATA_YS_HODIR:
-            return uiHodirYS;
-    }
-    return 0;
-}
-
-void instance_ulduar::SetData(uint32 id, uint32 value)
-{
-    switch(id)
-    {
-        case DATA_LEVIATHAN_DOOR:
-            if (pLeviathanDoor)
-                pLeviathanDoor->SetGoState(GOState(value));
-            break;
-        case DATA_RUNIC_DOOR:
-            if (pRunicDoor)
-                pRunicDoor->SetGoState(GOState(value));
-            break;
-        case DATA_STONE_DOOR:
-            if (pStoneDoor)
-                pStoneDoor->SetGoState(GOState(value));
-            break;
-        case DATA_CALL_TRAM:
-            if (MimironTram && instance)
+        void OnCreatureCreate(Creature* creature)
+        {
+            switch(creature->GetEntry())
             {
-                // Load Mimiron Tram (unfortunally only server side)
-                instance->LoadGrid(2307, 284.632);
-                
-                if (value == 0)
-                    MimironTram->SetGoState(GO_STATE_READY);
-                if (value == 1)
-                    MimironTram->SetGoState(GO_STATE_ACTIVE);
-                    
-                // Send movement update to players
-                if (Map* pMap = MimironTram->GetMap())
-                    if (pMap->IsDungeon())
+                case NPC_LEVIATHAN:
+                    uiLeviathanGUID = creature->GetGUID();
+                    break;
+                case NPC_IGNIS:
+                    uiIgnisGUID = creature->GetGUID();
+                    break;
+                case NPC_RAZORSCALE:
+                    uiRazorscaleGUID = creature->GetGUID();
+                    break;
+                case NPC_RAZORSCALE_CONTROLLER:
+                    uiRazorscaleController = creature->GetGUID();
+                    break;
+                case NPC_EXPEDITION_COMMANDER:
+                    uiExpCommanderGUID = creature->GetGUID();
+                    return;
+                case NPC_XT002:
+                    uiXT002GUID = creature->GetGUID();
+                    break;
+
+                // Assembly of Iron
+                case NPC_STEELBREAKER:
+                    uiAssemblyGUIDs[0] = creature->GetGUID();
+                    break;
+                case NPC_MOLGEIM:
+                    uiAssemblyGUIDs[1] = creature->GetGUID();
+                    break;
+                case NPC_BRUNDIR:
+                    uiAssemblyGUIDs[2] = creature->GetGUID();
+                    break;
+
+                // Kologarn
+                case NPC_KOLOGARN:
+                    uiKologarnGUID = creature->GetGUID();
+                    break;
+                case NPC_KOLOGARN_BRIDGE:
+                    // The below hacks are courtesy of the grid/visibilitysystem
+                    if (GetBossState(TYPE_KOLOGARN) == DONE)
                     {
-                        Map::PlayerList const &PlayerList = pMap->GetPlayers();
-
-                        if (!PlayerList.isEmpty())
-                            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                                if (i->getSource())
-                                {
-                                    UpdateData data;
-                                    WorldPacket pkt;
-                                    MimironTram->BuildValuesUpdateBlockForPlayer(&data, i->getSource());
-                                    data.BuildPacket(&pkt);
-                                    i->getSource()->GetSession()->SendPacket(&pkt);
-                                }
+                        creature->SetDeadByDefault(true);
+                        creature->setDeathState(CORPSE);
+                        creature->DestroyForNearbyPlayers();
+                        creature->UpdateObjectVisibility(true);
                     }
-            }
-            break;
-        case DATA_MIMIRON_ELEVATOR:
-            if (MimironElevator)
-                MimironElevator->SetGoState(GOState(value));
-            break;
-        case DATA_HODIR_RARE_CHEST:
-            if (HodirRareChest && value == GO_STATE_READY)
-                HodirRareChest->RemoveFlag(GAMEOBJECT_FLAGS,GO_FLAG_UNK1);
-            break;
-    }
-}
+                    else
+                    {
+                        creature->SetDeadByDefault(false);
+                        creature->setDeathState(CORPSE);
+                        creature->RemoveCorpse(true);
+                    }
+                    break;
 
-bool instance_ulduar::SetBossState(uint32 id, EncounterState state)
-{
-    if (!InstanceScript::SetBossState(id, state))
-        return false;
-            
-    switch (id)
-    {
-        case BOSS_KOLOGARN:
-            if (state == DONE)
-                HandleGameObject(uiKologarnBridge, false);
-            break;
-        case BOSS_HODIR:
-            CheckKeepersState();
-            break;
-        case BOSS_THORIM:
-            if (state == IN_PROGRESS)
-                pThorimLever->RemoveFlag(GAMEOBJECT_FLAGS,GO_FLAG_UNK1);
-            CheckKeepersState();
-            break;
-        case BOSS_MIMIRON:
-            CheckKeepersState();
-            break;
-        case BOSS_FREYA:
-            CheckKeepersState();
-            break;
-        case BOSS_VEZAX:
-            if (state == DONE)
+                case NPC_AURIAYA:
+                    uiAuriayaGUID = creature->GetGUID();
+                    break;
+                case NPC_MIMIRON:
+                    uiMimironGUID = creature->GetGUID();
+                    break;
+                case NPC_HODIR:
+                    uiHodirGUID = creature->GetGUID();
+                    break;
+                case NPC_THORIM:
+                    uiThorimGUID = creature->GetGUID();
+                    break;
+                case NPC_FREYA:
+                    uiFreyaGUID = creature->GetGUID();
+                    break;
+                case NPC_VEZAX:
+                    uiVezaxGUID = creature->GetGUID();
+                    break;
+                case NPC_YOGGSARON:
+                    uiYoggSaronGUID = creature->GetGUID();
+                    break;
+                case NPC_ALGALON:
+                    uiAlgalonGUID = creature->GetGUID();
+                    break;
+            }
+
+         }
+
+        void OnGameObjectCreate(GameObject* go)
+        {
+            switch(go->GetEntry())
             {
-                // Keeper's Images
-                if (Creature* pFreya = instance->GetCreature(uiFreyaImage))
-                    pFreya->SetVisible(true);
-                if (Creature* pThorim = instance->GetCreature(uiThorimImage))
-                    pThorim->SetVisible(true);
-                if (Creature* pMimiron = instance->GetCreature(uiMimironImage))
-                    pMimiron->SetVisible(true);
-                if (Creature* pHodir = instance->GetCreature(uiHodirImage))
-                    pHodir->SetVisible(true);
+                case GO_KOLOGARN_CHEST_HERO:
+                case GO_KOLOGARN_CHEST:
+                    uiKologarnChestGUID = go->GetGUID();
+                    break;
+                case GO_KOLOGARN_BRIDGE:
+                    uiKologarnBridgeGUID = go->GetGUID();
+                    if (GetBossState(TYPE_KOLOGARN) == DONE)
+                        HandleGameObject(0, false, go);
+                    break;
+                case GO_KOLOGARN_DOOR:
+                    uiKologarnDoorGUID = go->GetGUID();
+                    break;
+                case GO_THORIM_CHEST_HERO:
+                case GO_THORIM_CHEST:
+                    uiThorimChestGUID =go->GetGUID();
+                    break;
+                case GO_HODIR_CHEST_HERO:
+                case GO_HODIR_CHEST:
+                    uiHodirChestGUID = go->GetGUID();
+                    break;
+                case GO_FREYA_CHEST_HERO:
+                case GO_FREYA_CHEST:
+                    uiFreyaChestGUID = go->GetGUID();
+                    break;
+                case GO_LEVIATHAN_DOOR:
+                    AddDoor(go, true);
+                    break;
+                case GO_LEVIATHAN_GATE:
+                    uiLeviathanGateGUID = go->GetGUID();
+                    if (GetBossState(TYPE_LEVIATHAN) == DONE)
+                        go->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                    break;
+                case GO_VEZAX_DOOR:
+                    uiVezaxDoorGUID = go->GetGUID();
+                    HandleGameObject(0, false, go);
+                    break;
+                case GO_RAZOR_HARPOON_1:
+                    uiRazorHarpoonGUIDs[0] = go->GetGUID();
+                    break;
+                case GO_RAZOR_HARPOON_2:
+                    uiRazorHarpoonGUIDs[1] = go->GetGUID();
+                    break;
+                case GO_RAZOR_HARPOON_3:
+                    uiRazorHarpoonGUIDs[2] = go->GetGUID();
+                    break;
+                case GO_RAZOR_HARPOON_4:
+                    uiRazorHarpoonGUIDs[3] = go->GetGUID();
+                    break;
             }
-            break;
-    }
-        
-    return true;
-}
+        }
 
-void instance_ulduar::Prison_handler::operator()(Player &p)
-{
-    if (p.wmo_id() == 47478 /* The Prison of Yogg-Saron */)
-        if (i->yoggsaron_->canAttack(&p))
-            i->yoggsaron_->AI()->DoZoneInCombat();
-}
+        void OnGameObjectRemove(GameObject* go)
+        {
+            switch (go->GetEntry())
+            {
+                case GO_LEVIATHAN_DOOR:
+                    AddDoor(go, false);
+                    break;
+                default:
+                    break;
+            }
+        }
 
-void instance_ulduar::CheckKeepersState()
-{
-    if (GameObject* pGo = instance->GetGameObject(KeepersGateGUID))
-    {
-        InstanceScript *data = pGo->GetInstanceScript();
-        pGo->RemoveFlag(GAMEOBJECT_FLAGS,GO_FLAG_LOCKED);
-        if (data)
-            for (uint32 i = BOSS_MIMIRON; i < BOSS_VEZAX; ++i)
-                if (data->GetBossState(i) != DONE)
-                    pGo->SetFlag(GAMEOBJECT_FLAGS,GO_FLAG_LOCKED);
-    }
-}
+        void ProcessEvent(GameObject* /*go*/, uint32 eventId)
+        {
+            // Flame Leviathan's Tower Event triggers
+           Creature* pFlameLeviathan = instance->GetCreature(uiLeviathanGUID);
 
-InstanceScript *GetInstanceData_instance_ulduar(Map *pMap)
-{
-    return new instance_ulduar(pMap);
-}
+            if (pFlameLeviathan && pFlameLeviathan->isAlive()) //No leviathan, no event triggering ;)
+                switch(eventId)
+                {
+                    case EVENT_TOWER_OF_STORM_DESTROYED:
+                        pFlameLeviathan->AI()->DoAction(1);
+                        break;
+                    case EVENT_TOWER_OF_FROST_DESTROYED:
+                        pFlameLeviathan->AI()->DoAction(2);
+                        break;
+                    case EVENT_TOWER_OF_FLAMES_DESTROYED:
+                        pFlameLeviathan->AI()->DoAction(3);
+                        break;
+                    case EVENT_TOWER_OF_LIFE_DESTROYED:
+                        pFlameLeviathan->AI()->DoAction(4);
+                        break;
+                }
+        }
 
-// Mimiron Tram
-bool GOHello_go_call_tram(Player* pPlayer, GameObject* pGo)
-{
-    InstanceScript *pInstance = pGo->GetInstanceScript();
+        void ProcessEvent(Unit* /*unit*/, uint32 /*eventId*/)
+        {
+        }
 
-    if (!pInstance)
-        return false;
+        bool SetBossState(uint32 type, EncounterState state)
+        {
+            if (!InstanceScript::SetBossState(type, state))
+                return false;
 
-    switch(pGo->GetEntry())
-    {
-        case 194914:
-        case 194438:
-            pInstance->SetData(DATA_CALL_TRAM, 0);
-            break;
-        case 194912:
-        case 194437:
-            pInstance->SetData(DATA_CALL_TRAM, 1);
-            break;
-    }
-    return true;
-}
+            switch (type)
+            {
+                case TYPE_LEVIATHAN:
+                case TYPE_IGNIS:
+                case TYPE_RAZORSCALE:
+                case TYPE_XT002:
+                case TYPE_ASSEMBLY:
+                case TYPE_AURIAYA:
+                case TYPE_MIMIRON:
+                case TYPE_VEZAX:
+                    if (state == DONE)
+                        HandleGameObject(uiVezaxDoorGUID, true);
+                    break;
+                case TYPE_YOGGSARON:
+                    break;
+                case TYPE_KOLOGARN:
+                    if (state == DONE)
+                    {
+                        if (GameObject* go = instance->GetGameObject(uiKologarnChestGUID))
+                            go->SetRespawnTime(go->GetRespawnDelay());
+                        HandleGameObject(uiKologarnBridgeGUID, false);
+                    }
+                    if (state == IN_PROGRESS)
+                        HandleGameObject(uiKologarnDoorGUID, false);
+                    else
+                        HandleGameObject(uiKologarnDoorGUID, true);
+                    break;
+                case TYPE_HODIR:
+                    if (state == DONE)
+                        if (GameObject* go = instance->GetGameObject(uiHodirChestGUID))
+                            go->SetRespawnTime(go->GetRespawnDelay());
+                    break;
+                case TYPE_THORIM:
+                    if (state == DONE)
+                        if (GameObject* go = instance->GetGameObject(uiThorimChestGUID))
+                            go->SetRespawnTime(go->GetRespawnDelay());
+                    break;
+                case TYPE_FREYA:
+                    if (state == DONE)
+                        if (GameObject* go = instance->GetGameObject(uiFreyaChestGUID))
+                            go->SetRespawnTime(go->GetRespawnDelay());
+                    break;
+             }
+
+             return true;
+        }
+
+        void SetData(uint32 type, uint32 data)
+        {
+            switch(type)
+            {
+                case TYPE_COLOSSUS:
+                    uiEncounter[TYPE_COLOSSUS] = data;
+                    if (data == 2)
+                    {
+                        if (Creature* pBoss = instance->GetCreature(uiLeviathanGUID))
+                            pBoss->AI()->DoAction(10);
+                        if (GameObject* pGate = instance->GetGameObject(uiLeviathanGateGUID))
+                            pGate->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                        SaveToDB();
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void SetData64(uint32 type, uint64 data)
+        {
+            switch (type)
+            {
+                case DATA_LEFT_ARM:
+                    uiLeftArmGUID = data;
+                    break;
+                case DATA_RIGHT_ARM:
+                    uiRightArmGUID = data;
+                    break;
+            }
+        }
+
+        uint64 GetData64(uint32 data)
+        {
+            switch(data)
+            {
+                case TYPE_LEVIATHAN:            return uiLeviathanGUID;
+                case TYPE_IGNIS:                return uiIgnisGUID;
+                case TYPE_RAZORSCALE:           return uiRazorscaleGUID;
+                case DATA_RAZORSCALE_CONTROL:   return uiRazorscaleController;
+                case TYPE_XT002:                return uiXT002GUID;
+                case TYPE_KOLOGARN:             return uiKologarnGUID;
+                case DATA_LEFT_ARM:             return uiLeftArmGUID;
+                case DATA_RIGHT_ARM:            return uiRightArmGUID;
+                case TYPE_AURIAYA:              return uiAuriayaGUID;
+                case TYPE_MIMIRON:              return uiMimironGUID;
+                case TYPE_HODIR:                return uiHodirGUID;
+                case TYPE_THORIM:               return uiThorimGUID;
+                case TYPE_FREYA:                return uiFreyaGUID;
+                case TYPE_VEZAX:                return uiVezaxGUID;
+                case TYPE_YOGGSARON:            return uiYoggSaronGUID;
+                case TYPE_ALGALON:              return uiAlgalonGUID;
+
+                // razorscale expedition commander
+                case DATA_EXP_COMMANDER:        return uiExpCommanderGUID;
+                case GO_RAZOR_HARPOON_1:        return uiRazorHarpoonGUIDs[0];
+                case GO_RAZOR_HARPOON_2:        return uiRazorHarpoonGUIDs[1];
+                case GO_RAZOR_HARPOON_3:        return uiRazorHarpoonGUIDs[2];
+                case GO_RAZOR_HARPOON_4:        return uiRazorHarpoonGUIDs[3];
+                // Assembly of Iron
+                case DATA_STEELBREAKER:         return uiAssemblyGUIDs[0];
+                case DATA_MOLGEIM:              return uiAssemblyGUIDs[1];
+                case DATA_BRUNDIR:              return uiAssemblyGUIDs[2];
+            }
+
+            return 0;
+        }
+
+        uint32 GetData(uint32 type)
+        {
+            switch(type)
+            {
+                case TYPE_COLOSSUS:
+                    return uiEncounter[type];
+            }
+
+            return 0;
+        }
+
+        std::string GetSaveData()
+        {
+            OUT_SAVE_INST_DATA;
+
+            std::ostringstream saveStream;
+            saveStream << "U U " << GetBossSaveData() << GetData(TYPE_COLOSSUS);
+
+            OUT_SAVE_INST_DATA_COMPLETE;
+            return saveStream.str();
+        }
+
+        void Load(const char* strIn)
+        {
+            if (!strIn)
+            {
+                OUT_LOAD_INST_DATA_FAIL;
+                return;
+            }
+
+            OUT_LOAD_INST_DATA(strIn);
+
+            char dataHead1, dataHead2;
+
+            std::istringstream loadStream(strIn);
+            loadStream >> dataHead1 >> dataHead2;
+
+            if (dataHead1 == 'U' && dataHead2 == 'U')
+            {
+                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                {
+                    uint32 tmpState;
+                    loadStream >> tmpState;
+                    if (tmpState == IN_PROGRESS || tmpState > SPECIAL)
+                        tmpState = NOT_STARTED;
+
+                    if (i == TYPE_COLOSSUS)
+                        SetData(i, tmpState);
+                    else
+                        SetBossState(i, EncounterState(tmpState));
+                }
+            }
+
+            OUT_LOAD_INST_DATA_COMPLETE;
+        }
+    };
+
+};
+
 
 void AddSC_instance_ulduar()
 {
-    struct Instance_ulduar
-        : InstanceMapScript
-    {
-        Instance_ulduar()
-            : InstanceMapScript("instance_ulduar", 603)
-        {
-        }
-
-        InstanceScript *GetInstanceScript(InstanceMap *map) const
-        {
-            return GetInstanceData_instance_ulduar(std::move(map));
-        }
-    };
-    new Instance_ulduar;
-    
-    struct GO_call_tram
-        : GameObjectScript
-    {
-        GO_call_tram()
-            : GameObjectScript("go_call_tram")
-        {
-        }
-
-        bool OnGossipHello(Player *player, GameObject *go)
-        {
-            return GOHello_go_call_tram(std::move(player), std::move(go));
-        }
-    };
-    new GO_call_tram;
+    new instance_ulduar();
 }
