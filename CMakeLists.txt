@@ -51,6 +51,11 @@ include(CheckPlatform)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_ADDITIONAL_VERSIONS
+  "1.46.1"
+  "1.46.0"
+  "1.46"
+  "1.45.0"
+  "1.45"
   "1.44.0"
   "1.44"
   "1.43.0"
