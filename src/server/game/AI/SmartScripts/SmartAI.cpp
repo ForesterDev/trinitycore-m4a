@@ -216,10 +216,10 @@ void SmartAI::EndPath(bool fail)
         if (targets->size() == 1 && GetScript()->IsPlayer((*targets->begin())))
         {
             Player* plr = (*targets->begin())->ToPlayer();
-            if(!fail && plr->IsAtGroupRewardDistance(me) && !plr->GetCorpse())
+            if (!fail && plr->IsAtGroupRewardDistance(me) && !plr->GetCorpse())
                 plr->GroupEventHappens(mEscortQuestID, me);
 
-            if(fail && plr->GetQuestStatus(mEscortQuestID) == QUEST_STATUS_INCOMPLETE)
+            if (fail && plr->GetQuestStatus(mEscortQuestID) == QUEST_STATUS_INCOMPLETE)
                 plr->FailQuest(mEscortQuestID);
 
             if (Group* pGroup = plr->GetGroup())
@@ -228,9 +228,9 @@ void SmartAI::EndPath(bool fail)
                 {
                     Player* pGroupGuy = gr->getSource();
 
-                    if(!fail && pGroupGuy->IsAtGroupRewardDistance(me) && !pGroupGuy->GetCorpse())
+                    if (!fail && pGroupGuy->IsAtGroupRewardDistance(me) && !pGroupGuy->GetCorpse())
                         pGroupGuy->AreaExploredOrEventHappens(mEscortQuestID);
-                    if(fail && pGroupGuy->GetQuestStatus(mEscortQuestID) == QUEST_STATUS_INCOMPLETE)
+                    if (fail && pGroupGuy->GetQuestStatus(mEscortQuestID) == QUEST_STATUS_INCOMPLETE)
                         pGroupGuy->FailQuest(mEscortQuestID);
                 }
             }
@@ -241,9 +241,9 @@ void SmartAI::EndPath(bool fail)
                 if (GetScript()->IsPlayer((*iter)))
                 {
                     Player* plr = (*iter)->ToPlayer();
-                    if(!fail && plr->IsAtGroupRewardDistance(me) && !plr->GetCorpse())
+                    if (!fail && plr->IsAtGroupRewardDistance(me) && !plr->GetCorpse())
                         plr->AreaExploredOrEventHappens(mEscortQuestID);
-                    if(fail && plr->GetQuestStatus(mEscortQuestID) == QUEST_STATUS_INCOMPLETE)
+                    if (fail && plr->GetQuestStatus(mEscortQuestID) == QUEST_STATUS_INCOMPLETE)
                         plr->FailQuest(mEscortQuestID);
                 }
             }
@@ -375,7 +375,7 @@ void SmartAI::UpdateAI(const uint32 diff)
     if (!UpdateVictim())
         return;
 
-    if(mCanAutoAttack)
+    if (mCanAutoAttack)
         DoMeleeAttackIfReady();
 }
 
@@ -587,9 +587,9 @@ void SmartAI::KilledUnit(Unit* victim)
     GetScript()->ProcessEventsFor(SMART_EVENT_KILL, victim);
 }
 
-void SmartAI::JustSummoned(Creature* pUnit)
+void SmartAI::JustSummoned(Creature* creature)
 {
-    GetScript()->ProcessEventsFor(SMART_EVENT_SUMMONED_UNIT, pUnit);
+    GetScript()->ProcessEventsFor(SMART_EVENT_SUMMONED_UNIT, creature);
 }
 
 void SmartAI::AttackStart(Unit* who)
@@ -597,7 +597,7 @@ void SmartAI::AttackStart(Unit* who)
     if (who && me->Attack(who, true))
     {
         SetRun(mRun);
-        if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
+        if (me->GetMotionMaster()->GetMotionSlotType(MOTION_SLOT_ACTIVE) == POINT_MOTION_TYPE)
             me->GetMotionMaster()->MovementExpired();
 
         if (mCanCombatMove)

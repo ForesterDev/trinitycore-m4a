@@ -54,7 +54,7 @@ class LootTemplate::LootGroup                               // A set of loot def
     public:
         void AddEntry(LootStoreItem& item);                 // Adds an entry to the group (at loading stage)
         bool HasQuestDrop() const;                          // True if group includes at least 1 quest drop entry
-        bool HasQuestDropForPlayer(Player const * player) const;
+        bool HasQuestDropForPlayer(Player const* player) const;
                                                             // The same for active quests of the player
         void Process(Loot& loot, uint16 lootMode) const;    // Rolls an item from the group (if any) and adds the item to the loot
         float RawTotalChance() const;                       // Overall chance for the group (without equal chanced items)
@@ -70,7 +70,7 @@ class LootTemplate::LootGroup                               // A set of loot def
         LootStoreItemList ExplicitlyChanced;                // Entries with chances defined in DB
         LootStoreItemList EqualChanced;                     // Zero chances - every entry takes the same chance
 
-        LootStoreItem const * Roll() const;                 // Rolls an item from the group, returns NULL if all miss their chances
+        LootStoreItem const* Roll() const;                 // Rolls an item from the group, returns NULL if all miss their chances
 };
 
 //Remove all data and free all memory
@@ -338,7 +338,7 @@ LootItem::LootItem(LootStoreItem const& li)
 }
 
 // Basic checks for player/item compatibility - if false no chance to see the item in the loot
-bool LootItem::AllowedForPlayer(Player const * player) const
+bool LootItem::AllowedForPlayer(Player const* player) const
 {
     // DB conditions check
     if (!sConditionMgr->IsPlayerMeetToConditions(const_cast<Player*>(player), conditions))
@@ -375,7 +375,7 @@ bool LootItem::AllowedForPlayer(Player const * player) const
     return true;
 }
 
-void LootItem::AddAllowedLooter(const Player *player)
+void LootItem::AddAllowedLooter(const Player* player)
 {
     allowedGUIDs.insert(player->GetGUIDLow());
 }
@@ -973,7 +973,7 @@ void LootTemplate::LootGroup::AddEntry(LootStoreItem& item)
 }
 
 // Rolls an item from the group, returns NULL if all miss their chances
-LootStoreItem const * LootTemplate::LootGroup::Roll() const
+LootStoreItem const* LootTemplate::LootGroup::Roll() const
 {
     if (!ExplicitlyChanced.empty())                             // First explicitly chanced entries are checked
     {
@@ -1008,7 +1008,7 @@ bool LootTemplate::LootGroup::HasQuestDrop() const
 }
 
 // True if group includes at least 1 quest drop entry for active quests of the player
-bool LootTemplate::LootGroup::HasQuestDropForPlayer(Player const * player) const
+bool LootTemplate::LootGroup::HasQuestDropForPlayer(Player const* player) const
 {
     for (LootStoreItemList::const_iterator i = ExplicitlyChanced.begin(); i != ExplicitlyChanced.end(); ++i)
         if (player->HasQuestForItem(i->itemid))
@@ -1444,7 +1444,7 @@ void LoadLootTemplates_Creature()
     // output error for any still listed (not referenced from appropriate table) ids
     LootTemplates_Creature.ReportUnusedIds(ids_set);
 
-    if(count)
+    if (count)
         sLog->outString(">> Loaded %u creature loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         sLog->outErrorDb(">> Loaded 0 creature loot templates. DB table `creature_loot_template` is empty");
@@ -1479,7 +1479,7 @@ void LoadLootTemplates_Disenchant()
     // output error for any still listed (not referenced from appropriate table) ids
     LootTemplates_Disenchant.ReportUnusedIds(lootIdSet);
 
-    if(count)
+    if (count)
         sLog->outString(">> Loaded %u disenchanting loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         sLog->outErrorDb(">> Loaded 0 disenchanting loot templates. DB table `disenchant_loot_template` is empty");
@@ -1504,7 +1504,7 @@ void LoadLootTemplates_Fishing()
     // output error for any still listed (not referenced from appropriate table) ids
     LootTemplates_Fishing.ReportUnusedIds(ids_set);
 
-    if(count)
+    if (count)
         sLog->outString(">> Loaded %u fishing loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         sLog->outErrorDb(">> Loaded 0 fishing loot templates. DB table `fishing_loot_template` is empty");
@@ -1540,7 +1540,7 @@ void LoadLootTemplates_Gameobject()
     // output error for any still listed (not referenced from appropriate table) ids
     LootTemplates_Gameobject.ReportUnusedIds(ids_set);
 
-    if(count)
+    if (count)
         sLog->outString(">> Loaded %u gameobject loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         sLog->outErrorDb(">> Loaded 0 gameobject loot templates. DB table `gameobject_loot_template` is empty");
@@ -1566,7 +1566,7 @@ void LoadLootTemplates_Item()
     // output error for any still listed (not referenced from appropriate table) ids
     LootTemplates_Item.ReportUnusedIds(ids_set);
 
-    if(count)
+    if (count)
         sLog->outString(">> Loaded %u prospecting loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         sLog->outErrorDb(">> Loaded 0 prospecting loot templates. DB table `item_loot_template` is empty");
@@ -1597,7 +1597,7 @@ void LoadLootTemplates_Milling()
     // output error for any still listed (not referenced from appropriate table) ids
     LootTemplates_Milling.ReportUnusedIds(ids_set);
 
-    if(count)
+    if (count)
         sLog->outString(">> Loaded %u milling loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         sLog->outErrorDb(">> Loaded 0 milling loot templates. DB table `milling_loot_template` is empty");
@@ -1633,7 +1633,7 @@ void LoadLootTemplates_Pickpocketing()
     // output error for any still listed (not referenced from appropriate table) ids
     LootTemplates_Pickpocketing.ReportUnusedIds(ids_set);
 
-    if(count)
+    if (count)
         sLog->outString(">> Loaded %u pickpocketing loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         sLog->outErrorDb(">> Loaded 0 pickpocketing loot templates. DB table `pickpocketing_loot_template` is empty");
@@ -1664,7 +1664,7 @@ void LoadLootTemplates_Prospecting()
     // output error for any still listed (not referenced from appropriate table) ids
     LootTemplates_Prospecting.ReportUnusedIds(ids_set);
 
-    if(count)
+    if (count)
         sLog->outString(">> Loaded %u prospecting loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         sLog->outErrorDb(">> Loaded 0 prospecting loot templates. DB table `prospecting_loot_template` is empty");
@@ -1690,7 +1690,7 @@ void LoadLootTemplates_Mail()
     // output error for any still listed (not referenced from appropriate table) ids
     LootTemplates_Mail.ReportUnusedIds(ids_set);
 
-    if(count)
+    if (count)
         sLog->outString(">> Loaded %u mail loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         sLog->outErrorDb(">> Loaded 0 mail loot templates. DB table `mail_loot_template` is empty");
@@ -1726,7 +1726,7 @@ void LoadLootTemplates_Skinning()
     // output error for any still listed (not referenced from appropriate table) ids
     LootTemplates_Skinning.ReportUnusedIds(ids_set);
 
-    if(count)
+    if (count)
         sLog->outString(">> Loaded %u skinning loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         sLog->outErrorDb(">> Loaded 0 skinning loot templates. DB table `skinning_loot_template` is empty");
@@ -1770,7 +1770,7 @@ void LoadLootTemplates_Spell()
     // output error for any still listed (not referenced from appropriate table) ids
     LootTemplates_Spell.ReportUnusedIds(ids_set);
 
-    if(count)
+    if (count)
         sLog->outString(">> Loaded %u spell loot templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     else
         sLog->outErrorDb(">> Loaded 0 spell loot templates. DB table `spell_loot_template` is empty");

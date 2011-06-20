@@ -172,7 +172,7 @@ SocialMgr::~SocialMgr()
 {
 }
 
-void SocialMgr::GetFriendInfo(Player *player, uint32 friendGUID, FriendInfo &friendInfo)
+void SocialMgr::GetFriendInfo(Player* player, uint32 friendGUID, FriendInfo &friendInfo)
 {
     if (!player)
         return;
@@ -189,7 +189,7 @@ void SocialMgr::GetFriendInfo(Player *player, uint32 friendGUID, FriendInfo &fri
     uint32 team = player->GetTeam();
     AccountTypes security = player->GetSession()->GetSecurity();
     bool allowTwoSideWhoList = sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
-    AccountTypes gmLevelInWhoList = AccountTypes (sWorld->getIntConfig(CONFIG_GM_LEVEL_IN_WHO_LIST));
+    AccountTypes gmLevelInWhoList = AccountTypes(sWorld->getIntConfig(CONFIG_GM_LEVEL_IN_WHO_LIST));
 
     PlayerSocialMap::iterator itr = player->GetSocial()->m_playerSocialMap.find(friendGUID);
     if (itr != player->GetSocial()->m_playerSocialMap.end())
@@ -220,7 +220,7 @@ void SocialMgr::MakeFriendStatusPacket(FriendsResult result, uint32 guid, WorldP
     *data << uint64(guid);
 }
 
-void SocialMgr::SendFriendStatus(Player *player, FriendsResult result, uint32 friend_guid, bool broadcast)
+void SocialMgr::SendFriendStatus(Player* player, FriendsResult result, uint32 friend_guid, bool broadcast)
 {
     FriendInfo fi;
 
@@ -256,7 +256,7 @@ void SocialMgr::SendFriendStatus(Player *player, FriendsResult result, uint32 fr
         player->GetSession()->SendPacket(&data);
 }
 
-void SocialMgr::BroadcastToFriendListers(Player *player, WorldPacket *packet)
+void SocialMgr::BroadcastToFriendListers(Player* player, WorldPacket* packet)
 {
     if (!player)
         return;

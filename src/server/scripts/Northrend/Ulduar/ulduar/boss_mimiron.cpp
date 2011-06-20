@@ -16,6 +16,8 @@
  */
 
 #include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "SpellScript.h"
 #include "ulduar.h"
 
 enum Yells

@@ -30,7 +30,7 @@ OutdoorPvPNA::OutdoorPvPNA()
     m_TypeId = OUTDOOR_PVP_NA;
 }
 
-void OutdoorPvPNA::HandleKillImpl(Player *plr, Unit * killed)
+void OutdoorPvPNA::HandleKillImpl(Player *plr, Unit* killed)
 {
     if (killed->GetTypeId() == TYPEID_PLAYER && plr->GetTeam() != killed->ToPlayer()->GetTeam())
     {
@@ -65,12 +65,12 @@ uint32 OPvPCapturePointNA::GetAliveGuardsCount()
         case NA_NPC_GUARD_14:
         case NA_NPC_GUARD_15:
             {
-                if (Creature * cr = HashMapHolder<Creature>::Find(itr->second))
+                if (Creature* cr = HashMapHolder<Creature>::Find(itr->second))
                 {
                     if (cr->isAlive())
                         ++cnt;
                 }
-                else if (CreatureData const * cd = sObjectMgr->GetCreatureData(GUID_LOPART(itr->second)))
+                else if (CreatureData const* cd = sObjectMgr->GetCreatureData(GUID_LOPART(itr->second)))
                 {
                     if (!cd->is_dead)
                         ++cnt;
@@ -226,7 +226,7 @@ bool OutdoorPvPNA::SetupOutdoorPvP()
     return true;
 }
 
-void OutdoorPvPNA::HandlePlayerEnterZone(Player * plr, uint32 zone)
+void OutdoorPvPNA::HandlePlayerEnterZone(Player* plr, uint32 zone)
 {
     // add buffs
     if (plr->GetTeam() == m_obj->m_ControllingFaction)
@@ -234,7 +234,7 @@ void OutdoorPvPNA::HandlePlayerEnterZone(Player * plr, uint32 zone)
     OutdoorPvP::HandlePlayerEnterZone(plr, zone);
 }
 
-void OutdoorPvPNA::HandlePlayerLeaveZone(Player * plr, uint32 zone)
+void OutdoorPvPNA::HandlePlayerLeaveZone(Player* plr, uint32 zone)
 {
     // remove buffs
     plr->RemoveAurasDueToSpell(NA_CAPTURE_BUFF);
@@ -335,7 +335,7 @@ bool OutdoorPvPNA::Update(uint32 diff)
     return m_obj->Update(diff);
 }
 
-bool OPvPCapturePointNA::HandleCustomSpell(Player * plr, uint32 spellId, GameObject * /*go*/)
+bool OPvPCapturePointNA::HandleCustomSpell(Player* plr, uint32 spellId, GameObject* /*go*/)
 {
     std::vector<uint32> nodes;
     nodes.resize(2);
