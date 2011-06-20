@@ -296,7 +296,7 @@ class spell_dk_death_gate : public SpellScriptLoader
                 PreventHitDefaultEffect(effIndex);
                 if (!GetHitUnit())
                     return;
-                GetHitUnit()->CastSpell(GetHitUnit(), GetEffectValue(), false);
+                GetHitUnit()->CastSpell(GetHitUnit(), GetEffectValue(), true);
             }
 
             void Register()
