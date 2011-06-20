@@ -19,6 +19,10 @@
 #ifndef __BATTLEGROUNDSA_H
 #define __BATTLEGROUNDSA_H
 
+#include <memory>
+#include <array>
+#include "Battleground.h"
+
 class Battleground;
 
 class BattlegroundSAScore : public BattlegroundScore
@@ -26,6 +30,16 @@ class BattlegroundSAScore : public BattlegroundScore
     public:
         BattlegroundSAScore(): demolishers_destroyed(0), gates_destroyed(0) {};
         virtual ~BattlegroundSAScore() {};
+
+        std::pair<std::size_t, Stat_data_type> stat_data() const
+        {
+            std::array<int32, max_stats> d;
+            auto first = d.begin(), it = first;
+            *it++ = demolishers_destroyed;
+            *it++ = gates_destroyed;
+            return std::make_pair(it - first, std::move(d));
+        }
+
     uint8 demolishers_destroyed;
     uint8 gates_destroyed;
 };

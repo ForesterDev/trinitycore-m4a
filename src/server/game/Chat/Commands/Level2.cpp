@@ -16,6 +16,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
+#include "ArenaTeamMgr.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "DBCStores.h"
@@ -25,6 +27,8 @@
 #include "GameObject.h"
 #include "Opcodes.h"
 #include "Chat.h"
+#include <boost/format.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 #include "MapManager.h"
 #include "Language.h"
 #include "World.h"
@@ -38,10 +42,13 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include "ArenaTeam.h"
 #include "OutdoorPvPMgr.h"
 #include "Transport.h"
 #include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand
 #include "CreatureGroups.h"
+
+using boost::format;
 
 //mute player for some times
 bool ChatHandler::HandleMuteCommand(const char* args)
@@ -1056,5 +1063,43 @@ bool ChatHandler::HandleCharacterTitlesCommand(const char* args)
                 PSendSysMessage(LANG_TITLE_LIST_CONSOLE, id, titleInfo->bit_index, name.c_str(), localeNames[loc], knownStr, activeStr);
         }
     }
+    return true;
+}
+
+bool ChatHandler::cmd_gmteamdisband(const char *args)
+{
+    int team_id;
+    if (std::istringstream(args) >> team_id)
+        ;
+    else
+        return false;
+    // TODO: make this thread-safe
+    uint32 arenateamid;
+    try {
+        arenateamid = boost::numeric_cast<uint32>(team_id);
+    }
+    catch (const boost::numeric::bad_numeric_cast &) {
+        return false;
+    }
+    auto t = sArenaTeamMgr->GetArenaTeamById(std::move(arenateamid));
+    if (t)
+        ;
+    else
+    {
+        SendSysMessage(str(format("Could not find team %1%.") % team_id).c_str());
+        return true;
+    }
+    if (!t->IsFighting())
+        ;
+    else
+    {
+        SendSysMessage
+            (str(format("Team %1% is currently fighting and cannot be disbanded.")
+                    % team_id).c_str());
+        return true;
+    }
+    t->Disband(m_session);
+    delete t;
+    SendSysMessage("ok");
     return true;
 }

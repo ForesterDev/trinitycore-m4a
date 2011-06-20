@@ -52,6 +52,8 @@ class MapInstanced;
 class InstanceMap;
 namespace Trinity { struct ObjectUpdater; }
 
+typedef uint32 WMO_id;
+
 struct ScriptAction
 {
     uint64 sourceGUID;
@@ -346,6 +348,8 @@ class Map : public GridRefManager<NGridType>
             GetZoneAndAreaIdByAreaFlag(zoneid, areaid, GetAreaFlag(x, y, z), GetId());
         }
 
+        WMO_id wmo_id(const Position &p) const;
+
         void MoveAllCreaturesInMoveList();
         void RemoveAllObjectsInRemoveList();
         virtual void RemoveAllPlayers();
@@ -424,6 +428,9 @@ class Map : public GridRefManager<NGridType>
         template<class NOTIFIER> void VisitAll(const float &x, const float &y, float radius, NOTIFIER &notifier);
         template<class NOTIFIER> void VisitWorld(const float &x, const float &y, float radius, NOTIFIER &notifier);
         template<class NOTIFIER> void VisitGrid(const float &x, const float &y, float radius, NOTIFIER &notifier);
+
+        void player_zone_changed(Player &p);
+
         CreatureGroupHolderType CreatureGroupHolder;
 
         void UpdateIteratorBack(Player* player);

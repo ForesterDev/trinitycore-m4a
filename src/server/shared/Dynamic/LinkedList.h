@@ -180,7 +180,7 @@ class LinkedListHead
 
                 Iterator operator++(int)
                 {                                           // postincrement
-                    iterator _Tmp = *this;
+                    auto _Tmp = *this;
                     ++*this;
                     return (_Tmp);
                 }

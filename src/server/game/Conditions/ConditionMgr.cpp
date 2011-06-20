@@ -17,6 +17,7 @@
  */
 
 
+#include "gamePCH.h"
 #include "Player.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
@@ -1412,11 +1413,7 @@ void ConditionMgr::Clean()
     for (VehicleSpellConditionMap::iterator itr = m_VehicleSpellConditions.begin(); itr != m_VehicleSpellConditions.end(); ++itr)
     {
         for (ConditionTypeMap::iterator it = itr->second.begin(); it != itr->second.end(); ++it)
-        {
-            for (ConditionList::const_iterator i = it->second.begin(); i != it->second.end(); ++i)
-                delete *i;
             it->second.clear();
-        }
         itr->second.clear();
     }
 

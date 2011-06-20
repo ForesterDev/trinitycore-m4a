@@ -56,17 +56,14 @@ class instance_forge_of_souls : public InstanceMapScript
                     case CREATURE_DEVOURER:
                         devourerOfSouls = creature->GetGUID();
                         break;
+                    case NPC_KALIRA:
+                        fix_entry(creature, NPC_ELANDRA);
+                        break;
                     case NPC_SYLVANAS_PART1:
-                        if (teamInInstance == ALLIANCE)
-                            creature->UpdateEntry(NPC_JAINA_PART1, ALLIANCE);
+                        fix_entry(creature, NPC_JAINA_PART1);
                         break;
                     case NPC_LORALEN:
-                        if (teamInInstance == ALLIANCE)
-                            creature->UpdateEntry(NPC_ELANDRA, ALLIANCE);
-                        break;
-                    case NPC_KALIRA:
-                        if (teamInInstance == ALLIANCE)
-                            creature->UpdateEntry(NPC_KORELN, ALLIANCE);
+                        fix_entry(creature, NPC_KORELN);
                         break;
                 }
             }
@@ -141,6 +138,12 @@ class instance_forge_of_souls : public InstanceMapScript
             }
 
         private:
+            void fix_entry(Creature *const &pcreature, uint32 entry_a) const
+            {
+                if (teamInInstance == TEAM_ALLIANCE)
+                    pcreature->UpdateEntry(std::move(entry_a), ALLIANCE);
+            }
+
             uint64 bronjahm;
             uint64 devourerOfSouls;
 

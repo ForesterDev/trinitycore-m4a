@@ -16,8 +16,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "authPCH.h"
 #include <openssl/md5.h>
 
+#include "authPCH.h"
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "ByteBuffer.h"
@@ -358,6 +360,8 @@ bool AuthSocket::_HandleLogonChallenge()
         pkt << (uint8)WOW_FAIL_BANNED;
         sLog->outBasic("[AuthChallenge] Banned ip %s tried to login!", ip_address.c_str());
     }
+    else if (_build != 12340)
+        pkt << static_cast<uint8>(WOW_FAIL_VERSION_INVALID);
     else
     {
         // Get the account details from the account table
@@ -829,10 +833,13 @@ bool AuthSocket::_HandleRealmList()
     for (RealmList::RealmMap::const_iterator i = sRealmList->begin(); i != sRealmList->end(); ++i)
     {
         // don't work with realms which not compatible with the client
-        if ((_expversion & POST_BC_EXP_FLAG) && i->second.gamebuild != _build)
-            continue;
-        else if ((_expversion & PRE_BC_EXP_FLAG) && !AuthHelper::IsPreBCAcceptedClientBuild(i->second.gamebuild))
+        if (_expversion & POST_BC_EXP_FLAG) // 2.4.3 and 3.1.3 cliens
+            ;
+        else if (_expversion & PRE_BC_EXP_FLAG) // 1.12.1 and 1.12.2 clients are compatible with eachother
+        {
+            if (!AuthHelper::IsPreBCAcceptedClientBuild(i->second.gamebuild))
                 continue;
+        }
 
         uint8 AmountOfCharacters;
 

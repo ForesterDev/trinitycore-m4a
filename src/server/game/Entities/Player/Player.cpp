@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "Language.h"
 #include "DatabaseEnv.h"
@@ -73,6 +74,8 @@
 #include "CharacterDatabaseCleaner.h"
 #include "InstanceScript.h"
 #include <cmath>
+
+using std::ostringstream;
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
@@ -255,7 +258,7 @@ std::string PlayerTaxi::SaveTaxiDestinationsToString()
     if (m_TaxiDestinations.empty())
         return "";
 
-    std::ostringstream ss;
+    ostringstream ss;
 
     for (size_t i=0; i < m_TaxiDestinations.size(); ++i)
         ss << m_TaxiDestinations[i] << " ";
@@ -276,7 +279,7 @@ uint32 PlayerTaxi::GetCurrentTaxiPath() const
     return path;
 }
 
-std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi)
+ostringstream &operator<<(ostringstream &ss, const PlayerTaxi &taxi)
 {
     ss << "'";
     for (uint8 i = 0; i < TaxiMaskSize; ++i)
@@ -625,7 +628,11 @@ UpdateMask Player::updateVisualBits;
 #ifdef _MSC_VER
 #pragma warning(disable:4355)
 #endif
-Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputationMgr(this)
+Player::Player(WorldSession *session)
+    : Unit(),
+        m_achievementMgr(this),
+        m_reputationMgr(this),
+        wmo_id_()
 {
 #ifdef _MSC_VER
 #pragma warning(default:4355)
@@ -756,6 +763,17 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     rest_type=REST_TYPE_NO;
     ////////////////////Rest System/////////////////////
 
+    ///////////////////Anticheat////////////////////////
+    m_anti_lastmovetime = 0;   //last movement time
+    m_anti_NextLenCheck = 0;
+    m_anti_MovedLen = 0.0f;
+    m_anti_BeginFallZ = INVALID_HEIGHT;
+    m_anti_lastalarmtime = 0;    //last time when alarm generated
+    m_anti_alarmcount = 0;       //alarm counter
+    m_anti_TeleTime = 0;
+    m_CanFly = false;
+    ///////////////////Anticheat////////////////////////
+
     m_mailsLoaded = false;
     m_mailsUpdated = false;
     unReadMails = 0;
@@ -855,7 +873,16 @@ Player::~Player ()
 {
     // it must be unloaded already in PlayerLogout and accessed only for loggined player
     //m_social = NULL;
-
+    if (m_itemUpdateQueue.empty())
+        ;
+    else
+    {
+        for (auto it = m_itemUpdateQueue.begin(), last = m_itemUpdateQueue.end();
+                it != last; )
+            if (auto p = *it++)
+                p->RemoveFromUpdateQueueOf(this);
+        m_itemUpdateQueue.clear();
+    }
     // Note: buy back item already deleted from DB when player was saved
     for (uint8 i = 0; i < PLAYER_SLOTS_COUNT; ++i)
         delete m_items[i];
@@ -2018,7 +2045,9 @@ uint8 Player::chatTag() const
     // 0x4 - gm
     // 0x2 - dnd
     // 0x1 - afk
-    if (isGMChat())
+    if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DEVELOPER))
+        return 0x10;
+    else if (isGMChat())
         return 4;
     else if (isDND())
         return 3;
@@ -3480,11 +3509,15 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
     if (!spellInfo)
     {
-        // do character spell book cleanup (all characters)
+        // do character spell book cleanup
         if (!IsInWorld() && !learning)                       // spell load case
         {
-            sLog->outError("Player::addSpell: Non-existed in SpellStore spell #%u request, deleting for all characters in `character_spell`.", spell_id);
-            CharacterDatabase.PExecute("DELETE FROM character_spell WHERE spell = '%u'", spell_id);
+            sLog->outError("Player::addSpell: Non-existed in SpellStore spell #%u request, deleting.", spell_id);
+            ostringstream s;
+            s << "DELETE FROM character_spell WHERE guid="
+                << static_cast<unsigned long>(GetGUIDLow()) << " AND spell = '"
+                << static_cast<unsigned long>(spell_id) << '\'';
+            CharacterDatabase.Execute(s.str().c_str());
         }
         else
             sLog->outError("Player::addSpell: Non-existed in SpellStore spell #%u request.", spell_id);
@@ -3494,11 +3527,15 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
 
     if (!SpellMgr::IsSpellValid(spellInfo, this, false))
     {
-        // do character spell book cleanup (all characters)
+        // do character spell book cleanup
         if (!IsInWorld() && !learning)                       // spell load case
         {
-            sLog->outError("Player::addSpell: Broken spell #%u learning not allowed, deleting for all characters in `character_spell`.", spell_id);
-            CharacterDatabase.PExecute("DELETE FROM character_spell WHERE spell = '%u'", spell_id);
+            sLog->outError("Player::addSpell: Broken spell #%u learning not allowed, deleting.", spell_id);
+            ostringstream s;
+            s << "DELETE FROM character_spell WHERE guid="
+                << static_cast<unsigned long>(GetGUIDLow()) << " AND spell = '"
+                << static_cast<unsigned long>(spell_id) << '\'';
+            CharacterDatabase.Execute(s.str().c_str());
         }
         else
             sLog->outError("Player::addSpell: Broken spell #%u learning not allowed.", spell_id);
@@ -4280,7 +4317,7 @@ void Player::_SaveSpellCooldowns(SQLTransaction& trans)
     time_t infTime = curTime + infinityCooldownDelayCheck;
 
     bool first_round = true;
-    std::ostringstream ss;
+    ostringstream ss;
 
     // remove outdated and save active
     for (SpellCooldowns::iterator itr = m_spellCooldowns.begin(); itr != m_spellCooldowns.end();)
@@ -5229,14 +5266,15 @@ void Player::CreateCorpse()
     uint32 _cfi;
     for (uint8 i = 0; i < EQUIPMENT_SLOT_END; i++)
     {
-        if (m_items[i])
-        {
-            iDisplayID = m_items[i]->GetTemplate()->DisplayInfoID;
-            iIventoryType = m_items[i]->GetTemplate()->InventoryType;
+        if (GetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + 2 * i))
+            if (m_items[i])
+            {
+                iDisplayID = m_items[i]->GetTemplate()->DisplayInfoID;
+                iIventoryType = m_items[i]->GetTemplate()->InventoryType;
 
-            _cfi =  iDisplayID | (iIventoryType << 24);
-            corpse->SetUInt32Value(CORPSE_FIELD_ITEM + i, _cfi);
-        }
+                _cfi =  iDisplayID | (iIventoryType << 24);
+                corpse->SetUInt32Value(CORPSE_FIELD_ITEM + i, _cfi);
+            }
     }
 
     // we do not need to save corpses for BG/arenas
@@ -5739,6 +5777,62 @@ float Player::GetMeleeCritFromAgility()
     return crit*100.0f;
 }
 
+float Player::GetBaseDodge()
+{
+    uint32 pclass = getClass();
+    float BaseDodge[MAX_CLASSES] = {
+        3.664f,  // Warrior
+        3.494f,  // Paladin
+        -4.087f, // Hunter
+        2.095f,  // Rogue
+        3.417f,  // Priest
+        3.664f,  // DK?
+        2.108f,  // Shaman
+        3.658f,  // Mage
+        2.421f,  // Warlock
+        0.0f,
+        5.609f   // Druid
+    };
+    return BaseDodge[pclass - 1];
+}
+
+float Player::DodgeDiminishingReturn(float dodge)
+{
+    float dimdodge = 0.0f;
+    uint32 pclass = getClass();
+    float k[MAX_CLASSES] = {
+        0.956f, // Warrior
+        0.956f, // Paladin
+        0.988f, // Hunter
+        0.988f, // Rogue
+        0.953f, // Priest
+        0.956f, // DK?
+        0.988f, // Shaman
+        0.953f, // Mage
+        0.953f, // Warlock
+        0.0f,   // ??
+        0.972f  // Druid
+    };
+
+    float Dodge_Cap[MAX_CLASSES] = {
+        88.12f,      // Warrior
+        88.12f,      // Paladin
+        145.56f,     // Hunter
+        145.56f,     // Rogue
+        150.37f,     // Priest
+        88.12f,      // DK?
+        145.56f,     // Shaman
+        150.37f,     // Mage
+        150.37f,     // Warlock
+        0.0f,        // ??
+        116.89f      // Druid
+    };
+
+    if (dodge > 0.0f)
+        dimdodge = (dodge * Dodge_Cap[pclass - 1] / (dodge + (Dodge_Cap[pclass - 1] * k[pclass - 1])));
+    return dimdodge;
+}
+
 float Player::GetDodgeFromAgility()
 {
     // Table for base dodge values
@@ -5781,8 +5875,45 @@ float Player::GetDodgeFromAgility()
     if (dodgeRatio == NULL || pclass > MAX_CLASSES)
         return 0.0f;
 
-    float dodge=dodge_base[pclass-1] + GetStat(STAT_AGILITY) * dodgeRatio->ratio * crit_to_dodge[pclass-1];
-    return dodge*100.0f;
+    float dodge = dodge_base[pclass - 1] + GetStat(STAT_AGILITY) * dodgeRatio->ratio * crit_to_dodge[pclass - 1];
+    return dodge * 100.0f;
+}
+
+float Player::ParryDiminishingReturn(float parry)
+{
+    float dimparry=0.0f;
+    uint32 pclass = getClass();
+    float k[MAX_CLASSES] = {
+        0.956f, // Warrior
+        0.956f, // Paladin
+        0.988f, // Hunter
+        0.988f, // Rogue
+        0.953f, // Priest
+        0.956f, // DK?
+        0.988f, // Shaman
+        0.953f, // Mage
+        0.953f, // Warlock
+        0.0f,   // ??
+        0.972f  // Druid
+    };
+
+    float Parry_Cap[MAX_CLASSES] = {
+        47.00f,  // Warrior
+        47.00f,  // Paladin
+        145.56f, // Hunter
+        145.56f, // Rogue
+        0.0f,    // Priest
+        47.00f,  // DK?
+        145.56f, // Shaman
+        0.0f,    // Mage
+        0.0f,    // Warlock
+        0.0f,    // ??
+        0.0f     // Druid
+    };
+
+    if (parry > 0.0f)
+        dimparry = (parry * Parry_Cap[pclass - 1] / (parry + (Parry_Cap[pclass - 1] * k[pclass - 1])));
+    return dimparry;
 }
 
 float Player::GetSpellCritFromIntellect()
@@ -6793,6 +6924,12 @@ void Player::CheckAreaExploreAndOutdoor()
     if (isInFlight())
         return;
 
+    auto new_wmo_id = GetBaseMap()->wmo_id(*this);
+    if (wmo_id_ != new_wmo_id)
+    {
+        wmo_id_ = new_wmo_id;
+        GetMap()->player_zone_changed(*this);
+    }
     bool isOutdoor;
     uint16 areaFlag = GetBaseMap()->GetAreaFlag(GetPositionX(), GetPositionY(), GetPositionZ(), &isOutdoor);
 
@@ -11904,7 +12041,7 @@ Item* Player::StoreNewItem(ItemPosCountVec const& dest, uint32 item, bool update
             m_itemSoulboundTradeable.push_back(pItem);
 
             // save data
-            std::ostringstream ss;
+            ostringstream ss;
             for (AllowedLooterSet::iterator itr = allowedLooters->begin(); itr != allowedLooters->end(); ++itr)
                 ss << *itr << " ";
 
@@ -12190,7 +12327,10 @@ void Player::QuickEquipItem(uint16 pos, Item *pItem)
 
 void Player::SetVisibleItemSlot(uint8 slot, Item *pItem)
 {
-    if (pItem)
+    if (!(m_ExtraFlags & PLAYER_EXTRA_hide_armor
+                && !(slot == EQUIPMENT_SLOT_MAINHAND
+                    || slot == EQUIPMENT_SLOT_OFFHAND
+                    || slot == EQUIPMENT_SLOT_RANGED)) && pItem)
     {
         SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + (slot * 2), pItem->GetEntry());
         SetUInt16Value(PLAYER_VISIBLE_ITEM_1_ENCHANTMENT + (slot * 2), 0, pItem->GetEnchantmentId(PERM_ENCHANTMENT_SLOT));
@@ -16785,7 +16925,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     m_taxi.LoadTaxiMask(fields[17].GetCString());            // must be before InitTaxiNodesForLevel
 
-    uint32 extraflags = fields[31].GetUInt16();
+    m_ExtraFlags = fields[31].GetUInt16();
 
     m_stableSlots = fields[32].GetUInt8();
     if (m_stableSlots > MAX_PET_STABLES)
@@ -16952,7 +17092,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
             case 0:                      break;             // disable
             case 1: SetGameMaster(true); break;             // enable
             case 2:                                         // save state
-                if (extraflags & PLAYER_EXTRA_GM_ON)
+                if (m_ExtraFlags & PLAYER_EXTRA_GM_ON)
                     SetGameMaster(true);
                 break;
         }
@@ -16963,7 +17103,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
             case 0: SetGMVisible(false); break;             // invisible
             case 1:                      break;             // visible
             case 2:                                         // save state
-                if (extraflags & PLAYER_EXTRA_GM_INVISIBLE)
+                if (m_ExtraFlags & PLAYER_EXTRA_GM_INVISIBLE)
                     SetGMVisible(false);
                 break;
         }
@@ -16974,7 +17114,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
             case 0:                        break;           // disable
             case 1: SetAcceptTicket(true); break;           // enable
             case 2:                                         // save state
-            if (extraflags & PLAYER_EXTRA_GM_ACCEPT_TICKETS)
+            if (m_ExtraFlags & PLAYER_EXTRA_GM_ACCEPT_TICKETS)
                 SetAcceptTicket(true);
             break;
         }*/
@@ -16985,7 +17125,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
             case 0:                  break;                 // disable
             case 1: SetGMChat(true); break;                 // enable
             case 2:                                         // save state
-                if (extraflags & PLAYER_EXTRA_GM_CHAT)
+                if (m_ExtraFlags & PLAYER_EXTRA_GM_CHAT)
                     SetGMChat(true);
                 break;
         }
@@ -16996,7 +17136,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
             case 0:                          break;         // disable
             case 1: SetAcceptWhispers(true); break;         // enable
             case 2:                                         // save state
-                if (extraflags & PLAYER_EXTRA_ACCEPT_WHISPERS)
+                if (m_ExtraFlags & PLAYER_EXTRA_ACCEPT_WHISPERS)
                     SetAcceptWhispers(true);
                 break;
         }
@@ -18176,7 +18316,7 @@ void Player::SaveToDB()
     std::string sql_name = m_name;
     CharacterDatabase.escape_string(sql_name);
 
-    std::ostringstream ss;
+    ostringstream ss;
     ss << "REPLACE INTO characters (guid, account, name, race, class, gender, level, xp, money, playerBytes, playerBytes2, playerFlags, "
         "map, instance_id, instance_mode_mask, position_x, position_y, position_z, orientation, "
         "taximask, online, cinematic, "
@@ -18558,7 +18698,7 @@ void Player::_SaveInventory(SQLTransaction& trans)
             case ITEM_UNCHANGED:
                 break;
         }
-
+        item->RemoveFromUpdateQueueOf(this);
         item->SaveToDB(trans);                                   // item have unchanged inventory record and can be save standalone
     }
     m_itemUpdateQueue.clear();
@@ -18772,7 +18912,7 @@ void Player::_SaveStats(SQLTransaction& trans)
         return;
 
     trans->PAppend("DELETE FROM character_stats WHERE guid = '%u'", GetGUIDLow());
-    std::ostringstream ss;
+    ostringstream ss;
     ss << "INSERT INTO character_stats (guid, maxhealth, maxpower1, maxpower2, maxpower3, maxpower4, maxpower5, maxpower6, maxpower7, "
         "strength, agility, stamina, intellect, spirit, armor, resHoly, resFire, resNature, resFrost, resShadow, resArcane, "
         "blockPct, dodgePct, parryPct, critPct, rangedCritPct, spellCritPct, attackPower, rangedAttackPower, spellPower, resilience) VALUES ("
@@ -18868,7 +19008,7 @@ void Player::SendAttackSwingNotInRange()
 
 void Player::SavePositionInDB(uint32 mapid, float x, float y, float z, float o, uint32 zone, uint64 guid)
 {
-    std::ostringstream ss;
+    ostringstream ss;
     ss << "UPDATE characters SET position_x='"<<x<<"', position_y='"<<y
         << "', position_z='"<<z<<"', orientation='"<<o<<"', map='"<<mapid
         << "', zone='"<<zone<<"', trans_x='0', trans_y='0', trans_z='0', "
@@ -19269,7 +19409,7 @@ void Player::Whisper(const std::string& text, uint32 language, uint64 receiver)
     sScriptMgr->OnPlayerChat(this, CHAT_MSG_WHISPER, language, _text, rPlayer);
 
     // when player you are whispering to is dnd, he cannot receive your message, unless you are in gm mode
-    if (!rPlayer->isDND() || isGameMaster())
+    if (language == LANG_ADDON || !rPlayer->isDND() || isGameMaster())
     {
         WorldPacket data(SMSG_MESSAGECHAT, 200);
         BuildPlayerChat(&data, CHAT_MSG_WHISPER, _text, language);
@@ -19287,19 +19427,22 @@ void Player::Whisper(const std::string& text, uint32 language, uint64 receiver)
         // announce to player that player he is whispering to is dnd and cannot receive his message
         ChatHandler(this).PSendSysMessage(LANG_PLAYER_DND, rPlayer->GetName(), rPlayer->dndMsg.c_str());
 
-    if (!isAcceptWhispers() && !isGameMaster() && !rPlayer->isGameMaster())
+    if (language != LANG_ADDON)
     {
-        SetAcceptWhispers(true);
-        ChatHandler(this).SendSysMessage(LANG_COMMAND_WHISPERON);
+        if (!isAcceptWhispers() && !isGameMaster() && !rPlayer->isGameMaster())
+        {
+            SetAcceptWhispers(true);
+            ChatHandler(this).SendSysMessage(LANG_COMMAND_WHISPERON);
+        }
+
+        // announce to player that player he is whispering to is afk
+        if (rPlayer->isAFK())
+            ChatHandler(this).PSendSysMessage(LANG_PLAYER_AFK, rPlayer->GetName(), rPlayer->afkMsg.c_str());
+
+        // if player whisper someone, auto turn of dnd to be able to receive an answer
+        if (isDND() && !rPlayer->isGameMaster())
+            ToggleDND();
     }
-
-    // announce to player that player he is whispering to is afk
-    if (rPlayer->isAFK())
-        ChatHandler(this).PSendSysMessage(LANG_PLAYER_AFK, rPlayer->GetName(), rPlayer->afkMsg.c_str());
-
-    // if player whisper someone, auto turn of dnd to be able to receive an answer
-    if (isDND() && !rPlayer->isGameMaster())
-        ToggleDND();
 }
 
 void Player::PetSpellInitialize()
@@ -19670,8 +19813,18 @@ void Player::RemoveSpellMods(Spell* spell)
 
             // remove from list
             spell->m_appliedMods.erase(iterMod);
-
-            if (mod->ownerAura->DropCharge(AURA_REMOVE_BY_EXPIRE))
+            auto &aura = *mod->ownerAura;
+            bool removed = false;
+            if (aura.GetCharges())
+            {
+                aura.SetCharges(mod->charges == -1 ? 0 : static_cast<uint8>(std::min<int16>(mod->charges, std::numeric_limits<uint8>::max())));
+                if (!aura.GetCharges())
+                {
+                    aura.Remove(AURA_REMOVE_BY_EXPIRE);
+                    removed = true;
+                }
+            }
+            if (removed)
                 itr = m_spellMods[i].begin();
         }
     }
@@ -20607,17 +20760,25 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 it
 
 void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time)
 {
-    SpellCooldown sc;
-    sc.end = end_time;
-    sc.itemid = itemid;
-    m_spellCooldowns[spellid] = sc;
+    auto old = m_spellCooldowns.find(spellid);
+    if (old == m_spellCooldowns.end() || old->second.end < end_time)
+    {
+        SpellCooldown sc;
+        sc.end = end_time;
+        sc.itemid = itemid;
+        m_spellCooldowns[spellid] = sc;
+    }
 }
 
 void Player::SendCooldownEvent(SpellEntry const* spellInfo, uint32 itemId /*= 0*/, Spell* spell /*= NULL*/, bool setCooldown /*= true*/)
 {
     // start cooldowns at server side, if any
     if (setCooldown)
+    {
+        RemoveSpellCooldown(spellInfo->Id);
+        RemoveSpellCategoryCooldown(spellInfo->Category);
         AddSpellAndCategoryCooldowns(spellInfo, itemId, spell);
+    }
 
     // Send activate cooldown timer (possible 0) at client side
     WorldPacket data(SMSG_COOLDOWN_EVENT, 4 + 8);
@@ -21365,6 +21526,13 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
 void Player::SendInitialPacketsAfterAddToMap()
 {
+    if (getRace() == RACE_DRAENEI && getClass() == CLASS_DRUID)
+    {
+        WorldPacket msg(SMSG_LEARNED_SPELL, 4);
+        msg << GetLanguageDescByID(LANG_COMMON)->spell_id;
+        m_session->SendPacket(&msg);
+    }
+
     UpdateVisibilityForPlayer();
 
     // update zone
@@ -22326,6 +22494,7 @@ void Player::SetClientControl(Unit* target, uint8 allowMove)
 
 void Player::UpdateZoneDependentAuras(uint32 newZone)
 {
+    area_sig();
     // Some spells applied at enter into zone (with subzones), aura removed in UpdateAreaDependentAuras that called always at zone->area update
     SpellAreaForAreaMapBounds saBounds = sSpellMgr->GetSpellAreaForAreaMapBounds(newZone);
     for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
@@ -22336,6 +22505,7 @@ void Player::UpdateZoneDependentAuras(uint32 newZone)
 
 void Player::UpdateAreaDependentAuras(uint32 newArea)
 {
+    area_sig();
     // remove auras from spells with area limitations
     for (AuraMap::iterator iter = m_ownedAuras.begin(); iter != m_ownedAuras.end();)
     {
@@ -22694,7 +22864,7 @@ void Player::SetViewpoint(WorldObject* target, bool apply)
 WorldObject* Player::GetViewpoint() const
 {
     if (uint64 guid = GetUInt64Value(PLAYER_FARSIGHT))
-        return (WorldObject*)ObjectAccessor::GetObjectByTypeMask(*this, guid, TYPEMASK_SEER);
+        return ObjectAccessor::GetWorldObject(*this, guid);
     return NULL;
 }
 
@@ -23356,7 +23526,10 @@ InventoryResult Player::CanEquipUniqueItem(ItemTemplate const* itemProto, uint8 
 void Player::HandleFall(MovementInfo const& movementInfo)
 {
     // calculate total z distance of the fall
-    float z_diff = m_lastFallZ - movementInfo.pos.GetPositionZ();
+    float z_diff
+        = (m_lastFallZ >= m_anti_BeginFallZ ? m_lastFallZ : m_anti_BeginFallZ)
+            - movementInfo.pos.GetPositionZ();
+    m_anti_BeginFallZ = INVALID_HEIGHT;
     //sLog->outDebug("zDiff = %f", z_diff);
 
     //Players with low fall distance, Feather Fall or physical immunity (charges used) are ignored
@@ -24558,7 +24731,7 @@ void Player::RefundItem(Item *item)
         {
             ItemPosCountVec dest;
             InventoryResult msg = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemid, count);
-            ASSERT(msg == EQUIP_ERR_OK) /// Already checked before
+            ASSERT(msg == EQUIP_ERR_OK);    /// Already checked before
             Item* it = StoreNewItem(dest, itemid, true);
             SendNewItem(it, count, true, false, true);
         }

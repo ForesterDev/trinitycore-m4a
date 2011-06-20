@@ -25,6 +25,8 @@ EndScriptData */
 
 // Known bugs:
 // Some visuals aren't appearing right sometimes
+// Nether Portal doesn't spawn mistress in normal difficulty
+// Infernal Volcano doesn't spawn third infernal in normal difficulty
 
 #include "ScriptPCH.h"
 #include "trial_of_the_crusader.h"
@@ -54,32 +56,31 @@ enum Equipment
 enum Summons
 {
     NPC_LEGION_FLAME     = 34784,
-    NPC_INFERNAL_VOLCANO = 34813,
     NPC_FEL_INFERNAL     = 34815,
-    NPC_NETHER_PORTAL    = 34825,
     NPC_MISTRESS_OF_PAIN = 34826,
 };
 
-enum BossSpells
+namespace
 {
-    SPELL_NETHER_POWER          = 67108,
-    SPELL_INFERNAL              = 66258,
-    SPELL_INFERNAL_ERUPTION     = 66255,
-    SPELL_FEL_FIREBALL          = 66532,
-    SPELL_FEL_LIGHTING          = 66528,
-    SPELL_INCINERATE_FLESH      = 66237,
-    SPELL_TOUCH_OF_JARAXXUS     = 66209,
-    SPELL_BURNING_INFERNO       = 66242,
-    SPELL_NETHER_PORTAL         = 66263,
-    SPELL_LEGION_FLAME          = 66197,
-    SPELL_LEGION_FLAME_EFFECT   = 66201,
-    SPELL_SHIVAN_SLASH          = 67098,
-    SPELL_SPINNING_STRIKE       = 66283,
-    SPELL_MISTRESS_KISS         = 67077,
-    SPELL_FEL_INFERNO           = 67047,
-    SPELL_FEL_STREAK            = 66494,
-    SPELL_BERSERK               = 64238,
-};
+    enum BossSpells
+    {
+        SPELL_INFERNAL              = 66258,
+        SPELL_INFERNAL_ERUPTION     = 66255,
+        SPELL_FEL_FIREBALL          = 66532,
+        SPELL_FEL_LIGHTING          = 66528,
+        SPELL_INCINERATE_FLESH      = 66237,
+        SPELL_BURNING_INFERNO       = 66242,
+        SPELL_NETHER_PORTAL         = 66263,
+        SPELL_LEGION_FLAME          = 66197,
+        SPELL_LEGION_FLAME_EFFECT   = 66201,
+        SPELL_SHIVAN_SLASH          = 67098,
+        SPELL_SPINNING_STRIKE       = 66283,
+        SPELL_MISTRESS_KISS         = 67077,
+        SPELL_FEL_INFERNO           = 67047,
+        SPELL_FEL_STREAK            = 66494,
+        SPELL_BERSERK               = 64238,
+    };
+}
 
 /*######
 ## boss_jaraxxus
@@ -112,7 +113,6 @@ public:
         uint32 m_uiIncinerateFleshTimer;
         uint32 m_uiNetherPowerTimer;
         uint32 m_uiLegionFlameTimer;
-        uint32 m_uiTouchOfJaraxxusTimer;
         uint32 m_uiSummonNetherPortalTimer;
         uint32 m_uiSummonInfernalEruptionTimer;
 
@@ -124,11 +124,10 @@ public:
             m_uiFelFireballTimer = 5*IN_MILLISECONDS;
             m_uiFelLightningTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
             m_uiIncinerateFleshTimer = urand(20*IN_MILLISECONDS, 25*IN_MILLISECONDS);
-            m_uiNetherPowerTimer = 40*IN_MILLISECONDS;
+            m_uiNetherPowerTimer = urand(0 * IN_MILLISECONDS, 55 * IN_MILLISECONDS);
             m_uiLegionFlameTimer = 30*IN_MILLISECONDS;
-            m_uiTouchOfJaraxxusTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
-            m_uiSummonNetherPortalTimer = 1*MINUTE*IN_MILLISECONDS;
-            m_uiSummonInfernalEruptionTimer = 2*MINUTE*IN_MILLISECONDS;
+            m_uiSummonNetherPortalTimer = 20 * IN_MILLISECONDS;
+            m_uiSummonInfernalEruptionTimer = 80 * IN_MILLISECONDS;
             Summons.DespawnAll();
         }
 
@@ -165,10 +164,15 @@ public:
 
         void EnterCombat(Unit* /*pWho*/)
         {
-            me->SetInCombatWithZone();
-            if (m_pInstance)
-                m_pInstance->SetData(TYPE_JARAXXUS, IN_PROGRESS);
-            DoScriptText(SAY_AGGRO, me);
+            if (me->GetReactState() == REACT_PASSIVE)
+                me->CombatStop();
+            else
+            {
+                me->SetInCombatWithZone();
+                if (m_pInstance)
+                    m_pInstance->SetData(TYPE_JARAXXUS, IN_PROGRESS);
+                DoScriptText(SAY_AGGRO, me);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff)
@@ -178,20 +182,26 @@ public:
 
             if (m_uiSummonInfernalEruptionTimer <= uiDiff)
             {
-                DoScriptText(EMOTE_INFERNAL_ERUPTION, me);
-                DoScriptText(SAY_INFERNAL_ERUPTION, me);
-                uint8 i = urand(2, 3);
-                me->SummonCreature(NPC_INFERNAL_VOLCANO, JaraxxusLoc[i].GetPositionX(), JaraxxusLoc[i].GetPositionY(), JaraxxusLoc[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
-                m_uiSummonInfernalEruptionTimer = 2*MINUTE*IN_MILLISECONDS;
+                m_uiSummonInfernalEruptionTimer = 0;
+                if (!me->IsNonMeleeSpellCasted(false, false, true))
+                {
+                    DoScriptText(EMOTE_INFERNAL_ERUPTION, me);
+                    DoScriptText(SAY_INFERNAL_ERUPTION, me);
+                    DoCastAOE(66258 /* Infernal Eruption */);
+                    m_uiSummonInfernalEruptionTimer = 2*MINUTE*IN_MILLISECONDS;
+                }
             } else m_uiSummonInfernalEruptionTimer -= uiDiff;
 
             if (m_uiSummonNetherPortalTimer <= uiDiff)
             {
-                DoScriptText(EMOTE_NETHER_PORTAL, me);
-                DoScriptText(SAY_NETHER_PORTAL, me);
-                uint8 i = urand(2, 3);
-                me->SummonCreature(NPC_NETHER_PORTAL, JaraxxusLoc[i].GetPositionX(), JaraxxusLoc[i].GetPositionY(), JaraxxusLoc[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
-                m_uiSummonNetherPortalTimer = 2*MINUTE*IN_MILLISECONDS;
+                m_uiSummonNetherPortalTimer = 0;
+                if (!me->IsNonMeleeSpellCasted(false, false, true))
+                {
+                    DoScriptText(EMOTE_NETHER_PORTAL, me);
+                    DoScriptText(SAY_NETHER_PORTAL, me);
+                    DoCastAOE(66269 /* Nether Portal */);
+                    m_uiSummonNetherPortalTimer = 2*MINUTE*IN_MILLISECONDS;
+                }
             } else m_uiSummonNetherPortalTimer -= uiDiff;
 
             if (m_uiFelFireballTimer <= uiDiff)
@@ -202,14 +212,17 @@ public:
 
             if (m_uiFelLightningTimer <= uiDiff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM))
+                Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, -5.0f, true);
+                if (!pTarget)
+                    pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true);
+                if (pTarget)
                     DoCast(pTarget, SPELL_FEL_LIGHTING);
                 m_uiFelLightningTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
             } else m_uiFelLightningTimer -= uiDiff;
 
             if (m_uiIncinerateFleshTimer <= uiDiff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 0, true))
+                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                 {
                     DoScriptText(EMOTE_INCINERATE, me, pTarget);
                     DoScriptText(SAY_INCINERATE, me);
@@ -220,27 +233,23 @@ public:
 
             if (m_uiNetherPowerTimer <= uiDiff)
             {
-                DoCast(me, SPELL_NETHER_POWER);
-                m_uiNetherPowerTimer = 40*IN_MILLISECONDS;
+                m_uiNetherPowerTimer = 0;
+                if (!me->IsNonMeleeSpellCasted(false, false, true))
+                {
+                    DoCastAOE(67009 /* Nether Power */);
+                    m_uiNetherPowerTimer = urand(42 * IN_MILLISECONDS, 60 * IN_MILLISECONDS);
+                }
             } else m_uiNetherPowerTimer -= uiDiff;
 
             if (m_uiLegionFlameTimer <= uiDiff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 0, true))
+                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                 {
                     DoScriptText(EMOTE_LEGION_FLAME, me, pTarget);
                     DoCast(pTarget, SPELL_LEGION_FLAME);
                 }
                 m_uiLegionFlameTimer = 30*IN_MILLISECONDS;
             } else m_uiLegionFlameTimer -= uiDiff;
-
-            if (GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC && m_uiTouchOfJaraxxusTimer <= uiDiff)
-            {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                    DoCast(pTarget, SPELL_TOUCH_OF_JARAXXUS);
-                m_uiTouchOfJaraxxusTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
-            } else m_uiTouchOfJaraxxusTimer -= uiDiff;
-
             DoMeleeAttackIfReady();
         }
     };
@@ -291,65 +300,56 @@ public:
 
     struct mob_infernal_volcanoAI : public Scripted_NoMovementAI
     {
-        mob_infernal_volcanoAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature), Summons(me)
+        mob_infernal_volcanoAI(Creature *pCreature)
+        : Scripted_NoMovementAI(pCreature)
         {
+            if (!dynamic_cast<TempSummon *>(base().me))
+                throw std::runtime_error("bad infernal volcano");
             m_pInstance = (InstanceScript*)pCreature->GetInstanceScript();
+            me().SetCorpseDelay(0);
+            DoCastAOE(66252 /* Infernal Eruption */);
             Reset();
+        }
+
+        Scripted_NoMovementAI &base()
+        {
+            return *this;
+        }
+
+        TempSummon &me()
+        {
+            return *static_cast<TempSummon *>(base().me);
         }
 
         InstanceScript* m_pInstance;
 
-        SummonList Summons;
-
-        uint8 m_Count;
-        uint8 m_CountMax;
-        uint32 m_Timer;
-
         void Reset()
         {
-            me->SetReactState(REACT_PASSIVE);
-            m_Count = 0;
+            me().SetReactState(REACT_PASSIVE);
             if (!IsHeroic())
-            {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
-                m_CountMax = 3;
-                m_Timer = 15*IN_MILLISECONDS;
-            }
+                me().SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
             else
-            {
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
-                m_CountMax = 0;
-                m_Timer = 0;
-            }
-            Summons.DespawnAll();
+                me().RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
         }
 
         void JustSummoned(Creature* pSummoned)
         {
-            Summons.Summon(pSummoned);
+            if (auto p = dynamic_cast<Creature *>(me().GetSummoner()))
+                if (p->IsAIEnabled)
+                    p->AI()->JustSummoned(pSummoned);
             pSummoned->SetCorpseDelay(0);
         }
 
-        void JustDied(Unit* /*pKiller*/)
+        void SummonedCreatureDespawn(Creature *unit)
         {
-            me->DespawnOrUnsummon();
+            if (auto p = dynamic_cast<Creature *>(me().GetSummoner()))
+                if (p->IsAIEnabled)
+                    p->AI()->SummonedCreatureDespawn(unit);
         }
 
         void UpdateAI(const uint32 uiDiff)
         {
-            if (m_Timer <= uiDiff)
-            {
-                if (m_CountMax && m_CountMax == m_Count)
-                    me->DespawnOrUnsummon();
-                else
-                {
-                    DoCast(SPELL_INFERNAL_ERUPTION);
-                    ++m_Count;
-                }
-                m_Timer = 5*IN_MILLISECONDS;
-            } else m_Timer -= uiDiff;
-
-            UpdateVictim();
+            uiDiff;
         }
     };
 

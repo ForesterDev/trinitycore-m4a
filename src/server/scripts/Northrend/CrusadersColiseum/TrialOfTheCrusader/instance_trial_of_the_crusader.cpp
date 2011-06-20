@@ -43,8 +43,6 @@ class instance_trial_of_the_crusader : public InstanceMapScript
             uint32 NorthrendBeasts;
             std::string SaveDataBuffer;
             bool   NeedSave;
-
-            uint32 DataDamageTwin;
             uint32 FjolaCasting;
             uint32 EydisCasting;
 
@@ -89,8 +87,6 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 EventStage = 0;
 
                 TributeChestGUID = 0;
-                DataDamageTwin = 0;
-
                 MainGateDoorGUID = 0;
                 EastPortcullisGUID = 0;
                 WebDoorGUID = 0;
@@ -368,11 +364,6 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                                 break;
                         }
                         break;
-                    case DATA_HEALTH_TWIN_SHARED:
-                        DataDamageTwin = data;
-                        data = NOT_STARTED;
-                        break;
-
                     //Achievements
                     case DATA_SNOBOLD_COUNT:
                         if (data == INCREASE)
@@ -515,6 +506,8 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                             case 666:
                             case 1010:
                             case 1180:
+                            case 1181:
+                            case 1182:
                             case 2000:
                             case 2030:
                             case 3000:
@@ -577,6 +570,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                             case 1142:
                             case 1144:
                             case 1150:
+                            case 1160:
                                 EventNPCId = NPC_FIZZLEBANG;
                                 break;
                             default:
@@ -584,8 +578,6 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                                 break;
                         };
                         return EventNPCId;
-                    case DATA_HEALTH_TWIN_SHARED:
-                        return DataDamageTwin;
                     default:
                         break;
                 }

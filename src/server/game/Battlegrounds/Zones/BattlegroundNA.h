@@ -18,6 +18,10 @@
 #ifndef __BATTLEGROUNDNA_H
 #define __BATTLEGROUNDNA_H
 
+#include <memory>
+#include <array>
+#include "Battleground.h"
+
 class Battleground;
 
 enum BattlegroundNAObjectTypes
@@ -46,6 +50,14 @@ class BattlegroundNAScore : public BattlegroundScore
     public:
         BattlegroundNAScore() {};
         virtual ~BattlegroundNAScore() {};
+
+        std::pair<std::size_t, Stat_data_type> stat_data() const
+        {
+            std::array<int32, max_stats> d;
+            auto first = d.begin(), it = first;
+            return std::make_pair(it - first, std::move(d));
+        }
+
         //TODO fix me
 };
 

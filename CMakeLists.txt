@@ -24,10 +24,14 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH 1)
 # set macro-directory
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/macros")
 
-# build in Release-mode by default if not explicitly set
+# build in Release With Debug Information mode by default if not explicitly set
 if( NOT CMAKE_BUILD_TYPE )
-  set(CMAKE_BUILD_TYPE "Release")
+  set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 endif()
+
+if(CMAKE_COMPILER_IS_GNUCXX)
+  add_definitions(-std=c++0x)
+endif(CMAKE_COMPILER_IS_GNUCXX)
 
 include(CheckCXXSourceRuns)
 include(CheckIncludeFiles)
@@ -44,6 +48,26 @@ endif()
 include(CheckPlatform)
 
 # basic packagesearching and setup (further support will be needed, this is a preliminary release!)
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_ADDITIONAL_VERSIONS
+  "1.46.1"
+  "1.46.0"
+  "1.46"
+  "1.45.0"
+  "1.45"
+  "1.44.0"
+  "1.44"
+  "1.43.0"
+  "1.43"
+  "1.42.0"
+  "1.42"
+)
+find_package(Boost 1.42.0 REQUIRED
+  date_time
+  signals
+  thread
+)
 find_package(PCHSupport)
 find_package(ACE REQUIRED)
 find_package(OpenSSL REQUIRED)

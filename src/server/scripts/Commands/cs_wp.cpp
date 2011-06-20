@@ -22,6 +22,7 @@ Comment: All wp related commands
 Category: commandscripts
 EndScriptData */
 
+#include "ScriptPCH.h"
 #include "ScriptMgr.h"
 #include "ObjectMgr.h"
 #include "WaypointManager.h"

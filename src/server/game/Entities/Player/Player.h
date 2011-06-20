@@ -19,6 +19,8 @@
 #ifndef _PLAYER_H
 #define _PLAYER_H
 
+#include <boost/signal.hpp>
+#include <boost/signals/connection.hpp>
 #include "AchievementMgr.h"
 #include "Battleground.h"
 #include "Bag.h"
@@ -493,7 +495,8 @@ enum PlayerExtraFlags
     PLAYER_EXTRA_HAS_310_FLYER      = 0x0040,               // Marks if player already has 310% speed flying mount
 
     // other states
-    PLAYER_EXTRA_PVP_DEATH          = 0x0100                // store PvP death status until corpse creating.
+    PLAYER_EXTRA_PVP_DEATH = 0x0100,   // store PvP death status until corpse creating.
+    PLAYER_EXTRA_hide_armor = 0x8000,
 };
 
 // 2^n values
@@ -1033,8 +1036,30 @@ class Player : public Unit, public GridObject<Player>
     friend void Item::AddToUpdateQueueOf(Player* player);
     friend void Item::RemoveFromUpdateQueueOf(Player* player);
     public:
+        typedef boost::signal<void ()> Area_signal;
+        typedef boost::signals::connection Area_connection;
+
         explicit Player (WorldSession *session);
         ~Player ();
+
+        WMO_id wmo_id() const
+        {
+            return wmo_id_;
+        }
+
+        //movement anticheat
+        uint32 m_anti_lastmovetime;     //last movement time
+        float  m_anti_MovedLen;         //Length of traveled way
+        uint32 m_anti_NextLenCheck;
+        float  m_anti_BeginFallZ;    //alternative falling begin
+        uint32 m_anti_lastalarmtime;    //last time when alarm generated
+        uint32 m_anti_alarmcount;       //alarm counter
+        uint32 m_anti_TeleTime;
+        bool m_CanFly;
+        uint32 Anti__GetLastTeleTime() const { return m_anti_TeleTime; }
+        void Anti__SetLastTeleTime(uint32 TeleTime) { m_anti_TeleTime=TeleTime; }
+        bool CanFly() const { return m_CanFly;  }
+        void SetCanFly(bool CanFly) { m_CanFly = CanFly; }
 
         void CleanupsBeforeDelete(bool finalCleanup = true);
 
@@ -1841,7 +1866,10 @@ class Player : public Unit, public GridObject<Player>
         void UpdateDefenseBonusesMod();
         inline void RecalculateRating(CombatRating cr) { ApplyRatingMod(cr, 0, true);}
         float GetMeleeCritFromAgility();
+        float GetBaseDodge();
+        float DodgeDiminishingReturn(float value);
         float GetDodgeFromAgility();
+        float ParryDiminishingReturn(float value);
         float GetSpellCritFromIntellect();
         float OCTRegenHPPerSpirit();
         float OCTRegenMPPerSpirit();
@@ -2435,6 +2463,16 @@ class Player : public Unit, public GridObject<Player>
         float GetAverageItemLevel();
         bool isDebugAreaTriggers;
 
+        Area_connection connect_area(Area_signal::slot_function_type subscriber)
+        {
+            return area_sig.connect(std::move(subscriber));
+        }
+
+        void disconnect_area(Area_connection subscriber)
+        {
+            subscriber.disconnect();
+        }
+
     protected:
         uint32 m_regenTimerCount;
         float m_powerFraction[MAX_POWERS];
@@ -2754,6 +2792,8 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_timeSyncTimer;
         uint32 m_timeSyncClient;
         uint32 m_timeSyncServer;
+        WMO_id wmo_id_;
+        Area_signal area_sig;
 
         InstanceTimeMap _instanceResetTimes;
         InstanceSave* _pendingBind;

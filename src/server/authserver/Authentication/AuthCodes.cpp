@@ -1,3 +1,4 @@
+#include "authPCH.h"
 #include "AuthCodes.h"
 
 namespace AuthHelper

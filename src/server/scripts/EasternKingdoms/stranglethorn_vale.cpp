@@ -117,10 +117,6 @@ public:
 
 };
 
-/*######
-##
-######*/
-
 void AddSC_stranglethorn_vale()
 {
     new mob_yenniku();

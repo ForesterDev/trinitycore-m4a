@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "Opcodes.h"
@@ -54,6 +55,23 @@ void WorldSession::SendPartyResult(PartyOperation operation, const std::string& 
     data << uint32(val);                                    // LFD cooldown related (used with ERR_PARTY_LFG_BOOT_COOLDOWN_S and ERR_PARTY_LFG_BOOT_NOT_ELIGIBLE_S)
 
     SendPacket(&data);
+}
+
+namespace
+{
+    template<bool res>
+        WorldPacket make_group_invite_msg(const char *name)
+    {
+        WorldPacket data(SMSG_GROUP_INVITE, 10);                // guess size
+        data << uint8(res); // invited/already in group flag
+        data << name;   // max len 48
+        data << uint32(0);                                      // unk
+        data << uint8(0);                                       // count
+        //for (int i = 0; i < count; ++i)
+        //    data << uint32(0);
+        data << uint32(0);                                      // unk
+        return std::move(data);
+    }
 }
 
 void WorldSession::HandleGroupInviteOpcode(WorldPacket & recv_data)
@@ -121,19 +139,8 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket & recv_data)
     if (group2 || player->GetGroupInvite())
     {
         SendPartyResult(PARTY_OP_INVITE, membername, ERR_ALREADY_IN_GROUP_S);
-
-        if (group2)
-        {
-            // tell the player that they were invited but it failed as they were already in a group
-            WorldPacket data(SMSG_GROUP_INVITE, 10);                // guess size
-            data << uint8(0);                                       // invited/already in group flag
-            data << GetPlayer()->GetName();                         // max len 48
-            data << uint32(0);                                      // unk
-            data << uint8(0);                                       // count
-            data << uint32(0);                                      // unk
-            player->GetSession()->SendPacket(&data);
-        }
-
+        auto msg = make_group_invite_msg<false>(GetPlayer()->GetName());
+        player->GetSession()->SendPacket(&msg);
         return;
     }
 
@@ -181,12 +188,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket & recv_data)
     }
 
     // ok, we do it
-    WorldPacket data(SMSG_GROUP_INVITE, 10);                // guess size
-    data << uint8(1);                                       // invited/already in group flag
-    data << GetPlayer()->GetName();                         // max len 48
-    data << uint32(0);                                      // unk
-    data << uint8(0);                                       // count
-    data << uint32(0);                                      // unk
+    WorldPacket data = make_group_invite_msg<true>(GetPlayer()->GetName());
     player->GetSession()->SendPacket(&data);
 
     SendPartyResult(PARTY_OP_INVITE, membername, ERR_PARTY_RESULT_OK);

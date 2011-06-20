@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -130,7 +131,7 @@ bool ChatHandler::HandleSetSkillCommand(const char *args)
 
     int32 max   = max_p ? atol (max_p) : target->GetPureMaxSkillValue(skill);
 
-    if (level <= 0 || level > max || max <= 0)
+    if (level < 0 || level > max || max < 0)
         return false;
 
     target->SetSkill(skill, target->GetSkillStep(skill), level, max);

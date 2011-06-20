@@ -16,12 +16,13 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "DatabaseEnv.h"
 #include "AccountMgr.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "Util.h"
-#include "SHA1.h"
+#include <Cryptography/SHA1.h>
 
 AccountMgr::AccountMgr() {}
 AccountMgr::~AccountMgr() {}
@@ -223,12 +224,12 @@ bool AccountMgr::normalizeString(std::string& utf8str)
     size_t wstr_len = MAX_ACCOUNT_STR;
     if (!Utf8toWStr(utf8str, wstr_buf, wstr_len))
         return false;
-#ifdef _MSC_VER
-#pragma warning(disable: 4996)
-#endif
+#ifndef _MSC_VER
     std::transform(&wstr_buf[0], wstr_buf+wstr_len, &wstr_buf[0], wcharToUpperOnlyLatin);
-#ifdef _MSC_VER
-#pragma warning(default: 4996)
+#else
+	std::transform(&wstr_buf[0], wstr_buf + wstr_len,
+			stdext::make_unchecked_array_iterator(&wstr_buf[0]),
+			wcharToUpperOnlyLatin);
 #endif
 
     return WStrToUtf8(wstr_buf, wstr_len, utf8str);
