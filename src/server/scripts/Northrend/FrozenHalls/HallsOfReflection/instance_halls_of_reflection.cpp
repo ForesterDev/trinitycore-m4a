@@ -171,7 +171,7 @@ public:
                         creature->UpdateEntry(NPC_JAINA_PART1, ALLIANCE);
                     uiJainaPart1 = creature->GetGUID();
                     break;
-                case NPC_LORALEN:
+                case 37779 /* Dark Ranger Loralen */:
                     if (uiTeamInInstance == ALLIANCE)
                         creature->UpdateEntry(37582 /* Archmage Koreln */, ALLIANCE);
                     break;
