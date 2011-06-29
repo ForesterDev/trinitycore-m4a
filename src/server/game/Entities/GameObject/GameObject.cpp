@@ -555,6 +555,11 @@ void GameObject::Update(uint32 diff)
                 }
                 return;
             }
+            if (!m_spawnedByDefault)
+            {
+                Delete();
+                return;
+            }
 
             SetLootState(GO_READY);
 
@@ -568,13 +573,6 @@ void GameObject::Update(uint32 diff)
 
             if (!m_respawnDelayTime)
                 return;
-
-            if (!m_spawnedByDefault)
-            {
-                m_respawnTime = 0;
-                UpdateObjectVisibility();
-                return;
-            }
 
             m_respawnTime = time(NULL) + m_respawnDelayTime;
 
