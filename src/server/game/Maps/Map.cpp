@@ -2257,13 +2257,12 @@ void InstanceMap::InitVisibilityDistance()
 */
 bool InstanceMap::CanEnter(Player* player)
 {
-    if (!player->GetSession()->PlayerLoading())
-        if (player->GetMapRef().getTarget() == this)
-        {
-            sLog->outError("InstanceMap::CanEnter - player %s(%u) already in map %d, %d, %d!", player->GetName(), player->GetGUIDLow(), GetId(), GetInstanceId(), GetSpawnMode());
-            ASSERT(false);
-            return false;
-        }
+    if (player->GetMapRef().getTarget() == this)
+    {
+        sLog->outError("InstanceMap::CanEnter - player %s(%u) already in map %d, %d, %d!", player->GetName(), player->GetGUIDLow(), GetId(), GetInstanceId(), GetSpawnMode());
+        ASSERT(false);
+        return false;
+    }
 
     // allow GM's to enter
     if (player->isGameMaster())

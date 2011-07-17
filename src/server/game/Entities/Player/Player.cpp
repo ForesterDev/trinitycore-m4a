@@ -16846,7 +16846,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     // load the player's map here if it's not already loaded
     Map *map = sMapMgr->CreateMap(mapId, this, instanceId);
 
-    if (!map)
+    if (!map || !map->CanEnter(this))
     {
         instanceId = 0;
         AreaTrigger const* at = sObjectMgr->GetGoBackTrigger(mapId);
@@ -16863,14 +16863,14 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         }
 
         map = sMapMgr->CreateMap(mapId, this, 0);
-        if (!map)
+        if (!map || !map->CanEnter(this))
         {
             PlayerInfo const *info = sObjectMgr->GetPlayerInfo(getRace(), getClass());
             mapId = info->mapId;
             Relocate(info->positionX, info->positionY, info->positionZ, 0.0f);
             sLog->outError("Player (guidlow %d) have invalid coordinates (X: %f Y: %f Z: %f O: %f). Teleport to default race/class locations.", guid, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
             map = sMapMgr->CreateMap(mapId, this, 0);
-            if (!map)
+            if (!map || !map->CanEnter(this))
             {
                 sLog->outError("Player (guidlow %d) has invalid default map coordinates (X: %f Y: %f Z: %f O: %f). or instance couldn't be created", guid, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
                 return false;
@@ -18228,7 +18228,7 @@ bool Player::CheckInstanceLoginValid()
             return false;
     }
 
-    // do checks for satisfy accessreqs, instance full, encounter in progress (raid), perm bind group != perm bind player
+    // do checks for satisfy accessreqs
     return sMapMgr->CanPlayerEnter(GetMap()->GetId(), this, true);
 }
 
