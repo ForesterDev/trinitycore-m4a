@@ -810,7 +810,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         }
     }
 
-    if (!pCurrChar->GetMap()->Add(pCurrChar) || !pCurrChar->CheckInstanceLoginValid())
+    auto &map = *pCurrChar->GetMap();
+    if (!map.CanEnter(pCurrChar) || !map.Add(pCurrChar) || !pCurrChar->CheckInstanceLoginValid())
     {
         AreaTrigger const* at = sObjectMgr->GetGoBackTrigger(pCurrChar->GetMapId());
         if (at)
