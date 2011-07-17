@@ -1456,16 +1456,16 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
         case SPELLFAMILY_DEATHKNIGHT:
             // Death strike
             if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_DK_DEATH_STRIKE)
-				if (!m_IsTriggeredSpell)
-				{
-					uint32 count = unitTarget->GetDiseasesByCaster(m_caster->GetGUID());
-					int32 bp = int32(count * m_caster->CountPctFromMaxHealth(int32(m_spellInfo->EffectDamageMultiplier[0])));
-					// Improved Death Strike
-					if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 2751, 0))
-						AddPctN(bp, m_caster->CalculateSpellDamage(m_caster, aurEff->GetSpellProto(), 2));
-					m_caster->CastCustomSpell(m_caster, 45470, &bp, NULL, NULL, true);
-					return;
-				}
+                if (!m_IsTriggeredSpell)
+                {
+                    uint32 count = unitTarget->GetDiseasesByCaster(m_caster->GetGUID());
+                    int32 bp = int32(count * m_caster->CountPctFromMaxHealth(int32(m_spellInfo->EffectDamageMultiplier[0])));
+                    // Improved Death Strike
+                    if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 2751, 0))
+                        AddPctN(bp, m_caster->CalculateSpellDamage(m_caster, aurEff->GetSpellProto(), 2));
+                    m_caster->CastCustomSpell(m_caster, 45470, &bp, NULL, NULL, true);
+                    return;
+                }
             // Death Coil
             if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_DK_DEATH_COIL)
             {
