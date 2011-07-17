@@ -795,7 +795,9 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                         damage = (m_caster->GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE) + m_caster->GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE))/2;
                     else
                         damage = (m_caster->GetFloatValue(UNIT_FIELD_MINDAMAGE) + m_caster->GetFloatValue(UNIT_FIELD_MAXDAMAGE))/2;
-
+                    damage /= m_caster->GetFloatValue(UNIT_FIELD_BASEATTACKTIME) / 1000;
+                    damage += m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER) / 14.0f;
+                    damage *= m_caster->GetFloatValue(UNIT_FIELD_BASEATTACKTIME) / 1000;
                     switch (m_spellInfo->Id)
                     {
                         case 12162: damage *= 0.16f; break; // Rank 1
