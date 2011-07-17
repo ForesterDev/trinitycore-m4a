@@ -14328,6 +14328,8 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
                     takeCharges = true;
                     break;
                 }
+                case SPELL_AURA_SPELL_MAGNET:
+                    break;
                 case SPELL_AURA_MANA_SHIELD:
                 case SPELL_AURA_DUMMY:
                 {

@@ -3526,19 +3526,6 @@ void SpellMgr::LoadSpellRanks()
     sLog->outString();
 }
 
-namespace
-{
-    template<class LTy, class RTy>
-    void patch_spell(uint32 &count, uint32 id, LTy SpellEntry::*mem, RTy &&val)
-    {
-        if (auto p = const_cast<SpellEntry *>(sSpellStore.LookupEntry(id)))
-        {
-            p->*mem = forward<RTy>(val);
-            ++count;
-        }
-    }
-}
-
 // set data in core for now
 void SpellMgr::LoadSpellCustomAttr()
 {
@@ -3547,10 +3534,7 @@ void SpellMgr::LoadSpellCustomAttr()
     mSpellCustomAttr.resize(GetSpellStore()->GetNumRows(), 0);  // initialize with 0 values
 
     uint32 count = 0;
-    patch_spell(count, 7922 /* Charge Stun */, &SpellEntry::DmgClass, SPELL_DAMAGE_CLASS_MELEE);
-    patch_spell(count, 19675 /* Feral Charge Effect */, &SpellEntry::DmgClass, SPELL_DAMAGE_CLASS_MELEE);
-    patch_spell(count, 45334 /* Feral Charge Effect */, &SpellEntry::DmgClass, SPELL_DAMAGE_CLASS_MELEE);
-    patch_spell(count, 20253 /* Intercept */, &SpellEntry::DmgClass, SPELL_DAMAGE_CLASS_MELEE);
+
     SpellEntry* spellInfo = NULL;
     for (uint32 i = 0; i < sSpellStore.GetNumRows(); ++i)
     {
