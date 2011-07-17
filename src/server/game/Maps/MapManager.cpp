@@ -145,6 +145,7 @@ Map* MapManager::FindMap(uint32 mapid, uint32 instanceId) const
 
 bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
 {
+    (void)loginCheck;
     MapEntry const* entry = sMapStore.LookupEntry(mapid);
     if (!entry)
        return false;
@@ -225,7 +226,7 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
         InstanceGroupBind* boundInstance = group->GetBoundInstance(entry);
         if (boundInstance && boundInstance->save)
             if (Map* boundMap = sMapMgr->FindMap(mapid, boundInstance->save->GetInstanceId()))
-                if (!loginCheck && !boundMap->CanEnter(player))
+                if (!boundMap->CanEnter(player))
                     return false;
             /*
                 This check has to be moved to InstanceMap::CanEnter()

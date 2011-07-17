@@ -21605,6 +21605,8 @@ void Player::SendUpdateToOutOfRangeGroupMembers()
 
 void Player::SendTransferAborted(uint32 mapid, TransferAbortReason reason, uint8 arg)
 {
+    if (m_session->PlayerLoading())
+        return;
     WorldPacket data(SMSG_TRANSFER_ABORTED, 4+2);
     data << uint32(mapid);
     data << uint8(reason);                                 // transfer abort reason
