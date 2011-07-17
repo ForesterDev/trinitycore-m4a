@@ -791,13 +791,14 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     float damage;
                     // DW should benefit of attack power, damage percent mods etc.
                     // TODO: check if using offhand damage is correct and if it should be divided by 2
-                    if (m_caster->haveOffhandWeapon() && m_caster->getAttackTimer(BASE_ATTACK) > m_caster->getAttackTimer(OFF_ATTACK))
+                    auto type = m_caster->haveOffhandWeapon() && m_caster->getAttackTimer(BASE_ATTACK) > m_caster->getAttackTimer(OFF_ATTACK) ? OFF_ATTACK : BASE_ATTACK;
+                    if (type == OFF_ATTACK)
                         damage = (m_caster->GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE) + m_caster->GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE))/2;
                     else
                         damage = (m_caster->GetFloatValue(UNIT_FIELD_MINDAMAGE) + m_caster->GetFloatValue(UNIT_FIELD_MAXDAMAGE))/2;
-                    damage /= m_caster->GetFloatValue(UNIT_FIELD_BASEATTACKTIME) / 1000;
+                    damage /= m_caster->GetFloatValue(UNIT_FIELD_BASEATTACKTIME + type) / 1000;
                     damage += m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER) / 14.0f;
-                    damage *= m_caster->GetFloatValue(UNIT_FIELD_BASEATTACKTIME) / 1000;
+                    damage *= m_caster->GetFloatValue(UNIT_FIELD_BASEATTACKTIME + type) / 1000;
                     switch (m_spellInfo->Id)
                     {
                         case 12162: damage *= 0.16f; break; // Rank 1
