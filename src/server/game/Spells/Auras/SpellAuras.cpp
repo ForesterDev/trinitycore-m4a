@@ -1262,12 +1262,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         target->CastSpell(target, 32612, true, NULL, GetEffect(1));
                         break;
                     case 11129 /* Combustion */:
-                        if (removeMode != AURA_REMOVE_BY_DEATH)
+                        if (removeMode != AURA_REMOVE_NONE && removeMode != AURA_REMOVE_BY_DEATH)
                             if (caster)
                                 caster->RemoveAurasDueToSpell(28682);
                         break;
                     case 28682 /* Combustion */:
-                        if (removeMode != AURA_REMOVE_BY_DEATH)
+                        if (removeMode != AURA_REMOVE_NONE && removeMode != AURA_REMOVE_BY_DEATH)
                             target->RemoveAura(11129 /* Combustion */);
                         break;
                     case 74396: // Fingers of Frost
