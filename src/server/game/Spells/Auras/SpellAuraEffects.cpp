@@ -5708,13 +5708,7 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
         return;
 
     if (target->HasItemFitToSpellRequirements(GetSpellProto()))
-    {
-        auto amount = static_cast<float>(GetAmount());
-        target->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_PCT, amount, apply);
-        target->HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_PCT, amount, apply);
-        target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_PCT, amount, apply);
         aurApp->GetTarget()->ApplyModSignedFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, GetAmount()/100.0f, apply);
-    }
 }
 
 void AuraEffect::HandleModOffhandDamagePercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
