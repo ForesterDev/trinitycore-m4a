@@ -147,7 +147,7 @@ bool ArenaTeam::AddMember(const uint64& playerGuid)
     if (sWorld->getIntConfig(CONFIG_ARENA_START_PERSONAL_RATING) > 0)
         personalRating = sWorld->getIntConfig(CONFIG_ARENA_START_PERSONAL_RATING);
     else if (GetRating() >= low_rating_threshold)
-        personalRating = 1000;
+        personalRating = low_rating_threshold;
 
     // Try to get player's match maker rating from db and fall back to config setting if not found
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_LOAD_MATCH_MAKER_RATING);
