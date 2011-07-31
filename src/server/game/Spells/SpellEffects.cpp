@@ -7036,14 +7036,23 @@ void Spell::EffectCastButtons(SpellEffIndex effIndex)
         if (!ab || ab->GetType() != ACTION_BUTTON_SPELL)
             continue;
 
+        //! Action button data is unverified when it's set so it can be "hacked" 
+        //! to contain invalid spells, so filter here.
         uint32 spell_id = ab->GetAction();
         if (!spell_id)
             continue;
 
-        if (p_caster->HasSpellCooldown(spell_id))
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
+        if (!spellInfo)
             continue;
 
-        SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
+        if (!p_caster->HasSpell(spell_id) || p_caster->HasSpellCooldown(spell_id))
+            continue;
+
+        //! Valid totem spells only have the first TotemCategory field set, so only check this
+        if (spellInfo->TotemCategory[0] < TC_EARTH_TOTEM || spellInfo->TotemCategory[0] > TC_WATER_TOTEM)
+            continue;
+        
         uint32 cost = CalculatePowerCost(spellInfo, m_caster, GetSpellSchoolMask(spellInfo));
 
         if (m_caster->GetPower(POWER_MANA) < cost)
