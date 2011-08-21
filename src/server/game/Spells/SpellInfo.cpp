@@ -1504,7 +1504,8 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, Unit const* target, b
     if (AttributesEx3 & SPELL_ATTR3_ONLY_TARGET_GHOSTS && !(!target->isAlive() && target->HasAuraType(SPELL_AURA_GHOST)))
        return SPELL_FAILED_TARGET_NOT_GHOST;
 
-    if (AttributesEx6 & SPELL_ATTR6_CANT_TARGET_CROWD_CONTROLLED && !target->CanFreeMove())
+    // check this flag only for implicit targets (chain and area), allow to explicitly target units for spells like Shield of Righteousness
+    if (implicit && AttributesEx6 & SPELL_ATTR6_CANT_TARGET_CROWD_CONTROLLED && !target->CanFreeMove())
        return SPELL_FAILED_BAD_TARGETS;
 
     // check visibility - ignore stealth for implicit (area) targets
@@ -1528,7 +1529,7 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, Unit const* target, b
     if (target != caster && target->GetCharmerOrOwnerGUID() != caster->GetGUID())
     {
         // any unattackable target skipped
-        if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE))
+        if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
             return SPELL_FAILED_BAD_TARGETS;
     }
 
