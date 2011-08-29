@@ -132,6 +132,7 @@ public:
         uint64 uiSir;
 
         uint64 uiThaddius;
+        uint64 uiHeigan;
         uint64 uiFeugen;
         uint64 uiStalagg;
 
@@ -139,10 +140,32 @@ public:
         uint64 uiKelthuzadTrigger;
         uint64 uiPortals[4];
 
+        uint32 AbominationCount;
+
         GOState gothikDoorState;
 
         time_t minHorsemenDiedTime;
         time_t maxHorsemenDiedTime;
+
+        void Initialize()
+        {
+            GothikGateGUID      = 0;
+            HorsemenChestGUID   = 0;
+            SapphironGUID       = 0;
+            uiFaerlina          = 0;
+            uiThane             = 0;
+            uiLady              = 0;
+            uiBaron             = 0;
+            uiSir               = 0;
+            uiThaddius          = 0;
+            uiHeigan            = 0;
+            uiFeugen            = 0;
+            uiStalagg           = 0;
+            uiKelthuzad         = 0;
+            uiKelthuzadTrigger  = 0;
+
+            memset(uiPortals, 0, sizeof(uiPortals));
+        }
 
         void OnCreatureCreate(Creature* creature)
         {
@@ -155,6 +178,7 @@ public:
                 case 30549: uiBaron = creature->GetGUID(); return;
                 case 16063: uiSir = creature->GetGUID(); return;
                 case 15928: uiThaddius = creature->GetGUID(); return;
+                case 15936: uiHeigan = creature->GetGUID(); return;
                 case 15930: uiFeugen = creature->GetGUID(); return;
                 case 15929: uiStalagg = creature->GetGUID(); return;
                 case 15990: uiKelthuzad = creature->GetGUID(); return;
@@ -271,7 +295,23 @@ public:
                         maxHorsemenDiedTime = now;
                     }
                     break;
+                case DATA_ABOMINATION_KILLED:
+                    AbominationCount = value;
+                    break;
             }
+        }
+
+        uint32 GetData(uint32 id)
+        {
+            switch (id)
+            {
+                case DATA_ABOMINATION_KILLED:
+                    return AbominationCount;
+                default:
+                    break;
+            }
+
+            return 0;
         }
 
         uint64 GetData64(uint32 id)
@@ -290,6 +330,8 @@ public:
                 return uiSir;
             case DATA_THADDIUS:
                 return uiThaddius;
+            case DATA_HEIGAN:
+                return uiHeigan;
             case DATA_FEUGEN:
                 return uiFeugen;
             case DATA_STALAGG:
@@ -367,7 +409,7 @@ public:
         std::string GetSaveData()
         {
             std::ostringstream saveStream;
-            saveStream << GetBossSaveData() << " " << gothikDoorState;
+            saveStream << GetBossSaveData() << ' ' << gothikDoorState;
             return saveStream.str();
         }
 

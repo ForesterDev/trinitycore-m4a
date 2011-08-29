@@ -141,7 +141,7 @@ void BattlegroundAV::HandleQuestComplete(uint32 questid, Player* player)
     uint8 team = GetTeamIndexByTeamId(player->GetTeam());
     //TODO add reputation, events (including quest not available anymore, next quest availabe, go/npc de/spawning)and maybe honor
     sLog->outDebug(LOG_FILTER_BATTLEGROUND, "BG_AV Quest %i completed", questid);
-    switch(questid)
+    switch (questid)
     {
         case AV_QUEST_A_SCRAPS1:
         case AV_QUEST_A_SCRAPS2:
@@ -340,10 +340,8 @@ Creature* BattlegroundAV::AddAVCreature(uint16 cinfoid, uint16 type)
     return creature;
 }
 
-void BattlegroundAV::Update(uint32 diff)
+void BattlegroundAV::PostUpdateImpl(uint32 diff)
 {
-    Battleground::Update(diff);
-
     if (GetStatus() == STATUS_IN_PROGRESS)
     {
         for (uint8 i=0; i <= 1; i++)//0=alliance, 1=horde
@@ -476,7 +474,7 @@ void BattlegroundAV::EndBattleground(uint32 winner)
     Battleground::EndBattleground(winner);
 }
 
-void BattlegroundAV::RemovePlayer(Player* plr, uint64 /*guid*/)
+void BattlegroundAV::RemovePlayer(Player* plr, uint64 /*guid*/, uint32 /*team*/)
 {
    if (!plr)
     {
@@ -496,7 +494,7 @@ void BattlegroundAV::HandleAreaTrigger(Player *Source, uint32 Trigger)
         return;
 
     uint32 SpellId = 0;
-    switch(Trigger)
+    switch (Trigger)
     {
         case 95:
         case 2608:
@@ -536,7 +534,7 @@ void BattlegroundAV::UpdatePlayerScore(Player* Source, uint32 type, uint32 value
     if (itr == m_PlayerScores.end())                         // player not found...
         return;
 
-    switch(type)
+    switch (type)
     {
         case SCORE_GRAVEYARDS_ASSAULTED:
             ((BattlegroundAVScore*)itr->second)->GraveyardsAssaulted += value;
@@ -864,7 +862,7 @@ void BattlegroundAV::EventPlayerClickedOnFlag(Player *source, GameObject* target
     sLog->outDebug(LOG_FILTER_BATTLEGROUND, "BG_AV using gameobject %i with type %i", target_obj->GetEntry(), object);
     if (object < 0)
         return;
-    switch(target_obj->GetEntry())
+    switch (target_obj->GetEntry())
     {
         case BG_AV_OBJECTID_BANNER_A:
         case BG_AV_OBJECTID_BANNER_A_B:
@@ -970,7 +968,9 @@ void BattlegroundAV::EventPlayerAssaultsPoint(Player* player, uint32 object)
     {
         if (object == BG_AV_OBJECT_FLAG_N_SNOWFALL_GRAVE) //initial capping
         {
-            ASSERT(owner == AV_NEUTRAL_TEAM && m_Nodes[node].TotalOwner == AV_NEUTRAL_TEAM);
+            if (!(owner == AV_NEUTRAL_TEAM && m_Nodes[node].TotalOwner == AV_NEUTRAL_TEAM))
+                return;
+
             if (team == ALLIANCE)
                 SpawnBGObject(BG_AV_OBJECT_FLAG_C_A_SNOWFALL_GRAVE, RESPAWN_IMMEDIATELY);
             else
@@ -979,7 +979,9 @@ void BattlegroundAV::EventPlayerAssaultsPoint(Player* player, uint32 object)
         }
         else if (m_Nodes[node].TotalOwner == AV_NEUTRAL_TEAM) //recapping, when no team owns this node realy
         {
-            ASSERT(m_Nodes[node].State != POINT_CONTROLED);
+            if (!(m_Nodes[node].State != POINT_CONTROLED))
+                return;
+
             if (team == ALLIANCE)
                 SpawnBGObject(object-11, RESPAWN_IMMEDIATELY);
             else
@@ -1032,7 +1034,7 @@ void BattlegroundAV::EventPlayerAssaultsPoint(Player* player, uint32 object)
                 WorldSafeLocsEntry const *ClosestGrave = NULL;
                 for (std::vector<uint64>::iterator itr = ghost_list.begin(); itr != ghost_list.end(); ++itr)
                 {
-                    plr = sObjectMgr->GetPlayer(*ghost_list.begin());
+                    plr = ObjectAccessor::FindPlayer(*ghost_list.begin());
                     if (!plr)
                         continue;
                     if (!ClosestGrave)
@@ -1076,7 +1078,7 @@ void BattlegroundAV::FillInitialWorldStates(WorldPacket& data)
     }
 
     //towers
-    for (uint8 i = BG_AV_NODES_DUNBALDAR_SOUTH; i <= BG_AV_NODES_MAX; i++)
+    for (uint8 i = BG_AV_NODES_DUNBALDAR_SOUTH; i < BG_AV_NODES_MAX; ++i)
         for (uint8 j =1; j <= 3; j+=2)
         {//j=1=assaulted j=3=controled //i dont have j=2=destroyed cause destroyed is the same like enemy-team controll
             stateok = (m_Nodes[i].State == j || (m_Nodes[i].State == POINT_DESTROYED && j == 3));
@@ -1347,7 +1349,7 @@ bool BattlegroundAV::SetupBattleground()
 
     //creatures
     sLog->outDebug(LOG_FILTER_BATTLEGROUND, "BG_AV start poputlating nodes");
-    for (BG_AV_Nodes i= BG_AV_NODES_FIRSTAID_STATION; i < BG_AV_NODES_MAX; ++i)
+    for (BG_AV_Nodes i = BG_AV_NODES_FIRSTAID_STATION; i < BG_AV_NODES_MAX; ++i)
     {
         if (m_Nodes[i].Owner)
             PopulateNode(i);
@@ -1490,4 +1492,3 @@ void BattlegroundAV::ResetBGSubclass()
             DelCreature(i);
 
 }
-

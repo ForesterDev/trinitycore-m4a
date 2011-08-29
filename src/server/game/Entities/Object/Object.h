@@ -123,7 +123,7 @@ class Object
     public:
         virtual ~Object ();
 
-        const bool& IsInWorld() const { return m_inWorld; }
+        bool IsInWorld() const { return m_inWorld; }
         virtual void AddToWorld()
         {
             if (m_inWorld)
@@ -148,7 +148,7 @@ class Object
             ClearUpdateMask(true);
         }
 
-        const uint64& GetGUID() const { return GetUInt64Value(0); }
+        uint64 GetGUID() const { return GetUInt64Value(0); }
         uint32 GetGUIDLow() const { return GUID_LOPART(GetUInt64Value(0)); }
         uint32 GetGUIDMid() const { return GUID_ENPART(GetUInt64Value(0)); }
         uint32 GetGUIDHigh() const { return GUID_HIPART(GetUInt64Value(0)); }
@@ -168,25 +168,25 @@ class Object
 
         virtual void DestroyForPlayer(Player *target, bool anim = false) const;
 
-        const int32& GetInt32Value(uint16 index) const
+        int32 GetInt32Value(uint16 index) const
         {
             ASSERT(index < m_valuesCount || PrintIndexError(index , false));
             return m_int32Values[ index ];
         }
 
-        const uint32& GetUInt32Value(uint16 index) const
+        uint32 GetUInt32Value(uint16 index) const
         {
             ASSERT(index < m_valuesCount || PrintIndexError(index , false));
             return m_uint32Values[ index ];
         }
 
-        const uint64& GetUInt64Value(uint16 index) const
+        uint64 GetUInt64Value(uint16 index) const
         {
             ASSERT(index + 1 < m_valuesCount || PrintIndexError(index , false));
             return *((uint64*)&(m_uint32Values[ index ]));
         }
 
-        const float& GetFloatValue(uint16 index) const
+        float GetFloatValue(uint16 index) const
         {
             ASSERT(index < m_valuesCount || PrintIndexError(index , false));
             return m_floatValues[ index ];
@@ -209,7 +209,7 @@ class Object
         void SetInt32Value(uint16 index,        int32  value);
         void SetUInt32Value(uint16 index,       uint32  value);
         void UpdateUInt32Value(uint16 index,       uint32  value);
-        void SetUInt64Value(uint16 index, const uint64 &value);
+        void SetUInt64Value(uint16 index, const uint64 value);
         void SetFloatValue(uint16 index,       float   value);
         void SetByteValue(uint16 index, uint8 offset, uint8 value);
         void SetUInt16Value(uint16 index, uint8 offset, uint16 value);
@@ -217,8 +217,8 @@ class Object
         void SetStatFloatValue(uint16 index, float value);
         void SetStatInt32Value(uint16 index, int32 value);
 
-        bool AddUInt64Value(uint16 index, const uint64 &value);
-        bool RemoveUInt64Value(uint16 index, const uint64 &value);
+        bool AddUInt64Value(uint16 index, const uint64 value);
+        bool RemoveUInt64Value(uint16 index, const uint64 value);
 
         void ApplyModUInt32Value(uint16 index, int32 val, bool apply);
         void ApplyModInt32Value(uint16 index, int32 val, bool apply);
@@ -308,8 +308,6 @@ class Object
 
         void ClearUpdateMask(bool remove);
 
-        bool LoadValues(const char* data);
-
         uint16 GetValuesCount() const { return m_valuesCount; }
 
         virtual bool hasQuest(uint32 /* quest_id */) const { return false; }
@@ -329,6 +327,9 @@ class Object
         const Unit* ToUnit() const {if (GetTypeId() == TYPEID_UNIT || GetTypeId() == TYPEID_PLAYER) return (const Unit*)((Unit*)this); else return NULL; }
         GameObject* ToGameObject(){ if (GetTypeId() == TYPEID_GAMEOBJECT) return reinterpret_cast<GameObject*>(this); else return NULL; }
         const GameObject* ToGameObject() const {if (GetTypeId() == TYPEID_GAMEOBJECT) return (const GameObject*)((GameObject*)this); else return NULL; }
+
+        Corpse* ToCorpse(){ if (GetTypeId() == TYPEID_CORPSE) return reinterpret_cast<Corpse*>(this); else return NULL; }
+        const Corpse* ToCorpse() const {if (GetTypeId() == TYPEID_CORPSE) return (const Corpse*)((Corpse*)this); else return NULL; }
     protected:
 
         Object ();
@@ -700,7 +701,7 @@ class WorldObject : public Object, public WorldLocation
             { return IsInDist2d(x, y, dist + GetObjectSize()); }
         bool IsWithinDist2d(const Position *pos, float dist) const
             { return IsInDist2d(pos, dist + GetObjectSize()); }
-        bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D) const;
+        virtual bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D) const;
         // use only if you will sure about placing both object at same map
         bool IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D = true) const
         {

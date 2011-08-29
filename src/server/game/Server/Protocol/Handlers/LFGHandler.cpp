@@ -286,7 +286,7 @@ void WorldSession::SendLfgUpdatePlayer(const LfgUpdateData& updateData)
     bool queued = false;
     bool extrainfo = false;
 
-    switch(updateData.updateType)
+    switch (updateData.updateType)
     {
         case LFG_UPDATETYPE_JOIN_PROPOSAL:
         case LFG_UPDATETYPE_ADDED_TO_QUEUE:
@@ -329,7 +329,7 @@ void WorldSession::SendLfgUpdateParty(const LfgUpdateData& updateData)
     bool extrainfo = false;
     bool queued = false;
 
-    switch(updateData.updateType)
+    switch (updateData.updateType)
     {
         case LFG_UPDATETYPE_JOIN_PROPOSAL:
             extrainfo = true;
@@ -402,7 +402,7 @@ void WorldSession::SendLfgRoleCheckUpdate(const LfgRoleCheck* pRoleCheck)
     data << uint32(pRoleCheck->state);                     // Check result
     data << uint8(pRoleCheck->state == LFG_ROLECHECK_INITIALITING);
     data << uint8(dungeons.size());                        // Number of dungeons
-    if (dungeons.size())
+    if (!dungeons.empty())
     {
         for (LfgDungeonSet::iterator it = dungeons.begin(); it != dungeons.end(); ++it)
         {
@@ -412,7 +412,7 @@ void WorldSession::SendLfgRoleCheckUpdate(const LfgRoleCheck* pRoleCheck)
     }
 
     data << uint8(pRoleCheck->roles.size());               // Players in group
-    if (pRoleCheck->roles.size())
+    if (!pRoleCheck->roles.empty())
     {
         // Leader info MUST be sent 1st :S
         uint64 guid = pRoleCheck->leader;
@@ -420,7 +420,7 @@ void WorldSession::SendLfgRoleCheckUpdate(const LfgRoleCheck* pRoleCheck)
         data << uint64(guid);                              // Guid
         data << uint8(roles > 0);                          // Ready
         data << uint32(roles);                             // Roles
-        Player* plr = sObjectMgr->GetPlayer(guid);
+        Player* plr = ObjectAccessor::FindPlayer(guid);
         data << uint8(plr ? plr->getLevel() : 0);          // Level
 
         for (LfgRolesMap::const_iterator it = pRoleCheck->roles.begin(); it != pRoleCheck->roles.end(); ++it)
@@ -433,7 +433,7 @@ void WorldSession::SendLfgRoleCheckUpdate(const LfgRoleCheck* pRoleCheck)
             data << uint64(guid);                          // Guid
             data << uint8(roles > 0);                      // Ready
             data << uint32(roles);                         // Roles
-            plr = sObjectMgr->GetPlayer(guid);
+            plr = ObjectAccessor::FindPlayer(guid);
             data << uint8(plr ? plr->getLevel() : 0);      // Level
         }
     }

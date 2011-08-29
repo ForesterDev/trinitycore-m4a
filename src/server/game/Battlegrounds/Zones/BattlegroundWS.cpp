@@ -63,10 +63,8 @@ BattlegroundWS::~BattlegroundWS()
 {
 }
 
-void BattlegroundWS::Update(uint32 diff)
+void BattlegroundWS::PostUpdateImpl(uint32 diff)
 {
-    Battleground::Update(diff);
-
     if (GetStatus() == STATUS_IN_PROGRESS)
     {
         if (GetStartTime() >= 25*MINUTE*IN_MILLISECONDS)
@@ -143,20 +141,20 @@ void BattlegroundWS::Update(uint32 diff)
           m_FlagSpellForceTimer += diff;
           if (m_FlagDebuffState == 0 && m_FlagSpellForceTimer >= 600000)  //10 minutes
           {
-            if (Player* plr = sObjectMgr->GetPlayer(m_FlagKeepers[0]))
+            if (Player* plr = ObjectAccessor::FindPlayer(m_FlagKeepers[0]))
               plr->CastSpell(plr, WS_SPELL_FOCUSED_ASSAULT, true);
-            if (Player* plr = sObjectMgr->GetPlayer(m_FlagKeepers[1]))
+            if (Player* plr = ObjectAccessor::FindPlayer(m_FlagKeepers[1]))
               plr->CastSpell(plr, WS_SPELL_FOCUSED_ASSAULT, true);
             m_FlagDebuffState = 1;
           }
           else if (m_FlagDebuffState == 1 && m_FlagSpellForceTimer >= 900000) //15 minutes
           {
-            if (Player* plr = sObjectMgr->GetPlayer(m_FlagKeepers[0]))
+            if (Player* plr = ObjectAccessor::FindPlayer(m_FlagKeepers[0]))
             {
               plr->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
               plr->CastSpell(plr, WS_SPELL_BRUTAL_ASSAULT, true);
             }
-            if (Player* plr = sObjectMgr->GetPlayer(m_FlagKeepers[1]))
+            if (Player* plr = ObjectAccessor::FindPlayer(m_FlagKeepers[1]))
             {
               plr->RemoveAurasDueToSpell(WS_SPELL_FOCUSED_ASSAULT);
               plr->CastSpell(plr, WS_SPELL_BRUTAL_ASSAULT, true);
@@ -257,8 +255,7 @@ void BattlegroundWS::RespawnFlagAfterDrop(uint32 team)
 
     PlaySoundToAll(BG_WS_SOUND_FLAGS_RESPAWNED);
 
-    GameObject *obj = GetBgMap()->GetGameObject(GetDroppedFlagGUID(team));
-    if (obj)
+    if (GameObject *obj = GetBgMap()->GetGameObject(GetDroppedFlagGUID(team)))
         obj->Delete();
     else
         sLog->outError("unknown droped flag bg, guid: %u", GUID_LOPART(GetDroppedFlagGUID(team)));
@@ -560,7 +557,7 @@ void BattlegroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
     Source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
 }
 
-void BattlegroundWS::RemovePlayer(Player *plr, uint64 guid)
+void BattlegroundWS::RemovePlayer(Player *plr, uint64 guid, uint32 /*team*/)
 {
     // sometimes flag aura not removed :(
     if (IsAllianceFlagPickedup() && m_FlagKeepers[BG_TEAM_ALLIANCE] == guid)

@@ -180,6 +180,7 @@ namespace std
 #define atoll __atoi64
 #define vsnprintf _vsnprintf
 #define finite(X) _finite(X)
+#define llabs _abs64
 
 #else
 

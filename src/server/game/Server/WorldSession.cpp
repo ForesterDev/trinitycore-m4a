@@ -87,14 +87,15 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
 }
 
 /// WorldSession constructor
-WorldSession::WorldSession(uint32 id, WorldSocket *sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter):
+WorldSession::WorldSession(uint32 id, WorldSocket *sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter):
 m_muteTime(mute_time), m_timeOutTime(0), _player(NULL), m_Socket(sock),
 _security(sec), _accountId(id), m_expansion(expansion), _logoutTime(0),
 m_inQueue(false), m_playerLoading(false), m_playerLogout(false),
 m_playerRecentlyLogout(false), m_playerSave(false),
 m_sessionDbcLocale(sWorld->GetAvailableDbcLocale(locale)),
 m_sessionDbLocaleIndex(locale),
-m_latency(0), m_TutorialsChanged(false), recruiterId(recruiter)
+m_latency(0), m_TutorialsChanged(false), recruiterId(recruiter),
+isRecruiter(isARecruiter)
 {
     if (sock)
     {
@@ -103,6 +104,8 @@ m_latency(0), m_TutorialsChanged(false), recruiterId(recruiter)
         ResetTimeOutTime();
         LoginDatabase.PExecute("UPDATE account SET online = 1 WHERE id = %u;", GetAccountId());
     }
+
+    InitializeQueryCallbackParameters();
 }
 
 /// WorldSession destructor
@@ -753,6 +756,36 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
 
     if (mi->HasMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION))
         data >> mi->splineElevation;
+
+    // This must be a packet spoofing attempt. MOVEMENTFLAG_ROOT sent from the client is not valid,
+    // and when used in conjunction with any of the moving movement flags such as MOVEMENTFLAG_FORWARD
+    // it will freeze clients that receive this player's movement info.
+    if (mi->HasMovementFlag(MOVEMENTFLAG_ROOT))
+        mi->flags &= ~MOVEMENTFLAG_ROOT;
+
+    // Cannot hover and jump at the same time
+    if (mi->HasMovementFlag(MOVEMENTFLAG_HOVER) && mi->HasMovementFlag(MOVEMENTFLAG_JUMPING))
+        mi->flags &= ~MOVEMENTFLAG_JUMPING;
+
+    // Cannot ascend and descend at the same time
+    if (mi->HasMovementFlag(MOVEMENTFLAG_ASCENDING) && mi->HasMovementFlag(MOVEMENTFLAG_DESCENDING))
+        mi->flags &= ~(MOVEMENTFLAG_ASCENDING | MOVEMENTFLAG_DESCENDING);
+
+    // Cannot move left and right at the same time
+    if (mi->HasMovementFlag(MOVEMENTFLAG_LEFT) && mi->HasMovementFlag(MOVEMENTFLAG_RIGHT))
+        mi->flags &= ~(MOVEMENTFLAG_LEFT | MOVEMENTFLAG_RIGHT);
+
+    // Cannot strafe left and right at the same time
+    if (mi->HasMovementFlag(MOVEMENTFLAG_STRAFE_LEFT) && mi->HasMovementFlag(MOVEMENTFLAG_STRAFE_RIGHT))
+        mi->flags &= ~(MOVEMENTFLAG_STRAFE_LEFT | MOVEMENTFLAG_STRAFE_RIGHT);
+
+    // Cannot pitch up and down at the same time
+    if (mi->HasMovementFlag(MOVEMENTFLAG_PITCH_UP) && mi->HasMovementFlag(MOVEMENTFLAG_PITCH_DOWN))
+        mi->flags &= ~(MOVEMENTFLAG_PITCH_UP | MOVEMENTFLAG_PITCH_DOWN);
+
+    // Cannot move forwards and backwards at the same time
+    if (mi->HasMovementFlag(MOVEMENTFLAG_FORWARD) && mi->HasMovementFlag(MOVEMENTFLAG_BACKWARD))
+        mi->flags &= ~(MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_BACKWARD);
 }
 
 void WorldSession::WriteMovementInfo(WorldPacket *data, MovementInfo *mi)
@@ -941,16 +974,23 @@ void WorldSession::SetPlayer(Player *plr)
         m_GUIDLow = _player->GetGUIDLow();
 }
 
+void WorldSession::InitializeQueryCallbackParameters()
+{
+    // Callback parameters that have pointers in them should be properly
+    // initialized to NULL here.
+    _charCreateCallback.SetParam(NULL);
+}
+
 void WorldSession::ProcessQueryCallbacks()
 {
     QueryResult result;
 
     //! HandleNameQueryOpcode
-    while (!m_nameQueryCallbacks.is_empty())
+    while (!_nameQueryCallbacks.is_empty())
     {
         QueryResultFuture lResult;
         ACE_Time_Value timeout = ACE_Time_Value::zero;
-        if (m_nameQueryCallbacks.next_readable(lResult, &timeout) != 1)
+        if (_nameQueryCallbacks.next_readable(lResult, &timeout) != 1)
            break;
 
         if (lResult.ready())
@@ -962,80 +1002,87 @@ void WorldSession::ProcessQueryCallbacks()
     }
 
     //! HandleCharEnumOpcode
-    if (m_charEnumCallback.ready())
+    if (_charEnumCallback.ready())
     {
-        m_charEnumCallback.get(result);
+        _charEnumCallback.get(result);
         HandleCharEnum(result);
-        m_charEnumCallback.cancel();
+        _charEnumCallback.cancel();
     }
 
+    if (_charCreateCallback.IsReady())
+    {
+        PreparedQueryResult pResult;
+        _charCreateCallback.GetResult(pResult);
+        HandleCharCreateCallback(pResult, _charCreateCallback.GetParam());
+        // Don't call FreeResult() here, the callback handler will do that depending on the events in the callback chain
+    }
     //! HandlePlayerLoginOpcode
-    if (m_charLoginCallback.ready())
+    if (_charLoginCallback.ready())
     {
         SQLQueryHolder* param;
-        m_charLoginCallback.get(param);
+        _charLoginCallback.get(param);
         HandlePlayerLogin((LoginQueryHolder*)param);
-        m_charLoginCallback.cancel();
+        _charLoginCallback.cancel();
     }
 
     //! HandleAddFriendOpcode
-    if (m_addFriendCallback.IsReady())
+    if (_addFriendCallback.IsReady())
     {
-        std::string param = m_addFriendCallback.GetParam();
-        m_addFriendCallback.GetResult(result);
+        std::string param = _addFriendCallback.GetParam();
+        _addFriendCallback.GetResult(result);
         HandleAddFriendOpcodeCallBack(result, param);
-        m_addFriendCallback.FreeResult();
+        _addFriendCallback.FreeResult();
     }
 
     //- HandleCharRenameOpcode
-    if (m_charRenameCallback.IsReady())
+    if (_charRenameCallback.IsReady())
     {
-        std::string param = m_charRenameCallback.GetParam();
-        m_charRenameCallback.GetResult(result);
+        std::string param = _charRenameCallback.GetParam();
+        _charRenameCallback.GetResult(result);
         HandleChangePlayerNameOpcodeCallBack(result, param);
-        m_charRenameCallback.FreeResult();
+        _charRenameCallback.FreeResult();
     }
 
     //- HandleCharAddIgnoreOpcode
-    if (m_addIgnoreCallback.ready())
+    if (_addIgnoreCallback.ready())
     {
-        m_addIgnoreCallback.get(result);
+        _addIgnoreCallback.get(result);
         HandleAddIgnoreOpcodeCallBack(result);
-        m_addIgnoreCallback.cancel();
+        _addIgnoreCallback.cancel();
     }
 
     //- SendStabledPet
-    if (m_sendStabledPetCallback.IsReady())
+    if (_sendStabledPetCallback.IsReady())
     {
-        uint64 param = m_sendStabledPetCallback.GetParam();
-        m_sendStabledPetCallback.GetResult(result);
+        uint64 param = _sendStabledPetCallback.GetParam();
+        _sendStabledPetCallback.GetResult(result);
         SendStablePetCallback(result, param);
-        m_sendStabledPetCallback.FreeResult();
+        _sendStabledPetCallback.FreeResult();
     }
 
     //- HandleStablePet
-    if (m_stablePetCallback.ready())
+    if (_stablePetCallback.ready())
     {
-        m_stablePetCallback.get(result);
+        _stablePetCallback.get(result);
         HandleStablePetCallback(result);
-        m_stablePetCallback.cancel();
+        _stablePetCallback.cancel();
     }
 
     //- HandleUnstablePet
-    if (m_unstablePetCallback.IsReady())
+    if (_unstablePetCallback.IsReady())
     {
-        uint32 param = m_unstablePetCallback.GetParam();
-        m_unstablePetCallback.GetResult(result);
+        uint32 param = _unstablePetCallback.GetParam();
+        _unstablePetCallback.GetResult(result);
         HandleUnstablePetCallback(result, param);
-        m_unstablePetCallback.FreeResult();
+        _unstablePetCallback.FreeResult();
     }
 
     //- HandleStableSwapPet
-    if (m_stableSwapCallback.IsReady())
+    if (_stableSwapCallback.IsReady())
     {
-        uint32 param = m_stableSwapCallback.GetParam();
-        m_stableSwapCallback.GetResult(result);
+        uint32 param = _stableSwapCallback.GetParam();
+        _stableSwapCallback.GetResult(result);
         HandleStableSwapPetCallback(result, param);
-        m_stableSwapCallback.FreeResult();
+        _stableSwapCallback.FreeResult();
     }
 }

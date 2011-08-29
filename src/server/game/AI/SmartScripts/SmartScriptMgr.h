@@ -420,7 +420,7 @@ enum SMART_ACTION
     SMART_ACTION_INSTALL_AI_TEMPLATE                = 58,     // AITemplateID
     SMART_ACTION_SET_RUN                            = 59,     // 0/1
     SMART_ACTION_SET_FLY                            = 60,     // 0/1
-    SMART_ACTION_SET_SWIMM                          = 61,     // 0/1
+    SMART_ACTION_SET_SWIM                           = 61,     // 0/1
     SMART_ACTION_TELEPORT                           = 62,     // mapID,
     SMART_ACTION_STORE_VARIABLE_DECIMAL             = 63,     // varID, number
     SMART_ACTION_STORE_TARGET_LIST                  = 64,     // varID,
@@ -461,8 +461,9 @@ enum SMART_ACTION
     SMART_ACTION_SET_DYNAMIC_FLAG                   = 94,     // Flags
     SMART_ACTION_ADD_DYNAMIC_FLAG                   = 95,     // Flags
     SMART_ACTION_REMOVE_DYNAMIC_FLAG                = 96,     // Flags
+    SMART_ACTION_JUMP_TO_POS                        = 97,     // speedXY, speedZ, targetX, targetY, targetZ
 
-    SMART_ACTION_END                                = 97,
+    SMART_ACTION_END                                = 98,
 };
 
 struct SmartAction
@@ -753,8 +754,8 @@ struct SmartAction
 
         struct
         {
-            uint32 swimm;
-        } setSwimm;
+            uint32 swim;
+        } setSwim;
 
         struct
         {
@@ -844,6 +845,13 @@ struct SmartAction
         {
             uint32 anim;
         } sendGoCustomAnim;
+
+        struct
+        {
+            uint32 speedxy;
+            uint32 speedz;
+        } jump;
+
         struct
         {
             uint32 param1;
@@ -1145,7 +1153,6 @@ struct SmartScriptHolder
         runOnce = false;
         link = 0;
         entryOrGuid = 0;
-        link = 0;
         event_id = 0;
         enableTimed = false;
     }
@@ -1228,7 +1235,7 @@ class SmartAIMgr
         //event stores
         SmartAIEventMap mEventMap[SMART_SCRIPT_TYPE_MAX];
 
-        bool IsEventValid(SmartScriptHolder &e);
+        bool IsEventValid(SmartScriptHolder& e);
         bool IsTargetValid(SmartScriptHolder const& e);
 
         /*inline bool IsTargetValid(SmartScriptHolder e, int32 target)
@@ -1303,7 +1310,7 @@ class SmartAIMgr
 
         bool IsSpellValid(SmartScriptHolder const& e, uint32 entry)
         {
-            if (!sSpellStore.LookupEntry(entry))
+            if (!sSpellMgr->GetSpellInfo(entry))
             {
                 sLog->outErrorDb("SmartAIMgr: Entry %d SourceType %u Event %u Action %u uses non-existent Spell entry %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), entry);
                 return false;

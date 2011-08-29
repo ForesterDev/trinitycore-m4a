@@ -261,11 +261,11 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket & /*recv_
                 uint32 count1 = 0;                                  //always constant zero?
                 uint32 count2 = 0;                                  //count of next fields
 
-                Player *ali_plr = sObjectMgr->GetPlayer(((BattlegroundWS*)bg)->GetAllianceFlagPickerGUID());
+                Player *ali_plr = ObjectAccessor::FindPlayer(((BattlegroundWS*)bg)->GetAllianceFlagPickerGUID());
                 if (ali_plr)
                     ++count2;
 
-                Player *horde_plr = sObjectMgr->GetPlayer(((BattlegroundWS*)bg)->GetHordeFlagPickerGUID());
+                Player *horde_plr = ObjectAccessor::FindPlayer(((BattlegroundWS*)bg)->GetHordeFlagPickerGUID());
                 if (horde_plr)
                     ++count2;
 
@@ -317,8 +317,12 @@ void WorldSession::HandlePVPLogDataOpcode(WorldPacket & /*recv_data*/)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Recvd MSG_PVP_LOG_DATA Message");
 
-    Battleground *bg = _player->GetBattleground();
+    Battleground* bg = _player->GetBattleground();
     if (!bg)
+        return;
+
+    // Prevent players from sending BuildPvpLogDataPacket in an arena except for when sent in BattleGround::EndBattleGround.
+    if (bg->isArena())
         return;
 
     WorldPacket data;
@@ -367,7 +371,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
 
     if (!sBattlemasterListStore.LookupEntry(bgTypeId_))
     {
-        sLog->outError("BattlegroundHandler: invalid bgtype (%u) received.", bgTypeId_);
+        sLog->outError("BattlegroundHandler: invalid bgtype (%u) with player (Name: %s, GUID: %u) received.", bgTypeId_, _player->GetName(), _player->GetGUIDLow());
         return;
     }
     if (!_player->InBattlegroundQueue())
@@ -796,7 +800,7 @@ void WorldSession::HandleReportPvPAFK(WorldPacket & recv_data)
 {
     uint64 playerGuid;
     recv_data >> playerGuid;
-    Player *reportedPlayer = sObjectMgr->GetPlayer(playerGuid);
+    Player *reportedPlayer = ObjectAccessor::FindPlayer(playerGuid);
 
     if (!reportedPlayer)
     {

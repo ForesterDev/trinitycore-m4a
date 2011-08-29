@@ -1553,19 +1553,16 @@ class BattlegroundAVScore : public BattlegroundScore
 
 class BattlegroundAV : public Battleground
 {
-    friend class BattlegroundMgr;
-
     public:
         BattlegroundAV();
         ~BattlegroundAV();
-        void Update(uint32 diff);
 
         /* inherited from BattlegroundClass */
         virtual void AddPlayer(Player *plr);
         virtual void StartingEventCloseDoors();
         virtual void StartingEventOpenDoors();
 
-        void RemovePlayer(Player *plr, uint64 guid);
+        void RemovePlayer(Player *plr, uint64 guid, uint32 team);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         bool SetupBattleground();
         virtual void ResetBGSubclass();
@@ -1586,6 +1583,8 @@ class BattlegroundAV : public Battleground
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
 
     private:
+        virtual void PostUpdateImpl(uint32 diff);
+
         /* Nodes occupying */
         void EventPlayerAssaultsPoint(Player* player, uint32 object);
         void EventPlayerDefendsPoint(Player* player, uint32 object);

@@ -18,6 +18,7 @@
 #include "ScriptPCH.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "SpellScript.h"
 #include "ulduar.h"
 
 enum AuriayaSpells
@@ -91,7 +92,7 @@ enum AuriayaYells
 enum AuriayaActions
 {
     ACTION_CRAZY_CAT_LADY                        = 0,
-    ACTION_RESPAWN_DEFENDER         
+    ACTION_RESPAWN_DEFENDER
 };
 
 #define SENTRY_NUMBER                            RAID_MODE<uint8>(2, 4)
@@ -113,7 +114,7 @@ class boss_auriaya : public CreatureScript
             {
                 _Reset();
                 DefenderGUID = 0;
-                defenderLifes = 9;
+                defenderLives = 8;
                 crazyCatLady = true;
                 nineLives = false;
             }
@@ -122,7 +123,7 @@ class boss_auriaya : public CreatureScript
             {
                 _EnterCombat();
                 DoScriptText(SAY_AGGRO,me);
-                
+
                 events.ScheduleEvent(EVENT_SCREECH, urand(45000, 65000));
                 events.ScheduleEvent(EVENT_BLAST, urand(20000, 25000));
                 events.ScheduleEvent(EVENT_TERRIFYING, urand(20000, 30000));
@@ -148,7 +149,7 @@ class boss_auriaya : public CreatureScript
                 }
 
                 if (summoned->GetEntry() == NPC_FERAL_DEFENDER)
-                { 
+                {
                     if (!summoned->isInCombat() && me->getVictim())
                         summoned->AI()->AttackStart(me->getVictim());
                     summoned->SetAuraStack(SPELL_FERAL_ESSENCE, summoned, 9);
@@ -165,10 +166,10 @@ class boss_auriaya : public CreatureScript
                         SetData(DATA_CRAZY_CAT_LADY, 0);
                         break;
                     case ACTION_RESPAWN_DEFENDER:
-                        --defenderLifes;
-                        if (!defenderLifes)
+                        --defenderLives;
+                        if (!defenderLives)
                         {
-                            SetData(DATA_NINE_LIVES, 1); 
+                            SetData(DATA_NINE_LIVES, 1);
                             break;
                         }
                         events.ScheduleEvent(EVENT_RESPAWN_DEFENDER, 30000);
@@ -247,8 +248,8 @@ class boss_auriaya : public CreatureScript
                             if (Creature* Defender = ObjectAccessor::GetCreature(*me, DefenderGUID))
                             {
                                 Defender->Respawn();
-                                if (defenderLifes)
-                                    Defender->SetAuraStack(SPELL_FERAL_ESSENCE, Defender, defenderLifes);
+                                if (defenderLives)
+                                    Defender->SetAuraStack(SPELL_FERAL_ESSENCE, Defender, defenderLives);
                                 Defender->SetInCombatWithZone();
                                 if (!Defender->isInCombat())
                                     Defender->AI()->AttackStart(me->getVictim());
@@ -273,7 +274,7 @@ class boss_auriaya : public CreatureScript
 
         private:
             uint64 DefenderGUID;
-            uint8 defenderLifes;
+            uint8 defenderLives;
             bool crazyCatLady;
             bool nineLives;
         };
@@ -407,10 +408,8 @@ class npc_feral_defender : public CreatureScript
 
             void Reset()
             {
-                if (me->HasAura(SPELL_FERAL_ESSENCE))
-                    me->RemoveAuraFromStack(SPELL_FERAL_ESSENCE);
-                else
-                    me->RemoveAurasDueToSpell(SPELL_FERAL_ESSENCE);
+                events.ScheduleEvent(EVENT_FERAL_POUNCE, 5000);
+                events.ScheduleEvent(EVENT_RUSH, 10000);
             }
 
             void UpdateAI(uint32 const diff)
@@ -499,7 +498,7 @@ class spell_auriaya_strenght_of_the_pack : public SpellScriptLoader
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_auriaya_strenght_of_the_pack_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_AREA_ALLY_SRC);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_auriaya_strenght_of_the_pack_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
             }
         };
 
@@ -508,6 +507,34 @@ class spell_auriaya_strenght_of_the_pack : public SpellScriptLoader
             return new spell_auriaya_strenght_of_the_pack_SpellScript();
         }
 };
+
+class spell_auriaya_sentinel_blast : public SpellScriptLoader
+{
+    public:
+        spell_auriaya_sentinel_blast() : SpellScriptLoader("spell_auriaya_sentinel_blast") { }
+
+        class spell_auriaya_sentinel_blast_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_auriaya_sentinel_blast_SpellScript);
+
+            void FilterTargets(std::list<Unit*>& unitList)
+            {
+                unitList.remove_if(PlayerOrPetCheck());
+            }
+
+            void Register()
+            {
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_auriaya_sentinel_blast_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_auriaya_sentinel_blast_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_auriaya_sentinel_blast_SpellScript();
+        }
+};
+
 
 class achievement_nine_lives : public AchievementCriteriaScript
 {
@@ -518,6 +545,9 @@ class achievement_nine_lives : public AchievementCriteriaScript
 
         bool OnCheck(Player* /*player*/, Unit* target)
         {
+            if (!target)
+                return false;
+
             if (Creature* Auriaya = target->ToCreature())
                 if (Auriaya->AI()->GetData(DATA_NINE_LIVES))
                     return true;
@@ -535,6 +565,9 @@ class achievement_crazy_cat_lady : public AchievementCriteriaScript
 
         bool OnCheck(Player* /*player*/, Unit* target)
         {
+            if (!target)
+                return false;
+
             if (Creature* Auriaya = target->ToCreature())
                 if (Auriaya->AI()->GetData(DATA_CRAZY_CAT_LADY))
                     return true;
@@ -550,6 +583,7 @@ void AddSC_boss_auriaya()
     new npc_feral_defender();
     new npc_sanctum_sentry();
     new spell_auriaya_strenght_of_the_pack();
+    new spell_auriaya_sentinel_blast();
     new achievement_nine_lives();
     new achievement_crazy_cat_lady();
 }

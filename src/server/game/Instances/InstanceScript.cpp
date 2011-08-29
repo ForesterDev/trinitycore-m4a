@@ -238,7 +238,7 @@ std::string InstanceScript::GetBossSaveData()
 {
     std::ostringstream saveStream;
     for (std::vector<BossInfo>::iterator i = bosses.begin(); i != bosses.end(); ++i)
-        saveStream << (uint32)i->state << " ";
+        saveStream << (uint32)i->state << ' ';
     return saveStream.str();
 }
 
@@ -313,24 +313,6 @@ void InstanceScript::DoSendNotifyToInstance(const char *format, ...)
     }
 }
 
-// Complete Achievement for all players in instance
-void InstanceScript::DoCompleteAchievement(uint32 achievement)
-{
-    AchievementEntry const* pAE = GetAchievementStore()->LookupEntry(achievement);
-    Map::PlayerList const &PlayerList = instance->GetPlayers();
-
-    if (!pAE)
-    {
-        sLog->outError("TSCR: DoCompleteAchievement called for not existing achievement %u", achievement);
-        return;
-    }
-
-    if (!PlayerList.isEmpty())
-        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-            if (Player *pPlayer = i->getSource())
-                pPlayer->CompletedAchievement(pAE);
-}
-
 // Update Achievement Criteria for all players in instance
 void InstanceScript::DoUpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscValue1 /*= 0*/, uint32 miscValue2 /*= 0*/, Unit* unit /*= NULL*/)
 {
@@ -367,12 +349,19 @@ void InstanceScript::DoStopTimedAchievement(AchievementCriteriaTimedTypes type, 
 // Remove Auras due to Spell on all players in instance
 void InstanceScript::DoRemoveAurasDueToSpellOnPlayers(uint32 spell)
 {
-    Map::PlayerList const &PlayerList = instance->GetPlayers();
-
+    Map::PlayerList const& PlayerList = instance->GetPlayers();
     if (!PlayerList.isEmpty())
-        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-            if (Player* pPlayer = i->getSource())
-                pPlayer->RemoveAurasDueToSpell(spell);
+    {
+        for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
+        {
+            if (Player* player = itr->getSource())
+            {
+                player->RemoveAurasDueToSpell(spell);
+                if (Pet* pet = player->GetPet())
+                    pet->RemoveAurasDueToSpell(spell);
+            }
+        }
+    }
 }
 
 // Cast spell on all players in instance

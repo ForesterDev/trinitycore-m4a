@@ -42,19 +42,16 @@ class BattlegroundAAScore : public BattlegroundScore
 
 class BattlegroundAA : public Battleground
 {
-    friend class BattlegroundMgr;
-
     public:
         BattlegroundAA();
         ~BattlegroundAA();
-        void Update(uint32 diff);
 
         /* inherited from BattlegroundClass */
         virtual void AddPlayer(Player *plr);
         virtual void StartingEventCloseDoors();
         virtual void StartingEventOpenDoors();
 
-        void RemovePlayer(Player *plr, uint64 guid);
+        void RemovePlayer(Player *plr, uint64 guid, uint32 team);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         bool SetupBattleground();
         void HandleKillPlayer(Player* player, Player* killer);

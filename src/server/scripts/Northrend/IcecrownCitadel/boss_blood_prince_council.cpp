@@ -448,7 +448,7 @@ class boss_prince_keleseth_icc : public CreatureScript
                 me->SetHealth(_spawnHealth);
             }
 
-            void SpellHit(Unit* /*caster*/, SpellEntry const* spell)
+            void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
             {
                 if (spell->Id == SPELL_INVOCATION_OF_BLOOD_KELESETH)
                     DoAction(ACTION_CAST_INVOCATION);
@@ -526,9 +526,26 @@ class boss_prince_keleseth_icc : public CreatureScript
                 }
             }
 
+            bool CheckRoom()
+            {
+                if (!CheckBoundary(me))
+                {
+                    EnterEvadeMode();
+                    if (Creature* taldaram = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_TALDARAM_GUID)))
+                        taldaram->AI()->EnterEvadeMode();
+
+                    if (Creature* valanar = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_VALANAR_GUID)))
+                        valanar->AI()->EnterEvadeMode();
+
+                    return false;
+                }
+
+                return true;
+            }
+
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim() || !CheckInRoom())
+                if (!UpdateVictim() || !CheckRoom())
                     return;
 
                 events.Update(diff);
@@ -652,7 +669,7 @@ class boss_prince_taldaram_icc : public CreatureScript
                 me->SetHealth(_spawnHealth);
             }
 
-            void SpellHit(Unit* /*caster*/, SpellEntry const* spell)
+            void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
             {
                 if (spell->Id == SPELL_INVOCATION_OF_BLOOD_TALDARAM)
                     DoAction(ACTION_CAST_INVOCATION);
@@ -724,9 +741,26 @@ class boss_prince_taldaram_icc : public CreatureScript
                 }
             }
 
+            bool CheckRoom()
+            {
+                if (!CheckBoundary(me))
+                {
+                    EnterEvadeMode();
+                    if (Creature* keleseth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_KELESETH_GUID)))
+                        keleseth->AI()->EnterEvadeMode();
+
+                    if (Creature* valanar = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_VALANAR_GUID)))
+                        valanar->AI()->EnterEvadeMode();
+
+                    return false;
+                }
+
+                return true;
+            }
+
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim() || !CheckInRoom())
+                if (!UpdateVictim() || !CheckRoom())
                     return;
 
                 events.Update(diff);
@@ -883,7 +917,7 @@ class boss_prince_valanar_icc : public CreatureScript
                     DoZoneInCombat(summon);
             }
 
-            void SpellHit(Unit* /*caster*/, SpellEntry const* spell)
+            void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
             {
                 if (spell->Id == SPELL_INVOCATION_OF_BLOOD_VALANAR)
                     DoAction(ACTION_CAST_INVOCATION);
@@ -941,9 +975,26 @@ class boss_prince_valanar_icc : public CreatureScript
                 }
             }
 
+            bool CheckRoom()
+            {
+                if (!CheckBoundary(me))
+                {
+                    EnterEvadeMode();
+                    if (Creature* keleseth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_KELESETH_GUID)))
+                        keleseth->AI()->EnterEvadeMode();
+
+                    if (Creature* taldaram = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_TALDARAM_GUID)))
+                        taldaram->AI()->EnterEvadeMode();
+
+                    return false;
+                }
+
+                return true;
+            }
+
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim() || !CheckInRoom())
+                if (!UpdateVictim() || !CheckRoom())
                     return;
 
                 events.Update(diff);
@@ -1126,7 +1177,7 @@ class npc_ball_of_flame : public CreatureScript
                 }
             }
 
-            void SetGUID(uint64 const& guid, int32 /*type*/)
+            void SetGUID(uint64 const guid, int32 /*type*/)
             {
                 _chaseGUID = guid;
             }
@@ -1420,7 +1471,7 @@ class spell_taldaram_flame_ball_visual : public SpellScriptLoader
                     return;
 
                 // SPELL_FLAME_SPHERE_SPAWN_EFFECT
-                if (GetSpellProto()->Id == SPELL_FLAME_SPHERE_SPAWN_EFFECT)
+                if (GetSpellInfo()->Id == SPELL_FLAME_SPHERE_SPAWN_EFFECT)
                 {
                     target->CastSpell(target, SPELL_BALL_OF_FLAMES, true);
                     target->AI()->DoAction(ACTION_FLAME_BALL_CHASE);
@@ -1479,9 +1530,10 @@ class spell_valanar_kinetic_bomb : public SpellScriptLoader
 
             void ChangeSummonPos(SpellEffIndex /*effIndex*/)
             {
-                WorldLocation* summonPos = GetTargetDest();
+                WorldLocation summonPos = *GetTargetDest();
                 Position offset = {0.0f, 0.0f, 20.0f, 0.0f};
-                summonPos->RelocateOffset(offset);  // +20 in height
+                summonPos.RelocateOffset(offset);
+                SetTargetDest(summonPos);
             }
 
             void Register()

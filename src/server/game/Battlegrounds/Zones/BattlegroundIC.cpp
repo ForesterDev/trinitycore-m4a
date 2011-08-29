@@ -86,12 +86,12 @@ void BattlegroundIC::SendTransportInit(Player* player)
     player->GetSession()->SendPacket(&packet);
 }
 
-void BattlegroundIC::DoAction(uint32 action, uint64 const& var)
+void BattlegroundIC::DoAction(uint32 action, uint64 var)
 {
     if (action != ACTION_TELEPORT_PLAYER_TO_TRANSPORT)
         return;
 
-    Player* plr = sObjectMgr->GetPlayer(var);
+    Player* plr = ObjectAccessor::FindPlayer(var);
 
     if (!plr || !gunshipAlliance || !gunshipHorde)
         return;
@@ -109,9 +109,8 @@ void BattlegroundIC::DoAction(uint32 action, uint64 const& var)
     plr->TeleportTo(GetMapId(), TeleportToTransportPosition.GetPositionX(), TeleportToTransportPosition.GetPositionY(), TeleportToTransportPosition.GetPositionZ(), TeleportToTransportPosition.GetOrientation(), TELE_TO_NOT_LEAVE_TRANSPORT);
 }
 
-void BattlegroundIC::Update(uint32 diff)
+void BattlegroundIC::PostUpdateImpl(uint32 diff)
 {
-    Battleground::Update(diff);
 
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
@@ -187,7 +186,7 @@ void BattlegroundIC::Update(uint32 diff)
                             siege->Respawn(true);
                     }
 
-                    // we need to confirm this, i am not sure if this every 3 minutes
+                    // we need to confirm if it is every 3 minutes
                     for (uint8 u = (nodePoint[i].faction == TEAM_ALLIANCE ? BG_IC_NPC_DEMOLISHER_1_A : BG_IC_NPC_DEMOLISHER_1_H); u < (nodePoint[i].faction == TEAM_ALLIANCE ? BG_IC_NPC_DEMOLISHER_4_A : BG_IC_NPC_DEMOLISHER_4_H); u++)
                     {
                         if (Creature* demolisher = GetBGCreature(u))
@@ -201,7 +200,7 @@ void BattlegroundIC::Update(uint32 diff)
             }
         }
 
-        // the point is waiting for a change on his banner
+        // the point is waiting for a change on its banner
         if (nodePoint[i].needChange)
         {
             if (nodePoint[i].timer <= diff)
@@ -311,7 +310,7 @@ void BattlegroundIC::AddPlayer(Player *plr)
     SendTransportInit(plr);
 }
 
-void BattlegroundIC::RemovePlayer(Player* plr, uint64 /*guid*/)
+void BattlegroundIC::RemovePlayer(Player* plr, uint64 /*guid*/, uint32 /*team*/)
 {
     plr->RemoveAura(SPELL_QUARRY);
     plr->RemoveAura(SPELL_OIL_REFINERY);
@@ -407,9 +406,9 @@ bool BattlegroundIC::SetupBattleground()
     }
 
     //Send transport init packet to all player in map
-    for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end();itr++)
+    for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
     {
-        if (Player* player = sObjectMgr->GetPlayer(itr->first))
+        if (Player* player = ObjectAccessor::FindPlayer(itr->first))
             SendTransportInit(player);
     }
 
@@ -481,7 +480,7 @@ void BattlegroundIC::RealocatePlayers(ICNodePointType nodeType)
         WorldSafeLocsEntry const *ClosestGrave = NULL;
         for (std::vector<uint64>::const_iterator itr = ghost_list.begin(); itr != ghost_list.end(); ++itr)
         {
-            Player* plr = sObjectMgr->GetPlayer(*itr);
+            Player* plr = ObjectAccessor::FindPlayer(*itr);
             if (!plr)
                 continue;
 
@@ -818,7 +817,7 @@ void BattlegroundIC::HandleCapturedNodes(ICNodePoint* nodePoint, bool recapture)
     }
 }
 
-void BattlegroundIC::DestroyGate(Player* pl, GameObject* go, uint32 /*destroyedEvent*/)
+void BattlegroundIC::DestroyGate(Player* player, GameObject* go)
 {
     GateStatus[GetGateIDFromEntry(go->GetEntry())] = BG_IC_GATE_DESTROYED;
     uint32 uws_open = GetWorldStateFromGateEntry(go->GetEntry(), true);
@@ -828,7 +827,7 @@ void BattlegroundIC::DestroyGate(Player* pl, GameObject* go, uint32 /*destroyedE
         UpdateWorldState(uws_close, 0);
         UpdateWorldState(uws_open, 1);
     }
-    DoorOpen((pl->GetTeamId() == TEAM_ALLIANCE ? BG_IC_GO_HORDE_KEEP_PORTCULLIS : BG_IC_GO_DOODAD_PORTCULLISACTIVE02));
+    DoorOpen((player->GetTeamId() == TEAM_ALLIANCE ? BG_IC_GO_HORDE_KEEP_PORTCULLIS : BG_IC_GO_DOODAD_PORTCULLISACTIVE02));
 
     uint32 lang_entry = 0;
 
@@ -851,7 +850,7 @@ void BattlegroundIC::DestroyGate(Player* pl, GameObject* go, uint32 /*destroyedE
         break;
     }
 
-    SendMessage2ToAll(lang_entry, CHAT_MSG_BG_SYSTEM_NEUTRAL, NULL, (pl->GetTeamId() == TEAM_ALLIANCE ? LANG_BG_IC_HORDE_KEEP : LANG_BG_IC_ALLIANCE_KEEP));
+    SendMessage2ToAll(lang_entry, CHAT_MSG_BG_SYSTEM_NEUTRAL, NULL, (player->GetTeamId() == TEAM_ALLIANCE ? LANG_BG_IC_HORDE_KEEP : LANG_BG_IC_ALLIANCE_KEEP));
 }
 
 void BattlegroundIC::EventPlayerDamagedGO(Player* /*plr*/, GameObject* /*go*/, uint32 /*eventType*/)

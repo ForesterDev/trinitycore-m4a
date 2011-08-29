@@ -169,13 +169,10 @@ class BattlegroundWGScore : public BattlegroundScore
 
 class BattlegroundWS : public Battleground
 {
-    friend class BattlegroundMgr;
-
     public:
         /* Construction */
         BattlegroundWS();
         ~BattlegroundWS();
-        void Update(uint32 diff);
 
         /* inherited from BattlegroundClass */
         virtual void AddPlayer(Player *plr);
@@ -202,7 +199,7 @@ class BattlegroundWS : public Battleground
         virtual void EventPlayerClickedOnFlag(Player *Source, GameObject* target_obj);
         virtual void EventPlayerCapturedFlag(Player *Source);
 
-        void RemovePlayer(Player *plr, uint64 guid);
+        void RemovePlayer(Player *plr, uint64 guid, uint32 team);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         void HandleKillPlayer(Player* player, Player* killer);
         bool SetupBattleground();
@@ -238,6 +235,8 @@ class BattlegroundWS : public Battleground
         bool m_BothFlagsKept;
         uint8 m_FlagDebuffState;                            // 0 - no debuffs, 1 - focused assault, 2 - brutal assault
         uint8 m_minutesElapsed;
+
+        virtual void PostUpdateImpl(uint32 diff);
 };
 #endif
 

@@ -27,6 +27,10 @@ EndScriptData */
 // Some visuals aren't appearing right sometimes
 // Nether Portal doesn't spawn mistress in normal difficulty
 // Infernal Volcano doesn't spawn third infernal in normal difficulty
+//
+// TODO:
+// Redone summon's scripts in SAI
+// Add immunities to the boss and summons
 
 #include "ScriptPCH.h"
 #include "trial_of_the_crusader.h"
@@ -56,7 +60,7 @@ enum Equipment
 enum Summons
 {
     NPC_LEGION_FLAME     = 34784,
-    NPC_FEL_INFERNAL     = 34815,
+    NPC_FEL_INFERNAL     = 34815, // immune to all CC on Heroic (stuns, banish, interrupt, etc)
     NPC_MISTRESS_OF_PAIN = 34826,
 };
 
@@ -64,21 +68,26 @@ namespace
 {
     enum BossSpells
     {
-        SPELL_INFERNAL              = 66258,
-        SPELL_INFERNAL_ERUPTION     = 66255,
-        SPELL_FEL_FIREBALL          = 66532,
-        SPELL_FEL_LIGHTING          = 66528,
-        SPELL_INCINERATE_FLESH      = 66237,
-        SPELL_BURNING_INFERNO       = 66242,
-        SPELL_NETHER_PORTAL         = 66263,
-        SPELL_LEGION_FLAME          = 66197,
-        SPELL_LEGION_FLAME_EFFECT   = 66201,
-        SPELL_SHIVAN_SLASH          = 67098,
-        SPELL_SPINNING_STRIKE       = 66283,
-        SPELL_MISTRESS_KISS         = 67077,
-        SPELL_FEL_INFERNO           = 67047,
-        SPELL_FEL_STREAK            = 66494,
-        SPELL_BERSERK               = 64238,
+        SPELL_LEGION_FLAME                = 66197, // player should run away from raid because he triggers Legion Flame
+        SPELL_LEGION_FLAME_EFFECT         = 66201, // used by trigger npc
+        SPELL_NETHER_POWER                = 66228, // +20% of spell damage per stack, stackable up to 5/10 times, must be dispelled/stealed
+        SPELL_FEL_LIGHTING                = 66528, // jumps to nearby targets
+        SPELL_FEL_FIREBALL                = 66532, // does heavy damage to the tank, interruptable
+        SPELL_INCINERATE_FLESH            = 66237, // target must be healed or will trigger Burning Inferno
+        SPELL_BURNING_INFERNO             = 66242, // triggered by Incinerate Flesh
+        SPELL_INFERNAL_ERUPTION           = 66258, // summons Infernal Volcano
+        SPELL_INFERNAL_ERUPTION_EFFECT    = 66252, // summons Felflame Infernal (3 at Normal and inifinity at Heroic)
+        SPELL_NETHER_PORTAL               = 66269, // summons Nether Portal
+        SPELL_NETHER_PORTAL_EFFECT        = 66263, // summons Mistress of Pain (1 at Normal and infinity at Heroic)
+
+        SPELL_BERSERK                     = 64238, // unused
+
+        // Mistress of Pain spells
+        SPELL_SHIVAN_SLASH                = 67098,
+        SPELL_SPINNING_STRIKE             = 66283,
+        SPELL_MISTRESS_KISS               = 67077,
+        SPELL_FEL_INFERNO                 = 67047,
+        SPELL_FEL_STREAK                  = 66494,
     };
 }
 
@@ -91,16 +100,16 @@ class boss_jaraxxus : public CreatureScript
 public:
     boss_jaraxxus() : CreatureScript("boss_jaraxxus") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new boss_jaraxxusAI(pCreature);
+        return new boss_jaraxxusAI(creature);
     }
 
     struct boss_jaraxxusAI : public ScriptedAI
     {
-        boss_jaraxxusAI(Creature* pCreature) : ScriptedAI(pCreature), Summons(me)
+        boss_jaraxxusAI(Creature* creature) : ScriptedAI(creature), Summons(me)
         {
-            m_pInstance = pCreature->GetInstanceScript();
+            m_pInstance = creature->GetInstanceScript();
             Reset();
         }
 
@@ -140,16 +149,16 @@ public:
             me->SetReactState(REACT_PASSIVE);
         }
 
-        void KilledUnit(Unit *pWho)
+        void KilledUnit(Unit* who)
         {
-            if (pWho->GetTypeId() == TYPEID_PLAYER)
+            if (who->GetTypeId() == TYPEID_PLAYER)
             {
                 if (m_pInstance)
                     m_pInstance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELEGIBLE, 0);
             }
         }
 
-        void JustDied(Unit* /*pKiller*/)
+        void JustDied(Unit* /*killer*/)
         {
             Summons.DespawnAll();
             DoScriptText(SAY_DEATH, me);
@@ -157,12 +166,12 @@ public:
                 m_pInstance->SetData(TYPE_JARAXXUS, DONE);
         }
 
-        void JustSummoned(Creature* pSummoned)
+        void JustSummoned(Creature* summoned)
         {
-            Summons.Summon(pSummoned);
+            Summons.Summon(summoned);
         }
 
-        void EnterCombat(Unit* /*pWho*/)
+        void EnterCombat(Unit* /*who*/)
         {
             if (me->GetReactState() == REACT_PASSIVE)
                 me->CombatStop();
@@ -187,7 +196,7 @@ public:
                 {
                     DoScriptText(EMOTE_INFERNAL_ERUPTION, me);
                     DoScriptText(SAY_INFERNAL_ERUPTION, me);
-                    DoCastAOE(66258 /* Infernal Eruption */);
+                    DoCastAOE(SPELL_INFERNAL_ERUPTION);
                     m_uiSummonInfernalEruptionTimer = 2*MINUTE*IN_MILLISECONDS;
                 }
             } else m_uiSummonInfernalEruptionTimer -= uiDiff;
@@ -199,7 +208,7 @@ public:
                 {
                     DoScriptText(EMOTE_NETHER_PORTAL, me);
                     DoScriptText(SAY_NETHER_PORTAL, me);
-                    DoCastAOE(66269 /* Nether Portal */);
+                    DoCastAOE(SPELL_NETHER_PORTAL);
                     m_uiSummonNetherPortalTimer = 2*MINUTE*IN_MILLISECONDS;
                 }
             } else m_uiSummonNetherPortalTimer -= uiDiff;
@@ -212,21 +221,21 @@ public:
 
             if (m_uiFelLightningTimer <= uiDiff)
             {
-                Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, -5.0f, true);
-                if (!pTarget)
-                    pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true);
-                if (pTarget)
-                    DoCast(pTarget, SPELL_FEL_LIGHTING);
+                Unit *target = SelectTarget(SELECT_TARGET_RANDOM, 0, -5.0f, true);
+                if (!target)
+                    target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true);
+                if (target)
+                    DoCast(target, SPELL_FEL_LIGHTING);
                 m_uiFelLightningTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
             } else m_uiFelLightningTimer -= uiDiff;
 
             if (m_uiIncinerateFleshTimer <= uiDiff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                 {
-                    DoScriptText(EMOTE_INCINERATE, me, pTarget);
+                    DoScriptText(EMOTE_INCINERATE, me, target);
                     DoScriptText(SAY_INCINERATE, me);
-                    DoCast(pTarget, SPELL_INCINERATE_FLESH);
+                    DoCast(target, SPELL_INCINERATE_FLESH);
                 }
                 m_uiIncinerateFleshTimer = urand(20*IN_MILLISECONDS, 25*IN_MILLISECONDS);
             } else m_uiIncinerateFleshTimer -= uiDiff;
@@ -243,10 +252,10 @@ public:
 
             if (m_uiLegionFlameTimer <= uiDiff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                 {
-                    DoScriptText(EMOTE_LEGION_FLAME, me, pTarget);
-                    DoCast(pTarget, SPELL_LEGION_FLAME);
+                    DoScriptText(EMOTE_LEGION_FLAME, me, target);
+                    DoCast(target, SPELL_LEGION_FLAME);
                 }
                 m_uiLegionFlameTimer = 30*IN_MILLISECONDS;
             } else m_uiLegionFlameTimer -= uiDiff;
@@ -261,14 +270,14 @@ class mob_legion_flame : public CreatureScript
 public:
     mob_legion_flame() : CreatureScript("mob_legion_flame") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new mob_legion_flameAI(pCreature);
+        return new mob_legion_flameAI(creature);
     }
 
     struct mob_legion_flameAI : public Scripted_NoMovementAI
     {
-        mob_legion_flameAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+        mob_legion_flameAI(Creature* creature) : Scripted_NoMovementAI(creature)
         {
             Reset();
         }
@@ -293,21 +302,18 @@ class mob_infernal_volcano : public CreatureScript
 public:
     mob_infernal_volcano() : CreatureScript("mob_infernal_volcano") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new mob_infernal_volcanoAI(pCreature);
+        return new mob_infernal_volcanoAI(creature);
     }
 
     struct mob_infernal_volcanoAI : public Scripted_NoMovementAI
     {
-        mob_infernal_volcanoAI(Creature *pCreature)
-        : Scripted_NoMovementAI(pCreature)
+        mob_infernal_volcanoAI(Creature* creature) : Scripted_NoMovementAI(creature)
         {
             if (!dynamic_cast<TempSummon *>(base().me))
                 throw std::runtime_error("bad infernal volcano");
-            m_pInstance = (InstanceScript*)pCreature->GetInstanceScript();
-            me().SetCorpseDelay(0);
-            DoCastAOE(66252 /* Infernal Eruption */);
+            m_pInstance = (InstanceScript*)creature->GetInstanceScript();
             Reset();
         }
 
@@ -326,18 +332,25 @@ public:
         void Reset()
         {
             me().SetReactState(REACT_PASSIVE);
+
             if (!IsHeroic())
                 me().SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
             else
                 me().RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
         }
 
-        void JustSummoned(Creature* pSummoned)
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            DoCastAOE(SPELL_INFERNAL_ERUPTION_EFFECT);
+        }
+
+        void JustSummoned(Creature* summoned)
         {
             if (auto p = dynamic_cast<Creature *>(me().GetSummoner()))
                 if (p->IsAIEnabled)
-                    p->AI()->JustSummoned(pSummoned);
-            pSummoned->SetCorpseDelay(0);
+                    p->AI()->JustSummoned(summoned);
+            // makes immediate corpse despawn of summoned Felflame Infernals
+            summoned->SetCorpseDelay(0);
         }
 
         void SummonedCreatureDespawn(Creature *unit)
@@ -347,9 +360,10 @@ public:
                     p->AI()->SummonedCreatureDespawn(unit);
         }
 
-        void UpdateAI(const uint32 uiDiff)
+        void JustDied(Unit* /*killer*/)
         {
-            uiDiff;
+            // used to despawn corpse immediately
+            me().DespawnOrUnsummon();
         }
     };
 
@@ -360,16 +374,16 @@ class mob_fel_infernal : public CreatureScript
 public:
     mob_fel_infernal() : CreatureScript("mob_fel_infernal") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new mob_fel_infernalAI(pCreature);
+        return new mob_fel_infernalAI(creature);
     }
 
     struct mob_fel_infernalAI : public ScriptedAI
     {
-        mob_fel_infernalAI(Creature* pCreature) : ScriptedAI(pCreature)
+        mob_fel_infernalAI(Creature* creature) : ScriptedAI(creature)
         {
-            m_pInstance = (InstanceScript*)pCreature->GetInstanceScript();
+            m_pInstance = (InstanceScript*)creature->GetInstanceScript();
             Reset();
         }
 
@@ -382,7 +396,7 @@ public:
             me->SetInCombatWithZone();
         }
 
-        /*void SpellHitTarget(Unit *pTarget, const SpellEntry *pSpell)
+        /*void SpellHitTarget(Unit* target, const SpellInfo *pSpell)
         {
             if (pSpell->Id == SPELL_FEL_STREAK)
                 DoCastAOE(SPELL_FEL_INFERNO); //66517
@@ -398,8 +412,8 @@ public:
 
             if (m_uiFelStreakTimer <= uiDiff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                    DoCast(pTarget, SPELL_FEL_STREAK);
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                    DoCast(target, SPELL_FEL_STREAK);
                 m_uiFelStreakTimer = 30*IN_MILLISECONDS;
             } else m_uiFelStreakTimer -= uiDiff;
 
@@ -414,16 +428,16 @@ class mob_nether_portal : public CreatureScript
 public:
     mob_nether_portal() : CreatureScript("mob_nether_portal") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new mob_nether_portalAI(pCreature);
+        return new mob_nether_portalAI(creature);
     }
 
     struct mob_nether_portalAI : public ScriptedAI
     {
-        mob_nether_portalAI(Creature* pCreature) : ScriptedAI(pCreature), Summons(me)
+        mob_nether_portalAI(Creature* creature) : ScriptedAI(creature), Summons(me)
         {
-            m_pInstance = (InstanceScript*)pCreature->GetInstanceScript();
+            m_pInstance = (InstanceScript*)creature->GetInstanceScript();
             Reset();
         }
 
@@ -431,49 +445,34 @@ public:
 
         SummonList Summons;
 
-        uint32 m_Timer;
-        uint8  m_Count;
-        uint8  m_CountMax;
-
         void Reset()
         {
             me->SetReactState(REACT_PASSIVE);
-            m_Timer = 10*IN_MILLISECONDS;
-            m_Count = 0;
+
             if (!IsHeroic())
-            {
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
-                m_CountMax = 1;
-            }
             else
-            {
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
-                m_CountMax = 0;
-            }
+
             Summons.DespawnAll();
         }
 
-        void JustSummoned(Creature* pSummoned)
+        void IsSummonedBy(Unit* /*summoner*/)
         {
-            Summons.Summon(pSummoned);
-            pSummoned->SetCorpseDelay(0);
+            DoCast(SPELL_NETHER_PORTAL_EFFECT);
         }
 
-        void UpdateAI(const uint32 uiDiff)
+        void JustSummoned(Creature* summoned)
         {
-            if (m_Timer <= uiDiff)
-            {
-                if (m_CountMax && m_CountMax == m_Count)
-                    me->DespawnOrUnsummon();
-                else
-                {
-                    DoCast(SPELL_NETHER_PORTAL);
-                    ++m_Count;
-                }
-                m_Timer = 15*IN_MILLISECONDS;
-            } else m_Timer -= uiDiff;
+            Summons.Summon(summoned);
+            // makes immediate corpse despawn of summoned Mistress of Pain
+            summoned->SetCorpseDelay(0);
+        }
 
-            UpdateVictim();
+        void JustDied(Unit* /*killer*/)
+        {
+            // used to despawn corpse immediately
+            me->DespawnOrUnsummon();
         }
     };
 
@@ -484,16 +483,16 @@ class mob_mistress_of_pain : public CreatureScript
 public:
     mob_mistress_of_pain() : CreatureScript("mob_mistress_of_pain") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new mob_mistress_of_painAI(pCreature);
+        return new mob_mistress_of_painAI(creature);
     }
 
     struct mob_mistress_of_painAI : public ScriptedAI
     {
-        mob_mistress_of_painAI(Creature* pCreature) : ScriptedAI(pCreature)
+        mob_mistress_of_painAI(Creature* creature) : ScriptedAI(creature)
         {
-            m_pInstance = (InstanceScript*)pCreature->GetInstanceScript();
+            m_pInstance = (InstanceScript*)creature->GetInstanceScript();
             if (m_pInstance)
                 m_pInstance->SetData(DATA_MISTRESS_OF_PAIN_COUNT, INCREASE);
             Reset();
@@ -512,7 +511,7 @@ public:
             me->SetInCombatWithZone();
         }
 
-        void JustDied(Unit* /*pKiller*/)
+        void JustDied(Unit* /*killer*/)
         {
             if (m_pInstance)
                 m_pInstance->SetData(DATA_MISTRESS_OF_PAIN_COUNT, DECREASE);
@@ -534,15 +533,15 @@ public:
 
             if (m_uiSpinningStrikeTimer <= uiDiff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
-                    DoCast(pTarget, SPELL_SPINNING_STRIKE);
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
+                    DoCast(target, SPELL_SPINNING_STRIKE);
                 m_uiSpinningStrikeTimer = 30*IN_MILLISECONDS;
             } else m_uiSpinningStrikeTimer -= uiDiff;
 
             if (IsHeroic() && m_uiMistressKissTimer <= uiDiff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
-                    DoCast(pTarget, SPELL_MISTRESS_KISS);
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
+                    DoCast(target, SPELL_MISTRESS_KISS);
                 m_uiMistressKissTimer = 30*IN_MILLISECONDS;
             } else m_uiMistressKissTimer -= uiDiff;
 

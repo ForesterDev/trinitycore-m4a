@@ -25,6 +25,7 @@
 #include "ScriptPCH.h"
 #include "SpellAuraEffects.h"
 #include "SkillDiscovery.h"
+#include "GridNotifiers.h"
 
 class spell_gen_absorb0_hitlimit1 : public SpellScriptLoader
 {
@@ -40,7 +41,7 @@ class spell_gen_absorb0_hitlimit1 : public SpellScriptLoader
             bool Load()
             {
                 // Max absorb stored in 1 dummy effect
-                limit = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), EFFECT_1);
+                limit = GetSpellInfo()->Effects[EFFECT_1].CalcValue();
                 return true;
             }
 
@@ -161,6 +162,60 @@ class spell_gen_burn_brutallus : public SpellScriptLoader
         }
 };
 
+enum eCannibalizeSpells
+{
+    SPELL_CANNIBALIZE_TRIGGERED = 20578,
+};
+
+class spell_gen_cannibalize : public SpellScriptLoader
+{
+    public:
+        spell_gen_cannibalize() : SpellScriptLoader("spell_gen_cannibalize") { }
+
+        class spell_gen_cannibalize_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_cannibalize_SpellScript);
+
+            bool Validate(SpellInfo const* /*spellEntry*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_CANNIBALIZE_TRIGGERED))
+                    return false;
+                return true;
+            }
+
+            SpellCastResult CheckIfCorpseNear()
+            {
+                Unit* caster = GetCaster();
+                float max_range = GetSpellInfo()->GetMaxRange(false);
+                WorldObject* result = NULL;
+                // search for nearby enemy corpse in range
+                Trinity::AnyDeadUnitSpellTargetInRangeCheck check(caster, max_range, GetSpellInfo(), TARGET_SELECT_CHECK_ENEMY);
+                Trinity::WorldObjectSearcher<Trinity::AnyDeadUnitSpellTargetInRangeCheck> searcher(caster, result, check);
+                caster->GetMap()->VisitFirstFound(caster->m_positionX, caster->m_positionY, max_range, searcher);
+                if (!result)
+                    return SPELL_FAILED_NO_EDIBLE_CORPSES;
+                return SPELL_CAST_OK;
+            }
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+                caster->CastSpell(caster, SPELL_CANNIBALIZE_TRIGGERED, false);
+            }
+
+            void Register()
+            {
+                OnEffect += SpellEffectFn(spell_gen_cannibalize_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnCheckCast += SpellCheckCastFn(spell_gen_cannibalize_SpellScript::CheckIfCorpseNear);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_gen_cannibalize_SpellScript();
+        }
+};
+
 // 45472 Parachute
 enum eParachuteSpells
 {
@@ -177,11 +232,11 @@ class spell_gen_parachute : public SpellScriptLoader
         {
             PrepareAuraScript(spell_gen_parachute_AuraScript);
 
-            bool Validate(SpellEntry const* /*spellEntry*/)
+            bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellStore.LookupEntry(SPELL_PARACHUTE))
+                if (!sSpellMgr->GetSpellInfo(SPELL_PARACHUTE))
                     return false;
-                if (!sSpellStore.LookupEntry(SPELL_PARACHUTE_BUFF))
+                if (!sSpellMgr->GetSpellInfo(SPELL_PARACHUTE_BUFF))
                     return false;
                 return true;
             }
@@ -232,13 +287,13 @@ class spell_gen_pet_summoned : public SpellScriptLoader
                 if (caster->GetTypeId() != TYPEID_PLAYER)
                     return;
 
-                Player* plr = caster->ToPlayer();
-                if (plr->GetLastPetNumber())
+                Player* player = caster->ToPlayer();
+                if (player->GetLastPetNumber())
                 {
-                    PetType newPetType = (plr->getClass() == CLASS_HUNTER) ? HUNTER_PET : SUMMON_PET;
-                    if (Pet* newPet = new Pet(plr, newPetType))
+                    PetType newPetType = (player->getClass() == CLASS_HUNTER) ? HUNTER_PET : SUMMON_PET;
+                    if (Pet* newPet = new Pet(player, newPetType))
                     {
-                        if (newPet->LoadPetFromDB(plr, 0, plr->GetLastPetNumber(), true))
+                        if (newPet->LoadPetFromDB(player, 0, player->GetLastPetNumber(), true))
                         {
                             // revive the pet if it is dead
                             if (newPet->getDeathState() == DEAD)
@@ -363,11 +418,11 @@ class spell_gen_leeching_swarm : public SpellScriptLoader
         {
             PrepareAuraScript(spell_gen_leeching_swarm_AuraScript);
 
-            bool Validate(SpellEntry const* /*spellEntry*/)
+            bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellStore.LookupEntry(SPELL_LEECHING_SWARM_DMG))
+                if (!sSpellMgr->GetSpellInfo(SPELL_LEECHING_SWARM_DMG))
                     return false;
-                if (!sSpellStore.LookupEntry(SPELL_LEECHING_SWARM_HEAL))
+                if (!sSpellMgr->GetSpellInfo(SPELL_LEECHING_SWARM_HEAL))
                     return false;
                 return true;
             }
@@ -421,27 +476,27 @@ class spell_gen_trick : public SpellScriptLoader
         class spell_gen_trick_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_gen_trick_SpellScript);
-            bool Validate(SpellEntry const* /*spellEntry*/)
+            bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellStore.LookupEntry(SPELL_PIRATE_COSTUME_MALE))
+                if (!sSpellMgr->GetSpellInfo(SPELL_PIRATE_COSTUME_MALE))
                     return false;
-                if (!sSpellStore.LookupEntry(SPELL_PIRATE_COSTUME_FEMALE))
+                if (!sSpellMgr->GetSpellInfo(SPELL_PIRATE_COSTUME_FEMALE))
                     return false;
-                if (!sSpellStore.LookupEntry(SPELL_NINJA_COSTUME_MALE))
+                if (!sSpellMgr->GetSpellInfo(SPELL_NINJA_COSTUME_MALE))
                     return false;
-                if (!sSpellStore.LookupEntry(SPELL_NINJA_COSTUME_FEMALE))
+                if (!sSpellMgr->GetSpellInfo(SPELL_NINJA_COSTUME_FEMALE))
                     return false;
-                if (!sSpellStore.LookupEntry(SPELL_LEPER_GNOME_COSTUME_MALE))
+                if (!sSpellMgr->GetSpellInfo(SPELL_LEPER_GNOME_COSTUME_MALE))
                     return false;
-                if (!sSpellStore.LookupEntry(SPELL_LEPER_GNOME_COSTUME_FEMALE))
+                if (!sSpellMgr->GetSpellInfo(SPELL_LEPER_GNOME_COSTUME_FEMALE))
                     return false;
-                if (!sSpellStore.LookupEntry(SPELL_SKELETON_COSTUME))
+                if (!sSpellMgr->GetSpellInfo(SPELL_SKELETON_COSTUME))
                     return false;
-                if (!sSpellStore.LookupEntry(SPELL_GHOST_COSTUME_MALE))
+                if (!sSpellMgr->GetSpellInfo(SPELL_GHOST_COSTUME_MALE))
                     return false;
-                if (!sSpellStore.LookupEntry(SPELL_GHOST_COSTUME_FEMALE))
+                if (!sSpellMgr->GetSpellInfo(SPELL_GHOST_COSTUME_FEMALE))
                     return false;
-                if (!sSpellStore.LookupEntry(SPELL_TRICK_BUFF))
+                if (!sSpellMgr->GetSpellInfo(SPELL_TRICK_BUFF))
                     return false;
                 return true;
             }
@@ -506,23 +561,23 @@ class spell_gen_trick_or_treat : public SpellScriptLoader
         {
             PrepareSpellScript(spell_gen_trick_or_treat_SpellScript);
 
-            bool Validate(SpellEntry const* /*spellEntry*/)
+            bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellStore.LookupEntry(SPELL_TRICK))
+                if (!sSpellMgr->GetSpellInfo(SPELL_TRICK))
                     return false;
-                if (!sSpellStore.LookupEntry(SPELL_TREAT))
+                if (!sSpellMgr->GetSpellInfo(SPELL_TREAT))
                     return false;
-                if (!sSpellStore.LookupEntry(SPELL_TRICKED_OR_TREATED))
+                if (!sSpellMgr->GetSpellInfo(SPELL_TRICKED_OR_TREATED))
                     return false;
                 return true;
             }
 
             void HandleScript(SpellEffIndex /*effIndex*/)
             {
-                if (Player* pTarget = GetHitPlayer())
+                if (Player* target = GetHitPlayer())
                 {
-                    GetCaster()->CastSpell(pTarget, roll_chance_i(50) ? SPELL_TRICK : SPELL_TREAT, true, NULL);
-                    GetCaster()->CastSpell(pTarget, SPELL_TRICKED_OR_TREATED, true, NULL);
+                    GetCaster()->CastSpell(target, roll_chance_i(50) ? SPELL_TRICK : SPELL_TREAT, true, NULL);
+                    GetCaster()->CastSpell(target, SPELL_TRICKED_OR_TREATED, true, NULL);
                 }
             }
 
@@ -581,11 +636,11 @@ class spell_pvp_trinket_wotf_shared_cd : public SpellScriptLoader
         {
             PrepareSpellScript(spell_pvp_trinket_wotf_shared_cd_SpellScript);
 
-            bool Validate(SpellEntry const* /*spellEntry*/)
+            bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellStore.LookupEntry(SPELL_WILL_OF_THE_FORSAKEN_COOLDOWN_TRIGGER))
+                if (!sSpellMgr->GetSpellInfo(SPELL_WILL_OF_THE_FORSAKEN_COOLDOWN_TRIGGER))
                     return false;
-                if (!sSpellStore.LookupEntry(SPELL_WILL_OF_THE_FORSAKEN_COOLDOWN_TRIGGER_WOTF))
+                if (!sSpellMgr->GetSpellInfo(SPELL_WILL_OF_THE_FORSAKEN_COOLDOWN_TRIGGER_WOTF))
                     return false;
                 return true;
             }
@@ -595,9 +650,9 @@ class spell_pvp_trinket_wotf_shared_cd : public SpellScriptLoader
                 Player* caster = GetCaster()->ToPlayer();
                 if (!caster)
                     return;
-                SpellEntry const* spellInfo = GetSpellInfo();
+                SpellInfo const* spellInfo = GetSpellInfo();
 
-                caster->AddSpellCooldown(spellInfo->Id, 0, time(NULL) + GetSpellRecoveryTime(sSpellStore.LookupEntry(SPELL_WILL_OF_THE_FORSAKEN_COOLDOWN_TRIGGER)) / IN_MILLISECONDS);
+                caster->AddSpellCooldown(spellInfo->Id, 0, time(NULL) + sSpellMgr->GetSpellInfo(SPELL_WILL_OF_THE_FORSAKEN_COOLDOWN_TRIGGER)->GetRecoveryTime() / IN_MILLISECONDS);
                 WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+4);
                 data << uint64(caster->GetGUID());
                 data << uint8(0);
@@ -641,9 +696,9 @@ namespace
 
             bool Validate(const SpellEntry *)
             {
-                if (auto e = sSpellStore.LookupEntry(48366 /* Warning */))
+				if (auto info = sSpellMgr->GetSpellInfo(48366 /* Warning */))
                 {
-                    warning_entry() = std::move(e);
+                    warning_info() = std::move(info);
                     return true;
                 }
                 else
@@ -661,9 +716,9 @@ namespace
                     return false;
             }
 
-            static const SpellEntry *&warning_entry()
+            static const SpellInfo *&warning_info()
             {
-                static const SpellEntry *e;
+                static const SpellInfo *e;
                 return e;
             }
 
@@ -684,7 +739,7 @@ namespace
             {
                 if (!warning_applied)
                 {
-                    t.CastSpell(&t, warning_entry(), true);
+                    t.CastSpell(&t, warning_info(), true);
                     warning_applied = true;
                 }
             }
@@ -693,7 +748,7 @@ namespace
             {
                 if (warning_applied)
                 {
-                    t.RemoveAura(warning_entry()->Id);
+                    t.RemoveAura(warning_info()->Id);
                     warning_applied = false;
                 }
             }
@@ -764,9 +819,9 @@ class spell_gen_animal_blood : public SpellScriptLoader
         {
             PrepareAuraScript(spell_gen_animal_blood_AuraScript);
 
-            bool Validate(SpellEntry const* /*spell*/)
+            bool Validate(SpellInfo const* /*spell*/)
             {
-                if (!sSpellStore.LookupEntry(SPELL_SPAWN_BLOOD_POOL))
+                if (!sSpellMgr->GetSpellInfo(SPELL_SPAWN_BLOOD_POOL))
                     return false;
                 return true;
             }
@@ -797,42 +852,6 @@ class spell_gen_animal_blood : public SpellScriptLoader
         }
 };
 
-class spell_gen_shroud_of_death : public SpellScriptLoader
-{
-    public:
-        spell_gen_shroud_of_death() : SpellScriptLoader("spell_gen_shroud_of_death") { }
-
-        class spell_gen_shroud_of_death_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_gen_shroud_of_death_AuraScript);
-
-            void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                Unit* target = GetTarget();
-                target->m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_GHOST);
-                target->m_serverSideVisibilityDetect.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_GHOST);
-            }
-
-            void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                Unit* target = GetTarget();
-                target->m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_ALIVE);
-                target->m_serverSideVisibilityDetect.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_ALIVE);
-            }
-
-            void Register()
-            {
-                OnEffectApply += AuraEffectApplyFn(spell_gen_shroud_of_death_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-                OnEffectRemove += AuraEffectRemoveFn(spell_gen_shroud_of_death_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_gen_shroud_of_death_AuraScript();
-        }
-};
-
 enum DivineStormSpell
 {
     SPELL_DIVINE_STORM  = 53385,
@@ -848,16 +867,16 @@ class spell_gen_divine_storm_cd_reset : public SpellScriptLoader
         {
             PrepareSpellScript(spell_gen_divine_storm_cd_reset_SpellScript);
 
-            bool Validate(SpellEntry const* /*spellEntry*/)
+            bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellStore.LookupEntry(SPELL_DIVINE_STORM))
+                if (!sSpellMgr->GetSpellInfo(SPELL_DIVINE_STORM))
                     return false;
                 return true;
             }
 
             void HandleScript(SpellEffIndex /*effIndex*/)
             {
-                if (Player *caster = GetCaster()->ToPlayer())
+                if (Player* caster = GetCaster()->ToPlayer())
                     if (caster->HasSpellCooldown(SPELL_DIVINE_STORM))
                         caster->RemoveSpellCooldown(SPELL_DIVINE_STORM, true);
             }
@@ -1029,7 +1048,7 @@ class spell_generic_clone : public SpellScriptLoader
             {
                 PreventHitDefaultEffect(effIndex);
                 Unit* caster = GetCaster();
-                uint32 spellId = uint32(SpellMgr::CalculateSpellEffectAmount(GetSpellInfo(), effIndex));
+                uint32 spellId = uint32(GetSpellInfo()->Effects[effIndex].CalcValue());
 
                 if (Unit* target = GetHitUnit())
                     target->CastSpell(caster, spellId, true);
@@ -1068,19 +1087,19 @@ class spell_generic_clone_weapon : public SpellScriptLoader
         class spell_generic_clone_weapon_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_generic_clone_weapon_SpellScript);
-            bool Validate(SpellEntry const* /*spellEntry*/)
+            bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellStore.LookupEntry(SPELL_COPY_WEAPON))
+                if (!sSpellMgr->GetSpellInfo(SPELL_COPY_WEAPON))
                     return false;
-                if (!sSpellStore.LookupEntry(SPELL_COPY_WEAPON_2))
+                if (!sSpellMgr->GetSpellInfo(SPELL_COPY_WEAPON_2))
                     return false;
-                if (!sSpellStore.LookupEntry(SPELL_COPY_WEAPON_3))
+                if (!sSpellMgr->GetSpellInfo(SPELL_COPY_WEAPON_3))
                     return false;
-                if (!sSpellStore.LookupEntry(SPELL_COPY_OFFHAND))
+                if (!sSpellMgr->GetSpellInfo(SPELL_COPY_OFFHAND))
                     return false;
-                if (!sSpellStore.LookupEntry(SPELL_COPY_OFFHAND_2))
+                if (!sSpellMgr->GetSpellInfo(SPELL_COPY_OFFHAND_2))
                     return false;
-                if (!sSpellStore.LookupEntry(SPELL_COPY_RANGED))
+                if (!sSpellMgr->GetSpellInfo(SPELL_COPY_RANGED))
                     return false;
                 return true;
             }
@@ -1094,7 +1113,7 @@ class spell_generic_clone_weapon : public SpellScriptLoader
                 if (!target)
                     return;
 
-                uint32 spellId = uint32(SpellMgr::CalculateSpellEffectAmount(GetSpellInfo(), EFFECT_0));
+                uint32 spellId = uint32(GetSpellInfo()->Effects[EFFECT_0].CalcValue());
                 target->CastSpell(caster, spellId, true);
 
                 if (target->GetTypeId() == TYPEID_PLAYER)
@@ -1106,9 +1125,9 @@ class spell_generic_clone_weapon : public SpellScriptLoader
                     case SPELL_COPY_WEAPON_2:
                     case SPELL_COPY_WEAPON_3:
                     {
-                        if (Player* plrCaster = caster->ToPlayer())
+                        if (Player* player = caster->ToPlayer())
                         {
-                            if (Item* mainItem = plrCaster->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+                            if (Item* mainItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
                                 target->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, mainItem->GetEntry());
                         }
                         else
@@ -1118,9 +1137,9 @@ class spell_generic_clone_weapon : public SpellScriptLoader
                     case SPELL_COPY_OFFHAND:
                     case SPELL_COPY_OFFHAND_2:
                     {
-                        if (Player* plrCaster = caster->ToPlayer())
+                        if (Player* player = caster->ToPlayer())
                         {
-                            if (Item* offItem = plrCaster->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+                            if (Item* offItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
                                 target->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, offItem->GetEntry());
                         }
                         else
@@ -1129,9 +1148,9 @@ class spell_generic_clone_weapon : public SpellScriptLoader
                     }
                     case SPELL_COPY_RANGED:
                     {
-                        if (Player* plrCaster = caster->ToPlayer())
+                        if (Player* player = caster->ToPlayer())
                         {
-                            if (Item* rangedItem = plrCaster->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
+                            if (Item* rangedItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
                                 target->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 2, rangedItem->GetEntry());
                         }
                         else
@@ -1169,9 +1188,9 @@ class spell_gen_seaforium_blast : public SpellScriptLoader
         {
             PrepareSpellScript(spell_gen_seaforium_blast_SpellScript);
 
-            bool Validate(SpellEntry const* /*spell*/)
+            bool Validate(SpellInfo const* /*spell*/)
             {
-                if (!sSpellStore.LookupEntry(SPELL_PLANT_CHARGES_CREDIT_ACHIEVEMENT))
+                if (!sSpellMgr->GetSpellInfo(SPELL_PLANT_CHARGES_CREDIT_ACHIEVEMENT))
                     return false;
                 return true;
             }
@@ -1193,7 +1212,7 @@ class spell_gen_seaforium_blast : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_gen_seaforium_blast_SpellScript::AchievementCredit, EFFECT_1, SPELL_EFFECT_WMO_DAMAGE);
+                OnEffect += SpellEffectFn(spell_gen_seaforium_blast_SpellScript::AchievementCredit, EFFECT_1, SPELL_EFFECT_GAMEOBJECT_DAMAGE);
             }
         };
 
@@ -1335,12 +1354,146 @@ class spell_gen_magic_rooster : public SpellScriptLoader
         }
 };
 
+class spell_gen_allow_cast_from_item_only : public SpellScriptLoader
+{
+public:
+    spell_gen_allow_cast_from_item_only() : SpellScriptLoader("spell_gen_allow_cast_from_item_only") { }
+
+    class spell_gen_allow_cast_from_item_only_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gen_allow_cast_from_item_only_SpellScript);
+
+        SpellCastResult CheckRequirement()
+        {
+            if (!GetCastItem())
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+
+            return SPELL_CAST_OK;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_gen_allow_cast_from_item_only_SpellScript::CheckRequirement);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gen_allow_cast_from_item_only_SpellScript();
+    }
+};
+
+enum Launch
+{
+    SPELL_LAUNCH_NO_FALLING_DAMAGE = 66251
+};
+
+class spell_gen_launch : public SpellScriptLoader
+{
+    public:
+        spell_gen_launch() : SpellScriptLoader("spell_gen_launch") {}
+
+        class spell_gen_launch_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_launch_SpellScript);
+
+            void HandleScript(SpellEffIndex /*effIndex*/)
+            {
+                if (Player* player = GetHitPlayer())
+                    player->AddAura(SPELL_LAUNCH_NO_FALLING_DAMAGE,player); // prevents falling damage
+            }
+
+            void Launch()
+            {
+                WorldLocation const* const position = GetTargetDest();
+
+                if (Player* player = GetHitPlayer())
+                {
+                    player->ExitVehicle();
+
+                    // A better research is needed
+                    // There is no spell for this, the following calculation was based on void Spell::CalculateJumpSpeeds
+
+                    float speedZ = 10.0f;
+                    float dist = position->GetExactDist2d(player->GetPositionX(),player->GetPositionY());
+                    float speedXY = dist;
+
+                    player->GetMotionMaster()->MoveJump(position->GetPositionX(),position->GetPositionY(),position->GetPositionZ(),speedXY,speedZ);
+                }
+            }
+
+            void Register()
+            {
+                OnEffect += SpellEffectFn(spell_gen_launch_SpellScript::HandleScript, EFFECT_1, SPELL_EFFECT_FORCE_CAST);
+                AfterHit += SpellHitFn(spell_gen_launch_SpellScript::Launch);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_gen_launch_SpellScript();
+        }
+};
+
+class spell_gen_vehicle_scaling : public SpellScriptLoader
+{
+    public:
+        spell_gen_vehicle_scaling() : SpellScriptLoader("spell_gen_vehicle_scaling") { }
+
+        class spell_gen_vehicle_scaling_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_gen_vehicle_scaling_AuraScript);
+
+            void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+            {
+                Unit* caster = GetCaster();
+                if (!caster || !caster->ToPlayer())
+                    return;
+
+                float factor;
+                uint16 baseItemLevel;
+
+                // TODO: Reserach coeffs for different vehicles
+                switch (GetId())
+                {
+                    case 66668:
+                        factor = 1.0f;
+                        baseItemLevel = 205;
+                        break;
+                    default:
+                        factor = 1.0f;
+                        baseItemLevel = 170;
+                        break;
+                }
+
+                float avgILvl = caster->ToPlayer()->GetAverageItemLevel();
+                if (avgILvl < baseItemLevel)
+                    return;                     // TODO: Research possibility of scaling down
+
+                amount = uint16((avgILvl - baseItemLevel) * factor);
+            }
+
+            void Register()
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_gen_vehicle_scaling_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_MOD_HEALING_PCT);
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_gen_vehicle_scaling_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_gen_vehicle_scaling_AuraScript::CalculateAmount, EFFECT_2, SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_gen_vehicle_scaling_AuraScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
     new spell_gen_aura_of_anger();
     new spell_gen_av_drekthar_presence();
     new spell_gen_burn_brutallus();
+    new spell_gen_cannibalize();
     new spell_gen_leeching_swarm();
     new spell_gen_parachute();
     new spell_gen_pet_summoned();
@@ -1352,7 +1505,6 @@ void AddSC_generic_spell_scripts()
     new spell_pvp_trinket_wotf_shared_cd();
     new Wintergarde_gryphon_commander;
     new spell_gen_animal_blood();
-    new spell_gen_shroud_of_death();
     new spell_gen_divine_storm_cd_reset();
     new spell_gen_parachute_ic();
     new spell_gen_gunship_portal();
@@ -1364,4 +1516,7 @@ void AddSC_generic_spell_scripts()
     new spell_gen_turkey_marker();
     new spell_gen_lifeblood();
     new spell_gen_magic_rooster();
+    new spell_gen_allow_cast_from_item_only();
+    new spell_gen_launch();
+    new spell_gen_vehicle_scaling();
 }

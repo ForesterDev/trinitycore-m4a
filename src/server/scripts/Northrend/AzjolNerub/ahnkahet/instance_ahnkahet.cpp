@@ -59,9 +59,8 @@ public:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         uint32 spheres[2];
 
-        uint8 InitiandCnt,
-            switchtrigger,
-            initiandkilled;
+        uint8 InitiandCnt;
+        uint8 switchtrigger;
 
         std::string str_data;
 
@@ -81,7 +80,6 @@ public:
 
             InitiandCnt = 0;
             switchtrigger = 0;
-            initiandkilled = 0;
             JedogaSacrifices = 0;
             JedogaTarget = 0;
         }
@@ -117,17 +115,17 @@ public:
                     if (spheres[0] == IN_PROGRESS)
                     {
                         go->SetGoState(GO_STATE_ACTIVE);
-                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     }
-                    else go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                    else go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     break;
                 case 193094:     Prince_TaldaramSpheres[1] = go->GetGUID();
                     if (spheres[1] == IN_PROGRESS)
                     {
                         go->SetGoState(GO_STATE_ACTIVE);
-                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     }
-                    else go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                    else go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     break;
                 case 192236:    Prince_TaldaramGate = go->GetGUID(); // Web gate past Prince Taldaram
                     if (m_auiEncounter[1] == DONE)HandleGameObject(0, true, go);break;
@@ -200,8 +198,6 @@ public:
                                 cr->RemoveCorpse();
                             }
                         }
-                        if (!initiandkilled && instance->IsHeroic())
-                            DoCompleteAchievement(ACHIEV_VOLUNTEER_WORK);
                     }
                     break;
                 case DATA_HERALD_VOLAZJ_EVENT: m_auiEncounter[3] = data; break;
@@ -209,7 +205,6 @@ public:
                 case DATA_SPHERE1_EVENT: spheres[0] = data; break;
                 case DATA_SPHERE2_EVENT: spheres[1] = data; break;
                 case DATA_JEDOGA_TRIGGER_SWITCH: switchtrigger = data; break;
-                case DATA_INITIAND_KILLED: initiandkilled = data; break;
                 case DATA_JEDOGA_RESET_INITIANDS:
                     for (std::set<uint64>::const_iterator itr = InitiandGUIDs.begin(); itr != InitiandGUIDs.end(); ++itr)
                     {
@@ -245,7 +240,6 @@ public:
                     }
                     return 1;
                 case DATA_JEDOGA_TRIGGER_SWITCH: return switchtrigger;
-                case DATA_INITIAND_KILLED: return initiandkilled;
             }
             return 0;
         }
@@ -255,9 +249,9 @@ public:
             OUT_SAVE_INST_DATA;
 
             std::ostringstream saveStream;
-            saveStream << "A K " << m_auiEncounter[0] << " " << m_auiEncounter[1] << " "
-                << m_auiEncounter[2] << " " << m_auiEncounter[3] << " " << m_auiEncounter[4] << " "
-                << spheres[0] << " " << spheres[1];
+            saveStream << "A K " << m_auiEncounter[0] << ' ' << m_auiEncounter[1] << ' '
+                << m_auiEncounter[2] << ' ' << m_auiEncounter[3] << ' ' << m_auiEncounter[4] << ' '
+                << spheres[0] << ' ' << spheres[1];
 
             str_data = saveStream.str();
 

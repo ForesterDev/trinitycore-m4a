@@ -161,7 +161,7 @@ std::string Object::_ConcatFields(uint16 startIndex, uint16 size) const
 {
     std::ostringstream ss;
     for (uint16 index = 0; index < size; ++index)
-        ss << GetUInt32Value(index + startIndex) << " ";
+        ss << GetUInt32Value(index + startIndex) << ' ';
     return ss.str();
 }
 
@@ -445,7 +445,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
     if (flags & UPDATEFLAG_HIGHGUID)
     {
         // not high guid
-        *data << uint32(0x00000000);                // unk
+        *data << uint32(GetUInt32Value(OBJECT_FIELD_GUID));                // unk
     }
 
     // 0x4
@@ -769,21 +769,6 @@ void Object::BuildFieldsUpdate(Player *pl, UpdateDataMapType &data_map) const
     BuildValuesUpdateBlockForPlayer(&iter->second, iter->first);
 }
 
-bool Object::LoadValues(const char* data)
-{
-    if (!m_uint32Values) _InitValues();
-
-    Tokens tokens(data, ' ');
-
-    if (tokens.size() != m_valuesCount)
-        return false;
-
-    for (uint16 index = 0; index < m_valuesCount; ++index)
-        m_uint32Values[index] = atol(tokens[index]);
-
-    return true;
-}
-
 void Object::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 count)
 {
     if (!data)
@@ -866,7 +851,7 @@ void Object::UpdateUInt32Value(uint16 index, uint32 value)
     m_uint32Values[ index ] = value;
 }
 
-void Object::SetUInt64Value(uint16 index, const uint64 &value)
+void Object::SetUInt64Value(uint16 index, const uint64 value)
 {
     ASSERT(index + 1 < m_valuesCount || PrintIndexError(index, true));
     if (*((uint64*)&(m_uint32Values[ index ])) != value)
@@ -885,7 +870,7 @@ void Object::SetUInt64Value(uint16 index, const uint64 &value)
     }
 }
 
-bool Object::AddUInt64Value(uint16 index, const uint64 &value)
+bool Object::AddUInt64Value(uint16 index, const uint64 value)
 {
     ASSERT(index + 1 < m_valuesCount || PrintIndexError(index , true));
     if (value && !*((uint64*)&(m_uint32Values[index])))
@@ -906,7 +891,7 @@ bool Object::AddUInt64Value(uint16 index, const uint64 &value)
     return false;
 }
 
-bool Object::RemoveUInt64Value(uint16 index, const uint64 &value)
+bool Object::RemoveUInt64Value(uint16 index, const uint64 value)
 {
     ASSERT(index + 1 < m_valuesCount || PrintIndexError(index , true));
     if (value && *((uint64*)&(m_uint32Values[index])) == value)
@@ -1984,7 +1969,7 @@ void WorldObject::MonsterTextEmote(int32 textId, uint64 TargetGuid, bool IsBossE
 
 void WorldObject::MonsterWhisper(const char* text, uint64 receiver, bool IsBossWhisper)
 {
-    Player* player = sObjectMgr->GetPlayer(receiver);
+    Player* player = ObjectAccessor::FindPlayer(receiver);
     if (!player || !player->GetSession())
         return;
 
@@ -1998,7 +1983,7 @@ void WorldObject::MonsterWhisper(const char* text, uint64 receiver, bool IsBossW
 
 void WorldObject::MonsterWhisper(int32 textId, uint64 receiver, bool IsBossWhisper)
 {
-    Player* player = sObjectMgr->GetPlayer(receiver);
+    Player* player = ObjectAccessor::FindPlayer(receiver);
     if (!player || !player->GetSession())
         return;
 
@@ -2037,7 +2022,7 @@ void Unit::BuildHeartBeatMsg(WorldPacket *data) const
     BuildMovementPacket(data);
 }
 
-void WorldObject::SendMessageToSetInRange(WorldPacket *data, float dist, bool /*bToSelf*/)
+void WorldObject::SendMessageToSetInRange(WorldPacket *data, float dist, bool /*self*/)
 {
     Trinity::MessageDistDeliverer notifier(this, data, dist);
     VisitNearbyWorldObject(dist, notifier);
@@ -2748,7 +2733,7 @@ void WorldObject::DestroyForNearbyPlayers()
         return;
 
     std::list<Player*> targets;
-    Trinity::AnyPlayerInObjectRangeCheck check(this, GetVisibilityRange());
+    Trinity::AnyPlayerInObjectRangeCheck check(this, GetVisibilityRange(), false);
     Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(this, targets, check);
     VisitNearbyWorldObject(GetVisibilityRange(), searcher);
     for (std::list<Player*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
