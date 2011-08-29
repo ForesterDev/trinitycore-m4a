@@ -283,7 +283,7 @@ bool SmartAIMgr::IsTargetValid(SmartScriptHolder const& e)
     return true;
 }
 
-bool SmartAIMgr::IsEventValid(SmartScriptHolder &e)
+bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
 {
     if (e.event.type >= SMART_EVENT_END)
     {
@@ -335,13 +335,13 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder &e)
             case SMART_EVENT_SPELLHIT_TARGET:
                 if (e.event.spellHit.spell)
                 {
-                    SpellEntry const* pSpell = sSpellStore.LookupEntry(e.event.spellHit.spell);
-                    if (!pSpell)
+                    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(e.event.spellHit.spell);
+                    if (!spellInfo)
                     {
                         sLog->outErrorDb("SmartAIMgr: Entry %d SourceType %u Event %u Action %u uses non-existent Spell entry %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.event.spellHit.spell);
                         return false;
                     }
-                    if (e.event.spellHit.school && (e.event.spellHit.school & pSpell->SchoolMask) != pSpell->SchoolMask)
+                    if (e.event.spellHit.school && (e.event.spellHit.school & spellInfo->SchoolMask) != spellInfo->SchoolMask)
                     {
                         sLog->outErrorDb("SmartAIMgr: Entry %d SourceType %u Event %u Action %u uses Spell entry %u with invalid school mask, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.event.spellHit.spell);
                         return false;
@@ -495,7 +495,7 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder &e)
     switch (e.GetActionType())
     {
         case SMART_ACTION_SET_FACTION:
-            if (e.action.faction.factionID && !sFactionStore.LookupEntry(e.action.faction.factionID))
+            if (e.action.faction.factionID && !sFactionTemplateStore.LookupEntry(e.action.faction.factionID))
             {
                 sLog->outErrorDb("SmartAIMgr: Entry %d SourceType %u Event %u Action %u uses non-existent Faction %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.action.faction.factionID);
                 return false;
@@ -740,7 +740,7 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder &e)
         case SMART_ACTION_WP_PAUSE:
         case SMART_ACTION_SET_FLY:
         case SMART_ACTION_SET_RUN:
-        case SMART_ACTION_SET_SWIMM:
+        case SMART_ACTION_SET_SWIM:
         case SMART_ACTION_FORCE_DESPAWN:
         case SMART_ACTION_SET_INGAME_PHASE_MASK:
         case SMART_ACTION_SET_UNIT_FLAG:
@@ -775,6 +775,7 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder &e)
         case SMART_ACTION_SET_DYNAMIC_FLAG:
         case SMART_ACTION_ADD_DYNAMIC_FLAG:
         case SMART_ACTION_REMOVE_DYNAMIC_FLAG:
+        case SMART_ACTION_JUMP_TO_POS:
             break;
         default:
             sLog->outErrorDb("SmartAIMgr: Not handled action_type(%u), event_type(%u), Entry %d SourceType %u Event %u, skipped.", e.GetActionType(), e.GetEventType(), e.entryOrGuid, e.GetScriptType(), e.event_id);

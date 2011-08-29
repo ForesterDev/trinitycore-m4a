@@ -40,11 +40,11 @@ class spell_dru_glyph_of_starfire : public SpellScriptLoader
         {
             PrepareSpellScript(spell_dru_glyph_of_starfire_SpellScript);
 
-            bool Validate(SpellEntry const* /*spellEntry*/)
+            bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellStore.LookupEntry(DRUID_INCREASED_MOONFIRE_DURATION))
+                if (!sSpellMgr->GetSpellInfo(DRUID_INCREASED_MOONFIRE_DURATION))
                     return false;
-                if (!sSpellStore.LookupEntry(DRUID_NATURES_SPLENDOR))
+                if (!sSpellMgr->GetSpellInfo(DRUID_NATURES_SPLENDOR))
                     return false;
                 return true;
             }
@@ -58,7 +58,7 @@ class spell_dru_glyph_of_starfire : public SpellScriptLoader
                         Aura* aura = aurEff->GetBase();
 
                         uint32 countMin = aura->GetMaxDuration();
-                        uint32 countMax = GetSpellMaxDuration(aura->GetSpellProto()) + 9000;
+                        uint32 countMax = aura->GetSpellInfo()->GetMaxDuration() + 9000;
                         if (caster->HasAura(DRUID_INCREASED_MOONFIRE_DURATION))
                             countMax += 3000;
                         if (caster->HasAura(DRUID_NATURES_SPLENDOR))
@@ -98,7 +98,7 @@ class spell_dru_moonkin_form_passive : public SpellScriptLoader
 
             bool Load()
             {
-                absorbPct = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), EFFECT_0, GetCaster());
+                absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
                 return true;
             }
 
@@ -110,8 +110,8 @@ class spell_dru_moonkin_form_passive : public SpellScriptLoader
 
             void Absorb(AuraEffect * /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
             {
-                // reduces all damage taken while Stunned in Cat Form
-                if (GetTarget()->GetUInt32Value(UNIT_FIELD_FLAGS) & (UNIT_FLAG_STUNNED))
+                // reduces all damage taken while Stunned in Moonkin Form
+                if (GetTarget()->GetUInt32Value(UNIT_FIELD_FLAGS) & (UNIT_FLAG_STUNNED) && GetTarget()->HasAuraWithMechanic(1<<MECHANIC_STUN))
                     absorbAmount = CalculatePctN(dmgInfo.GetDamage(), absorbPct);
             }
 
@@ -142,7 +142,7 @@ class spell_dru_primal_tenacity : public SpellScriptLoader
 
             bool Load()
             {
-                absorbPct = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), EFFECT_1, GetCaster());
+                absorbPct = GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster());
                 return true;
             }
 
@@ -155,7 +155,7 @@ class spell_dru_primal_tenacity : public SpellScriptLoader
             void Absorb(AuraEffect * /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
             {
                 // reduces all damage taken while Stunned in Cat Form
-                if ((GetTarget()->GetShapeshiftForm() == FORM_CAT) && (GetTarget()->GetUInt32Value(UNIT_FIELD_FLAGS) & (UNIT_FLAG_STUNNED)))
+                if (GetTarget()->GetShapeshiftForm() == FORM_CAT && GetTarget()->GetUInt32Value(UNIT_FIELD_FLAGS) & (UNIT_FLAG_STUNNED) && GetTarget()->HasAuraWithMechanic(1<<MECHANIC_STUN))
                     absorbAmount = CalculatePctN(dmgInfo.GetDamage(), absorbPct);
             }
 
@@ -186,7 +186,7 @@ class spell_dru_savage_defense : public SpellScriptLoader
 
             bool Load()
             {
-                absorbPct = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), EFFECT_0, GetCaster());
+                absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
                 return true;
             }
 
@@ -260,13 +260,39 @@ class spell_dru_t10_restoration_4p_bonus : public SpellScriptLoader
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_dru_t10_restoration_4p_bonus_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_AREA_ALLY_DST);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_dru_t10_restoration_4p_bonus_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ALLY);
             }
         };
 
         SpellScript* GetSpellScript() const
         {
             return new spell_dru_t10_restoration_4p_bonus_SpellScript();
+        }
+};
+
+class spell_dru_starfall_aoe : public SpellScriptLoader
+{
+    public:
+        spell_dru_starfall_aoe() : SpellScriptLoader("spell_dru_starfall_aoe") { }
+
+        class spell_dru_starfall_aoe_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_dru_starfall_aoe_SpellScript);
+
+            void FilterTargets(std::list<Unit*>& unitList)
+            {
+                unitList.remove(GetTargetUnit());
+            }
+
+            void Register()
+            {
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_dru_starfall_aoe_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+            }
+        };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_dru_starfall_aoe_SpellScript();
         }
 };
 
@@ -277,4 +303,5 @@ void AddSC_druid_spell_scripts()
     new spell_dru_primal_tenacity();
     new spell_dru_savage_defense();
     new spell_dru_t10_restoration_4p_bonus();
+    new spell_dru_starfall_aoe();
 }

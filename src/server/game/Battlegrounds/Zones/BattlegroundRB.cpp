@@ -36,11 +36,6 @@ BattlegroundRB::~BattlegroundRB()
 
 }
 
-void BattlegroundRB::Update(uint32 diff)
-{
-    Battleground::Update(diff);
-}
-
 void BattlegroundRB::StartingEventCloseDoors()
 {
 }
@@ -58,7 +53,7 @@ void BattlegroundRB::AddPlayer(Player *plr)
     m_PlayerScores[plr->GetGUID()] = sc;
 }
 
-void BattlegroundRB::RemovePlayer(Player* /*plr*/, uint64 /*guid*/)
+void BattlegroundRB::RemovePlayer(Player* /*plr*/, uint64 /*guid*/, uint32 /*team*/)
 {
 }
 

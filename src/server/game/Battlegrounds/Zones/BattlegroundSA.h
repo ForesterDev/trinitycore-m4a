@@ -424,12 +424,8 @@ struct BG_SA_RoundScore
 /// Class for manage Strand of Ancient battleground
 class BattlegroundSA : public Battleground
 {
-    friend class BattlegroundMgr;
-
     public:
-        /// Constructor
         BattlegroundSA();
-        /// Destructor
         ~BattlegroundSA();
 
         /**
@@ -437,7 +433,7 @@ class BattlegroundSA : public Battleground
          * -Update timer
          * -Round switch
          */
-        void Update(uint32 diff);
+        void PostUpdateImpl(uint32 diff);
 
         /* inherited from BattlegroundClass */
         /// Called when a player join battle
@@ -495,12 +491,18 @@ class BattlegroundSA : public Battleground
         void EndBattleground(uint32 winner);
 
         /// CAlled when a player leave battleground
-        void RemovePlayer(Player *plr, uint64 guid);
+        void RemovePlayer(Player *plr, uint64 guid, uint32 team);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
 
         /* Scorekeeping */
         /// Update score board
         void UpdatePlayerScore(Player *Source, uint32 type, uint32 value, bool doAddHonor = true);
+
+        // Achievement Defense of the Ancients
+        bool gateDestroyed;
+
+        /// Id of attacker team
+        TeamId Attackers;
 
     private:
 
@@ -530,7 +532,7 @@ class BattlegroundSA : public Battleground
          * -Update worldstate
          * -Delete gameobject in front of door (lighting object, with different colours for each door)
          */
-        void DestroyGate(Player* pl, GameObject* /*go*/, uint32 destroyedEvent);
+        void DestroyGate(Player* player, GameObject* go);
         /// Update timer worldstate
         void SendTime();
         /**
@@ -554,8 +556,6 @@ class BattlegroundSA : public Battleground
         /// Send packet to player for destroy boats (client part)
         void SendTransportsRemove(Player* player);
 
-        /// Id of attacker team
-        TeamId Attackers;
         /// Totale elapsed time of current round
         uint32 TotalTime;
         /// Max time of round

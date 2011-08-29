@@ -25,6 +25,7 @@
 #include "DatabaseEnv.h"
 #include "ItemEnchantmentMgr.h"
 #include "SpellMgr.h"
+#include "SpellInfo.h"
 #include "ScriptMgr.h"
 #include "ConditionMgr.h"
 
@@ -95,7 +96,7 @@ void AddItemsSetItem(Player* player, Item* item)
         {
             if (!eff->spells[y])                             // free slot
             {
-                SpellEntry const* spellInfo = sSpellStore.LookupEntry(set->spells[x]);
+                SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(set->spells[x]);
                 if (!spellInfo)
                 {
                     sLog->outError("WORLD: unknown spell id %u in items set %u effects", set->spells[x], setid);
@@ -331,7 +332,7 @@ void Item::SaveToDB(SQLTransaction& trans)
 
             std::ostringstream ssSpells;
             for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
-                ssSpells << GetSpellCharges(i) << " ";
+                ssSpells << GetSpellCharges(i) << ' ';
             stmt->setString(++index, ssSpells.str());
 
             stmt->setUInt32(++index, GetUInt32Value(ITEM_FIELD_FLAGS));
@@ -339,9 +340,9 @@ void Item::SaveToDB(SQLTransaction& trans)
             std::ostringstream ssEnchants;
             for (uint8 i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
             {
-                ssEnchants << GetEnchantmentId(EnchantmentSlot(i)) << " ";
-                ssEnchants << GetEnchantmentDuration(EnchantmentSlot(i)) << " ";
-                ssEnchants << GetEnchantmentCharges(EnchantmentSlot(i)) << " ";
+                ssEnchants << GetEnchantmentId(EnchantmentSlot(i)) << ' ';
+                ssEnchants << GetEnchantmentDuration(EnchantmentSlot(i)) << ' ';
+                ssEnchants << GetEnchantmentCharges(EnchantmentSlot(i)) << ' ';
             }
             stmt->setString(++index, ssEnchants.str());
 
@@ -505,7 +506,7 @@ ItemTemplate const *Item::GetTemplate() const
 
 Player* Item::GetOwner()const
 {
-    return sObjectMgr->GetPlayer(GetOwnerGUID());
+    return ObjectAccessor::FindPlayer(GetOwnerGUID());
 }
 
 uint32 Item::GetSkill()
@@ -838,7 +839,7 @@ InventoryResult Item::CanBeMergedPartlyWith(ItemTemplate const* proto) const
     return EQUIP_ERR_OK;
 }
 
-bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
+bool Item::IsFitToSpellRequirements(SpellInfo const* spellInfo) const
 {
     ItemTemplate const* proto = GetTemplate();
 
@@ -847,7 +848,7 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
         // Special case - accept vellum for armor/weapon requirements
         if ((spellInfo->EquippedItemClass == ITEM_CLASS_ARMOR && proto->IsArmorVellum())
             ||(spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON && proto->IsWeaponVellum()))
-            if (sSpellMgr->IsSkillTypeSpell(spellInfo->Id, SKILL_ENCHANTING)) // only for enchanting spells
+            if (spellInfo->IsAbilityOfSkillType(SKILL_ENCHANTING)) // only for enchanting spells
                 return true;
 
         if (spellInfo->EquippedItemClass != int32(proto->Class))
@@ -1139,12 +1140,13 @@ void Item::SaveRefundDataToDB()
     CharacterDatabase.CommitTransaction(trans);
 }
 
-void Item::DeleteRefundDataFromDB()
+void Item::DeleteRefundDataFromDB(SQLTransaction* trans)
 {
-    CharacterDatabase.PExecute("DELETE FROM item_refund_instance WHERE item_guid = '%u'", GetGUIDLow());
+    if (trans && !trans->null())
+        (*trans)->PAppend("DELETE FROM item_refund_instance WHERE item_guid = '%u'", GetGUIDLow());
 }
 
-void Item::SetNotRefundable(Player *owner, bool changestate)
+void Item::SetNotRefundable(Player *owner, bool changestate /*=true*/, SQLTransaction* trans /*=NULL*/)
 {
     if (!HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_REFUNDABLE))
         return;
@@ -1153,11 +1155,11 @@ void Item::SetNotRefundable(Player *owner, bool changestate)
     // Following is not applicable in the trading procedure
     if (changestate)
         SetState(ITEM_CHANGED, owner);
-
+     
     SetRefundRecipient(0);
     SetPaidMoney(0);
     SetPaidExtendedCost(0);
-    DeleteRefundDataFromDB();
+    DeleteRefundDataFromDB(trans);
 
     owner->DeleteRefundReference(GetGUIDLow());
 }

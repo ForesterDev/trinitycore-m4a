@@ -60,7 +60,7 @@ public:
             std::ostringstream saveStream;
 
             saveStream << "T C " << m_auiEncounter[0]
-                << " " << uiGongWaves;
+                << ' ' << uiGongWaves;
 
             str_data = saveStream.str();
 
@@ -105,7 +105,7 @@ public:
                 case GO_GONG:
                     uiGongGUID = go->GetGUID();
                     if (m_auiEncounter[0] == DONE)
-                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     break;
                 default:
                     break;
@@ -123,7 +123,7 @@ public:
                     case 9:
                     case 14:
                         if (GameObject* go = instance->GetGameObject(uiGongGUID))
-                            go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                            go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                         break;
                     case 1:
                     case 10:
@@ -134,7 +134,7 @@ public:
                         if (!go)
                             return;
 
-                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
 
                         uint32 uiCreature = 0;
                         uint8 uiSummonTimes = 0;
@@ -162,8 +162,8 @@ public:
                             {
                                 for (uint8 i = 0; i < uiSummonTimes; ++i)
                                 {
-                                    if (Creature* pSummon = go->SummonCreature(uiCreature, 2502.635f + float(irand(-5, 5)), 844.140f + float(irand(-5, 5)), 46.896f, 0.633f))
-                                        pSummon->GetMotionMaster()->MovePoint(0, 2533.479f + float(irand(-5, 5)), 870.020f + float(irand(-5, 5)), 47.678f);
+                                    if (Creature* summon = go->SummonCreature(uiCreature, 2502.635f + float(irand(-5, 5)), 844.140f + float(irand(-5, 5)), 46.896f, 0.633f))
+                                        summon->GetMotionMaster()->MovePoint(0, 2533.479f + float(irand(-5, 5)), 870.020f + float(irand(-5, 5)), 47.678f);
                                 }
                             }
                             creature->GetMotionMaster()->MovePoint(0, 2533.479f + float(irand(-5, 5)), 870.020f + float(irand(-5, 5)), 47.678f);

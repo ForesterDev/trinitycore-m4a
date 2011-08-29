@@ -69,7 +69,7 @@ public:
         }
 
         if (AchievementEntry const* pAE = GetAchievementStore()->LookupEntry(achievementId))
-            target->CompletedAchievement(pAE, true);
+            target->CompletedAchievement(pAE);
 
         return true;
     }

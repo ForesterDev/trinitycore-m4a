@@ -868,7 +868,6 @@ void World::LoadConfigSettings(bool reload)
 
     m_int_configs[CONFIG_GM_LEVEL_IN_GM_LIST]   = sConfig->GetIntDefault("GM.InGMList.Level", SEC_ADMINISTRATOR);
     m_int_configs[CONFIG_GM_LEVEL_IN_WHO_LIST]  = sConfig->GetIntDefault("GM.InWhoList.Level", SEC_ADMINISTRATOR);
-    m_int_configs[CONFIG_GM_LEVEL_ALLOW_ACHIEVEMENTS]  = sConfig->GetIntDefault("GM.AllowAchievementGain.Level", SEC_ADMINISTRATOR);
     m_bool_configs[CONFIG_GM_LOG_TRADE]         = sConfig->GetBoolDefault("GM.LogTrade", false);
     m_int_configs[CONFIG_START_GM_LEVEL]        = sConfig->GetIntDefault("GM.StartLevel", 1);
     if (m_int_configs[CONFIG_START_GM_LEVEL] < m_int_configs[CONFIG_START_PLAYER_LEVEL])
@@ -1118,7 +1117,7 @@ void World::LoadConfigSettings(bool reload)
     ///- Read the "Data" directory from the config file
     std::string dataPath = sConfig->GetStringDefault("DataDir", "./");
     if (dataPath.at(dataPath.length()-1) != '/' && dataPath.at(dataPath.length()-1) != '\\')
-        dataPath.append("/");
+        dataPath.push_back('/');
 
     if (reload)
     {
@@ -1268,6 +1267,15 @@ void World::SetInitialWorldSettings()
     LoadDBCStores(m_dataPath);
     DetectDBCLang();
 
+    sLog->outString("Loading spell dbc data corrections...");
+    sSpellMgr->LoadDbcDataCorrections();
+
+    sLog->outString("Loading SpellInfo store...");
+    sSpellMgr->LoadSpellInfoStore();
+
+    sLog->outString("Loading spell custom attributes...");
+    sSpellMgr->LoadSpellCustomAttr();
+
     sLog->outString("Loading Script Names...");
     sObjectMgr->LoadScriptNames();
 
@@ -1321,6 +1329,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading Spell Proc Event conditions...");
     sSpellMgr->LoadSpellProcEvents();
 
+    sLog->outString("Loading Spell Proc conditions and data...");
+    sSpellMgr->LoadSpellProcs();
+
     sLog->outString("Loading Spell Bonus Data...");
     sSpellMgr->LoadSpellBonusess();
 
@@ -1359,9 +1370,6 @@ void World::SetInitialWorldSettings()
 
     sLog->outString("Loading Creature template addons...");
     sObjectMgr->LoadCreatureTemplateAddons();
-
-    sLog->outString("Loading Vehicle scaling information...");
-    sObjectMgr->LoadVehicleScaling();
 
     sLog->outString("Loading Reputation Reward Rates...");
     sObjectMgr->LoadReputationRewardRate();
@@ -1462,9 +1470,6 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading spell pet auras...");
     sSpellMgr->LoadSpellPetAuras();
 
-    sLog->outString("Loading spell extra attributes...");
-    sSpellMgr->LoadSpellCustomAttr();
-
     sLog->outString("Loading Spell target coordinates...");
     sSpellMgr->LoadSpellTargetPositions();
 
@@ -1551,8 +1556,6 @@ void World::SetInitialWorldSettings()
 
     sLog->outString("Loading GameTeleports...");
     sObjectMgr->LoadGameTele();
-
-    sObjectMgr->LoadGossipScripts();                             // must be before gossip menu options
 
     sLog->outString("Loading Gossip menu...");
     sObjectMgr->LoadGossipMenu();
@@ -1765,7 +1768,7 @@ void World::DetectDBCLang()
     uint8 default_locale = TOTAL_LOCALES;
     for (uint8 i = default_locale-1; i < TOTAL_LOCALES; --i)  // -1 will be 255 due to uint8
     {
-        if (strlen(race->name[i]) > 0)                     // check by race names
+        if (race->name[i][0] != '\0')                     // check by race names
         {
             default_locale = i;
             m_availableDbcLocaleMask |= (1 << i);
@@ -2327,7 +2330,7 @@ bool World::RemoveBanAccount(BanMode mode, std::string nameOrIP)
 /// Ban an account or ban an IP address, duration will be parsed using TimeStringToSecs if it is positive, otherwise permban
 BanReturn World::BanCharacter(std::string name, std::string duration, std::string reason, std::string author)
 {
-    Player *pBanned = sObjectMgr->GetPlayer(name.c_str());
+    Player* pBanned = sObjectAccessor->FindPlayerByName(name.c_str());
     uint32 guid = 0;
 
     uint32 duration_secs = TimeStringToSecs(duration);
@@ -2368,7 +2371,7 @@ BanReturn World::BanCharacter(std::string name, std::string duration, std::strin
 /// Remove a ban from a character
 bool World::RemoveBanCharacter(std::string name)
 {
-    Player *pBanned = sObjectMgr->GetPlayer(name.c_str());
+    Player* pBanned = sObjectAccessor->FindPlayerByName(name.c_str());
     uint32 guid = 0;
 
     /// Pick a player to ban if not online
@@ -2511,7 +2514,7 @@ void World::SendServerMessage(ServerMessageType type, const char *text, Player* 
 void World::UpdateSessions(uint32 diff)
 {
     ///- Add new sessions
-    WorldSession* sess;
+    WorldSession* sess = NULL;
     while (addSessQueue.next(sess))
         AddSession_ (sess);
 
@@ -2542,7 +2545,7 @@ void World::ProcessCliCommands()
 {
     CliCommandHolder::Print* zprint = NULL;
     void* callbackArg = NULL;
-    CliCommandHolder* command;
+    CliCommandHolder* command = NULL;
     while (cliCmdQueue.next(command))
     {
         sLog->outDetail("CLI command under processing...");

@@ -1,9 +1,25 @@
+/*
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifndef TRINITY_SPELLAURAEFFECTS_H
 #define TRINITY_SPELLAURAEFFECTS_H
 
 class Unit;
-class DynamicObject;
 class AuraEffect;
 class Aura;
 
@@ -14,7 +30,7 @@ typedef void(AuraEffect::*pAuraEffectHandler)(AuraApplication const* aurApp, uin
 class AuraEffect
 {
     friend void Aura::_InitEffects(uint8 effMask, Unit* caster, int32 *baseAmount);
-    friend Aura * Unit::_TryStackingOrRefreshingExistingAura(SpellEntry const* newAura, uint8 effMask, Unit* caster, int32* baseAmount, Item* castItem, uint64 casterGUID);
+    friend Aura * Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint8 effMask, Unit* caster, int32* baseAmount, Item* castItem, uint64 casterGUID);
     friend Aura::~Aura();
     private:
         ~AuraEffect();
@@ -25,16 +41,17 @@ class AuraEffect
         Aura * GetBase() const { return m_base; }
         void GetTargetList(std::list<Unit*> & targetList) const;
         void GetApplicationList(std::list<AuraApplication*> & applicationList) const;
+        SpellModifier* GetSpellModifier() const { return m_spellmod; }
 
-        SpellEntry const* GetSpellProto() const { return m_spellProto; }
-        uint32 GetId() const { return m_spellProto->Id; }
+        SpellInfo const* GetSpellInfo() const { return m_spellInfo; }
+        uint32 GetId() const { return m_spellInfo->Id; }
         uint32 GetEffIndex() const { return m_effIndex; }
         int32 GetBaseAmount() const { return m_baseAmount; }
         int32 GetAmplitude() const { return m_amplitude; }
 
-        int32 GetMiscValueB() const { return m_spellProto->EffectMiscValueB[m_effIndex]; }
-        int32 GetMiscValue() const { return m_spellProto->EffectMiscValue[m_effIndex]; }
-        AuraType GetAuraType() const { return (AuraType)m_spellProto->EffectApplyAuraName[m_effIndex]; }
+        int32 GetMiscValueB() const { return m_spellInfo->Effects[m_effIndex].MiscValueB; }
+        int32 GetMiscValue() const { return m_spellInfo->Effects[m_effIndex].MiscValue; }
+        AuraType GetAuraType() const { return (AuraType)m_spellInfo->Effects[m_effIndex].ApplyAuraName; }
         int32 GetAmount() const { return m_amount; }
         void SetAmount(int32 amount) { m_amount = amount; m_canBeRecalculated = false;}
 
@@ -62,14 +79,12 @@ class AuraEffect
 
         bool IsPeriodic() const { return m_isPeriodic; }
         void SetPeriodic(bool isPeriodic) { m_isPeriodic = isPeriodic; }
-        bool IsAffectedOnSpell(SpellEntry const *spell) const;
+        bool IsAffectedOnSpell(SpellInfo const *spell) const;
 
         void SendTickImmune(Unit* target, Unit *caster) const;
-
         void PeriodicTick(AuraApplication * aurApp, Unit* caster) const;
-        void PeriodicDummyTick(Unit* target, Unit* caster) const;
-        void TriggerSpell(Unit* target, Unit* caster) const;
-        void TriggerSpellWithValue(Unit* target, Unit* caster) const;
+
+        void HandleProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);
 
         void CleanupTriggeredSpells(Unit* target);
 
@@ -78,7 +93,7 @@ class AuraEffect
     private:
         Aura * const m_base;
 
-        SpellEntry const* const m_spellProto;
+        SpellInfo const* const m_spellInfo;
         uint8 const m_effIndex;
         int32 const m_baseAmount;
 
@@ -95,7 +110,7 @@ class AuraEffect
         bool IsPeriodicTickCrit(Unit* target, Unit const* caster) const;
 
     public:
-        // aura effect handlers
+        // aura effect apply/remove handlers
         void HandleNULL(AuraApplication const* /*aurApp*/, uint8 /*mode*/, bool /*apply*/) const
         {
             // not implemented
@@ -259,9 +274,30 @@ class AuraEffect
         void HandleAuraConvertRune(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraLinked(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraOpenStable(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+        void HandleAuraModFakeInebriation(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraOverrideSpells(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraSetVehicle(AuraApplication const* aurApp, uint8 mode, bool apply) const;
-        void HandleAuraModFakeInebriation(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+        void HandlePreventResurrection(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+
+        // aura effect periodic tick handlers
+        void HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const;
+        void HandlePeriodicTriggerSpellAuraTick(Unit* target, Unit* caster) const;
+        void HandlePeriodicTriggerSpellWithValueAuraTick(Unit* target, Unit* caster) const;
+        void HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const;
+        void HandlePeriodicHealthLeechAuraTick(Unit* target, Unit* caster) const;
+        void HandlePeriodicHealthFunnelAuraTick(Unit* target, Unit* caster) const;
+        void HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const;
+        void HandlePeriodicManaLeechAuraTick(Unit* target, Unit* caster) const;
+        void HandleObsModPowerAuraTick(Unit* target, Unit* caster) const;
+        void HandlePeriodicEnergizeAuraTick(Unit* target, Unit* caster) const;
+        void HandlePeriodicPowerBurnManaAuraTick(Unit* target, Unit* caster) const;
+
+        // aura effect proc handlers
+        void HandleProcTriggerSpellAuraProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);
+        void HandleProcTriggerSpellWithValueAuraProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);
+        void HandleProcTriggerDamageAuraProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);
+        void HandleRaidProcFromChargeAuraProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);
+        void HandleRaidProcFromChargeWithValueAuraProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);
 };
 
 namespace Trinity
@@ -273,8 +309,8 @@ namespace Trinity
             AbsorbAuraOrderPred() { }
             bool operator() (AuraEffect * aurEffA, AuraEffect * aurEffB) const
             {
-                SpellEntry const* spellProtoA = aurEffA->GetSpellProto();
-                SpellEntry const* spellProtoB = aurEffB->GetSpellProto();
+                SpellInfo const* spellProtoA = aurEffA->GetSpellInfo();
+                SpellInfo const* spellProtoB = aurEffB->GetSpellInfo();
 
                 // Wards
                 if ((spellProtoA->SpellFamilyName == SPELLFAMILY_MAGE) ||
