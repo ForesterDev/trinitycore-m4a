@@ -999,7 +999,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 }
                 case 47170:                                 // Impale Leviroth
                 {
-                    if (!unitTarget && unitTarget->GetEntry() != 26452 && unitTarget->HealthAbovePct(95))
+                    if (!unitTarget || (unitTarget->GetEntry() != 26452 && unitTarget->HealthAbovePct(95)))
                         return;
 
                         m_caster->DealDamage(unitTarget, unitTarget->CountPctFromMaxHealth(93));
@@ -1545,7 +1545,7 @@ void Spell::EffectTriggerSpellWithValue(SpellEffIndex effIndex)
 
     int32 bp = damage;
 
-    Unit* caster = spellInfo->IsRequiringSelectedTarget() ? m_caster : unitTarget;
+    Unit* caster = spellInfo->NeedsToBeTriggeredByCaster() ? m_caster : unitTarget;
 
     caster->CastCustomSpell(unitTarget, triggered_spell_id, &bp, &bp, &bp, true);
 }
@@ -1600,14 +1600,6 @@ void Spell::EffectForceCast(SpellEffIndex effIndex)
                 break;
         }
     }
-
-    // temphack
-    if (m_spellInfo->Id == 51888)
-    {
-        unitTarget->CastSpell(unitTarget, spellInfo->Id, true, NULL, NULL, m_originalCasterGUID);
-        return;
-    }
-
     unitTarget->CastSpell(m_caster, spellInfo, true);
 }
 
@@ -1778,7 +1770,7 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
 
     // Note: not exist spells with weapon req. and IsSpellHaveCasterSourceTargets == true
     // so this just for speedup places in else
-    Unit* caster = spellInfo->IsRequiringSelectedTarget() ? m_caster : unitTarget;
+    Unit* caster = spellInfo->NeedsToBeTriggeredByCaster() ? m_caster : unitTarget;
 
     caster->CastSpell(unitTarget, spellInfo, true, 0, 0, (originalCaster ? originalCaster->GetGUID() : 0));
 }
