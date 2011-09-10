@@ -694,7 +694,7 @@ namespace
                 OnEffectRemove += AuraEffectRemoveFn(Myt::removed, i, n, m);
             }
 
-            bool Validate(const SpellEntry *)
+            bool Validate(const SpellInfo *)
             {
 				if (auto info = sSpellMgr->GetSpellInfo(48366 /* Warning */))
                 {
