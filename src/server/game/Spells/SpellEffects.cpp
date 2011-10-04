@@ -6705,10 +6705,13 @@ void Spell::EffectDiscoverTaxi(SpellEffIndex effIndex)
         unitTarget->ToPlayer()->GetSession()->SendDiscoverNewTaxiNode(nodeid);
 }
 
-void Spell::EffectTitanGrip(SpellEffIndex /*effIndex*/)
+void Spell::EffectTitanGrip(SpellEffIndex effIndex)
 {
     if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
+    {
         unitTarget->ToPlayer()->SetCanTitanGrip(true);
+        m_caster->AddAura(m_spellInfo->Effects[effIndex].MiscValue, unitTarget);
+    }
 }
 
 void Spell::EffectRedirectThreat(SpellEffIndex /*effIndex*/)
