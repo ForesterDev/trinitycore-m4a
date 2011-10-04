@@ -1355,6 +1355,14 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
                 aurEff->SetAmount(CalculatePctU(aurEff->GetAmount(), damageInfo.damage));
             }
             break;
+        case SPELLFAMILY_PALADIN:
+            // Divine Storm
+            if (m_spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_PALADIN_DIVINESTORM)
+            {
+                int32 dmg = CalculatePctN(damageInfo.damage, CalculateDamage(1, nullptr));
+                m_caster->CastCustomSpell(unitTarget, 54171, &dmg, 0, 0, true);
+            }
+            break;
         case SPELLFAMILY_DEATHKNIGHT:
             // Scourge Strike
             if (m_spellInfo->SpellFamilyFlags[1] & 0x08000000)
