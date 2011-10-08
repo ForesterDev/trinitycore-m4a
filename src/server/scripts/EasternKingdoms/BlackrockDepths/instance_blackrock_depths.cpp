@@ -73,14 +73,14 @@ class instance_blackrock_depths : public InstanceMapScript
 public:
     instance_blackrock_depths() : InstanceMapScript("instance_blackrock_depths", 230) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* pMap) const
+    InstanceScript* GetInstanceScript(InstanceMap* map) const
     {
-        return new instance_blackrock_depths_InstanceMapScript(pMap);
+        return new instance_blackrock_depths_InstanceMapScript(map);
     }
 
     struct instance_blackrock_depths_InstanceMapScript : public InstanceScript
     {
-        instance_blackrock_depths_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {}
+        instance_blackrock_depths_InstanceMapScript(Map* map) : InstanceScript(map) {}
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string str_data;
@@ -162,7 +162,7 @@ public:
 
         void OnCreatureCreate(Creature* creature)
         {
-            switch(creature->GetEntry())
+            switch (creature->GetEntry())
             {
             case NPC_EMPEROR: EmperorGUID = creature->GetGUID(); break;
             case NPC_PHALANX: PhalanxGUID = creature->GetGUID(); break;
@@ -184,7 +184,7 @@ public:
 
         void OnGameObjectCreate(GameObject* go)
         {
-            switch(go->GetEntry())
+            switch (go->GetEntry())
             {
             case GO_ARENA1: GoArena1GUID = go->GetGUID(); break;
             case GO_ARENA2: GoArena2GUID = go->GetGUID(); break;
@@ -220,7 +220,7 @@ public:
         {
             sLog->outDebug(LOG_FILTER_TSCR, "TSCR: Instance Blackrock Depths: SetData64 update (Type: %u Data " UI64FMTD ")", type, data);
 
-            switch(type)
+            switch (type)
             {
             case DATA_EVENSTARTER:
                 TombEventStarterGUID = data;
@@ -236,7 +236,7 @@ public:
         {
             sLog->outDebug(LOG_FILTER_TSCR, "TSCR: Instance Blackrock Depths: SetData update (Type: %u Data %u)", type, data);
 
-            switch(type)
+            switch (type)
             {
             case TYPE_RING_OF_LAW:
                 m_auiEncounter[0] = data;
@@ -281,7 +281,7 @@ public:
 
         uint32 GetData(uint32 type)
         {
-            switch(type)
+            switch (type)
             {
             case TYPE_RING_OF_LAW:
                 return m_auiEncounter[0];
@@ -306,7 +306,7 @@ public:
 
         uint64 GetData64(uint32 data)
         {
-            switch(data)
+            switch (data)
             {
             case DATA_EMPEROR:
                 return EmperorGUID;

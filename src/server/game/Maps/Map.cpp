@@ -31,7 +31,6 @@
 #include "ObjectMgr.h"
 #include "Group.h"
 
-
 union u_map_magic
 {
     char asChar[4];
@@ -119,7 +118,7 @@ void Map::LoadVMap(int gx, int gy)
 {
                                                             // x and y are swapped !!
     int vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld->GetDataPath()+ "vmaps").c_str(),  GetId(), gx, gy);
-    switch(vmapLoadResult)
+    switch (vmapLoadResult)
     {
         case VMAP::VMAP_LOAD_RESULT_OK:
             sLog->outDetail("VMAP loaded name:%s, id:%d, x:%d, y:%d (vmap rep.: x:%d, y:%d)", GetMapName(), GetId(), gx, gy, gx, gy);
@@ -305,8 +304,8 @@ void Map::SwitchGridContainers(T* obj, bool on)
     obj->m_isWorldObject = on;
 }
 
-template void Map::SwitchGridContainers(Creature* , bool);
-//template void Map::SwitchGridContainers(DynamicObject* , bool);
+template void Map::SwitchGridContainers(Creature*, bool);
+//template void Map::SwitchGridContainers(DynamicObject*, bool);
 
 template<class T>
 void Map::DeleteFromWorld(T* obj)
@@ -1604,7 +1603,6 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps, float maxSearchD
                 return vmapHeight;
             else
                 return mapHeight;                           // better use .map surface height
-
         }
         else
             return vmapHeight;                              // we have only vmapHeight (if have)
@@ -2028,7 +2026,7 @@ void Map::RemoveAllObjectsInRemoveList()
         bool on = itr->second;
         i_objectsToSwitch.erase(itr);
 
-        switch(obj->GetTypeId())
+        switch (obj->GetTypeId())
         {
             case TYPEID_UNIT:
                 if (!obj->ToCreature()->isPet())
@@ -2045,7 +2043,7 @@ void Map::RemoveAllObjectsInRemoveList()
         std::set<WorldObject*>::iterator itr = i_objectsToRemove.begin();
         WorldObject* obj = *itr;
 
-        switch(obj->GetTypeId())
+        switch (obj->GetTypeId())
         {
             case TYPEID_CORPSE:
             {
@@ -2176,15 +2174,15 @@ void Map::RemoveFromActive(Creature* c)
     }
 }
 
-template void Map::Add(Corpse* );
-template void Map::Add(Creature* );
-template void Map::Add(GameObject* );
-template void Map::Add(DynamicObject* );
+template void Map::Add(Corpse*);
+template void Map::Add(Creature*);
+template void Map::Add(GameObject*);
+template void Map::Add(DynamicObject*);
 
-template void Map::Remove(Corpse* , bool);
-template void Map::Remove(Creature* , bool);
-template void Map::Remove(GameObject* , bool);
-template void Map::Remove(DynamicObject* , bool);
+template void Map::Remove(Corpse*, bool);
+template void Map::Remove(Creature*, bool);
+template void Map::Remove(GameObject*, bool);
+template void Map::Remove(DynamicObject*, bool);
 
 /* ******* Dungeon Instance Maps ******* */
 
@@ -2240,8 +2238,8 @@ bool InstanceMap::CanEnter(Player* player)
     }
 
     // cannot enter while an encounter is in progress on raids
-    /*Group* pGroup = player->GetGroup();
-    if (!player->isGameMaster() && pGroup && pGroup->InCombatToInstance(GetInstanceId()) && player->GetMapId() != GetId())*/
+    /*Group* group = player->GetGroup();
+    if (!player->isGameMaster() && group && group->InCombatToInstance(GetInstanceId()) && player->GetMapId() != GetId())*/
     if (IsRaid() && GetInstanceScript() && GetInstanceScript()->IsEncounterInProgress())
     {
         player->SendTransferAborted(GetId(), TRANSFER_ABORT_ZONE_IN_COMBAT);
@@ -2593,7 +2591,7 @@ BattlegroundMap::BattlegroundMap(uint32 id, time_t expiry, uint32 InstanceId, Ma
 
 BattlegroundMap::~BattlegroundMap()
 {
-    if(m_bg)
+    if (m_bg)
     {
         //unlink to prevent crash, always unlink all pointer reference before destruction
         m_bg->SetBgMap(NULL);
@@ -2656,7 +2654,6 @@ void BattlegroundMap::RemoveAllPlayers()
             if (Player* plr = itr->getSource())
                 if (!plr->IsBeingTeleportedFar())
                     plr->TeleportTo(plr->GetBattlegroundEntryPoint());
-
 }
 
 Creature*

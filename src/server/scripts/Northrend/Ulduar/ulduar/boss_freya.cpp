@@ -373,7 +373,7 @@ class boss_freya : public CreatureScript
                     {
                         me->AddAura(SPELL_DRAINED_OF_POWER, Elder[n]);
                         Elder[n]->CastSpell(me, SPELL_IRONBRANCH_ESSENCE, true);
-                        Elder[n]->RemoveLootMode(LOOT_MODE_DEFAULT);
+                        Elder[n]->RemoveLootMode(LOOT_MODE_DEFAULT); //! Why?
                         Elder[n]->AI()->AttackStart(who);
                         Elder[n]->AddThreat(who, 250.0f);
                         Elder[n]->SetInCombatWith(who);
@@ -381,17 +381,19 @@ class boss_freya : public CreatureScript
                     }
                 }
 
-                if (Elder[0]->isAlive())
+                if (Elder[0] && Elder[0]->isAlive())
                 {
                     Elder[0]->CastSpell(me, SPELL_BRIGHTLEAF_ESSENCE, true);
                     events.ScheduleEvent(EVENT_UNSTABLE_ENERGY, urand(10000, 20000));
                 }
-                if (Elder[1]->isAlive())
+
+                if (Elder[1] && Elder[1]->isAlive())
                 {
                     Elder[1]->CastSpell(me, SPELL_STONEBARK_ESSENCE, true);
                     events.ScheduleEvent(EVENT_GROUND_TREMOR, urand(10000, 20000));
                 }
-                if (Elder[2]->isAlive())
+
+                if (Elder[2] && Elder[2]->isAlive())
                 {
                     Elder[2]->CastSpell(me, SPELL_IRONBRANCH_ESSENCE, true);
                     events.ScheduleEvent(EVENT_STRENGTHENED_IRON_ROOTS, urand(10000, 20000));
@@ -623,6 +625,21 @@ class boss_freya : public CreatureScript
                         break;
                 }
                 waveCount++;
+            }
+
+            void JustDied(Unit* who)
+            {
+                //! Freya's chest is dynamically spawned on death by different spells.
+                const uint32 summonSpell[2][4] = 
+                {
+                              /* 0Elder, 1Elder, 2Elder, 3Elder */
+                    /* 10N */    {62950, 62953, 62955, 62957},
+                    /* 25N */    {62952, 62954, 62956, 62958}
+                };
+
+                who->CastSpell((Unit*)NULL, summonSpell[me->GetMap()->GetDifficulty()][elderCount], true);
+
+                _JustDied();
             }
 
             void JustSummoned(Creature* summoned)
