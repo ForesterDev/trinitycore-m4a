@@ -6710,7 +6710,9 @@ void Spell::EffectTitanGrip(SpellEffIndex effIndex)
     if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
     {
         unitTarget->ToPlayer()->SetCanTitanGrip(true);
-        m_caster->AddAura(m_spellInfo->Effects[effIndex].MiscValue, unitTarget);
+        uint32 spell_id = m_spellInfo->Effects[effIndex].MiscValue;
+        if (!m_caster->HasAura(spell_id))
+            m_caster->AddAura(spell_id, unitTarget);
     }
 }
 
