@@ -1634,38 +1634,39 @@ void Spell::DoTriggersOnSpellHit(Unit *unit, uint8 effMask)
             m_caster->AddAura(m_preCastSpell, unit);
     }
 
-    // handle SPELL_AURA_ADD_TARGET_TRIGGER auras
-    // this is executed after spell proc spells on target hit
-    // spells are triggered for each hit spell target
-    // info confirmed with retail sniffs of permafrost and shadow weaving
-    if (!m_hitTriggerSpells.empty() && CanExecuteTriggersOnHit(effMask))
-    {
-        int _duration = 0;
-        for (HitTriggerSpells::const_iterator i = m_hitTriggerSpells.begin(); i != m_hitTriggerSpells.end(); ++i)
+    if (effMask & 0x1U)
+        // handle SPELL_AURA_ADD_TARGET_TRIGGER auras
+        // this is executed after spell proc spells on target hit
+        // spells are triggered for each hit spell target
+        // info confirmed with retail sniffs of permafrost and shadow weaving
+        if (!m_hitTriggerSpells.empty() && CanExecuteTriggersOnHit(effMask))
         {
-            if (roll_chance_i(i->second))
+            int _duration = 0;
+            for (HitTriggerSpells::const_iterator i = m_hitTriggerSpells.begin(); i != m_hitTriggerSpells.end(); ++i)
             {
-                m_caster->CastSpell(unit, i->first, true);
-                sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell %d triggered spell %d by SPELL_AURA_ADD_TARGET_TRIGGER aura", m_spellInfo->Id, i->first->Id);
-
-                // SPELL_AURA_ADD_TARGET_TRIGGER auras shouldn't trigger auras without duration
-                // set duration of current aura to the triggered spell
-                if (i->first->GetDuration() == -1)
+                if (roll_chance_i(i->second))
                 {
-                    if (Aura * triggeredAur = unit->GetAura(i->first->Id, m_caster->GetGUID()))
+                    m_caster->CastSpell(unit, i->first, true);
+                    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell %d triggered spell %d by SPELL_AURA_ADD_TARGET_TRIGGER aura", m_spellInfo->Id, i->first->Id);
+
+                    // SPELL_AURA_ADD_TARGET_TRIGGER auras shouldn't trigger auras without duration
+                    // set duration of current aura to the triggered spell
+                    if (i->first->GetDuration() == -1)
                     {
-                        // get duration from aura-only once
-                        if (!_duration)
+                        if (Aura * triggeredAur = unit->GetAura(i->first->Id, m_caster->GetGUID()))
                         {
-                            Aura * aur = unit->GetAura(m_spellInfo->Id, m_caster->GetGUID());
-                            _duration = aur ? aur->GetDuration() : -1;
+                            // get duration from aura-only once
+                            if (!_duration)
+                            {
+                                Aura * aur = unit->GetAura(m_spellInfo->Id, m_caster->GetGUID());
+                                _duration = aur ? aur->GetDuration() : -1;
+                            }
+                            triggeredAur->SetDuration(_duration);
                         }
-                        triggeredAur->SetDuration(_duration);
                     }
                 }
             }
         }
-    }
 
     // trigger linked auras remove/apply
     // TODO: remove/cleanup this, as this table is not documented and people are doing stupid things with it
