@@ -282,6 +282,18 @@ enum Difficulty
 #define MAX_RAID_DIFFICULTY        4
 #define MAX_DIFFICULTY             4
 
+inline bool is_25_player_raid(Difficulty d)
+{
+    switch (d)
+    {
+    default:
+        return false;
+    case RAID_DIFFICULTY_25MAN_NORMAL:
+    case RAID_DIFFICULTY_25MAN_HEROIC:
+        return true;
+    }
+}
+
 enum SpawnMask
 {
     SPAWNMASK_CONTINENT         = (1 << REGULAR_DIFFICULTY), // any any maps without spawn modes
