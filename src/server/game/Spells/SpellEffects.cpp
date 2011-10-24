@@ -689,6 +689,8 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         }
                     }
                 }
+                else if (m_spellInfo->SpellFamilyFlags[2] & 0x800U /* Chimera Shot - Serpent */)
+                    apply_direct_bonus = false;
                 break;
             }
             case SPELLFAMILY_PALADIN:
