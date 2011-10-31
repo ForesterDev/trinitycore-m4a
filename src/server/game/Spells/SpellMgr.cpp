@@ -3253,6 +3253,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 71123: // Decimate (Stinky & Precious)
                 spellInfo->EffectRadiusIndex[0] = 12;   // 100yd
                 break;
+            case 71169 /* Shadow's Fate */:
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+                break;
             case 72723: // Resistant Skin (Deathbringer Saurfang adds)
                 // this spell initially granted Shadow damage immunity, however it was removed but the data was left in client
                 spellInfo->Effect[2] = 0;
