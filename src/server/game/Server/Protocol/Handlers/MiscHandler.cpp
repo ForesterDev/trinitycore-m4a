@@ -468,12 +468,6 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
                 }
                 if (!s_show)
                     continue;
-                if (itr->second->isGameMaster())
-                {
-                    pname = "<GM>";
-                    pname.append(itr->second->GetName());
-                }
-
                 {
                     Who tmp = {move(pname), move(gname), move(lvl), move(class_), move(race),
                             move(gender), move(pzoneid)};
