@@ -84,11 +84,11 @@ public:
     {
         boss_algalonAI(Creature* c) : ScriptedAI(c)
         {
-            pInstance = c->GetInstanceScript();
+            instance = c->GetInstanceScript();
             Summon = false; // not in reset. intro speech done only once.
         }
 
-        InstanceScript* pInstance;
+        InstanceScript* instance;
 
         std::list<uint64> m_lCollapsingStarGUIDList;
 
@@ -123,8 +123,8 @@ public:
                 uiStep = 1;
             }
 
-            if (pInstance)
-                pInstance->SetData(BOSS_ALGALON, IN_PROGRESS);
+            if (instance)
+                instance->SetData(BOSS_ALGALON, IN_PROGRESS);
         }
 
         void KilledUnit(Unit* /*victim*/)
@@ -137,8 +137,8 @@ public:
             Phase = 1;
 
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            if (pInstance)
-                pInstance->SetData(BOSS_ALGALON, NOT_STARTED);
+            if (instance)
+                instance->SetData(BOSS_ALGALON, NOT_STARTED);
 
             BlackHoleGUID = 0;
 
@@ -166,10 +166,10 @@ public:
 
             for (std::list<uint64>::const_iterator itr = m_lCollapsingStarGUIDList.begin(); itr != m_lCollapsingStarGUIDList.end(); ++itr)
             {
-                if (Creature* pTemp = Unit::GetCreature(*me, *itr))
+                if (Creature* temp = Unit::GetCreature(*me, *itr))
                 {
-                    if (pTemp->isAlive())
-                        pTemp->DespawnOrUnsummon();
+                    if (temp->isAlive())
+                        temp->DespawnOrUnsummon();
                 }
             }
             m_lCollapsingStarGUIDList.clear();
@@ -218,8 +218,8 @@ public:
 
                 me->DisappearAndDie();
 
-                if (pInstance)
-                    pInstance->SetData(BOSS_ALGALON, DONE);
+                if (instance)
+                    instance->SetData(BOSS_ALGALON, DONE);
 
                 return;
             }
@@ -230,7 +230,7 @@ public:
                 {
                     if (uiPhase_timer <= diff)
                     {
-                        switch(uiStep)
+                        switch (uiStep)
                         {
                             case 1:
                                 DoScriptText(SAY_SUMMON_1, me);
@@ -343,10 +343,10 @@ public:
     {
         mob_collapsing_starAI(Creature* creature) : ScriptedAI(creature)
         {
-            pInstance = creature->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
-        InstanceScript* pInstance;
+        InstanceScript* instance;
 
         uint32 BlackHoleExplosion_Timer;
 

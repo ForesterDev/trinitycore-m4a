@@ -51,6 +51,8 @@ enum UlduarNPCs
 {
     // General
     NPC_LEVIATHAN                = 33113,
+    NPC_SALVAGED_DEMOLISHER      = 33109,
+    NPC_SALVAGED_SIEGE_ENGINE    = 33060,
     NPC_IGNIS                    = 33118,
     NPC_RAZORSCALE               = 33186,
     NPC_RAZORSCALE_CONTROLLER    = 33233,
@@ -127,10 +129,9 @@ enum UlduarGameObjects
     GO_HODIR_RARE_CACHE_OF_WINTER_HERO    = 194201,
     GO_HODIR_CHEST_HERO                   = 194308,
     GO_HODIR_CHEST                        = 194307,
-    GO_FREYA_CHEST_HERO                   = 194325,
-    GO_FREYA_CHEST                        = 194324,
     GO_LEVIATHAN_DOOR                     = 194905,
     GO_LEVIATHAN_GATE                     = 194630,
+    GO_XT_002_DOOR                        = 194631,
     GO_VEZAX_DOOR                         = 194750,
     GO_MOLE_MACHINE                       = 194316,
     GO_RAZOR_HARPOON_1                    = 194542,
@@ -177,12 +178,14 @@ enum UlduarData
     DATA_TOY_PILE_2,
     DATA_TOY_PILE_3,
 
-    // Kologarn
-    DATA_LEFT_ARM,
-    DATA_RIGHT_ARM,
-
     // Hodir
     DATA_HODIR_RARE_CACHE,
+};
+
+enum UlduarAchievementData
+{
+    // FL Achievement boolean
+    DATA_UNBROKEN = 29052906, // 2905, 2906 are achievement IDs,
 };
 
 template<class AI>

@@ -155,7 +155,7 @@ class ScriptRegistry
     if (!V) \
         return R;
 
-void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
+void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* target)
 {
     if (!pSource)
     {
@@ -189,7 +189,7 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
                 break;
             case CHAT_TYPE_WHISPER:
             case CHAT_TYPE_BOSS_WHISPER:
-                if (auto p = dynamic_cast<Player *>(pTarget))
+                if (auto p = dynamic_cast<Player *>(target))
                     pSource->PlayDirectSound(pData->uiSoundId, p);
                 break;
             }
@@ -208,21 +208,21 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
     switch (pData->uiType)
     {
         case CHAT_TYPE_SAY:
-            pSource->MonsterSay(iTextEntry, pData->uiLanguage, pTarget ? pTarget->GetGUID() : 0);
+            pSource->MonsterSay(iTextEntry, pData->uiLanguage, target ? target->GetGUID() : 0);
             break;
         case CHAT_TYPE_YELL:
-            pSource->MonsterYell(iTextEntry, pData->uiLanguage, pTarget ? pTarget->GetGUID() : 0);
+            pSource->MonsterYell(iTextEntry, pData->uiLanguage, target ? target->GetGUID() : 0);
             break;
         case CHAT_TYPE_TEXT_EMOTE:
-            pSource->MonsterTextEmote(iTextEntry, pTarget ? pTarget->GetGUID() : 0);
+            pSource->MonsterTextEmote(iTextEntry, target ? target->GetGUID() : 0);
             break;
         case CHAT_TYPE_BOSS_EMOTE:
-            pSource->MonsterTextEmote(iTextEntry, pTarget ? pTarget->GetGUID() : 0, true);
+            pSource->MonsterTextEmote(iTextEntry, target ? target->GetGUID() : 0, true);
             break;
         case CHAT_TYPE_WHISPER:
         {
-            if (pTarget && pTarget->GetTypeId() == TYPEID_PLAYER)
-                pSource->MonsterWhisper(iTextEntry, pTarget->GetGUID());
+            if (target && target->GetTypeId() == TYPEID_PLAYER)
+                pSource->MonsterWhisper(iTextEntry, target->GetGUID());
             else
                 sLog->outError("TSCR: DoScriptText entry %i cannot whisper without target unit (TYPEID_PLAYER).", iTextEntry);
 
@@ -230,15 +230,15 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
         }
         case CHAT_TYPE_BOSS_WHISPER:
         {
-            if (pTarget && pTarget->GetTypeId() == TYPEID_PLAYER)
-                pSource->MonsterWhisper(iTextEntry, pTarget->GetGUID(), true);
+            if (target && target->GetTypeId() == TYPEID_PLAYER)
+                pSource->MonsterWhisper(iTextEntry, target->GetGUID(), true);
             else
                 sLog->outError("TSCR: DoScriptText entry %i cannot whisper without target unit (TYPEID_PLAYER).", iTextEntry);
 
             break;
         }
         case CHAT_TYPE_ZONE_YELL:
-            pSource->MonsterYellToZone(iTextEntry, pData->uiLanguage, pTarget ? pTarget->GetGUID() : 0);
+            pSource->MonsterYellToZone(iTextEntry, pData->uiLanguage, target ? target->GetGUID() : 0);
             break;
     }
 }
@@ -305,7 +305,6 @@ void ScriptMgr::Unload()
 
 void ScriptMgr::LoadDatabase()
 {
-    sScriptSystemMgr->LoadVersion();
     sScriptSystemMgr->LoadScriptTexts();
     sScriptSystemMgr->LoadScriptTextsCustom();
     sScriptSystemMgr->LoadScriptWaypoints();
@@ -1228,7 +1227,7 @@ void ScriptMgr::OnPlayerReputationChange(Player* player, uint32 factionID, int32
     FOREACH_SCRIPT(PlayerScript)->OnReputationChange(player, factionID, standing, incremental);
 }
 
-void ScriptMgr::OnPlayerDuelRequest(Player *target, Player *challenger)
+void ScriptMgr::OnPlayerDuelRequest(Player* target, Player* challenger)
 {
     FOREACH_SCRIPT(PlayerScript)->OnDuelRequest(target, challenger);
 }
@@ -1238,7 +1237,7 @@ void ScriptMgr::OnPlayerDuelStart(Player* player1, Player* player2)
     FOREACH_SCRIPT(PlayerScript)->OnDuelStart(player1, player2);
 }
 
-void ScriptMgr::OnPlayerDuelEnd(Player *winner, Player *loser, DuelCompleteType type)
+void ScriptMgr::OnPlayerDuelEnd(Player* winner, Player* loser, DuelCompleteType type)
 {
     FOREACH_SCRIPT(PlayerScript)->OnDuelEnd(winner, loser, type);
 }

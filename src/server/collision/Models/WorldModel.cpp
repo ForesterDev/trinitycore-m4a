@@ -162,7 +162,7 @@ namespace VMAP
         if ((iFlags[tx + ty*iTilesX] & 0x0F) == 0x0F)
             return false;
 
-        // (dx, dy) coordinates inside tile, in [0,1]^2
+        // (dx, dy) coordinates inside tile, in [0, 1]^2
         float dx = tx_f - (float)tx;
         float dy = ty_f - (float)ty;
 
@@ -170,7 +170,7 @@ namespace VMAP
 
             ^ dy
             |
-          1 x---------x (1,1)
+          1 x---------x (1, 1)
             | (b)   / |
             |     /   |
             |   /     |
@@ -203,7 +203,7 @@ namespace VMAP
                 iTilesX * iTilesY;
     }
 
-    bool WmoLiquid::writeToFile(FILE *wf)
+    bool WmoLiquid::writeToFile(FILE* wf)
     {
         bool result = true;
         if (result && fwrite(&iTilesX, sizeof(uint32), 1, wf) != 1) result = false;
@@ -217,10 +217,10 @@ namespace VMAP
         return result;
     }
 
-    bool WmoLiquid::readFromFile(FILE *rf, WmoLiquid *&out)
+    bool WmoLiquid::readFromFile(FILE* rf, WmoLiquid* &out)
     {
         bool result = true;
-        WmoLiquid *liquid = new WmoLiquid();
+        WmoLiquid* liquid = new WmoLiquid();
         if (result && fread(&liquid->iTilesX, sizeof(uint32), 1, rf) != 1) result = false;
         if (result && fread(&liquid->iTilesY, sizeof(uint32), 1, rf) != 1) result = false;
         if (result && fread(&liquid->iCorner, sizeof(Vector3), 1, rf) != 1) result = false;
@@ -255,7 +255,7 @@ namespace VMAP
         meshTree.build(triangles, bFunc);
     }
 
-    bool GroupModel::writeToFile(FILE *wf)
+    bool GroupModel::writeToFile(FILE* wf)
     {
         bool result = true;
         uint32 chunkSize, count;
@@ -301,7 +301,7 @@ namespace VMAP
         return result;
     }
 
-    bool GroupModel::readFromFile(FILE *rf)
+    bool GroupModel::readFromFile(FILE* rf)
     {
         char chunk[8];
         bool result = true;
@@ -363,6 +363,7 @@ namespace VMAP
     {
         if (triangles.empty())
             return false;
+
         GModelRayCallback callback(triangles, vertices);
         meshTree.intersectRay(ray, callback, distance, stopAtFirstHit);
         return callback.hit;
@@ -443,7 +444,7 @@ namespace VMAP
             {
                 float group_Z;
                 //float pVol = prims[entry].GetBound().volume();
-                //if(pVol < minVol)
+                //if (pVol < minVol)
                 //{
                     /* if (prims[entry].iBound.contains(point)) */
                     if (prims[entry].IsInsideObject(point, zVec, group_Z))
@@ -471,6 +472,7 @@ namespace VMAP
     {
         if (groupModels.empty())
             return false;
+
         WModelAreaCallback callback(groupModels, down);
         groupTree.intersectPoint(p, callback);
         if (callback.hit != groupModels.end())
@@ -489,6 +491,7 @@ namespace VMAP
     {
         if (groupModels.empty())
             return false;
+
         WModelAreaCallback callback(groupModels, down);
         groupTree.intersectPoint(p, callback);
         if (callback.hit != groupModels.end())
@@ -502,13 +505,12 @@ namespace VMAP
 
     bool WorldModel::writeFile(const std::string &filename)
     {
-        FILE *wf = fopen(filename.c_str(), "wb");
+        FILE* wf = fopen(filename.c_str(), "wb");
         if (!wf)
             return false;
 
-        bool result = true;
         uint32 chunkSize, count;
-        result = fwrite(VMAP_MAGIC, 1, 8, wf) == 8;
+        bool result = fwrite(VMAP_MAGIC, 1, 8, wf) == 8;
         if (result && fwrite("WMOD", 1, 4, wf) != 4) result = false;
         chunkSize = sizeof(uint32) + sizeof(uint32);
         if (result && fwrite(&chunkSize, sizeof(uint32), 1, wf) != 1) result = false;
@@ -536,7 +538,7 @@ namespace VMAP
 
     bool WorldModel::readFile(const std::string &filename)
     {
-        FILE *rf = fopen(filename.c_str(), "rb");
+        FILE* rf = fopen(filename.c_str(), "rb");
         if (!rf)
             return false;
 

@@ -207,10 +207,10 @@ public:
     {
         npc_jaina_or_sylvanas_horAI(Creature* creature) : ScriptedAI(creature)
         {
-            pInstance = me->GetInstanceScript();
+            instance = me->GetInstanceScript();
         }
 
-        InstanceScript* pInstance;
+        InstanceScript* instance;
         uint64 uiUther;
         uint64 uiLichKing;
 
@@ -230,7 +230,7 @@ public:
 
         void DoAction(const int32 actionId)
         {
-            switch(actionId)
+            switch (actionId)
             {
                 case ACTION_START_INTRO:
                     events.ScheduleEvent(EVENT_START_INTRO, 0);
@@ -244,12 +244,12 @@ public:
         void UpdateAI(const uint32 diff)
         {
             events.Update(diff);
-            switch(events.ExecuteEvent())
+            switch (events.ExecuteEvent())
             {
                 case EVENT_START_INTRO:
                     me->GetMotionMaster()->MovePoint(0, MoveThronePos);
                     // Begining of intro is differents between factions as the speech sequence and timers are differents.
-                    if (pInstance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
+                    if (instance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
                         events.ScheduleEvent(EVENT_INTRO_A2_1, 0);
                     else
                         events.ScheduleEvent(EVENT_INTRO_H2_1, 0);
@@ -266,7 +266,7 @@ public:
                     break;
                 case EVENT_INTRO_A2_3:
                     // TODO: she's doing some kind of spell casting emote
-                    pInstance->HandleGameObject(pInstance->GetData64(DATA_FROSTMOURNE), true);
+                    instance->HandleGameObject(instance->GetData64(DATA_FROSTMOURNE), true);
                     events.ScheduleEvent(EVENT_INTRO_A2_4, 10000);
                     break;
                 case EVENT_INTRO_A2_4:
@@ -441,7 +441,7 @@ public:
 
                     if (Creature* pUther = me->GetCreature(*me, uiUther))
                     {
-                        if (pInstance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
+                        if (instance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
                             DoScriptText(SAY_UTHER_INTRO_A2_9, pUther);
                         else
                             DoScriptText(SAY_UTHER_INTRO_H2_7, pUther);
@@ -477,9 +477,9 @@ public:
 
                 case EVENT_INTRO_LK_5:
                     // summon Falric and Marwyn. then go back to the door
-                    if (Creature* pFalric = me->GetCreature(*me, pInstance->GetData64(DATA_FALRIC)))
+                    if (Creature* pFalric = me->GetCreature(*me, instance->GetData64(DATA_FALRIC)))
                         pFalric->SetVisible(true);
-                    if (Creature* pMarwyn = me->GetCreature(*me, pInstance->GetData64(DATA_MARWYN)))
+                    if (Creature* pMarwyn = me->GetCreature(*me, instance->GetData64(DATA_MARWYN)))
                         pMarwyn->SetVisible(true);
 
                     if (Creature* pLichKing = me->GetCreature(*me, uiLichKing))
@@ -492,28 +492,28 @@ public:
                     break;
 
                 case EVENT_INTRO_LK_6:
-                    if (Creature* pFalric = me->GetCreature(*me, pInstance->GetData64(DATA_FALRIC)))
+                    if (Creature* pFalric = me->GetCreature(*me, instance->GetData64(DATA_FALRIC)))
                         DoScriptText(SAY_FALRIC_INTRO_1, pFalric);
 
                     events.ScheduleEvent(EVENT_INTRO_LK_7, 2000);
                     break;
 
                 case EVENT_INTRO_LK_7:
-                    if (Creature* pMarwyn = me->GetCreature(*me, pInstance->GetData64(DATA_MARWYN)))
+                    if (Creature* pMarwyn = me->GetCreature(*me, instance->GetData64(DATA_MARWYN)))
                         DoScriptText(SAY_MARWYN_INTRO_1, pMarwyn);
 
                     events.ScheduleEvent(EVENT_INTRO_LK_8, 2000);
                     break;
 
                 case EVENT_INTRO_LK_8:
-                    if (Creature* pFalric = me->GetCreature(*me, pInstance->GetData64(DATA_FALRIC)))
+                    if (Creature* pFalric = me->GetCreature(*me, instance->GetData64(DATA_FALRIC)))
                         DoScriptText(SAY_FALRIC_INTRO_2, pFalric);
 
                     events.ScheduleEvent(EVENT_INTRO_LK_9, 5000);
                     break;
 
                 case EVENT_INTRO_LK_9:
-                    if (pInstance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
+                    if (instance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
                         DoScriptText(SAY_JAINA_INTRO_END, me);
                     else
                         DoScriptText(SAY_SYLVANAS_INTRO_END, me);
@@ -524,8 +524,8 @@ public:
                     break;
 
                 case EVENT_INTRO_END:
-                    if (pInstance)
-                        pInstance->SetData(DATA_WAVE_COUNT, SPECIAL);   // start first wave
+                    if (instance)
+                        instance->SetData(DATA_WAVE_COUNT, SPECIAL);   // start first wave
 
                     // Loralen or Koreln disappearAndDie()
                     me->DisappearAndDie();
@@ -534,9 +534,9 @@ public:
                 case EVENT_SKIP_INTRO:
                     // TODO: implement
 
-                    if (Creature* pFalric = me->GetCreature(*me, pInstance->GetData64(DATA_FALRIC)))
+                    if (Creature* pFalric = me->GetCreature(*me, instance->GetData64(DATA_FALRIC)))
                         pFalric->SetVisible(true);
-                    if (Creature* pMarwyn = me->GetCreature(*me, pInstance->GetData64(DATA_MARWYN)))
+                    if (Creature* pMarwyn = me->GetCreature(*me, instance->GetData64(DATA_MARWYN)))
                         pMarwyn->SetVisible(true);
 
                     me->GetMotionMaster()->MovePoint(0, LichKingSpawnPos);
@@ -664,7 +664,7 @@ public:
 
             while (uint32 eventId = events.ExecuteEvent())
             {
-                switch(eventId)
+                switch (eventId)
                 {
                     case EVENT_SHADOW_WORD_PAIN:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
@@ -747,7 +747,7 @@ public:
 
             while (uint32 eventId = events.ExecuteEvent())
             {
-                switch(eventId)
+                switch (eventId)
                 {
                     case EVENT_FIREBALL:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
@@ -847,7 +847,7 @@ public:
 
             while (uint32 eventId = events.ExecuteEvent())
             {
-                switch(eventId)
+                switch (eventId)
                 {
                     case EVENT_SHADOW_STEP:
                         DoCast(SPELL_SHADOW_STEP);
@@ -917,7 +917,7 @@ public:
 
             while (uint32 eventId = events.ExecuteEvent())
             {
-                switch(eventId)
+                switch (eventId)
                 {
                     case EVENT_SPECTRAL_STRIKE:
                         DoCast(me->getVictim(), SPELL_SPECTRAL_STRIKE);
@@ -983,7 +983,7 @@ public:
 
             while (uint32 eventId = events.ExecuteEvent())
             {
-                switch(eventId)
+                switch (eventId)
                 {
                     case EVENT_SHOOT:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))

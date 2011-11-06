@@ -19,7 +19,7 @@
 #include "gamePCH.h"
 #include "GameObjectAI.h"
 
-//GameObjectAI::GameObjectAI(GameObject *g) : go(g) {}
+//GameObjectAI::GameObjectAI(GameObject* g) : go(g) {}
 int GameObjectAI::Permissible(const GameObject* go)
 {
     if (go->GetAIName() == "GameObjectAI")

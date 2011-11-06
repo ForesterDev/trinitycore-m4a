@@ -52,8 +52,7 @@ void SummonList::DespawnEntry(uint32 entry)
         else if (summon->GetEntry() == entry)
         {
             erase(i++);
-            summon->setDeathState(JUST_DIED);
-            summon->RemoveCorpse();
+            summon->DespawnOrUnsummon();
         }
         else
             ++i;
@@ -70,13 +69,7 @@ void SummonList::DespawnAll()
         else
         {
             erase(begin());
-            if (TempSummon* summ = summon->ToTempSummon())
-            {
-                summon->DestroyForNearbyPlayers();
-                summ->UnSummon();
-            }
-            else
-                summon->DisappearAndDie();
+            summon->DespawnOrUnsummon();
         }
     }
 }
@@ -269,27 +262,6 @@ SpellInfo const* ScriptedAI::SelectSpell(Unit* target, uint32 school, uint32 mec
     return apSpell[urand(0, spellCount - 1)];
 }
 
-bool ScriptedAI::CanCast(Unit* target, SpellInfo const* spell, bool triggered /*= false*/)
-{
-    //No target so we can't cast
-    if (!target || !spell)
-        return false;
-
-    //Silenced so we can't cast
-    if (!triggered && me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
-        return false;
-
-    //Check for power
-    if (!triggered && me->GetPower(Powers(spell->PowerType)) < spell->ManaCost)
-        return false;
-
-    //Unit is out of range of this spell
-    if (me->IsInRange(target, float(me->GetSpellMinRangeForTarget(target, spell)), float(me->GetSpellMaxRangeForTarget(target, spell))))
-        return false;
-
-    return true;
-}
-
 void ScriptedAI::DoResetThreat()
 {
     if (!me->CanHaveThreatList() || me->getThreatManager().isThreatListEmpty())
@@ -391,16 +363,15 @@ Player* ScriptedAI::GetPlayerAtMinimumRange(float minimumRange)
 {
     Player* player = NULL;
 
-    CellPair pair(Trinity::ComputeCellPair(me->GetPositionX(), me->GetPositionY()));
+    CellCoord pair(Trinity::ComputeCellCoord(me->GetPositionX(), me->GetPositionY()));
     Cell cell(pair);
-    cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();
 
     Trinity::PlayerAtMinimumRangeAway check(me, minimumRange);
     Trinity::PlayerSearcher<Trinity::PlayerAtMinimumRangeAway> searcher(me, player, check);
     TypeContainerVisitor<Trinity::PlayerSearcher<Trinity::PlayerAtMinimumRangeAway>, GridTypeMapContainer> visitor(searcher);
 
-    cell.Visit(pair, visitor, *(me->GetMap()));
+    cell.Visit(pair, visitor, *me->GetMap(), *me, minimumRange);
 
     return player;
 }
@@ -457,7 +428,7 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(uint32 const diff)
     float y = me->GetPositionY();
     float z = me->GetPositionZ();
 
-    switch(me->GetEntry())
+    switch (me->GetEntry())
     {
         case NPC_BROODLORD:                                         // broodlord (not move down stairs)
             if (z > 448.60f)
@@ -475,9 +446,11 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(uint32 const diff)
             if (x > 3218.86f && x < 3275.69f && y < 572.40f && y > 484.68f)
                 return false;
             break;
-        default:
-            sLog->outError("TSCR: EnterEvadeIfOutOfCombatArea used for creature entry %u, but does not have any definition.", me->GetEntry());
-            return false;
+        default: // For most of creatures that certain area is their home area.
+            sLog->outDetail("TSCR: EnterEvadeIfOutOfCombatArea used for creature entry %u, but does not have any definition. Using the default one.", me->GetEntry());
+            uint32 homeAreaId = me->GetMap()->GetAreaId(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY(), me->GetHomePosition().GetPositionZ());
+            if (me->GetAreaId() == homeAreaId)
+                return false;
     }
 
     EnterEvadeMode();

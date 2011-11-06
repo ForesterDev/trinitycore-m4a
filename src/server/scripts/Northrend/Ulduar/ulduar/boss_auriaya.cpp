@@ -122,7 +122,7 @@ class boss_auriaya : public CreatureScript
             void EnterCombat(Unit* /*who*/)
             {
                 _EnterCombat();
-                DoScriptText(SAY_AGGRO,me);
+                DoScriptText(SAY_AGGRO, me);
 
                 events.ScheduleEvent(EVENT_SCREECH, urand(45000, 65000));
                 events.ScheduleEvent(EVENT_BLAST, urand(20000, 25000));
@@ -333,8 +333,8 @@ class npc_sanctum_sentry : public CreatureScript
 
             void Reset()
             {
-                events.ScheduleEvent(EVENT_RIP, urand(4000,8000));
-                events.ScheduleEvent(EVENT_POUNCE, urand(12000,15000));
+                events.ScheduleEvent(EVENT_RIP, urand(4000, 8000));
+                events.ScheduleEvent(EVENT_POUNCE, urand(12000, 15000));
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -367,7 +367,7 @@ class npc_sanctum_sentry : public CreatureScript
                                 me->AI()->AttackStart(target);
                                 DoCast(target, SPELL_SAVAGE_POUNCE);
                             }
-                            events.ScheduleEvent(EVENT_POUNCE, urand(12000,17000));
+                            events.ScheduleEvent(EVENT_POUNCE, urand(12000, 17000));
                             break;
                         default:
                             break;
@@ -493,7 +493,7 @@ class spell_auriaya_strenght_of_the_pack : public SpellScriptLoader
 
             void FilterTargets(std::list<Unit*>& unitList)
             {
-                unitList.remove_if(SanctumSentryCheck());
+                unitList.remove_if (SanctumSentryCheck());
             }
 
             void Register()
@@ -519,7 +519,7 @@ class spell_auriaya_sentinel_blast : public SpellScriptLoader
 
             void FilterTargets(std::list<Unit*>& unitList)
             {
-                unitList.remove_if(PlayerOrPetCheck());
+                unitList.remove_if (PlayerOrPetCheck());
             }
 
             void Register()

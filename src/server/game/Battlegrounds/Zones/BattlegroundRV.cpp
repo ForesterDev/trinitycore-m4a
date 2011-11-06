@@ -103,7 +103,7 @@ void BattlegroundRV::StartingEventOpenDoors()
     setTimer(BG_RV_FIRST_TIMER);
 }
 
-void BattlegroundRV::AddPlayer(Player *plr)
+void BattlegroundRV::AddPlayer(Player* plr)
 {
     Battleground::AddPlayer(plr);
     //create score and add it to map, default values are set in constructor
@@ -151,7 +151,7 @@ bool BattlegroundRV::HandlePlayerUnderMap(Player* player)
     return true;
 }
 
-void BattlegroundRV::HandleAreaTrigger(Player *Source, uint32 Trigger)
+void BattlegroundRV::HandleAreaTrigger(Player* Source, uint32 Trigger)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;

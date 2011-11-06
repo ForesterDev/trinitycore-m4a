@@ -59,7 +59,7 @@ bool PetAI::_needToStop()
     if (_CheckTargetCC(me->getVictim()) && !targetHasCC)
         return true;
 
-    return !me->canAttack(me->getVictim());
+    return !me->IsValidAttackTarget(me->getVictim());
 }
 
 void PetAI::_stopAttack()
@@ -142,13 +142,8 @@ void PetAI::UpdateAI(const uint32 diff)
             if (me->GetCharmInfo() && me->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
                 continue;
 
-            // ignore some combinations of combat state and combat/noncombat spells
-            if (!me->getVictim())
+            if (spellInfo->IsPositive())
             {
-                // ignore attacking spells, and allow only self/around spells
-                if (!spellInfo->IsPositive())
-                    continue;
-
                 // non combat spells allowed
                 // only pet spells have IsNonCombatSpell and not fit this reqs:
                 // Consume Shadows, Lesser Invisibility, so ignore checks for its
@@ -164,41 +159,34 @@ void PetAI::UpdateAI(const uint32 diff)
                     if (cooldown >= 0 && duration >= 0 && cooldown > duration)
                         continue;
                 }
-            }
-            else
-            {
-                // just ignore non-combat spells
-                if (!spellInfo->CanBeUsedInCombat())
-                    continue;
-            }
 
-            Spell* spell = new Spell(me, spellInfo, TRIGGERED_NONE, 0);
+                Spell* spell = new Spell(me, spellInfo, TRIGGERED_NONE, 0);
 
-            // Fix to allow pets on STAY to autocast
-            if (me->getVictim() && _CanAttack(me->getVictim()) && spell->CanAutoCast(me->getVictim()))
-            {
-                targetSpellStore.push_back(std::make_pair(me->getVictim(), spell));
-                continue;
-            }
-            else
-            {
                 bool spellUsed = false;
                 for (std::set<uint64>::const_iterator tar = m_AllySet.begin(); tar != m_AllySet.end(); ++tar)
                 {
-                    Unit* Target = ObjectAccessor::GetUnit(*me, *tar);
+                    Unit* target = ObjectAccessor::GetUnit(*me, *tar);
 
                     //only buff targets that are in combat, unless the spell can only be cast while out of combat
-                    if (!Target)
+                    if (!target)
                         continue;
 
-                    if (spell->CanAutoCast(Target))
+                    if (spell->CanAutoCast(target))
                     {
-                        targetSpellStore.push_back(std::make_pair(Target, spell));
+                        targetSpellStore.push_back(std::make_pair(target, spell));
                         spellUsed = true;
                         break;
                     }
                 }
                 if (!spellUsed)
+                    delete spell;
+            }
+            else if (me->getVictim() && CanAttack(me->getVictim()) && spellInfo->CanBeUsedInCombat())
+            {
+                Spell* spell = new Spell(me, spellInfo, TRIGGERED_NONE, 0);
+                if (spell->CanAutoCast(me->getVictim()))
+                    targetSpellStore.push_back(std::make_pair<Unit*, Spell*>(me->getVictim(), spell));
+                else
                     delete spell;
             }
         }
@@ -260,7 +248,7 @@ void PetAI::UpdateAllies()
     m_AllySet.insert(me->GetGUID());
     if (group)                                              //add group
     {
-        for (GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+        for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
         {
             Player* Target = itr->getSource();
             if (!Target || !group->SameSubGroup((Player*)owner, Target))
@@ -303,7 +291,7 @@ void PetAI::AttackStart(Unit* target)
     // Overrides Unit::AttackStart to correctly evaluate Pet states
 
     // Check all pet states to decide if we can attack this target
-    if (!_CanAttack(target))
+    if (!CanAttack(target))
         return;
 
     targetHasCC = _CheckTargetCC(target);
@@ -453,7 +441,7 @@ void PetAI::MovementInform(uint32 moveType, uint32 data)
     }
 }
 
-bool PetAI::_CanAttack(Unit* target)
+bool PetAI::CanAttack(Unit* target)
 {
     // Evaluates wether a pet can attack a specific
     // target based on CommandState, ReactState and other flags

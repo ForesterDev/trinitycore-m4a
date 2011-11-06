@@ -200,7 +200,7 @@ std::string CreateDumpString(char const* tableName, QueryResult result)
     if (!tableName || !result) return "";
     std::ostringstream ss;
     ss << "INSERT INTO "<< _TABLE_SIM_ << tableName << _TABLE_SIM_ << " VALUES (";
-    Field *fields = result->Fetch();
+    Field* fields = result->Fetch();
     for (uint32 i = 0; i < result->GetFieldCount(); ++i)
     {
         if (i == 0) ss << '\'';
@@ -353,7 +353,16 @@ bool PlayerDumpWriter::GetDump(uint32 guid, std::string &dump)
 
 DumpReturn PlayerDumpWriter::WriteDump(const std::string& file, uint32 guid)
 {
-    FILE *fout = fopen(file.c_str(), "w");
+    if (sWorld->getBoolConfig(CONFIG_PDUMP_NO_PATHS))
+        if (strstr(file.c_str(), "\\") || strstr(file.c_str(), "/"))
+            return DUMP_FILE_OPEN_ERROR;
+    if (sWorld->getBoolConfig(CONFIG_PDUMP_NO_OVERWRITE))
+        if (FILE* f = fopen(file.c_str(), "r"))
+        {
+            fclose(f);
+            return DUMP_FILE_OPEN_ERROR;
+        }
+    FILE* fout = fopen(file.c_str(), "w");
     if (!fout)
         return DUMP_FILE_OPEN_ERROR;
 
@@ -383,11 +392,11 @@ void fixNULLfields(std::string &line)
 
 DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, std::string name, uint32 guid)
 {
-    uint32 charcount = sAccountMgr->GetCharactersCount(account);
+    uint32 charcount = AccountMgr::GetCharactersCount(account);
     if (charcount >= 10)
         return DUMP_TOO_MANY_CHARS;
 
-    FILE *fin = fopen(file.c_str(), "r");
+    FILE* fin = fopen(file.c_str(), "r");
     if (!fin)
         return DUMP_FILE_OPEN_ERROR;
 
@@ -494,7 +503,7 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
         }
 
         // change the data to server values
-        switch(type)
+        switch (type)
         {
             case DTT_CHARACTER:
             {

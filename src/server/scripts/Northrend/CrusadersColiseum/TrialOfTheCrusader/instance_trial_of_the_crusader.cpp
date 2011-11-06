@@ -33,7 +33,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
 
         struct instance_trial_of_the_crusader_InstanceMapScript : public InstanceScript
         {
-            instance_trial_of_the_crusader_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {}
+            instance_trial_of_the_crusader_InstanceMapScript(Map* map) : InstanceScript(map) {}
 
             uint32 EncounterStatus[MAX_ENCOUNTERS];
             uint32 TrialCounter;
@@ -43,8 +43,6 @@ class instance_trial_of_the_crusader : public InstanceMapScript
             uint32 NorthrendBeasts;
             std::string SaveDataBuffer;
             bool   NeedSave;
-            uint32 FjolaCasting;
-            uint32 EydisCasting;
 
             uint64 BarrentGUID;
             uint64 TirionGUID;

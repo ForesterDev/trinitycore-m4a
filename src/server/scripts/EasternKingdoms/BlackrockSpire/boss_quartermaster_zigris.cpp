@@ -57,8 +57,8 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
-            events.ScheduleEvent(EVENT_SHOOT, 1*IN_MILLISECONDS);
-            events.ScheduleEvent(EVENT_STUN_BOMB, 16*IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_SHOOT,      1 * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_STUN_BOMB, 16 * IN_MILLISECONDS);
         }
 
         void JustDied(Unit* /*who*/)
@@ -86,7 +86,7 @@ public:
                         break;
                     case EVENT_STUN_BOMB:
                         DoCast(me->getVictim(), SPELL_STUNBOMB);
-                        events.ScheduleEvent(EVENT_STUN_BOMB, 14*IN_MILLISECONDS);
+                        events.ScheduleEvent(EVENT_STUN_BOMB, 14 * IN_MILLISECONDS);
                         break;
                 }
             }

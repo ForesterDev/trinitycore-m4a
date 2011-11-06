@@ -70,8 +70,9 @@ public:
                 return;
 
             Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself();
-
-            if (!player || player->isGameMaster() || player->IsBeingTeleported())
+            
+            // If player has Disguise aura for quest A Meeting With The Magister or An Audience With The Arcanist, do not teleport it away but let it pass
+            if (!player || player->isGameMaster() || player->IsBeingTeleported() || player->HasAura(70973) || player->HasAura(70971))
                 return;
 
             switch (me->GetEntry())
@@ -108,7 +109,7 @@ public:
         void UpdateAI(const uint32 /*diff*/){}
     };
 
-    CreatureAI *GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_mageguard_dalaranAI(creature);
     }

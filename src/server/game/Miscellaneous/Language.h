@@ -805,7 +805,9 @@ enum TrinityStrings
     LANG_ALLOW_TICKETS                  = 1134,
     LANG_DISALLOW_TICKETS               = 1135,
     LANG_CHAR_NOT_BANNED                = 1136,
-    // Room for more level 3              1137-1199 not used
+    LANG_DEV_ON                         = 1137,
+    LANG_DEV_OFF                        = 1138,
+    // Room for more level 3              1139-1199 not used
 
     // Debug commands
     LANG_CINEMATIC_NOT_EXIST            = 1200,
@@ -909,6 +911,8 @@ enum TrinityStrings
     LANG_COMMAND_TICKETLISTADDCOMMENT   = 2024,
     LANG_COMMAND_TICKETLISTAGECREATE    = 2025,
     LANG_COMMAND_TICKETSHOWESCALATEDLIST = 2026,
+    LANG_COMMAND_TICKETPENDING          = 2027,
+    LANG_COMMAND_TICKETRESET            = 2028,
 
     // Trinity strings                    5000-9999
     LANG_COMMAND_FREEZE                 = 5000,
@@ -943,6 +947,7 @@ enum TrinityStrings
     LANG_GOINFO_LOOTID                  = 5028,
     LANG_COMMAND_LOOKUP_MAX_RESULTS     = 5029,
     // Room for more Trinity strings      5030-9999
+    LANG_FLEE                           = 5030,
 
     // Level requirement notifications
     LANG_SAY_REQ                        = 6604,

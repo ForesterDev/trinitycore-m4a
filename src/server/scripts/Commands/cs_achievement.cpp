@@ -46,7 +46,7 @@ public:
         return commandTable;
     }
 
-    static bool HandleAchievementAddCommand(ChatHandler* handler, const char *args)
+    static bool HandleAchievementAddCommand(ChatHandler* handler, char const* args)
     {
         if (!*args)
             return false;
@@ -54,8 +54,8 @@ public:
         uint32 achievementId = atoi((char*)args);
         if (!achievementId)
         {
-            if (char* cId = handler->extractKeyFromLink((char*)args, "Hachievement"))
-                achievementId = atoi(cId);
+            if (char* id = handler->extractKeyFromLink((char*)args, "Hachievement"))
+                achievementId = atoi(id);
             if (!achievementId)
                 return false;
         }
@@ -68,8 +68,8 @@ public:
             return false;
         }
 
-        if (AchievementEntry const* pAE = GetAchievementStore()->LookupEntry(achievementId))
-            target->CompletedAchievement(pAE);
+        if (AchievementEntry const* achievementEntry = GetAchievementStore()->LookupEntry(achievementId))
+            target->CompletedAchievement(achievementEntry);
 
         return true;
     }

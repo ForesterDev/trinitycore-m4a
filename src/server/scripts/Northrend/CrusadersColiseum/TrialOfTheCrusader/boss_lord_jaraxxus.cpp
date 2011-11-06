@@ -109,11 +109,11 @@ public:
     {
         boss_jaraxxusAI(Creature* creature) : ScriptedAI(creature), Summons(me)
         {
-            m_pInstance = creature->GetInstanceScript();
+            m_instance = creature->GetInstanceScript();
             Reset();
         }
 
-        InstanceScript* m_pInstance;
+        InstanceScript* m_instance;
 
         SummonList Summons;
 
@@ -127,8 +127,8 @@ public:
 
         void Reset()
         {
-            if (m_pInstance)
-                m_pInstance->SetData(TYPE_JARAXXUS, NOT_STARTED);
+            if (m_instance)
+                m_instance->SetData(TYPE_JARAXXUS, NOT_STARTED);
             SetEquipmentSlots(false, EQUIP_MAIN, EQUIP_OFFHAND, EQUIP_RANGED);
             m_uiFelFireballTimer = 5*IN_MILLISECONDS;
             m_uiFelLightningTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
@@ -142,8 +142,8 @@ public:
 
         void JustReachedHome()
         {
-            if (m_pInstance)
-                m_pInstance->SetData(TYPE_JARAXXUS, FAIL);
+            if (m_instance)
+                m_instance->SetData(TYPE_JARAXXUS, FAIL);
             DoCast(me, SPELL_JARAXXUS_CHAINS);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetReactState(REACT_PASSIVE);
@@ -153,8 +153,8 @@ public:
         {
             if (who->GetTypeId() == TYPEID_PLAYER)
             {
-                if (m_pInstance)
-                    m_pInstance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELEGIBLE, 0);
+                if (m_instance)
+                    m_instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELEGIBLE, 0);
             }
         }
 
@@ -162,8 +162,8 @@ public:
         {
             Summons.DespawnAll();
             DoScriptText(SAY_DEATH, me);
-            if (m_pInstance)
-                m_pInstance->SetData(TYPE_JARAXXUS, DONE);
+            if (m_instance)
+                m_instance->SetData(TYPE_JARAXXUS, DONE);
         }
 
         void JustSummoned(Creature* summoned)
@@ -178,8 +178,8 @@ public:
             else
             {
                 me->SetInCombatWithZone();
-                if (m_pInstance)
-                    m_pInstance->SetData(TYPE_JARAXXUS, IN_PROGRESS);
+                if (m_instance)
+                    m_instance->SetData(TYPE_JARAXXUS, IN_PROGRESS);
                 DoScriptText(SAY_AGGRO, me);
             }
         }
@@ -313,7 +313,7 @@ public:
         {
             if (!dynamic_cast<TempSummon *>(base().me))
                 throw std::runtime_error("bad infernal volcano");
-            m_pInstance = (InstanceScript*)creature->GetInstanceScript();
+            m_instance = (InstanceScript*)creature->GetInstanceScript();
             Reset();
         }
 
@@ -327,7 +327,7 @@ public:
             return *static_cast<TempSummon *>(base().me);
         }
 
-        InstanceScript* m_pInstance;
+        InstanceScript* m_instance;
 
         void Reset()
         {
@@ -383,11 +383,11 @@ public:
     {
         mob_fel_infernalAI(Creature* creature) : ScriptedAI(creature)
         {
-            m_pInstance = (InstanceScript*)creature->GetInstanceScript();
+            m_instance = (InstanceScript*)creature->GetInstanceScript();
             Reset();
         }
 
-        InstanceScript* m_pInstance;
+        InstanceScript* m_instance;
         uint32 m_uiFelStreakTimer;
 
         void Reset()
@@ -396,7 +396,7 @@ public:
             me->SetInCombatWithZone();
         }
 
-        /*void SpellHitTarget(Unit* target, const SpellInfo *pSpell)
+        /*void SpellHitTarget(Unit* target, const SpellInfo* pSpell)
         {
             if (pSpell->Id == SPELL_FEL_STREAK)
                 DoCastAOE(SPELL_FEL_INFERNO); //66517
@@ -407,7 +407,7 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (m_pInstance && m_pInstance->GetData(TYPE_JARAXXUS) != IN_PROGRESS)
+            if (m_instance && m_instance->GetData(TYPE_JARAXXUS) != IN_PROGRESS)
                 me->DespawnOrUnsummon();
 
             if (m_uiFelStreakTimer <= uiDiff)
@@ -437,11 +437,11 @@ public:
     {
         mob_nether_portalAI(Creature* creature) : ScriptedAI(creature), Summons(me)
         {
-            m_pInstance = (InstanceScript*)creature->GetInstanceScript();
+            m_instance = (InstanceScript*)creature->GetInstanceScript();
             Reset();
         }
 
-        InstanceScript* m_pInstance;
+        InstanceScript* m_instance;
 
         SummonList Summons;
 
@@ -492,13 +492,13 @@ public:
     {
         mob_mistress_of_painAI(Creature* creature) : ScriptedAI(creature)
         {
-            m_pInstance = (InstanceScript*)creature->GetInstanceScript();
-            if (m_pInstance)
-                m_pInstance->SetData(DATA_MISTRESS_OF_PAIN_COUNT, INCREASE);
+            m_instance = (InstanceScript*)creature->GetInstanceScript();
+            if (m_instance)
+                m_instance->SetData(DATA_MISTRESS_OF_PAIN_COUNT, INCREASE);
             Reset();
         }
 
-        InstanceScript* m_pInstance;
+        InstanceScript* m_instance;
         uint32 m_uiShivanSlashTimer;
         uint32 m_uiSpinningStrikeTimer;
         uint32 m_uiMistressKissTimer;
@@ -513,17 +513,20 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
-            if (m_pInstance)
-                m_pInstance->SetData(DATA_MISTRESS_OF_PAIN_COUNT, DECREASE);
+            if (m_instance)
+                m_instance->SetData(DATA_MISTRESS_OF_PAIN_COUNT, DECREASE);
         }
 
         void UpdateAI(const uint32 uiDiff)
         {
+            if (m_instance && m_instance->GetData(TYPE_JARAXXUS) != IN_PROGRESS)
+            {
+                me->DespawnOrUnsummon();
+                return;
+            }
+
             if (!UpdateVictim())
                 return;
-
-            if (m_pInstance && m_pInstance->GetData(TYPE_JARAXXUS) != IN_PROGRESS)
-                me->DespawnOrUnsummon();
 
             if (m_uiShivanSlashTimer <= uiDiff)
             {

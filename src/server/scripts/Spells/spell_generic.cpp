@@ -102,7 +102,7 @@ class spell_gen_av_drekthar_presence : public SpellScriptLoader
 
             bool CheckAreaTarget(Unit* target)
             {
-                switch(target->GetEntry())
+                switch (target->GetEntry())
                 {
                     // alliance
                     case 14762: // Dun Baldar North Marshal
@@ -205,7 +205,7 @@ class spell_gen_cannibalize : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_gen_cannibalize_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnEffectHit += SpellEffectFn(spell_gen_cannibalize_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
                 OnCheckCast += SpellCheckCastFn(spell_gen_cannibalize_SpellScript::CheckIfCorpseNear);
             }
         };
@@ -320,7 +320,7 @@ class spell_gen_pet_summoned : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_gen_pet_summoned_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+                OnEffectHitTarget += SpellEffectFn(spell_gen_pet_summoned_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
@@ -344,10 +344,10 @@ namespace
 
             void Register()
             {
-                OnEffect += SpellEffectFn(Myt::effect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+				OnEffectHitTarget += SpellEffectFn(Myt::effect_hit_target, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
 
-            void effect(SpellEffIndex)
+            void effect_hit_target(SpellEffIndex)
             {
                 if (auto v = GetCaster()->GetVehicleBase())
                 {
@@ -392,7 +392,7 @@ class spell_gen_remove_flight_auras : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_gen_remove_flight_auras_SpellScript::HandleScript, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+                OnEffectHitTarget += SpellEffectFn(spell_gen_remove_flight_auras_SpellScript::HandleScript, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
@@ -534,7 +534,7 @@ class spell_gen_trick : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_gen_trick_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+                OnEffectHitTarget += SpellEffectFn(spell_gen_trick_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
@@ -583,7 +583,7 @@ class spell_gen_trick_or_treat : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_gen_trick_or_treat_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+                OnEffectHitTarget += SpellEffectFn(spell_gen_trick_or_treat_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
@@ -663,7 +663,7 @@ class spell_pvp_trinket_wotf_shared_cd : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_pvp_trinket_wotf_shared_cd_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnEffectHit += SpellEffectFn(spell_pvp_trinket_wotf_shared_cd_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
@@ -883,7 +883,7 @@ class spell_gen_divine_storm_cd_reset : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_gen_divine_storm_cd_reset_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnEffectHitTarget += SpellEffectFn(spell_gen_divine_storm_cd_reset_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
@@ -908,14 +908,14 @@ class spell_gen_gunship_portal : public SpellScriptLoader
                 if (caster->GetTypeId() != TYPEID_PLAYER)
                     return;
 
-                if (Battleground *bg = caster->ToPlayer()->GetBattleground())
+                if (Battleground* bg = caster->ToPlayer()->GetBattleground())
                     if (bg->GetTypeID(true) == BATTLEGROUND_IC)
                         bg->DoAction(1, caster->GetGUID());
             }
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_gen_gunship_portal_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+                OnEffectHitTarget += SpellEffectFn(spell_gen_gunship_portal_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
@@ -1056,8 +1056,8 @@ class spell_generic_clone : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_generic_clone_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
-                OnEffect += SpellEffectFn(spell_generic_clone_SpellScript::HandleScriptEffect, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
+                OnEffectHitTarget += SpellEffectFn(spell_generic_clone_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+                OnEffectHitTarget += SpellEffectFn(spell_generic_clone_SpellScript::HandleScriptEffect, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
@@ -1164,7 +1164,7 @@ class spell_generic_clone_weapon : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_generic_clone_weapon_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+                OnEffectHitTarget += SpellEffectFn(spell_generic_clone_weapon_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
@@ -1212,7 +1212,7 @@ class spell_gen_seaforium_blast : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_gen_seaforium_blast_SpellScript::AchievementCredit, EFFECT_1, SPELL_EFFECT_GAMEOBJECT_DAMAGE);
+                OnEffectHitTarget += SpellEffectFn(spell_gen_seaforium_blast_SpellScript::AchievementCredit, EFFECT_1, SPELL_EFFECT_GAMEOBJECT_DAMAGE);
             }
         };
 
@@ -1344,7 +1344,7 @@ class spell_gen_magic_rooster : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_gen_magic_rooster_SpellScript::HandleScript, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
+                OnEffectHitTarget += SpellEffectFn(spell_gen_magic_rooster_SpellScript::HandleScript, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
@@ -1400,7 +1400,7 @@ class spell_gen_launch : public SpellScriptLoader
             void HandleScript(SpellEffIndex /*effIndex*/)
             {
                 if (Player* player = GetHitPlayer())
-                    player->AddAura(SPELL_LAUNCH_NO_FALLING_DAMAGE,player); // prevents falling damage
+                    player->AddAura(SPELL_LAUNCH_NO_FALLING_DAMAGE, player); // prevents falling damage
             }
 
             void Launch()
@@ -1415,16 +1415,16 @@ class spell_gen_launch : public SpellScriptLoader
                     // There is no spell for this, the following calculation was based on void Spell::CalculateJumpSpeeds
 
                     float speedZ = 10.0f;
-                    float dist = position->GetExactDist2d(player->GetPositionX(),player->GetPositionY());
+                    float dist = position->GetExactDist2d(player->GetPositionX(), player->GetPositionY());
                     float speedXY = dist;
 
-                    player->GetMotionMaster()->MoveJump(position->GetPositionX(),position->GetPositionY(),position->GetPositionZ(),speedXY,speedZ);
+                    player->GetMotionMaster()->MoveJump(position->GetPositionX(), position->GetPositionY(), position->GetPositionZ(), speedXY, speedZ);
                 }
             }
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_gen_launch_SpellScript::HandleScript, EFFECT_1, SPELL_EFFECT_FORCE_CAST);
+                OnEffectHitTarget += SpellEffectFn(spell_gen_launch_SpellScript::HandleScript, EFFECT_1, SPELL_EFFECT_FORCE_CAST);
                 AfterHit += SpellHitFn(spell_gen_launch_SpellScript::Launch);
             }
         };
@@ -1487,6 +1487,52 @@ class spell_gen_vehicle_scaling : public SpellScriptLoader
         }
 };
 
+
+class spell_gen_oracle_wolvar_reputation: public SpellScriptLoader
+{
+public:
+    spell_gen_oracle_wolvar_reputation() : SpellScriptLoader("spell_gen_oracle_wolvar_reputation") { }
+
+    class spell_gen_oracle_wolvar_reputation_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gen_oracle_wolvar_reputation_SpellScript)
+
+        void HandleDummy(SpellEffIndex effIndex)
+        {
+
+            if (Player* player = GetCaster()->ToPlayer())
+            {
+
+                uint32 factionId = GetSpellInfo()->Effects[effIndex].CalcValue();
+                int32  repChange =  GetSpellInfo()->Effects[EFFECT_1].CalcValue();
+
+                FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionId);
+
+                if (!factionEntry)
+                    return;
+
+                // Set rep to baserep + basepoints (expecting spillover for oposite faction -> become hated)
+                // Not when player already has equal or higher rep with this faction
+                if (player->GetReputationMgr().GetBaseReputation(factionEntry) < repChange)
+                    player->GetReputationMgr().SetReputation(factionEntry, repChange);
+
+                // EFFECT_INDEX_2 most likely update at war state, we already handle this in SetReputation
+            }
+
+        }
+
+        void Register()
+        {
+            OnEffectHit += SpellEffectFn(spell_gen_oracle_wolvar_reputation_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gen_oracle_wolvar_reputation_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -1519,4 +1565,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_allow_cast_from_item_only();
     new spell_gen_launch();
     new spell_gen_vehicle_scaling();
+    new spell_gen_oracle_wolvar_reputation();
 }

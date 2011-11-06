@@ -60,8 +60,8 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
-            events.ScheduleEvent(EVENT_CROWD_PUMMEL, 8*IN_MILLISECONDS);
-            events.ScheduleEvent(EVENT_MIGHTY_BLOW, 14*IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_CROWD_PUMMEL, 8 * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_MIGHTY_BLOW, 14 * IN_MILLISECONDS);
         }
 
         void JustDied(Unit* /*who*/)
@@ -77,7 +77,7 @@ public:
             //Summon Gizrul
             if (!Summoned && HealthBelowPct(25))
             {
-                me->SummonCreature(NPC_GIZRUL_THE_SLAVENER, SummonLocation, TEMPSUMMON_TIMED_DESPAWN, 300*IN_MILLISECONDS);
+                me->SummonCreature(NPC_GIZRUL_THE_SLAVENER, SummonLocation, TEMPSUMMON_TIMED_DESPAWN, 300 * IN_MILLISECONDS);
                 Summoned = true;
             }
 
@@ -92,11 +92,11 @@ public:
                 {
                     case EVENT_CROWD_PUMMEL:
                         DoCast(me->getVictim(), SPELL_CROWDPUMMEL);
-                        events.ScheduleEvent(EVENT_CROWD_PUMMEL, 14*IN_MILLISECONDS);
+                        events.ScheduleEvent(EVENT_CROWD_PUMMEL, 14 * IN_MILLISECONDS);
                         break;
                     case EVENT_MIGHTY_BLOW:
                         DoCast(me->getVictim(), SPELL_MIGHTYBLOW);
-                        events.ScheduleEvent(EVENT_MIGHTY_BLOW, 10*IN_MILLISECONDS);
+                        events.ScheduleEvent(EVENT_MIGHTY_BLOW, 10 * IN_MILLISECONDS);
                         break;
                 }
             }

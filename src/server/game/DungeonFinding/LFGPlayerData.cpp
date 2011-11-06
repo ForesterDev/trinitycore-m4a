@@ -28,7 +28,7 @@ LfgPlayerData::~LfgPlayerData()
 
 void LfgPlayerData::SetState(LfgState state)
 {
-    switch(state)
+    switch (state)
     {
         case LFG_STATE_NONE:
         case LFG_STATE_DUNGEON:

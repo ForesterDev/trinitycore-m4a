@@ -124,7 +124,7 @@ void SmartAIMgr::LoadSmartAIFromDB()
         }
         if (temp.entryOrGuid >= 0)
         {
-            switch(source_type)
+            switch (source_type)
             {
                 case SMART_SCRIPT_TYPE_CREATURE:
                 {
@@ -395,7 +395,8 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
                 break;
             case SMART_EVENT_ACCEPTED_QUEST:
             case SMART_EVENT_REWARD_QUEST:
-                if (!IsQuestValid(e, e.event.quest.quest)) return false;
+                if (e.event.quest.quest && !IsQuestValid(e, e.event.quest.quest))
+                    return false;
                 break;
             case SMART_EVENT_RECEIVE_EMOTE:
             {
@@ -527,7 +528,8 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
             }
             break;
         case SMART_ACTION_SOUND:
-            if (!IsSoundValid(e, e.action.sound.sound)) return false;
+            if (!IsSoundValid(e, e.action.sound.sound))
+                return false;
             if (e.action.sound.range > TEXT_RANGE_WORLD)
             {
                 sLog->outErrorDb("SmartAIMgr: Entry %d SourceType %u Event %u Action %u uses invalid Text Range %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.action.sound.range);
@@ -540,7 +542,7 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
             break;
         case SMART_ACTION_FAIL_QUEST:
         case SMART_ACTION_ADD_QUEST:
-            if (e.action.quest.quest && !IsQuestValid(e, e.action.quest.quest)) return false;
+            if (!e.action.quest.quest || !IsQuestValid(e, e.action.quest.quest)) return false;
             break;
         case SMART_ACTION_ACTIVATE_TAXI:
             {
@@ -639,7 +641,7 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
             }
         case SMART_ACTION_SUMMON_CREATURE:
             if (!IsCreatureValid(e, e.action.summonCreature.creature)) return false;
-            if (e.action.summonCreature.type > TEMPSUMMON_MANUAL_DESPAWN)
+            if (e.action.summonCreature.type < TEMPSUMMON_TIMED_OR_DEAD_DESPAWN || e.action.summonCreature.type > TEMPSUMMON_MANUAL_DESPAWN)
             {
                 sLog->outErrorDb("SmartAIMgr: Entry %d SourceType %u Event %u Action %u uses incorrect TempSummonType %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.action.summonCreature.type);
                 return false;
@@ -757,6 +759,8 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
         case SMART_ACTION_ACTIVATE_GOBJECT:
         case SMART_ACTION_CALL_SCRIPT_RESET:
         case SMART_ACTION_ENTER_VEHICLE:
+        case SMART_ACTION_LEAVE_VEHICLE:
+        case SMART_ACTION_REMOVE_PASSENGERS:
         case SMART_ACTION_NONE:
         case SMART_ACTION_CALL_TIMED_ACTIONLIST:
         case SMART_ACTION_SET_NPC_FLAG:
@@ -776,6 +780,7 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
         case SMART_ACTION_ADD_DYNAMIC_FLAG:
         case SMART_ACTION_REMOVE_DYNAMIC_FLAG:
         case SMART_ACTION_JUMP_TO_POS:
+        case SMART_ACTION_SEND_GOSSIP_MENU:
             break;
         default:
             sLog->outErrorDb("SmartAIMgr: Not handled action_type(%u), event_type(%u), Entry %d SourceType %u Event %u, skipped.", e.GetActionType(), e.GetEventType(), e.entryOrGuid, e.GetScriptType(), e.event_id);
