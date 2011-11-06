@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Map.h"
 #include "GridStates.h"
 #include "ScriptMgr.h"
@@ -29,7 +30,14 @@
 #include "ObjectAccessor.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
+#include "Detail/Vmap_mutex.hpp"
 #include "Group.h"
+
+using boost::unique_lock;
+using boost::shared_lock;
+using boost::upgrade_lock;
+using Detail::Vmap_mutex;
+using Detail::vmap_mutex;
 
 union u_map_magic
 {
@@ -99,12 +107,15 @@ bool Map::ExistVMap(uint32 mapid, int gx, int gy)
 {
     if (VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager())
     {
+        upgrade_lock<Vmap_mutex> l(vmap_mutex());
         if (vmgr->isMapLoadingEnabled())
         {
+            unique_lock<Vmap_mutex> ul(move(l));
             bool exists = vmgr->existsMap((sWorld->GetDataPath()+ "vmaps").c_str(),  mapid, gx, gy);
             if (!exists)
             {
                 std::string name = vmgr->getDirFileName(mapid, gx, gy);
+                ul.unlock();
                 sLog->outError("VMap file '%s' is missing or points to wrong version of vmap file. Redo vmaps with latest version of vmap_assembler.exe.", (sWorld->GetDataPath()+"vmaps/"+name).c_str());
                 return false;
             }
@@ -116,8 +127,13 @@ bool Map::ExistVMap(uint32 mapid, int gx, int gy)
 
 void Map::LoadVMap(int gx, int gy)
 {
-                                                            // x and y are swapped !!
-    int vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld->GetDataPath()+ "vmaps").c_str(),  GetId(), gx, gy);
+    int vmapLoadResult;
+    {
+        auto &m = *VMAP::VMapFactory::createOrGetVMapManager();
+        unique_lock<Vmap_mutex> l(vmap_mutex());
+                                                                // x and y are swapped !!
+        vmapLoadResult = m.loadMap((sWorld->GetDataPath() + "vmaps").c_str(), GetId(), gx, gy);
+    }
     switch (vmapLoadResult)
     {
         case VMAP::VMAP_LOAD_RESULT_OK:
@@ -300,6 +316,13 @@ void Map::SwitchGridContainers(T* obj, bool on)
 
 template void Map::SwitchGridContainers(Creature*, bool);
 //template void Map::SwitchGridContainers(DynamicObject*, bool);
+
+void Map::player_zone_changed(Player &p)
+{
+    if (auto instance = dynamic_cast<InstanceMap *>(this))
+        if (auto script = instance->GetInstanceScript())
+            script->player_zone_changed(p);
+}
 
 template<class T>
 void Map::DeleteFromWorld(T* obj)
@@ -992,8 +1015,10 @@ bool Map::UnloadGrid(NGridType& ngrid, bool unloadAll)
                 GridMaps[gx][gy]->unloadData();
                 delete GridMaps[gx][gy];
             }
+            auto &m = *VMAP::VMapFactory::createOrGetVMapManager();
+            unique_lock<Vmap_mutex> l(vmap_mutex());
             // x and y are swapped
-            VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(GetId(), gx, gy);
+            m.unloadMap(GetId(), gx, gy);
         }
         else
             ((MapInstanced*)m_parentMap)->RemoveGridMapReference(GridCoord(gx, gy));
@@ -1581,13 +1606,18 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps, float maxSearchD
     if (pUseVmaps)
     {
         VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
+        upgrade_lock<Vmap_mutex> l(vmap_mutex());
         if (vmgr->isHeightCalcEnabled())
         {
+            unique_lock<Vmap_mutex> ul(move(l));
             // look from a bit higher pos to find the floor
             vmapHeight = vmgr->getHeight(GetId(), x, y, z + 2.0f, maxSearchDist);
         }
         else
+        {
+            l.unlock();
             vmapHeight = VMAP_INVALID_HEIGHT_VALUE;
+        }
     }
     else
         vmapHeight = VMAP_INVALID_HEIGHT_VALUE;
@@ -1669,17 +1699,21 @@ bool Map::GetAreaInfo(float x, float y, float z, uint32 &flags, int32 &adtId, in
 {
     float vmap_z = z;
     VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
-    if (vmgr->getAreaInfo(GetId(), x, y, vmap_z, flags, adtId, rootId, groupId))
     {
-        // check if there's terrain between player height and object height
-        if (GridMap* gmap = const_cast<Map*>(this)->GetGrid(x, y))
+        shared_lock<Vmap_mutex> l(vmap_mutex());
+        if (vmgr->getAreaInfo(GetId(), x, y, vmap_z, flags, adtId, rootId, groupId))
         {
-            float _mapheight = gmap->getHeight(x, y);
-            // z + 2.0f condition taken from GetHeight(), not sure if it's such a great choice...
-            if (z + 2.0f > _mapheight &&  _mapheight > vmap_z)
-                return false;
+            l.unlock();
+            // check if there's terrain between player height and object height
+            if (GridMap* gmap = const_cast<Map*>(this)->GetGrid(x, y))
+            {
+                float _mapheight = gmap->getHeight(x, y);
+                // z + 2.0f condition taken from GetHeight(), not sure if it's such a great choice...
+                if (z + 2.0f > _mapheight &&  _mapheight > vmap_z)
+                    return false;
+            }
+            return true;
         }
-        return true;
     }
     return false;
 }
@@ -1737,31 +1771,35 @@ ZLiquidStatus Map::getLiquidStatus(float x, float y, float z, uint8 ReqLiquidTyp
     VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
     float liquid_level, ground_level = INVALID_HEIGHT;
     uint32 liquid_type;
-    if (vmgr->GetLiquidLevel(GetId(), x, y, z, ReqLiquidType, liquid_level, ground_level, liquid_type))
     {
-        sLog->outDebug(LOG_FILTER_MAPS, "getLiquidStatus(): vmap liquid level: %f ground: %f type: %u", liquid_level, ground_level, liquid_type);
-        // Check water level and ground level
-        if (liquid_level > ground_level && z > ground_level - 2)
+        shared_lock<Vmap_mutex> l(vmap_mutex());
+        if (vmgr->GetLiquidLevel(GetId(), x, y, z, ReqLiquidType, liquid_level, ground_level, liquid_type))
         {
-            // All ok in water -> store data
-            if (data)
+            l.unlock();
+            sLog->outDebug(LOG_FILTER_MAPS, "getLiquidStatus(): vmap liquid level: %f ground: %f type: %u", liquid_level, ground_level, liquid_type);
+            // Check water level and ground level
+            if (liquid_level > ground_level && z > ground_level - 2)
             {
-                data->type  = liquid_type;
-                data->level = liquid_level;
-                data->depth_level = ground_level;
+                // All ok in water -> store data
+                if (data)
+                {
+                    data->type  = liquid_type;
+                    data->level = liquid_level;
+                    data->depth_level = ground_level;
+                }
+
+                // For speed check as int values
+                int delta = int((liquid_level - z) * 10);
+
+                // Get position delta
+                if (delta > 20)                   // Under water
+                    return LIQUID_MAP_UNDER_WATER;
+                if (delta > 0 )                   // In water
+                    return LIQUID_MAP_IN_WATER;
+                if (delta > -1)                   // Walk on water
+                    return LIQUID_MAP_WATER_WALK;
+                result = LIQUID_MAP_ABOVE_WATER;
             }
-
-            // For speed check as int values
-            int delta = int((liquid_level - z) * 10);
-
-            // Get position delta
-            if (delta > 20)                   // Under water
-                return LIQUID_MAP_UNDER_WATER;
-            if (delta > 0 )                   // In water
-                return LIQUID_MAP_IN_WATER;
-            if (delta > -1)                   // Walk on water
-                return LIQUID_MAP_WATER_WALK;
-            result = LIQUID_MAP_ABOVE_WATER;
         }
     }
 
@@ -1814,6 +1852,21 @@ void Map::GetZoneAndAreaIdByAreaFlag(uint32& zoneid, uint32& areaid, uint16 area
 
     areaid = entry ? entry->ID : 0;
     zoneid = entry ? ((entry->zone != 0) ? entry->zone : entry->ID) : 0;
+}
+
+WMO_id Map::wmo_id(const Position &p) const
+{
+    {
+        uint32 flags;
+        int32 adt_id;
+        int32 root_id;
+        int32 group_id;
+        if (GetAreaInfo(p.m_positionX, p.m_positionY, p.m_positionZ, flags, adt_id,
+                    root_id, group_id))
+            if (auto e = GetWMOAreaTableEntryByTripple(root_id, adt_id, group_id))
+                return e->Id;
+    }
+    return 0;
 }
 
 bool Map::IsInWater(float x, float y, float pZ, LiquidData* data) const

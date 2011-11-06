@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "DBCEnums.h"
 #include "ObjectMgr.h"
@@ -616,9 +617,15 @@ void AchievementMgr::LoadFromDB(PreparedQueryResult achievementResult, PreparedQ
             AchievementCriteriaEntry const* criteria = sAchievementCriteriaStore.LookupEntry(id);
             if (!criteria)
             {
-                // we will remove not existed criteria for all characters
-                sLog->outError("Non-existing achievement criteria %u data removed from table `character_achievement_progress`.", id);
-                CharacterDatabase.PExecute("DELETE FROM character_achievement_progress WHERE criteria = %u", id);
+                // we will remove not existed criteria
+                sLog->outError("Non-existing achievement criteria %u data removed.", id);
+                {
+                    std::ostringstream s;
+                    s << "DELETE FROM character_achievement_progress WHERE guid="
+                        << static_cast<unsigned long long>(GetPlayer()->GetGUIDLow())
+                        << " AND criteria = " << static_cast<unsigned long>(id);
+                    CharacterDatabase.Execute(s.str().c_str());
+                }
                 continue;
             }
 
@@ -2394,12 +2401,7 @@ void AchievementGlobalMgr::LoadCompletedAchievements()
 
         uint32 achievement_id = fields[0].GetUInt32();
         if (!sAchievementStore.LookupEntry(achievement_id))
-        {
-            // we will remove not existed achievement for all characters
-            sLog->outError("Non-existing achievement %u data removed from table `character_achievement`.", achievement_id);
-            CharacterDatabase.PExecute("DELETE FROM character_achievement WHERE achievement = %u", achievement_id);
             continue;
-        }
 
         m_allCompletedAchievements.insert(achievement_id);
     } while (result->NextRow());

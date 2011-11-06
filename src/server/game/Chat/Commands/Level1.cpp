@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -38,6 +39,7 @@
 
 #ifdef _DEBUG_VMAPS
 #include "VMapFactory.h"
+#include "Detail/Vmap_mutex.hpp"
 #endif
 
 bool ChatHandler::HandleNameAnnounceCommand(const char* args)

@@ -18,6 +18,10 @@
 #ifndef __BATTLEGROUNDRL_H
 #define __BATTLEGROUNDRL_H
 
+#include <memory>
+#include <array>
+#include "Battleground.h"
+
 class Battleground;
 
 enum BattlegroundRLObjectTypes
@@ -42,6 +46,14 @@ class BattlegroundRLScore : public BattlegroundScore
     public:
         BattlegroundRLScore() {};
         virtual ~BattlegroundRLScore() {};
+
+        std::pair<std::size_t, Stat_data_type> stat_data() const
+        {
+            std::array<int32, max_stats> d;
+            auto first = d.begin(), it = first;
+            return std::make_pair(it - first, std::move(d));
+        }
+
         //TODO fix me
 };
 

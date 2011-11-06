@@ -85,7 +85,6 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 EventStage = 0;
 
                 TributeChestGUID = 0;
-
                 MainGateDoorGUID = 0;
                 EastPortcullisGUID = 0;
                 WebDoorGUID = 0;
@@ -505,6 +504,8 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                             case 666:
                             case 1010:
                             case 1180:
+                            case 1181:
+                            case 1182:
                             case 2000:
                             case 2030:
                             case 3000:
@@ -567,6 +568,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                             case 1142:
                             case 1144:
                             case 1150:
+                            case 1160:
                                 EventNPCId = NPC_FIZZLEBANG;
                                 break;
                             default:

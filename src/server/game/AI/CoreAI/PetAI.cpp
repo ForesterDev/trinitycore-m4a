@@ -16,8 +16,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "PetAI.h"
-#include "Errors.h"
+#include <Debugging/Errors.h>
 #include "Pet.h"
 #include "Player.h"
 #include "DBCStores.h"
@@ -172,7 +173,7 @@ void PetAI::UpdateAI(const uint32 diff)
 
                     if (spell->CanAutoCast(target))
                     {
-                        targetSpellStore.push_back(std::make_pair<Unit*, Spell*>(target, spell));
+                        targetSpellStore.push_back(std::make_pair(target, spell));
                         spellUsed = true;
                         break;
                     }

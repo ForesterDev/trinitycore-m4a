@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ScriptPCH.h"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -336,30 +337,31 @@ class boss_sindragosa : public CreatureScript
                 // Frost Infusion
                 if (Player* player = target->ToPlayer())
                 {
-                    if (uint32 spellId = sSpellMgr->GetSpellIdForDifficulty(_isThirdPhase ? SPELL_FROST_BREATH_P2 : SPELL_FROST_BREATH_P1, me))
-                    {
-                        if (player->GetQuestStatus(QUEST_FROST_INFUSION) != QUEST_STATUS_REWARDED && spellId == spell->Id)
+                    if (Is25ManRaid())
+                        if (uint32 spellId = sSpellMgr->GetSpellIdForDifficulty(_isThirdPhase ? SPELL_FROST_BREATH_P2 : SPELL_FROST_BREATH_P1, me))
                         {
-                            if (Item* shadowsEdge = player->GetWeaponForAttack(BASE_ATTACK, true))
+                            if (player->GetQuestStatus(QUEST_FROST_INFUSION) != QUEST_STATUS_REWARDED && spellId == spell->Id)
                             {
-                                if (!player->HasAura(SPELL_FROST_IMBUED_BLADE) && shadowsEdge->GetEntry() == ITEM_SHADOW_S_EDGE)
+                                if (Item* shadowsEdge = player->GetWeaponForAttack(BASE_ATTACK, true))
                                 {
-                                    if (Aura* infusion = player->GetAura(SPELL_FROST_INFUSION))
+                                    if (!player->HasAura(SPELL_FROST_IMBUED_BLADE) && shadowsEdge->GetEntry() == ITEM_SHADOW_S_EDGE)
                                     {
-                                        if (infusion->GetStackAmount() == 3)
+                                        if (Aura* infusion = player->GetAura(SPELL_FROST_INFUSION))
                                         {
-                                            player->CastSpell(player, SPELL_FROST_IMBUED_BLADE, true);
-                                            player->RemoveAura(infusion);
+                                            if (infusion->GetStackAmount() == 3)
+                                            {
+                                                player->CastSpell(player, SPELL_FROST_IMBUED_BLADE, true);
+                                                player->RemoveAura(infusion);
+                                            }
+                                            else
+                                                player->CastSpell(player, SPELL_FROST_INFUSION, true);
                                         }
                                         else
                                             player->CastSpell(player, SPELL_FROST_INFUSION, true);
                                     }
-                                    else
-                                        player->CastSpell(player, SPELL_FROST_INFUSION, true);
                                 }
                             }
                         }
-                    }
                 }
 
                 if (spell->Id == SPELL_FROST_BOMB_TRIGGER)

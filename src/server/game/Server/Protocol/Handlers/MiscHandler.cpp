@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "Language.h"
 #include "DatabaseEnv.h"
@@ -28,8 +29,8 @@
 #include "ObjectMgr.h"
 #include "GuildMgr.h"
 #include "WorldSession.h"
-#include "BigNumber.h"
-#include "SHA1.h"
+#include <Cryptography/BigNumber.h>
+#include <Cryptography/SHA1.h>
 #include "UpdateData.h"
 #include "LootMgr.h"
 #include "Chat.h"
@@ -51,6 +52,9 @@
 #include "GameObjectAI.h"
 #include "Group.h"
 #include "AccountMgr.h"
+
+using std::move;
+using std::string;
 
 void WorldSession::HandleRepopRequestOpcode(WorldPacket & recv_data)
 {
@@ -88,7 +92,7 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket & recv_data)
     uint32 gossipListId;
     uint32 menuId;
     uint64 guid;
-    std::string code = "";
+    string code = "";
 
     recv_data >> guid >> menuId >> gossipListId;
 
@@ -165,15 +169,128 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket & recv_data)
     }
 }
 
+namespace
+{
+    struct Who
+    {
+        string pname;
+        string gname;
+        uint32 lvl;
+        uint32 class_;
+        uint32 race;
+        uint8 gender;
+        uint32 pzoneid;
+    };
+
+    template<class Who_it>
+        WorldPacket make_who_msg(Who_it whos_first, Who_it whos_last)
+    {
+        WorldPacket data(SMSG_WHO, 50);                       // guess size
+        uint32 clientcount = 0;
+        data << clientcount;    // clientcount place holder, listed count
+        data << clientcount;    // clientcount place holder, online count
+        for (; clientcount < 50 && whos_first != whos_last; ++clientcount, ++whos_first)
+        {
+            auto &who = *whos_first;
+            data << who.pname;  // player name
+            data << who.gname;  // guild name
+            data << who.lvl;    // player level
+            data << who.class_; // player class
+            data << who.race;   // player race
+            data << who.gender; // player gender
+            data << who.pzoneid;    // player zone id
+        }
+        data.put( 0, clientcount );                             // insert right count, listed count
+        // insert right count, online count
+        data.put(4, static_cast<uint32>(std::min(
+                        clientcount + std::distance(whos_first, whos_last),
+                        std::numeric_limits<uint32>::max()
+                            + typename std::iterator_traits<Who_it>::difference_type()))
+            );
+        return move(data);
+    }
+
+    template<class Func,
+            class Diff = std::ptrdiff_t>
+        struct Who_it
+        : std::iterator<std::input_iterator_tag, Who, Diff, const Who *, const Who &>
+    {
+        typedef Who_it Myt;
+
+        Who_it()
+            : func(nullptr)
+        {
+        }
+
+        Who_it(Func &func)
+            : func(std::addressof(func))
+        {
+            getwho();
+        }
+
+        const Who &operator*() const
+        {
+            return who;
+        }
+
+        const Who *operator->() const
+        {
+            return &**this;
+        }
+
+        Myt &operator++()
+        {
+            getwho();
+            return *this;
+        }
+
+        Myt operator++(int)
+        {
+            Myt tmp = *this;
+            ++*this;
+            return move(tmp);
+        }
+
+        bool equal(const Myt &right) const
+        {
+            return func == right.func;
+        }
+
+        void getwho()
+        {
+            if (func)
+                if (!(*func)(who))
+                    func = nullptr;
+        }
+
+        Func *func;
+        Who who;
+    };
+
+    template<class Func,
+            class Diff>
+        bool operator==(const Who_it<Func, Diff> &left, const Who_it<Func, Diff> &right)
+    {
+        return left.equal(right);
+    }
+
+    template<class Func,
+            class Diff>
+        bool operator!=(const Who_it<Func, Diff> &left, const Who_it<Func, Diff> &right)
+    {
+        return !(left == right);
+    }
+}
+
 void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Recvd CMSG_WHO Message");
 
-    uint32 matchcount = 0;
+    uint32 clientcount = 0;
 
     uint32 level_min, level_max, racemask, classmask, zones_count, str_count;
     uint32 zoneids[10];                                     // 10 is client limit
-    std::string player_name, guild_name;
+    string player_name, guild_name;
 
     recv_data >> level_min;                                 // maximal player level, default 0
     recv_data >> level_max;                                 // minimal player level, default 100 (MAX_LEVEL)
@@ -206,17 +323,32 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
     std::wstring str[4];                                    // 4 is client limit
     for (uint32 i = 0; i < str_count; ++i)
     {
-        std::string temp;
+        string temp;
         recv_data >> temp;                                  // user entered string, it used as universal search pattern(guild+player name)?
 
         if (!Utf8toWStr(temp, str[i]))
             continue;
-
-        wstrToLower(str[i]);
-
         sLog->outDebug(LOG_FILTER_NETWORKIO, "String %u: %s", i, temp.c_str());
     }
-
+    if (str_count == 1)
+        if (str[0] == L"cheat")
+            if (level_min == 0)
+                if (level_max == 100)
+                    if (player_name.empty())
+                        if (guild_name.empty())
+                            if (racemask == ~uint32())
+                                if (classmask == ~uint32())
+                                    if (zones_count == 0)
+                                    {
+                                        auto func = [](Who &)
+                                            {
+                                                return false;
+                                            };
+                                        auto msg = make_who_msg(Who_it<decltype(func)>(func), Who_it<decltype(func)>());
+                                        SendPacket(&msg);
+                                        return;
+                                    }
+    for_each(begin(str), end(str), wstrToLower);
     std::wstring wplayer_name;
     std::wstring wguild_name;
     if (!(Utf8toWStr(player_name, wplayer_name) && Utf8toWStr(guild_name, wguild_name)))
@@ -233,132 +365,127 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
     uint32 security = GetSecurity();
     bool allowTwoSideWhoList = sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
     uint32 gmLevelInWhoList  = sWorld->getIntConfig(CONFIG_GM_LEVEL_IN_WHO_LIST);
-    uint32 displaycount = 0;
-
-    WorldPacket data(SMSG_WHO, 50);                       // guess size
-    data << uint32(matchcount);                           // placeholder, count of players matching criteria
-    data << uint32(displaycount);                         // placeholder, count of players displayed
-
     ACE_READ_GUARD(HashMapHolder<Player>::LockType, g, *HashMapHolder<Player>::GetLock());
     HashMapHolder<Player>::MapType const& m = sObjectAccessor->GetPlayers();
-    for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
-    {
-        if (AccountMgr::IsPlayerAccount(security))
+    HashMapHolder<Player>::MapType::const_iterator itr = m.begin();
+    uint32 count = m.size();
+    auto func = [&](Who &who) -> bool
         {
-            // player can see member of other team only if CONFIG_ALLOW_TWO_SIDE_WHO_LIST
-            if (itr->second->GetTeam() != team && !allowTwoSideWhoList)
-                continue;
-
-            // player can see MODERATOR, GAME MASTER, ADMINISTRATOR only if CONFIG_GM_IN_WHO_LIST
-            if ((itr->second->GetSession()->GetSecurity() > AccountTypes(gmLevelInWhoList)))
-                continue;
-        }
-
-        //do not process players which are not in world
-        if (!(itr->second->IsInWorld()))
-            continue;
-
-        // check if target is globally visible for player
-        if (!(itr->second->IsVisibleGloballyFor(_player)))
-            continue;
-
-        // check if target's level is in level range
-        uint8 lvl = itr->second->getLevel();
-        if (lvl < level_min || lvl > level_max)
-            continue;
-
-        // check if class matches classmask
-        uint32 class_ = itr->second->getClass();
-        if (!(classmask & (1 << class_)))
-            continue;
-
-        // check if race matches racemask
-        uint32 race = itr->second->getRace();
-        if (!(racemask & (1 << race)))
-            continue;
-
-        uint32 pzoneid = itr->second->GetZoneId();
-        uint8 gender = itr->second->getGender();
-
-        bool z_show = true;
-        for (uint32 i = 0; i < zones_count; ++i)
-        {
-            if (zoneids[i] == pzoneid)
+            // 49 is maximum player count sent to client - can be overridden
+            // through config, but is unstable
+            if (clientcount == sWorld->getIntConfig(CONFIG_MAX_WHO))
+                return false;
+            bool result = false;
+            for (; !result && itr != m.end(); ++itr)
             {
-                z_show = true;
-                break;
-            }
-
-            z_show = false;
-        }
-        if (!z_show)
-            continue;
-
-        std::string pname = itr->second->GetName();
-        std::wstring wpname;
-        if (!Utf8toWStr(pname, wpname))
-            continue;
-        wstrToLower(wpname);
-
-        if (!(wplayer_name.empty() || wpname.find(wplayer_name) != std::wstring::npos))
-            continue;
-
-        std::string gname = sGuildMgr->GetGuildNameById(itr->second->GetGuildId());
-        std::wstring wgname;
-        if (!Utf8toWStr(gname, wgname))
-            continue;
-        wstrToLower(wgname);
-
-        if (!(wguild_name.empty() || wgname.find(wguild_name) != std::wstring::npos))
-            continue;
-
-        std::string aname;
-        if (AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(itr->second->GetZoneId()))
-            aname = areaEntry->area_name[GetSessionDbcLocale()];
-
-        bool s_show = true;
-        for (uint32 i = 0; i < str_count; ++i)
-        {
-            if (!str[i].empty())
-            {
-                if (wgname.find(str[i]) != std::wstring::npos ||
-                    wpname.find(str[i]) != std::wstring::npos ||
-                    Utf8FitTo(aname, str[i]))
+                if (AccountMgr::IsPlayerAccount(security))
                 {
-                    s_show = true;
-                    break;
+                    // player can see member of other team only if CONFIG_ALLOW_TWO_SIDE_WHO_LIST
+                    if (itr->second->GetTeam() != team && !allowTwoSideWhoList)
+                        continue;
+
+                    // player can see MODERATOR, GAME MASTER, ADMINISTRATOR only if CONFIG_GM_IN_WHO_LIST
+                    if ((itr->second->GetSession()->GetSecurity() > AccountTypes(gmLevelInWhoList)))
+                        continue;
                 }
-                s_show = false;
+
+                //do not process players which are not in world
+                if (!(itr->second->IsInWorld()))
+                    continue;
+
+                // check if target is globally visible for player
+                if (!(itr->second->IsVisibleGloballyFor(_player)))
+                    continue;
+
+                // check if target's level is in level range
+                uint8 lvl = itr->second->getLevel();
+                if (lvl < level_min || lvl > level_max)
+                    continue;
+
+                // check if class matches classmask
+                uint32 class_ = itr->second->getClass();
+                if (!(classmask & (1 << class_)))
+                    continue;
+
+                // check if race matches racemask
+                uint32 race = itr->second->getRace();
+                if (!(racemask & (1 << race)))
+                    continue;
+
+                uint32 pzoneid = itr->second->GetZoneId();
+                uint8 gender = itr->second->getGender();
+
+                bool z_show = true;
+                for (uint32 i = 0; i < zones_count; ++i)
+                {
+                    if (zoneids[i] == pzoneid)
+                    {
+                        z_show = true;
+                        break;
+                    }
+
+                    z_show = false;
+                }
+                if (!z_show)
+                    continue;
+
+                string pname = itr->second->GetName();
+                std::wstring wpname;
+                if (!Utf8toWStr(pname, wpname))
+                    continue;
+                wstrToLower(wpname);
+
+                if (!(wplayer_name.empty() || wpname.find(wplayer_name) != std::wstring::npos))
+                    continue;
+
+                string gname = sGuildMgr->GetGuildNameById(itr->second->GetGuildId());
+                std::wstring wgname;
+                if (!Utf8toWStr(gname, wgname))
+                    continue;
+                wstrToLower(wgname);
+
+                if (!(wguild_name.empty() || wgname.find(wguild_name) != std::wstring::npos))
+                    continue;
+
+                string aname;
+                if (AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(itr->second->GetZoneId()))
+                    aname = areaEntry->area_name[GetSessionDbcLocale()];
+
+                bool s_show = true;
+                for (uint32 i = 0; i < str_count; ++i)
+                {
+                    if (!str[i].empty())
+                    {
+                        if (wgname.find(str[i]) != std::wstring::npos ||
+                            wpname.find(str[i]) != std::wstring::npos ||
+                            Utf8FitTo(aname, str[i]))
+                        {
+                            s_show = true;
+                            break;
+                        }
+                        s_show = false;
+                    }
+                }
+                if (!s_show)
+                    continue;
+                if (itr->second->isGameMaster())
+                {
+                    pname = "<GM>";
+                    pname.append(itr->second->GetName());
+                }
+
+                {
+                    Who tmp = {move(pname), move(gname), move(lvl), move(class_), move(race),
+                            move(gender), move(pzoneid)};
+                    who = move(tmp);
+                }
+                ++clientcount;
+                result = true;
             }
-        }
-        if (!s_show)
-            continue;
-
-        // 49 is maximum player count sent to client - can be overridden
-        // through config, but is unstable
-        if ((matchcount++) >= sWorld->getIntConfig(CONFIG_MAX_WHO))
-            continue;
-
-        if (itr->second->isGameMaster())
-        {
-            pname = "<GM>";
-            pname.append(itr->second->GetName());
-        }
-
-        data << pname;                                    // player name
-        data << gname;                                    // guild name
-        data << uint32(lvl);                              // player level
-        data << uint32(class_);                           // player class
-        data << uint32(race);                             // player race
-        data << uint8(gender);                            // player gender
-        data << uint32(pzoneid);                          // player zone id
-
-        ++displaycount;
-    }
-
-    data.put(0, displaycount);                            // insert right count, count displayed
-    data.put(4, matchcount);                              // insert right count, count of matches
-
+            return result;
+        };
+    WorldPacket data =
+        make_who_msg(Who_it<decltype(func)>(func), Who_it<decltype(func)>());
     SendPacket(&data);
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Send SMSG_WHO Message");
 }
@@ -370,7 +497,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket & /*recv_data*/)
     if (uint64 lguid = GetPlayer()->GetLootGUID())
         DoLootRelease(lguid);
 
-    uint8 reason = 0;
+    uint32 reason = 0;
 
     if (GetPlayer()->isInCombat())
         reason = 1;
@@ -381,9 +508,9 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket & /*recv_data*/)
 
     if (reason)
     {
-        WorldPacket data(SMSG_LOGOUT_RESPONSE, 1+4);
-        data << uint8(reason);
-        data << uint32(0);
+        WorldPacket data(SMSG_LOGOUT_RESPONSE, 4 + 1);
+        data << reason;
+        data << uint8(0);
         SendPacket(&data);
         LogoutRequest(0);
         return;
@@ -393,9 +520,9 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket & /*recv_data*/)
     if (GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || GetPlayer()->isInFlight() ||
         GetSecurity() >= AccountTypes(sWorld->getIntConfig(CONFIG_INSTANT_LOGOUT)))
     {
-        WorldPacket data(SMSG_LOGOUT_RESPONSE, 1+4);
-        data << uint8(0);
-        data << uint32(16777216);
+        WorldPacket data(SMSG_LOGOUT_RESPONSE, 4 + 1);
+        data << uint32(0);
+        data << uint8(1);
         SendPacket(&data);
         LogoutPlayer(true);
         return;
@@ -413,9 +540,9 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket & /*recv_data*/)
         GetPlayer()->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
     }
 
-    WorldPacket data(SMSG_LOGOUT_RESPONSE, 1+4);
-    data << uint8(0);
+    WorldPacket data(SMSG_LOGOUT_RESPONSE, 4 + 1);
     data << uint32(0);
+    data << uint8(0);
     SendPacket(&data);
     LogoutRequest(time(NULL));
 }
@@ -527,8 +654,8 @@ void WorldSession::HandleAddFriendOpcode(WorldPacket & recv_data)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_ADD_FRIEND");
 
-    std::string friendName = GetTrinityString(LANG_FRIEND_IGNORE_UNKNOWN);
-    std::string friendNote;
+    string friendName = GetTrinityString(LANG_FRIEND_IGNORE_UNKNOWN);
+    string friendNote;
 
     recv_data >> friendName;
 
@@ -548,7 +675,8 @@ void WorldSession::HandleAddFriendOpcode(WorldPacket & recv_data)
         );
 }
 
-void WorldSession::HandleAddFriendOpcodeCallBack(QueryResult result, std::string friendNote)
+void WorldSession::HandleAddFriendOpcodeCallBack
+    (QueryResult result, string friendNote)
 {
     if (!GetPlayer())
         return;
@@ -619,7 +747,7 @@ void WorldSession::HandleAddIgnoreOpcode(WorldPacket & recv_data)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_ADD_IGNORE");
 
-    std::string IgnoreName = GetTrinityString(LANG_FRIEND_IGNORE_UNKNOWN);
+    string IgnoreName = GetTrinityString(LANG_FRIEND_IGNORE_UNKNOWN);
 
     recv_data >> IgnoreName;
 
@@ -690,7 +818,7 @@ void WorldSession::HandleSetContactNotesOpcode(WorldPacket & recv_data)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_SET_CONTACT_NOTES");
     uint64 guid;
-    std::string note;
+    string note;
     recv_data >> guid >> note;
     _player->GetSocial()->SetFriendNote(GUID_LOPART(guid), note);
 }
@@ -698,7 +826,7 @@ void WorldSession::HandleSetContactNotesOpcode(WorldPacket & recv_data)
 void WorldSession::HandleBugOpcode(WorldPacket & recv_data)
 {
     uint32 suggestion, contentlen, typelen;
-    std::string content, type;
+    string content, type;
 
     recv_data >> suggestion >> contentlen >> content;
 
@@ -1194,8 +1322,6 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     recv_data >> guid;
     sLog->outStaticDebug("Inspected guid is " UI64FMTD, guid);
 
-    _player->SetSelection(guid);
-
     Player* plr = ObjectAccessor::FindPlayer(guid);
     if (!plr)                                                // wrong player
         return;
@@ -1235,7 +1361,7 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
 
     WorldPacket data(MSG_INSPECT_HONOR_STATS, 8+1+4*4);
     data << uint64(player->GetGUID());
-    data << uint8(player->GetHonorPoints());
+    data << uint8(0);
     data << uint32(player->GetUInt32Value(PLAYER_FIELD_KILLS));
     data << uint32(player->GetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION));
     data << uint32(player->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION));
@@ -1258,6 +1384,7 @@ void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
 
     recv_data >> time;                                      // time in m.sec.
     recv_data >> mapid;
+    recv_data.read_skip<std::uint64_t>();
     recv_data >> PositionX;
     recv_data >> PositionY;
     recv_data >> PositionZ;
@@ -1282,7 +1409,7 @@ void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
 void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "Received opcode CMSG_WHOIS");
-    std::string charname;
+    string charname;
     recv_data >> charname;
 
     if (!AccountMgr::IsAdminAccount(GetSecurity()))
@@ -1344,7 +1471,7 @@ void WorldSession::HandleComplainOpcode(WorldPacket & recv_data)
     uint32 unk2 = 0;
     uint32 unk3 = 0;
     uint32 unk4 = 0;
-    std::string description = "";
+    string description = "";
     recv_data >> spam_type;                                 // unk 0x01 const, may be spam type (mail/chat)
     recv_data >> spammer_guid;                              // player guid
     switch (spam_type)
@@ -1379,7 +1506,7 @@ void WorldSession::HandleRealmSplitOpcode(WorldPacket & recv_data)
     sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_REALM_SPLIT");
 
     uint32 unk;
-    std::string split_date = "01/01/01";
+    string split_date = "01/01/01";
     recv_data >> unk;
 
     WorldPacket data(SMSG_REALM_SPLIT, 4+4+split_date.size()+1);

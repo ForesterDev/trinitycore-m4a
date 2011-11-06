@@ -19,6 +19,7 @@
 #ifndef __SPELL_H
 #define __SPELL_H
 
+#include <memory>
 #include "GridDefines.h"
 #include "SharedDefines.h"
 #include "ObjectMgr.h"
@@ -668,6 +669,88 @@ class Spell
         double rand_norm()                      { return m_caster->GetMap()->mtRand.randExc(); }
         double rand_chance()                    { return m_caster->GetMap()->mtRand.randExc(100.0); }
 #endif
+
+private:
+    class Use
+    {
+    public:
+        Use()
+            : spell(nullptr)
+        {
+        }
+
+        explicit Use(Spell &s)
+            : spell(&s)
+        {
+            inc();
+        }
+
+        Use(const Use &right)
+            : spell(right.spell)
+        {
+            inc();
+        }
+
+        Use(Use &&right)
+            : spell(std::move(right.spell))
+        {
+            right.spell = nullptr;
+        }
+
+        ~Use()
+        {
+            dec();
+        }
+
+        Use &operator=(const Use &right)
+        {
+            if (this != &right)
+            {
+                dec();
+                this->spell = right.spell;
+                inc();
+            }
+            return *this;
+        }
+
+        Use &operator=(Use &&right)
+        {
+            dec();
+            this->spell = std::move(right.spell);
+            right.spell = nullptr;
+            return *this;
+        }
+
+        void reset()
+        {
+            dec();
+            spell = nullptr;
+        }
+
+        void reset(Spell &s)
+        {
+            dec();
+            spell = &s;
+            inc();
+        }
+
+    private:
+        void inc()
+        {
+            if (spell)
+                ++spell->use_count;
+        }
+
+        void dec()
+        {
+            if (spell)
+                --spell->use_count;
+        }
+
+        Spell *spell;
+    };
+
+    int use_count;
 };
 
 namespace Trinity
