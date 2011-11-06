@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "ObjectMgr.h"                                      // for normalizePlayerName
 #include "ChannelMgr.h"
 
@@ -50,11 +51,8 @@ void WorldSession::HandleJoinChannel(WorldPacket& recvPacket)
         return;
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
-    {
-        cMgr->team = _player->GetTeam();
         if (Channel* chn = cMgr->GetJoinChannel(channelname, channel_id))
             chn->Join(_player->GetGUID(), pass.c_str());
-    }
 }
 
 void WorldSession::HandleLeaveChannel(WorldPacket& recvPacket)

@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Channel.h"
 #include "Chat.h"
 #include "ObjectMgr.h"
@@ -24,7 +25,8 @@
 #include "DatabaseEnv.h"
 #include "AccountMgr.h"
 
-Channel::Channel(const std::string& name, uint32 channel_id, uint32 Team)
+Channel::Channel
+    (const std::string &name, uint32 channel_id, uint32 Team, bool custom)
  : m_announce(true), m_ownership(true), m_name(name), m_password(""), m_flags(0), m_channelId(channel_id), m_ownerGUID(0), m_Team(Team)
 {
     m_IsSaved = false;
@@ -46,6 +48,14 @@ Channel::Channel(const std::string& name, uint32 channel_id, uint32 Team)
             m_flags |= CHANNEL_FLAG_LFG;
         else                                                // for all other channels
             m_flags |= CHANNEL_FLAG_NOT_LFG;
+        is_global = false;
+    }
+    else if (!custom)
+    {
+        m_announce = false;
+        m_flags |= CHANNEL_FLAG_NOT_LFG | CHANNEL_FLAG_GENERAL;
+        m_IsSaved = false;
+        is_global = true;
     }
     else                                                    // it's custom channel
     {
@@ -94,6 +104,7 @@ Channel::Channel(const std::string& name, uint32 channel_id, uint32 Team)
 
             m_IsSaved = true;
         }
+        is_global = false;
     }
 }
 
@@ -173,6 +184,16 @@ void Channel::Join(uint64 p, const char *pass)
 
     if (plr)
     {
+        if (player_level_ok(*plr))
+            ;
+        else
+        {
+            ChatHandler(plr).PSendSysMessage
+                ("You do not meet the level requirements of %s.", m_name.c_str());
+            MakeBanned(&data);
+            SendToOne(&data, p);
+            return;
+        }
         if (HasFlag(CHANNEL_FLAG_LFG) &&
             sWorld->getBoolConfig(CONFIG_RESTRICTED_LFG_CHANNEL) && AccountMgr::IsPlayerAccount(plr->GetSession()->GetSecurity()) && plr->GetGroup())
         {
@@ -243,7 +264,7 @@ void Channel::Leave(uint64 p, bool send)
             data.clear();
         }
 
-        bool changeowner = players[p].IsOwner();
+        bool changeowner = !IsConstant() && players[p].IsOwner();
 
         players.erase(p);
         if (m_announce && (!plr || !AccountMgr::IsGMAccount(plr->GetSession()->GetSecurity()) || !sWorld->getBoolConfig(CONFIG_SILENTLY_GM_JOIN_TO_CHANNEL)))
@@ -307,7 +328,7 @@ void Channel::KickOrBan(uint64 good, const char *badname, bool ban)
         }
         else
         {
-            bool changeowner = (m_ownerGUID == bad->GetGUID());
+            bool changeowner = !IsConstant() && m_ownerGUID == bad->GetGUID();
 
             WorldPacket data;
 
@@ -686,6 +707,18 @@ void Channel::Invite(uint64 p, const char *newname)
     Player* plr = ObjectAccessor::FindPlayer(p);
     if (!plr)
         return;
+    if (player_level_ok(*newp))
+        ;
+    else
+    {
+        ChatHandler(plr).PSendSysMessage(
+                "%s does not meet the level requirements of %s.", newp->GetName(),
+                m_name.c_str());
+        WorldPacket data;
+        MakePlayerInviteBanned(&data, newp->GetName());
+        SendToOne(&data, p);
+        return;
+    }
 
     if (newp->GetTeam() != plr->GetTeam() && !sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
     {
@@ -1067,4 +1100,18 @@ void Channel::LeaveNotify(uint64 guid)
         SendToAllButOne(&data, guid);
     else
         SendToAll(&data);
+}
+
+bool Channel::player_level_ok(const Player &p) const
+{
+    if (!is_global)
+        ;
+    else
+        if (10 <= p.getLevel())
+            ;
+        else if (p.isGameMaster())
+            ;
+        else
+            return false;
+    return true;
 }

@@ -16,11 +16,13 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "Log.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
+#include <boost/thread/locks.hpp>
 #include "ArenaTeamMgr.h"
 #include "GuildMgr.h"
 #include "GroupMgr.h"
@@ -45,6 +47,9 @@
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 #include "PoolMgr.h"
+
+using boost::unique_lock;
+using boost::mutex;
 
 ScriptMapMap sQuestEndScripts;
 ScriptMapMap sQuestStartScripts;
@@ -6265,12 +6270,16 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
             }
             return m_hiItemGuid++;
         case HIGHGUID_UNIT:
-            if (m_hiCreatureGuid >= 0x00FFFFFE)
             {
-                sLog->outError("Creature guid overflow!! Can't continue, shutting down server. ");
-                World::StopNow(ERROR_EXIT_CODE);
+                unique_lock<mutex> l(hi_creature_guid_mutex);
+                if (m_hiCreatureGuid >= 0x00FFFFFE)
+                {
+                    l.unlock();
+                    sLog->outError("Creature guid overflow!! Can't continue, shutting down server. ");
+                    World::StopNow(ERROR_EXIT_CODE);
+                }
+                return m_hiCreatureGuid++;
             }
-            return m_hiCreatureGuid++;
         case HIGHGUID_PET:
             if (m_hiPetGuid >= 0x00FFFFFE)
             {
@@ -6293,12 +6302,16 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
             }
             return m_hiCharGuid++;
         case HIGHGUID_GAMEOBJECT:
-            if (m_hiGoGuid >= 0x00FFFFFE)
             {
-                sLog->outError("Gameobject guid overflow!! Can't continue, shutting down server. ");
-                World::StopNow(ERROR_EXIT_CODE);
+                unique_lock<mutex> l(hi_go_guid_mutex);
+                if (m_hiGoGuid >= 0x00FFFFFE)
+                {
+                    l.unlock();
+                    sLog->outError("Gameobject guid overflow!! Can't continue, shutting down server. ");
+                    World::StopNow(ERROR_EXIT_CODE);
+                }
+                return m_hiGoGuid++;
             }
-            return m_hiGoGuid++;
         case HIGHGUID_CORPSE:
             if (m_hiCorpseGuid >= 0xFFFFFFFE)
             {
@@ -6307,12 +6320,16 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
             }
             return m_hiCorpseGuid++;
         case HIGHGUID_DYNAMICOBJECT:
-            if (m_hiDoGuid >= 0xFFFFFFFE)
             {
-                sLog->outError("DynamicObject guid overflow!! Can't continue, shutting down server. ");
-                World::StopNow(ERROR_EXIT_CODE);
+                unique_lock<mutex> l(hi_do_guid_mutex);
+                if (m_hiDoGuid >= 0xFFFFFFFE)
+                {
+                    l.unlock();
+                    sLog->outError("DynamicObject guid overflow!! Can't continue, shutting down server. ");
+                    World::StopNow(ERROR_EXIT_CODE);
+                }
+                return m_hiDoGuid++;
             }
-            return m_hiDoGuid++;
         case HIGHGUID_MO_TRANSPORT:
             if (m_hiMoTransGuid >= 0xFFFFFFFE)
             {

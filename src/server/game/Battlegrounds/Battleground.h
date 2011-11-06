@@ -19,6 +19,9 @@
 #ifndef __BATTLEGROUND_H
 #define __BATTLEGROUND_H
 
+#include <cstddef>
+#include <utility>
+#include <array>
 #include "Common.h"
 #include "SharedDefines.h"
 #include "DBCEnums.h"
@@ -280,10 +283,19 @@ enum GroupJoinBattlegroundResult
 class BattlegroundScore
 {
     public:
+        enum
+        {
+            max_stats = 8
+        };
+
+        typedef std::array<int32, max_stats> Stat_data_type;
+
         BattlegroundScore() : KillingBlows(0), Deaths(0), HonorableKills(0),
             BonusHonor(0), DamageDone(0), HealingDone(0)
         {}
         virtual ~BattlegroundScore() {}                     //virtual destructor is used when deleting score from scores map
+
+        virtual std::pair<std::size_t, Stat_data_type> stat_data() const = 0;
 
         uint32 KillingBlows;
         uint32 Deaths;

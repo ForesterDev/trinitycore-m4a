@@ -415,9 +415,9 @@ public:
 
         void Load(const char * data)
         {
-            std::istringstream loadStream(LoadBossState(data));
+            std::istringstream loadStream(data);
             uint32 buff;
-            loadStream >> buff;
+            LoadBossState(loadStream) >> buff;
             gothikDoorState = GOState(buff);
         }
     };

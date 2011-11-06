@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "DBCStores.h"
 #include "WorldPacket.h"
@@ -351,11 +352,14 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     {
         // not have spell in spellbook or spell passive and not casted by client
         if (!mover->ToPlayer()->HasActiveSpell (spellId) || spellInfo->IsPassive())
-        {
-            //cheater? kick? ban?
-            recvPacket.rfinish(); // prevent spam at ignore packet
-            return;
-        }
+            if (spellId == 68398)
+                ;
+            else
+            {
+                //cheater? kick? ban?
+                recvPacket.rfinish(); // prevent spam at ignore packet
+                return;
+            }
     }
     else
     {
@@ -623,11 +627,12 @@ void WorldSession::HandleMirrorImageDataRequest(WorldPacket & recv_data)
         // Display items in visible slots
         for (EquipmentSlots const* itr = &itemSlots[0]; *itr != EQUIPMENT_SLOT_END; ++itr)
         {
-            if (*itr == EQUIPMENT_SLOT_HEAD && player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM))
+            auto &es = *itr;
+            if (es == EQUIPMENT_SLOT_HEAD && player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM))
                 data << uint32(0);
-            else if (*itr == EQUIPMENT_SLOT_BACK && player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
+            else if (es == EQUIPMENT_SLOT_BACK && player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
                 data << uint32(0);
-            else if (Item const* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, *itr))
+            else if (const Item *item = player->GetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + 2 * es) ? player->GetItemByPos(INVENTORY_SLOT_BAG_0, es) : nullptr)
                 data << uint32(item->GetTemplate()->DisplayInfoID);
             else
                 data << uint32(0);

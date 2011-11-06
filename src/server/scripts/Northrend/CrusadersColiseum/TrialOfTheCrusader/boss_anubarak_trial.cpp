@@ -32,6 +32,7 @@ EndScriptData */
 // FrostSph - often they are casting Permafrost a little above the ground
 
 #include "ScriptPCH.h"
+#include <Spell.h>
 #include "trial_of_the_crusader.h"
 
 enum Yells
@@ -307,13 +308,16 @@ public:
                     } else m_uiSubmergeTimer -= uiDiff;
                     break;
                 case 1:
-                    DoCast(me, SPELL_SUBMERGE_ANUBARAK);
-                    DoCast(me, SPELL_CLEAR_ALL_DEBUFFS);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                    DoScriptText(SAY_BURROWER, me);
-                    m_uiScarabSummoned = 0;
-                    m_uiSummonScarabTimer = 4*IN_MILLISECONDS;
-                    m_uiStage = 2;
+                    if (!me->IsNonMeleeSpellCasted(false, true, true))
+                    {
+                        DoCast(me, SPELL_SUBMERGE_ANUBARAK);
+                        DoCast(me, SPELL_CLEAR_ALL_DEBUFFS);
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                        DoScriptText(SAY_BURROWER, me);
+                        m_uiScarabSummoned = 0;
+                        m_uiSummonScarabTimer = 4*IN_MILLISECONDS;
+                        m_uiStage = 2;
+                    }
                     break;
                 case 2:
                     if (m_uiPursuingSpikeTimer <= uiDiff)
@@ -526,23 +530,37 @@ public:
 
             if ((m_uiSubmergeTimer <= uiDiff) && HealthBelowPct(80))
             {
+                m_uiSubmergeTimer = 0;
+                bool ok = false;
                 if (me->HasAura(SPELL_SUBMERGE_EFFECT))
                 {
                     me->RemoveAurasDueToSpell(SPELL_SUBMERGE_EFFECT);
                     DoCast(me, SPELL_EMERGE_EFFECT);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                     me->CombatStart(me->SelectNearestTarget());
+                    ok = true;
                 }
                 else
                 {
                     if (!me->HasAura(SPELL_PERMAFROST_HELPER))
                     {
-                        DoCast(me, SPELL_SUBMERGE_EFFECT);
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                        me->CombatStop();
+						std::unique_ptr<Spell> s(new Spell(me, sSpellMgr->GetSpellInfo(SPELL_SUBMERGE_EFFECT), TRIGGERED_NONE));
+                        if (!me->IsNonMeleeSpellCasted(false, true, true))
+                            if (s->CheckCast(true) == SPELL_CAST_OK)
+                            {
+                                SpellCastTargets t;
+                                s->prepare(&t);
+                                s.release();
+                                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                                me->CombatStop();
+                                ok = true;
+                            }
                     }
+                    else
+                        ok = true;
                 }
-                m_uiSubmergeTimer = 20*IN_MILLISECONDS;
+                if (ok)
+                    m_uiSubmergeTimer = 20 * IN_MILLISECONDS;
             } else m_uiSubmergeTimer -= uiDiff;
 
             DoMeleeAttackIfReady();

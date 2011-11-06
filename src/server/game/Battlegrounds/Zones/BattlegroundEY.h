@@ -19,7 +19,10 @@
 #ifndef __BATTLEGROUNDEY_H
 #define __BATTLEGROUNDEY_H
 
+#include <memory>
+#include <array>
 #include "Language.h"
+#include "Battleground.h"
 
 class Battleground;
 
@@ -326,6 +329,15 @@ class BattlegroundEYScore : public BattlegroundScore
     public:
         BattlegroundEYScore () : FlagCaptures(0) {};
         virtual ~BattlegroundEYScore() {};
+
+        std::pair<std::size_t, Stat_data_type> stat_data() const
+        {
+            std::array<int32, max_stats> d;
+            auto first = d.begin(), it = first;
+            *it++ = FlagCaptures;
+            return std::make_pair(it - first, std::move(d));
+        }
+
         uint32 FlagCaptures;
 };
 

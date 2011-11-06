@@ -19,9 +19,11 @@
 #ifndef TRINITY_OBJECTACCESSOR_H
 #define TRINITY_OBJECTACCESSOR_H
 
+#include <memory>
 #include "Define.h"
 #include <ace/Singleton.h>
 #include <ace/Thread_Mutex.h>
+#include <Debugging/Errors.h>
 #include "UnorderedMap.h"
 
 #include "UpdateData.h"
@@ -53,7 +55,9 @@ class HashMapHolder
         static void Insert(T* o)
         {
             ACE_WRITE_GUARD(LockType, Guard, i_lock);
-            m_objectMap[o->GetGUID()] = o;
+            auto res = m_objectMap
+                    .insert(typename MapType::value_type(o->GetGUID(), std::move(o)));
+            ASSERT(res.second);
         }
 
         static void Remove(T* o)
