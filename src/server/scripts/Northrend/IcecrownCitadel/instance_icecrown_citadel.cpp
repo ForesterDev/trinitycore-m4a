@@ -651,6 +651,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                             if (chest->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), name_id, instance, PHASEMASK_NORMAL, -437.563995f, 1948.219971f, 214.882004f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 1.000000f, 100, GO_STATE_READY))
                             {
                                 chest->SetRespawnTime(0);
+                                chest->SetSpawnedByDefault(false);
                                 instance->AddToMap(chest.release());
                             }
                         }
