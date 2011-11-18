@@ -22,65 +22,68 @@
 #include "SpellAuraEffects.h"
 #include "icecrown_citadel.h"
 
-enum Texts
+namespace
 {
-    SAY_AGGRO                           = 0, // You are fools to have come to this place! The icy winds of Northrend will consume your souls!
-    SAY_UNCHAINED_MAGIC                 = 1, // Suffer, mortals, as your pathetic magic betrays you!
-    EMOTE_WARN_BLISTERING_COLD          = 2, // %s prepares to unleash a wave of blistering cold!
-    SAY_BLISTERING_COLD                 = 3, // Can you feel the cold hand of death upon your heart?
-    SAY_RESPITE_FOR_A_TORMENTED_SOUL    = 4, // Aaah! It burns! What sorcery is this?!
-    SAY_AIR_PHASE                       = 5, // Your incursion ends here! None shall survive!
-    SAY_PHASE_2                         = 6, // Now feel my master's limitless power and despair!
-    EMOTE_WARN_FROZEN_ORB               = 7, // %s fires a frozen orb towards $N!
-    SAY_KILL                            = 8, // Perish!
-                                             // A flaw of mortality...
-    SAY_BERSERK                         = 9, // Enough! I tire of these games!
-    SAY_DEATH                           = 10, // Free...at last...
-};
+    enum Texts
+    {
+        SAY_AGGRO                           = 0, // You are fools to have come to this place! The icy winds of Northrend will consume your souls!
+        SAY_UNCHAINED_MAGIC                 = 1, // Suffer, mortals, as your pathetic magic betrays you!
+        EMOTE_WARN_BLISTERING_COLD          = 2, // %s prepares to unleash a wave of blistering cold!
+        SAY_BLISTERING_COLD                 = 3, // Can you feel the cold hand of death upon your heart?
+        SAY_RESPITE_FOR_A_TORMENTED_SOUL    = 4, // Aaah! It burns! What sorcery is this?!
+        SAY_AIR_PHASE                       = 5, // Your incursion ends here! None shall survive!
+        SAY_PHASE_2                         = 6, // Now feel my master's limitless power and despair!
+        EMOTE_WARN_FROZEN_ORB               = 7, // %s fires a frozen orb towards $N!
+        SAY_KILL                            = 8, // Perish!
+                                                 // A flaw of mortality...
+        SAY_BERSERK                         = 9, // Enough! I tire of these games!
+        SAY_DEATH                           = 10, // Free...at last...
+    };
 
-enum Spells
-{
-    // Sindragosa
-    SPELL_SINDRAGOSA_S_FURY     = 70608,
-    SPELL_TANK_MARKER           = 71039,
-    SPELL_FROST_AURA            = 70084,
-    SPELL_PERMAEATING_CHILL     = 70109,
-    SPELL_CLEAVE                = 19983,
-    SPELL_TAIL_SMASH            = 71077,
-    SPELL_FROST_BREATH_P1       = 69649,
-    SPELL_FROST_BREATH_P2       = 73061,
-    SPELL_UNCHAINED_MAGIC       = 69762,
-    SPELL_BACKLASH              = 69770,
-    SPELL_ICY_GRIP              = 70117,
-    SPELL_ICY_GRIP_JUMP         = 70122,
-    SPELL_BLISTERING_COLD       = 70123,
-    SPELL_FROST_BEACON          = 70126,
-    SPELL_ICE_TOMB_TARGET       = 69712,
-    SPELL_ICE_TOMB_DUMMY        = 69675,
-    SPELL_ICE_TOMB_UNTARGETABLE = 69700,
-    SPELL_ICE_TOMB_DAMAGE       = 70157,
-    SPELL_ASPHYXIATION          = 71665,
-    SPELL_FROST_BOMB_TRIGGER    = 69846,
-    SPELL_FROST_BOMB_VISUAL     = 70022,
-    SPELL_FROST_BOMB            = 69845,
-    SPELL_MYSTIC_BUFFET         = 70128,
+    enum Spells
+    {
+        // Sindragosa
+        SPELL_SINDRAGOSA_S_FURY     = 70608,
+        SPELL_TANK_MARKER           = 71039,
+        SPELL_FROST_AURA            = 70084,
+        SPELL_PERMAEATING_CHILL     = 70109,
+        SPELL_CLEAVE                = 19983,
+        SPELL_TAIL_SMASH            = 71077,
+        SPELL_FROST_BREATH_P1       = 69649,
+        SPELL_FROST_BREATH_P2       = 73061,
+        SPELL_UNCHAINED_MAGIC       = 69762,
+        SPELL_BACKLASH              = 69770,
+        SPELL_ICY_GRIP              = 70117,
+        SPELL_ICY_GRIP_JUMP         = 70122,
+        SPELL_BLISTERING_COLD       = 70123,
+        SPELL_FROST_BEACON          = 70126,
+        SPELL_ICE_TOMB_TARGET       = 69712,
+        SPELL_ICE_TOMB_DUMMY        = 69675,
+        SPELL_ICE_TOMB_UNTARGETABLE = 69700,
+        SPELL_ICE_TOMB_DAMAGE       = 70157,
+        SPELL_ASPHYXIATION          = 71665,
+        SPELL_FROST_BOMB_TRIGGER    = 69846,
+        SPELL_FROST_BOMB_VISUAL     = 70022,
+        SPELL_FROST_BOMB            = 69845,
+        SPELL_MYSTIC_BUFFET         = 70128,
 
-    // Spinestalker
-    SPELL_BELLOWING_ROAR        = 36922,
-    SPELL_CLEAVE_SPINESTALKER   = 40505,
-    SPELL_TAIL_SWEEP            = 71370,
+        // Spinestalker
+        SPELL_BELLOWING_ROAR        = 36922,
+        SPELL_CLEAVE_SPINESTALKER   = 40505,
+        SPELL_TAIL_SWEEP            = 71370,
 
-    // Rimefang
-    SPELL_FROST_BREATH          = 71386,
-    SPELL_FROST_AURA_RIMEFANG   = 71387,
-    SPELL_ICY_BLAST             = 71376,
-    SPELL_ICY_BLAST_AREA        = 71380,
+        // Rimefang
+        SPELL_FROST_BREATH          = 71386,
+        SPELL_FROST_AURA_RIMEFANG   = 71387,
+        SPELL_ICY_BLAST             = 71376,
+        SPELL_ICY_BLAST_AREA        = 71380,
 
-    // Frostwarden Handler
-    SPELL_FOCUS_FIRE            = 71350,
-    SPELL_ORDER_WHELP           = 71357,
-    SPELL_CONCUSSIVE_SHOCK      = 71337,
-};
+        // Frostwarden Handler
+        SPELL_FOCUS_FIRE            = 71350,
+        SPELL_ORDER_WHELP           = 71357,
+        SPELL_CONCUSSIVE_SHOCK      = 71337,
+    };
+}
 
 enum Events
 {
@@ -127,14 +130,17 @@ enum FrostwingData
     DATA_TRAPPED_PLAYER         = 4,
 };
 
-enum MovementPoints
+namespace
 {
-    POINT_FROSTWYRM_FLY_IN  = 1,
-    POINT_FROSTWYRM_LAND    = 2,
-    POINT_AIR_PHASE         = 3,
-    POINT_TAKEOFF           = 4,
-    POINT_LAND              = 5,
-};
+    enum MovementPoints
+    {
+        POINT_FROSTWYRM_FLY_IN  = 1,
+        POINT_FROSTWYRM_LAND    = 2,
+        POINT_AIR_PHASE         = 3,
+        POINT_TAKEOFF           = 4,
+        POINT_LAND              = 5,
+    };
+}
 
 enum Shadowmourne
 {
