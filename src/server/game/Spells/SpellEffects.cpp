@@ -583,6 +583,8 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         }
                     }
                 }
+                else if (m_spellInfo->SpellFamilyFlags[2] & 0x8U /* Improved Devouring Plague */)
+                    apply_direct_bonus = false;
                 break;
             }
             case SPELLFAMILY_DRUID:
