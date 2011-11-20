@@ -440,6 +440,9 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         damage = unitTarget->CountPctFromMaxHealth(damage);
                         break;
                     }
+                    case 50526 /* Wandering Plague */:
+                        apply_direct_bonus = false;
+                        break;
                     // Gargoyle Strike
                     case 51963:
                     {
