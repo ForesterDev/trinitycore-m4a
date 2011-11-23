@@ -774,7 +774,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     {
         uint64 auramask = player->GetAuraUpdateMaskForRaid();
         *data << uint64(auramask);
-        for (uint32 i = 0; i < MAX_AURAS; ++i)
+        for (uint32 i = 0; i < max_party_member_auras; ++i)
         {
             if (auramask & (uint64(1) << i))
             {
@@ -862,7 +862,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
         {
             uint64 auramask = pet->GetAuraUpdateMaskForRaid();
             *data << uint64(auramask);
-            for (uint32 i = 0; i < MAX_AURAS; ++i)
+            for (uint32 i = 0; i < max_party_member_auras; ++i)
             {
                 if (auramask & (uint64(1) << i))
                 {
@@ -922,7 +922,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket &recv_data)
     uint64 auramask = 0;
     size_t maskPos = data.wpos();
     data << (uint64) auramask;                              // placeholder
-    for (uint8 i = 0; i < MAX_AURAS; ++i)
+    for (uint8 i = 0; i < max_party_member_auras; ++i)
     {
         if (AuraApplication * aurApp = player->GetVisibleAura(i))
         {
@@ -948,7 +948,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket &recv_data)
         uint64 petauramask = 0;
         size_t petMaskPos = data.wpos();
         data << (uint64) petauramask;                       // placeholder
-        for (uint8 i = 0; i < MAX_AURAS; ++i)
+        for (uint8 i = 0; i < max_party_member_auras; ++i)
         {
             if (AuraApplication * auraApp = pet->GetVisibleAura(i))
             {
