@@ -14979,7 +14979,7 @@ uint32 Unit::GetCastingTimeForBonus(SpellInfo const* spellProto, DamageEffectTyp
 
 void Unit::UpdateAuraForGroup(uint8 slot)
 {
-    if (slot >= MAX_AURAS)                        // slot not found, return
+    if (slot >= max_party_member_auras)           // slot not found, return
         return;
     if (Player* player = ToPlayer())
     {
