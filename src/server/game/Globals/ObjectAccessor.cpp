@@ -199,12 +199,20 @@ void ObjectAccessor::RemoveCorpse(Corpse* corpse)
 {
     ASSERT(corpse && corpse->GetType() != CORPSE_BONES);
 
+    //TODO: more works need to be done for corpse and other world object
     if (Map* map = corpse->FindMap())
     {
         corpse->DestroyForNearbyPlayers();
-        map->RemoveFromMap(corpse, false);
+        if (corpse->IsInGrid())
+            map->RemoveFromMap(corpse, false);
+        else
+        {
+            corpse->RemoveFromWorld();
+            corpse->ResetMap();
+        }
     }
     else
+
         corpse->RemoveFromWorld();
 
     // Critical section
@@ -250,6 +258,10 @@ void ObjectAccessor::AddCorpsesToGrid(GridCoord const& gridpair, GridType& grid,
 
     for (Player2CorpsesMapType::iterator iter = i_player2corpse.begin(); iter != i_player2corpse.end(); ++iter)
     {
+        // We need this check otherwise a corpose may be added to a grid twice
+        if (iter->second->IsInGrid())
+            continue;
+
         if (iter->second->GetGridCoord() == gridpair)
         {
             // verify, if the corpse in our instance (add only corpses which are)
@@ -281,6 +293,7 @@ Corpse* ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid, bool insignia
 
     // remove corpse from player_guid -> corpse map and from current map
     RemoveCorpse(corpse);
+
     // remove corpse from DB
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     corpse->DeleteFromDB(trans);
