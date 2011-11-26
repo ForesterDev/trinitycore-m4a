@@ -1170,7 +1170,7 @@ void GameEventMgr::GameEventSpawn(int16 event_id)
             sObjectMgr->AddCreatureToGrid(*itr, data);
 
             // Spawn if necessary (loaded grids only)
-            Map* map = const_cast<Map*>(sMapMgr->CreateBaseMap(data->mapid));
+            Map* map = sMapMgr->CreateBaseMap(data->mapid);
             // We use spawn coords to spawn
             if (!map->Instanceable() && map->IsGridLoaded(data->posX, data->posY))
             {
@@ -1199,7 +1199,7 @@ void GameEventMgr::GameEventSpawn(int16 event_id)
             sObjectMgr->AddGameobjectToGrid(*itr, data);
             // Spawn if necessary (loaded grids only)
             // this base map checked as non-instanced and then only existed
-            Map* map = const_cast<Map*>(sMapMgr->CreateBaseMap(data->mapid));
+            Map* map = sMapMgr->CreateBaseMap(data->mapid);
             // We use current coords to unspawn, not spawn coords since creature can have changed grid
             if (!map->Instanceable() && map->IsGridLoaded(data->posX, data->posY))
             {
@@ -1590,15 +1590,15 @@ void GameEventMgr::SaveWorldEventStateToDB(uint16 event_id)
     CharacterDatabase.CommitTransaction(trans);
 }
 
-void GameEventMgr::SendWorldStateUpdate(Player* plr, uint16 event_id)
+void GameEventMgr::SendWorldStateUpdate(Player* player, uint16 event_id)
 {
     GameEventConditionMap::const_iterator itr;
     for (itr = mGameEvent[event_id].conditions.begin(); itr !=mGameEvent[event_id].conditions.end(); ++itr)
     {
         if (itr->second.done_world_state)
-            plr->SendUpdateWorldState(itr->second.done_world_state, (uint32)(itr->second.done));
+            player->SendUpdateWorldState(itr->second.done_world_state, (uint32)(itr->second.done));
         if (itr->second.max_world_state)
-            plr->SendUpdateWorldState(itr->second.max_world_state, (uint32)(itr->second.reqNum));
+            player->SendUpdateWorldState(itr->second.max_world_state, (uint32)(itr->second.reqNum));
     }
 }
 
