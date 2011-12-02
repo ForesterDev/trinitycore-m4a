@@ -1161,11 +1161,18 @@ class spell_sindragosa_ice_tomb : public SpellScriptLoader
             void PeriodicTick(AuraEffect const* /*aurEff*/)
             {
                 PreventDefaultAction();
+                GetTarget()->CastSpell(static_cast<Unit *>(nullptr), SPELL_ICE_TOMB_UNTARGETABLE, true);
             }
 
             void Register()
             {
                 OnEffectPeriodic += AuraEffectPeriodicFn(spell_sindragosa_ice_tomb_AuraScript::PeriodicTick, EFFECT_2, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+                AfterEffectRemove += AuraEffectRemoveFn(spell_sindragosa_ice_tomb_AuraScript::removed, EFFECT_2, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+            }
+
+            void removed(const AuraEffect *aurEff, AuraEffectHandleModes mode)
+            {
+                GetTarget()->RemoveAura(SPELL_ICE_TOMB_UNTARGETABLE, GetTarget()->GetGUID());
             }
         };
 
