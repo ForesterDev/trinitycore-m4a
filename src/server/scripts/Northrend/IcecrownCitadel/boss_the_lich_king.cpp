@@ -70,114 +70,117 @@ enum Texts
     SAY_TERENAS_INTRO_3             = 2,
 };
 
-enum Spells
+namespace
 {
-    // The Lich King
-    SPELL_PLAGUE_AVOIDANCE              = 72846,    // raging spirits also get it
-    SPELL_EMOTE_SIT_NO_SHEATH           = 73220,
-    SPELL_BOSS_HITTIN_YA                = 73878,
-    SPELL_EMOTE_SHOUT_NO_SHEATH         = 73213,
-    SPELL_ICE_LOCK                      = 71614,
+    enum Spells
+    {
+        // The Lich King
+        SPELL_PLAGUE_AVOIDANCE              = 72846,    // raging spirits also get it
+        SPELL_EMOTE_SIT_NO_SHEATH           = 73220,
+        SPELL_BOSS_HITTIN_YA                = 73878,
+        SPELL_EMOTE_SHOUT_NO_SHEATH         = 73213,
+        SPELL_ICE_LOCK                      = 71614,
 
-    // Phase 1
-    SPELL_SUMMON_SHAMBLING_HORROR       = 70372,
-    SPELL_RISEN_WITCH_DOCTOR_SPAWN      = 69639,
-    SPELL_SUMMON_DRUDGE_GHOULS          = 70358,
-    SPELL_INFEST                        = 70541,
-    SPELL_NECROTIC_PLAGUE               = 70337,
-    SPELL_NECROTIC_PLAGUE_JUMP          = 70338,
-    SPELL_PLAGUE_SIPHON                 = 74074,
-    SPELL_SHADOW_TRAP                   = 73539,
-    SPELL_SHADOW_TRAP_AURA              = 73525,
-    SPELL_SHADOW_TRAP_KNOCKBACK         = 73529,
+        // Phase 1
+        SPELL_SUMMON_SHAMBLING_HORROR       = 70372,
+        SPELL_RISEN_WITCH_DOCTOR_SPAWN      = 69639,
+        SPELL_SUMMON_DRUDGE_GHOULS          = 70358,
+        SPELL_INFEST                        = 70541,
+        SPELL_NECROTIC_PLAGUE               = 70337,
+        SPELL_NECROTIC_PLAGUE_JUMP          = 70338,
+        SPELL_PLAGUE_SIPHON                 = 74074,
+        SPELL_SHADOW_TRAP                   = 73539,
+        SPELL_SHADOW_TRAP_AURA              = 73525,
+        SPELL_SHADOW_TRAP_KNOCKBACK         = 73529,
 
-    // Phase Transition
-    SPELL_REMORSELESS_WINTER_1          = 68981,
-    SPELL_REMORSELESS_WINTER_2          = 72259,
-    SPELL_PAIN_AND_SUFFERING            = 72133,
-    SPELL_SUMMON_ICE_SPHERE             = 69104,
-    SPELL_ICE_SPHERE                    = 69090,
-    SPELL_ICE_BURST_TARGET_SEARCH       = 69109,
-    SPELL_ICE_PULSE                     = 69091,
-    SPELL_ICE_BURST                     = 69108,
-    SPELL_RAGING_SPIRIT                 = 69200,
-    SPELL_RAGING_SPIRIT_VISUAL          = 69197,
-    SPELL_RAGING_SPIRIT_VISUAL_CLONE    = 69198,
-    SPELL_SOUL_SHRIEK                   = 69242,
-    SPELL_QUAKE                         = 72262,
+        // Phase Transition
+        SPELL_REMORSELESS_WINTER_1          = 68981,
+        SPELL_REMORSELESS_WINTER_2          = 72259,
+        SPELL_PAIN_AND_SUFFERING            = 72133,
+        SPELL_SUMMON_ICE_SPHERE             = 69104,
+        SPELL_ICE_SPHERE                    = 69090,
+        SPELL_ICE_BURST_TARGET_SEARCH       = 69109,
+        SPELL_ICE_PULSE                     = 69091,
+        SPELL_ICE_BURST                     = 69108,
+        SPELL_RAGING_SPIRIT                 = 69200,
+        SPELL_RAGING_SPIRIT_VISUAL          = 69197,
+        SPELL_RAGING_SPIRIT_VISUAL_CLONE    = 69198,
+        SPELL_SOUL_SHRIEK                   = 69242,
+        SPELL_QUAKE                         = 72262,
 
-    // Phase 2
-    SPELL_DEFILE                        = 72762,
-    SPELL_DEFILE_AURA                   = 72743,
-    SPELL_DEFILE_GROW                   = 72756,
-    SPELL_SUMMON_VALKYR                 = 69037,
-    SPELL_SUMMON_VALKYR_PERIODIC        = 74361,
-    SPELL_HARVEST_SOUL_VALKYR           = 68985,    // Val'kyr Shadowguard vehicle aura
-    SPELL_SOUL_REAPER                   = 69409,
-    SPELL_SOUL_REAPER_BUFF              = 69410,
-    SPELL_WINGS_OF_THE_DAMNED           = 74352,
-    SPELL_VALKYR_TARGET_SEARCH          = 69030,
-    SPELL_CHARGE                        = 74399,    // cast on selected target
-    SPELL_VALKYR_CARRY                  = 74445,    // removes unselectable flag
-    SPELL_LIFE_SIPHON                   = 73488,
-    SPELL_LIFE_SIPHON_HEAL              = 73489,
-    SPELL_EJECT_ALL_PASSENGERS          = 68576,
+        // Phase 2
+        SPELL_DEFILE                        = 72762,
+        SPELL_DEFILE_AURA                   = 72743,
+        SPELL_DEFILE_GROW                   = 72756,
+        SPELL_SUMMON_VALKYR                 = 69037,
+        SPELL_SUMMON_VALKYR_PERIODIC        = 74361,
+        SPELL_HARVEST_SOUL_VALKYR           = 68985,    // Val'kyr Shadowguard vehicle aura
+        SPELL_SOUL_REAPER                   = 69409,
+        SPELL_SOUL_REAPER_BUFF              = 69410,
+        SPELL_WINGS_OF_THE_DAMNED           = 74352,
+        SPELL_VALKYR_TARGET_SEARCH          = 69030,
+        SPELL_CHARGE                        = 74399,    // cast on selected target
+        SPELL_VALKYR_CARRY                  = 74445,    // removes unselectable flag
+        SPELL_LIFE_SIPHON                   = 73488,
+        SPELL_LIFE_SIPHON_HEAL              = 73489,
+        SPELL_EJECT_ALL_PASSENGERS          = 68576,
 
-    // Phase 3
-    SPELL_VILE_SPIRITS                  = 70498,
-    SPELL_VILE_SPIRIT_MOVE_SEARCH       = 70501,
-    SPELL_VILE_SPIRIT_DAMAGE_SEARCH     = 70502,
-    SPELL_SPIRIT_BURST                  = 70503,
-    SPELL_HARVEST_SOUL                  = 68980,
-    SPELL_HARVEST_SOULS                 = 73654,    // Heroic version, weird because it has all 4 difficulties just like above spell
-    SPELL_HARVEST_SOUL_VEHICLE          = 68984,
-    SPELL_HARVEST_SOUL_VISUAL           = 71372,
-    SPELL_HARVEST_SOUL_TELEPORT         = 72546,
-    SPELL_HARVEST_SOULS_TELEPORT        = 73655,
-    SPELL_HARVEST_SOUL_TELEPORT_BACK    = 72597,
-    SPELL_IN_FROSTMOURNE_ROOM           = 74276,
-    SPELL_KILL_FROSTMOURNE_PLAYERS      = 75127,
-    SPELL_HARVESTED_SOUL                = 72679,
-    SPELL_TRIGGER_VILE_SPIRIT_HEROIC    = 73582,
+        // Phase 3
+        SPELL_VILE_SPIRITS                  = 70498,
+        SPELL_VILE_SPIRIT_MOVE_SEARCH       = 70501,
+        SPELL_VILE_SPIRIT_DAMAGE_SEARCH     = 70502,
+        SPELL_SPIRIT_BURST                  = 70503,
+        SPELL_HARVEST_SOUL                  = 68980,
+        SPELL_HARVEST_SOULS                 = 73654,    // Heroic version, weird because it has all 4 difficulties just like above spell
+        SPELL_HARVEST_SOUL_VEHICLE          = 68984,
+        SPELL_HARVEST_SOUL_VISUAL           = 71372,
+        SPELL_HARVEST_SOUL_TELEPORT         = 72546,
+        SPELL_HARVEST_SOULS_TELEPORT        = 73655,
+        SPELL_HARVEST_SOUL_TELEPORT_BACK    = 72597,
+        SPELL_IN_FROSTMOURNE_ROOM           = 74276,
+        SPELL_KILL_FROSTMOURNE_PLAYERS      = 75127,
+        SPELL_HARVESTED_SOUL                = 72679,
+        SPELL_TRIGGER_VILE_SPIRIT_HEROIC    = 73582,
 
-    // Frostmourne
-    SPELL_LIGHTS_FAVOR                  = 69382,
-    SPELL_RESTORE_SOUL                  = 72595,
-    SPELL_RESTORE_SOULS                 = 73650,    // Heroic
-    SPELL_DARK_HUNGER                   = 69383,    // Passive proc healing
-    SPELL_DESTROY_SOUL                  = 74086,    // Used when Terenas Menethil dies
-    SPELL_SOUL_RIP                      = 69397,    // Deals increasing damage
-    SPELL_SOUL_RIP_DAMAGE               = 69398,
-    SPELL_TERENAS_LOSES_INSIDE          = 72572,
-    SPELL_SUMMON_SPIRIT_BOMB_1          = 73581,    // (Heroic)
-    SPELL_SUMMON_SPIRIT_BOMB_2          = 74299,    // (Heroic)
-    SPELL_EXPLOSION                     = 73576,    // Spirit Bomb (Heroic)
+        // Frostmourne
+        SPELL_LIGHTS_FAVOR                  = 69382,
+        SPELL_RESTORE_SOUL                  = 72595,
+        SPELL_RESTORE_SOULS                 = 73650,    // Heroic
+        SPELL_DARK_HUNGER                   = 69383,    // Passive proc healing
+        SPELL_DESTROY_SOUL                  = 74086,    // Used when Terenas Menethil dies
+        SPELL_SOUL_RIP                      = 69397,    // Deals increasing damage
+        SPELL_SOUL_RIP_DAMAGE               = 69398,
+        SPELL_TERENAS_LOSES_INSIDE          = 72572,
+        SPELL_SUMMON_SPIRIT_BOMB_1          = 73581,    // (Heroic)
+        SPELL_SUMMON_SPIRIT_BOMB_2          = 74299,    // (Heroic)
+        SPELL_EXPLOSION                     = 73576,    // Spirit Bomb (Heroic)
 
-    // Outro
-    SPELL_FURY_OF_FROSTMOURNE           = 72350,
-    SPELL_FURY_OF_FROSTMOURNE_NO_REZ    = 72351,
-    SPELL_EMOTE_QUESTION_NO_SHEATH      = 73330,
-    SPELL_RAISE_DEAD                    = 71769,
-    SPELL_LIGHTS_BLESSING               = 71797,
-    SPELL_JUMP                          = 71809,
-    SPELL_JUMP_TRIGGERED                = 71811,
-    SPELL_JUMP_2                        = 72431,
-    SPELL_SUMMON_BROKEN_FROSTMOURNE     = 74081,    // visual
-    SPELL_SUMMON_BROKEN_FROSTMOURNE_2   = 72406,    // animation
-    SPELL_SUMMON_BROKEN_FROSTMOURNE_3   = 73017,    // real summon
-    SPELL_BROKEN_FROSTMOURNE            = 72398,
-    SPELL_BROKEN_FROSTMOURNE_KNOCK      = 72405,
-    SPELL_SOUL_BARRAGE                  = 72305,
-    SPELL_SUMMON_TERENAS                = 72420,
-    SPELL_MASS_RESURRECTION             = 72429,
-    SPELL_MASS_RESURRECTION_REAL        = 72423,
-    SPELL_PLAY_MOVIE                    = 73159,
+        // Outro
+        SPELL_FURY_OF_FROSTMOURNE           = 72350,
+        SPELL_FURY_OF_FROSTMOURNE_NO_REZ    = 72351,
+        SPELL_EMOTE_QUESTION_NO_SHEATH      = 73330,
+        SPELL_RAISE_DEAD                    = 71769,
+        SPELL_LIGHTS_BLESSING               = 71797,
+        SPELL_JUMP                          = 71809,
+        SPELL_JUMP_TRIGGERED                = 71811,
+        SPELL_JUMP_2                        = 72431,
+        SPELL_SUMMON_BROKEN_FROSTMOURNE     = 74081,    // visual
+        SPELL_SUMMON_BROKEN_FROSTMOURNE_2   = 72406,    // animation
+        SPELL_SUMMON_BROKEN_FROSTMOURNE_3   = 73017,    // real summon
+        SPELL_BROKEN_FROSTMOURNE            = 72398,
+        SPELL_BROKEN_FROSTMOURNE_KNOCK      = 72405,
+        SPELL_SOUL_BARRAGE                  = 72305,
+        SPELL_SUMMON_TERENAS                = 72420,
+        SPELL_MASS_RESURRECTION             = 72429,
+        SPELL_MASS_RESURRECTION_REAL        = 72423,
+        SPELL_PLAY_MOVIE                    = 73159,
 
-    // Shambling Horror
-    SPELL_SHOCKWAVE                     = 72149,
-    SPELL_ENRAGE                        = 72143,
-    SPELL_FRENZY                        = 28747,
-};
+        // Shambling Horror
+        SPELL_SHOCKWAVE                     = 72149,
+        SPELL_ENRAGE                        = 72143,
+        SPELL_FRENZY                        = 28747,
+    };
+}
 
 #define NECROTIC_PLAGUE_LK   RAID_MODE<uint32>(70337, 73912, 73913, 73914)
 #define NECROTIC_PLAGUE_PLR  RAID_MODE<uint32>(70338, 73785, 73786, 73787)
@@ -186,83 +189,86 @@ enum Spells
 #define SUMMON_VALKYR        RAID_MODE<uint32>(69037, 74361, 69037, 74361)
 #define HARVEST_SOUL         RAID_MODE<uint32>(68980, 74325, 74296, 74297)
 
-enum Events
+namespace
 {
-    // The Lich King
-    // intro events
-    EVENT_INTRO_MOVE_1              = 1,
-    EVENT_INTRO_MOVE_2              = 2,
-    EVENT_INTRO_MOVE_3              = 3,
-    EVENT_INTRO_TALK_1              = 4,
-    EVENT_EMOTE_CAST_SHOUT          = 5,
-    EVENT_INTRO_EMOTE_1             = 6,
-    EVENT_INTRO_CHARGE              = 7,
-    EVENT_INTRO_CAST_FREEZE         = 8,
-    EVENT_FINISH_INTRO              = 9,
+    enum Events
+    {
+        // The Lich King
+        // intro events
+        EVENT_INTRO_MOVE_1              = 1,
+        EVENT_INTRO_MOVE_2              = 2,
+        EVENT_INTRO_MOVE_3              = 3,
+        EVENT_INTRO_TALK_1              = 4,
+        EVENT_EMOTE_CAST_SHOUT          = 5,
+        EVENT_INTRO_EMOTE_1             = 6,
+        EVENT_INTRO_CHARGE              = 7,
+        EVENT_INTRO_CAST_FREEZE         = 8,
+        EVENT_FINISH_INTRO              = 9,
 
-    // combat events
-    EVENT_SUMMON_SHAMBLING_HORROR   = 10,
-    EVENT_SUMMON_DRUDGE_GHOUL       = 11,
-    EVENT_INFEST                    = 12,
-    EVENT_NECROTIC_PLAGUE           = 13,
-    EVENT_SHADOW_TRAP               = 14,   // heroic only
-    EVENT_SOUL_REAPER               = 15,
-    EVENT_DEFILE                    = 16,
-    EVENT_HARVEST_SOUL              = 17,   // normal mode only
-    EVENT_PAIN_AND_SUFFERING        = 18,
-    EVENT_SUMMON_ICE_SPHERE         = 19,
-    EVENT_SUMMON_RAGING_SPIRIT      = 20,
-    EVENT_QUAKE                     = 21,
-    EVENT_SUMMON_VALKYR             = 22,
-    EVENT_GRAB_PLAYER               = 23,
-    EVENT_MOVE_TO_DROP_POS          = 24,
-    EVENT_LIFE_SIPHON               = 25,   // heroic only
-    EVENT_START_ATTACK              = 26,
-    EVENT_QUAKE_2                   = 27,
-    EVENT_VILE_SPIRITS              = 28,
-    EVENT_HARVEST_SOULS             = 29,   // heroic only
-    EVENT_WICKED_SPIRITS            = 30,
-    EVENT_SOUL_RIP                  = 31,
-    EVENT_DESTROY_SOUL              = 32,
-    EVENT_FROSTMOURNE_TALK_1        = 33,
-    EVENT_FROSTMOURNE_TALK_2        = 34,
-    EVENT_FROSTMOURNE_TALK_3        = 35,
-    EVENT_TELEPORT_BACK             = 36,
-    EVENT_FROSTMOURNE_HEROIC        = 37,
-    EVENT_OUTRO_TALK_1              = 38,
-    EVENT_OUTRO_TALK_2              = 39,
-    EVENT_OUTRO_EMOTE_TALK          = 40,
-    EVENT_OUTRO_TALK_3              = 41,
-    EVENT_OUTRO_MOVE_CENTER         = 42,
-    EVENT_OUTRO_TALK_4              = 43,
-    EVENT_OUTRO_RAISE_DEAD          = 44,
-    EVENT_OUTRO_TALK_5              = 45,
-    EVENT_OUTRO_BLESS               = 46,
-    EVENT_OUTRO_REMOVE_ICE          = 47,
-    EVENT_OUTRO_MOVE_1              = 48,
-    EVENT_OUTRO_JUMP                = 49,
-    EVENT_OUTRO_TALK_6              = 50,
-    EVENT_OUTRO_KNOCK_BACK          = 51,
-    EVENT_OUTRO_SOUL_BARRAGE        = 52,
-    EVENT_OUTRO_SUMMON_TERENAS      = 53,
-    EVENT_OUTRO_TERENAS_TALK_1      = 54,
-    EVENT_OUTRO_TERENAS_TALK_2      = 55,
-    EVENT_OUTRO_TALK_7              = 56,
-    EVENT_OUTRO_TALK_8              = 57,
-    EVENT_BERSERK                   = 58,
+        // combat events
+        EVENT_SUMMON_SHAMBLING_HORROR   = 10,
+        EVENT_SUMMON_DRUDGE_GHOUL       = 11,
+        EVENT_INFEST                    = 12,
+        EVENT_NECROTIC_PLAGUE           = 13,
+        EVENT_SHADOW_TRAP               = 14,   // heroic only
+        EVENT_SOUL_REAPER               = 15,
+        EVENT_DEFILE                    = 16,
+        EVENT_HARVEST_SOUL              = 17,   // normal mode only
+        EVENT_PAIN_AND_SUFFERING        = 18,
+        EVENT_SUMMON_ICE_SPHERE         = 19,
+        EVENT_SUMMON_RAGING_SPIRIT      = 20,
+        EVENT_QUAKE                     = 21,
+        EVENT_SUMMON_VALKYR             = 22,
+        EVENT_GRAB_PLAYER               = 23,
+        EVENT_MOVE_TO_DROP_POS          = 24,
+        EVENT_LIFE_SIPHON               = 25,   // heroic only
+        EVENT_START_ATTACK              = 26,
+        EVENT_QUAKE_2                   = 27,
+        EVENT_VILE_SPIRITS              = 28,
+        EVENT_HARVEST_SOULS             = 29,   // heroic only
+        EVENT_WICKED_SPIRITS            = 30,
+        EVENT_SOUL_RIP                  = 31,
+        EVENT_DESTROY_SOUL              = 32,
+        EVENT_FROSTMOURNE_TALK_1        = 33,
+        EVENT_FROSTMOURNE_TALK_2        = 34,
+        EVENT_FROSTMOURNE_TALK_3        = 35,
+        EVENT_TELEPORT_BACK             = 36,
+        EVENT_FROSTMOURNE_HEROIC        = 37,
+        EVENT_OUTRO_TALK_1              = 38,
+        EVENT_OUTRO_TALK_2              = 39,
+        EVENT_OUTRO_EMOTE_TALK          = 40,
+        EVENT_OUTRO_TALK_3              = 41,
+        EVENT_OUTRO_MOVE_CENTER         = 42,
+        EVENT_OUTRO_TALK_4              = 43,
+        EVENT_OUTRO_RAISE_DEAD          = 44,
+        EVENT_OUTRO_TALK_5              = 45,
+        EVENT_OUTRO_BLESS               = 46,
+        EVENT_OUTRO_REMOVE_ICE          = 47,
+        EVENT_OUTRO_MOVE_1              = 48,
+        EVENT_OUTRO_JUMP                = 49,
+        EVENT_OUTRO_TALK_6              = 50,
+        EVENT_OUTRO_KNOCK_BACK          = 51,
+        EVENT_OUTRO_SOUL_BARRAGE        = 52,
+        EVENT_OUTRO_SUMMON_TERENAS      = 53,
+        EVENT_OUTRO_TERENAS_TALK_1      = 54,
+        EVENT_OUTRO_TERENAS_TALK_2      = 55,
+        EVENT_OUTRO_TALK_7              = 56,
+        EVENT_OUTRO_TALK_8              = 57,
+        EVENT_BERSERK                   = 58,
 
-    // Shambling Horror
-    EVENT_SHOCKWAVE                 = 59,
-    EVENT_ENRAGE                    = 60,
+        // Shambling Horror
+        EVENT_SHOCKWAVE                 = 59,
+        EVENT_ENRAGE                    = 60,
 
-    // Raging Spirit
-    EVENT_SOUL_SHRIEK               = 61,
+        // Raging Spirit
+        EVENT_SOUL_SHRIEK               = 61,
 
-    // Strangulate Vehicle (Harvest Soul)
-    EVENT_TELEPORT                  = 62,
-    EVENT_MOVE_TO_LICH_KING         = 63,
-    EVENT_DESPAWN_SELF              = 64,
-};
+        // Strangulate Vehicle (Harvest Soul)
+        EVENT_TELEPORT                  = 62,
+        EVENT_MOVE_TO_LICH_KING         = 63,
+        EVENT_DESPAWN_SELF              = 64,
+    };
+}
 
 enum EventGroups
 {
@@ -270,26 +276,29 @@ enum EventGroups
     EVENT_GROUP_VILE_SPIRITS    = 2,
 };
 
-enum Phases
+namespace
 {
-    PHASE_INTRO                 = 1,
-    PHASE_ONE                   = 2,
-    PHASE_TWO                   = 3,
-    PHASE_THREE                 = 4,
-    PHASE_TRANSITION            = 5,
-    PHASE_FROSTMOURNE           = 6,    // only set on heroic mode when all players are sent into frostmourne
-    PHASE_OUTRO                 = 7,
+    enum Phases
+    {
+        PHASE_INTRO                 = 1,
+        PHASE_ONE                   = 2,
+        PHASE_TWO                   = 3,
+        PHASE_THREE                 = 4,
+        PHASE_TRANSITION            = 5,
+        PHASE_FROSTMOURNE           = 6,    // only set on heroic mode when all players are sent into frostmourne
+        PHASE_OUTRO                 = 7,
 
-    PHASE_MASK_INTRO            = 1 << PHASE_INTRO,
-    PHASE_MASK_ONE              = 1 << PHASE_ONE,
-    PHASE_MASK_TWO              = 1 << PHASE_TWO,
-    PHASE_MASK_THREE            = 1 << PHASE_THREE,
-    PHASE_MASK_TRANSITION       = 1 << PHASE_TRANSITION,
-    PHASE_MASK_NO_CAST_CHECK    = (1 << PHASE_TRANSITION) | (1 << PHASE_FROSTMOURNE) | (1 << PHASE_OUTRO),
-    PHASE_MASK_FROSTMOURNE      = 1 << PHASE_FROSTMOURNE,
-    PHASE_MASK_OUTRO            = 1 << PHASE_OUTRO,
-    PHASE_MASK_NO_VICTIM        = (1 << PHASE_INTRO) | (1 << PHASE_OUTRO) | (1 << PHASE_FROSTMOURNE),
-};
+        PHASE_MASK_INTRO            = 1 << PHASE_INTRO,
+        PHASE_MASK_ONE              = 1 << PHASE_ONE,
+        PHASE_MASK_TWO              = 1 << PHASE_TWO,
+        PHASE_MASK_THREE            = 1 << PHASE_THREE,
+        PHASE_MASK_TRANSITION       = 1 << PHASE_TRANSITION,
+        PHASE_MASK_NO_CAST_CHECK    = (1 << PHASE_TRANSITION) | (1 << PHASE_FROSTMOURNE) | (1 << PHASE_OUTRO),
+        PHASE_MASK_FROSTMOURNE      = 1 << PHASE_FROSTMOURNE,
+        PHASE_MASK_OUTRO            = 1 << PHASE_OUTRO,
+        PHASE_MASK_NO_VICTIM        = (1 << PHASE_INTRO) | (1 << PHASE_OUTRO) | (1 << PHASE_FROSTMOURNE),
+    };
+}
 
 #define PHASE_TWO_THREE  (events.GetPhaseMask() & PHASE_MASK_TWO ? PHASE_TWO : PHASE_THREE)
 
