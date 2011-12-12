@@ -771,6 +771,16 @@ enum EnviromentalDamage
     DAMAGE_FALL_TO_VOID = 6                                 // custom case for fall without durability loss
 };
 
+enum PlayerChatTag
+{
+    CHAT_TAG_NONE       = 0x00,
+    CHAT_TAG_AFK        = 0x01,
+    CHAT_TAG_DND        = 0x02,
+    CHAT_TAG_GM         = 0x04,
+    CHAT_TAG_UNK        = 0x08, // Probably battleground commentator
+    CHAT_TAG_DEV        = 0x10,
+};
+
 enum PlayedTimeIndex
 {
     PLAYED_TIME_TOTAL = 0,
@@ -1150,7 +1160,7 @@ class Player : public Unit, public GridObject<Player>
         bool ToggleDND();
         bool isAFK() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK); }
         bool isDND() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DND); }
-        uint8 chatTag() const;
+        uint8 GetChatTag() const;
         std::string afkMsg;
         std::string dndMsg;
 
@@ -2354,7 +2364,7 @@ class Player : public Unit, public GridObject<Player>
 
         bool IsNeverVisible() const;
 
-        bool IsVisibleGloballyFor(Player* pl) const;
+        bool IsVisibleGloballyFor(Player* player) const;
 
         void SendInitialVisiblePackets(Unit* target);
         void UpdateObjectVisibility(bool forced = true);
@@ -2518,6 +2528,41 @@ class Player : public Unit, public GridObject<Player>
         void ClearWhisperWhiteList() { WhisperList.clear(); }
         void AddWhisperWhiteList(uint64 guid) { WhisperList.push_back(guid); }
         bool IsInWhisperWhiteList(uint64 guid);
+
+        //! Return collision height sent to client
+        float GetCollisionHeight(bool mounted)
+        {
+            if (mounted)
+            {
+                CreatureDisplayInfoEntry const* mountDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID));
+                if (!mountDisplayInfo)
+                    return GetCollisionHeight(false);
+                    
+                CreatureModelDataEntry const* mountModelData = sCreatureModelDataStore.LookupEntry(mountDisplayInfo->ModelId);
+                if (!mountModelData)
+                    return GetCollisionHeight(false);
+
+                CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(GetNativeDisplayId());
+                ASSERT(displayInfo);
+                CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
+                ASSERT(modelData);
+
+                float scaleMod = GetFloatValue(OBJECT_FIELD_SCALE_X); // 99% sure about this
+
+                return scaleMod * mountModelData->MountHeight + modelData->CollisionHeight * 0.5f;
+            }
+            else
+            {
+                //! Dismounting case - use basic default model data
+                CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(GetNativeDisplayId());
+                ASSERT(displayInfo);
+                CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
+                ASSERT(modelData);
+
+                return modelData->CollisionHeight;
+            }
+            //! TODO: Need a proper calculation for collision height when mounted
+        }
 
     protected:
         // Gamemaster whisper whitelist

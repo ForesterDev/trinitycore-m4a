@@ -365,7 +365,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
     uint32 security = GetSecurity();
     bool allowTwoSideWhoList = sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
     uint32 gmLevelInWhoList  = sWorld->getIntConfig(CONFIG_GM_LEVEL_IN_WHO_LIST);
-    ACE_READ_GUARD(HashMapHolder<Player>::LockType, g, *HashMapHolder<Player>::GetLock());
+    TRINITY_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
     HashMapHolder<Player>::MapType const& m = sObjectAccessor->GetPlayers();
     HashMapHolder<Player>::MapType::const_iterator itr = m.begin();
     uint32 count = m.size();
@@ -1316,18 +1316,18 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     recv_data >> guid;
     sLog->outStaticDebug("Inspected guid is " UI64FMTD, guid);
 
-    Player* plr = ObjectAccessor::FindPlayer(guid);
-    if (!plr)                                                // wrong player
+    Player* player = ObjectAccessor::FindPlayer(guid);
+    if (!player)                                                // wrong player
         return;
 
     uint32 talent_points = 0x47;
-    uint32 guid_size = plr->GetPackGUID().wpos();
+    uint32 guid_size = player->GetPackGUID().wpos();
     WorldPacket data(SMSG_INSPECT_TALENT, guid_size+4+talent_points);
-    data.append(plr->GetPackGUID());
+    data.append(player->GetPackGUID());
 
     if (sWorld->getBoolConfig(CONFIG_TALENTS_INSPECTING) || _player->isGameMaster())
     {
-        plr->BuildPlayerTalentsInfoData(&data);
+        player->BuildPlayerTalentsInfoData(&data);
     }
     else
     {
@@ -1336,7 +1336,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
         data << uint8(0);                                   // talentGroupIndex
     }
 
-    plr->BuildEnchantmentsInfoData(&data);
+    player->BuildEnchantmentsInfoData(&data);
     SendPacket(&data);
 }
 
@@ -1418,15 +1418,15 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
         return;
     }
 
-    Player* plr = sObjectAccessor->FindPlayerByName(charname.c_str());
+    Player* player = sObjectAccessor->FindPlayerByName(charname.c_str());
 
-    if (!plr)
+    if (!player)
     {
         SendNotification(LANG_PLAYER_NOT_EXIST_OR_OFFLINE, charname.c_str());
         return;
     }
 
-    uint32 accid = plr->GetSession()->GetAccountId();
+    uint32 accid = player->GetSession()->GetAccountId();
 
     QueryResult result = LoginDatabase.PQuery("SELECT username, email, last_ip FROM account WHERE id=%u", accid);
     if (!result)

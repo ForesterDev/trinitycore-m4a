@@ -175,7 +175,7 @@ class BattlegroundWS : public Battleground
         ~BattlegroundWS();
 
         /* inherited from BattlegroundClass */
-        virtual void AddPlayer(Player* plr);
+        virtual void AddPlayer(Player* player);
         virtual void StartingEventCloseDoors();
         virtual void StartingEventOpenDoors();
 
@@ -199,7 +199,7 @@ class BattlegroundWS : public Battleground
         virtual void EventPlayerClickedOnFlag(Player* Source, GameObject* target_obj);
         virtual void EventPlayerCapturedFlag(Player* Source);
 
-        void RemovePlayer(Player* plr, uint64 guid, uint32 team);
+        void RemovePlayer(Player* player, uint64 guid, uint32 team);
         void HandleAreaTrigger(Player* Source, uint32 Trigger);
         void HandleKillPlayer(Player* player, Player* killer);
         bool SetupBattleground();

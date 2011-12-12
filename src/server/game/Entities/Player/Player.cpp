@@ -964,7 +964,7 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
         return false;
     }
 
-    SetMap(sMapMgr->CreateMap(info->mapId, this, 0));
+    SetMap(sMapMgr->CreateMap(info->mapId, this));
 
     uint8 powertype = cEntry->powerType;
 
@@ -2044,23 +2044,20 @@ bool Player::ToggleDND()
     return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DND);
 }
 
-uint8 Player::chatTag() const
+uint8 Player::GetChatTag() const
 {
-    // it's bitmask
-    // 0x8 - ??
-    // 0x4 - gm
-    // 0x2 - dnd
-    // 0x1 - afk
-    if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DEVELOPER))
-        return 0x10;
-    else if (isGMChat())
-        return 4;
-    else if (isDND())
-        return 3;
+    uint8 tag = CHAT_TAG_NONE;
+
+    if (isGMChat())
+        tag |= CHAT_TAG_GM;
+    if (isDND())
+        tag |= CHAT_TAG_DND;
     if (isAFK())
-        return 1;
-    else
-        return 0;
+        tag |= CHAT_TAG_AFK;
+    if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DEVELOPER))
+        tag |= CHAT_TAG_DEV;
+
+    return tag;
 }
 
 void Player::SendTeleportPacket(Position &oldPos)
@@ -2232,8 +2229,11 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         if (!sMapMgr->CanPlayerEnter(mapid, this, false))
             return false;
 
-        Map* map = sMapMgr->CreateMap(mapid, this, 0);
-        if (!map || map->CanEnter(this))
+        //I think this always returns true. Correct me if I am wrong.
+        // If the map is not created, assume it is possible to enter it.
+        // It will be created in the WorldPortAck.
+        //Map* map = sMapMgr->FindBaseNonInstanceMap(mapid);
+        //if (!map || map->CanEnter(this))
         {
             //lets reset near teleport flag if it wasn't reset during chained teleports
             SetSemaphoreTeleportNear(false);
@@ -2304,7 +2304,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
             // remove from old map now
             if (oldmap)
-                oldmap->RemoveFromMap(this, false);
+                oldmap->RemovePlayerFromMap(this, false);
 
             // new final coordinates
             float final_x = x;
@@ -2342,8 +2342,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             // code for finish transfer to new map called in WorldSession::HandleMoveWorldportAckOpcode at client packet
             SetSemaphoreTeleportFar(true);
         }
-        else
-            return false;
+        //else
+        //    return false;
     }
     return true;
 }
@@ -3509,7 +3509,7 @@ bool Player::AddTalent(uint32 spell_id, uint8 spec, bool learning)
                 if (!rankSpellId || rankSpellId == spell_id)
                     continue;
 
-                PlayerTalentMap::iterator itr = m_talents[spec]->find(rankSpellId);
+                itr = m_talents[spec]->find(rankSpellId);
                 if (itr != m_talents[spec]->end())
                     itr->second->state = PLAYERSPELL_REMOVED;
             }
@@ -4127,8 +4127,6 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
 
     if (uint32 prev_id = sSpellMgr->GetPrevSpellInChain(spell_id))
     {
-        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spell_id);
-
         // if talent then lesser rank also talent and need learn
         if (talentCosts)
         {
@@ -4279,8 +4277,8 @@ void Player::RemoveArenaSpellCooldowns(bool removeActivePetCooldowns)
         if (Pet* pet = GetPet())
         {
             // notify player
-            for (CreatureSpellCooldowns::const_iterator itr = pet->m_CreatureSpellCooldowns.begin(); itr != pet->m_CreatureSpellCooldowns.end(); ++itr)
-                SendClearCooldown(itr->first, pet);
+            for (CreatureSpellCooldowns::const_iterator itr2 = pet->m_CreatureSpellCooldowns.begin(); itr2 != pet->m_CreatureSpellCooldowns.end(); ++itr2)
+                SendClearCooldown(itr2->first, pet);
 
             // actually clear cooldowns
             pet->m_CreatureSpellCooldowns.clear();
@@ -4433,9 +4431,9 @@ bool Player::resetTalents(bool no_cost)
 
     RemovePet(NULL, PET_SAVE_NOT_IN_SLOT, true);
 
-    for (uint32 i = 0; i < sTalentStore.GetNumRows(); ++i)
+    for (uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); ++talentId)
     {
-        TalentEntry const* talentInfo = sTalentStore.LookupEntry(i);
+        TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentId);
 
         if (!talentInfo)
             continue;
@@ -4871,14 +4869,14 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
                         {
                             do
                             {
-                                Field* fields = resultItems->Fetch();
-                                uint32 item_guidlow = fields[11].GetUInt32();
-                                uint32 item_template = fields[12].GetUInt32();
+                                Field* fields2 = resultItems->Fetch();
+                                uint32 item_guidlow = fields2[11].GetUInt32();
+                                uint32 item_template = fields2[12].GetUInt32();
 
                                 ItemTemplate const* itemProto = sObjectMgr->GetItemTemplate(item_template);
                                 if (!itemProto)
                                 {
-                                    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_INSTANCE);
+                                    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_INSTANCE);
                                     stmt->setUInt32(0, item_guidlow);
                                     trans->Append(stmt);
                                     continue;
@@ -5125,8 +5123,6 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     if (GetSession()->IsARecruiter() || (GetSession()->GetRecruiterId() != 0))
         SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_REFER_A_FRIEND);
 
-    setDeathState(ALIVE);
-
     SetMovement(MOVE_LAND_WALK);
     SetMovement(MOVE_UNROOT);
 
@@ -5155,6 +5151,8 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
 
     // update visibility
     UpdateObjectVisibility();
+
+    setDeathState(ALIVE);
 
     if (!applySickness)
         return;
@@ -6284,11 +6282,11 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step)
     return false;
 }
 
-void Player::UpdateWeaponSkill (WeaponAttackType attType)
+void Player::UpdateWeaponSkill(WeaponAttackType attType)
 {
     // no skill gain in pvp
-    Unit* pVictim = getVictim();
-    if (pVictim && pVictim->GetTypeId() == TYPEID_PLAYER)
+    Unit* victim = getVictim();
+    if (victim && victim->GetTypeId() == TYPEID_PLAYER)
         return;
 
     if (IsInFeralForm())
@@ -6297,42 +6295,25 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
     if (GetShapeshiftForm() == FORM_TREE)
         return;                                             // use weapon but not skill up
 
-    if (pVictim && pVictim->GetTypeId() == TYPEID_UNIT && (pVictim->ToCreature()->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_SKILLGAIN))
+    if (victim && victim->GetTypeId() == TYPEID_UNIT && (victim->ToCreature()->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_SKILLGAIN))
         return;
 
     uint32 weapon_skill_gain = sWorld->getIntConfig(CONFIG_SKILL_GAIN_WEAPON);
 
-    switch (attType)
-    {
-        case BASE_ATTACK:
-        {
-            Item* tmpitem = GetWeaponForAttack(attType, true);
+    Item* tmpitem = GetWeaponForAttack(attType, true);
+    if (!tmpitem && attType == BASE_ATTACK)
+        UpdateSkill(SKILL_UNARMED, weapon_skill_gain);
+    else if (tmpitem && tmpitem->GetTemplate()->SubClass != ITEM_SUBCLASS_WEAPON_FISHING_POLE)
+        UpdateSkill(tmpitem->GetSkill(), weapon_skill_gain);
 
-            if (!tmpitem)
-                UpdateSkill(SKILL_UNARMED, weapon_skill_gain);
-            else if (tmpitem->GetTemplate()->SubClass != ITEM_SUBCLASS_WEAPON_FISHING_POLE)
-                UpdateSkill(tmpitem->GetSkill(), weapon_skill_gain);
-            break;
-        }
-        case OFF_ATTACK:
-        case RANGED_ATTACK:
-        {
-            Item* tmpitem = GetWeaponForAttack(attType, true);
-            if (tmpitem)
-                UpdateSkill(tmpitem->GetSkill(), weapon_skill_gain);
-            break;
-        }
-        default:
-            break;
-    }
     UpdateAllCritPercentages();
 }
 
-void Player::UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool defence)
+void Player::UpdateCombatSkills(Unit* victim, WeaponAttackType attType, bool defence)
 {
-    uint8 plevel = getLevel();                              // if defense than pVictim == attacker
+    uint8 plevel = getLevel();                              // if defense than victim == attacker
     uint8 greylevel = Trinity::XP::GetGrayLevel(plevel);
-    uint8 moblevel = pVictim->getLevelForTarget(this);
+    uint8 moblevel = victim->getLevelForTarget(this);
     if (moblevel < greylevel)
         return;
 
@@ -15981,9 +15962,9 @@ void Player::CastedCreatureOrGO(uint32 entry, uint64 guid, uint32 spell_id)
                             if (reqTarget != entry) // if entry doesn't match, check for killcredits referenced in template
                             {
                                 CreatureTemplate const* cinfo = sObjectMgr->GetCreatureTemplate(entry);
-                                for (uint8 i = 0; i < MAX_KILL_CREDIT; ++i)
-                                    if (cinfo->KillCredit[i] == reqTarget)
-                                        entry = cinfo->KillCredit[i];
+                                for (uint8 j = 0; j < MAX_KILL_CREDIT; ++j)
+                                    if (cinfo->KillCredit[j] == reqTarget)
+                                        entry = cinfo->KillCredit[j];
                             }
                          }
                     }
@@ -16874,7 +16855,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     // NOW player must have valid map
     // load the player's map here if it's not already loaded
-    Map* map = sMapMgr->CreateMap(mapId, this, instanceId);
+    Map* map = sMapMgr->CreateMap(mapId, this);
 
     if (!map || !map->CanEnter(this))
     {
@@ -16892,14 +16873,14 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
             RelocateToHomebind();
         }
 
-        map = sMapMgr->CreateMap(mapId, this, 0);
+        map = sMapMgr->CreateMap(mapId, this);
         if (!map || !map->CanEnter(this))
         {
             PlayerInfo const* info = sObjectMgr->GetPlayerInfo(getRace(), getClass());
             mapId = info->mapId;
             Relocate(info->positionX, info->positionY, info->positionZ, 0.0f);
             sLog->outError("Player (guidlow %d) have invalid coordinates (X: %f Y: %f Z: %f O: %f). Teleport to default race/class locations.", guid, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
-            map = sMapMgr->CreateMap(mapId, this, 0);
+            map = sMapMgr->CreateMap(mapId, this);
             if (!map || !map->CanEnter(this))
             {
                 sLog->outError("Player (guidlow %d) has invalid default map coordinates (X: %f Y: %f Z: %f O: %f). or instance couldn't be created", guid, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
@@ -17620,7 +17601,7 @@ void Player::_LoadMailedItems(Mail* mail)
         {
             sLog->outError("Player %u has unknown item_template (ProtoType) in mailed items(GUID: %u template: %u) in mail (%u), deleted.", GetGUIDLow(), item_guid_low, item_template, mail->messageID);
             CharacterDatabase.PExecute("DELETE FROM mail_items WHERE item_guid = '%u'", item_guid_low);
-            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_INSTANCE);
+            stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_INSTANCE);
             stmt->setUInt32(0, item_guid_low);
             CharacterDatabase.Execute(stmt);
             continue;
@@ -19423,7 +19404,7 @@ inline void Player::BuildPlayerChat(WorldPacket* data, uint8 msgtype, const std:
     *data << uint64(GetGUID());
     *data << uint32(text.length() + 1);
     *data << text;
-    *data << uint8(chatTag());
+    *data << uint8(GetChatTag());
 }
 
 void Player::Say(const std::string& text, const uint32 language)
@@ -20217,9 +20198,9 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
 
     if (sWorld->getBoolConfig(CONFIG_INSTANT_TAXI))
     {
-        TaxiNodesEntry const* lastnode = sTaxiNodesStore.LookupEntry(nodes[nodes.size()-1]);
+        TaxiNodesEntry const* lastPathNode = sTaxiNodesStore.LookupEntry(nodes[nodes.size()-1]);
         m_taxi.ClearTaxiDestinations();
-        TeleportTo(lastnode->map_id, lastnode->x, lastnode->y, lastnode->z, GetOrientation());
+        TeleportTo(lastPathNode->map_id, lastPathNode->x, lastPathNode->y, lastPathNode->z, GetOrientation());
         return false;
     }
     else
@@ -24444,9 +24425,9 @@ void Player::ActivateSpec(uint8 spec)
     // Let client clear his current Actions
     SendActionButtons(2);
     // m_actionButtons.clear() is called in the next _LoadActionButtons
-    for (uint32 i = 0; i < sTalentStore.GetNumRows(); ++i)
+    for (uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); ++talentId)
     {
-        TalentEntry const* talentInfo = sTalentStore.LookupEntry(i);
+        TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentId);
 
         if (!talentInfo)
             continue;
