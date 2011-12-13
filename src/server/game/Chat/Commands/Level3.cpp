@@ -65,6 +65,8 @@
 #include "Group.h"
 #include "ChannelMgr.h"
 
+using boost::optional;
+
 bool ChatHandler::HandleMaxSkillCommand(const char* /*args*/)
 {
     Player* SelectedPlayer = getSelectedPlayer();
@@ -2422,7 +2424,7 @@ bool ChatHandler::HandleListAurasCommand (const char * /*args*/)
         ss_name << "|cffffffff|Hspell:" << aura->GetId() << "|h[" << name << "]|h|r";
 
         PSendSysMessage(LANG_COMMAND_TARGET_AURADETAIL, aura->GetId(), (m_session ? ss_name.str().c_str() : name),
-            aurApp->GetEffectMask(), aura->GetCharges(), aura->GetStackAmount(), aurApp->GetSlot(),
+            aurApp->GetEffectMask(), aura->GetCharges(), aura->GetStackAmount(), optional<int>(aurApp->GetSlot()).get_value_or(-1),
             aura->GetDuration(), aura->GetMaxDuration(), (aura->IsPassive() ? passiveStr : ""),
             (talent ? talentStr : ""), IS_PLAYER_GUID(aura->GetCasterGUID()) ? "player" : "creature",
             GUID_LOPART(aura->GetCasterGUID()));

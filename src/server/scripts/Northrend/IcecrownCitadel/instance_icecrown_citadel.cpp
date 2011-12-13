@@ -25,6 +25,8 @@
 #include "AccountMgr.h"
 #include "icecrown_citadel.h"
 
+using std::unique_ptr;
+
 enum EventIds
 {
     EVENT_QUAKE                     = 23437,
@@ -625,6 +627,34 @@ class instance_icecrown_citadel : public InstanceMapScript
                 switch (type)
                 {
                     case DATA_LADY_DEATHWHISPER:
+                        if (state == DONE)
+                        {
+                            unique_ptr<GameObject> chest(new GameObject);
+                            uint32 name_id;
+                            switch (instance->GetDifficulty())
+                            {
+                            case RAID_DIFFICULTY_10MAN_NORMAL:
+                                name_id = 201873 /* Gunship Armory */;
+                                break;
+                            case RAID_DIFFICULTY_25MAN_NORMAL:
+                                name_id = 201874 /* Gunship Armory */;
+                                break;
+                            case RAID_DIFFICULTY_10MAN_HEROIC:
+                                name_id = 201872 /* Gunship Armory */;
+                                break;
+                            case RAID_DIFFICULTY_25MAN_HEROIC:
+                                name_id = 201875 /* Gunship Armory */;
+                                break;
+                            default:
+                                ASSERT(false);
+                            }
+                            if (chest->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), name_id, instance, PHASEMASK_NORMAL, -437.563995f, 1948.219971f, 214.882004f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 1.000000f, 100, GO_STATE_READY))
+                            {
+                                chest->SetRespawnTime(0);
+                                chest->SetSpawnedByDefault(false);
+                                instance->AddToMap(chest.release());
+                            }
+                        }
                         SetBossState(DATA_GUNSHIP_EVENT, state);    // TEMP HACK UNTIL GUNSHIP SCRIPTED
                         if (state == DONE)
                         {
