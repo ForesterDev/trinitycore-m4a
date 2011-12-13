@@ -37,10 +37,12 @@
 #include "SpellScript.h"
 #include "Vehicle.h"
 
+using boost::none;
+using boost::optional;
 using Trinity::UnitListSearcher;
 
 AuraApplication::AuraApplication(Unit* target, Unit* caster, Aura* aura, uint8 effMask):
-m_target(target), m_base(aura), m_slot(MAX_AURAS), m_flags(AFLAG_NONE),
+m_target(target), m_base(aura), m_flags(AFLAG_NONE),
 m_effectsToApply(effMask), m_removeMode(AURA_REMOVE_NONE), m_needClientUpdate(false)
 {
     ASSERT(GetTarget() && GetBase());
@@ -48,7 +50,7 @@ m_effectsToApply(effMask), m_removeMode(AURA_REMOVE_NONE), m_needClientUpdate(fa
     if (GetBase()->CanBeSentToClient())
     {
         // Try find slot for aura
-        uint8 slot = MAX_AURAS;
+        optional<uint8> slot;
         // Lookup for auras already applied from spell
         if (AuraApplication * foundAura = GetTarget()->GetAuraApplication(GetBase()->GetId(), GetBase()->GetCasterGUID(), GetBase()->GetCastItemGUID()))
         {
@@ -60,7 +62,7 @@ m_effectsToApply(effMask), m_removeMode(AURA_REMOVE_NONE), m_needClientUpdate(fa
             Unit::VisibleAuraMap const* visibleAuras = GetTarget()->GetVisibleAuras();
             // lookup for free slots in units visibleAuras
             Unit::VisibleAuraMap::const_iterator itr = visibleAuras->find(0);
-            for (uint32 freeSlot = 0; freeSlot < MAX_AURAS; ++itr, ++freeSlot)
+            for (uint32 freeSlot = 0; freeSlot < max_unit_auras; ++itr, ++freeSlot)
             {
                 if (itr == visibleAuras->end() || itr->first != freeSlot)
                 {
@@ -71,12 +73,12 @@ m_effectsToApply(effMask), m_removeMode(AURA_REMOVE_NONE), m_needClientUpdate(fa
         }
 
         // Register Visible Aura
-        if (slot < MAX_AURAS)
+        if (slot)
         {
             m_slot = slot;
-            GetTarget()->SetVisibleAura(slot, this);
+            GetTarget()->SetVisibleAura(*slot, this);
             SetNeedClientUpdate();
-            sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Aura: %u Effect: %d put to unit visible auras slot: %u", GetBase()->GetId(), GetEffectMask(), slot);
+            sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Aura: %u Effect: %d put to unit visible auras slot: %u", GetBase()->GetId(), GetEffectMask(), *slot);
         }
         else
             sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Aura: %u Effect: %d could not find empty unit visible slot", GetBase()->GetId(), GetEffectMask());
@@ -87,9 +89,9 @@ m_effectsToApply(effMask), m_removeMode(AURA_REMOVE_NONE), m_needClientUpdate(fa
 
 void AuraApplication::_Remove()
 {
-    uint8 slot = GetSlot();
+    optional<uint8> slot = GetSlot();
 
-    if (slot >= MAX_AURAS)
+    if (!slot)
         return;
 
     if (AuraApplication * foundAura = m_target->GetAuraApplication(GetBase()->GetId(), GetBase()->GetCasterGUID(), GetBase()->GetCastItemGUID()))
@@ -97,20 +99,20 @@ void AuraApplication::_Remove()
         // Reuse visible aura slot by aura which is still applied - prevent storing dead pointers
         if (slot == foundAura->GetSlot())
         {
-            if (GetTarget()->GetVisibleAura(slot) == this)
+            if (GetTarget()->GetVisibleAura(*slot) == this)
             {
-                GetTarget()->SetVisibleAura(slot, foundAura);
+                GetTarget()->SetVisibleAura(*slot, foundAura);
                 foundAura->SetNeedClientUpdate();
             }
             // set not valid slot for aura - prevent removing other visible aura
-            slot = MAX_AURAS;
+            slot = none;
         }
     }
 
     // update for out of range group members
-    if (slot < MAX_AURAS)
+    if (slot)
     {
-        GetTarget()->RemoveVisibleAura(slot);
+        GetTarget()->RemoveVisibleAura(*slot);
         ClientUpdate(true);
     }
 }
@@ -180,15 +182,15 @@ void AuraApplication::_HandleEffect(uint8 effIndex, bool apply)
 
 void AuraApplication::BuildUpdatePacket(ByteBuffer& data, bool remove) const
 {
-    data << uint8(m_slot);
+    data << uint8(*m_slot);
 
     if (remove)
     {
-        ASSERT(!m_target->GetVisibleAura(m_slot));
+        ASSERT(!m_target->GetVisibleAura(*m_slot));
         data << uint32(0);
         return;
     }
-    ASSERT(m_target->GetVisibleAura(m_slot));
+    ASSERT(m_target->GetVisibleAura(*m_slot));
 
     Aura const* aura = GetBase();
     data << uint32(aura->GetId());

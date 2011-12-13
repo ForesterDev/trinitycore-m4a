@@ -8095,7 +8095,8 @@ void Player::_ApplyWeaponDependentAuraCritMod(Item* item, WeaponAttackType attac
     // generic not weapon specific case processes in aura code
     if (aura->GetSpellInfo()->EquippedItemClass == -1)
         return;
-
+    if (!CanUseAttackType(attackType))
+        return;
     BaseModGroup mod = BASEMOD_END;
     switch (attackType)
     {
@@ -18215,9 +18216,11 @@ bool Player::Satisfy(AccessRequirement const* ar, uint32 target_map, bool report
         else if (GetTeam() == HORDE && ar->quest_H && !GetQuestRewardStatus(ar->quest_H))
             missingQuest = ar->quest_H;
 
-        uint32 missingAchievement = 0;
-        if (ar->achievement && !GetAchievementMgr().HasAchieved(sAchievementStore.LookupEntry(ar->achievement)))
-            missingAchievement = ar->achievement;
+        uint32 missingAchievement = ar->achievement;
+        if (missingAchievement)
+            if (auto leader = GetGroup() ? GetGroup()->GetLeaderGUID() != GetGUID() ? ObjectAccessor::GetPlayer(*this, GetGroup()->GetLeaderGUID()) : this : this)
+                if (leader->GetAchievementMgr().HasAchieved(sAchievementStore.LookupEntry(missingAchievement)))
+                    missingAchievement = 0;
 
         Difficulty target_difficulty = GetDifficulty(mapEntry->IsRaid());
         MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(target_map, target_difficulty);

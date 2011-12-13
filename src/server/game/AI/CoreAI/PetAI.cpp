@@ -185,7 +185,7 @@ void PetAI::UpdateAI(const uint32 diff)
             {
                 Spell* spell = new Spell(me, spellInfo, TRIGGERED_NONE, 0);
                 if (spell->CanAutoCast(me->getVictim()))
-                    targetSpellStore.push_back(std::make_pair<Unit*, Spell*>(me->getVictim(), spell));
+                    targetSpellStore.push_back(std::make_pair(me->getVictim(), spell));
                 else
                     delete spell;
             }
