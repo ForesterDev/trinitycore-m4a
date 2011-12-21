@@ -2997,7 +2997,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
 
     // don't allow channeled spells / spells with cast time to be casted while moving
     // (even if they are interrupted on moving, spells with almost immediate effect get to have their effect processed before movement interrupter kicks in)
-    if ((m_spellInfo->IsChanneled() || m_casttime) && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->isMoving() && m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT)
+    if ((m_spellInfo->IsChanneled() || m_casttime) && m_caster->isMoving() && m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT)
     {
         SendCastResult(SPELL_FAILED_MOVING);
         finish(false);
@@ -3505,7 +3505,7 @@ void Spell::update(uint32 difftime)
     }
 
     // check if the player caster has moved before the spell finished
-    if ((m_caster->GetTypeId() == TYPEID_PLAYER && m_timer != 0) &&
+    if (m_timer != 0 &&
         m_caster->isMoving() && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT) &&
         (m_spellInfo->Effects[0].Effect != SPELL_EFFECT_STUCK || !m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING)))
     {
@@ -4734,7 +4734,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     // cancel autorepeat spells if cast start when moving
     // (not wand currently autorepeat cast delayed to moving stop anyway in spell update code)
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->isMoving())
+    if (m_caster->isMoving())
     {
         // skip stuck spell to allow use it in falling case and apply spell limitations at movement
         if ((!m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING) || m_spellInfo->Effects[0].Effect != SPELL_EFFECT_STUCK) &&
