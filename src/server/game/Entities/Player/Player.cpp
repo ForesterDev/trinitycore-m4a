@@ -629,7 +629,7 @@ UpdateMask Player::updateVisualBits;
 #ifdef _MSC_VER
 #pragma warning(disable:4355)
 #endif
-Player::Player (WorldSession* session): Unit(), m_achievementMgr(this), m_reputationMgr(this)
+Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_reputationMgr(this)
 {
 #ifdef _MSC_VER
 #pragma warning(default:4355)
@@ -839,7 +839,6 @@ Player::Player (WorldSession* session): Unit(), m_achievementMgr(this), m_reputa
     m_grantableLevels = 0;
 
     m_ControlledByPlayer = true;
-    m_isWorldObject = true;
 
     sWorld->IncreasePlayerCount();
 
@@ -1850,7 +1849,7 @@ void Player::setDeathState(DeathState s)
         SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
 }
 
-bool Player::BuildEnumData(QueryResult result, WorldPacket* data)
+bool Player::BuildEnumData(PreparedQueryResult result, WorldPacket* data)
 {
     //             0               1                2                3                 4                  5                       6                        7
     //    "SELECT characters.guid, characters.name, characters.race, characters.class, characters.gender, characters.playerBytes, characters.playerBytes2, characters.level, "
@@ -1894,8 +1893,8 @@ bool Player::BuildEnumData(QueryResult result, WorldPacket* data)
     *data << uint8(playerBytes2 & 0xFF);                    // facial hair
 
     *data << uint8(fields[7].GetUInt8());                   // level
-    *data << uint32(fields[8].GetUInt32());                 // zone
-    *data << uint32(fields[9].GetUInt32());                 // map
+    *data << uint32(fields[8].GetUInt16());                 // zone
+    *data << uint32(fields[9].GetUInt16());                 // map
 
     *data << fields[10].GetFloat();                         // x
     *data << fields[11].GetFloat();                         // y
@@ -2050,28 +2049,6 @@ void Player::SendTeleportAckPacket()
     data << uint32(0);                                     // this value increments every time
     BuildMovementPacket(&data);
     GetSession()->SendPacket(&data);
-}
-
-// this is not used anywhere
-void Player::TeleportOutOfMap(Map* oldMap)
-{
-    while (IsBeingTeleportedFar())
-        GetSession()->HandleMoveWorldportAckOpcode();
-
-    if (GetMap() != oldMap)
-        return;
-
-    TeleportTo(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, GetOrientation());
-
-    while (IsBeingTeleportedFar())
-        GetSession()->HandleMoveWorldportAckOpcode();
-
-    if (GetMap() == oldMap)
-    {
-        sLog->outCrash("Cannot teleport player out of map!");
-        ResetMap();
-        ASSERT(false);
-    }
 }
 
 bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options)
@@ -3439,19 +3416,24 @@ void Player::AddNewMailDeliverTime(time_t deliver_time)
     }
 }
 
-bool Player::AddTalent(uint32 spell_id, uint8 spec, bool learning)
+bool Player::AddTalent(uint32 spellId, uint8 spec, bool learning)
 {
-    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spell_id);
+    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
     if (!spellInfo)
     {
         // do character spell book cleanup (all characters)
         if (!IsInWorld() && !learning)                       // spell load case
         {
-            sLog->outError("Player::addSpell: Non-existed in SpellStore spell #%u request, deleting for all characters in `character_spell`.", spell_id);
-            CharacterDatabase.PExecute("DELETE FROM character_talent WHERE spell = '%u'", spell_id);
+            sLog->outError("Player::addSpell: Non-existed in SpellStore spell #%u request, deleting for all characters in `character_spell`.", spellId);
+
+            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_INVALID_SPELL);
+
+            stmt->setUInt32(0, spellId);
+
+            CharacterDatabase.Execute(stmt);
         }
         else
-            sLog->outError("Player::addSpell: Non-existed in SpellStore spell #%u request.", spell_id);
+            sLog->outError("Player::addSpell: Non-existed in SpellStore spell #%u request.", spellId);
 
         return false;
     }
@@ -3461,19 +3443,24 @@ bool Player::AddTalent(uint32 spell_id, uint8 spec, bool learning)
         // do character spell book cleanup (all characters)
         if (!IsInWorld() && !learning)                       // spell load case
         {
-            sLog->outError("Player::addTalent: Broken spell #%u learning not allowed, deleting for all characters in `character_talent`.", spell_id);
-            CharacterDatabase.PExecute("DELETE FROM character_talent WHERE spell = '%u'", spell_id);
+            sLog->outError("Player::addTalent: Broken spell #%u learning not allowed, deleting for all characters in `character_talent`.", spellId);
+
+            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_INVALID_SPELL);
+
+            stmt->setUInt32(0, spellId);
+
+            CharacterDatabase.Execute(stmt);
         }
         else
-            sLog->outError("Player::addTalent: Broken spell #%u learning not allowed.", spell_id);
+            sLog->outError("Player::addTalent: Broken spell #%u learning not allowed.", spellId);
 
         return false;
     }
 
-    PlayerTalentMap::iterator itr = m_talents[spec]->find(spell_id);
+    PlayerTalentMap::iterator itr = m_talents[spec]->find(spellId);
     if (itr != m_talents[spec]->end())
         itr->second->state = PLAYERSPELL_UNCHANGED;
-    else if (TalentSpellPos const* talentPos = GetTalentSpellPos(spell_id))
+    else if (TalentSpellPos const* talentPos = GetTalentSpellPos(spellId))
     {
         if (TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentPos->talent_id))
         {
@@ -3481,7 +3468,7 @@ bool Player::AddTalent(uint32 spell_id, uint8 spec, bool learning)
             {
                 // skip learning spell and no rank spell case
                 uint32 rankSpellId = talentInfo->RankID[rank];
-                if (!rankSpellId || rankSpellId == spell_id)
+                if (!rankSpellId || rankSpellId == spellId)
                     continue;
 
                 itr = m_talents[spec]->find(rankSpellId);
@@ -3496,25 +3483,30 @@ bool Player::AddTalent(uint32 spell_id, uint8 spec, bool learning)
         newtalent->state = state;
         newtalent->spec = spec;
 
-        (*m_talents[spec])[spell_id] = newtalent;
+        (*m_talents[spec])[spellId] = newtalent;
         return true;
     }
     return false;
 }
 
-bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependent, bool disabled, bool loading /*=false*/)
+bool Player::addSpell(uint32 spellId, bool active, bool learning, bool dependent, bool disabled, bool loading /*= false*/)
 {
-    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spell_id);
+    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
     if (!spellInfo)
     {
         // do character spell book cleanup (all characters)
         if (!IsInWorld() && !learning)                       // spell load case
         {
-            sLog->outError("Player::addSpell: Non-existed in SpellStore spell #%u request, deleting for all characters in `character_spell`.", spell_id);
-            CharacterDatabase.PExecute("DELETE FROM character_spell WHERE spell = '%u'", spell_id);
+            sLog->outError("Player::addSpell: Non-existed in SpellStore spell #%u request, deleting for all characters in `character_spell`.", spellId);
+
+            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_INVALID_SPELL);
+
+            stmt->setUInt32(0, spellId);
+
+            CharacterDatabase.Execute(stmt);
         }
         else
-            sLog->outError("Player::addSpell: Non-existed in SpellStore spell #%u request.", spell_id);
+            sLog->outError("Player::addSpell: Non-existed in SpellStore spell #%u request.", spellId);
 
         return false;
     }
@@ -3524,11 +3516,16 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
         // do character spell book cleanup (all characters)
         if (!IsInWorld() && !learning)                       // spell load case
         {
-            sLog->outError("Player::addSpell: Broken spell #%u learning not allowed, deleting for all characters in `character_spell`.", spell_id);
-            CharacterDatabase.PExecute("DELETE FROM character_spell WHERE spell = '%u'", spell_id);
+            sLog->outError("Player::addSpell: Broken spell #%u learning not allowed, deleting for all characters in `character_spell`.", spellId);
+
+            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_INVALID_SPELL);
+
+            stmt->setUInt32(0, spellId);
+
+            CharacterDatabase.Execute(stmt);
         }
         else
-            sLog->outError("Player::addSpell: Broken spell #%u learning not allowed.", spell_id);
+            sLog->outError("Player::addSpell: Broken spell #%u learning not allowed.", spellId);
 
         return false;
     }
@@ -3539,18 +3536,18 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
     bool disabled_case = false;
     bool superceded_old = false;
 
-    PlayerSpellMap::iterator itr = m_spells.find(spell_id);
+    PlayerSpellMap::iterator itr = m_spells.find(spellId);
 
     // Remove temporary spell if found to prevent conflicts
     if (itr != m_spells.end() && itr->second->state == PLAYERSPELL_TEMPORARY)
-        RemoveTemporarySpell(spell_id);
+        RemoveTemporarySpell(spellId);
     else if (itr != m_spells.end())
     {
         uint32 next_active_spell_id = 0;
         // fix activate state for non-stackable low rank (and find next spell for !active case)
         if (!spellInfo->IsStackableWithRanks() && spellInfo->IsRanked())
         {
-            if (uint32 next = sSpellMgr->GetNextSpellInChain(spell_id))
+            if (uint32 next = sSpellMgr->GetNextSpellInChain(spellId))
             {
                 if (HasSpell(next))
                 {
@@ -3593,7 +3590,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
             if (active)
             {
                 if (spellInfo->IsPassive() && IsNeedCastPassiveSpellAtLearn(spellInfo))
-                    CastSpell (this, spell_id, true);
+                    CastSpell (this, spellId, true);
             }
             else if (IsInWorld())
             {
@@ -3601,14 +3598,14 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                 {
                     // update spell ranks in spellbook and action bar
                     WorldPacket data(SMSG_SUPERCEDED_SPELL, 4 + 4);
-                    data << uint32(spell_id);
+                    data << uint32(spellId);
                     data << uint32(next_active_spell_id);
                     GetSession()->SendPacket(&data);
                 }
                 else
                 {
                     WorldPacket data(SMSG_REMOVED_SPELL, 4);
-                    data << uint32(spell_id);
+                    data << uint32(spellId);
                     GetSession()->SendPacket(&data);
                 }
             }
@@ -3652,7 +3649,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
     if (!disabled_case) // skip new spell adding if spell already known (disabled spells case)
     {
         // talent: unlearn all other talent ranks (high and low)
-        if (TalentSpellPos const* talentPos = GetTalentSpellPos(spell_id))
+        if (TalentSpellPos const* talentPos = GetTalentSpellPos(spellId))
         {
             if (TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentPos->talent_id))
             {
@@ -3660,7 +3657,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                 {
                     // skip learning spell and no rank spell case
                     uint32 rankSpellId = talentInfo->RankID[rank];
-                    if (!rankSpellId || rankSpellId == spell_id)
+                    if (!rankSpellId || rankSpellId == spellId)
                         continue;
 
                     removeSpell(rankSpellId, false, false);
@@ -3668,7 +3665,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
             }
         }
         // non talent spell: learn low ranks (recursive call)
-        else if (uint32 prev_spell = sSpellMgr->GetPrevSpellInChain(spell_id))
+        else if (uint32 prev_spell = sSpellMgr->GetPrevSpellInChain(spellId))
         {
             if (!IsInWorld() || disabled)                    // at spells loading, no output, but allow save
                 addSpell(prev_spell, active, true, true, disabled);
@@ -3701,7 +3698,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                             {
                                 WorldPacket data(SMSG_SUPERCEDED_SPELL, 4 + 4);
                                 data << uint32(itr2->first);
-                                data << uint32(spell_id);
+                                data << uint32(spellId);
                                 GetSession()->SendPacket(&data);
                             }
 
@@ -3716,7 +3713,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                             if (IsInWorld())                 // not send spell (re-/over-)learn packets at loading
                             {
                                 WorldPacket data(SMSG_SUPERCEDED_SPELL, 4 + 4);
-                                data << uint32(spell_id);
+                                data << uint32(spellId);
                                 data << uint32(itr2->first);
                                 GetSession()->SendPacket(&data);
                             }
@@ -3731,31 +3728,31 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
             }
         }
 
-        m_spells[spell_id] = newspell;
+        m_spells[spellId] = newspell;
 
         // return false if spell disabled
         if (newspell->disabled)
             return false;
     }
 
-    uint32 talentCost = GetTalentSpellCost(spell_id);
+    uint32 talentCost = GetTalentSpellCost(spellId);
 
     // cast talents with SPELL_EFFECT_LEARN_SPELL (other dependent spells will learned later as not auto-learned)
     // note: all spells with SPELL_EFFECT_LEARN_SPELL isn't passive
     if (!loading && talentCost > 0 && spellInfo->HasEffect(SPELL_EFFECT_LEARN_SPELL))
     {
         // ignore stance requirement for talent learn spell (stance set for spell only for client spell description show)
-        CastSpell(this, spell_id, true);
+        CastSpell(this, spellId, true);
     }
     // also cast passive spells (including all talents without SPELL_EFFECT_LEARN_SPELL) with additional checks
     else if (spellInfo->IsPassive())
     {
         if (IsNeedCastPassiveSpellAtLearn(spellInfo))
-            CastSpell(this, spell_id, true);
+            CastSpell(this, spellId, true);
     }
     else if (spellInfo->HasEffect(SPELL_EFFECT_SKILL_STEP))
     {
-        CastSpell(this, spell_id, true);
+        CastSpell(this, spellId, true);
         return false;
     }
 
@@ -3772,9 +3769,9 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
     // add dependent skills
     uint16 maxskill     = GetMaxSkillValueForLevel();
 
-    SpellLearnSkillNode const* spellLearnSkill = sSpellMgr->GetSpellLearnSkill(spell_id);
+    SpellLearnSkillNode const* spellLearnSkill = sSpellMgr->GetSpellLearnSkill(spellId);
 
-    SkillLineAbilityMapBounds skill_bounds = sSpellMgr->GetSkillLineAbilityMapBounds(spell_id);
+    SkillLineAbilityMapBounds skill_bounds = sSpellMgr->GetSkillLineAbilityMapBounds(spellId);
 
     if (spellLearnSkill)
     {
@@ -3832,7 +3829,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
     }
 
     // learn dependent spells
-    SpellLearnSpellMapBounds spell_bounds = sSpellMgr->GetSpellLearnSpellMapBounds(spell_id);
+    SpellLearnSpellMapBounds spell_bounds = sSpellMgr->GetSpellLearnSpellMapBounds(spellId);
 
     for (SpellLearnSpellMap::const_iterator itr2 = spell_bounds.first; itr2 != spell_bounds.second; ++itr2)
     {
@@ -3854,7 +3851,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
             GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LEARN_SKILLLINE_SPELLS, _spell_idx->second->skillId);
         }
 
-        GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LEARN_SPELL, spell_id);
+        GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LEARN_SPELL, spellId);
     }
 
     // return true (for send learn packet) only if spell active (in case ranked spells) and not replace old spell
@@ -4944,8 +4941,14 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
         }
         // The character gets unlinked from the account, the name gets freed up and appears as deleted ingame
         case CHAR_DELETE_UNLINK:
-            CharacterDatabase.PExecute("UPDATE characters SET deleteInfos_Name=name, deleteInfos_Account=account, deleteDate='" UI64FMTD "', name='', account=0 WHERE guid=%u", uint64(time(NULL)), guid);
+        {
+            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPDATE_DELETE_INFO);
+
+            stmt->setUInt32(0, guid);
+
+            CharacterDatabase.Execute(stmt);
             break;
+        }
         default:
             sLog->outError("Player::DeleteFromDB: Unsupported delete method: %u.", charDelete_method);
     }
@@ -6171,6 +6174,7 @@ bool Player::UpdateFishingSkill()
 // bonus abilities in sSkillLineAbilityStore
 // Used only to avoid scan DBC at each skill grow
 static uint32 bonusSkillLevels[] = {75, 150, 225, 300, 375, 450};
+static const size_t bonusSkillLevelsSize = sizeof(bonusSkillLevels) / sizeof(uint32);
 
 bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step)
 {
@@ -6208,9 +6212,10 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step)
         SetUInt32Value(valueIndex, MAKE_SKILL_VALUE(new_value, MaxValue));
         if (itr->second.uState != SKILL_NEW)
             itr->second.uState = SKILL_CHANGED;
-        for (uint32* bsl = &bonusSkillLevels[0]; *bsl; ++bsl)
+        for (size_t i = 0; i < bonusSkillLevelsSize; ++i)
         {
-            if ((SkillValue < *bsl && new_value >= *bsl))
+            uint32 bsl = bonusSkillLevels[i];
+            if (SkillValue < bsl && new_value >= bsl)
             {
                 learnSkillRewardedSpells(SkillId, new_value);
                 break;
@@ -7340,7 +7345,14 @@ uint32 Player::GetZoneIdFromDB(uint64 guid)
         zone = sMapMgr->GetZoneId(map, posx, posy, posz);
 
         if (zone > 0)
-            CharacterDatabase.PExecute("UPDATE characters SET zone='%u' WHERE guid='%u'", zone, guidLow);
+        {
+            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPDATE_ZONE);
+
+            stmt->setUInt16(0, uint16(zone));
+            stmt->setUInt32(1, guidLow);
+
+            CharacterDatabase.Execute(stmt);
+        }
     }
 
     return zone;
@@ -12371,7 +12383,13 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
                 DestroyItem(slot, i, update);
 
         if (pItem->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_WRAPPED))
-            CharacterDatabase.PExecute("DELETE FROM character_gifts WHERE item_guid = '%u'", pItem->GetGUIDLow());
+        {
+            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GIFT);
+
+            stmt->setUInt32(0, pItem->GetGUIDLow());
+
+            CharacterDatabase.Execute(stmt);
+        }
 
         RemoveEnchantmentDurations(pItem);
         RemoveItemDurations(pItem);
@@ -12885,6 +12903,8 @@ void Player::SwapItem(uint16 src, uint16 dst)
 
             RemoveItem(srcbag, srcslot, true);
             StoreItem(dest, pSrcItem, true);
+            if (IsBankPos(src))
+                ItemAddedQuestCheck(pSrcItem->GetEntry(), pSrcItem->GetCount());
         }
         else if (IsBankPos (dst))
         {
@@ -12898,6 +12918,7 @@ void Player::SwapItem(uint16 src, uint16 dst)
 
             RemoveItem(srcbag, srcslot, true);
             BankItem(dest, pSrcItem, true);
+            ItemRemovedQuestCheck(pSrcItem->GetEntry(), pSrcItem->GetCount());
         }
         else if (IsEquipmentPos (dst))
         {
@@ -13322,11 +13343,7 @@ void Player::UpdateSoulboundTradeItems()
     // also checks for garbage data
     for (ItemDurationList::iterator itr = m_itemSoulboundTradeable.begin(); itr != m_itemSoulboundTradeable.end();)
     {
-        if (!*itr)
-        {
-            m_itemSoulboundTradeable.erase(itr++);
-            continue;
-        }
+        ASSERT(*itr);
         if ((*itr)->GetOwnerGUID() != GetGUID())
         {
             m_itemSoulboundTradeable.erase(itr++);
@@ -13341,16 +13358,10 @@ void Player::UpdateSoulboundTradeItems()
     }
 }
 
+//TODO: should never allow an item to be added to m_itemSoulboundTradeable twice
 void Player::RemoveTradeableItem(Item* item)
 {
-    for (ItemDurationList::iterator itr = m_itemSoulboundTradeable.begin(); itr != m_itemSoulboundTradeable.end(); ++itr)
-    {
-        if ((*itr) == item)
-        {
-            m_itemSoulboundTradeable.erase(itr);
-            break;
-        }
-    }
+    m_itemSoulboundTradeable.remove(item);
 }
 
 void Player::UpdateItemDuration(uint32 time, bool realtimeonly)
@@ -15052,11 +15063,11 @@ void Player::FailQuest(uint32 questId)
         // Destroy quest items on quest failure.
         for (uint8 i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
             if (quest->RequiredItemId[i] > 0 && quest->RequiredItemCount[i] > 0)
-                // Destroy items recieved on starting the quest.
+                // Destroy items received on starting the quest.
                 DestroyItemCount(quest->RequiredItemId[i], quest->RequiredItemCount[i], true, true);
         for (uint8 i = 0; i < QUEST_SOURCE_ITEM_IDS_COUNT; ++i)
             if (quest->RequiredSourceItemId[i] > 0 && quest->RequiredSourceItemCount[i] > 0)
-                // Destroy items recieved during the quest.
+                // Destroy items received during the quest.
                 DestroyItemCount(quest->RequiredSourceItemId[i], quest->RequiredSourceItemCount[i], true, true);
     }
 }
@@ -16496,7 +16507,13 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     if (ObjectMgr::CheckPlayerName(m_name) != CHAR_NAME_SUCCESS ||
         (AccountMgr::IsPlayerAccount(GetSession()->GetSecurity()) && sObjectMgr->IsReservedName(m_name)))
     {
-        CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE guid ='%u'", uint32(AT_LOGIN_RENAME), guid);
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPDATE_AT_LOGIN_FLAG);
+
+        stmt->setUInt16(0, uint16(AT_LOGIN_RENAME));
+        stmt->setUInt32(1, guid);
+
+        CharacterDatabase.Execute(stmt);
+
         return false;
     }
 
@@ -17517,29 +17534,33 @@ void Player::_LoadMailedItems(Mail* mail)
     {
         Field* fields = result->Fetch();
 
-        uint32 item_guid_low = fields[11].GetUInt32();
-        uint32 item_template = fields[12].GetUInt32();
+        uint32 itemGuid = fields[11].GetUInt32();
+        uint32 itemTemplate = fields[12].GetUInt32();
 
-        mail->AddItem(item_guid_low, item_template);
+        mail->AddItem(itemGuid, itemTemplate);
 
-        ItemTemplate const* proto = sObjectMgr->GetItemTemplate(item_template);
+        ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemTemplate);
 
         if (!proto)
         {
-            sLog->outError("Player %u has unknown item_template (ProtoType) in mailed items(GUID: %u template: %u) in mail (%u), deleted.", GetGUIDLow(), item_guid_low, item_template, mail->messageID);
-            CharacterDatabase.PExecute("DELETE FROM mail_items WHERE item_guid = '%u'", item_guid_low);
+            sLog->outError("Player %u has unknown item_template (ProtoType) in mailed items(GUID: %u template: %u) in mail (%u), deleted.", GetGUIDLow(), itemGuid, itemTemplate, mail->messageID);
+
+            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_INVALID_MAIL_ITEM);
+            stmt->setUInt32(0, itemGuid);
+            CharacterDatabase.Execute(stmt);
+
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_INSTANCE);
-            stmt->setUInt32(0, item_guid_low);
+            stmt->setUInt32(0, itemGuid);
             CharacterDatabase.Execute(stmt);
             continue;
         }
 
         Item* item = NewItemOrBag(proto);
 
-        if (!item->LoadFromDB(item_guid_low, MAKE_NEW_GUID(fields[13].GetUInt32(), 0, HIGHGUID_PLAYER), fields, item_template))
+        if (!item->LoadFromDB(itemGuid, MAKE_NEW_GUID(fields[13].GetUInt32(), 0, HIGHGUID_PLAYER), fields, itemTemplate))
         {
-            sLog->outError("Player::_LoadMailedItems - Item in mail (%u) doesn't exist !!!! - item guid: %u, deleted from mail", mail->messageID, item_guid_low);
-            CharacterDatabase.PExecute("DELETE FROM mail_items WHERE item_guid = '%u'", item_guid_low);
+            sLog->outError("Player::_LoadMailedItems - Item in mail (%u) doesn't exist !!!! - item guid: %u, deleted from mail", mail->messageID, itemGuid);
+            CharacterDatabase.PExecute("DELETE FROM mail_items WHERE item_guid = '%u'", itemGuid);
             item->FSetState(ITEM_REMOVED);
 
             SQLTransaction temp = SQLTransaction(NULL);
@@ -18143,8 +18164,14 @@ bool Player::Satisfy(AccessRequirement const* ar, uint32 target_map, bool report
             missingQuest = ar->quest_H;
 
         uint32 missingAchievement = 0;
-        if (ar->achievement && !GetAchievementMgr().HasAchieved(sAchievementStore.LookupEntry(ar->achievement)))
-            missingAchievement = ar->achievement;
+        Player* leader = this;
+        uint64 leaderGuid = GetGroup() ? GetGroup()->GetLeaderGUID() : GetGUID();
+        if (leaderGuid != GetGUID())
+            leader = ObjectAccessor::FindPlayer(leaderGuid);
+
+        if (ar->achievement)
+            if (!leader || !leader->GetAchievementMgr().HasAchieved(ar->achievement))
+                missingAchievement = ar->achievement;
 
         Difficulty target_difficulty = GetDifficulty(mapEntry->IsRaid());
         MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(target_map, target_difficulty);
@@ -18919,7 +18946,7 @@ void Player::_SaveSkills(SQLTransaction& trans)
 
 void Player::_SaveSpells(SQLTransaction& trans)
 {
-    for (PlayerSpellMap::iterator itr = m_spells.begin(), next = m_spells.begin(); itr != m_spells.end();)
+    for (PlayerSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end();)
     {
         if (itr->second->state == PLAYERSPELL_REMOVED || itr->second->state == PLAYERSPELL_CHANGED)
             trans->PAppend("DELETE FROM character_spell WHERE guid = '%u' and spell = '%u'", GetGUIDLow(), itr->first);
@@ -20221,7 +20248,7 @@ bool Player::ActivateTaxiPathTo(uint32 taxi_path_id, uint32 spellid /*= 0*/)
 void Player::CleanupAfterTaxiFlight()
 {
     m_taxi.ClearTaxiDestinations();        // not destinations, clear source node
-    Unmount();
+    Dismount();
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
     getHostileRefManager().setOnlineOfflineState(true);
 }

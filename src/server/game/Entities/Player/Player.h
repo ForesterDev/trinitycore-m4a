@@ -1091,13 +1091,10 @@ class Player : public Unit, public GridObject<Player>
         void RemoveFromWorld();
 
         bool TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0);
-        void TeleportOutOfMap(Map* oldMap);
-
         bool TeleportTo(WorldLocation const &loc, uint32 options = 0)
         {
             return TeleportTo(loc.GetMapId(), loc.GetPositionX(), loc.GetPositionY(), loc.GetPositionZ(), loc.GetOrientation(), options);
         }
-
         bool TeleportToBGEntryPoint();
 
         void SetSummonPoint(uint32 mapid, float x, float y, float z)
@@ -1114,7 +1111,7 @@ class Player : public Unit, public GridObject<Player>
 
         void Update(uint32 time);
 
-        static bool BuildEnumData(QueryResult result, WorldPacket* data);
+        static bool BuildEnumData(PreparedQueryResult result, WorldPacket* data);
 
         void SetInWater(bool apply);
 
@@ -1653,7 +1650,7 @@ class Player : public Unit, public GridObject<Player>
 
         void SendProficiency(ItemClass itemClass, uint32 itemSubclassMask);
         void SendInitialSpells();
-        bool addSpell(uint32 spell_id, bool active, bool learning, bool dependent, bool disabled, bool loading = false);
+        bool addSpell(uint32 spellId, bool active, bool learning, bool dependent, bool disabled, bool loading = false);
         void learnSpell(uint32 spell_id, bool dependent);
         void removeSpell(uint32 spell_id, bool disabled = false, bool learn_low_rank = true);
         void resetSpells(bool myClassOnly = false);
@@ -1677,7 +1674,7 @@ class Player : public Unit, public GridObject<Player>
         void LearnTalent(uint32 talentId, uint32 talentRank);
         void LearnPetTalent(uint64 petGuid, uint32 talentId, uint32 talentRank);
 
-        bool AddTalent(uint32 spell, uint8 spec, bool learning);
+        bool AddTalent(uint32 spellId, uint8 spec, bool learning);
         bool HasTalent(uint32 spell_id, uint8 spec) const;
 
         uint32 CalculateTalentsPoints() const;
@@ -2503,7 +2500,7 @@ class Player : public Unit, public GridObject<Player>
                 CreatureDisplayInfoEntry const* mountDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID));
                 if (!mountDisplayInfo)
                     return GetCollisionHeight(false);
-                    
+
                 CreatureModelDataEntry const* mountModelData = sCreatureModelDataStore.LookupEntry(mountDisplayInfo->ModelId);
                 if (!mountModelData)
                     return GetCollisionHeight(false);
