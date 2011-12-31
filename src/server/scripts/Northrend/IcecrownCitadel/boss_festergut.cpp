@@ -36,22 +36,25 @@ enum ScriptTexts
     SAY_DEATH                   = 9,
 };
 
-enum Spells
+namespace
 {
-    // Festergut
-    SPELL_INHALE_BLIGHT         = 69165,
-    SPELL_PUNGENT_BLIGHT        = 69195,
-    SPELL_GASTRIC_BLOAT         = 72219, // 72214 is the proper way (with proc) but atm procs can't have cooldown for creatures
-    SPELL_GASTRIC_EXPLOSION     = 72227,
-    SPELL_GAS_SPORE             = 69278,
-    SPELL_VILE_GAS              = 69240,
-    SPELL_INOCULATED            = 69291,
+    enum Spells
+    {
+        // Festergut
+        SPELL_INHALE_BLIGHT         = 69165,
+        SPELL_PUNGENT_BLIGHT        = 69195,
+        SPELL_GASTRIC_BLOAT         = 72219, // 72214 is the proper way (with proc) but atm procs can't have cooldown for creatures
+        SPELL_GASTRIC_EXPLOSION     = 72227,
+        SPELL_GAS_SPORE             = 69278,
+        SPELL_VILE_GAS              = 69240,
+        SPELL_INOCULATED            = 69291,
 
-    // Stinky
-    SPELL_MORTAL_WOUND          = 71127,
-    SPELL_DECIMATE              = 71123,
-    SPELL_PLAGUE_STENCH         = 71805,
-};
+        // Stinky
+        SPELL_MORTAL_WOUND          = 71127,
+        SPELL_DECIMATE              = 71123,
+        SPELL_PLAGUE_STENCH         = 71805,
+    };
+}
 
 // Used for HasAura checks
 #define PUNGENT_BLIGHT_HELPER RAID_MODE<uint32>(69195, 71219, 73031, 73032)
