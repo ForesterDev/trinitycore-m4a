@@ -976,14 +976,14 @@ class boss_the_lich_king : public CreatureScript
                             break;
                         case EVENT_QUAKE:
                             events.SetPhase(PHASE_TWO);
-                            me->ClearUnitState(UNIT_STAT_CASTING);  // clear state to ensure check in DoCastAOE passes
+                            me->InterruptNonMeleeSpells(false, 0, false);
                             DoCastAOE(SPELL_QUAKE);
                             SendMusicToPlayers(MUSIC_SPECIAL);
                             Talk(SAY_LK_QUAKE);
                             break;
                         case EVENT_QUAKE_2:
                             events.SetPhase(PHASE_THREE);
-                            me->ClearUnitState(UNIT_STAT_CASTING);  // clear state to ensure check in DoCastAOE passes
+                            me->InterruptNonMeleeSpells(false, 0, false);
                             DoCastAOE(SPELL_QUAKE);
                             SendMusicToPlayers(MUSIC_SPECIAL);
                             Talk(SAY_LK_QUAKE);
