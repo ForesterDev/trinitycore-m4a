@@ -37,7 +37,7 @@ typedef DatabaseWorkerPool<CharacterDatabaseConnection> CharacterDatabaseWorkerP
 enum CharacterDatabaseStatements
 {
     /*  Naming standard for defines:
-        {DB}_{SET/DEL/ADD/REP}_{Summary of data changed}
+        {DB}_{SEL/INS/UPD/DEL/REP}_{Summary of data changed}
         When updating more than one field, consider looking at the calling function
         name for a suiting suffix.
     */
@@ -343,6 +343,7 @@ enum CharacterDatabaseStatements
     CHAR_INS_CHARACTER_SOCIAL,
     CHAR_DEL_CHARACTER_SOCIAL,
     CHAR_UPD_CHARACTER_SOCIAL_NOTE,
+    CHAR_UPD_CHARACTER_POSITION,
 
     MAX_CHARACTERDATABASE_STATEMENTS,
 };
