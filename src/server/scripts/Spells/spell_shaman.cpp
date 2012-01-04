@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -125,7 +125,7 @@ class spell_sha_fire_nova : public SpellScriptLoader
                 {
                     Creature* totem = caster->GetMap()->GetCreature(caster->m_SummonSlot[1]);
                     if (totem && totem->isTotem())
-                        totem->CastSpell(totem, spellId, true);
+                        caster->CastSpell(totem, spellId, true);
                 }
             }
 
