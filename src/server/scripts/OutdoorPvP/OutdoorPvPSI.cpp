@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -167,11 +167,15 @@ bool OutdoorPvPSI::HandleDropFlag(Player* player, uint32 spellId)
                         if (!go->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), SI_SILITHYST_MOUND, map, player->GetPhaseMask(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), 0, 0, 0, 0, 100, GO_STATE_READY))
                         {
                             delete go;
+                            return true;
                         }
-                        else
+
+                        go->SetRespawnTime(0);
+
+                        if (!map->AddToMap(go))
                         {
-                            go->SetRespawnTime(0);
-                            map->AddToMap(go);
+                            delete go;
+                            return true;
                         }
                     }
                 }
@@ -190,17 +194,22 @@ bool OutdoorPvPSI::HandleDropFlag(Player* player, uint32 spellId)
                         Map* map = player->GetMap();
                         if (!map)
                         {
-                          delete go;
-                          return true;
-                          }
+                            delete go;
+                            return true;
+                        }
+
                         if (!go->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), SI_SILITHYST_MOUND, map, player->GetPhaseMask(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), 0, 0, 0, 0, 100, GO_STATE_READY))
                         {
                             delete go;
+                            return true;
                         }
-                        else
+
+                        go->SetRespawnTime(0);
+
+                        if (!map->AddToMap(go))
                         {
-                            go->SetRespawnTime(0);
-                            map->AddToMap(go);
+                            delete go;
+                            return true;
                         }
                     }
                 }

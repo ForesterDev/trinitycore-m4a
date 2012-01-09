@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -22,6 +22,7 @@
 #include "IVMapManager.h"
 #include "Dynamic/UnorderedMap.h"
 #include "Define.h"
+#include <ace/Thread_Mutex.h>
 
 //===========================================================
 
@@ -71,6 +72,8 @@ namespace VMAP
             // Tree to check collision
             ModelFileMap iLoadedModelFiles;
             InstanceTreeMap iInstanceMapTrees;
+            // Mutex for iLoadedModelFiles
+            ACE_Thread_Mutex LoadedModelFilesLock;
 
             bool _loadMap(uint32 mapId, const std::string& basePath, uint32 tileX, uint32 tileY);
             /* void _unloadMap(uint32 pMapId, uint32 x, uint32 y); */

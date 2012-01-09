@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -281,11 +281,10 @@ bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags
             uint8 spellFlags = itr->second.flags;
             if (unit)
             {
-
                 if ((spellFlags & SPELL_DISABLE_PLAYER && unit->GetTypeId() == TYPEID_PLAYER) ||
                     (unit->GetTypeId() == TYPEID_UNIT && ((unit->ToCreature()->isPet() && spellFlags & SPELL_DISABLE_PET) || spellFlags & SPELL_DISABLE_CREATURE)))
                 {
-                    if (flags & SPELL_DISABLE_MAP)
+                    if (spellFlags & SPELL_DISABLE_MAP)
                     {
                         std::set<uint32> const& mapIds = itr->second.params[0];
                         if (mapIds.find(unit->GetMapId()) != mapIds.end())
@@ -312,6 +311,7 @@ bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags
             }
             else if (spellFlags & SPELL_DISABLE_DEPRECATED_SPELL)    // call not from spellcast
                 return true;
+
             break;
         }
         case DISABLE_TYPE_MAP:

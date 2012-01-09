@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -206,14 +206,14 @@ void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket& /*recv_data
                 ItemTemplate const* iProto = NULL;
                 for (uint8 i = 0; i < QUEST_REWARDS_COUNT; ++i)
                 {
-                    if (!qRew->RewItemId[i])
+                    if (!qRew->RewardItemId[i])
                         continue;
 
-                    iProto = sObjectMgr->GetItemTemplate(qRew->RewItemId[i]);
+                    iProto = sObjectMgr->GetItemTemplate(qRew->RewardItemId[i]);
 
-                    data << uint32(qRew->RewItemId[i]);
+                    data << uint32(qRew->RewardItemId[i]);
                     data << uint32(iProto ? iProto->DisplayInfoID : 0);
-                    data << uint32(qRew->RewItemCount[i]);
+                    data << uint32(qRew->RewardItemIdCount[i]);
                 }
             }
         }
@@ -496,14 +496,14 @@ void WorldSession::SendLfgPlayerReward(uint32 rdungeonEntry, uint32 sdungeonEntr
         ItemTemplate const* iProto = NULL;
         for (uint8 i = 0; i < QUEST_REWARDS_COUNT; ++i)
         {
-            if (!qRew->RewItemId[i])
+            if (!qRew->RewardItemId[i])
                 continue;
 
-            iProto = sObjectMgr->GetItemTemplate(qRew->RewItemId[i]);
+            iProto = sObjectMgr->GetItemTemplate(qRew->RewardItemId[i]);
 
-            data << uint32(qRew->RewItemId[i]);
+            data << uint32(qRew->RewardItemId[i]);
             data << uint32(iProto ? iProto->DisplayInfoID : 0);
-            data << uint32(qRew->RewItemCount[i]);
+            data << uint32(qRew->RewardItemIdCount[i]);
         }
     }
     SendPacket(&data);

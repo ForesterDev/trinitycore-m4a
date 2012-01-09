@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -2125,7 +2125,7 @@ public:
             {
                 Quest const* qInfo = sObjectMgr->GetQuestTemplate(QUEST_YOU_RE_NOT_SO_BIG_NOW);
                 if (qInfo)
-                    CAST_PLR(killer)->KilledMonsterCredit(qInfo->ReqCreatureOrGOId[0], 0);
+                    CAST_PLR(killer)->KilledMonsterCredit(qInfo->RequiredNpcOrGo[0], 0);
             }
         }
     };

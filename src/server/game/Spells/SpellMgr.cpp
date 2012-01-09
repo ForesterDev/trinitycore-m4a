@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -2838,6 +2838,13 @@ void SpellMgr::LoadSpellCustomAttr()
             case 48689:
             case 48690:
             case 48691:
+            case 6785: // Ravage
+            case 6787:
+            case 9866:
+            case 9867:
+            case 27005:
+            case 48578:
+            case 48579:
             case 21987: // Lash of Pain
             case 23959: // Test Stab R50
             case 24825: // Test Backstab
@@ -2967,8 +2974,10 @@ void SpellMgr::LoadDbcDataCorrections()
 
         switch (spellInfo->Id)
         {
-            case 42835: // Spout
-                spellInfo->Effect[0] = 0; // remove damage effect, only anim is needed
+            case 40244: case 40245: // Simon Game Visual
+            case 40246: case 40247: // Simon Game Visual
+            case 42835: // Spout, remove damage effect, only anim is needed
+                spellInfo->Effect[0] = 0;
                 break;
             case 30657: // Quake
                 spellInfo->EffectTriggerSpell[0] = 30571;
@@ -2979,6 +2988,10 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
             case 31447: // Mark of Kaz'rogal (needs target selection script)
             case 31298: // Sleep (needs target selection script)
+            case 51904: // Summon Ghouls On Scarlet Crusade (this should use conditions table, script for this spell needs to be fixed)
+            case 2895:  // Wrath of Air Totem rank 1 (Aura)
+            case 68933: // Wrath of Air Totem rank 2 (Aura)
+            case 29200: // Purify Helboar Meat
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
                 spellInfo->EffectImplicitTargetB[0] = 0;
                 break;
@@ -3021,8 +3034,12 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER_AREA_PARTY;
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS_2;
                 break;
-            case 44978: case 45001: case 45002: // Wild Magic
-            case 45004: case 45006: case 45010: // Wild Magic
+            case 44978: // Wild Magic
+            case 45001:
+            case 45002:
+            case 45004:
+            case 45006:
+            case 45010:
             case 31347: // Doom
             case 41635: // Prayer of Mending
             case 44869: // Spectral Blast
@@ -3079,7 +3096,8 @@ void SpellMgr::LoadDbcDataCorrections()
             case 50312: // Unholy Frenzy
                 spellInfo->MaxAffectedTargets = 15;
                 break;
-            case 38794: case 33711: //Murmur's Touch
+            case 33711: //Murmur's Touch
+            case 38794:
                 spellInfo->MaxAffectedTargets = 1;
                 spellInfo->EffectTriggerSpell[0] = 33760;
                 break;
@@ -3119,9 +3137,6 @@ void SpellMgr::LoadDbcDataCorrections()
             case 51852: // The Eye of Acherus (no spawn in phase 2 in db)
                 spellInfo->EffectMiscValue[0] |= 1;
                 break;
-            case 51904: // Summon Ghouls On Scarlet Crusade (this should use conditions table, script for this spell needs to be fixed)
-                spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
-                break;
             case 29809: // Desecration Arm - 36 instead of 37 - typo? :/
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_7_YARDS;
                 break;
@@ -3150,6 +3165,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 64904: // Hymn of Hope
                 spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT;
                 break;
+            case 19465: // Improved Stings (Rank 2)
+                spellInfo->EffectImplicitTargetA[EFFECT_2] = TARGET_UNIT_CASTER;
+                break;
             case 30421: // Nether Portal - Perseverence
                 spellInfo->EffectBasePoints[2] += 30000;
                 break;
@@ -3165,7 +3183,7 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectApplyAuraName[1] = SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN;
                 break;
             case 41913: // Parasitic Shadowfiend Passive
-                spellInfo->EffectApplyAuraName[0] = 4; // proc debuff, and summon infinite fiends
+                spellInfo->EffectApplyAuraName[0] = SPELL_AURA_DUMMY; // proc debuff, and summon infinite fiends
                 break;
             case 27892: // To Anchor 1
             case 27928: // To Anchor 1
@@ -3193,11 +3211,6 @@ void SpellMgr::LoadDbcDataCorrections()
             case 6474: // Earthbind Totem (instant pulse)
                 spellInfo->AttributesEx5 |= SPELL_ATTR5_START_PERIODIC_AT_APPLY;
                 break;
-            case 2895:  // Wrath of Air Totem rank 1 (Aura)
-            case 68933: // Wrath of Air Totem rank 2 (Aura)
-                spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
-                spellInfo->EffectImplicitTargetB[0] = 0;
-                break;
             case 52109: // Flametongue Totem rank 1 (Aura)
             case 52110: // Flametongue Totem rank 2 (Aura)
             case 52111: // Flametongue Totem rank 3 (Aura)
@@ -3216,7 +3229,7 @@ void SpellMgr::LoadDbcDataCorrections()
             case 53244: // Marked for Death (Rank 3)
             case 53245: // Marked for Death (Rank 4)
             case 53246: // Marked for Death (Rank 5)
-                spellInfo->EffectSpellClassMask[0] = flag96(423937, 276955137, 2049);
+                spellInfo->EffectSpellClassMask[0] = flag96(0x00067801, 0x10820001, 0x00000801);
                 break;
             case 70728: // Exploit Weakness (needs target selection script)
             case 70840: // Devious Minds (needs target selection script)
@@ -3232,6 +3245,10 @@ void SpellMgr::LoadDbcDataCorrections()
                         // SpellFamilyFlags[0] & 0x00000040 in SPELLFAMILY_DEATHKNIGHT is currently unused (3.3.5a)
                         // this needs research on modifier applying rules, does not seem to be in Attributes fields
                 spellInfo->EffectSpellClassMask[0] = flag96(0x00000040, 0x00000000, 0x00000000);
+                break;
+            case 63163: // Apply Enchanted Bridle (Argent Tournament)
+                spellInfo->EffectDieSides[0] = 0; // was 1, that should probably mean seat 0, but instead it's treated as spell 1
+                spellInfo->EffectBasePoints[0] = 52391; // Ride Vehicle (forces seat 0)
                 break;
             case 19970: // Entangling Roots (Rank 6) -- Nature's Grasp Proc
             case 19971: // Entangling Roots (Rank 5) -- Nature's Grasp Proc
@@ -3497,6 +3514,11 @@ void SpellMgr::LoadDbcDataCorrections()
             case 72405: // Broken Frostmourne
                 spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_200_YARDS;   // 200yd
                 break;
+            case 40055: // Introspection
+            case 40165: // Introspection
+            case 40166: // Introspection
+            case 40167: // Introspection
+                spellInfo->Attributes |= SPELL_ATTR0_NEGATIVE_1;
             default:
                 break;
         }

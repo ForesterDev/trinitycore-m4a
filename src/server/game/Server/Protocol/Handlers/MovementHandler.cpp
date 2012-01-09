@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -495,7 +495,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
             if (trans_rad > 3600.0f) // transport radius = 60 yards //cheater with on_transport_flag
                 return;
 
-            // elevators also cause the client to send MOVEMENTFLAG_ONTRANSPORT - just unmount if the guid can be found in the transport list
+            // elevators also cause the client to send MOVEMENTFLAG_ONTRANSPORT - just dismount if the guid can be found in the transport list
             for (MapManager::TransportSet::const_iterator iter = sMapMgr->m_Transports.begin(); iter != sMapMgr->m_Transports.end(); ++iter)
             {
                 if ((*iter)->GetGUID() == movementInfo.t_guid)
@@ -765,22 +765,13 @@ void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)
     uint64 guid;
     recv_data >> guid;
 
-    auto &player = *GetPlayer();
-    if (player.IsInWorld())
+    if (GetPlayer()->IsInWorld())
     {
-        if (Unit *mover = ObjectAccessor::GetUnit(player, guid))
-            if (mover == &player
-                    || player.m_Controlled.find(mover) != player.m_Controlled.end())
-            {
-                player.SetMover(mover);
-                if (mover != &player && mover->canFly())
-                {
-                    WorldPacket data(SMSG_MOVE_SET_CAN_FLY, 12);
-                    data.append(mover->GetPackGUID());
-                    data << uint32(0);
-                    SendPacket(&data);
-                }
-            }
+        if (_player->m_mover->GetGUID() != guid)
+        {
+            sLog->outError("HandleSetActiveMoverOpcode: incorrect mover guid: mover is " UI64FMTD " (%s - Entry: %u) and should be " UI64FMTD, guid, GetLogNameForGuid(guid), GUID_ENPART(guid), _player->m_mover->GetGUID());
+            GetPlayer()->SetMover(GetPlayer());
+        }
     }
 }
 

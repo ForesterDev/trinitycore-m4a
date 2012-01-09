@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -31,7 +31,7 @@
 #include "CreatureAISelector.h"
 #include "Group.h"
 
-GameObject::GameObject() : WorldObject(), m_goValue(new GameObjectValue), m_AI(NULL)
+GameObject::GameObject() : WorldObject(false), m_goValue(new GameObjectValue), m_AI(NULL)
 {
     m_objectType |= TYPEMASK_GAMEOBJECT;
     m_objectTypeId = TYPEID_GAMEOBJECT;
@@ -694,7 +694,7 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     WorldDatabase.CommitTransaction(trans);
 }
 
-bool GameObject::LoadFromDB(uint32 guid, Map* map)
+bool GameObject::LoadGameObjectFromDB(uint32 guid, Map* map, bool addToMap)
 {
     GameObjectData const* data = sObjectMgr->GetGOData(guid);
 
@@ -759,6 +759,9 @@ bool GameObject::LoadFromDB(uint32 guid, Map* map)
 
     m_goData = data;
 
+    if (addToMap && !GetMap()->AddToMap(this))
+        return false;
+
     return true;
 }
 
@@ -766,8 +769,18 @@ void GameObject::DeleteFromDB()
 {
     sObjectMgr->RemoveGORespawnTime(m_DBTableGuid, GetInstanceId());
     sObjectMgr->DeleteGOData(m_DBTableGuid);
-    WorldDatabase.PExecute("DELETE FROM gameobject WHERE guid = '%u'", m_DBTableGuid);
-    WorldDatabase.PExecute("DELETE FROM game_event_gameobject WHERE guid = '%u'", m_DBTableGuid);
+
+    PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_DEL_GAMEOBJECT);
+
+    stmt->setUInt32(0, m_DBTableGuid);
+
+    WorldDatabase.Execute(stmt);
+
+    stmt = WorldDatabase.GetPreparedStatement(WORLD_DEL_EVENT_GAMEOBJECT);
+
+    stmt->setUInt32(0, m_DBTableGuid);
+
+    WorldDatabase.Execute(stmt);
 }
 
 GameObject* GameObject::GetGameObject(WorldObject& object, uint64 guid)
@@ -1849,4 +1862,10 @@ void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player*
             break;
         }
     }
+}
+
+void GameObject::SetLootState(LootState s)
+{
+    m_lootState = s;
+    AI()->OnStateChanged(s);
 }

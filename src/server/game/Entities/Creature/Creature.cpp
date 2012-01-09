@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -138,7 +138,7 @@ bool ForcedDespawnDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
     return true;
 }
 
-Creature::Creature(): Unit(), MapCreature(),
+Creature::Creature(bool isWorldObject): Unit(isWorldObject), MapCreature(),
 lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGroupLowGUID(0),
 m_PlayerDamageReq(0), m_lootMoney(0), m_lootRecipient(0), m_lootRecipientGroup(0), m_corpseRemoveTime(0), m_respawnTime(0),
 m_respawnDelay(300), m_corpseDelay(60), m_respawnradius(0.0f), m_reactState(REACT_AGGRESSIVE),
@@ -161,6 +161,7 @@ m_creatureInfo(NULL), m_creatureData(NULL), m_formation(NULL)
 
     ResetLootMode(); // restore default loot mode
     TriggerJustRespawned = false;
+    m_isTempWorldObject = false;
 }
 
 Creature::~Creature()
@@ -1246,7 +1247,7 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 vehId, uint3
     return true;
 }
 
-bool Creature::LoadFromDB(uint32 guid, Map* map)
+bool Creature::LoadCreatureFromDB(uint32 guid, Map* map, bool addToMap)
 {
     CreatureData const* data = sObjectMgr->GetCreatureData(guid);
 
@@ -1312,6 +1313,8 @@ bool Creature::LoadFromDB(uint32 guid, Map* map)
 
     m_creatureData = data;
 
+    if (addToMap && !GetMap()->AddToMap(this))
+        return false;
     return true;
 }
 
@@ -1506,9 +1509,6 @@ void Creature::setDeathState(DeathState s)
         if (m_formation && m_formation->getLeader() == this)
             m_formation->FormationReset(true);
 
-        if (ZoneScript* zoneScript = GetZoneScript())
-            zoneScript->OnCreatureDeath(this);
-
         if ((canFly() || IsFlying()) && FallGround())
             return;
 
@@ -1643,7 +1643,20 @@ bool Creature::IsImmunedToSpell(SpellInfo const* spellInfo)
     if (!spellInfo)
         return false;
 
-    if (GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->Mechanic - 1)))
+    // Spells that don't have effectMechanics.
+    if (!spellInfo->HasAnyEffectMechanic() && GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->Mechanic - 1)))
+        return true;
+
+    // This check must be done instead of 'if (GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->Mechanic - 1)))' for not break
+    // the check of mechanic immunity on DB (tested) because GetCreatureInfo()->MechanicImmuneMask and m_spellImmune[IMMUNITY_MECHANIC] don't have same data.
+    bool immunedToAllEffects = true;
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        if (!IsImmunedToSpellEffect(spellInfo, i))
+        {
+            immunedToAllEffects = false;
+            break;
+        }
+    if (immunedToAllEffects)
         return true;
 
     return Unit::IsImmunedToSpell(spellInfo);
