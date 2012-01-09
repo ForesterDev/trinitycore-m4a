@@ -20,6 +20,7 @@
 /// @{
 /// \file
 
+#include "worldPCH.h"
 #include "Common.h"
 #include "ObjectMgr.h"
 #include "World.h"
@@ -474,7 +475,7 @@ bool ChatHandler::HandleCharacterEraseCommand(const char* args){
     std::string account_name;
     AccountMgr::GetName (account_id, account_name);
 
-    Player::DeleteFromDB(character_guid, account_id, true, true);
+    Player::DeleteFromDB(character_guid, account_id);
     PSendSysMessage(LANG_CHARACTER_DELETED, character_name.c_str(), GUID_LOPART(character_guid), account_name.c_str(), account_id);
     return true;
 }

@@ -18,6 +18,8 @@
 #ifndef ZONE_SCRIPT_H_
 #define ZONE_SCRIPT_H_
 
+#include <utility>
+#include <functional>
 #include "Common.h"
 #include "Creature.h"
 
@@ -48,6 +50,24 @@ class ZoneScript
         virtual void SetData(uint32 /*DataId*/, uint32 /*Value*/) {}
 
         virtual void ProcessEvent(WorldObject* /*obj*/, uint32 /*eventId*/) {}
+
+        void player_zone_changed(Player &p)
+        {
+            if (player_zone_changed_handler)
+                player_zone_changed_handler(p);
+        }
+
+protected:
+    typedef void Player_zone_changed_handler(Player &p);
+
+    template<class Hty>
+        void set_player_zone_changed_handler(Hty h)
+    {
+        player_zone_changed_handler = std::forward<Hty>(h);
+    }
+
+private:
+    std::function<Player_zone_changed_handler> player_zone_changed_handler;
 };
 
 #endif

@@ -19,32 +19,35 @@
 #include "pit_of_saron.h"
 #include "Vehicle.h"
 
-enum Yells
+namespace
 {
-    SAY_AMBUSH_1                    = -1658050,
-    SAY_AMBUSH_2                    = -1658051,
-    SAY_GAUNTLET_START              = -1658052,
-    SAY_TYRANNUS_INTRO_1            = -1658053,
-    SAY_GORKUN_INTRO_2              = -1658054,
-    SAY_TYRANNUS_INTRO_3            = -1658055,
+    enum Yells
+    {
+        SAY_AMBUSH_1                    = -1658050,
+        SAY_AMBUSH_2                    = -1658051,
+        SAY_GAUNTLET_START              = -1658052,
+        SAY_TYRANNUS_INTRO_1            = -1658053,
+        SAY_GORKUN_INTRO_2              = -1658054,
+        SAY_TYRANNUS_INTRO_3            = -1658055,
 
-    SAY_AGGRO                       = -1658056,
-    SAY_SLAY_1                      = -1658057,
-    SAY_SLAY_2                      = -1658058,
-    SAY_DEATH                       = -1658059,
-    SAY_MARK_RIMEFANG_1             = -1658060,
-    SAY_MARK_RIMEFANG_2             = -1658061,
-    SAY_DARK_MIGHT_1                = -1658062,
-    SAY_DARK_MIGHT_2                = -1658063,
+        SAY_AGGRO                       = -1658056,
+        SAY_SLAY_1                      = -1658057,
+        SAY_SLAY_2                      = -1658058,
+        SAY_DEATH                       = -1658059,
+        SAY_MARK_RIMEFANG_1             = -1658060,
+        SAY_MARK_RIMEFANG_2             = -1658061,
+        SAY_DARK_MIGHT_1                = -1658062,
+        SAY_DARK_MIGHT_2                = -1658063,
 
-    SAY_GORKUN_OUTRO_1              = -1658064,
-    SAY_GORKUN_OUTRO_2              = -1658065,
-    SAY_JAYNA_OUTRO_3               = -1658066,
-    SAY_SYLVANAS_OUTRO_3            = -1658067,
-    SAY_JAYNA_OUTRO_4               = -1658068,
-    SAY_SYLVANAS_OUTRO_4            = -1658069,
-    SAY_JAYNA_OUTRO_5               = -1658070,
-};
+        SAY_GORKUN_OUTRO_1              = -1658064,
+        SAY_GORKUN_OUTRO_2              = -1658065,
+        SAY_JAYNA_OUTRO_3               = -1658066,
+        SAY_SYLVANAS_OUTRO_3            = -1658067,
+        SAY_JAYNA_OUTRO_4               = -1658068,
+        SAY_SYLVANAS_OUTRO_4            = -1658069,
+        SAY_JAYNA_OUTRO_5               = -1658070,
+    };
+}
 
 enum Spells
 {
@@ -381,31 +384,40 @@ class player_overlord_brandAI : public PlayerAI
     public:
         player_overlord_brandAI(Player* player) : PlayerAI(player)
         {
-            tyrannus = NULL;
+            tyrannus_guid = uint64();
         }
 
         void SetGUID(uint64 guid, int32 /*type*/)
         {
-            tyrannus = ObjectAccessor::GetCreature(*me, guid);
-            if (!tyrannus)
-                me->IsAIEnabled = false;
+            tyrannus_guid = guid;
         }
 
         void DamageDealt(Unit* /*victim*/, uint32& damage, DamageEffectType /*damageType*/)
         {
+            auto tyrannus = this->tyrannus();
+            if (!tyrannus)
+                return;
             if (tyrannus->getVictim())
                 me->CastCustomSpell(SPELL_OVERLORD_BRAND_DAMAGE, SPELLVALUE_BASE_POINT0, damage, tyrannus->getVictim(), true, NULL, NULL, tyrannus->GetGUID());
         }
 
         void HealDone(Unit* /*target*/, uint32& addHealth)
         {
+            auto tyrannus = this->tyrannus();
+            if (!tyrannus)
+                return;
             me->CastCustomSpell(SPELL_OVERLORD_BRAND_HEAL, SPELLVALUE_BASE_POINT0, int32(addHealth*5.5f), tyrannus, true, NULL, NULL, tyrannus->GetGUID());
         }
 
         void UpdateAI(const uint32 /*diff*/) { }
 
     private:
-        Creature* tyrannus;
+        Creature *tyrannus()
+        {
+            return ObjectAccessor::GetCreature(*me, tyrannus_guid);
+        }
+
+        uint64 tyrannus_guid;
 };
 
 class spell_tyrannus_overlord_brand : public SpellScriptLoader
@@ -417,26 +429,41 @@ class spell_tyrannus_overlord_brand : public SpellScriptLoader
         {
             PrepareAuraScript(spell_tyrannus_overlord_brand_AuraScript);
 
+        public:
+            spell_tyrannus_overlord_brand_AuraScript()
+                : affected(nullptr)
+            {
+            }
+
+            ~spell_tyrannus_overlord_brand_AuraScript()
+            {
+                if (affected)
+                    remove();
+            }
+
             void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
+                if (affected)
+                    remove();
+                auto p = GetTarget()->ToPlayer();
+                if (!p)
                     return;
-
-                oldAI = GetTarget()->GetAI();
-                GetTarget()->SetAI(new player_overlord_brandAI(GetTarget()->ToPlayer()));
-                GetTarget()->GetAI()->SetGUID(GetCasterGUID());
-                oldAIState = GetTarget()->IsAIEnabled;
-                GetTarget()->IsAIEnabled = true;
+                oldAI = p->GetAI();
+                p->SetAI(new player_overlord_brandAI(p));
+                p->GetAI()->SetGUID(GetCasterGUID());
+                oldAIState = p->IsAIEnabled;
+                p->IsAIEnabled = true;
+                affected = p;
             }
 
             void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
+                if (!affected)
                     return;
-
-                delete GetTarget()->GetAI();
-                GetTarget()->SetAI(oldAI);
-                GetTarget()->IsAIEnabled = oldAIState;
+                auto p = GetTarget()->ToPlayer();
+                if (!(p == affected))
+                    return;
+                remove();
             }
 
             void Register()
@@ -445,6 +472,15 @@ class spell_tyrannus_overlord_brand : public SpellScriptLoader
                 AfterEffectRemove += AuraEffectRemoveFn(spell_tyrannus_overlord_brand_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
             }
 
+            void remove()
+            {
+                delete affected->GetAI();
+                affected->SetAI(oldAI);
+                affected->IsAIEnabled = oldAIState;
+                affected = nullptr;
+            }
+
+            Player *affected;
             UnitAI* oldAI;
             bool oldAIState;
         };

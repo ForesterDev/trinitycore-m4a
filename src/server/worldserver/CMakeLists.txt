@@ -8,6 +8,8 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+include_directories(${Boost_INCLUDE_DIRS})
+
 file(GLOB_RECURSE sources_CommandLine CommandLine/*.cpp CommandLine/*.h)
 file(GLOB_RECURSE sources_RemoteAccess RemoteAccess/*.cpp RemoteAccess/*.h)
 file(GLOB_RECURSE sources_TCSoap TCSoap/*.cpp TCSoap/*.h)
@@ -40,6 +42,7 @@ if( WIN32 )
     ${sources_Debugging}
     worldserver.rc
   )
+  set_ignore_precompiled_header(${sources_Debugging})
 endif()
 
 include_directories(
@@ -134,6 +137,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/authserver/Server
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/CommandLine
+  ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders
   ${CMAKE_CURRENT_SOURCE_DIR}/RemoteAccess
   ${CMAKE_CURRENT_SOURCE_DIR}/TCSoap
   ${CMAKE_CURRENT_SOURCE_DIR}/WorldThread
@@ -196,7 +200,8 @@ if( USE_COREPCH )
   if(CMAKE_COMPILER_IS_GNUCXX)
     add_precompiled_header(worldserver ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/worldPCH.h)
   elseif(MSVC)
-    add_native_precompiled_header(worldserver ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/worldPCH)
+    set_precompiled_header(worldserver "worldPCH.h"
+      "${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/worldPCH.cpp")
   endif()
 endif()
 

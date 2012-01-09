@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
@@ -200,7 +201,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNoImmediateEffect,                         //144 SPELL_AURA_SAFE_FALL                         implemented in WorldSession::HandleMovementOpcodes
     &AuraEffect::HandleAuraModPetTalentsPoints,                   //145 SPELL_AURA_MOD_PET_TALENT_POINTS
     &AuraEffect::HandleNoImmediateEffect,                         //146 SPELL_AURA_ALLOW_TAME_PET_TYPE
-    &AuraEffect::HandleModStateImmunityMask,                      //147 SPELL_AURA_MECHANIC_IMMUNITY_MASK
+    &AuraEffect::HandleAddCreatureImmunity,                       //147 SPELL_AURA_ADD_CREATURE_IMMUNITY
     &AuraEffect::HandleAuraRetainComboPoints,                     //148 SPELL_AURA_RETAIN_COMBO_POINTS
     &AuraEffect::HandleNoImmediateEffect,                         //149 SPELL_AURA_REDUCE_PUSHBACK
     &AuraEffect::HandleShieldBlockValue,                          //150 SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT
@@ -648,13 +649,6 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                         AddPctN(amount, m_spellInfo->Effects[EFFECT_2].CalcValue(caster));
                 }
             }
-            // Unholy Blight damage over time effect
-            else if (GetId() == 50536)
-            {
-                m_canBeRecalculated = false;
-                // we're getting total damage on aura apply, change it to be damage per tick
-                amount = int32((float)amount / GetTotalTicks());
-            }
             break;
         case SPELL_AURA_PERIODIC_ENERGIZE:
             if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_GENERIC)
@@ -755,7 +749,30 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
         DoneActualBenefit *= caster->CalculateLevelPenalty(GetSpellInfo());
         amount += (int32)DoneActualBenefit;
     }
-
+    if (GetAuraType() == SPELL_AURA_SCHOOL_ABSORB)
+        switch (m_spellInfo->SpellFamilyName)
+        {
+        case SPELLFAMILY_PRIEST:
+            // Power Word: Shield
+            if (GetSpellInfo()->SpellFamilyFlags[0] & 0x1 && GetSpellInfo()->SpellFamilyFlags[2] & 0x400)
+            {
+                auto &owner = *m_base->GetUnitOwner();
+                if (owner.GetMap()->IsBattlegroundOrArena()
+                        || owner.GetZoneId() == 4197 /* Wintergrasp */)
+                    amount = (amount * (100 - 10) + 50) / 100;
+            }
+            break;
+        case SPELLFAMILY_PALADIN:
+            // Sacred Shield
+            if (m_spellInfo->SpellFamilyFlags[1] & 0x80000)
+            {
+                auto &owner = *m_base->GetUnitOwner();
+                if (owner.GetMap()->IsBattlegroundOrArena()
+                        || owner.GetZoneId() == 4197 /* Wintergrasp */)
+                    amount = (amount * (100 - 10) + 50) / 100;
+            }
+            break;
+        }
     GetBase()->CallScriptEffectCalcAmountHandlers(const_cast<AuraEffect const*>(this), amount, m_canBeRecalculated);
     amount *= GetBase()->GetStackAmount();
     return amount;
@@ -2852,9 +2869,15 @@ void AuraEffect::HandleAuraAllowFlight(AuraApplication const* aurApp, uint8 mode
         // allow flying
         WorldPacket data;
         if (apply)
+        {
+            ((Player*)target)->SetCanFly(true);
             data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
+        }
         else
+        {
             data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
+            ((Player*)target)->SetCanFly(false);
+        }
         data.append(target->GetPackGUID());
         data << uint32(0);                                      // unk
         player->SendDirectMessage(&data);
@@ -3258,9 +3281,15 @@ void AuraEffect::HandleAuraModIncreaseFlightSpeed(AuraApplication const* aurApp,
             {
                 WorldPacket data;
                 if (apply)
+                {
+                    ((Player*)target)->SetCanFly(true);
                     data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
+                }
                 else
+                {
                     data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
+                    ((Player*)target)->SetCanFly(false);
+                }
                 data.append(player->GetPackGUID());
                 data << uint32(0);                                      // unknown
                 player->SendDirectMessage(&data);
@@ -3324,47 +3353,56 @@ void AuraEffect::HandleAuraModUseNormalSpeed(AuraApplication const* aurApp, uint
 /***                     IMMUNITY                      ***/
 /*********************************************************/
 
-void AuraEffect::HandleModStateImmunityMask(AuraApplication const* aurApp, uint8 mode, bool apply) const
+namespace
+{
+    template<class Ty,
+            std::size_t Size>
+        std::pair<Ty *, Ty *> make_range(Ty (&array)[Size])
+    {
+        return std::make_pair(std::begin(array), std::end(array));
+    }
+}
+
+void AuraEffect::HandleAddCreatureImmunity(AuraApplication const* aurApp, uint8 mode, bool apply) const
 {
     if (!(mode & AURA_EFFECT_HANDLE_REAL))
         return;
 
     Unit* target = aurApp->GetTarget();
 
-    std::list <AuraType> immunity_list;
-    if (GetMiscValue() & (1<<10))
-        immunity_list.push_back(SPELL_AURA_MOD_STUN);
-    if (GetMiscValue() & (1<<1))
-        immunity_list.push_back(SPELL_AURA_TRANSFORM);
-
-    // These flag can be recognized wrong:
-    if (GetMiscValue() & (1<<6))
-        immunity_list.push_back(SPELL_AURA_MOD_DECREASE_SPEED);
-    if (GetMiscValue() & (1<<0))
-        immunity_list.push_back(SPELL_AURA_MOD_ROOT);
-    if (GetMiscValue() & (1<<2))
-        immunity_list.push_back(SPELL_AURA_MOD_CONFUSE);
-    if (GetMiscValue() & (1<<9))
-        immunity_list.push_back(SPELL_AURA_MOD_FEAR);
-
-    // an exception for Bladestorm
-    if ((GetMiscValue() & (1<<7)) && (GetId() != 46924))
-        immunity_list.push_back(SPELL_AURA_MOD_DISARM);
-
-    // apply immunities
-    for (std::list <AuraType>::iterator iter = immunity_list.begin(); iter != immunity_list.end(); ++iter)
-        target->ApplySpellImmune(GetId(), IMMUNITY_STATE, *iter, apply);
-
-    // Patch 3.0.3 Bladestorm now breaks all snares and roots on the warrior when activated.
-    if (apply && GetId() == 46924)
+    std::pair<const Mechanics *, const Mechanics *> immunity_list;
+    switch (GetMiscValue())
     {
-        target->RemoveAurasByType(SPELL_AURA_MOD_ROOT);
-        target->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+    case 1733:
+        {
+            static const Mechanics l[] = {
+                        MECHANIC_STUN,
+                        MECHANIC_SNARE,
+                        MECHANIC_ROOT,
+                        MECHANIC_DISORIENTED,
+                        MECHANIC_FEAR,
+                        MECHANIC_KNOCKOUT,
+                        MECHANIC_BANISH,
+                        MECHANIC_POLYMORPH,
+                        MECHANIC_HORROR,
+                        MECHANIC_FREEZE
+                    };
+            immunity_list = make_range(l);
+        }
+        break;
     }
 
+    auto id = GetId();
+    uint32 mask = 0x0;
+    for (auto it = immunity_list.first; it != immunity_list.second; )
+        mask |= uint32(0x1) << *it++;
+
+    // apply immunities
+    for (auto it = immunity_list.first; it != immunity_list.second; )
+        target->ApplySpellImmune(id, IMMUNITY_MECHANIC, *it++, apply);
+
     if (apply && GetSpellInfo()->AttributesEx & SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY)
-        for (std::list <AuraType>::iterator iter = immunity_list.begin(); iter != immunity_list.end(); ++iter)
-            target->RemoveAurasByType(*iter);
+        target->RemoveAurasWithMechanic(mask, AURA_REMOVE_BY_DEFAULT, id);
 }
 
 void AuraEffect::HandleModMechanicImmunity(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -5662,6 +5700,12 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                          if (Unit* veh = target->GetVehicleBase())
                              veh->CastSpell(target, 62475, true);
                     }
+                    break;
+                case 63050 /* Sanity */:
+                    if (35 < m_base->GetStackAmount())
+                        target->RemoveAura(63752 /* Low Sanity Screen Effect */);
+                    else
+                        target->AddAura(63752 /* Low Sanity Screen Effect */, target);
                     break;
                 case 64821: // Fuse Armor (Razorscale)
                     if (GetBase()->GetStackAmount() == GetSpellInfo()->StackAmount)

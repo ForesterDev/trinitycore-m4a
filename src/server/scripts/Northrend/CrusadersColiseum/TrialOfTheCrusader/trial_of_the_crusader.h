@@ -21,7 +21,6 @@ enum
     TYPE_EVENT_TIMER            = 101,
     TYPE_EVENT_NPC              = 102,
     TYPE_NORTHREND_BEASTS       = 103,
-
     DATA_SNOBOLD_COUNT                   = 301,
     DATA_MISTRESS_OF_PAIN_COUNT          = 302,
     DATA_TRIBUTE_TO_IMMORTALITY_ELEGIBLE = 303,
@@ -69,14 +68,6 @@ const Position ToCCommonLoc[]=
     {567.641724f, 195.351501f, 394.659943f, 0}, // 14
     {560.633972f, 195.391708f, 395.137543f, 0}, // 15
     {565.816956f, 195.477921f, 395.136810f, 0}, // 16
-};
-
-const Position JaraxxusLoc[]=
-{
-    {508.104767f, 138.247345f, 395.128052f, 0}, // 0 - Fizzlebang start location
-    {548.610596f, 139.807800f, 394.321838f, 0}, // 1 - fizzlebang end
-    {581.854187f, 138.0f, 394.319f, 0},         // 2 - Portal Right
-    {550.558838f, 138.0f, 394.319f, 0},         // 3 - Portal Left
 };
 
 const Position FactionChampionLoc[]=
@@ -158,7 +149,7 @@ enum eAnnouncerMessages
     MSG_ANUBARAK               = 724006,
 };
 
-enum eCreature
+enum
 {
     NPC_BARRENT                 = 34816,
     NPC_TIRION                  = 34996,

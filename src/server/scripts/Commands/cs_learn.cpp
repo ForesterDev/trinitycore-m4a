@@ -22,6 +22,7 @@ Comment: All learn related commands
 Category: commandscripts
 EndScriptData */
 
+#include "ScriptPCH.h"
 #include "ScriptMgr.h"
 #include "ObjectMgr.h"
 #include "SpellMgr.h"

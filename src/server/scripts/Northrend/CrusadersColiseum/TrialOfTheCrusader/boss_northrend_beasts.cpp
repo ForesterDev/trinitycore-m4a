@@ -32,19 +32,22 @@ EndScriptData */
 #include "ScriptPCH.h"
 #include "trial_of_the_crusader.h"
 
-enum Yells
+namespace
 {
-    //Gormok
-    SAY_SNOBOLLED        = -1649000,
-    //Acidmaw & Dreadscale
-    SAY_SUBMERGE         = -1649010,
-    SAY_EMERGE           = -1649011,
-    SAY_BERSERK          = -1649012,
-    //Icehowl
-    SAY_TRAMPLE_STARE    = -1649020,
-    SAY_TRAMPLE_FAIL     = -1649021,
-    SAY_TRAMPLE_START    = -1649022,
-};
+    enum Yells
+    {
+        //Gormok
+        SAY_SNOBOLLED        = -1649000,
+        //Acidmaw & Dreadscale
+        SAY_SUBMERGE         = -1649010,
+        SAY_EMERGE           = -1649011,
+        SAY_BERSERK          = -1649012,
+        //Icehowl
+        SAY_TRAMPLE_STARE    = -1649020,
+        SAY_TRAMPLE_FAIL     = -1649021,
+        SAY_TRAMPLE_START    = -1649022,
+    };
+}
 
 enum Equipment
 {

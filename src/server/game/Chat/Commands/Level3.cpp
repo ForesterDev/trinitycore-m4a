@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -63,6 +64,8 @@
 #include "SmartAI.h"
 #include "Group.h"
 #include "ChannelMgr.h"
+
+using boost::optional;
 
 bool ChatHandler::HandleMaxSkillCommand(const char* /*args*/)
 {
@@ -130,7 +133,7 @@ bool ChatHandler::HandleSetSkillCommand(const char *args)
 
     int32 max   = max_p ? atol (max_p) : target->GetPureMaxSkillValue(skill);
 
-    if (level <= 0 || level > max || max <= 0)
+    if (level < 0 || level > max || max < 0)
         return false;
 
     target->SetSkill(skill, target->GetSkillStep(skill), level, max);
@@ -2426,7 +2429,7 @@ bool ChatHandler::HandleListAurasCommand (const char * /*args*/)
         ss_name << "|cffffffff|Hspell:" << aura->GetId() << "|h[" << name << "]|h|r";
 
         PSendSysMessage(LANG_COMMAND_TARGET_AURADETAIL, aura->GetId(), (m_session ? ss_name.str().c_str() : name),
-            aurApp->GetEffectMask(), aura->GetCharges(), aura->GetStackAmount(), aurApp->GetSlot(),
+            aurApp->GetEffectMask(), aura->GetCharges(), aura->GetStackAmount(), optional<int>(aurApp->GetSlot()).get_value_or(-1),
             aura->GetDuration(), aura->GetMaxDuration(), (aura->IsPassive() ? passiveStr : ""),
             (talent ? talentStr : ""), IS_PLAYER_GUID(aura->GetCasterGUID()) ? "player" : "creature",
             GUID_LOPART(aura->GetCasterGUID()));

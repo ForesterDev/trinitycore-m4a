@@ -20,6 +20,8 @@
     \ingroup world
 */
 
+#include "gamePCH.h"
+#include <iomanip>
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "Config.h"
@@ -565,6 +567,18 @@ void World::LoadConfigSettings(bool reload)
     ///- Read other configuration items from the config file
 
     m_bool_configs[CONFIG_DURABILITY_LOSS_IN_PVP] = ConfigMgr::GetBoolDefault("DurabilityLoss.InPvP", false);
+
+    // movement anticheat
+    m_MvAnticheatEnable                     = ConfigMgr::GetBoolDefault("Anticheat.Movement.Enable",false);
+    m_MvAnticheatKick                       = ConfigMgr::GetBoolDefault("Anticheat.Movement.Kick",false);
+    m_MvAnticheatAlarmCount                 = (uint32)ConfigMgr::GetIntDefault("Anticheat.Movement.AlarmCount", 5);
+    m_MvAnticheatAlarmPeriod                = (uint32)ConfigMgr::GetIntDefault("Anticheat.Movement.AlarmTime", 5000);
+    m_MvAntiCheatBan                        = (unsigned char)ConfigMgr::GetIntDefault("Anticheat.Movement.BanType",0);
+    m_MvAnticheatBanTime                    = ConfigMgr::GetStringDefault("Anticheat.Movement.BanTime","1m");
+    m_MvAnticheatGmLevel                    = (unsigned char)ConfigMgr::GetIntDefault("Anticheat.Movement.GmLevel",0);
+    m_MvAnticheatKill                       = ConfigMgr::GetBoolDefault("Anticheat.Movement.Kill",false);
+    m_MvAnticheatMaxXYT                     = ConfigMgr::GetFloatDefault("Anticheat.Movement.MaxXYT",0.04f);
+    m_MvAnticheatIgnoreAfterTeleport        = (uint16)ConfigMgr::GetIntDefault("Anticheat.Movement.IgnoreSecAfterTeleport",10);
 
     m_int_configs[CONFIG_COMPRESSION] = ConfigMgr::GetIntDefault("Compression", 1);
     if (m_int_configs[CONFIG_COMPRESSION] < 1 || m_int_configs[CONFIG_COMPRESSION] > 9)
@@ -2473,21 +2487,20 @@ void World::ShutdownMsg(bool show, Player* player)
     if (m_ShutdownMask & SHUTDOWN_MASK_IDLE)
         return;
 
-    ///- Display a message every 12 hours, hours, 5 minutes, minute, 5 seconds and finally seconds
-    if (show ||
-        (m_ShutdownTimer < 5* MINUTE && (m_ShutdownTimer % 15) == 0) || // < 5 min; every 15 sec
-        (m_ShutdownTimer < 15 * MINUTE && (m_ShutdownTimer % MINUTE) == 0) || // < 15 min ; every 1 min
-        (m_ShutdownTimer < 30 * MINUTE && (m_ShutdownTimer % (5 * MINUTE)) == 0) || // < 30 min ; every 5 min
-        (m_ShutdownTimer < 12 * HOUR && (m_ShutdownTimer % HOUR) == 0) || // < 12 h ; every 1 h
-        (m_ShutdownTimer > 12 * HOUR && (m_ShutdownTimer % (12 * HOUR)) == 0)) // > 12 h ; every 12 h
-    {
-        std::string str = secsToTimeString(m_ShutdownTimer);
+    ///- Display a message every minute or 15 seconds
+    auto &t = m_ShutdownTimer;
+    if (!(t < 60 * 5 && t % 15 == 0))
+        if (!(t % 60 == 0))
+            if (!show)
+                return;
+    std::ostringstream ss;
+    ss << t / 60 << ':' << std::setfill('0') << std::setw(2) << t % 60;
+    std::string str = ss.str();
 
-        ServerMessageType msgid = (m_ShutdownMask & SHUTDOWN_MASK_RESTART) ? SERVER_MSG_RESTART_TIME : SERVER_MSG_SHUTDOWN_TIME;
+    ServerMessageType msgid = (m_ShutdownMask & SHUTDOWN_MASK_RESTART) ? SERVER_MSG_RESTART_TIME : SERVER_MSG_SHUTDOWN_TIME;
 
-        SendServerMessage(msgid, str.c_str(), player);
-        sLog->outStaticDebug("Server is %s in %s", (m_ShutdownMask & SHUTDOWN_MASK_RESTART ? "restart" : "shuttingdown"), str.c_str());
-    }
+    SendServerMessage(msgid, str.c_str(), player);
+    sLog->outStaticDebug("Server is %s in %s", (m_ShutdownMask & SHUTDOWN_MASK_RESTART ? "restart" : "shuttingdown"), str.c_str());
 }
 
 /// Cancel a planned server shutdown

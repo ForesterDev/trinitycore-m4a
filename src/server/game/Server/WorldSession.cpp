@@ -20,6 +20,7 @@
     \ingroup u2w
 */
 
+#include "gamePCH.h"
 #include "WorldSocket.h"                                    // must be first to make ACE happy with ACE includes in it
 #include "Common.h"
 #include "DatabaseEnv.h"

@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "authPCH.h"
 #include "Common.h"
 #include "RealmList.h"
 #include "Database/DatabaseEnv.h"

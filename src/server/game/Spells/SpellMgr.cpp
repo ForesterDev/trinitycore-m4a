@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "SpellMgr.h"
 #include "SpellInfo.h"
 #include "ObjectMgr.h"
@@ -30,6 +31,8 @@
 #include "CreatureAI.h"
 #include "MapManager.h"
 #include "BattlegroundIC.h"
+
+using std::forward;
 
 bool IsPrimaryProfessionSkill(uint32 skill)
 {
@@ -1119,6 +1122,17 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
     // Extra conditions -- leaving the possibility add extra conditions...
     switch (spellId)
     {
+    case 48388 /* Call Wintergarde Gryphon */:
+        switch (player->GetAreaId())
+        {
+        case 4177 /* Wintergarde Keep */:
+        case 4178 /* Wintergarde Mine */:
+        case 4188 /* The Carrion Fields */:
+            break;
+        default:
+            return false;
+        }
+        break;
         case 58600: // No fly Zone - Dalaran
         {
             if (!player)
@@ -3333,6 +3347,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 71161: // Plague Stench (Stinky)
             case 71123: // Decimate (Stinky & Precious)
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_100_YARDS;   // 100yd
+                break;
+            case 71169 /* Shadow's Fate */:
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                 break;
             case 72723: // Resistant Skin (Deathbringer Saurfang adds)
                 // this spell initially granted Shadow damage immunity, however it was removed but the data was left in client

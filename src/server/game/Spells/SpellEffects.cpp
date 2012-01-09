@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -439,6 +440,9 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         damage = unitTarget->CountPctFromMaxHealth(damage);
                         break;
                     }
+                    case 50526 /* Wandering Plague */:
+                        apply_direct_bonus = false;
+                        break;
                     // Gargoyle Strike
                     case 51963:
                     {
@@ -579,6 +583,8 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         }
                     }
                 }
+                else if (m_spellInfo->SpellFamilyFlags[2] & 0x8U /* Improved Devouring Plague */)
+                    apply_direct_bonus = false;
                 break;
             }
             case SPELLFAMILY_DRUID:
@@ -714,6 +720,8 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         }
                     }
                 }
+                else if (m_spellInfo->SpellFamilyFlags[2] & 0x800U /* Chimera Shot - Serpent */)
+                    apply_direct_bonus = false;
                 break;
             }
             case SPELLFAMILY_PALADIN:
@@ -748,6 +756,9 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.035f);
                     }
                 }
+                // Scourge Strike
+                if (m_spellInfo->SpellFamilyFlags[2] & 0x80)
+                    apply_direct_bonus = false;
                 break;
             }
             case SPELLFAMILY_MAGE:
@@ -1311,7 +1322,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 // Bloodthirst
                 case 23881:
                 {
-                    m_caster->CastCustomSpell(unitTarget, 23885, &damage, NULL, NULL, true, NULL);
+                    m_caster->CastCustomSpell(unitTarget, 55970, &damage, NULL, NULL, true, NULL);
                     return;
                 }
             }
@@ -1339,7 +1350,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     if (AuraEffect const* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_WARLOCK, 208, 0))
                         AddPctN(mana, aurEff->GetAmount());
 
-                    m_caster->CastCustomSpell(unitTarget, 31818, &mana, NULL, NULL, false);
+                    m_caster->CastCustomSpell(unitTarget, 31818, &mana, NULL, NULL, true);
 
                     // Mana Feed
                     int32 manaFeedVal = 0;
@@ -1467,15 +1478,16 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
         case SPELLFAMILY_DEATHKNIGHT:
             // Death strike
             if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_DK_DEATH_STRIKE)
-            {
-                uint32 count = unitTarget->GetDiseasesByCaster(m_caster->GetGUID());
-                bp = int32(count * m_caster->CountPctFromMaxHealth(int32(m_spellInfo->Effects[EFFECT_0].DamageMultiplier)));
-                // Improved Death Strike
-                if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 2751, 0))
-                    AddPctN(bp, m_caster->CalculateSpellDamage(m_caster, aurEff->GetSpellInfo(), 2));
-                m_caster->CastCustomSpell(m_caster, 45470, &bp, NULL, NULL, false);
-                return;
-            }
+                if (!IsTriggered())
+                {
+                    uint32 count = unitTarget->GetDiseasesByCaster(m_caster->GetGUID());
+                    bp = int32(count * m_caster->CountPctFromMaxHealth(int32(m_spellInfo->Effects[EFFECT_0].DamageMultiplier)));
+                    // Improved Death Strike
+                    if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 2751, 0))
+                        AddPctN(bp, m_caster->CalculateSpellDamage(m_caster, aurEff->GetSpellInfo(), 2));
+                    m_caster->CastCustomSpell(m_caster, 45470, &bp, NULL, NULL, true);
+                    return;
+                }
             // Death Coil
             if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_DK_DEATH_COIL)
             {
@@ -1534,6 +1546,24 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 break;
             }
             break;
+        case SPELLFAMILY_ROGUE:
+            switch(GetSpellInfo()->Id)
+            {
+                case 45176: // Master Poisoner Proc Trigger (SERVERSIDE)
+                {
+                    uint32 spellId = damage;
+                    uint32 value = m_triggeredByAuraSpell->Effects[EFFECT_0].CalcValue();
+
+                    if (AuraEffect * aurEff = unitTarget->GetAuraEffect(spellId, EFFECT_2, m_caster->GetGUID()))
+                        aurEff->SetAmount(value);
+                    return;
+                }
+                default:
+                    break;
+            }
+            break;
+        default:
+            break;
     }
 
     //spells triggered by dummy effect should not miss
@@ -1576,15 +1606,15 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 
 void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
 {
-    if (effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH_TARGET
-        && effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH)
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET
+        && effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
         return;
 
     uint32 triggered_spell_id = m_spellInfo->Effects[effIndex].TriggerSpell;
 
     // todo: move those to spell scripts
     if (m_spellInfo->Effects[effIndex].Effect == SPELL_EFFECT_TRIGGER_SPELL
-        && effectHandleMode == SPELL_EFFECT_HANDLE_LAUNCH_TARGET)
+        && effectHandleMode == SPELL_EFFECT_HANDLE_HIT_TARGET)
     {
         // special cases
         switch (triggered_spell_id)
@@ -1697,13 +1727,13 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
     }
 
     SpellCastTargets targets;
-    if (effectHandleMode == SPELL_EFFECT_HANDLE_LAUNCH_TARGET)
+    if (effectHandleMode == SPELL_EFFECT_HANDLE_HIT_TARGET)
     {
         if (!spellInfo->NeedsToBeTriggeredByCaster())
             return;
         targets.SetUnitTarget(unitTarget);
     }
-    else //if (effectHandleMode == SPELL_EFFECT_HANDLE_LAUNCH)
+    else //if (effectHandleMode == SPELL_EFFECT_HANDLE_HIT)
     {
         if (spellInfo->NeedsToBeTriggeredByCaster() && (m_spellInfo->Effects[effIndex].GetProvidedTargetMask() & TARGET_FLAG_UNIT_MASK))
             return;
@@ -5051,6 +5081,13 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         m_caster->CastSpell(m_caster, 63919, true);
                     return;
                 }
+                case 67009 /* Nether Power */:
+                    if (effIndex == 0)
+                        if (auto entry = sSpellMgr->GetSpellInfo(damage))
+                            if (auto final = sSpellMgr->GetSpellForDifficultyFromSpell(entry, m_caster))
+                                if (unitTarget)
+                                    m_caster->SetAuraStack(final->Id, unitTarget, final->StackAmount);
+                    break;
                 case 71342:                                     // Big Love Rocket
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -7080,13 +7117,18 @@ void Spell::EffectDiscoverTaxi(SpellEffIndex effIndex)
         unitTarget->ToPlayer()->GetSession()->SendDiscoverNewTaxiNode(nodeid);
 }
 
-void Spell::EffectTitanGrip(SpellEffIndex /*effIndex*/)
+void Spell::EffectTitanGrip(SpellEffIndex effIndex)
 {
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
         return;
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
         m_caster->ToPlayer()->SetCanTitanGrip(true);
+        uint32 spell_id = m_spellInfo->Effects[effIndex].MiscValue;
+        if (!m_caster->HasAura(spell_id))
+            m_caster->AddAura(spell_id, m_caster);
+    }
 }
 
 void Spell::EffectRedirectThreat(SpellEffIndex /*effIndex*/)
@@ -7316,6 +7358,11 @@ void Spell::EffectPlayerNotification(SpellEffIndex effIndex)
 
     switch (m_spellInfo->Id)
     {
+    case 48366 /* Warning */:
+        if (effIndex == 2)
+            unitTarget->MonsterWhisper("Return to Wintergarde or the Carrion Fields or "
+                    "your gryphon will drop you!", unitTarget->GetGUID(), true);
+        break;
         case 58730: // Restricted Flight Area
         case 58600: // Restricted Flight Area
             unitTarget->ToPlayer()->GetSession()->SendNotification(LANG_ZONE_NOFLYZONE);

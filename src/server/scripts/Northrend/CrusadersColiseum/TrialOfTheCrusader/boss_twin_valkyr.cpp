@@ -30,20 +30,23 @@ EndScriptData */
 #include "ScriptPCH.h"
 #include "trial_of_the_crusader.h"
 
-enum Yells
+namespace
 {
-    SAY_AGGRO           = -1649040,
-    SAY_DEATH           = -1649041,
-    SAY_BERSERK         = -1649042,
-    EMOTE_SHIELD        = -1649043,
-    SAY_SHIELD          = -1649044,
-    SAY_KILL1           = -1649045,
-    SAY_KILL2           = -1649046,
-    EMOTE_LIGHT_VORTEX  = -1649047,
-    SAY_LIGHT_VORTEX    = -1649048,
-    EMOTE_DARK_VORTEX   = -1649049,
-    SAY_DARK_VORTEX     = -1649050,
-};
+    enum Yells
+    {
+        SAY_AGGRO           = -1649040,
+        SAY_DEATH           = -1649041,
+        SAY_BERSERK         = -1649042,
+        EMOTE_SHIELD        = -1649043,
+        SAY_SHIELD          = -1649044,
+        SAY_KILL1           = -1649045,
+        SAY_KILL2           = -1649046,
+        EMOTE_LIGHT_VORTEX  = -1649047,
+        SAY_LIGHT_VORTEX    = -1649048,
+        EMOTE_DARK_VORTEX   = -1649049,
+        SAY_DARK_VORTEX     = -1649050,
+    };
+}
 
 enum Equipment
 {
@@ -51,44 +54,47 @@ enum Equipment
     EQUIP_MAIN_2         = 37377,
 };
 
-enum Summons
+namespace
 {
-    NPC_BULLET_CONTROLLER        = 34743,
+    enum Summons
+    {
+        NPC_BULLET_CONTROLLER        = 34743,
 
-    NPC_BULLET_DARK              = 34628,
-    NPC_BULLET_LIGHT             = 34630,
-};
+        NPC_BULLET_DARK              = 34628,
+        NPC_BULLET_LIGHT             = 34630,
+    };
 
-enum BossSpells
-{
-    SPELL_LIGHT_TWIN_SPIKE      = 66075,
-    SPELL_LIGHT_SURGE           = 65766,
-    SPELL_LIGHT_SHIELD          = 65858,
-    SPELL_LIGHT_TWIN_PACT       = 65876,
-    SPELL_LIGHT_VORTEX          = 66046,
-    SPELL_LIGHT_TOUCH           = 67297,
-    SPELL_LIGHT_ESSENCE         = 65686,
-    SPELL_EMPOWERED_LIGHT       = 65748,
-    SPELL_TWIN_EMPATHY_LIGHT    = 66133,
-    SPELL_UNLEASHED_LIGHT       = 65795,
+    enum BossSpells
+    {
+        SPELL_LIGHT_TWIN_SPIKE      = 66075,
+        SPELL_LIGHT_SURGE           = 65766,
+        SPELL_LIGHT_SHIELD          = 65858,
+        SPELL_LIGHT_TWIN_PACT       = 65876,
+        SPELL_LIGHT_VORTEX          = 66046,
+        SPELL_LIGHT_TOUCH           = 67297,
+        SPELL_LIGHT_ESSENCE         = 65686,
+        SPELL_EMPOWERED_LIGHT       = 65748,
+        SPELL_TWIN_EMPATHY_LIGHT    = 66133,
+        SPELL_UNLEASHED_LIGHT       = 65795,
 
-    SPELL_DARK_TWIN_SPIKE       = 66069,
-    SPELL_DARK_SURGE            = 65768,
-    SPELL_DARK_SHIELD           = 65874,
-    SPELL_DARK_TWIN_PACT        = 65875,
-    SPELL_DARK_VORTEX           = 66058,
-    SPELL_DARK_TOUCH            = 67282,
-    SPELL_DARK_ESSENCE          = 65684,
-    SPELL_EMPOWERED_DARK        = 65724,
-    SPELL_TWIN_EMPATHY_DARK     = 66132,
-    SPELL_UNLEASHED_DARK        = 65808,
+        SPELL_DARK_TWIN_SPIKE       = 66069,
+        SPELL_DARK_SURGE            = 65768,
+        SPELL_DARK_SHIELD           = 65874,
+        SPELL_DARK_TWIN_PACT        = 65875,
+        SPELL_DARK_VORTEX           = 66058,
+        SPELL_DARK_TOUCH            = 67282,
+        SPELL_DARK_ESSENCE          = 65684,
+        SPELL_EMPOWERED_DARK        = 65724,
+        SPELL_TWIN_EMPATHY_DARK     = 66132,
+        SPELL_UNLEASHED_DARK        = 65808,
 
-    SPELL_CONTROLLER_PERIODIC    = 66149,
-    SPELL_POWER_TWINS           = 65879,
-    SPELL_BERSERK               = 64238,
-    SPELL_POWERING_UP           = 67590,
-    SPELL_SURGE_OF_SPEED        = 65828,
-};
+        SPELL_CONTROLLER_PERIODIC    = 66149,
+        SPELL_POWER_TWINS           = 65879,
+        SPELL_BERSERK               = 64238,
+        SPELL_POWERING_UP           = 67590,
+        SPELL_SURGE_OF_SPEED        = 65828,
+    };
+}
 
 #define SPELL_DARK_ESSENCE_HELPER RAID_MODE<uint32>(65684, 67176, 67177, 67178)
 #define SPELL_LIGHT_ESSENCE_HELPER RAID_MODE<uint32>(65686, 67222, 67223, 67224)
@@ -144,6 +150,10 @@ struct boss_twin_baseAI : public ScriptedAI
     boss_twin_baseAI(Creature* creature) : ScriptedAI(creature), Summons(me)
     {
         m_instance = (InstanceScript*)creature->GetInstanceScript();
+        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_HEALING_PCT, true);
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_HEALING_RECEIVED, true);
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_SCHOOL_HEAL_ABSORB, true);
     }
 
     InstanceScript* m_instance;
@@ -163,7 +173,6 @@ struct boss_twin_baseAI : public ScriptedAI
     int32 m_uiVortexEmote;
     uint32 m_uiSisterNpcId;
     uint32 m_uiMyEmphatySpellId;
-    uint32 m_uiOtherEssenceSpellId;
     uint32 m_uiSurgeSpellId;
     uint32 m_uiVortexSpellId;
     uint32 m_uiShieldSpellId;
@@ -192,7 +201,6 @@ struct boss_twin_baseAI : public ScriptedAI
     {
         if (m_instance)
             m_instance->SetData(TYPE_VALKIRIES, FAIL);
-
         Summons.DespawnAll();
         me->DespawnOrUnsummon();
     }
@@ -317,7 +325,6 @@ struct boss_twin_baseAI : public ScriptedAI
     {
         if (!m_instance || !UpdateVictim())
             return;
-
         switch (m_uiStage)
         {
             case 0:
@@ -347,7 +354,7 @@ struct boss_twin_baseAI : public ScriptedAI
                         pSister->CastSpell(pSister, SPELL_POWER_TWINS, false);
                     }
                     DoCast(me, m_uiShieldSpellId);
-                    DoCast(me, m_uiTwinPactSpellId);
+                    DoCastAOE(m_uiTwinPactSpellId);
                     m_uiStage = 0;
                     m_uiSpecialAbilityTimer = MINUTE*IN_MILLISECONDS;
                 }
@@ -360,17 +367,25 @@ struct boss_twin_baseAI : public ScriptedAI
 
         if (m_uiSpikeTimer <= uiDiff)
         {
-            DoCastVictim(m_uiSpikeSpellId);
-            m_uiSpikeTimer = 20*IN_MILLISECONDS;
+            m_uiSpikeTimer = 0;
+            if (!me->IsNonMeleeSpellCasted(false, false, true))
+            {
+                DoCastVictim(m_uiSpikeSpellId);
+                m_uiSpikeTimer = 20*IN_MILLISECONDS;
+            }
         }
         else
             m_uiSpikeTimer -= uiDiff;
 
         if (IsHeroic() && m_uiTouchTimer <= uiDiff)
         {
-            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true, m_uiOtherEssenceSpellId))
-                me->CastCustomSpell(m_uiTouchSpellId, SPELLVALUE_MAX_TARGETS, 1, target, false);
-            m_uiTouchTimer = urand(10, 15)*IN_MILLISECONDS;
+            m_uiTouchTimer = 0;
+            if (!me->IsNonMeleeSpellCasted(false, false, true))
+            {
+                me->CastCustomSpell(m_uiTouchSpellId, SPELLVALUE_MAX_TARGETS, 1, nullptr, false)
+                    ;
+                m_uiTouchTimer = urand(10, 15)*IN_MILLISECONDS;
+            }
         }
         else
             m_uiTouchTimer -= uiDiff;
@@ -407,6 +422,7 @@ public:
         boss_fjolaAI(Creature* creature) : boss_twin_baseAI(creature)
         {
             m_instance = (InstanceScript*)creature->GetInstanceScript();
+            me->ModifyAuraState(AURA_STATE_UNKNOWN22, true);
         }
 
         InstanceScript* m_instance;
@@ -421,7 +437,6 @@ public:
             m_uiVortexSay = SAY_LIGHT_VORTEX;
             m_uiSisterNpcId = NPC_DARKBANE;
             m_uiMyEmphatySpellId = SPELL_TWIN_EMPATHY_DARK;
-            m_uiOtherEssenceSpellId = SPELL_DARK_ESSENCE_HELPER;
             m_uiSurgeSpellId = SPELL_LIGHT_SURGE;
             m_uiVortexSpellId = SPELL_LIGHT_VORTEX;
             m_uiShieldSpellId = SPELL_LIGHT_SHIELD;
@@ -479,7 +494,10 @@ public:
 
     struct boss_eydisAI : public boss_twin_baseAI
     {
-        boss_eydisAI(Creature* creature) : boss_twin_baseAI(creature) {}
+        boss_eydisAI(Creature* creature) : boss_twin_baseAI(creature)
+        {
+            me->ModifyAuraState(AURA_STATE_UNKNOWN19, true);
+        }
 
         void Reset() {
             boss_twin_baseAI::Reset();
@@ -491,7 +509,6 @@ public:
             m_uiVortexSay = SAY_DARK_VORTEX;
             m_uiSisterNpcId = NPC_LIGHTBANE;
             m_uiMyEmphatySpellId = SPELL_TWIN_EMPATHY_LIGHT;
-            m_uiOtherEssenceSpellId = SPELL_LIGHT_ESSENCE_HELPER;
             m_uiSurgeSpellId = SPELL_DARK_SURGE;
             m_uiVortexSpellId = SPELL_DARK_VORTEX;
             m_uiShieldSpellId = SPELL_DARK_SHIELD;

@@ -18,6 +18,10 @@
 #ifndef __BATTLEGROUNDBE_H
 #define __BATTLEGROUNDBE_H
 
+#include <memory>
+#include <array>
+#include "Battleground.h"
+
 class Battleground;
 
 enum BattlegroundBEObjectTypes
@@ -46,6 +50,13 @@ class BattlegroundBEScore : public BattlegroundScore
     public:
         BattlegroundBEScore() {};
         virtual ~BattlegroundBEScore() {};
+
+        std::pair<std::size_t, Stat_data_type> stat_data() const
+        {
+            std::array<int32, max_stats> d;
+            auto first = d.begin(), it = first;
+            return std::make_pair(it - first, std::move(d));
+        }
 };
 
 class BattlegroundBE : public Battleground
