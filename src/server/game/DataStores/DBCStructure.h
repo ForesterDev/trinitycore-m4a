@@ -1253,10 +1253,12 @@ struct MailTemplateEntry
 
 struct MapEntry
 {
+    static const uint32 dynamic_bit = 0x100U;
+
     uint32  MapID;                                          // 0
     //char*       internalname;                             // 1 unused
     uint32  map_type;                                       // 2
-    //uint32 unk_330;                                       // 3
+    uint32  unk_330;                                        // 3
                                                             // 4 0 or 1 for battlegrounds (not arenas)
     char*   name[16];                                       // 5-20
                                                             // 21 name flags, unused
