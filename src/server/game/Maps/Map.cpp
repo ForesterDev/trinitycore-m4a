@@ -235,6 +235,21 @@ i_scriptLock(false)
             setNGrid(NULL, idx, j);
         }
     }
+    if (i_mapEntry->unk_330 & MapEntry::dynamic_bit)
+    {
+        if (IsNonRaidDungeon())
+            difficulty_ = DUNGEON_DIFFICULTY_NORMAL;
+        else if (IsRaid())
+            difficulty_ = Is25ManRaid() ? RAID_DIFFICULTY_25MAN_NORMAL : RAID_DIFFICULTY_10MAN_NORMAL;
+        else
+            difficulty_ = SpawnMode;
+        dynamic_difficulty_ = IsHeroic() ? 1 : 0;
+    }
+    else
+    {
+        difficulty_ = SpawnMode;
+        dynamic_difficulty_ = 0;
+    }
 
     //lets initialize visibility distance for map
     Map::InitVisibilityDistance();

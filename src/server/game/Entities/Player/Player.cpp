@@ -21780,8 +21780,8 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     // SMSG_INSTANCE_DIFFICULTY
     data.Initialize(SMSG_INSTANCE_DIFFICULTY, 4+4);
-    data << uint32(GetMap()->GetDifficulty());
-    data << uint32(0);
+    data << int32(GetMap()->difficulty());
+    data << int32(GetMap()->dynamic_difficulty());
     GetSession()->SendPacket(&data);
 
     SendInitialSpells();

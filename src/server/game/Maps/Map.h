@@ -19,6 +19,7 @@
 #ifndef TRINITY_MAP_H
 #define TRINITY_MAP_H
 
+#include <cstdint>
 #include "Define.h"
 #include <ace/RW_Thread_Mutex.h>
 #include <ace/Thread_Mutex.h>
@@ -431,6 +432,17 @@ class Map : public GridRefManager<NGridType>
 
         InstanceMap* ToInstanceMap(){ if (IsDungeon())  return reinterpret_cast<InstanceMap*>(this); else return NULL;  }
         const InstanceMap* ToInstanceMap() const { if (IsDungeon())  return (const InstanceMap*)((InstanceMap*)this); else return NULL;  }
+
+        std::int32_t difficulty() const
+        {
+            return difficulty_;
+        }
+
+        std::int32_t dynamic_difficulty() const
+        {
+            return dynamic_difficulty_;
+        }
+
     private:
         void LoadMapAndVMap(int gx, int gy);
         void LoadVMap(int gx, int gy);
@@ -557,6 +569,9 @@ class Map : public GridRefManager<NGridType>
             else
                 m_activeNonPlayers.erase(obj);
         }
+
+        std::int32_t difficulty_;
+        std::int32_t dynamic_difficulty_;
 };
 
 enum InstanceResetMethod
