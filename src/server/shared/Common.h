@@ -110,66 +110,6 @@
 #  include <netdb.h>
 #endif
 
-#if COMPILER == COMPILER_GNU
-namespace std
-{
-    template<class ty> inline
-        ty *addressof(ty &val)
-    {   // return address of val
-        return reinterpret_cast<ty *>(&const_cast<unsigned char &>
-                (reinterpret_cast<const volatile unsigned char &>(val)));
-    }
-}
-
-template<class iter> inline
-    typename std::iterator_traits<iter>::iterator_category iter_cat(const iter &)
-{   // return category from iterator argument
-    typename std::iterator_traits<iter>::iterator_category cat;
-    return cat;
-}
-
-namespace std
-{
-    template<class container> inline
-        typename container::iterator begin(container &cont)
-    {   // get beginning of sequence
-        return cont.begin();
-    }
-
-    template<class container> inline
-        typename container::const_iterator begin(const container &cont)
-    {   // get beginning of sequence
-        return cont.begin();
-    }
-
-    template<class container> inline
-        typename container::iterator end(container &cont)
-    {   // get end of sequence
-        return cont.end();
-    }
-
-    template<class container> inline
-        typename container::const_iterator end(const container &cont)
-    {   // get end of sequence
-        return cont.end();
-    }
-
-    template<class ty,
-            std::size_t size> inline
-        ty *begin(ty (&array)[size])
-    {   // get beginning of array
-        return array;
-    }
-
-    template<class ty,
-            std::size_t size> inline
-        ty *end(ty (&array)[size])
-    {   // get end of array
-        return array + size;
-    }
-}
-#endif  // COMPILER == COMPILER_GNU
-
 #if COMPILER == COMPILER_MICROSOFT
 
 #include <float.h>
