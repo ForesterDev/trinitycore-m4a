@@ -421,7 +421,7 @@ void Aura::_ApplyForTarget(Unit* target, Unit* caster, AuraApplication * auraApp
 void Aura::_UnapplyForTarget(Unit* target, Unit* caster, AuraApplication * auraApp)
 {
     ASSERT(target);
-    ASSERT(auraApp->GetRemoveMode());
+    ASSERT(auraApp->GetRemoveMode() != AURA_REMOVE_NONE);
     ASSERT(auraApp);
 
     ApplicationMap::iterator itr = m_applications.find(target->GetGUID());
