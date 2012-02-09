@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -84,7 +84,7 @@ public:
         void UpdateAI(const uint32 uiDiff)
         {
             if (work == true)
-                me->HandleEmoteCommand(466);
+                me->HandleEmoteCommand(EMOTE_ONESHOT_WORK_CHOPWOOD);
             if (m_uiRebuffTimer <= uiDiff)
             {
                 DoCast(me, SPELL_BUFF_SLEEP);

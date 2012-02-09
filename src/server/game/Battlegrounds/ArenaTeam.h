@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -97,7 +97,7 @@ struct ArenaTeamMember
     uint16 PersonalRating;
     uint16 MatchMakerRating;
 
-    void ModifyPersonalRating(Player* player, int32 mod, uint32 slot);
+    void ModifyPersonalRating(Player* player, int32 mod, uint32 type);
     void ModifyMatchmakerRating(int32 mod, uint32 slot);
 };
 

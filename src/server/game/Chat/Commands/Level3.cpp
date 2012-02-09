@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -2198,7 +2198,7 @@ void ChatHandler::HandleCharacterLevel(Player* player, uint64 playerGuid, uint32
     else
     {
         // Update level and reset XP, everything else will be updated at login
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPDATE_LEVEL);
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_LEVEL);
 
         stmt->setUInt8(0, uint8(newLevel));
         stmt->setUInt32(1, GUID_LOPART(playerGuid));
@@ -2585,7 +2585,7 @@ bool ChatHandler::HandleResetSpellsCommand(const char* args)
     }
     else
     {
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPDATE_AT_LOGIN_FLAG);
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_ADD_AT_LOGIN_FLAG);
 
         stmt->setUInt16(0, uint16(AT_LOGIN_RESET_SPELLS));
         stmt->setUInt32(1, GUID_LOPART(targetGuid));
@@ -2643,7 +2643,7 @@ bool ChatHandler::HandleResetTalentsCommand(const char* args)
     }
     else if (targetGuid)
     {
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPDATE_AT_LOGIN_FLAG);
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_ADD_AT_LOGIN_FLAG);
 
         stmt->setUInt16(0, uint16(AT_LOGIN_NONE | AT_LOGIN_RESET_PET_TALENTS));
         stmt->setUInt32(1, GUID_LOPART(targetGuid));
@@ -2691,7 +2691,7 @@ bool ChatHandler::HandleResetAllCommand(const char * args)
         return false;
     }
 
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPDATE_ALL_AT_LOGIN_FLAGS);
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_ALL_AT_LOGIN_FLAGS);
 
     stmt->setUInt16(0, uint16(atLogin));
 
@@ -3112,7 +3112,7 @@ bool ChatHandler::HandleBanInfoCharacterCommand(const char *args)
 
     if (!target)
     {
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_GET_GUID_BY_NAME);
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_GUID_BY_NAME);
         stmt->setString(0, name);
         PreparedQueryResult resultCharacter = CharacterDatabase.Query(stmt);
 
@@ -3127,7 +3127,7 @@ bool ChatHandler::HandleBanInfoCharacterCommand(const char *args)
     else
         target_guid = target->GetGUIDLow();
 
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_GET_BANINFO);
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_BANINFO);
     stmt->setUInt32(0, target_guid);
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
     if (!result)
@@ -3222,7 +3222,7 @@ bool ChatHandler::HandleBanListCharacterCommand(const char *args)
         return false;
 
     std::string filter(cFilter);
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_GET_GUID_BY_NAME_FILTER);
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_GUID_BY_NAME_FILTER);
     stmt->setString(0, filter.c_str());
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
     if (!result)
@@ -3239,7 +3239,7 @@ bool ChatHandler::HandleBanListCharacterCommand(const char *args)
         do
         {
             Field* fields = result->Fetch();
-            PreparedStatement* stmt2 = CharacterDatabase.GetPreparedStatement(CHAR_GET_BANNED_NAME);
+            PreparedStatement* stmt2 = CharacterDatabase.GetPreparedStatement(CHAR_SEL_BANNED_NAME);
             stmt2->setUInt32(0, fields[0].GetUInt32());
             PreparedQueryResult banresult = CharacterDatabase.Query(stmt2);
             if (banresult)
@@ -3261,7 +3261,7 @@ bool ChatHandler::HandleBanListCharacterCommand(const char *args)
 
             std::string char_name = fields[1].GetString();
 
-            PreparedStatement* stmt2 = CharacterDatabase.GetPreparedStatement(CHAR_GET_BANINFO_LIST);
+            PreparedStatement* stmt2 = CharacterDatabase.GetPreparedStatement(CHAR_SEL_BANINFO_LIST);
             stmt2->setUInt32(0, fields[0].GetUInt32());
             PreparedQueryResult banInfo = CharacterDatabase.Query(stmt2);
             if (banInfo)
@@ -3692,6 +3692,9 @@ bool ChatHandler::HandleMovegensCommand(const char* /*args*/)
     PSendSysMessage(LANG_MOVEGENS_LIST, (unit->GetTypeId() == TYPEID_PLAYER ? "Player" : "Creature"), unit->GetGUIDLow());
 
     MotionMaster* mm = unit->GetMotionMaster();
+    float x,y,z;
+    mm->GetDestination(x,y,z);
+
     for (uint8 i = 0; i < MAX_MOTION_SLOT; ++i)
     {
         MovementGenerator* mg = mm->GetMotionSlot(i);
@@ -3707,48 +3710,55 @@ bool ChatHandler::HandleMovegensCommand(const char* /*args*/)
             case WAYPOINT_MOTION_TYPE:      SendSysMessage(LANG_MOVEGENS_WAYPOINT);      break;
             case ANIMAL_RANDOM_MOTION_TYPE: SendSysMessage(LANG_MOVEGENS_ANIMAL_RANDOM); break;
             case CONFUSED_MOTION_TYPE:      SendSysMessage(LANG_MOVEGENS_CONFUSED);      break;
-            case TARGETED_MOTION_TYPE:
+            case CHASE_MOTION_TYPE:
             {
+                Unit* target = NULL;
                 if (unit->GetTypeId() == TYPEID_PLAYER)
-                {
-                    TargetedMovementGenerator<Player> const* mgen = static_cast<TargetedMovementGenerator<Player> const*>(mg);
-                    Unit* target = mgen->GetTarget();
-                    if (target)
-                        PSendSysMessage(LANG_MOVEGENS_TARGETED_PLAYER, target->GetName(), target->GetGUIDLow());
-                    else
-                        SendSysMessage(LANG_MOVEGENS_TARGETED_NULL);
-                }
+                    target = static_cast<ChaseMovementGenerator<Player> const*>(mg)->GetTarget();
                 else
-                {
-                    TargetedMovementGenerator<Creature> const* mgen = static_cast<TargetedMovementGenerator<Creature> const*>(mg);
-                    Unit* target = mgen->GetTarget();
-                    if (target)
-                        PSendSysMessage(LANG_MOVEGENS_TARGETED_CREATURE, target->GetName(), target->GetGUIDLow());
-                    else
-                        SendSysMessage(LANG_MOVEGENS_TARGETED_NULL);
-                }
+                    target = static_cast<ChaseMovementGenerator<Creature> const*>(mg)->GetTarget();
+
+                if (!target)
+                    SendSysMessage(LANG_MOVEGENS_CHASE_NULL);
+                else if (target->GetTypeId() == TYPEID_PLAYER)
+                    PSendSysMessage(LANG_MOVEGENS_CHASE_PLAYER, target->GetName(), target->GetGUIDLow());
+                else
+                    PSendSysMessage(LANG_MOVEGENS_CHASE_CREATURE, target->GetName(), target->GetGUIDLow());
                 break;
             }
+            case FOLLOW_MOTION_TYPE:
+            {
+                Unit* target = NULL;
+                if (unit->GetTypeId() == TYPEID_PLAYER)
+                    target = static_cast<FollowMovementGenerator<Player> const*>(mg)->GetTarget();
+                else
+                    target = static_cast<FollowMovementGenerator<Creature> const*>(mg)->GetTarget();
+
+                if (!target)
+                    SendSysMessage(LANG_MOVEGENS_FOLLOW_NULL);
+                else if (target->GetTypeId() == TYPEID_PLAYER)
+                    PSendSysMessage(LANG_MOVEGENS_FOLLOW_PLAYER, target->GetName(), target->GetGUIDLow());
+                else
+                    PSendSysMessage(LANG_MOVEGENS_FOLLOW_CREATURE, target->GetName(), target->GetGUIDLow());
+                 break;
+             }
             case HOME_MOTION_TYPE:
+            {
                 if (unit->GetTypeId() == TYPEID_UNIT)
-                {
-                    float x, y, z;
-                    mg->GetDestination(x, y, z);
                     PSendSysMessage(LANG_MOVEGENS_HOME_CREATURE, x, y, z);
-                }
                 else
                     SendSysMessage(LANG_MOVEGENS_HOME_PLAYER);
                 break;
+            }
             case FLIGHT_MOTION_TYPE:   SendSysMessage(LANG_MOVEGENS_FLIGHT);  break;
             case POINT_MOTION_TYPE:
             {
-                float x, y, z;
-                mg->GetDestination(x, y, z);
                 PSendSysMessage(LANG_MOVEGENS_POINT, x, y, z);
                 break;
             }
             case FLEEING_MOTION_TYPE:  SendSysMessage(LANG_MOVEGENS_FEAR);    break;
             case DISTRACT_MOTION_TYPE: SendSysMessage(LANG_MOVEGENS_DISTRACT);  break;
+            case EFFECT_MOTION_TYPE: SendSysMessage(LANG_MOVEGENS_EFFECT);  break;
             default:
                 PSendSysMessage(LANG_MOVEGENS_UNKNOWN, mg->GetMovementGeneratorType());
                 break;
@@ -4040,18 +4050,13 @@ bool ChatHandler::HandleComeToMeCommand(const char *args)
     if (!newFlagStr)
         return false;
 
-    uint32 newFlags = (uint32)strtoul(newFlagStr, NULL, 0);
-
     Creature* caster = getSelectedCreature();
     if (!caster)
     {
-        m_session->GetPlayer()->SetUnitMovementFlags(newFlags);
         SendSysMessage(LANG_SELECT_CREATURE);
         SetSentErrorMessage(true);
         return false;
     }
-
-    caster->SetUnitMovementFlags(newFlags);
 
     Player* player = m_session->GetPlayer();
 
@@ -4467,7 +4472,7 @@ bool ChatHandler::HandleChannelSetOwnership(const char *args)
     {
         if (chn)
             chn->SetOwnership(true);
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SET_CHANNEL_OWNERSHIP);
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHANNEL_OWNERSHIP);
         stmt->setUInt8 (0, 1);
         stmt->setString(1, channel);
         CharacterDatabase.Execute(stmt);
@@ -4477,7 +4482,7 @@ bool ChatHandler::HandleChannelSetOwnership(const char *args)
     {
         if (chn)
             chn->SetOwnership(false);
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SET_CHANNEL_OWNERSHIP);
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHANNEL_OWNERSHIP);
         stmt->setUInt8 (0, 0);
         stmt->setString(1, channel);
         CharacterDatabase.Execute(stmt);

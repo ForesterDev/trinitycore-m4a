@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -180,7 +180,7 @@ void HostileReference::updateOnlineStatus()
     // target is not in flight
     if (isValid()
         && (getTarget()->GetTypeId() != TYPEID_PLAYER || !getTarget()->ToPlayer()->isGameMaster())
-        && !getTarget()->HasUnitState(UNIT_STAT_IN_FLIGHT)
+        && !getTarget()->HasUnitState(UNIT_STATE_IN_FLIGHT)
         && getTarget()->IsInMap(getSourceUnit())
         )
     {

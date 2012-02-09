@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -64,6 +64,7 @@ class _SpellScript
         virtual void _Register();
         virtual void _Unload();
         virtual void _Init(std::string const* scriptname, uint32 spellId);
+        std::string const* _GetScriptName() const;
 
     protected:
         class EffectHook
@@ -131,6 +132,9 @@ enum SpellScriptHookType
     SPELL_SCRIPT_HOOK_AFTER_HIT,
     SPELL_SCRIPT_HOOK_UNIT_TARGET_SELECT,
     SPELL_SCRIPT_HOOK_CHECK_CAST,
+    SPELL_SCRIPT_HOOK_BEFORE_CAST,
+    SPELL_SCRIPT_HOOK_ON_CAST,
+    SPELL_SCRIPT_HOOK_AFTER_CAST,
 };
 
 #define HOOK_SPELL_HIT_START SPELL_SCRIPT_HOOK_EFFECT_HIT
@@ -148,9 +152,19 @@ class SpellScript : public _SpellScript
             typedef SpellCastResult(CLASSNAME::*SpellCheckCastFnType)(); \
             typedef void(CLASSNAME::*SpellEffectFnType)(SpellEffIndex); \
             typedef void(CLASSNAME::*SpellHitFnType)(); \
+            typedef void(CLASSNAME::*SpellCastFnType)(); \
             typedef void(CLASSNAME::*SpellUnitTargetFnType)(std::list<Unit*>&); \
 
         SPELLSCRIPT_FUNCTION_TYPE_DEFINES(SpellScript)
+
+        class CastHandler
+        {
+            public:
+                CastHandler(SpellCastFnType _pCastHandlerScript);
+                void Call(SpellScript* spellScript);
+            private:
+                SpellCastFnType pCastHandlerScript;
+        };
 
         class CheckCastHandler
         {
@@ -194,6 +208,7 @@ class SpellScript : public _SpellScript
         };
 
         #define SPELLSCRIPT_FUNCTION_CAST_DEFINES(CLASSNAME) \
+        class CastHandlerFunction : public SpellScript::CastHandler { public: CastHandlerFunction(SpellCastFnType _pCastHandlerScript) : SpellScript::CastHandler((SpellScript::SpellCastFnType)_pCastHandlerScript) {} }; \
         class CheckCastHandlerFunction : public SpellScript::CheckCastHandler { public: CheckCastHandlerFunction(SpellCheckCastFnType _checkCastHandlerScript) : SpellScript::CheckCastHandler((SpellScript::SpellCheckCastFnType)_checkCastHandlerScript) {} }; \
         class EffectHandlerFunction : public SpellScript::EffectHandler { public: EffectHandlerFunction(SpellEffectFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName) : SpellScript::EffectHandler((SpellScript::SpellEffectFnType)_pEffectHandlerScript, _effIndex, _effName) {} }; \
         class HitHandlerFunction : public SpellScript::HitHandler { public: HitHandlerFunction(SpellHitFnType _pHitHandlerScript) : SpellScript::HitHandler((SpellScript::SpellHitFnType)_pHitHandlerScript) {} }; \
@@ -221,6 +236,13 @@ class SpellScript : public _SpellScript
         // SpellScript interface
         // hooks to which you can attach your functions
         //
+        // example: BeforeCast += SpellCastFn(class::function);
+        HookList<CastHandler> BeforeCast;
+        // example: OnCast += SpellCastFn(class::function);
+        HookList<CastHandler> OnCast;
+        // example: AfterCast += SpellCastFn(class::function);
+        HookList<CastHandler> AfterCast;
+        #define SpellCastFn(F) CastHandlerFunction(&F)
 
         // example: OnCheckCast += SpellCheckCastFn();
         // where function is SpellCastResult function()
@@ -250,14 +272,18 @@ class SpellScript : public _SpellScript
         #define SpellUnitTargetFn(F, I, N) UnitTargetHandlerFunction(&F, I, N)
 
         // hooks are executed in following order, at specified event of spell:
-        // 1. OnUnitTargetSelect - executed just before adding selected targets to final target list
-        // 2. OnEffectLaunch - executed just before specified effect handler call - when spell missile is launched
-        // 3. OnEffectLaunchTarget - executed just before specified effect handler call - when spell missile is launched - called for each target from spell target map
-        // 4. OnEffectHit - executed just before specified effect handler call - when spell missile hits dest
-        // 5. BeforeHit - executed just before spell hits a target - called for each target from spell target map
-        // 6. OnEffectHitTarget - executed just before specified effect handler call - called for each target from spell target map
-        // 7. OnHit - executed just before spell deals damage and procs auras - when spell hits target - called for each target from spell target map
-        // 8. AfterHit - executed just after spell finishes all it's jobs for target - called for each target from spell target map
+        // 1. BeforeCast - executed when spell preparation is finished (when cast bar becomes full) before cast is handled
+        // 2. OnCheckCast - allows to override result of CheckCast function
+        // 3. OnUnitTargetSelect - executed just before adding selected targets to final target list
+        // 4. OnCast - executed just before spell is launched (creates missile) or executed
+        // 5. AfterCast - executed after spell missile is launched and immediate spell actions are done
+        // 6. OnEffectLaunch - executed just before specified effect handler call - when spell missile is launched
+        // 7. OnEffectLaunchTarget - executed just before specified effect handler call - when spell missile is launched - called for each target from spell target map
+        // 8. OnEffectHit - executed just before specified effect handler call - when spell missile hits dest
+        // 9. BeforeHit - executed just before spell hits a target - called for each target from spell target map
+        // 10. OnEffectHitTarget - executed just before specified effect handler call - called for each target from spell target map
+        // 11. OnHit - executed just before spell deals damage and procs auras - when spell hits target - called for each target from spell target map
+        // 12. AfterHit - executed just after spell finishes all it's jobs for target - called for each target from spell target map
 
         //
         // methods allowing interaction with Spell object
@@ -359,6 +385,8 @@ enum AuraScriptHookType
     AURA_SCRIPT_HOOK_EFFECT_MANASHIELD,
     AURA_SCRIPT_HOOK_EFFECT_AFTER_MANASHIELD,
     AURA_SCRIPT_HOOK_CHECK_AREA_TARGET,
+    AURA_SCRIPT_HOOK_DISPEL,
+    AURA_SCRIPT_HOOK_AFTER_DISPEL,
     /*AURA_SCRIPT_HOOK_APPLY,
     AURA_SCRIPT_HOOK_REMOVE, */
 };
@@ -374,6 +402,7 @@ class AuraScript : public _SpellScript
 
     #define AURASCRIPT_FUNCTION_TYPE_DEFINES(CLASSNAME) \
         typedef bool(CLASSNAME::*AuraCheckAreaTargetFnType)(Unit* target); \
+        typedef void(CLASSNAME::*AuraDispelFnType)(DispelInfo* dispelInfo); \
         typedef void(CLASSNAME::*AuraEffectApplicationModeFnType)(AuraEffect const*, AuraEffectHandleModes); \
         typedef void(CLASSNAME::*AuraEffectPeriodicFnType)(AuraEffect const*); \
         typedef void(CLASSNAME::*AuraEffectUpdatePeriodicFnType)(AuraEffect*); \
@@ -391,6 +420,14 @@ class AuraScript : public _SpellScript
                 bool Call(AuraScript* auraScript, Unit* target);
             private:
                 AuraCheckAreaTargetFnType pHandlerScript;
+        };
+        class AuraDispelHandler
+        {
+            public:
+                AuraDispelHandler(AuraDispelFnType pHandlerScript);
+                void Call(AuraScript* auraScript, DispelInfo* dispelInfo);
+            private:
+                AuraDispelFnType pHandlerScript;
         };
         class EffectBase : public  _SpellScript::EffectAuraNameCheck, public _SpellScript::EffectHook
         {
@@ -467,6 +504,7 @@ class AuraScript : public _SpellScript
 
         #define AURASCRIPT_FUNCTION_CAST_DEFINES(CLASSNAME) \
         class CheckAreaTargetFunction : public AuraScript::CheckAreaTargetHandler { public: CheckAreaTargetFunction(AuraCheckAreaTargetFnType _pHandlerScript) : AuraScript::CheckAreaTargetHandler((AuraScript::AuraCheckAreaTargetFnType)_pHandlerScript) {} }; \
+        class AuraDispelFunction : public AuraScript::AuraDispelHandler { public: AuraDispelFunction(AuraDispelFnType _pHandlerScript) : AuraScript::AuraDispelHandler((AuraScript::AuraDispelFnType)_pHandlerScript) {} }; \
         class EffectPeriodicHandlerFunction : public AuraScript::EffectPeriodicHandler { public: EffectPeriodicHandlerFunction(AuraEffectPeriodicFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName) : AuraScript::EffectPeriodicHandler((AuraScript::AuraEffectPeriodicFnType)_pEffectHandlerScript, _effIndex, _effName) {} }; \
         class EffectUpdatePeriodicHandlerFunction : public AuraScript::EffectUpdatePeriodicHandler { public: EffectUpdatePeriodicHandlerFunction(AuraEffectUpdatePeriodicFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName) : AuraScript::EffectUpdatePeriodicHandler((AuraScript::AuraEffectUpdatePeriodicFnType)_pEffectHandlerScript, _effIndex, _effName) {} }; \
         class EffectCalcAmountHandlerFunction : public AuraScript::EffectCalcAmountHandler { public: EffectCalcAmountHandlerFunction(AuraEffectCalcAmountFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName) : AuraScript::EffectCalcAmountHandler((AuraScript::AuraEffectCalcAmountFnType)_pEffectHandlerScript, _effIndex, _effName) {} }; \
@@ -514,6 +552,17 @@ class AuraScript : public _SpellScript
         // where function is: bool function (Unit* target);
         HookList<CheckAreaTargetHandler> DoCheckAreaTarget;
         #define AuraCheckAreaTargetFn(F) CheckAreaTargetFunction(&F)
+
+        // executed when aura is dispelled by a unit
+        // example: OnDispel += AuraDispelFn(class::function);
+        // where function is: void function (DispelInfo* dispelInfo);
+        HookList<AuraDispelHandler> OnDispel;
+        // executed after aura is dispelled by a unit
+        // example: AfterDispel += AuraDispelFn(class::function);
+        // where function is: void function (DispelInfo* dispelInfo);
+        HookList<AuraDispelHandler> AfterDispel;
+        #define AuraDispelFn(F) AuraDispelFunction(&F)
+
         // executed when aura effect is applied with specified mode to target
         // should be used when when effect handler preventing/replacing is needed, do not use this hook for triggering spellcasts/removing auras etc - may be unsafe
         // example: OnEffectApply += AuraEffectApplyFn(class::function, EffectIndexSpecifier, EffectAuraNameSpecifier, AuraEffectHandleModes);

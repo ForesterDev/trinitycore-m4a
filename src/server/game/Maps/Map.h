@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -424,6 +424,8 @@ class Map : public GridRefManager<NGridType>
 
         InstanceMap* ToInstanceMap(){ if (IsDungeon())  return reinterpret_cast<InstanceMap*>(this); else return NULL;  }
         const InstanceMap* ToInstanceMap() const { if (IsDungeon())  return (const InstanceMap*)((InstanceMap*)this); else return NULL;  }
+        float GetWaterOrGroundLevel(float x, float y, float z, float* ground = NULL, bool swim = false) const;
+
     private:
         void LoadMapAndVMap(int gx, int gy);
         void LoadVMap(int gx, int gy);

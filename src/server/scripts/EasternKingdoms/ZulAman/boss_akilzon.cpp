@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -325,7 +325,7 @@ class boss_akilzon : public CreatureScript
                     if (target)
                     {
                         target->SetUnitMovementFlags(MOVEMENTFLAG_LEVITATING);
-                        target->SendMonsterMove(x, y, me->GetPositionZ()+15, 0);
+                        target->MonsterMoveWithSpeed(x, y, me->GetPositionZ()+15, 0);
                     }
                     Unit* Cloud = me->SummonTrigger(x, y, me->GetPositionZ()+16, 0, 15000);
                     if (Cloud)

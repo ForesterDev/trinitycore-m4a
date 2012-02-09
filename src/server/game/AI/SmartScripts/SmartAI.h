@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -175,6 +175,8 @@ class SmartAI : public CreatureAI
 
         void SetSwim(bool swim = true);
 
+        void SetInvinceabilityHpLevel(uint32 level) { mInvinceabilityHpLevel = level; }
+
         void sGossipHello(Player* player);
         void sGossipSelect(Player* player, uint32 sender, uint32 action);
         void sGossipSelectCode(Player* player, uint32 sender, uint32 action, const char* code);
@@ -193,6 +195,8 @@ class SmartAI : public CreatureAI
             mDespawnState = t ? 1 : 0;
         }
         void StartDespawn() { mDespawnState = 2; }
+        
+        void RemoveAuras();
 
     private:
         uint32 mFollowCreditType;
@@ -220,6 +224,7 @@ class SmartAI : public CreatureAI
         bool mCanAutoAttack;
         bool mCanCombatMove;
         bool mForcedPaused;
+        uint32 mInvinceabilityHpLevel;
 
         bool AssistPlayerInCombat(Unit* who);
 
@@ -251,6 +256,7 @@ public:
     void SetData(uint32 id, uint32 value);
     void SetScript9(SmartScriptHolder& e, uint32 entry, Unit* invoker);
     void OnGameEvent(bool start, uint16 eventId);
+    void OnStateChanged(uint32 state, Unit* unit);
 
 protected:
     GameObject* const go;

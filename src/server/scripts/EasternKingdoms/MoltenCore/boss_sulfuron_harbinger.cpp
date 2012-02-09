@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -84,7 +84,7 @@ class boss_sulfuron : public CreatureScript
 
                 events.Update(diff);
 
-                if (me->HasUnitState(UNIT_STAT_CASTING))
+                if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
                 while (uint32 eventId = events.ExecuteEvent())
@@ -169,7 +169,7 @@ class mob_flamewaker_priest : public CreatureScript
 
                 events.Update(diff);
 
-                if (me->HasUnitState(UNIT_STAT_CASTING))
+                if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
                 while (uint32 eventId = events.ExecuteEvent())

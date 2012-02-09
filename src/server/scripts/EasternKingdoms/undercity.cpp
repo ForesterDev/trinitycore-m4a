@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -109,7 +109,7 @@ public:
             {
                 if (Creature* target = Unit::GetCreature(*summoned, targetGUID))
                 {
-                    target->SendMonsterMove(target->GetPositionX(), target->GetPositionY(), me->GetPositionZ()+15.0f, 0);
+                    target->MonsterMoveWithSpeed(target->GetPositionX(), target->GetPositionY(), me->GetPositionZ()+15.0f, 0);
                     target->SetPosition(target->GetPositionX(), target->GetPositionY(), me->GetPositionZ()+15.0f, 0.0f);
                     summoned->CastSpell(target, SPELL_RIBBON_OF_SOULS, false);
                 }
@@ -186,7 +186,7 @@ public:
                 if (EventMove_Timer <= diff)
                 {
                     me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-                    me->SendMonsterMoveWithSpeed(me->GetPositionX(), me->GetPositionY(), HIGHBORNE_LOC_Y_NEW, 5000);
+                    me->MonsterMoveWithSpeed(me->GetPositionX(), me->GetPositionY(), HIGHBORNE_LOC_Y_NEW, me->GetDistance(me->GetPositionX(), me->GetPositionY(), HIGHBORNE_LOC_Y_NEW) / (5000 * 0.001f));
                     me->SetPosition(me->GetPositionX(), me->GetPositionY(), HIGHBORNE_LOC_Y_NEW, me->GetOrientation());
                     EventMove = false;
                 } else EventMove_Timer -= diff;
