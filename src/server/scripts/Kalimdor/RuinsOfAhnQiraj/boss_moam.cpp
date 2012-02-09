@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -127,7 +127,7 @@ class boss_moam : public CreatureScript
                 }
 
                 // Messing up mana-drain channel
-                //if (me->HasUnitState(UNIT_STAT_CASTING))
+                //if (me->HasUnitState(UNIT_STATE_CASTING))
                 //    return;
 
                 while (uint32 eventId = events.ExecuteEvent())

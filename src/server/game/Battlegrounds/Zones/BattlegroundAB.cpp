@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -27,17 +27,6 @@
 #include "Object.h"
 #include "Player.h"
 #include "Util.h"
-
-// these variables aren't used outside of this file, so declare them only here
-uint32 BG_AB_HonorScoreTicks[BG_HONOR_MODE_NUM] = {
-    330, // normal honor
-    200  // holiday
-};
-
-uint32 BG_AB_ReputationScoreTicks[BG_HONOR_MODE_NUM] = {
-    200, // normal honor
-    150  // holiday
-};
 
 BattlegroundAB::BattlegroundAB()
 {
@@ -202,6 +191,9 @@ void BattlegroundAB::StartingEventOpenDoors()
     }
     DoorOpen(BG_AB_OBJECT_GATE_A);
     DoorOpen(BG_AB_OBJECT_GATE_H);
+
+    // Achievement: Let's Get This Done
+    StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, AB_EVENT_START_BATTLE);
 }
 
 void BattlegroundAB::AddPlayer(Player* player)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -2889,6 +2889,23 @@ void SpellMgr::LoadSpellCustomAttr()
             case 69293: // Wing Buffet
             case 74439: // Machine Gun
             case 63278: // Mark of the Faceless (General Vezax)
+            case 62544: // Thrust (Argent Tournament)
+            case 64588: // Thrust (Argent Tournament)
+            case 66479: // Thrust (Argent Tournament)
+            case 68505: // Thrust (Argent Tournament)
+            case 62709: // Counterattack! (Argent Tournament)
+            case 62626: // Break-Shield (Argent Tournament, Player)
+            case 64590: // Break-Shield (Argent Tournament, Player)
+            case 64342: // Break-Shield (Argent Tournament, NPC)
+            case 64686: // Break-Shield (Argent Tournament, NPC)
+            case 65147: // Break-Shield (Argent Tournament, NPC)
+            case 68504: // Break-Shield (Argent Tournament, NPC)
+            case 62874: // Charge (Argent Tournament, Player)
+            case 68498: // Charge (Argent Tournament, Player)
+            case 64591: // Charge (Argent Tournament, Player)
+            case 63003: // Charge (Argent Tournament, NPC)
+            case 63010: // Charge (Argent Tournament, NPC)
+            case 68321: // Charge (Argent Tournament, NPC)
             case 72255: // Mark of the Fallen Champion (Deathbringer Saurfang)
             case 72444: // Mark of the Fallen Champion (Deathbringer Saurfang)
             case 72445: // Mark of the Fallen Champion (Deathbringer Saurfang)
@@ -2960,8 +2977,10 @@ void SpellMgr::LoadDbcDataCorrections()
 
         switch (spellInfo->Id)
         {
-            case 42835: // Spout
-                spellInfo->Effect[0] = 0; // remove damage effect, only anim is needed
+            case 40244: case 40245: // Simon Game Visual
+            case 40246: case 40247: // Simon Game Visual
+            case 42835: // Spout, remove damage effect, only anim is needed
+                spellInfo->Effect[0] = 0;
                 break;
             case 30657: // Quake
                 spellInfo->EffectTriggerSpell[0] = 30571;
@@ -2970,6 +2989,7 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
                 spellInfo->EffectImplicitTargetB[0] = 0;
                 break;
+            case 63665: // Charge (Argent Tournament emote on riders)
             case 31447: // Mark of Kaz'rogal (needs target selection script)
             case 31298: // Sleep (needs target selection script)
             case 51904: // Summon Ghouls On Scarlet Crusade (this should use conditions table, script for this spell needs to be fixed)
@@ -3039,6 +3059,7 @@ void SpellMgr::LoadDbcDataCorrections()
             case 42611: // Shoot
             case 61588: // Blazing Harpoon
             case 52479: // Gift of the Harvester
+            case 48246: // Ball of Flame
                 spellInfo->MaxAffectedTargets = 1;
                 break;
             case 41376: // Spite
@@ -3381,6 +3402,7 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->AreaGroupId = 0; // originally, these require area 4522, which is... outside of Icecrown Citadel
                 break;
             case 70602: // Corruption
+            case 48278: // Paralyze
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                 break;
             case 70715: // Column of Frost (visual marker)
@@ -3495,6 +3517,11 @@ void SpellMgr::LoadDbcDataCorrections()
             case 72405: // Broken Frostmourne
                 spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_200_YARDS;   // 200yd
                 break;
+            case 40055: // Introspection
+            case 40165: // Introspection
+            case 40166: // Introspection
+            case 40167: // Introspection
+                spellInfo->Attributes |= SPELL_ATTR0_NEGATIVE_1;
             default:
                 break;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -32,7 +32,7 @@ void InstanceScript::SaveToDB()
     if (data.empty())
         return;
 
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPDATE_INSTANCE_DATA);
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_INSTANCE_DATA);
     stmt->setUInt32(0, GetCompletedEncounterMask());
     stmt->setString(1, data);
     stmt->setUInt32(2, instance->GetInstanceId());
@@ -302,21 +302,21 @@ void InstanceScript::DoUpdateWorldState(uint32 uiStateId, uint32 uiStateData)
 }
 
 // Send Notify to all players in instance
-void InstanceScript::DoSendNotifyToInstance(const char *format, ...)
+void InstanceScript::DoSendNotifyToInstance(char const* format, ...)
 {
-    InstanceMap::PlayerList const &PlayerList = instance->GetPlayers();
+    InstanceMap::PlayerList const& players = instance->GetPlayers();
 
-    if (!PlayerList.isEmpty())
+    if (!players.isEmpty())
     {
         va_list ap;
         va_start(ap, format);
-        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-        {
-            if (Player* player = i->getSource())
-                if (WorldSession* pSession = player->GetSession())
-                    pSession->SendNotification(format, ap);
-        }
+        char buff[1024];
+        vsnprintf(buff, 1024, format, ap);
         va_end(ap);
+        for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+            if (Player* player = i->getSource())
+                if (WorldSession* session = player->GetSession())
+                    session->SendNotification(buff);
     }
 }
 
