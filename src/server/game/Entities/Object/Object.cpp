@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "SharedDefines.h"
 #include "WorldPacket.h"
@@ -37,6 +38,7 @@
 #include "TargetedMovementGenerator.h"
 #include "WaypointMovementGenerator.h"
 #include "VMapFactory.h"
+#include "Detail/Vmap_mutex.hpp"
 #include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
@@ -47,6 +49,10 @@
 #include "OutdoorPvPMgr.h"
 #include "MovementPacketBuilder.h"
 #include "DynamicTree.h"
+
+using boost::unique_lock;
+using Detail::Vmap_mutex;
+using Detail::vmap_mutex;
 
 uint32 GuidHigh2TypeId(uint32 guid_hi)
 {
@@ -1309,6 +1315,7 @@ bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
     /*float x, y, z;
     GetPosition(x, y, z);
     VMAP::IVMapManager* vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
+    unique_lock<Vmap_mutex> l(vmap_mutex());
     return vMapManager->isInLineOfSight(GetMapId(), x, y, z+2.0f, ox, oy, oz+2.0f);*/
     if (IsInWorld())
         return GetMap()->isInLineOfSight(GetPositionX(), GetPositionY(), GetPositionZ()+2.f, ox, oy, oz+2.f, GetPhaseMask());
@@ -2678,7 +2685,14 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
     floor = GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true);
     destz = fabs(ground - pos.m_positionZ) <= fabs(floor - pos.m_positionZ) ? ground : floor;
 
-    bool col = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(GetMapId(), pos.m_positionX, pos.m_positionY, pos.m_positionZ+0.5f, destx, desty, destz+0.5f, destx, desty, destz, -0.5f);
+    bool col;
+    {
+        auto &m = *VMAP::VMapFactory::createOrGetVMapManager();
+        unique_lock<Vmap_mutex> l(vmap_mutex());
+        col = m.getObjectHitPos(GetMapId(), pos.m_positionX, pos.m_positionY,
+                    pos.m_positionZ + 0.5f, destx, desty, destz + 0.5f, destx, desty,
+                    destz, -0.5f);
+    }
 
     // collision occured
     if (col)

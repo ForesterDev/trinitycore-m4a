@@ -114,7 +114,6 @@ public:
         uint64 uiMarwyn;
         uint64 uiLichKingEvent;
         uint64 uiJainaPart1;
-        uint64 uiSylvanasPart1;
 
         uint64 uiFrostmourne;
         uint64 uiFrostmourneAltar;
@@ -136,7 +135,6 @@ public:
             uiMarwyn = 0;
             uiLichKingEvent = 0;
             uiJainaPart1 = 0;
-            uiSylvanasPart1 = 0;
 
             uiFrostmourne = 0;
             uiFrostmourneAltar = 0;
@@ -168,11 +166,14 @@ public:
                 case NPC_LICH_KING_EVENT:
                     uiLichKingEvent = creature->GetGUID();
                     break;
-                case NPC_JAINA_PART1:
+                case NPC_SYLVANAS_PART1:
+					if (uiTeamInInstance == ALLIANCE)
+                        creature->UpdateEntry(NPC_JAINA_PART1, ALLIANCE);
                     uiJainaPart1 = creature->GetGUID();
                     break;
-                case NPC_SYLVANAS_PART1:
-                    uiSylvanasPart1 = creature->GetGUID();
+                case 37779 /* Dark Ranger Loralen */:
+                    if (uiTeamInInstance == ALLIANCE)
+                        creature->UpdateEntry(37582 /* Archmage Koreln */, ALLIANCE);
                     break;
             }
         }
@@ -366,8 +367,6 @@ public:
             // As I can't find a trigger area there, just respawn Jaina/Sylvanas so the event may be restarted.
             if (Creature* pJaina = instance->GetCreature(uiJainaPart1))
                 pJaina->Respawn();
-            if (Creature* pSylvanas = instance->GetCreature(uiSylvanasPart1))
-                pSylvanas->Respawn();
 
             if (Creature* pFalric = instance->GetCreature(uiFalric))
                 pFalric->SetVisible(false);

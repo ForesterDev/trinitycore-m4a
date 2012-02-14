@@ -81,13 +81,13 @@ typedef std::map<uint32, PlayerSocial> SocialMap;
 /// Results of friend related commands
 enum FriendsResult
 {
-    FRIEND_DB_ERROR         = 0x00,
+    FRIEND_DB_ERROR         = 0x00,                         // ERR_FRIEND_NOT_FOUND
     FRIEND_LIST_FULL        = 0x01,
     FRIEND_ONLINE           = 0x02,
     FRIEND_OFFLINE          = 0x03,
-    FRIEND_NOT_FOUND        = 0x04,
+    FRIEND_NOT_FOUND        = 0x04,                         // ERR_FRIEND_NOT_FOUND
     FRIEND_REMOVED          = 0x05,
-    FRIEND_ADDED_ONLINE     = 0x06,
+    FRIEND_ADDED_ONLINE     = 0x06,                         // ERR_FRIEND_ADDED_S
     FRIEND_ADDED_OFFLINE    = 0x07,
     FRIEND_ALREADY          = 0x08,
     FRIEND_SELF             = 0x09,

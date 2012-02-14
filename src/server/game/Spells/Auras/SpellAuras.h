@@ -19,6 +19,7 @@
 #ifndef TRINITY_SPELLAURAS_H
 #define TRINITY_SPELLAURAS_H
 
+#include <boost/optional/optional.hpp>
 #include "SpellAuraDefines.h"
 #include "SpellInfo.h"
 
@@ -48,7 +49,7 @@ class AuraApplication
     private:
         Unit* const m_target;
         Aura* const m_base;
-        uint8 m_slot;                                   // Aura slot on unit
+        boost::optional<uint8> m_slot;                  // Aura slot on unit
         uint8 m_flags;                                  // Aura info flag
         uint8 m_effectsToApply;                         // Used only at spell hit to determine which effect should be applied
         AuraRemoveMode m_removeMode:8;                  // Store info for know remove aura reason
@@ -64,7 +65,7 @@ class AuraApplication
         Unit* GetTarget() const { return m_target; }
         Aura* GetBase() const { return m_base; }
 
-        uint8 GetSlot() const { return m_slot; }
+        boost::optional<uint8> GetSlot() const { return m_slot; }
         uint8 GetFlags() const { return m_flags; }
         uint8 GetEffectMask() const { return m_flags & (AFLAG_EFF_INDEX_0 | AFLAG_EFF_INDEX_1 | AFLAG_EFF_INDEX_2); }
         bool HasEffect(uint8 effect) const { ASSERT(effect < MAX_SPELL_EFFECTS);  return m_flags & (1<<effect); }
@@ -152,7 +153,12 @@ class Aura
         bool IsArea() const;
         bool IsPassive() const;
         bool IsDeathPersistent() const;
-        bool IsRemovedOnShapeLost(Unit* target) const { return (GetCasterGUID() == target->GetGUID() && m_spellInfo->Stances && !(m_spellInfo->AttributesEx2 & SPELL_ATTR2_NOT_NEED_SHAPESHIFT) && !(m_spellInfo->Attributes & SPELL_ATTR0_NOT_SHAPESHIFT)); }
+
+        bool IsRemovedOnShapeLost(Unit *target) const
+        {
+            return GetCasterGUID() == target->GetGUID() && m_spellInfo->Stances && !(m_spellInfo->AttributesEx2 & SPELL_ATTR2_NOT_NEED_SHAPESHIFT);
+        }
+
         bool CanBeSaved() const;
         bool IsRemoved() const { return m_isRemoved; }
         bool CanBeSentToClient() const;

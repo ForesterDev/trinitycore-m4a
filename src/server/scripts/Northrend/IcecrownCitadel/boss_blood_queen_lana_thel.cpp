@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ScriptPCH.h"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -455,6 +456,8 @@ class boss_blood_queen_lana_thel : public CreatureScript
             // offtank for this encounter is the player standing closest to main tank
             Player* SelectRandomTarget(bool includeOfftank, std::list<Player*>* targetList = NULL)
             {
+                if (!me->getVictim())
+                    return nullptr;
                 std::list<HostileReference*> const& threatlist = me->getThreatManager().getThreatList();
                 std::list<Player*> tempTargets;
 
@@ -543,19 +546,21 @@ class spell_blood_queen_vampiric_bite : public SpellScriptLoader
                 if (GetCaster()->GetMap()->IsHeroic())
                     GetCaster()->CastSpell(GetCaster(), SPELL_PRESENCE_OF_THE_DARKFALLEN, true);
                 // Shadowmourne questline
-                if (GetCaster()->ToPlayer()->GetQuestStatus(QUEST_BLOOD_INFUSION) == QUEST_STATUS_INCOMPLETE)
-                {
-                    if (Aura* aura = GetCaster()->GetAura(SPELL_GUSHING_WOUND))
+                auto &map = *GetCaster()->GetMap();
+                if (map.IsRaid() && is_25_player_raid(map.GetDifficulty()))
+                    if (GetCaster()->ToPlayer()->GetQuestStatus(QUEST_BLOOD_INFUSION) == QUEST_STATUS_INCOMPLETE)
                     {
-                        if (aura->GetStackAmount() == 3)
+                        if (Aura* aura = GetCaster()->GetAura(SPELL_GUSHING_WOUND))
                         {
-                            GetCaster()->CastSpell(GetCaster(), SPELL_THIRST_QUENCHED, true);
-                            GetCaster()->RemoveAura(aura);
+                            if (aura->GetStackAmount() == 3)
+                            {
+                                GetCaster()->CastSpell(GetCaster(), SPELL_THIRST_QUENCHED, true);
+                                GetCaster()->RemoveAura(aura);
+                            }
+                            else
+                                GetCaster()->CastSpell(GetCaster(), SPELL_GUSHING_WOUND, true);
                         }
-                        else
-                            GetCaster()->CastSpell(GetCaster(), SPELL_GUSHING_WOUND, true);
                     }
-                }
                 if (InstanceScript* instance = GetCaster()->GetInstanceScript())
                     if (Creature* bloodQueen = ObjectAccessor::GetCreature(*GetCaster(), instance->GetData64(DATA_BLOOD_QUEEN_LANA_THEL)))
                         bloodQueen->AI()->SetGUID(GetHitUnit()->GetGUID(), GUID_VAMPIRE);

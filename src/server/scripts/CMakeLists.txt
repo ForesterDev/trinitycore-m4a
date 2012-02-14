@@ -8,6 +8,7 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+include_directories(${Boost_INCLUDE_DIRS})
 # Enable precompiled headers when using the GCC compiler.
 if( USE_SCRIPTPCH )
   include_directories(
@@ -35,6 +36,9 @@ set(scripts_STAT_SRCS
   ../game/AI/ScriptedAI/ScriptedCreature.cpp
   ../game/AI/ScriptedAI/ScriptedFollowerAI.cpp
   ../game/AI/ScriptedAI/ScriptedSimpleAI.cpp
+  ../game/Scripting/ScriptLoader.cpp
+  ../game/Scripting/ScriptMgr.cpp
+  ../game/Scripting/ScriptSystem.cpp
 )
 
 if(SCRIPTS)
@@ -148,11 +152,14 @@ add_library(scripts STATIC ${scripts_STAT_SRCS})
 
 add_dependencies(scripts revision.h)
 
+target_link_libraries(scripts ${Boost_LIBRARIES} game)
+
 # Generate precompiled header
 if( USE_SCRIPTPCH )
   if(CMAKE_COMPILER_IS_GNUCXX)
     add_precompiled_header(scripts ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/ScriptPCH.h)
   elseif(MSVC)
-    add_native_precompiled_header(scripts ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/ScriptPCH)
+    set_precompiled_header(scripts "ScriptPCH.h"
+      "${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/ScriptPCH.cpp")
   endif()
 endif()

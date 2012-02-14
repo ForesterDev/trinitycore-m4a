@@ -16,6 +16,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
+
 #include "Common.h"
 #include "Item.h"
 #include "ObjectMgr.h"
@@ -678,6 +680,9 @@ void Item::UpdateItemSuffixFactor()
 
 void Item::SetState(ItemUpdateState state, Player* forplayer)
 {
+    if (state == ITEM_REMOVED)
+        if (auto this_bag = dynamic_cast<Bag *>(this))
+            ASSERT(this_bag->IsEmpty());
     if (uState == ITEM_NEW && state == ITEM_REMOVED)
     {
         // pretend the item never existed
@@ -728,7 +733,7 @@ void Item::RemoveFromUpdateQueueOf(Player* player)
     if (!IsInUpdateQueue())
         return;
 
-    ASSERT(player != NULL)
+    ASSERT(player != NULL);
 
     if (player->GetGUID() != GetOwnerGUID())
     {
@@ -1026,6 +1031,11 @@ void Item::SendTimeUpdate(Player* owner)
     data << (uint64)GetGUID();
     data << (uint32)GetUInt32Value(ITEM_FIELD_DURATION);
     owner->GetSession()->SendPacket(&data);
+}
+
+Item::~Item()
+{
+    ASSERT(!IsInUpdateQueue());
 }
 
 Item* Item::CreateItem(uint32 item, uint32 count, Player const* player)

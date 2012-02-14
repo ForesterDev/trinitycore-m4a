@@ -69,7 +69,103 @@ public:
     }
 };
 
+#define SPELL_SEEDS_OF_NATURES_WRATH 49587
+#define QUEST_THAT_WHICH_CREATES_CAN_ALSO_DESTROY 12459
+
+#define NPC_WEAKENED_REANIMATED_FROST_WYRM 27821
+#define NPC_WEAKENED_TURGID_THE_VILE 27809
+#define NPC_WEAKENED_OVERSEER_DEATHGAZE 27807
+
+struct npc_reanimated_frost_wormAI : public ScriptedAI
+{
+    npc_reanimated_frost_wormAI(Creature *c) : ScriptedAI(c) {}
+
+    void SpellHit(Unit *hitter, const SpellEntry *spell)
+    {
+        if ((spell->Id == SPELL_SEEDS_OF_NATURES_WRATH) &&
+            (hitter->GetTypeId() == TYPEID_PLAYER) &&
+            (CAST_PLR(hitter)->IsActiveQuest(QUEST_THAT_WHICH_CREATES_CAN_ALSO_DESTROY)))
+        {
+            me->UpdateEntry(NPC_WEAKENED_REANIMATED_FROST_WYRM);
+        }
+    }
+};
+
+struct npc_turgid_the_vileAI : public ScriptedAI
+{
+    npc_turgid_the_vileAI(Creature *c) : ScriptedAI(c) {}
+
+    void SpellHit(Unit *hitter, const SpellEntry *spell)
+    {
+        if ((spell->Id == SPELL_SEEDS_OF_NATURES_WRATH) &&
+            (hitter->GetTypeId() == TYPEID_PLAYER) &&
+            (CAST_PLR(hitter)->IsActiveQuest(QUEST_THAT_WHICH_CREATES_CAN_ALSO_DESTROY)))
+        {
+            me->UpdateEntry(NPC_WEAKENED_TURGID_THE_VILE);
+        }
+    }
+};
+
+struct npc_overseer_deathgazeAI : public ScriptedAI
+{
+    npc_overseer_deathgazeAI(Creature *c) : ScriptedAI(c) {}
+
+    void SpellHit(Unit *hitter, const SpellEntry *spell)
+    {
+        if ((spell->Id == SPELL_SEEDS_OF_NATURES_WRATH) &&
+            (hitter->GetTypeId() == TYPEID_PLAYER) &&
+            (CAST_PLR(hitter)->IsActiveQuest(QUEST_THAT_WHICH_CREATES_CAN_ALSO_DESTROY)))
+        {
+            me->UpdateEntry(NPC_WEAKENED_OVERSEER_DEATHGAZE);
+        }
+    }
+};
+
 void AddSC_dragonblight()
 {
     new npc_alexstrasza_wr_gate;
+    struct NPC_reanimated_frost_worm
+        : CreatureScript
+    {
+        NPC_reanimated_frost_worm()
+            : CreatureScript("npc_reanimated_frost_worm")
+        {
+        }
+
+        CreatureAI *GetAI(Creature *creature) const
+        {
+            return new npc_reanimated_frost_wormAI(std::move(creature));
+        }
+    };
+    new NPC_reanimated_frost_worm;
+
+    struct NPC_turgid_the_vile
+        : CreatureScript
+    {
+        NPC_turgid_the_vile()
+            : CreatureScript("npc_turgid_the_vile")
+        {
+        }
+
+        CreatureAI *GetAI(Creature *creature) const
+        {
+            return new npc_turgid_the_vileAI(std::move(creature));
+        }
+    };
+    new NPC_turgid_the_vile;
+
+    struct NPC_overseer_deathgaze
+        : CreatureScript
+    {
+        NPC_overseer_deathgaze()
+            : CreatureScript("npc_overseer_deathgaze")
+        {
+        }
+
+        CreatureAI *GetAI(Creature *creature) const
+        {
+            return new npc_overseer_deathgazeAI(std::move(creature));
+        }
+    };
+    new NPC_overseer_deathgaze;
 }

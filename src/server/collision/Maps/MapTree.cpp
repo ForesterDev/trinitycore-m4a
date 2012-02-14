@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "collisionPCH.h"
 #include "MapTree.h"
 #include "ModelInstance.h"
 #include "VMapManager2.h"
@@ -28,7 +29,7 @@
 #include <limits>
 
 #ifndef NO_CORE_FUNCS
-    #include "Errors.h"
+#include <Debugging/Errors.h>
 #else
     #define ASSERT(x)
 #endif
