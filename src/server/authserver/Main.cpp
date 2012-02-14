@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "authPCH.h"
 #include <ace/Dev_Poll_Reactor.h>
 #include <ace/TP_Reactor.h>
 #include <ace/ACE.h>
@@ -23,6 +24,7 @@
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
 
+#include "authPCH.h"
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "Configuration/Config.h"

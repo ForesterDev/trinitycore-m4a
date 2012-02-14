@@ -375,6 +375,8 @@ class ChatHandler
         void HandleCharacterDeletedRestoreHelper(DeletedInfo const& delInfo);
 
     private:
+        bool cmd_gmteamdisband(const char *args);
+
         bool _HandleGMTicketResponseAppendCommand(const char* args, bool newLine);
 
         WorldSession* m_session;                           // != NULL for chat command call and NULL for CLI command

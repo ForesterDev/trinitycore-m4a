@@ -19,6 +19,7 @@
 #ifndef TRINITY_INSTANCE_DATA_H
 #define TRINITY_INSTANCE_DATA_H
 
+#include <memory>
 #include "ZoneScript.h"
 #include "World.h"
 #include "ObjectMgr.h"
@@ -136,7 +137,7 @@ class InstanceScript : public ZoneScript
         virtual void Initialize() {}
 
         //On load
-        virtual void Load(char const* data) { LoadBossState(data); }
+        virtual void Load(const char *data);
 
         //When save is needed, this function generates the data
         virtual std::string GetSaveData() { return GetBossSaveData(); }
@@ -220,7 +221,20 @@ class InstanceScript : public ZoneScript
         void UpdateDoorState(GameObject* door);
         void UpdateMinionState(Creature* minion, EncounterState state);
 
-        std::string LoadBossState(char const* data);
+        template<class Istream>
+        Istream &LoadBossState(Istream &data)
+        {
+            uint32 buff;
+            uint32 bossId = 0;
+            for (std::vector<BossInfo>::iterator i = bosses.begin(); i != bosses.end(); ++i, ++bossId)
+            {
+                data >> buff;
+                if (buff < TO_BE_DECIDED)
+                    SetBossState(bossId, (EncounterState)buff);
+            }
+            return data;
+        }
+
         std::string GetBossSaveData();
     private:
         std::vector<BossInfo> bosses;

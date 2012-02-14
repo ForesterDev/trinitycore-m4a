@@ -19,6 +19,7 @@
     \ingroup Trinityd
  */
 
+#include "worldPCH.h"
 #include "Common.h"
 #include "Config.h"
 #include "Log.h"

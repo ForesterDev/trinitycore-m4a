@@ -23,6 +23,7 @@ SDComment: Timers need to be confirmed, Golemagg's Trust need to be checked
 SDCategory: Molten Core
 EndScriptData */
 
+#include "ScriptPCH.h"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"

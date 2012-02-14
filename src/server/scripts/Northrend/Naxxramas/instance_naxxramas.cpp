@@ -453,9 +453,10 @@ public:
 
         void Load(const char * data)
         {
-            std::istringstream loadStream(LoadBossState(data));
+            std::istringstream loadStream(data);
             uint32 temp, buff, buff2;
 
+            LoadBossState(loadStream);
             for (uint32 i = 0; i < MAX_BOSS_NUMBER; ++i)
                 loadStream >> temp;
 

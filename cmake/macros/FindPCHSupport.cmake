@@ -313,3 +313,18 @@ MACRO(ADD_NATIVE_PRECOMPILED_HEADER _targetName _input)
     endif(CMAKE_GENERATOR MATCHES Visual*)
 
 ENDMACRO(ADD_NATIVE_PRECOMPILED_HEADER)
+
+function(set_precompiled_header TARGET FILENAME SOURCE)
+    if(MSVC)
+        set_target_properties(${TARGET} PROPERTIES COMPILE_FLAGS "/Yu\"${FILENAME}\"")
+        set_source_files_properties(${SOURCE} PROPERTIES COMPILE_FLAGS "/Yc")
+    endif(MSVC)
+endfunction(set_precompiled_header)
+
+function(set_ignore_precompiled_header SOURCES)
+    if(MSVC)
+        foreach(SOURCE ${SOURCES})
+            set_source_files_properties(${SOURCE} PROPERTIES COMPILE_FLAGS "/Y-")
+        endforeach(SOURCE)
+    endif(MSVC)
+endfunction(set_ignore_precompiled_header)

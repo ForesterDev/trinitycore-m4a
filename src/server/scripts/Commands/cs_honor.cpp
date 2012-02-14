@@ -22,6 +22,7 @@ Comment: All honor related commands
 Category: commandscripts
 EndScriptData */
 
+#include "ScriptPCH.h"
 #include "ScriptMgr.h"
 #include "ObjectMgr.h"
 #include "Chat.h"

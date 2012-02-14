@@ -66,6 +66,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/Dynamic
   ${CMAKE_CURRENT_SOURCE_DIR}/Logging
   ${CMAKE_CURRENT_SOURCE_DIR}/Packets
+  ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders
   ${CMAKE_CURRENT_SOURCE_DIR}/Threading
   ${CMAKE_CURRENT_SOURCE_DIR}/Utilities
   ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Object
@@ -85,7 +86,8 @@ if( USE_COREPCH )
   if(CMAKE_COMPILER_IS_GNUCXX)
     add_precompiled_header(shared ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/sharedPCH.h)
   elseif(MSVC)
-    add_native_precompiled_header(shared ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/sharedPCH)
+    set_precompiled_header(shared "sharedPCH.h"
+      "${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/sharedPCH.cpp")
   endif()
 endif()
 

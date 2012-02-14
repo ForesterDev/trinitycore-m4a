@@ -77,6 +77,7 @@
 #define STRCASECMP strcasecmp
 #endif
 
+#include <iterator>
 #include <set>
 #include <list>
 #include <string>

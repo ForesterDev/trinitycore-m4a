@@ -16,6 +16,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "sharedPCH.h"
+
 #ifdef _WIN32
 
 #include "Common.h"

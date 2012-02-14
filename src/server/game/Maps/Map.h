@@ -19,6 +19,7 @@
 #ifndef TRINITY_MAP_H
 #define TRINITY_MAP_H
 
+#include <cstdint>
 #include "Define.h"
 #include <ace/RW_Thread_Mutex.h>
 #include <ace/Thread_Mutex.h>
@@ -53,6 +54,8 @@ class Battleground;
 class MapInstanced;
 class InstanceMap;
 namespace Trinity { struct ObjectUpdater; }
+
+typedef uint32 WMO_id;
 
 struct ScriptAction
 {
@@ -331,6 +334,8 @@ class Map : public GridRefManager<NGridType>
             GetZoneAndAreaIdByAreaFlag(zoneid, areaid, GetAreaFlag(x, y, z), GetId());
         }
 
+        WMO_id wmo_id(const Position &p) const;
+
         void MoveAllCreaturesInMoveList();
         void RemoveAllObjectsInRemoveList();
         virtual void RemoveAllPlayers();
@@ -412,6 +417,9 @@ class Map : public GridRefManager<NGridType>
         template<class NOTIFIER> void VisitFirstFound(const float &x, const float &y, float radius, NOTIFIER &notifier);
         template<class NOTIFIER> void VisitWorld(const float &x, const float &y, float radius, NOTIFIER &notifier);
         template<class NOTIFIER> void VisitGrid(const float &x, const float &y, float radius, NOTIFIER &notifier);
+
+        void player_zone_changed(Player &p);
+
         CreatureGroupHolderType CreatureGroupHolder;
 
         void UpdateIteratorBack(Player* player);
@@ -434,6 +442,17 @@ class Map : public GridRefManager<NGridType>
         void Insert(const GameObjectModel& mdl) { _dynamicTree.insert(mdl); }
         bool Contains(const GameObjectModel& mdl) const { return _dynamicTree.contains(mdl);}
         bool getObjectHitPos(uint32 phasemask, float x1, float y1, float z1, float x2, float y2, float z2, float& rx, float &ry, float& rz, float modifyDist);
+
+        std::int32_t difficulty() const
+        {
+            return difficulty_;
+        }
+
+        std::int32_t dynamic_difficulty() const
+        {
+            return dynamic_difficulty_;
+        }
+
     private:
         void LoadMapAndVMap(int gx, int gy);
         void LoadVMap(int gx, int gy);
@@ -561,6 +580,9 @@ class Map : public GridRefManager<NGridType>
             else
                 m_activeNonPlayers.erase(obj);
         }
+
+        std::int32_t difficulty_;
+        std::int32_t dynamic_difficulty_;
 };
 
 enum InstanceResetMethod
