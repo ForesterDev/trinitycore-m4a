@@ -27,12 +27,12 @@
 
 BattlegroundSA::BattlegroundSA()
 {
-    m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_SA_START_TWO_MINUTES;
-    m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_SA_START_ONE_MINUTE;
-    m_StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_SA_START_HALF_MINUTE;
-    m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_SA_HAS_BEGUN;
-    m_BgObjects.resize(BG_SA_MAXOBJ);
-    m_BgCreatures.resize(BG_SA_MAXNPC + BG_SA_MAX_GY);
+    StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_SA_START_TWO_MINUTES;
+    StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_SA_START_ONE_MINUTE;
+    StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_SA_START_HALF_MINUTE;
+    StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_SA_HAS_BEGUN;
+    BgObjects.resize(BG_SA_MAXOBJ);
+    BgCreatures.resize(BG_SA_MAXNPC + BG_SA_MAX_GY);
     TimerEnabled = false;
     UpdateWaitTimer = 0;
     SignaledRoundTwo = false;
@@ -461,7 +461,7 @@ void BattlegroundSA::AddPlayer(Player* player)
             player->TeleportTo(607, 1209.7f, -65.16f, 70.1f, 0.0f, 0);
     }
     SendTransportInit(player);
-    m_PlayerScores[player->GetGUID()] = sc;
+    PlayerScores[player->GetGUID()] = sc;
 }
 
 void BattlegroundSA::RemovePlayer(Player* /*player*/, uint64 /*guid*/, uint32 /*team*/)
@@ -477,8 +477,8 @@ void BattlegroundSA::HandleAreaTrigger(Player* /*Source*/, uint32 /*Trigger*/)
 
 void BattlegroundSA::UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor)
 {
-    BattlegroundScoreMap::iterator itr = m_PlayerScores.find(Source->GetGUID());
-    if (itr == m_PlayerScores.end())                         // player not found...
+    BattlegroundScoreMap::iterator itr = PlayerScores.find(Source->GetGUID());
+    if (itr == PlayerScores.end())                         // player not found...
         return;
 
     if (type == SCORE_DESTROYED_DEMOLISHER)
@@ -564,7 +564,7 @@ void BattlegroundSA::HandleKillUnit(Creature* unit, Player* killer)
  */
 void BattlegroundSA::OverrideGunFaction()
 {
-    if (!m_BgCreatures[0])
+    if (!BgCreatures[0])
         return;
 
     for (uint8 i = BG_SA_GUN_1; i <= BG_SA_GUN_10;i++)
@@ -582,7 +582,7 @@ void BattlegroundSA::OverrideGunFaction()
 
 void BattlegroundSA::DemolisherStartState(bool start)
 {
-    if (!m_BgCreatures[0])
+    if (!BgCreatures[0])
         return;
 
     for (uint8 i = BG_SA_DEMOLISHER_1; i <= BG_SA_DEMOLISHER_4; i++)
@@ -864,7 +864,7 @@ void BattlegroundSA::UpdateDemolisherSpawns()
 {
     for (uint8 i = BG_SA_DEMOLISHER_1; i <= BG_SA_DEMOLISHER_4; i++)
     {
-        if (m_BgCreatures[i])
+        if (BgCreatures[i])
         {
             if (Creature* Demolisher = GetBGCreature(i))
             {
@@ -899,12 +899,12 @@ void BattlegroundSA::UpdateDemolisherSpawns()
 
 void BattlegroundSA::SendTransportInit(Player* player)
 {
-    if (m_BgObjects[BG_SA_BOAT_ONE] ||  m_BgObjects[BG_SA_BOAT_TWO])
+    if (BgObjects[BG_SA_BOAT_ONE] ||  BgObjects[BG_SA_BOAT_TWO])
     {
         UpdateData transData;
-        if (m_BgObjects[BG_SA_BOAT_ONE])
+        if (BgObjects[BG_SA_BOAT_ONE])
             GetBGObject(BG_SA_BOAT_ONE)->BuildCreateUpdateBlockForPlayer(&transData, player);
-        if (m_BgObjects[BG_SA_BOAT_TWO])
+        if (BgObjects[BG_SA_BOAT_TWO])
             GetBGObject(BG_SA_BOAT_TWO)->BuildCreateUpdateBlockForPlayer(&transData, player);
         WorldPacket packet;
         transData.BuildPacket(&packet);
@@ -914,12 +914,12 @@ void BattlegroundSA::SendTransportInit(Player* player)
 
 void BattlegroundSA::SendTransportsRemove(Player* player)
 {
-    if (m_BgObjects[BG_SA_BOAT_ONE] ||  m_BgObjects[BG_SA_BOAT_TWO])
+    if (BgObjects[BG_SA_BOAT_ONE] ||  BgObjects[BG_SA_BOAT_TWO])
     {
         UpdateData transData;
-        if (m_BgObjects[BG_SA_BOAT_ONE])
+        if (BgObjects[BG_SA_BOAT_ONE])
             GetBGObject(BG_SA_BOAT_ONE)->BuildOutOfRangeUpdateBlock(&transData);
-        if (m_BgObjects[BG_SA_BOAT_TWO])
+        if (BgObjects[BG_SA_BOAT_TWO])
             GetBGObject(BG_SA_BOAT_TWO)->BuildOutOfRangeUpdateBlock(&transData);
         WorldPacket packet;
         transData.BuildPacket(&packet);

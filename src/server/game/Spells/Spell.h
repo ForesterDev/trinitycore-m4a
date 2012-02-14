@@ -56,7 +56,7 @@ enum SpellCastFlags
     CAST_FLAG_UNKNOWN_15         = 0x00004000,
     CAST_FLAG_UNKNOWN_16         = 0x00008000,
     CAST_FLAG_UNKNOWN_17         = 0x00010000,
-    CAST_FLAG_UNKNOWN_18         = 0x00020000,
+    CAST_FLAG_ADJUST_MISSILE     = 0x00020000,
     CAST_FLAG_UNKNOWN_19         = 0x00040000,
     CAST_FLAG_UNKNOWN_20         = 0x00080000,
     CAST_FLAG_UNKNOWN_21         = 0x00100000,
@@ -644,7 +644,7 @@ class Spell
 
         // effect helpers
         void GetSummonPosition(uint32 i, Position &pos, float radius = 0.0f, uint32 count = 0);
-        void SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* properties);
+        void SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* properties, uint32 numSummons);
         void CalculateJumpSpeeds(uint8 i, float dist, float & speedxy, float & speedz);
 
         SpellCastResult CanOpenLock(uint32 effIndex, uint32 lockid, SkillType& skillid, int32& reqSkillValue, int32& skillValue);

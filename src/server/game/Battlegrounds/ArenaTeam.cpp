@@ -465,7 +465,7 @@ void ArenaTeam::Inspect(WorldSession* session, uint64 guid)
     session->SendPacket(&data);
 }
 
-void ArenaTeamMember::ModifyPersonalRating(Player* player, int32 mod, uint32 slot)
+void ArenaTeamMember::ModifyPersonalRating(Player* player, int32 mod, uint32 type)
 {
     if (int32(PersonalRating) + mod < 0)
         PersonalRating = 0;
@@ -474,8 +474,8 @@ void ArenaTeamMember::ModifyPersonalRating(Player* player, int32 mod, uint32 slo
 
     if (player)
     {
-        player->SetArenaTeamInfoField(slot, ARENA_TEAM_PERSONAL_RATING, PersonalRating);
-        player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_PERSONAL_RATING, PersonalRating, slot);
+        player->SetArenaTeamInfoField(ArenaTeam::GetSlotByType(type), ARENA_TEAM_PERSONAL_RATING, PersonalRating);
+        player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_PERSONAL_RATING, PersonalRating, type);
     }
 }
 
@@ -735,7 +735,7 @@ void ArenaTeam::MemberLost(Player* player, uint32 againstMatchmakerRating, int32
         {
             // Update personal rating
             int32 mod = GetRatingMod(itr->PersonalRating, againstMatchmakerRating, false);
-            itr->ModifyPersonalRating(player, mod, GetSlot());
+            itr->ModifyPersonalRating(player, mod, GetType());
 
             // Update matchmaker rating
             itr->ModifyMatchmakerRating(MatchmakerRatingChange, GetSlot());
@@ -761,7 +761,7 @@ void ArenaTeam::OfflineMemberLost(uint64 guid, uint32 againstMatchmakerRating, i
         {
             // update personal rating
             int32 mod = GetRatingMod(itr->PersonalRating, againstMatchmakerRating, false);
-            itr->ModifyPersonalRating(NULL, mod, GetSlot());
+            itr->ModifyPersonalRating(NULL, mod, GetType());
 
             // update matchmaker rating
             itr->ModifyMatchmakerRating(MatchmakerRatingChange, GetSlot());
@@ -783,7 +783,7 @@ void ArenaTeam::MemberWon(Player* player, uint32 againstMatchmakerRating, int32 
         {
             // update personal rating
             int32 mod = GetRatingMod(itr->PersonalRating, againstMatchmakerRating, true);
-            itr->ModifyPersonalRating(player, mod, GetSlot());
+            itr->ModifyPersonalRating(player, mod, GetType());
 
             // update matchmaker rating
             itr->ModifyMatchmakerRating(MatchmakerRatingChange, GetSlot());

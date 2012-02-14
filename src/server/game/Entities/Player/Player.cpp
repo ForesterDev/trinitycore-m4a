@@ -299,13 +299,22 @@ Item* TradeData::GetItem(TradeSlots slot) const
     return m_items[slot] ? m_player->GetItemByGuid(m_items[slot]) : NULL;
 }
 
-bool TradeData::HasItem(uint64 item_guid) const
+bool TradeData::HasItem(uint64 itemGuid) const
 {
     for (uint8 i = 0; i < TRADE_SLOT_COUNT; ++i)
-        if (m_items[i] == item_guid)
+        if (m_items[i] == itemGuid)
             return true;
 
     return false;
+}
+
+TradeSlots TradeData::GetTradeSlotForItem(uint64 itemGuid) const
+{
+    for (uint8 i = 0; i < TRADE_SLOT_COUNT; ++i)
+        if (m_items[i] == itemGuid)
+            return TradeSlots(i);
+
+    return TRADE_SLOT_INVALID;
 }
 
 Item* TradeData::GetSpellCastItem() const
@@ -861,8 +870,6 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
 
     for (uint8 i = 0; i < MAX_POWERS; ++i)
         m_powerFraction[i] = 0;
-
-    m_ConditionErrorMsgId = 0;
 
     isDebugAreaTriggers = false;
 
@@ -1604,7 +1611,7 @@ void Player::Update(uint32 p_time)
 
     GetAchievementMgr().UpdateTimedAchievements(p_time);
 
-    if (HasUnitState(UNIT_STAT_MELEE_ATTACKING) && !HasUnitState(UNIT_STAT_CASTING))
+    if (HasUnitState(UNIT_STATE_MELEE_ATTACKING) && !HasUnitState(UNIT_STATE_CASTING))
     {
         if (Unit* pVictim = getVictim())
         {
@@ -2125,6 +2132,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
     // reset movement flags at teleport, because player will continue move with these flags after teleport
     SetUnitMovementFlags(0);
+    DisableSpline();
 
     if (m_transport)
     {
@@ -3265,7 +3273,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     // cleanup unit flags (will be re-applied if need at aura load).
     RemoveFlag(UNIT_FIELD_FLAGS,
         UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_ATTACKABLE_1 |
-        UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE  | UNIT_FLAG_LOOTING          |
+        UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC  | UNIT_FLAG_LOOTING          |
         UNIT_FLAG_PET_IN_COMBAT  | UNIT_FLAG_SILENCED     | UNIT_FLAG_PACIFIED         |
         UNIT_FLAG_STUNNED        | UNIT_FLAG_IN_COMBAT    | UNIT_FLAG_DISARMED         |
         UNIT_FLAG_CONFUSED       | UNIT_FLAG_FLEEING      | UNIT_FLAG_NOT_SELECTABLE   |
@@ -4442,11 +4450,14 @@ bool Player::resetTalents(bool no_cost)
             // skip non-existant talent ranks
             if (talentInfo->RankID[rank] == 0)
                 continue;
+            const SpellInfo* _spellEntry = sSpellMgr->GetSpellInfo(talentInfo->RankID[rank]);
+            if (!_spellEntry)
+                continue;
             removeSpell(talentInfo->RankID[rank], true);
-            if (const SpellInfo* _spellEntry = sSpellMgr->GetSpellInfo(talentInfo->RankID[rank]))
-                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)                  // search through the SpellInfo for valid trigger spells
-                    if (_spellEntry->Effects[i].TriggerSpell > 0 && _spellEntry->Effects[i].Effect == SPELL_EFFECT_LEARN_SPELL)
-                        removeSpell(_spellEntry->Effects[i].TriggerSpell, true); // and remove any spells that the talent teaches
+            // search for spells that the talent teaches and unlearn them
+            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                if (_spellEntry->Effects[i].TriggerSpell > 0 && _spellEntry->Effects[i].Effect == SPELL_EFFECT_LEARN_SPELL)
+                    removeSpell(_spellEntry->Effects[i].TriggerSpell, true);
             // if this talent rank can be found in the PlayerTalentMap, mark the talent as removed so it gets deleted
             PlayerTalentMap::iterator plrTalent = m_talents[m_activeSpec]->find(talentInfo->RankID[rank]);
             if (plrTalent != m_talents[m_activeSpec]->end())
@@ -5175,43 +5186,10 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     }
 }
 
-/**
- * FallMode = 0 implies that the player is dying, or already dead, and the proper death state will be set.
- *          = 1 simply causes the player to plummet towards the ground, and not suffer any damage.
- *          = 2 causes the player to plummet towards the ground, and causes falling damage, regardless
- *              of any auras that might of prevented fall damage.
- */
-bool Player::FallGround(uint8 FallMode)
-{
-    // Let's abort after we called this function one time
-    if (getDeathState() == DEAD_FALLING && FallMode == 0)
-        return false;
-
-    float x, y, z;
-    GetPosition(x, y, z);
-    float ground_Z = GetMap()->GetHeight(x, y, z);
-    float z_diff = 0.0f;
-    if ((z_diff = fabs(ground_Z - z)) < 0.1f)
-        return false;
-
-    GetMotionMaster()->MoveFall(ground_Z, EVENT_FALL_GROUND);
-
-    // Below formula for falling damage is from Player::HandleFall
-    if (FallMode == 2 && z_diff >= 14.57f)
-    {
-        uint32 damage = std::min(GetMaxHealth(), (uint32)((0.018f * z_diff - 0.2426f) * GetMaxHealth() * sWorld->getRate(RATE_DAMAGE_FALL)));
-        if (damage)
-            EnvironmentalDamage(DAMAGE_FALL, damage);
-    }
-    else if (FallMode == 0)
-        Unit::setDeathState(DEAD_FALLING);
-    return true;
-}
-
 void Player::KillPlayer()
 {
     if (IsFlying() && !GetTransport())
-        FallGround();
+        i_motionMaster.MoveFall();
 
     SetMovement(MOVE_ROOT);
 
@@ -7456,6 +7434,22 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         SendInitWorldStates(newZone, newArea);              // only if really enters to new zone, not just area change, works strange...
     }
 
+    // group update
+    if (GetGroup())
+    {
+        SetGroupUpdateFlag(GROUP_UPDATE_FULL);
+        Group* grp = GetGroup();
+        if (GetSession() && grp->isLFGGroup() && sLFGMgr->IsTeleported(GetGUID()))
+        {
+            for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
+            {
+                Player* tempplr = itr->getSource();
+                if (tempplr)
+                    GetSession()->SendNameQueryOpcode(tempplr->GetGUID());
+            }
+        }
+    }
+
     m_zoneUpdateId    = newZone;
     m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
 
@@ -7542,10 +7536,6 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 
     // recent client version not send leave/join channel packets for built-in local channels
     UpdateLocalChannels(newZone);
-
-    // group update
-    if (GetGroup())
-        SetGroupUpdateFlag(GROUP_UPDATE_FULL);
 
     UpdateZoneDependentAuras(newZone);
 }
@@ -8782,7 +8772,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 }
             }
 
-            go->SetLootState(GO_ACTIVATED);
+            go->SetLootState(GO_ACTIVATED, this);
         }
 
         if (go->getLootState() == GO_ACTIVATED)
@@ -11450,7 +11440,7 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16 &dest, Item* pItem, bool
             {
                 // May be here should be more stronger checks; STUNNED checked
                 // ROOT, CONFUSED, DISTRACTED, FLEEING this needs to be checked.
-                if (HasUnitState(UNIT_STAT_STUNNED))
+                if (HasUnitState(UNIT_STATE_STUNNED))
                     return EQUIP_ERR_YOU_ARE_STUNNED;
 
                 // do not allow equipping gear except weapons, offhands, projectiles, relics in
@@ -11880,6 +11870,93 @@ InventoryResult Player::CanUseItem(ItemTemplate const* proto) const
     return EQUIP_ERR_ITEM_NOT_FOUND;
 }
 
+InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObject const* lootedObject) const
+{
+    LfgDungeonSet const& dungeons = sLFGMgr->GetSelectedDungeons(GetGUID());
+    if (dungeons.empty())
+        return EQUIP_ERR_OK;    // not using LFG
+
+    if (!GetGroup() || !GetGroup()->isLFGGroup())
+        return EQUIP_ERR_OK;    // not in LFG group
+
+    // check if looted object is inside the lfg dungeon
+    bool lootedObjectInDungeon = false;
+    Map const* map = lootedObject->GetMap();
+    if (uint32 dungeonId = sLFGMgr->GetDungeon(GetGroup()->GetGUID(), true))
+        if (LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(dungeonId))
+            if (dungeon->map == map->GetId() && dungeon->difficulty == map->GetDifficulty())
+                lootedObjectInDungeon = true;
+
+    if (!lootedObjectInDungeon)
+        return EQUIP_ERR_OK;
+
+    if (!proto)
+        return EQUIP_ERR_ITEM_NOT_FOUND;
+   // Used by group, function NeedBeforeGreed, to know if a prototype can be used by a player
+
+    const static uint32 item_weapon_skills[MAX_ITEM_SUBCLASS_WEAPON] =
+    {
+        SKILL_AXES,     SKILL_2H_AXES,  SKILL_BOWS,          SKILL_GUNS,      SKILL_MACES,
+        SKILL_2H_MACES, SKILL_POLEARMS, SKILL_SWORDS,        SKILL_2H_SWORDS, 0,
+        SKILL_STAVES,   0,              0,                   SKILL_FIST_WEAPONS,   0,
+        SKILL_DAGGERS,  SKILL_THROWN,   SKILL_ASSASSINATION, SKILL_CROSSBOWS, SKILL_WANDS,
+        SKILL_FISHING
+    }; //Copy from function Item::GetSkill()
+
+    if ((proto->AllowableClass & getClassMask()) == 0 || (proto->AllowableRace & getRaceMask()) == 0)
+        return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
+
+    if (proto->RequiredSpell != 0 && !HasSpell(proto->RequiredSpell))
+        return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
+
+    if (proto->RequiredSkill != 0)
+    {
+        if (!GetSkillValue(proto->RequiredSkill))
+            return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
+        else if (GetSkillValue(proto->RequiredSkill) < proto->RequiredSkillRank)
+            return EQUIP_ERR_CANT_EQUIP_SKILL;
+    }
+
+    uint8 _class = getClass();
+
+    if (proto->Class == ITEM_CLASS_WEAPON && GetSkillValue(item_weapon_skills[proto->SubClass]) == 0)
+        return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
+
+    if (proto->Class == ITEM_CLASS_ARMOR && proto->SubClass > ITEM_SUBCLASS_ARMOR_MISC && proto->SubClass < ITEM_SUBCLASS_ARMOR_BUCKLER && proto->InventoryType != INVTYPE_CLOAK)
+    {
+        if (_class == CLASS_WARRIOR || _class == CLASS_PALADIN || _class == CLASS_DEATH_KNIGHT)
+        {
+            if (getLevel() < 40)
+            {
+                if (proto->SubClass != ITEM_SUBCLASS_ARMOR_MAIL)
+                    return EQUIP_ERR_CANT_DO_RIGHT_NOW;
+            }
+            else if (proto->SubClass != ITEM_SUBCLASS_ARMOR_PLATE)
+                return EQUIP_ERR_CANT_DO_RIGHT_NOW;
+        }
+        else if (_class == CLASS_HUNTER || _class == CLASS_SHAMAN)
+        {
+            if (getLevel() < 40)
+            {
+                if (proto->SubClass != ITEM_SUBCLASS_ARMOR_LEATHER)
+                    return EQUIP_ERR_CANT_DO_RIGHT_NOW;
+            }
+            else if (proto->SubClass != ITEM_SUBCLASS_ARMOR_MAIL)
+                return EQUIP_ERR_CANT_DO_RIGHT_NOW;
+        }
+
+        if (_class == CLASS_ROGUE || _class == CLASS_DRUID)
+            if (proto->SubClass != ITEM_SUBCLASS_ARMOR_LEATHER)
+                return EQUIP_ERR_CANT_DO_RIGHT_NOW;
+
+        if (_class == CLASS_MAGE || _class == CLASS_PRIEST || _class == CLASS_WARLOCK)
+            if (proto->SubClass != ITEM_SUBCLASS_ARMOR_CLOTH)
+                return EQUIP_ERR_CANT_DO_RIGHT_NOW;
+    }
+
+    return EQUIP_ERR_OK;
+}
+
 InventoryResult Player::CanUseAmmo(uint32 item) const
 {
     sLog->outDebug(LOG_FILTER_PLAYER_ITEMS, "STORAGE:  CanUseAmmo item = %u", item);
@@ -11963,6 +12040,7 @@ Item* Player::StoreNewItem(ItemPosCountVec const& dest, uint32 item, bool update
     {
         ItemAddedQuestCheck(item, count);
         GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_RECEIVE_EPIC_ITEM, item, count);
+        GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_OWN_ITEM, item, 1);
         if (randomPropertyId)
             pItem->SetItemRandomProperties(randomPropertyId);
         pItem = StoreItem(dest, pItem, update);
@@ -12016,7 +12094,6 @@ Item* Player::StoreItem(ItemPosCountVec const& dest, Item* pItem, bool update)
 
         lastItem = _StoreItem(pos, pItem, count, true, update);
     }
-    GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_OWN_ITEM, entry);
     return lastItem;
 }
 
@@ -12790,6 +12867,14 @@ void Player::SplitItem(uint16 src, uint16 dst, uint32 count)
         return;
     }
 
+    //! If trading
+    if (TradeData* tradeData = GetTradeData())
+    {
+        //! If current item is in trade window (only possible with packet spoofing - silent return)
+        if (tradeData->GetTradeSlotForItem(pSrcItem->GetGUID()) != TRADE_SLOT_INVALID)
+            return;
+    }
+
     sLog->outDebug(LOG_FILTER_PLAYER_ITEMS, "STORAGE:  SplitItem bag = %u, slot = %u, item = %u, count = %u", dstbag, dstslot, pSrcItem->GetEntry(), count);
     Item* pNewItem = pSrcItem->CloneItem(count, this);
     if (!pNewItem)
@@ -12818,7 +12903,7 @@ void Player::SplitItem(uint16 src, uint16 dst, uint32 count)
         pSrcItem->SetState(ITEM_CHANGED, this);
         StoreItem(dest, pNewItem, true);
     }
-    else if (IsBankPos (dst))
+    else if (IsBankPos(dst))
     {
         // change item amount before check (for unique max count check)
         pSrcItem->SetCount(pSrcItem->GetCount() - count);
@@ -12838,7 +12923,7 @@ void Player::SplitItem(uint16 src, uint16 dst, uint32 count)
         pSrcItem->SetState(ITEM_CHANGED, this);
         BankItem(dest, pNewItem, true);
     }
-    else if (IsEquipmentPos (dst))
+    else if (IsEquipmentPos(dst))
     {
         // change item amount before check (for unique max count check), provide space for splitted items
         pSrcItem->SetCount(pSrcItem->GetCount() - count);
@@ -14054,10 +14139,14 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
             PrepareQuestMenu(source->GetGUID());
     }
 
+    if (source->GetTypeId() == TYPEID_GAMEOBJECT)
+        if (source->ToGameObject()->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER)
+            PrepareQuestMenu(source->GetGUID());
+
     for (GossipMenuItemsMap::const_iterator itr = menuItemBounds.first; itr != menuItemBounds.second; ++itr)
     {
         bool canTalk = true;
-        if (!sConditionMgr->IsPlayerMeetToConditions(this, itr->second.Conditions))
+        if (!sConditionMgr->IsObjectMeetToConditions(this, itr->second.Conditions))
             continue;
 
         if (source->GetTypeId() == TYPEID_UNIT)
@@ -14139,11 +14228,6 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
 
             switch (itr->second.OptionType)
             {
-                case GOSSIP_OPTION_QUESTGIVER:
-                    if (go->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER)
-                        PrepareQuestMenu(source->GetGUID());
-                    canTalk = false;
-                    break;
                 case GOSSIP_OPTION_GOSSIP:
                     if (go->GetGoType() != GAMEOBJECT_TYPE_QUESTGIVER && go->GetGoType() != GAMEOBJECT_TYPE_GOOBER)
                         canTalk = false;
@@ -14297,7 +14381,7 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
             break;
         case GOSSIP_OPTION_UNLEARNTALENTS:
             PlayerTalkClass->SendCloseGossip();
-            source->ToCreature()->CastSpell(this, 46331, true); // Trainer: Untrain Talents
+            SendTalentWipeConfirm(guid);
             break;
         case GOSSIP_OPTION_UNLEARNPETTALENTS:
             PlayerTalkClass->SendCloseGossip();
@@ -14364,7 +14448,7 @@ uint32 Player::GetGossipTextId(uint32 menuId)
     GossipMenusMapBounds menuBounds = sObjectMgr->GetGossipMenusMapBounds(menuId);
 
     for (GossipMenusMap::const_iterator itr = menuBounds.first; itr != menuBounds.second; ++itr)
-        if (sConditionMgr->IsPlayerMeetToConditions(this, itr->second.conditions))
+        if (sConditionMgr->IsObjectMeetToConditions(this, itr->second.conditions))
             textId = itr->second.text_id;
 
     return textId;
@@ -14798,7 +14882,9 @@ bool Player::CanRewardQuest(Quest const* quest, uint32 reward, bool msg)
 void Player::AddQuest(Quest const* quest, Object* questGiver)
 {
     uint16 log_slot = FindQuestSlot(0);
-    ASSERT(log_slot < MAX_QUEST_LOG_SIZE);
+
+    if (log_slot >= MAX_QUEST_LOG_SIZE) // Player does not have any free slot in the quest log
+        return; 
 
     uint32 quest_id = quest->GetQuestId();
 
@@ -15350,7 +15436,7 @@ bool Player::SatisfyQuestStatus(Quest const* qInfo, bool msg)
 bool Player::SatisfyQuestConditions(Quest const* qInfo, bool msg)
 {
     ConditionList conditions = sConditionMgr->GetConditionsForNotGroupedEntry(CONDITION_SOURCE_TYPE_QUEST_ACCEPT, qInfo->GetQuestId());
-    if (!sConditionMgr->IsPlayerMeetToConditions(this, conditions))
+    if (!sConditionMgr->IsObjectMeetToConditions(this, conditions))
     {
         if (msg)
             SendCanTakeQuestResponse(INVALIDREASON_DONT_HAVE_REQ);
@@ -16714,6 +16800,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     _LoadInstanceTimeRestrictions(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADINSTANCELOCKTIMES));
     _LoadBGData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADBGDATA));
 
+    GetSession()->SetPlayer(this);
     MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
     if (!mapEntry || !IsPositionValid())
     {
@@ -19832,7 +19919,7 @@ void Player::VehicleSpellInitialize()
         }
 
         ConditionList conditions = sConditionMgr->GetConditionsForVehicleSpell(veh->GetEntry(), spellId);
-        if (!sConditionMgr->IsPlayerMeetToConditions(this, conditions))
+        if (!sConditionMgr->IsObjectMeetToConditions(this, conditions))
         {
             sLog->outDebug(LOG_FILTER_CONDITIONSYS, "VehicleSpellInitialize: conditions not met for Vehicle entry %u spell %u", veh->ToCreature()->GetEntry(), spellId);
             data << uint16(0) << uint8(0) << uint8(i+8);
@@ -20246,7 +20333,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
         return false;
 
     // not let cheating with start flight in time of logout process || while in combat || has type state: stunned || has type state: root
-    if (GetSession()->isLogingOut() || isInCombat() || HasUnitState(UNIT_STAT_STUNNED) || HasUnitState(UNIT_STAT_ROOT))
+    if (GetSession()->isLogingOut() || isInCombat() || HasUnitState(UNIT_STATE_STUNNED) || HasUnitState(UNIT_STATE_ROOT))
     {
         WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
         data << uint32(ERR_TAXIPLAYERBUSY);
@@ -21549,9 +21636,7 @@ void Player::SendInitialVisiblePackets(Unit* target)
     SendAurasForTarget(target);
     if (target->isAlive())
     {
-        if (target->GetMotionMaster()->GetCurrentMovementGeneratorType() != IDLE_MOTION_TYPE)
-            target->SendMonsterMoveWithSpeedToCurrentDestination(this);
-        if (target->HasUnitState(UNIT_STAT_MELEE_ATTACKING) && target->getVictim())
+        if (target->HasUnitState(UNIT_STATE_MELEE_ATTACKING) && target->getVictim())
             target->SendMeleeAttackStart(target->getVictim());
     }
 }

@@ -89,6 +89,7 @@ public:
             { "update",         SEC_ADMINISTRATOR,  false, &HandleDebugUpdateCommand,          "", NULL },
             { "itemexpire",     SEC_ADMINISTRATOR,  false, &HandleDebugItemExpireCommand,      "", NULL },
             { "areatriggers",   SEC_ADMINISTRATOR,  false, &HandleDebugAreaTriggersCommand,    "", NULL },
+            { "los",            SEC_MODERATOR,      false, &HandleDebugLoSCommand,             "", NULL },
             { NULL,             0,                  false, NULL,                               "", NULL }
         };
         static ChatCommand commandTable[] =
@@ -1039,6 +1040,13 @@ public:
 
         uint32 animId = atoi((char*)args);
         handler->GetSession()->GetPlayer()->HandleEmoteCommand(animId);
+        return true;
+    }
+    
+    static bool HandleDebugLoSCommand(ChatHandler* handler, char const* args)
+    {
+        if (Unit* unit = handler->getSelectedUnit())
+            handler->PSendSysMessage("Unit %s (GuidLow: %u) is %sin LoS", unit->GetName(), unit->GetGUIDLow(), handler->GetSession()->GetPlayer()->IsWithinLOSInMap(unit) ? "" : "not ");
         return true;
     }
 
