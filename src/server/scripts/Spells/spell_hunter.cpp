@@ -22,8 +22,13 @@
  */
 
 #include "ScriptPCH.h"
-#include "SpellAuraEffects.h"
+#include "ScriptMgr.h"
+#include "Cell.h"
+#include "CellImpl.h"
 #include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "SpellScript.h"
+#include "SpellAuraEffects.h"
 
 enum HunterSpells
 {

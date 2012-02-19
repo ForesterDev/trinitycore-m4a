@@ -22,7 +22,8 @@
  */
 
 #include "ScriptPCH.h"
-#include "Spell.h"
+#include "ScriptMgr.h"
+#include "SpellScript.h"
 #include "SpellAuraEffects.h"
 
 enum WarlockSpells
