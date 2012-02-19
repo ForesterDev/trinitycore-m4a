@@ -23,9 +23,14 @@
  */
 
 #include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "SpellScript.h"
 #include "SpellAuraEffects.h"
 #include "SkillDiscovery.h"
+#include "Cell.h"
+#include "CellImpl.h"
 #include "GridNotifiers.h"
+#include "InstanceScript.h"
 #include "Group.h"
 #include "LFGMgr.h"
 

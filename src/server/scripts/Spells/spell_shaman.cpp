@@ -22,6 +22,10 @@
  */
 
 #include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "GridNotifiers.h"
+#include "Unit.h"
+#include "SpellScript.h"
 #include "SpellAuraEffects.h"
 
 enum ShamanSpells
