@@ -4956,10 +4956,11 @@ SpellCastResult Spell::CheckCast(bool strict)
         return castResult;
 
     bool hasDispellableAura = false;
+    bool hasNonDispelEffect = false;
     for (int i = 0; i < MAX_SPELL_EFFECTS; i++)
         if (m_spellInfo->Effects[i].Effect == SPELL_EFFECT_DISPEL)
         {
-            if (m_spellInfo->Effects[i].IsTargetingArea())
+            if (m_spellInfo->Effects[i].IsTargetingArea() || m_spellInfo->AttributesEx & SPELL_ATTR1_MELEE_COMBAT_START)
             {
                 hasDispellableAura = true;
                 break;
@@ -4976,8 +4977,13 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
             }
         }
+        else if (m_spellInfo->Effects[i].IsEffect())
+        {
+            hasNonDispelEffect = true;
+            break;
+        }
 
-    if (!hasDispellableAura && m_spellInfo->HasEffect(SPELL_EFFECT_DISPEL))
+    if (!hasNonDispelEffect && !hasDispellableAura && m_spellInfo->HasEffect(SPELL_EFFECT_DISPEL))
         return SPELL_FAILED_NOTHING_TO_DISPEL;
 
     for (int i = 0; i < MAX_SPELL_EFFECTS; i++)
