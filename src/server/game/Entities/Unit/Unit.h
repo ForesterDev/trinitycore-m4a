@@ -701,14 +701,14 @@ enum MovementFlags
     // TODO: Check if PITCH_UP and PITCH_DOWN really belong here..
     MOVEMENTFLAG_MASK_MOVING =
         MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_BACKWARD | MOVEMENTFLAG_STRAFE_LEFT | MOVEMENTFLAG_STRAFE_RIGHT |
-        MOVEMENTFLAG_PITCH_UP | MOVEMENTFLAG_PITCH_DOWN | MOVEMENTFLAG_FALLING | MOVEMENTFLAG_FALLING | MOVEMENTFLAG_ASCENDING | MOVEMENTFLAG_DESCENDING |
+        MOVEMENTFLAG_PITCH_UP | MOVEMENTFLAG_PITCH_DOWN | MOVEMENTFLAG_FALLING | MOVEMENTFLAG_FALLING_FAR | MOVEMENTFLAG_ASCENDING | MOVEMENTFLAG_DESCENDING |
         MOVEMENTFLAG_SPLINE_ELEVATION,
 
     MOVEMENTFLAG_MASK_TURNING =
         MOVEMENTFLAG_LEFT | MOVEMENTFLAG_RIGHT,
 
     //! TODO if needed: add more flags to this masks that are exclusive to players
-    MOVEMENTFLAG_MASK_PLAYER_ONLY = 
+    MOVEMENTFLAG_MASK_PLAYER_ONLY =
         MOVEMENTFLAG_FLYING,
 };
 enum MovementFlags2
@@ -1398,9 +1398,7 @@ class Unit : public WorldObject
         bool IsNeutralToAll() const;
         bool IsInPartyWith(Unit const* unit) const;
         bool IsInRaidWith(Unit const* unit) const;
-        void GetPartyMemberInDist(std::list<Unit*> &units, float dist);
         void GetPartyMembers(std::list<Unit*> &units);
-        void GetRaidMember(std::list<Unit*> &units, float dist);
         bool IsContestedGuard() const
         {
             if (FactionTemplateEntry const* entry = getFactionTemplateEntry())
@@ -1635,7 +1633,7 @@ class Unit : public WorldObject
         /*! These methods send the same packet to the client in apply and unapply case.
             The client-side interpretation of this packet depends on the presence of relevant movementflags
             which are sent with movementinfo. Furthermore, these packets are broadcast to nearby players as well
-            as the current unit. 
+            as the current unit.
         */
         void SendMovementHover();
         void SendMovementFeatherFall();
