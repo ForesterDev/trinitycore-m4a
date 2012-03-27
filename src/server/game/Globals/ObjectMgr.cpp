@@ -252,6 +252,10 @@ ObjectMgr::~ObjectMgr()
         itr->second.Clear();
 
     _cacheTrainerSpellStore.clear();
+
+    for (DungeonEncounterContainer::iterator itr =_dungeonEncounterStore.begin(); itr != _dungeonEncounterStore.end(); ++itr)
+        for (DungeonEncounterList::iterator encounterItr = itr->second.begin(); encounterItr != itr->second.end(); ++encounterItr)
+            delete *encounterItr;
 }
 
 void ObjectMgr::AddLocaleString(std::string const& s, LocaleConstant locale, StringVector& data)
@@ -418,7 +422,7 @@ void ObjectMgr::LoadCreatureTemplates()
         creatureTemplate.GossipMenuId      = fields[13].GetUInt32();
         creatureTemplate.minlevel          = fields[14].GetUInt8();
         creatureTemplate.maxlevel          = fields[15].GetUInt8();
-        creatureTemplate.expansion         = uint32(fields[16].GetUInt16());
+        creatureTemplate.expansion         = uint32(fields[16].GetInt16());
         creatureTemplate.faction_A         = uint32(fields[17].GetUInt16());
         creatureTemplate.faction_H         = uint32(fields[18].GetUInt16());
         creatureTemplate.npcflag           = fields[19].GetUInt32();
@@ -451,7 +455,7 @@ void ObjectMgr::LoadCreatureTemplates()
         creatureTemplate.SkinLootId        = fields[46].GetUInt32();
 
         for (uint8 i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
-            creatureTemplate.resistance[i] = fields[47 + i -1].GetInt32();
+            creatureTemplate.resistance[i] = fields[47 + i -1].GetInt16();
 
         for (uint8 i = 0; i < CREATURE_MAX_SPELLS; ++i)
             creatureTemplate.spells[i] = fields[53 + i].GetUInt32();
@@ -1422,8 +1426,8 @@ void ObjectMgr::LoadCreatures()
     {
         Field* fields = result->Fetch();
 
-        uint32 guid         = fields[ 0].GetUInt32();
-        uint32 entry        = fields[ 1].GetUInt32();
+        uint32 guid         = fields[0].GetUInt32();
+        uint32 entry        = fields[1].GetUInt32();
 
         CreatureTemplate const* cInfo = GetCreatureTemplate(entry);
         if (!cInfo)
@@ -1434,14 +1438,14 @@ void ObjectMgr::LoadCreatures()
 
         CreatureData& data = _creatureDataStore[guid];
         data.id             = entry;
-        data.mapid          = fields[ 2].GetUInt32();
-        data.displayid      = fields[ 3].GetUInt32();
-        data.equipmentId    = fields[ 4].GetUInt32();
-        data.posX           = fields[ 5].GetFloat();
-        data.posY           = fields[ 6].GetFloat();
-        data.posZ           = fields[ 7].GetFloat();
-        data.orientation    = fields[ 8].GetFloat();
-        data.spawntimesecs  = fields[ 9].GetUInt32();
+        data.mapid          = fields[2].GetUInt16();
+        data.displayid      = fields[3].GetUInt32();
+        data.equipmentId    = fields[4].GetInt32();
+        data.posX           = fields[5].GetFloat();
+        data.posY           = fields[6].GetFloat();
+        data.posZ           = fields[7].GetFloat();
+        data.orientation    = fields[8].GetFloat();
+        data.spawntimesecs  = fields[9].GetUInt32();
         data.spawndist      = fields[10].GetFloat();
         data.currentwaypoint= fields[11].GetUInt32();
         data.curhealth      = fields[12].GetUInt32();
@@ -1449,7 +1453,7 @@ void ObjectMgr::LoadCreatures()
         data.movementType   = fields[14].GetUInt8();
         data.spawnMask      = fields[15].GetUInt8();
         data.phaseMask      = fields[16].GetUInt16();
-        int16 gameEvent     = fields[17].GetInt16();
+        int16 gameEvent     = fields[17].GetInt8();
         uint32 PoolId       = fields[18].GetUInt32();
         data.npcflag        = fields[19].GetUInt32();
         data.unit_flags     = fields[20].GetUInt32();
@@ -1731,8 +1735,8 @@ void ObjectMgr::LoadGameobjects()
     {
         Field* fields = result->Fetch();
 
-        uint32 guid         = fields[ 0].GetUInt32();
-        uint32 entry        = fields[ 1].GetUInt32();
+        uint32 guid         = fields[0].GetUInt32();
+        uint32 entry        = fields[1].GetUInt32();
 
         GameObjectTemplate const* gInfo = GetGameObjectTemplate(entry);
         if (!gInfo)
@@ -1763,14 +1767,14 @@ void ObjectMgr::LoadGameobjects()
         GameObjectData& data = _gameObjectDataStore[guid];
 
         data.id             = entry;
-        data.mapid          = fields[ 2].GetUInt32();
-        data.posX           = fields[ 3].GetFloat();
-        data.posY           = fields[ 4].GetFloat();
-        data.posZ           = fields[ 5].GetFloat();
-        data.orientation    = fields[ 6].GetFloat();
-        data.rotation0      = fields[ 7].GetFloat();
-        data.rotation1      = fields[ 8].GetFloat();
-        data.rotation2      = fields[ 9].GetFloat();
+        data.mapid          = fields[2].GetUInt32();
+        data.posX           = fields[3].GetFloat();
+        data.posY           = fields[4].GetFloat();
+        data.posZ           = fields[5].GetFloat();
+        data.orientation    = fields[6].GetFloat();
+        data.rotation0      = fields[7].GetFloat();
+        data.rotation1      = fields[8].GetFloat();
+        data.rotation2      = fields[9].GetFloat();
         data.rotation3      = fields[10].GetFloat();
         data.spawntimesecs  = fields[11].GetInt32();
 
@@ -1903,7 +1907,7 @@ void ObjectMgr::LoadGameobjectRespawnTimes()
     uint32 oldMSTime = getMSTime();
 
     // Remove outdated data
-    CharacterDatabase.DirectExecute(CharacterDatabase.GetPreparedStatement(CHAR_DEL_EXPIRED_GO_RESPAWNS));
+    CharacterDatabase.DirectExecute("DELETE FROM gameobject_respawn WHERE respawnTime <= UNIX_TIMESTAMP(NOW())");
 
     uint32 count = 0;
 
@@ -1943,10 +1947,12 @@ uint64 ObjectMgr::GetPlayerGUIDByName(std::string name) const
 {
     uint64 guid = 0;
 
-    CharacterDatabase.EscapeString(name);
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_GUID_BY_NAME);
 
-    // Player name safe to sending to DB (checked at login) and this function using
-    QueryResult result = CharacterDatabase.PQuery("SELECT guid FROM characters WHERE name = '%s'", name.c_str());
+    stmt->setString(0, name);
+
+    PreparedQueryResult result = CharacterDatabase.Query(stmt);
+
     if (result)
         guid = MAKE_NEW_GUID((*result)[0].GetUInt32(), 0, HIGHGUID_PLAYER);
 
@@ -1962,7 +1968,11 @@ bool ObjectMgr::GetPlayerNameByGUID(uint64 guid, std::string &name) const
         return true;
     }
 
-    QueryResult result = CharacterDatabase.PQuery("SELECT name FROM characters WHERE guid = '%u'", GUID_LOPART(guid));
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_NAME);
+
+    stmt->setUInt32(0, GUID_LOPART(guid));
+
+    PreparedQueryResult result = CharacterDatabase.Query(stmt);
 
     if (result)
     {
@@ -1981,7 +1991,11 @@ uint32 ObjectMgr::GetPlayerTeamByGUID(uint64 guid) const
         return Player::TeamForRace(player->getRace());
     }
 
-    QueryResult result = CharacterDatabase.PQuery("SELECT race FROM characters WHERE guid = '%u'", GUID_LOPART(guid));
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHAR_RACE);
+
+    stmt->setUInt32(0, GUID_LOPART(guid));
+
+    PreparedQueryResult result = CharacterDatabase.Query(stmt);
 
     if (result)
     {
@@ -2000,7 +2014,12 @@ uint32 ObjectMgr::GetPlayerAccountIdByGUID(uint64 guid) const
         return player->GetSession()->GetAccountId();
     }
 
-    QueryResult result = CharacterDatabase.PQuery("SELECT account FROM characters WHERE guid = '%u'", GUID_LOPART(guid));
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_ACCOUNT_BY_GUID);
+
+    stmt->setUInt32(0, GUID_LOPART(guid));
+
+    PreparedQueryResult result = CharacterDatabase.Query(stmt);
+
     if (result)
     {
         uint32 acc = (*result)[0].GetUInt32();
@@ -2012,7 +2031,12 @@ uint32 ObjectMgr::GetPlayerAccountIdByGUID(uint64 guid) const
 
 uint32 ObjectMgr::GetPlayerAccountIdByPlayerName(const std::string& name) const
 {
-    QueryResult result = CharacterDatabase.PQuery("SELECT account FROM characters WHERE name = '%s'", name.c_str());
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_ACCOUNT_BY_NAME);
+
+    stmt->setString(0, name);
+
+    PreparedQueryResult result = CharacterDatabase.Query(stmt);
+
     if (result)
     {
         uint32 acc = (*result)[0].GetUInt32();
@@ -4809,7 +4833,9 @@ void ObjectMgr::LoadWaypointScripts()
     for (ScriptMapMap::const_iterator itr = sWaypointScripts.begin(); itr != sWaypointScripts.end(); ++itr)
         actionSet.insert(itr->first);
 
-    QueryResult result = WorldDatabase.PQuery("SELECT DISTINCT(`action`) FROM waypoint_data");
+    PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WOLRD_SEL_WAYPOINT_DATA_ACTION);
+    PreparedQueryResult result = WorldDatabase.Query(stmt);
+
     if (result)
     {
         do
@@ -5377,7 +5403,7 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
             }
         }
 
-        stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_MAIL);
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_MAIL_BY_ID);
         stmt->setUInt32(0, m->messageID);
         CharacterDatabase.Execute(stmt);
         delete m;
@@ -5949,7 +5975,7 @@ void ObjectMgr::LoadAreaTriggerTeleports()
 
         AreaTrigger at;
 
-        at.target_mapId             = fields[1].GetUInt32();
+        at.target_mapId             = fields[1].GetUInt16();
         at.target_X                 = fields[2].GetFloat();
         at.target_Y                 = fields[3].GetFloat();
         at.target_Z                 = fields[4].GetFloat();
@@ -6811,13 +6837,13 @@ void ObjectMgr::LoadReputationOnKill()
         uint32 creature_id = fields[0].GetUInt32();
 
         ReputationOnKillEntry repOnKill;
-        repOnKill.RepFaction1          = fields[1].GetUInt32();
-        repOnKill.RepFaction2          = fields[2].GetUInt32();
+        repOnKill.RepFaction1          = fields[1].GetInt16();
+        repOnKill.RepFaction2          = fields[2].GetInt16();
         repOnKill.IsTeamAward1        = fields[3].GetBool();
-        repOnKill.ReputationMaxCap1  = fields[4].GetUInt32();
+        repOnKill.ReputationMaxCap1  = fields[4].GetUInt8();
         repOnKill.RepValue1            = fields[5].GetInt32();
         repOnKill.IsTeamAward2        = fields[6].GetBool();
-        repOnKill.ReputationMaxCap2  = fields[7].GetUInt32();
+        repOnKill.ReputationMaxCap2  = fields[7].GetUInt8();
         repOnKill.RepValue2            = fields[8].GetInt32();
         repOnKill.TeamDependent       = fields[9].GetUInt8();
 
@@ -7033,8 +7059,8 @@ void ObjectMgr::LoadQuestPOI()
         return;
     }
 
-    //                                                0        1   2  3
-    QueryResult points = WorldDatabase.PQuery("SELECT questId, id, x, y FROM quest_poi_points ORDER BY questId DESC, idx");
+    //                                                0       1   2  3
+    QueryResult points = WorldDatabase.Query("SELECT questId, id, x, y FROM quest_poi_points ORDER BY questId DESC, idx");
 
     std::vector<std::vector<std::vector<QuestPOIPoint> > > POIs;
 
@@ -8189,7 +8215,10 @@ void ObjectMgr::LoadTrainerSpell()
 int ObjectMgr::LoadReferenceVendor(int32 vendor, int32 item, std::set<uint32> *skip_vendors)
 {
     // find all items from the reference vendor
-    QueryResult result = WorldDatabase.PQuery("SELECT item, maxcount, incrtime, ExtendedCost FROM npc_vendor WHERE entry='%d' ORDER BY slot ASC", item);
+    PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_SEL_NPC_VENDOR_REF);
+    stmt->setUInt32(0, uint32(item));
+    PreparedQueryResult result = WorldDatabase.Query(stmt);
+
     if (!result)
         return 0;
 
@@ -8205,7 +8234,7 @@ int ObjectMgr::LoadReferenceVendor(int32 vendor, int32 item, std::set<uint32> *s
             count += LoadReferenceVendor(vendor, -item_id, skip_vendors);
         else
         {
-            int32  maxcount     = fields[1].GetInt32();
+            int32  maxcount     = fields[1].GetUInt8(); // tinyint(3) unsigned
             uint32 incrtime     = fields[2].GetUInt32();
             uint32 ExtendedCost = fields[3].GetUInt32();
 
@@ -8663,16 +8692,16 @@ void ObjectMgr::LoadCreatureClassLevelStats()
     {
         Field* fields = result->Fetch();
 
-        uint8 Level = fields[0].GetUInt8();
-        uint8 Class = fields[1].GetUInt8();
+        uint8 Level = fields[0].GetInt8();
+        uint8 Class = fields[1].GetInt8();
 
         CreatureBaseStats stats;
 
         for (uint8 i = 0; i < MAX_CREATURE_BASE_HP; ++i)
-            stats.BaseHealth[i] = fields[i + 2].GetUInt32();
+            stats.BaseHealth[i] = fields[i + 2].GetInt16();
 
-        stats.BaseMana = fields[5].GetUInt32();
-        stats.BaseArmor = fields[6].GetUInt32();
+        stats.BaseMana = fields[5].GetInt16();
+        stats.BaseArmor = fields[6].GetInt16();
 
         if (!Class || ((1 << (Class - 1)) & CLASSMASK_ALL_CREATURES) == 0)
             sLog->outErrorDb("Creature base stats for level %u has invalid class %u", Level, Class);
