@@ -471,7 +471,10 @@ public:
 
     struct boss_illidan_stormrageAI : public ScriptedAI
     {
-        boss_illidan_stormrageAI(Creature* c) : ScriptedAI(c), Summons(me)
+        boss_illidan_stormrageAI(Creature *c)
+        : ScriptedAI(c),
+            AkamaGUID(),
+            Summons(me)
         {
             instance = c->GetInstanceScript();
             DoCast(me, SPELL_DUAL_WIELD, true);
