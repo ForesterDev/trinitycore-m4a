@@ -56,6 +56,12 @@ RealmSocket::~RealmSocket(void)
 
 int RealmSocket::open(void * arg)
 {
+    int optval = 1;
+    if (peer().set_option(SOL_SOCKET, SO_KEEPALIVE, &optval, sizeof optval) == -1)
+    {
+        sLog->outError("Error %s while opening realm socket!", ACE_OS::strerror(errno));
+        return -1;
+    }
     ACE_INET_Addr addr;
 
     if (peer().get_remote_addr(addr) == -1)
