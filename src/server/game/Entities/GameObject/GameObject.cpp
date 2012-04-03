@@ -133,7 +133,7 @@ void GameObject::AddToWorld()
 
         if (m_DBTableGuid)
             if (sPoolMgr->IsPartOfAPool<GameObject>(m_DBTableGuid))
-                ASSERT(sPoolMgr->IsSpawnedObject<GameObject>(m_DBTableGuid));
+                ASSERT((sPoolMgr->IsSpawnedObject<GameObject>(m_DBTableGuid)));
         sObjectAccessor->AddObject(this);
         bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
         bool toggledState = (GetGOData() ? GetGOData()->go_state == GO_STATE_ACTIVE : false);
