@@ -108,6 +108,8 @@ enum Events
     EVENT_LAND                      = 12,
     EVENT_AIR_MOVEMENT              = 21,
     EVENT_THIRD_PHASE_CHECK         = 22,
+    EVENT_AIR_MOVEMENT_FAR          = 23,
+    EVENT_LAND_GROUND               = 24,
 
     // Spinestalker
     EVENT_BELLOWING_ROAR            = 13,
@@ -145,6 +147,8 @@ namespace
         POINT_AIR_PHASE         = 3,
         POINT_TAKEOFF           = 4,
         POINT_LAND              = 5,
+        POINT_AIR_PHASE_FAR     = 6,
+        POINT_LAND_GROUND       = 7,
     };
 }
 
@@ -165,6 +169,8 @@ Position const SindragosaSpawnPos  = {4818.700f, 2483.710f, 287.0650f, 3.089233f
 Position const SindragosaFlyPos    = {4475.190f, 2484.570f, 234.8510f, 3.141593f};
 Position const SindragosaLandPos   = {4419.190f, 2484.570f, 203.3848f, 3.141593f};
 Position const SindragosaAirPos    = {4475.990f, 2484.430f, 247.9340f, 3.141593f};
+Position const SindragosaAirPosFar = {4525.600f, 2485.150f, 245.0820f, 3.141593f};
+Position const SindragosaFlyInPos  = {4419.190f, 2484.360f, 232.5150f, 3.141593f};
 
 class FrostwyrmLandEvent : public BasicEvent
 {
@@ -319,15 +325,23 @@ class boss_sindragosa : public CreatureScript
                         break;
                     case POINT_AIR_PHASE:
                         me->CastCustomSpell(SPELL_ICE_TOMB_TARGET, SPELLVALUE_BASE_POINT0, RAID_MODE<int32>(2, 5, 2, 6), NULL, false);
-                        events.ScheduleEvent(EVENT_FROST_BOMB, 8000);
+                        me->SetFacingTo(float(M_PI));
+                        events.ScheduleEvent(EVENT_AIR_MOVEMENT_FAR, 1);
+                        events.ScheduleEvent(EVENT_FROST_BOMB, 9000);
+                        break;
+                    case POINT_AIR_PHASE_FAR:
+                        me->SetFacingTo(float(M_PI));
+                        events.ScheduleEvent(EVENT_LAND, 30000);
                         break;
                     case POINT_LAND:
+                        events.ScheduleEvent(EVENT_LAND_GROUND, 1);
+                        break;
+                    case POINT_LAND_GROUND:
                         me->SetFlying(false);
                         me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                         me->SetReactState(REACT_DEFENSIVE);
                         if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
                             me->GetMotionMaster()->MovementExpired();
-                        DoStartMovement(me->getVictim());
                         _isInAirPhase = false;
                         // trigger Asphyxiation
                         summons.DoAction(NPC_ICE_TOMB, ACTION_TRIGGER_ASPHYXIATION);
@@ -459,7 +473,6 @@ class boss_sindragosa : public CreatureScript
                             break;
                         case EVENT_ICY_GRIP:
                             DoCast(me, SPELL_ICY_GRIP);
-                            events.ScheduleEvent(EVENT_ICY_GRIP, urand(70000, 75000), EVENT_GROUP_LAND_PHASE);
                             events.ScheduleEvent(EVENT_BLISTERING_COLD, 1000, EVENT_GROUP_LAND_PHASE);
                             break;
                         case EVENT_BLISTERING_COLD:
@@ -477,18 +490,20 @@ class boss_sindragosa : public CreatureScript
                             me->SetFlying(true);
                             me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                             me->SetReactState(REACT_PASSIVE);
+                            me->AttackStop();
                             Position pos;
                             pos.Relocate(me);
                             pos.m_positionZ += 17.0f;
                             me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos, 8.30078125f);
-                            events.DelayEvents(45000, EVENT_GROUP_LAND_PHASE);
+                            events.CancelEventGroup(EVENT_GROUP_LAND_PHASE);
                             events.ScheduleEvent(EVENT_AIR_PHASE, 110000);
-                            events.RescheduleEvent(EVENT_UNCHAINED_MAGIC, urand(55000, 60000), EVENT_GROUP_LAND_PHASE);
-                            events.ScheduleEvent(EVENT_LAND, 45000);
                             break;
                         }
                         case EVENT_AIR_MOVEMENT:
                             me->GetMotionMaster()->MovePoint(POINT_AIR_PHASE, SindragosaAirPos);
+                            break;
+                        case EVENT_AIR_MOVEMENT_FAR:
+                            me->GetMotionMaster()->MovePoint(POINT_AIR_PHASE_FAR, SindragosaAirPosFar);
                             break;
                         case EVENT_ICE_TOMB:
                             events.ScheduleEvent(EVENT_ICE_TOMB, 0);
@@ -502,15 +517,23 @@ class boss_sindragosa : public CreatureScript
                             destZ = 205.0f; // random number close to ground, get exact in next call
                             me->UpdateGroundPositionZ(destX, destY, destZ);
                             me->CastSpell(destX, destY, destZ, SPELL_FROST_BOMB_TRIGGER, false);
-                            events.ScheduleEvent(EVENT_FROST_BOMB, urand(5000, 10000));
+                            events.ScheduleEvent(EVENT_FROST_BOMB, urand(6000, 8000));
                             break;
                         }
                         case EVENT_LAND:
                         {
                             events.CancelEvent(EVENT_FROST_BOMB);
-                            me->GetMotionMaster()->MovePoint(POINT_LAND, SindragosaLandPos);
+                            me->GetMotionMaster()->MovePoint(POINT_LAND, SindragosaFlyInPos);
                             break;
                         }
+                        case EVENT_LAND_GROUND:
+                            events.ScheduleEvent(EVENT_CLEAVE, urand(13000, 15000), EVENT_GROUP_LAND_PHASE);
+                            events.ScheduleEvent(EVENT_TAIL_SMASH, urand(19000, 23000), EVENT_GROUP_LAND_PHASE);
+                            events.ScheduleEvent(EVENT_FROST_BREATH, urand(10000, 15000), EVENT_GROUP_LAND_PHASE);
+                            events.ScheduleEvent(EVENT_UNCHAINED_MAGIC, urand(12000, 17000), EVENT_GROUP_LAND_PHASE);
+                            events.ScheduleEvent(EVENT_ICY_GRIP, urand(35000, 40000), EVENT_GROUP_LAND_PHASE);
+                            me->GetMotionMaster()->MoveLand(POINT_LAND_GROUND, SindragosaLandPos, 0.0f);
+                            break;
                         case EVENT_THIRD_PHASE_CHECK:
                         {
                             if (!_isInAirPhase)
@@ -1079,8 +1102,8 @@ class spell_sindragosa_unchained_magic : public SpellScriptLoader
 
             void FilterTargets(std::list<Unit*>& unitList)
             {
-                unitList.remove_if (UnchainedMagicTargetSelector());
-                uint32 maxSize = uint32(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 5 : 2);
+                unitList.remove_if(UnchainedMagicTargetSelector());
+                uint32 maxSize = uint32(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 6 : 2);
                 if (unitList.size() > maxSize)
                     Trinity::RandomResizeList(unitList, maxSize);
             }
@@ -1499,10 +1522,7 @@ namespace
     private:
         void unit_hit()
         {
-            auto &caster = *GetCaster();
-            auto unit = GetHitUnit();
-            caster.CastSpell(unit, SPELL_FROST_BEACON, true);
-            caster.CastSpell(unit, SPELL_ICE_TOMB_DUMMY, true);
+            GetCaster()->CastSpell(GetHitUnit(), SPELL_ICE_TOMB_DUMMY, true);
         }
 
         void select_targets(list<Unit *> &targetList)
@@ -1575,6 +1595,7 @@ void AddSC_boss_sindragosa()
     new spell_frostwarden_handler_order_whelp();
     new spell_frostwarden_handler_focus_fire();
     load_spell_script<ice_tomb_spell>("spell_sindragosa_ice_tomb");
+    new spell_trigger_spell_from_caster("spell_sindragosa_ice_tomb_dummy", SPELL_FROST_BEACON);
     new at_sindragosa_lair();
     new achievement_all_you_can_eat();
 }
