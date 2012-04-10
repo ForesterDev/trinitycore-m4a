@@ -31,6 +31,8 @@
 #include "UnitAI.h"
 #include "GameObjectAI.h"
 
+using std::ostringstream;
+
 bool GameEventMgr::CheckOneGameEvent(uint16 entry) const
 {
     switch (mGameEvent[entry].state)
@@ -428,6 +430,13 @@ void GameEventMgr::LoadFromDB()
                 uint32 guid    = fields[0].GetUInt32();
                 int16 event_id = fields[1].GetInt16();
 
+                if (sPoolMgr->IsPartOfAPool<GameObject>(guid))
+                {
+                    ostringstream s;
+                    s << "`game_event_gameobject` guid " << guid << " is part of a pool";
+                    sLog->outErrorDb("%s", s.str().c_str());
+                    continue;
+                }
                 int32 internal_event_id = mGameEvent.size() + event_id - 1;
 
                 if (internal_event_id < 0 || internal_event_id >= int32(mGameEventGameobjectGuids.size()))
