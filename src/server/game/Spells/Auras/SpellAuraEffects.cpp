@@ -985,8 +985,6 @@ void AuraEffect::HandleEffect(AuraApplication * aurApp, uint8 mode, bool apply)
         || mode == AURA_EFFECT_HANDLE_REAPPLY
         || mode == (AURA_EFFECT_HANDLE_CHANGE_AMOUNT | AURA_EFFECT_HANDLE_REAPPLY));
 
-    if (apply)
-        ASSERT(m_base->IsAppliedOnTarget(aurApp->GetTarget()->GetGUID()));
     // register/unregister effect in lists in case of real AuraEffect apply/remove
     // registration/unregistration is done always before real effect handling (some effect handlers code is depending on this)
     if (mode & AURA_EFFECT_HANDLE_REAL)
