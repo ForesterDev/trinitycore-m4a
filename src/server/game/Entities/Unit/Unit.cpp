@@ -3744,17 +3744,17 @@ void Unit::RemoveAurasByType(AuraType auraType, uint64 casterGUID, Aura* except,
     for (AuraEffectList::iterator iter = m_modAuras[auraType].begin(); iter != m_modAuras[auraType].end();)
     {
         Aura* aura = (*iter)->GetBase();
-        AuraApplication * aurApp = aura->GetApplicationOfTarget(GetGUID());
 
         ++iter;
-        if (aura != except && (!casterGUID || aura->GetCasterGUID() == casterGUID)
-            && ((negative && !aurApp->IsPositive()) || (positive && aurApp->IsPositive())))
-        {
-            uint32 removedAuras = m_removedAurasCount;
-            RemoveAura(aurApp);
-            if (m_removedAurasCount > removedAuras + 1)
-                iter = m_modAuras[auraType].begin();
-        }
+        if (AuraApplication * aurApp = aura->GetApplicationOfTarget(GetGUID()))
+            if (aura != except && (!casterGUID || aura->GetCasterGUID() == casterGUID)
+                && ((negative && !aurApp->IsPositive()) || (positive && aurApp->IsPositive())))
+            {
+                uint32 removedAuras = m_removedAurasCount;
+                RemoveAura(aurApp);
+                if (m_removedAurasCount > removedAuras + 1)
+                    iter = m_modAuras[auraType].begin();
+            }
     }
 }
 
