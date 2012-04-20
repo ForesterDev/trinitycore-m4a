@@ -1152,26 +1152,11 @@ class spell_sindragosa_ice_tomb : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spell*/)
             {
-                if (!sObjectMgr->GetCreatureTemplate(NPC_ICE_TOMB))
-                    return false;
-                if (!sObjectMgr->GetGameObjectTemplate(GO_ICE_BLOCK))
-                    return false;
                 return true;
             }
 
             void SummonTomb()
             {
-                Position pos;
-                GetHitUnit()->GetPosition(&pos);
-                if (TempSummon* summon = GetCaster()->SummonCreature(NPC_ICE_TOMB, pos))
-                {
-                    summon->AI()->SetGUID(GetHitUnit()->GetGUID(), DATA_TRAPPED_PLAYER);
-                    if (GameObject* go = summon->SummonGameObject(GO_ICE_BLOCK, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0))
-                    {
-                        go->SetSpellId(SPELL_ICE_TOMB_DAMAGE);
-                        summon->AddGameObject(go);
-                    }
-                }
             }
 
             void Register()
@@ -1184,22 +1169,73 @@ class spell_sindragosa_ice_tomb : public SpellScriptLoader
         {
             PrepareAuraScript(spell_sindragosa_ice_tomb_AuraScript);
 
+            enum event
+            {
+                event_summon,
+                event_cast,
+                event_none,
+            };
+
             void PeriodicTick(AuraEffect const* /*aurEff*/)
             {
                 PreventDefaultAction();
-                GetTarget()->CastSpell(static_cast<Unit *>(nullptr), SPELL_ICE_TOMB_UNTARGETABLE, true);
+                switch (event_)
+                {
+                case event_summon:
+                    {
+                        auto &target = *GetTarget();
+                        Position pos;
+                        target.GetPosition(&pos);
+                        if (TempSummon* summon = GetCaster()->SummonCreature(NPC_ICE_TOMB, pos))
+                        {
+                            summon->AI()->SetGUID(target.GetGUID(), DATA_TRAPPED_PLAYER);
+                            if (GameObject* go = summon->SummonGameObject(GO_ICE_BLOCK, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0))
+                            {
+                                go->SetSpellId(SPELL_ICE_TOMB_DAMAGE);
+                                summon->AddGameObject(go);
+                            }
+                        }
+                    }
+                    event_ = event_cast;
+                    break;
+                case event_cast:
+                    GetTarget()->CastSpell(static_cast<Unit *>(nullptr), SPELL_ICE_TOMB_UNTARGETABLE, true);
+                    event_ = event_none;
+                    break;
+                case event_none:
+                    break;
+                }
             }
 
             void Register()
             {
                 OnEffectPeriodic += AuraEffectPeriodicFn(spell_sindragosa_ice_tomb_AuraScript::PeriodicTick, EFFECT_2, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+                AfterEffectApply += AuraEffectApplyFn(spell_sindragosa_ice_tomb_AuraScript::applied, EFFECT_2, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
                 AfterEffectRemove += AuraEffectRemoveFn(spell_sindragosa_ice_tomb_AuraScript::removed, EFFECT_2, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+            }
+
+            bool Validate(const SpellInfo *spellEntry)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_ICE_TOMB_UNTARGETABLE))
+                    return false;
+                if (!sObjectMgr->GetCreatureTemplate(NPC_ICE_TOMB))
+                    return false;
+                if (!sObjectMgr->GetGameObjectTemplate(GO_ICE_BLOCK))
+                    return false;
+                return true;
+            }
+
+            void applied(const AuraEffect *aurEff, AuraEffectHandleModes mode)
+            {
+                event_ = event_summon;
             }
 
             void removed(const AuraEffect *aurEff, AuraEffectHandleModes mode)
             {
                 GetTarget()->RemoveAura(SPELL_ICE_TOMB_UNTARGETABLE, GetTarget()->GetGUID());
             }
+
+            event event_;
         };
 
         SpellScript* GetSpellScript() const
