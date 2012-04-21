@@ -206,6 +206,26 @@ class SpellScriptLoader : public ScriptObject
         virtual AuraScript* GetAuraScript() const { return NULL; }
 };
 
+template<class spell_script>
+inline void load_spell_script(const char *name)
+{
+    struct script_loader
+    : SpellScriptLoader
+    {
+        script_loader(const char *name)
+        : SpellScriptLoader(name)
+        {
+        }
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_script();
+        }
+    };
+
+    new script_loader(name);
+}
+
 class ServerScript : public ScriptObject
 {
     protected:
