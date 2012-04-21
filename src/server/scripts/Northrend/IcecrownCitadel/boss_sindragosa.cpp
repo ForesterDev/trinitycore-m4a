@@ -17,10 +17,15 @@
 
 #include "ScriptPCH.h"
 #include "ObjectMgr.h"
+#include <Spell.h>
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellAuraEffects.h"
 #include "icecrown_citadel.h"
+
+using boost::numeric_cast;
+using std::list;
+using Trinity::RandomResizeList;
 
 namespace
 {
@@ -295,7 +300,7 @@ class boss_sindragosa : public CreatureScript
                         events.ScheduleEvent(EVENT_AIR_MOVEMENT, 1);
                         break;
                     case POINT_AIR_PHASE:
-                        me->CastCustomSpell(SPELL_ICE_TOMB_TARGET, SPELLVALUE_MAX_TARGETS, RAID_MODE<int32>(2, 5, 2, 6), NULL);
+                        me->CastCustomSpell(SPELL_ICE_TOMB_TARGET, SPELLVALUE_BASE_POINT0, RAID_MODE<int32>(2, 5, 2, 6), NULL, false);
                         events.ScheduleEvent(EVENT_FROST_BOMB, 8000);
                         break;
                     case POINT_LAND:
@@ -373,7 +378,16 @@ class boss_sindragosa : public CreatureScript
                         }
                 }
 
-                if (spell->Id == SPELL_FROST_BOMB_TRIGGER)
+                auto spell_id = spell->Id;
+                if (spell_id == SPELL_ICE_TOMB_TARGET)
+                {
+                    if (events.GetNextEventTime(EVENT_ICE_TOMB))
+                    {
+                        Talk(EMOTE_WARN_FROZEN_ORB, target->GetGUID());
+                        events.RescheduleEvent(EVENT_ICE_TOMB, 1000 * 15);
+                    }
+                }
+                else if (spell_id == SPELL_FROST_BOMB_TRIGGER)
                 {
                     target->CastSpell(target, SPELL_FROST_BOMB, true);
                     target->RemoveAurasDueToSpell(SPELL_FROST_BOMB_VISUAL);
@@ -389,6 +403,8 @@ class boss_sindragosa : public CreatureScript
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
+
+                DoMeleeAttackIfReady();
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {
@@ -450,13 +466,9 @@ class boss_sindragosa : public CreatureScript
                             me->GetMotionMaster()->MovePoint(POINT_AIR_PHASE, SindragosaAirPos);
                             break;
                         case EVENT_ICE_TOMB:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -SPELL_ICE_TOMB_UNTARGETABLE))
-                            {
-                                Talk(EMOTE_WARN_FROZEN_ORB, target->GetGUID());
-                                DoCast(target, SPELL_ICE_TOMB_DUMMY, true);
-                            }
-                            events.ScheduleEvent(EVENT_ICE_TOMB, urand(16000, 23000));
-                            break;
+                            events.ScheduleEvent(EVENT_ICE_TOMB, 0);
+                            me->CastCustomSpell(SPELL_ICE_TOMB_TARGET, SPELLVALUE_BASE_POINT0, 1, nullptr, false);
+                            return;
                         case EVENT_FROST_BOMB:
                         {
                             float destX, destY, destZ;
@@ -501,8 +513,6 @@ class boss_sindragosa : public CreatureScript
                             break;
                     }
                 }
-
-                DoMeleeAttackIfReady();
             }
 
         private:
@@ -1507,6 +1517,41 @@ class spell_frostwarden_handler_focus_fire : public SpellScriptLoader
         }
 };
 
+namespace
+{
+    class ice_tomb_spell
+    : public SpellScript
+    {
+        PrepareSpellScript(ice_tomb_spell);
+
+    public:
+        void Register()
+        {
+            AfterHit += SpellHitFn(ice_tomb_spell::unit_hit);
+            OnUnitTargetSelect += SpellUnitTargetFn(ice_tomb_spell::select_targets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+
+        bool Validate(const SpellInfo *spellEntry)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_ICE_TOMB_DUMMY))
+                return false;
+            return true;
+        }
+
+    private:
+        void unit_hit()
+        {
+            GetCaster()->CastSpell(GetHitUnit(), SPELL_ICE_TOMB_DUMMY, true);
+        }
+
+        void select_targets(list<Unit *> &targetList)
+        {
+            targetList.remove(GetCaster()->getVictim());
+            RandomResizeList(targetList, numeric_cast<uint32>(GetSpellInfo()->Effects[0].CalcValue(nullptr, &GetSpellValue()->EffectBasePoints[0])));
+        }
+    };
+}
+
 class at_sindragosa_lair : public AreaTriggerScript
 {
     public:
@@ -1569,7 +1614,7 @@ void AddSC_boss_sindragosa()
     new spell_rimefang_icy_blast();
     new spell_frostwarden_handler_order_whelp();
     new spell_frostwarden_handler_focus_fire();
-    new spell_trigger_spell_from_caster("spell_sindragosa_ice_tomb", SPELL_ICE_TOMB_DUMMY);
+    load_spell_script<ice_tomb_spell>("spell_sindragosa_ice_tomb");
     new spell_trigger_spell_from_caster("spell_sindragosa_ice_tomb_dummy", SPELL_FROST_BEACON);
     new at_sindragosa_lair();
     new achievement_all_you_can_eat();
