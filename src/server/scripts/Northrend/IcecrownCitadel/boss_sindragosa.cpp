@@ -501,7 +501,7 @@ class boss_sindragosa : public CreatureScript
                             if (!_isInAirPhase)
                             {
                                 Talk(SAY_PHASE_2);
-                                events.ScheduleEvent(EVENT_ICE_TOMB, urand(7000, 10000));
+                                events.ScheduleEvent(EVENT_ICE_TOMB, 1000 * 6);
                                 events.RescheduleEvent(EVENT_ICY_GRIP, urand(35000, 40000));
                                 DoCast(me, SPELL_MYSTIC_BUFFET, true);
                             }
@@ -1541,7 +1541,10 @@ namespace
     private:
         void unit_hit()
         {
-            GetCaster()->CastSpell(GetHitUnit(), SPELL_ICE_TOMB_DUMMY, true);
+            auto &caster = *GetCaster();
+            auto unit = GetHitUnit();
+            caster.CastSpell(unit, SPELL_FROST_BEACON, true);
+            caster.CastSpell(unit, SPELL_ICE_TOMB_DUMMY, true);
         }
 
         void select_targets(list<Unit *> &targetList)
@@ -1615,7 +1618,6 @@ void AddSC_boss_sindragosa()
     new spell_frostwarden_handler_order_whelp();
     new spell_frostwarden_handler_focus_fire();
     load_spell_script<ice_tomb_spell>("spell_sindragosa_ice_tomb");
-    new spell_trigger_spell_from_caster("spell_sindragosa_ice_tomb_dummy", SPELL_FROST_BEACON);
     new at_sindragosa_lair();
     new achievement_all_you_can_eat();
 }
