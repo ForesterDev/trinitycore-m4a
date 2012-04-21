@@ -18,6 +18,7 @@
 #include "ScriptPCH.h"
 #include "ObjectMgr.h"
 #include <Spell.h>
+#include <ThreatManager.h>
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellAuraEffects.h"
@@ -1567,7 +1568,9 @@ namespace
 
         void select_targets(list<Unit *> &targetList)
         {
-            targetList.remove(GetCaster()->getVictim());
+            if (auto victim = GetCaster()->getThreatManager().getCurrentVictim())
+                if (victim->isValid())
+                    targetList.remove(victim->getTarget());
             RandomResizeList(targetList, numeric_cast<uint32>(GetSpellInfo()->Effects[0].CalcValue(nullptr, &GetSpellValue()->EffectBasePoints[0])));
         }
     };
