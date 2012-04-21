@@ -8725,6 +8725,11 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             if (!victim || !victim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, procSpell, this))
                 return false;
             break;
+        case 70107 /* Permeating Chill */:
+            if (victim)
+                if (victim->GetEntry() == 36853 /* Sindragosa */)
+                    break;
+            return false;
         // Deathbringer Saurfang - Blood Beast's Blood Link
         case 72176:
             basepoints0 = 3;
