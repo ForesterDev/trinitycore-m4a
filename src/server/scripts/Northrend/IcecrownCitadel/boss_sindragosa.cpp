@@ -37,7 +37,7 @@ namespace
         SAY_BLISTERING_COLD                 = 3, // Can you feel the cold hand of death upon your heart?
         SAY_RESPITE_FOR_A_TORMENTED_SOUL    = 4, // Aaah! It burns! What sorcery is this?!
         SAY_AIR_PHASE                       = 5, // Your incursion ends here! None shall survive!
-        SAY_PHASE_2                         = 6, // Now feel my master's limitless power and despair!
+        SAY_PHASE_2                         = 6, // Now, feel my master's limitless power and despair!
         EMOTE_WARN_FROZEN_ORB               = 7, // %s fires a frozen orb towards $N!
         SAY_KILL                            = 8, // Perish!
                                                  // A flaw of mortality...
