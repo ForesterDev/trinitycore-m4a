@@ -7,8 +7,10 @@
 
 #include <memory>
 #include <algorithm>
+#include <list>
 #include <stdexcept>
 #include <functional>
+#include <boost/numeric/conversion/cast.hpp>
 #include "ScriptMgr.h"
 #include "Cell.h"
 #include "CellImpl.h"
