@@ -1231,11 +1231,12 @@ class spell_sindragosa_ice_tomb : public SpellScriptLoader
                 switch (event_)
                 {
                 case event_summon:
+                    if (auto caster = GetCaster())
                     {
                         auto &target = *GetTarget();
                         Position pos;
                         target.GetPosition(&pos);
-                        if (TempSummon* summon = GetCaster()->SummonCreature(NPC_ICE_TOMB, pos))
+                        if (TempSummon* summon = caster->SummonCreature(NPC_ICE_TOMB, pos))
                         {
                             summon->AI()->SetGUID(target.GetGUID(), DATA_TRAPPED_PLAYER);
                             if (GameObject* go = summon->SummonGameObject(GO_ICE_BLOCK, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0))
