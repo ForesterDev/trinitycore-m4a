@@ -396,27 +396,44 @@ bool AuthSocket::_HandleLogonChallenge()
 
             if (!locked)
             {
-                //set expired bans to inactive
-                LoginDatabase.Execute(LoginDatabase.GetPreparedStatement(LOGIN_UPD_EXPIRED_ACCOUNT_BANS));
-
                 // If the account is banned, reject the logon attempt
+                auto banned = false;
                 stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_BANNED);
-                stmt->setUInt32(0, fields[1].GetUInt32());
+                auto id = fields[1].GetUInt32();
+                stmt->setUInt32(0, id);
                 PreparedQueryResult banresult = LoginDatabase.Query(stmt);
                 if (banresult)
-                {
-                    if ((*banresult)[0].GetUInt64() == (*banresult)[1].GetUInt64())
+                    do
                     {
-                        pkt << (uint8)WOW_FAIL_BANNED;
-                        sLog->outBasic("'%s:%d' [AuthChallenge] Banned account %s tried to login!", socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str ());
+                        auto fields_ = banresult->Fetch();
+                        if (!fields_[2].GetBool())
+                        {
+                            if (!banned)
+                            {
+                                banned = true;
+                                if (fields_[0].GetUInt64() == fields_[1].GetUInt64())
+                                {
+                                    pkt << (uint8)WOW_FAIL_BANNED;
+                                    sLog->outBasic("'%s:%d' [AuthChallenge] Banned account %s tried to login!", socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str ());
+                                }
+                                else
+                                {
+                                    pkt << (uint8)WOW_FAIL_SUSPENDED;
+                                    sLog->outBasic("'%s:%d' [AuthChallenge] Temporarily banned account %s tried to login!", socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str ());
+                                }
+                            }
+                        }
+                        else
+                        {
+                            //set expired ban to inactive
+                            stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_EXPIRED_ACCOUNT_BAN);
+                            stmt->setUInt32(0, id);
+                            stmt->setInt64(1, fields_[0].GetInt64());
+                            LoginDatabase.Execute(stmt);
+                        }
                     }
-                    else
-                    {
-                        pkt << (uint8)WOW_FAIL_SUSPENDED;
-                        sLog->outBasic("'%s:%d' [AuthChallenge] Temporarily banned account %s tried to login!", socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str ());
-                    }
-                }
-                else
+                    while (banresult->NextRow());
+                if (!banned)
                 {
                     // Get the password from the account table, upper it, and make the SRP6 calculation
                     std::string rI = fields[0].GetString();
