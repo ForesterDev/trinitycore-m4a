@@ -1,3 +1,4 @@
+#include <cmath>
 #include "Define.h"
 #include "VMapDefinitions.h"
 #include "MapTree.h"
