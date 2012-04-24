@@ -1234,30 +1234,30 @@ class spell_gen_magic_rooster : public SpellScriptLoader
 
 class spell_gen_allow_cast_from_item_only : public SpellScriptLoader
 {
-public:
-    spell_gen_allow_cast_from_item_only() : SpellScriptLoader("spell_gen_allow_cast_from_item_only") { }
+    public:
+        spell_gen_allow_cast_from_item_only() : SpellScriptLoader("spell_gen_allow_cast_from_item_only") { }
 
-    class spell_gen_allow_cast_from_item_only_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_gen_allow_cast_from_item_only_SpellScript);
-
-        SpellCastResult CheckRequirement()
+        class spell_gen_allow_cast_from_item_only_SpellScript : public SpellScript
         {
-            if (!GetCastItem())
-                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
-            return SPELL_CAST_OK;
-        }
+            PrepareSpellScript(spell_gen_allow_cast_from_item_only_SpellScript);
 
-        void Register()
+            SpellCastResult CheckRequirement()
+            {
+                if (!GetCastItem())
+                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                return SPELL_CAST_OK;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_gen_allow_cast_from_item_only_SpellScript::CheckRequirement);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
         {
-            OnCheckCast += SpellCheckCastFn(spell_gen_allow_cast_from_item_only_SpellScript::CheckRequirement);
+            return new spell_gen_allow_cast_from_item_only_SpellScript();
         }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_gen_allow_cast_from_item_only_SpellScript();
-    }
 };
 
 enum Launch
@@ -2590,6 +2590,72 @@ class spell_gen_ds_flush_knockback : public SpellScriptLoader
         }
 };
 
+class spell_gen_wg_water : public SpellScriptLoader
+{
+    public:
+        spell_gen_wg_water() : SpellScriptLoader("spell_gen_wg_water") {}
+
+        class spell_gen_wg_water_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_wg_water_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (!GetSpellInfo()->CheckTargetCreatureType(GetCaster()))
+                    return SPELL_FAILED_DONT_REPORT;
+                return SPELL_CAST_OK;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_gen_wg_water_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_gen_wg_water_SpellScript();
+        }
+};
+
+class spell_gen_count_pct_from_max_hp : public SpellScriptLoader
+{
+    public:
+        spell_gen_count_pct_from_max_hp(char const* name, int32 damagePct = 0) : SpellScriptLoader(name), _damagePct(damagePct) { }
+
+        class spell_gen_count_pct_from_max_hp_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_count_pct_from_max_hp_SpellScript)
+
+        public:
+            spell_gen_count_pct_from_max_hp_SpellScript(int32 damagePct) : SpellScript(), _damagePct(damagePct) { }
+
+            void RecalculateDamage()
+            {
+                if (!_damagePct)
+                    _damagePct = GetHitDamage();
+
+                SetHitDamage(GetHitUnit()->CountPctFromMaxHealth(_damagePct));
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_gen_count_pct_from_max_hp_SpellScript::RecalculateDamage);
+            }
+
+        private:
+            int32 _damagePct;
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_gen_count_pct_from_max_hp_SpellScript(_damagePct);
+        }
+
+    private:
+        int32 _damagePct;
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -2640,4 +2706,7 @@ void AddSC_generic_spell_scripts()
     new spell_gen_tournament_pennant();
     new spell_gen_chaos_blast();
     new spell_gen_ds_flush_knockback();
+    new spell_gen_wg_water();
+    new spell_gen_count_pct_from_max_hp("spell_gen_default_count_pct_from_max_hp");
+    new spell_gen_count_pct_from_max_hp("spell_gen_50pct_count_pct_from_max_hp", 50);
 }

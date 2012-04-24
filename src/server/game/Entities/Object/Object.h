@@ -685,7 +685,7 @@ class WorldObject : public Object, public WorldLocation
         bool IsInMap(const WorldObject* obj) const
         {
             if (obj)
-                return IsInWorld() && obj->IsInWorld() && (GetMap() == obj->GetMap()) && InSamePhase(obj);
+                return IsInWorld() && obj->IsInWorld() && (GetMap() == obj->GetMap());
             return false;
         }
         bool IsWithinDist3d(float x, float y, float z, float dist) const
@@ -703,7 +703,7 @@ class WorldObject : public Object, public WorldLocation
         }
         bool IsWithinDistInMap(WorldObject const* obj, float dist2compare, bool is3D = true) const
         {
-            return obj && IsInMap(obj) && _IsWithinDist(obj, dist2compare, is3D);
+            return obj && IsInMap(obj) && InSamePhase(obj) && _IsWithinDist(obj, dist2compare, is3D);
         }
         bool IsWithinLOS(float x, float y, float z) const;
         bool IsWithinLOSInMap(const WorldObject* obj) const;
@@ -878,20 +878,6 @@ class WorldObject : public Object, public WorldLocation
 
 namespace Trinity
 {
-    template<class T>
-    void RandomResizeList(std::list<T> &_list, uint32 _size)
-    {
-        size_t list_size = _list.size();
-
-        while (list_size > _size)
-        {
-            typename std::list<T>::iterator itr = _list.begin();
-            std::advance(itr, urand(0, list_size - 1));
-            _list.erase(itr);
-            --list_size;
-        }
-    }
-
     // Binary predicate to sort WorldObjects based on the distance to a reference WorldObject
     class ObjectDistanceOrderPred
     {
