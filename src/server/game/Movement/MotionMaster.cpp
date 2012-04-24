@@ -114,6 +114,9 @@ void MotionMaster::UpdateMotion(uint32 diff)
 
         _cleanFlag &= ~MMCF_RESET;
     }
+
+    // probably not the best place to pu this but im not really sure where else to put it.
+    _owner->UpdateUnderwaterState(_owner->GetMap(), _owner->GetPositionX(), _owner->GetPositionY(), _owner->GetPositionZ());
 }
 
 void MotionMaster::DirectClean(bool reset)
@@ -382,6 +385,12 @@ void MotionMaster::MoveFall(uint32 id/*=0*/)
     // Abort too if the ground is very near
     if (fabs(_owner->GetPositionZ() - tz) < 0.1f)
         return;
+
+    if (_owner->GetTypeId() == TYPEID_PLAYER)
+    {
+        _owner->AddUnitMovementFlag(MOVEMENTFLAG_FALLING);
+        _owner->m_movementInfo.SetFallTime(0);
+    }
 
     Movement::MoveSplineInit init(*_owner);
     init.MoveTo(_owner->GetPositionX(), _owner->GetPositionY(), tz);

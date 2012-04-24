@@ -2486,6 +2486,9 @@ class Player : public Unit, public GridObject<Player>
         */
         void SendMovementSetCanFly(bool apply);
         void SendMovementSetCanTransitionBetweenSwimAndFly(bool apply);
+        void SendMovementSetHover(bool apply);
+        void SendMovementSetWaterWalking(bool apply);
+        void SendMovementSetFeatherFall(bool apply);
 
         bool CanFly() const { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_CAN_FLY); }
 
@@ -2822,7 +2825,6 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_lastFallTime;
         float  m_lastFallZ;
 
-        LiquidTypeEntry const* _lastLiquid;
         int32 m_MirrorTimer[MAX_TIMERS];
         uint8 m_MirrorTimerFlags;
         uint8 m_MirrorTimerFlagsLast;
