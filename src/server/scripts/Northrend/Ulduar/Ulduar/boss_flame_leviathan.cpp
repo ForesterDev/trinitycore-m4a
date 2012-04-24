@@ -1273,7 +1273,7 @@ class go_ulduar_tower : public GameObjectScript
     public:
         go_ulduar_tower() : GameObjectScript("go_ulduar_tower") { }
 
-        void OnDestroyed(GameObject* go, Player* /*player*/,  uint32 /*value*/)
+        void OnDestroyed(GameObject* go, Player* /*player*/)
         {
             InstanceScript* instance = go->GetInstanceScript();
             if (!instance)
@@ -1678,7 +1678,7 @@ class spell_pursue : public SpellScriptLoader
                 else
                 {
                     //! In the end, only one target should be selected
-                    _target = SelectRandomContainerElement(targets);
+                    _target = Trinity::Containers::SelectRandomContainerElement(targets);
                     FilterTargetsSubsequently(targets);
                 }
             }

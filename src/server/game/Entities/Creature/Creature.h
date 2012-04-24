@@ -266,7 +266,6 @@ struct CreatureData
 // `creature_addon` table
 struct CreatureAddon
 {
-    uint32 guidOrEntry;
     uint32 path_id;
     uint32 mount;
     uint32 bytes1;
@@ -508,7 +507,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
             if (isPet())
                 return false;
 
-            return GetCreatureTemplate()->rank == CREATURE_ELITE_WORLDBOSS;
+            return GetCreatureTemplate()->type_flags & CREATURE_TYPEFLAGS_BOSS;
         }
 
         bool IsDungeonBoss() const;

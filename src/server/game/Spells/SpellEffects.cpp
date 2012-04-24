@@ -390,23 +390,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         if (!unitTarget->HasAura(27825))
                             return;
                         break;
-                    // Cataclysmic Bolt
-                    case 38441:
-                    {
-                        damage = unitTarget->CountPctFromMaxHealth(50);
-                        break;
-                    }
-                    case 20625: // Ritual of Doom Sacrifice
-                    case 29142: // Eyesore Blaster
-                    case 35139: // Throw Boom's Doom
-                    case 42393: // Brewfest - Attack Keg
-                    case 55269: // Deathly Stare
-                    case 56578: // Rapid-Fire Harpoon
-                    case 62775: // Tympanic Tantrum
-                    {
-                        damage = unitTarget->CountPctFromMaxHealth(damage);
-                        break;
-                    }
                     // Gargoyle Strike
                     case 51963:
                     {
@@ -666,19 +649,19 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     if (found)
                         damage += m_spellInfo->Effects[EFFECT_1].CalcValue();
 
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    if (Player* caster = m_caster->ToPlayer())
                     {
                         // Add Ammo and Weapon damage plus RAP * 0.1
-                        Item* item = m_caster->ToPlayer()->GetWeaponForAttack(RANGED_ATTACK);
-                        if (item)
+                        if (Item* item = caster->GetWeaponForAttack(RANGED_ATTACK))
                         {
-                            float dmg_min = item->GetTemplate()->Damage->DamageMin;
-                            float dmg_max = item->GetTemplate()->Damage->DamageMax;
+                            ItemTemplate const* weaponTemplate = item->GetTemplate();
+                            float dmg_min = weaponTemplate->Damage[0].DamageMin;
+                            float dmg_max = weaponTemplate->Damage[0].DamageMax;
                             if (dmg_max == 0.0f && dmg_min > dmg_max)
                                 damage += int32(dmg_min);
                             else
                                 damage += irand(int32(dmg_min), int32(dmg_max));
-                            damage += int32(m_caster->ToPlayer()->GetAmmoDPS()*item->GetTemplate()->Delay*0.001f);
+                            damage += int32(caster->GetAmmoDPS() * weaponTemplate->Delay * 0.001f);
                         }
                     }
                 }
@@ -774,7 +757,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     uint32 maxTargets = std::min<uint32>(3, attackers.size());
                     for (uint32 i = 0; i < maxTargets; ++i)
                     {
-                        Unit* attacker = SelectRandomContainerElement(attackers);
+                        Unit* attacker = Trinity::Containers::SelectRandomContainerElement(attackers);
                         AddUnitTarget(attacker, 1 << 1);
                         attackers.erase(attacker);
                     }
@@ -1611,20 +1594,6 @@ void Spell::EffectHeal(SpellEffIndex /*effIndex*/)
                 }
             }
         }
-        // Lifebloom - final heal coef multiplied by original DoT stack
-        else if (m_spellInfo->Id == 33778)
-            addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, addhealth, HEAL, m_spellValue->EffectBasePoints[1]);
-        // Riptide - increase healing done by Chain Heal
-        else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN && m_spellInfo->SpellFamilyFlags[0] & 0x100)
-        {
-            addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, addhealth, HEAL);
-            if (AuraEffect* aurEff = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_SHAMAN, 0, 0, 0x10, m_originalCasterGUID))
-            {
-                addhealth = int32(addhealth * 1.25f);
-                // consume aura
-                unitTarget->RemoveAura(aurEff->GetBase());
-            }
-        }
         // Death Pact - return pct of max health to caster
         else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellInfo->SpellFamilyFlags[0] & 0x00080000)
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, int32(caster->CountPctFromMaxHealth(damage)), HEAL);
@@ -2008,7 +1977,7 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
         if (!avalibleElixirs.empty())
         {
             // cast random elixir on target
-            m_caster->CastSpell(unitTarget, SelectRandomContainerElement(avalibleElixirs), true, m_CastItem);
+            m_caster->CastSpell(unitTarget, Trinity::Containers::SelectRandomContainerElement(avalibleElixirs), true, m_CastItem);
         }
     }
 }
@@ -5726,7 +5695,7 @@ void Spell::EffectSummonDeadPet(SpellEffIndex /*effIndex*/)
         return;
 
     Pet* pet = player->GetPet();
-    if (!pet || pet->isAlive())
+    if (pet && pet->isAlive())
         return;
 
     if (damage < 0)
@@ -5734,8 +5703,16 @@ void Spell::EffectSummonDeadPet(SpellEffIndex /*effIndex*/)
 
     float x, y, z;
     player->GetPosition(x, y, z);
+    if (!pet)
+    {
+        player->SummonPet(0, x, y, z, player->GetOrientation(), SUMMON_PET, 0);
+        pet = player->GetPet();
+    }
+    if (!pet)
+        return;
+    
     player->GetMap()->CreatureRelocation(pet, x, y, z, player->GetOrientation());
-
+    
     pet->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
     pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
     pet->setDeathState(ALIVE);
