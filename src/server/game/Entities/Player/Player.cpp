@@ -1875,8 +1875,8 @@ bool Player::BuildEnumData(PreparedQueryResult result, WorldPacket* data)
     //    "SELECT characters.guid, characters.name, characters.race, characters.class, characters.gender, characters.playerBytes, characters.playerBytes2, characters.level, "
     //     8                9               10                     11                     12                     13                    14
     //    "characters.zone, characters.map, characters.position_x, characters.position_y, characters.position_z, guild_member.guildid, characters.playerFlags, "
-    //    15                    16                   17                     18                   19               20                     21
-    //    "characters.at_login, character_pet.entry, character_pet.modelid, character_pet.level, characters.data, character_banned.guid, character_declinedname.genitive "
+    //    15                    16                   17                     18                   19               20                        22
+    //    "characters.at_login, character_pet.entry, character_pet.modelid, character_pet.level, characters.data, character_banned.bandate, character_declinedname.genitive "
 
     Field* fields = result->Fetch();
 
@@ -1933,11 +1933,20 @@ bool Player::BuildEnumData(PreparedQueryResult result, WorldPacket* data)
         charFlags |= CHARACTER_FLAG_GHOST;
     if (atLoginFlags & AT_LOGIN_RENAME)
         charFlags |= CHARACTER_FLAG_RENAME;
-    if (fields[20].GetUInt32())
-        charFlags |= CHARACTER_FLAG_LOCKED_BY_BILLING;
+    if (!fields[20].is_null())
+        if (!fields[21].GetBool())
+            charFlags |= CHARACTER_FLAG_LOCKED_BY_BILLING;
+        else
+        {
+            // remove expired ban
+            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_EXPIRED_BAN);
+            stmt->setUInt32(0, guid);
+            stmt->setUInt32(1, fields[20].GetUInt32());
+            CharacterDatabase.Execute(stmt);
+        }
     if (sWorld->getBoolConfig(CONFIG_DECLINED_NAMES_USED))
     {
-        if (!fields[21].GetString().empty())
+        if (!fields[22].GetString().empty())
             charFlags |= CHARACTER_FLAG_DECLINED;
     }
     else
