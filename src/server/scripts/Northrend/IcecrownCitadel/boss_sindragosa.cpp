@@ -328,6 +328,7 @@ class boss_sindragosa : public CreatureScript
                         me->CastCustomSpell(SPELL_ICE_TOMB_TARGET, SPELLVALUE_BASE_POINT0, RAID_MODE<int32>(2, 5, 2, 6), NULL, false);
                         me->SetFacingTo(float(M_PI));
                         events.ScheduleEvent(EVENT_AIR_MOVEMENT_FAR, 1);
+                        frost_bomb_count = 4;
                         events.ScheduleEvent(EVENT_FROST_BOMB, 9000);
                         break;
                     case POINT_AIR_PHASE_FAR:
@@ -518,7 +519,8 @@ class boss_sindragosa : public CreatureScript
                             destZ = 205.0f; // random number close to ground, get exact in next call
                             me->UpdateGroundPositionZ(destX, destY, destZ);
                             me->CastSpell(destX, destY, destZ, SPELL_FROST_BOMB_TRIGGER, false);
-                            events.ScheduleEvent(EVENT_FROST_BOMB, urand(6000, 8000));
+                            if (--frost_bomb_count)
+                                events.ScheduleEvent(EVENT_FROST_BOMB, urand(6000, 8000));
                             break;
                         }
                         case EVENT_LAND:
@@ -558,6 +560,7 @@ class boss_sindragosa : public CreatureScript
             uint8 _mysticBuffetStack;
             bool _isInAirPhase;
             bool _isThirdPhase;
+            int frost_bomb_count;
         };
 
         CreatureAI* GetAI(Creature* creature) const
