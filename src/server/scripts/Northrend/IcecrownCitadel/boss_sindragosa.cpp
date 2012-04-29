@@ -1343,7 +1343,7 @@ class MysticBuffetTargetFilter
 
         bool operator()(Unit* unit)
         {
-            return true;
+            return false;
         }
 
     private:
