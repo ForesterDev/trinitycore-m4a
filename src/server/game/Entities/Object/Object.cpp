@@ -1305,16 +1305,17 @@ bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
     if (!IsInMap(obj))
         return false;
 
-    // hack for ice tomb's gameobject
+    G3D::Vector3 pos_1(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ());
+    G3D::Vector3 pos_2(GetPositionX(), GetPositionY(), GetPositionZ());
     if (obj->GetTypeId() == TYPEID_UNIT)
-        if (obj->GetEntry() == 36980 /* Ice Tomb */)
+    {
+        auto dist = (pos_2 - pos_1).magnitude();
+        auto combatreach = obj->GetObjectSize();
+        if (G3D::fuzzyLe(dist, combatreach))
             return true;
-    if (GetTypeId() == TYPEID_UNIT)
-        if (GetEntry() == 36980 /* Ice Tomb */)
-            return true;
-    float ox, oy, oz;
-    obj->GetPosition(ox, oy, oz);
-    return IsWithinLOS(ox, oy, oz);
+        pos_1 = G3D::Ray::fromOriginAndDirection(pos_1, (pos_2 - pos_1) / dist).bump(combatreach).origin();
+    }
+    return IsWithinLOS(pos_1.x, pos_1.y, pos_1.z);
 }
 
 bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
@@ -1325,7 +1326,19 @@ bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
     unique_lock<Vmap_mutex> l(vmap_mutex());
     return vMapManager->isInLineOfSight(GetMapId(), x, y, z+2.0f, ox, oy, oz+2.0f);*/
     if (IsInWorld())
-        return GetMap()->isInLineOfSight(GetPositionX(), GetPositionY(), GetPositionZ()+2.f, ox, oy, oz+2.f, GetPhaseMask());
+    {
+        G3D::Vector3 pos_1(GetPositionX(), GetPositionY(), GetPositionZ());
+        G3D::Vector3 pos_2(ox, oy, oz);
+        if (GetTypeId() == TYPEID_UNIT)
+        {
+            auto dist = (pos_2 - pos_1).magnitude();
+            auto combatreach = GetObjectSize();
+            if (G3D::fuzzyLe(dist, combatreach))
+                return true;
+            pos_1 = G3D::Ray::fromOriginAndDirection(pos_1, (pos_2 - pos_1) / dist).bump(combatreach).origin();
+        }
+        return GetMap()->isInLineOfSight(pos_1.x, pos_1.y, pos_1.z+2.f, pos_2.x, pos_2.y, pos_2.z+2.f, GetPhaseMask());
+    }
 
     return true;
 }
