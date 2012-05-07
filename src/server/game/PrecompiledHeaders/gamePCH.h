@@ -12,6 +12,9 @@
 #include <boost/none.hpp>
 #include <boost/optional/optional.hpp>
 #include <boost/thread/locks.hpp>
+#include <G3D/g3dmath.h>
+#include <G3D/Ray.h>
+#include <G3D/Vector3.h>
 #include "WorldSocket.h"        // must be first to make ACE happy with ACE includes in it
 
 #include "Common.h"
