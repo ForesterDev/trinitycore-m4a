@@ -1282,6 +1282,8 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
     }
     else // Impossible get negative result but....
         damageInfo->damage = 0;
+    if (damageInfo->procEx & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT))
+        damageInfo->procEx |= PROC_EX_ATTACK;
 }
 
 void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
