@@ -9,7 +9,9 @@
 #include <array>
 #include <limits>
 #include <sstream>
+#include <boost/math/special_functions/round.hpp>
 #include <boost/none.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 #include <boost/optional/optional.hpp>
 #include <boost/thread/locks.hpp>
 #include <G3D/g3dmath.h>
