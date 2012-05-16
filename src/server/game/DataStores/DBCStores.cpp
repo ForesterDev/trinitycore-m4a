@@ -859,7 +859,7 @@ PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattlegroundB
     return NULL;
 }
 
-uint32 const* GetTalentTabPages(uint8 cls)
+uint32 const (&GetTalentTabPages(uint8 cls))[MAX_TALENT_TABS]
 {
     return sTalentTabPages[cls];
 }
