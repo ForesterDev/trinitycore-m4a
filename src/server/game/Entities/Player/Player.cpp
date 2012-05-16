@@ -76,6 +76,7 @@
 #include <cmath>
 #include "AccountMgr.h"
 
+using std::array;
 using std::ostringstream;
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
@@ -805,6 +806,7 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
             m_Glyphs[i][g] = 0;
 
         m_talents[i] = new PlayerTalentMap();
+        talent_points_spent[i].fill(int());
     }
 
     for (uint8 i = 0; i < BASEMOD_END; ++i)
@@ -3492,18 +3494,22 @@ bool Player::AddTalent(uint32 spellId, uint8 spec, bool learning)
         itr->second->state = PLAYERSPELL_UNCHANGED;
     else if (TalentSpellPos const* talentPos = GetTalentSpellPos(spellId))
     {
-        if (TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentPos->talent_id))
+        TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentPos->talent_id);
+        auto tab = sTalentTabStore.LookupEntry(talentInfo->TalentTab);
+        auto tab_index = tab && tab->tabpage < MAX_TALENT_TABS && tab->TalentTabID == GetTalentTabPages(getClass())[tab->tabpage] ? tab->tabpage : MAX_TALENT_TABS;
+        for (uint8 rank = 0; rank < MAX_TALENT_RANK; ++rank)
         {
-            for (uint8 rank = 0; rank < MAX_TALENT_RANK; ++rank)
-            {
-                // skip learning spell and no rank spell case
-                uint32 rankSpellId = talentInfo->RankID[rank];
-                if (!rankSpellId || rankSpellId == spellId)
-                    continue;
+            // skip learning spell and no rank spell case
+            uint32 rankSpellId = talentInfo->RankID[rank];
+            if (!rankSpellId || rankSpellId == spellId)
+                continue;
 
-                itr = m_talents[spec]->find(rankSpellId);
-                if (itr != m_talents[spec]->end())
-                    itr->second->state = PLAYERSPELL_REMOVED;
+            itr = m_talents[spec]->find(rankSpellId);
+            if (itr != m_talents[spec]->end())
+            {
+                itr->second->state = PLAYERSPELL_REMOVED;
+                if (tab_index != MAX_TALENT_TABS)
+                    talent_points_spent[spec][tab_index] -= 1 + rank;
             }
         }
 
@@ -3514,6 +3520,8 @@ bool Player::AddTalent(uint32 spellId, uint8 spec, bool learning)
         newtalent->spec = spec;
 
         (*m_talents[spec])[spellId] = newtalent;
+        if (tab_index != MAX_TALENT_TABS)
+            talent_points_spent[spec][tab_index] += 1 + talentPos->rank;
         return true;
     }
     return false;
@@ -4442,7 +4450,7 @@ bool Player::resetTalents(bool no_cost)
         // to prevent unexpected lost normal learned spell skip another class talents
         if ((getClassMask() & talentTabInfo->ClassMask) == 0)
             continue;
-
+        auto tab_index = talentTabInfo->tabpage < MAX_TALENT_TABS && talentTabInfo->TalentTabID == GetTalentTabPages(getClass())[talentTabInfo->tabpage] ? talentTabInfo->tabpage : MAX_TALENT_TABS;
         for (int8 rank = MAX_TALENT_RANK-1; rank >= 0; --rank)
         {
             // skip non-existant talent ranks
@@ -4459,7 +4467,11 @@ bool Player::resetTalents(bool no_cost)
             // if this talent rank can be found in the PlayerTalentMap, mark the talent as removed so it gets deleted
             PlayerTalentMap::iterator plrTalent = m_talents[m_activeSpec]->find(talentInfo->RankID[rank]);
             if (plrTalent != m_talents[m_activeSpec]->end())
+            {
                 plrTalent->second->state = PLAYERSPELL_REMOVED;
+                if (tab_index != MAX_TALENT_TABS)
+                    talent_points_spent[m_activeSpec][tab_index] -= 1 + rank;
+            }
         }
     }
 
@@ -24188,6 +24200,11 @@ void Player::LearnPetTalent(uint64 petGuid, uint32 talentId, uint32 talentRank)
 
     // update free talent points
     pet->SetFreeTalentPoints(CurTalentPoints - (talentRank - curtalent_maxrank + 1));
+}
+
+array<int, MAX_TALENT_TABS> Player::talent_tab_points_spent(int talent_group)
+{
+    return talent_points_spent[talent_group];
 }
 
 void Player::AddKnownCurrency(uint32 itemId)

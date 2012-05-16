@@ -19,6 +19,7 @@
 #ifndef _PLAYER_H
 #define _PLAYER_H
 
+#include <array>
 #include <boost/signal.hpp>
 #include <boost/signals/connection.hpp>
 #include "AchievementMgr.h"
@@ -1692,6 +1693,7 @@ class Player : public Unit, public GridObject<Player>
         void SendTalentsInfoData(bool pet);
         void LearnTalent(uint32 talentId, uint32 talentRank);
         void LearnPetTalent(uint64 petGuid, uint32 talentId, uint32 talentRank);
+        std::array<int, MAX_TALENT_TABS> talent_tab_points_spent(int talent_group);
 
         bool AddTalent(uint32 spellId, uint8 spec, bool learning);
         bool HasTalent(uint32 spell_id, uint8 spec) const;
@@ -2889,6 +2891,7 @@ class Player : public Unit, public GridObject<Player>
         InstanceTimeMap _instanceResetTimes;
         uint32 _pendingBindId;
         uint32 _pendingBindTimer;
+        std::array<std::array<int, MAX_TALENT_TABS>, MAX_TALENT_SPECS> talent_points_spent;
 };
 
 void AddItemsSetItem(Player*player, Item* item);
