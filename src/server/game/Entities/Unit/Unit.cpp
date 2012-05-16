@@ -59,6 +59,9 @@
 
 #include <math.h>
 
+using boost::math::lround;
+using boost::numeric_cast;
+
 float baseMoveSpeed[MAX_MOVE_TYPE] =
 {
     2.5f,                  // MOVE_WALK
@@ -10759,7 +10762,7 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
 
     tmpDamage = (tmpDamage + TakenTotal) * TakenTotalMod;
 
-    return uint32(std::max(tmpDamage, 0.0f));
+    return numeric_cast<uint32>(lround(std::max(tmpDamage, 0.0f)));
 }
 
 int32 Unit::SpellBaseDamageBonus(SpellSchoolMask schoolMask)
