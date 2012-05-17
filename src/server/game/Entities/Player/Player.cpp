@@ -24202,7 +24202,7 @@ void Player::LearnPetTalent(uint64 petGuid, uint32 talentId, uint32 talentRank)
     pet->SetFreeTalentPoints(CurTalentPoints - (talentRank - curtalent_maxrank + 1));
 }
 
-array<int, MAX_TALENT_TABS> Player::talent_tab_points_spent(int talent_group)
+array<int, MAX_TALENT_TABS> Player::talent_tab_points_spent(int talent_group) const
 {
     return talent_points_spent[talent_group];
 }

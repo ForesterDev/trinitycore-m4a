@@ -1095,9 +1095,9 @@ class UnchainedMagicTargetSelector
     public:
         UnchainedMagicTargetSelector() { }
 
-        bool operator()(Unit* unit)
+        bool operator()(const Unit* unit)
         try {
-            auto &player = dynamic_cast<Player &>(*unit);
+            auto &player = dynamic_cast<const Player &>(*unit);
             auto primary_tab_index = -1;
             {
                 auto tab_points_spent = player.talent_tab_points_spent(player.GetActiveSpec());
