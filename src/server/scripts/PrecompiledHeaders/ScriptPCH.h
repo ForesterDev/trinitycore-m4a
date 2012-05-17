@@ -5,11 +5,13 @@
 #ifndef SC_PRECOMPILED_H
 #define SC_PRECOMPILED_H
 
-#include <memory>
 #include <algorithm>
+#include <functional>
+#include <memory>
 #include <list>
 #include <stdexcept>
-#include <functional>
+#include <typeinfo>
+#include <utility>
 #include <boost/numeric/conversion/cast.hpp>
 #include "ScriptMgr.h"
 #include "Cell.h"

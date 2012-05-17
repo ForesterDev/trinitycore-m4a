@@ -25,7 +25,13 @@
 #include "icecrown_citadel.h"
 
 using boost::numeric_cast;
+using std::bad_cast;
+using std::begin;
+using std::end;
 using std::list;
+using std::max_element;
+using std::min_element;
+using std::nth_element;
 using Trinity::RandomResizeList;
 
 namespace
@@ -1090,8 +1096,54 @@ class UnchainedMagicTargetSelector
         UnchainedMagicTargetSelector() { }
 
         bool operator()(Unit* unit)
-        {
-            return unit->getPowerType() != POWER_MANA;
+        try {
+            auto &player = dynamic_cast<Player &>(*unit);
+            auto primary_tab_index = -1;
+            {
+                auto tab_points_spent = player.talent_tab_points_spent(player.GetActiveSpec());
+                auto first = begin(tab_points_spent);
+                auto last = end(tab_points_spent);
+                auto max = max_element(first, last);
+                auto min = min_element(first, last);
+                if (max != last && min != last)
+                {
+                    auto high_points_spent = *max;
+                    auto low_points_spent = *min;
+                    auto middle = first + (last - first) / 2;
+                    nth_element(first, middle, last);
+                    auto mid_points_spent = *middle;
+                    // now let's use our crazy formula to determine which tab is the primary one
+                    if (3 * (mid_points_spent - low_points_spent) < 2 * (high_points_spent - low_points_spent))
+                        primary_tab_index = max - first;
+                }
+            }
+            if (primary_tab_index != -1)
+                switch (GetTalentTabPages(player.getClass())[primary_tab_index])
+                {
+                case 41 /* Fire */:
+                case 61 /* Frost */:
+                case 81 /* Arcane */:
+                case 201 /* Discipline */:
+                case 202 /* Holy */:
+                case 203 /* Shadow */:
+                case 261 /* Elemental */:
+                case 262 /* Restoration */:
+                case 282 /* Restoration */:
+                case 283 /* Balance */:
+                case 301 /* Destruction */:
+                case 302 /* Affliction */:
+                case 303 /* Demonology */:
+                case 382 /* Holy */:
+                    return false;
+                default:
+                    return true;
+                }
+            else
+                return true;
+        }
+        catch (const bad_cast &e) {
+            (void)e;
+            return true;
         }
 };
 
