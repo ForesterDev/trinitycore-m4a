@@ -1693,7 +1693,7 @@ class Player : public Unit, public GridObject<Player>
         void SendTalentsInfoData(bool pet);
         void LearnTalent(uint32 talentId, uint32 talentRank);
         void LearnPetTalent(uint64 petGuid, uint32 talentId, uint32 talentRank);
-        std::array<int, MAX_TALENT_TABS> talent_tab_points_spent(int talent_group);
+        std::array<int, MAX_TALENT_TABS> talent_tab_points_spent(int talent_group) const;
 
         bool AddTalent(uint32 spellId, uint8 spec, bool learning);
         bool HasTalent(uint32 spell_id, uint8 spec) const;
@@ -1702,7 +1702,7 @@ class Player : public Unit, public GridObject<Player>
 
         // Dual Spec
         void UpdateSpecCount(uint8 count);
-        uint32 GetActiveSpec() { return m_activeSpec; }
+        uint32 GetActiveSpec() const { return m_activeSpec; }
         void SetActiveSpec(uint8 spec){ m_activeSpec = spec; }
         uint8 GetSpecsCount() { return m_specsCount; }
         void SetSpecsCount(uint8 count) { m_specsCount = count; }
