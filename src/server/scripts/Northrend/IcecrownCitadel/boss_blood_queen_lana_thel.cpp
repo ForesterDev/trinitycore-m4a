@@ -398,13 +398,17 @@ class boss_blood_queen_lana_thel : public CreatureScript
                             break;
                         }
                         case EVENT_SWARMING_SHADOWS:
-                            if (Player* target = SelectRandomTarget(false))
-                            {
-                                Talk(EMOTE_SWARMING_SHADOWS, target->GetGUID());
-                                Talk(SAY_SWARMING_SHADOWS);
-                                DoCast(target, SPELL_SWARMING_SHADOWS);
-                            }
-                            events.ScheduleEvent(EVENT_SWARMING_SHADOWS, 30500, EVENT_GROUP_NORMAL);
+                            if (auto time = events.GetNextEventTime(EVENT_AIR_PHASE))
+                                if (time >= events.GetTimer() + 1000 * 10)
+                                {
+                                    if (Player* target = SelectRandomTarget(false))
+                                    {
+                                        Talk(EMOTE_SWARMING_SHADOWS, target->GetGUID());
+                                        Talk(SAY_SWARMING_SHADOWS);
+                                        DoCast(target, SPELL_SWARMING_SHADOWS);
+                                    }
+                                    events.ScheduleEvent(EVENT_SWARMING_SHADOWS, 30500, EVENT_GROUP_NORMAL);
+                                }
                             break;
                         case EVENT_TWILIGHT_BLOODBOLT:
                         {
