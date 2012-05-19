@@ -59,7 +59,6 @@ Channel::Channel
     }
     else                                                    // it's custom channel
     {
-        channel_id = 0;
         m_flags |= CHANNEL_FLAG_CUSTOM;
 
         // If storing custom channels in the db is enabled either load or save the channel
@@ -692,7 +691,7 @@ void Channel::Invite(uint64 p, const char *newname)
     }
 
     Player* newp = sObjectAccessor->FindPlayerByName(newname);
-    if (!newp)
+    if (!newp || !newp->isGMVisible())
     {
         WorldPacket data;
         MakePlayerNotFound(&data, newname);

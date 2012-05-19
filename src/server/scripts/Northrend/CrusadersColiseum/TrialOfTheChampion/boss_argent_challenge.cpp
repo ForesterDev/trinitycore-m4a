@@ -62,7 +62,7 @@ class OrientationCheck : public std::unary_function<Unit*, bool>
         explicit OrientationCheck(Unit* _caster) : caster(_caster) { }
         bool operator() (Unit* unit)
         {
-            return !unit->isInFront(caster, 40.0f, 2.5f);
+            return !unit->isInFront(caster, 2.5f) || !unit->IsWithinDist(caster, 40.0f);
         }
 
     private:
@@ -414,8 +414,8 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
-            if (me->isSummon())
-                if (Unit* summoner = me->ToTempSummon()->GetSummoner())
+            if (TempSummon* summ = me->ToTempSummon())
+                if (Unit* summoner = summ->GetSummoner())
                     if (summoner->isAlive())
                         summoner->GetAI()->SetData(1, 0);
         }
@@ -447,9 +447,9 @@ public:
 
         uint8 uiWaypoint;
 
-        void WaypointReached(uint32 uiPoint)
+        void WaypointReached(uint32 waypointId)
         {
-            if (uiPoint == 0)
+            if (waypointId == 0)
             {
                 switch (uiWaypoint)
                 {

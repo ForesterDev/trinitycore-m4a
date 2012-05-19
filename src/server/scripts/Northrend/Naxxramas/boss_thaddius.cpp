@@ -91,7 +91,9 @@ enum ThaddiusSpells
     SPELL_POSITIVE_CHARGE       = 28062,
     SPELL_POSITIVE_CHARGE_STACK = 29659,
     SPELL_NEGATIVE_CHARGE       = 28085,
-    SPELL_NEGATIVE_CHARGE_STACK = 29660
+    SPELL_NEGATIVE_CHARGE_STACK = 29660,
+    SPELL_POSITIVE_POLARITY     = 28059,
+    SPELL_NEGATIVE_POLARITY     = 28084,
 };
 
 enum Events
@@ -119,7 +121,7 @@ public:
 
     struct boss_thaddiusAI : public BossAI
     {
-        boss_thaddiusAI(Creature* c) : BossAI(c, BOSS_THADDIUS)
+        boss_thaddiusAI(Creature* creature) : BossAI(creature, BOSS_THADDIUS)
         {
             // init is a bit tricky because thaddius shall track the life of both adds, but not if there was a wipe
             // and, in particular, if there was a crash after both adds were killed (should not respawn)
@@ -157,7 +159,7 @@ public:
                 DoScriptText(SAY_SLAY, me);
         }
 
-        void JustDied(Unit* /*Killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             _JustDied();
             DoScriptText(SAY_DEATH, me);
@@ -294,9 +296,9 @@ public:
 
     struct mob_stalaggAI : public ScriptedAI
     {
-        mob_stalaggAI(Creature* c) : ScriptedAI(c)
+        mob_stalaggAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;
@@ -380,9 +382,9 @@ public:
 
     struct mob_feugenAI : public ScriptedAI
     {
-        mob_feugenAI(Creature* c) : ScriptedAI(c)
+        mob_feugenAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;
@@ -507,6 +509,41 @@ class spell_thaddius_pos_neg_charge : public SpellScriptLoader
         }
 };
 
+class spell_thaddius_polarity_shift : public SpellScriptLoader
+{
+    public:
+        spell_thaddius_polarity_shift() : SpellScriptLoader("spell_thaddius_polarity_shift") { }
+
+        class spell_thaddius_polarity_shift_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_thaddius_polarity_shift_SpellScript);
+
+            bool Validate(SpellInfo const* /*spell*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_POSITIVE_POLARITY) || !sSpellMgr->GetSpellInfo(SPELL_NEGATIVE_POLARITY))
+                    return false;
+                return true;
+            }
+
+            void HandleDummy(SpellEffIndex /* effIndex */)
+            {
+                Unit* caster = GetCaster();
+                if (Unit* target = GetHitUnit())
+                    target->CastSpell(target, roll_chance_i(50) ? SPELL_POSITIVE_POLARITY : SPELL_NEGATIVE_POLARITY, true, NULL, NULL, caster->GetGUID());
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_thaddius_polarity_shift_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_thaddius_polarity_shift_SpellScript();
+        }
+};
+
 class achievement_polarity_switch : public AchievementCriteriaScript
 {
     public:
@@ -524,5 +561,6 @@ void AddSC_boss_thaddius()
     new mob_stalagg();
     new mob_feugen();
     new spell_thaddius_pos_neg_charge();
+    new spell_thaddius_polarity_shift();
     new achievement_polarity_switch();
 }

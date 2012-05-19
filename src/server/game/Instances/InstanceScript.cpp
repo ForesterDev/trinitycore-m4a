@@ -310,7 +310,7 @@ void InstanceScript::DoSendNotifyToInstance(char const* format, ...)
         for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
             if (Player* player = i->getSource())
                 if (WorldSession* session = player->GetSession())
-                    session->SendNotification(buff);
+                    session->SendNotification("%s", buff);
     }
 }
 
@@ -391,22 +391,22 @@ void InstanceScript::SendEncounterUnit(uint32 type, Unit* unit /*= NULL*/, uint8
 
     switch (type)
     {
-        case ENCOUNTER_FRAME_ADD:
-        case ENCOUNTER_FRAME_REMOVE:
-        case 2:
+        case ENCOUNTER_FRAME_ENGAGE:
+        case ENCOUNTER_FRAME_DISENGAGE:
+        case ENCOUNTER_FRAME_UPDATE_PRIORITY:
             data.append(unit->GetPackGUID());
             data << uint8(param1);
             break;
-        case 3:
-        case 4:
-        case 6:
+        case ENCOUNTER_FRAME_ADD_TIMER:
+        case ENCOUNTER_FRAME_ENABLE_OBJECTIVE:
+        case ENCOUNTER_FRAME_DISABLE_OBJECTIVE:
+            data << uint8(param1);
+            break;
+        case ENCOUNTER_FRAME_UPDATE_OBJECTIVE:
             data << uint8(param1);
             data << uint8(param2);
             break;
-        case 5:
-            data << uint8(param1);
-            break;
-        case 7:
+        case ENCOUNTER_FRAME_UNK7:
         default:
             break;
     }

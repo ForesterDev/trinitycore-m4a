@@ -413,7 +413,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
         trader->GetSession()->SendTradeStatus(TRADE_STATUS_TRADE_ACCEPT);
 
         // test if item will fit in each inventory
-        hisCanCompleteTrade =  (trader->CanStoreItems(myItems, TRADE_SLOT_TRADED_COUNT) == EQUIP_ERR_OK);
+        hisCanCompleteTrade = (trader->CanStoreItems(myItems, TRADE_SLOT_TRADED_COUNT) == EQUIP_ERR_OK);
         myCanCompleteTrade = (_player->CanStoreItems(hisItems, TRADE_SLOT_TRADED_COUNT) == EQUIP_ERR_OK);
 
         clearAcceptTradeMode(myItems, hisItems);
@@ -547,14 +547,11 @@ void WorldSession::HandleCancelTradeOpcode(WorldPacket& /*recvPacket*/)
 
 void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 {
-    if (GetPlayer()->m_trade)
-    {
-        recvPacket.rfinish();
-        return;
-    }
-
     uint64 ID;
     recvPacket >> ID;
+
+    if (GetPlayer()->m_trade)
+        return;
 
     if (!GetPlayer()->isAlive())
     {
@@ -729,4 +726,3 @@ void WorldSession::HandleClearTradeItemOpcode(WorldPacket& recvPacket)
 
     my_trade->SetItem(TradeSlots(tradeSlot), NULL);
 }
-

@@ -121,7 +121,7 @@ typedef UNORDERED_MAP<Player*, UpdateData> UpdateDataMapType;
 class Object
 {
     public:
-        virtual ~Object ();
+        virtual ~Object();
 
         bool IsInWorld() const { return m_inWorld; }
 
@@ -146,7 +146,7 @@ class Object
         void BuildOutOfRangeUpdateBlock(UpdateData* data) const;
         void BuildMovementUpdateBlock(UpdateData* data, uint32 flags = 0) const;
 
-        virtual void DestroyForPlayer(Player* target, bool anim = false) const;
+        virtual void DestroyForPlayer(Player* target, bool onDeath = false) const;
 
         int32 GetInt32Value(uint16 index) const
         {
@@ -226,7 +226,9 @@ class Object
 
         bool HasFlag(uint16 index, uint32 flag) const
         {
-            if (index >= m_valuesCount && !PrintIndexError(index, false)) return false;
+            if (index >= m_valuesCount && !PrintIndexError(index, false))
+                return false;
+
             return (m_uint32Values[index] & flag) != 0;
         }
 
@@ -298,21 +300,21 @@ class Object
         // FG: some hacky helpers
         void ForceValuesUpdateAtIndex(uint32);
 
-        Player* ToPlayer(){ if (GetTypeId() == TYPEID_PLAYER)  return reinterpret_cast<Player*>(this); else return NULL;  }
-        const Player* ToPlayer() const { if (GetTypeId() == TYPEID_PLAYER)  return (const Player*)((Player*)this); else return NULL;  }
-        Creature* ToCreature(){ if (GetTypeId() == TYPEID_UNIT) return reinterpret_cast<Creature*>(this); else return NULL; }
-        const Creature* ToCreature() const {if (GetTypeId() == TYPEID_UNIT) return (const Creature*)((Creature*)this); else return NULL; }
+        Player* ToPlayer() { if (GetTypeId() == TYPEID_PLAYER) return reinterpret_cast<Player*>(this); else return NULL; }
+        Player const* ToPlayer() const { if (GetTypeId() == TYPEID_PLAYER) return (Player const*)((Player*)this); else return NULL; }
+        Creature* ToCreature() { if (GetTypeId() == TYPEID_UNIT) return reinterpret_cast<Creature*>(this); else return NULL; }
+        Creature const* ToCreature() const { if (GetTypeId() == TYPEID_UNIT) return (Creature const*)((Creature*)this); else return NULL; }
 
-        Unit* ToUnit(){ if (GetTypeId() == TYPEID_UNIT || GetTypeId() == TYPEID_PLAYER) return reinterpret_cast<Unit*>(this); else return NULL; }
-        const Unit* ToUnit() const {if (GetTypeId() == TYPEID_UNIT || GetTypeId() == TYPEID_PLAYER) return (const Unit*)((Unit*)this); else return NULL; }
-        GameObject* ToGameObject(){ if (GetTypeId() == TYPEID_GAMEOBJECT) return reinterpret_cast<GameObject*>(this); else return NULL; }
-        const GameObject* ToGameObject() const {if (GetTypeId() == TYPEID_GAMEOBJECT) return (const GameObject*)((GameObject*)this); else return NULL; }
+        Unit* ToUnit() { if (GetTypeId() == TYPEID_UNIT || GetTypeId() == TYPEID_PLAYER) return reinterpret_cast<Unit*>(this); else return NULL; }
+        Unit const* ToUnit() const { if (GetTypeId() == TYPEID_UNIT || GetTypeId() == TYPEID_PLAYER) return (const Unit*)((Unit*)this); else return NULL; }
+        GameObject* ToGameObject() { if (GetTypeId() == TYPEID_GAMEOBJECT) return reinterpret_cast<GameObject*>(this); else return NULL; }
+        GameObject const* ToGameObject() const { if (GetTypeId() == TYPEID_GAMEOBJECT) return (const GameObject*)((GameObject*)this); else return NULL; }
 
-        Corpse* ToCorpse(){ if (GetTypeId() == TYPEID_CORPSE) return reinterpret_cast<Corpse*>(this); else return NULL; }
-        const Corpse* ToCorpse() const {if (GetTypeId() == TYPEID_CORPSE) return (const Corpse*)((Corpse*)this); else return NULL; }
+        Corpse* ToCorpse() { if (GetTypeId() == TYPEID_CORPSE) return reinterpret_cast<Corpse*>(this); else return NULL; }
+        Corpse const* ToCorpse() const { if (GetTypeId() == TYPEID_CORPSE) return (const Corpse*)((Corpse*)this); else return NULL; }
     protected:
 
-        Object ();
+        Object();
 
         void _InitValues();
         void _Create (uint32 guidlow, uint32 entry, HighGuid guidhigh);
@@ -450,7 +452,7 @@ struct Position
     bool IsInDist(const Position* pos, float dist) const
         { return GetExactDistSq(pos) < dist * dist; }
     bool HasInArc(float arcangle, const Position* pos) const;
-    bool HasInLine(Unit const* target, float distance, float width) const;
+    bool HasInLine(WorldObject const* target, float width) const;
     std::string ToString() const;
 };
 ByteBuffer& operator>>(ByteBuffer& buf, Position::PositionXYZOStreamer const& streamer);
@@ -504,6 +506,8 @@ struct MovementInfo
     uint16 GetExtraMovementFlags() { return flags2; }
     void AddExtraMovementFlag(uint16 flag) { flags2 |= flag; }
     bool HasExtraMovementFlag(uint16 flag) const { return flags2 & flag; }
+
+    void SetFallTime(uint32 time) { fallTime = time; }
 
     void OutDebug();
 };
@@ -680,7 +684,7 @@ class WorldObject : public Object, public WorldLocation
         bool IsInMap(const WorldObject* obj) const
         {
             if (obj)
-                return IsInWorld() && obj->IsInWorld() && (GetMap() == obj->GetMap()) && InSamePhase(obj);
+                return IsInWorld() && obj->IsInWorld() && (GetMap() == obj->GetMap());
             return false;
         }
         bool IsWithinDist3d(float x, float y, float z, float dist) const
@@ -698,7 +702,7 @@ class WorldObject : public Object, public WorldLocation
         }
         bool IsWithinDistInMap(WorldObject const* obj, float dist2compare, bool is3D = true) const
         {
-            return obj && IsInMap(obj) && _IsWithinDist(obj, dist2compare, is3D);
+            return obj && IsInMap(obj) && InSamePhase(obj) && _IsWithinDist(obj, dist2compare, is3D);
         }
         bool IsWithinLOS(float x, float y, float z) const;
         bool IsWithinLOSInMap(const WorldObject* obj) const;
@@ -706,8 +710,8 @@ class WorldObject : public Object, public WorldLocation
         bool IsInRange(WorldObject const* obj, float minRange, float maxRange, bool is3D = true) const;
         bool IsInRange2d(float x, float y, float minRange, float maxRange) const;
         bool IsInRange3d(float x, float y, float z, float minRange, float maxRange) const;
-        bool isInFront(WorldObject const* target, float distance, float arc = M_PI) const;
-        bool isInBack(WorldObject const* target, float distance, float arc = M_PI) const;
+        bool isInFront(WorldObject const* target, float arc = M_PI) const;
+        bool isInBack(WorldObject const* target, float arc = M_PI) const;
 
         bool IsInBetween(const WorldObject* obj1, const WorldObject* obj2, float size = 0) const;
 
@@ -775,7 +779,8 @@ class WorldObject : public Object, public WorldLocation
                 GetClosePoint(x, y, z, GetObjectSize());
                 ang = GetOrientation();
             }
-            Position pos = {x, y, z, ang};
+            Position pos;
+            pos.Relocate(x, y, z, ang);
             return SummonCreature(id, pos, spwtype, despwtime, 0);
         }
         GameObject* SummonGameObject(uint32 entry, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime);
@@ -872,20 +877,6 @@ class WorldObject : public Object, public WorldLocation
 
 namespace Trinity
 {
-    template<class T>
-    void RandomResizeList(std::list<T> &_list, uint32 _size)
-    {
-        size_t list_size = _list.size();
-
-        while (list_size > _size)
-        {
-            typename std::list<T>::iterator itr = _list.begin();
-            std::advance(itr, urand(0, list_size - 1));
-            _list.erase(itr);
-            --list_size;
-        }
-    }
-
     // Binary predicate to sort WorldObjects based on the distance to a reference WorldObject
     class ObjectDistanceOrderPred
     {

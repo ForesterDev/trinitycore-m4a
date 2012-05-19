@@ -321,29 +321,34 @@ SpellInfo const* SpellScript::GetSpellInfo()
     return m_spell->GetSpellInfo();
 }
 
-WorldLocation const* SpellScript::GetTargetDest()
+WorldLocation const* SpellScript::GetExplTargetDest()
 {
     if (m_spell->m_targets.HasDst())
-        return m_spell->m_targets.GetDst();
+        return m_spell->m_targets.GetDstPos();
     return NULL;
 }
 
-void SpellScript::SetTargetDest(WorldLocation& loc)
+void SpellScript::SetExplTargetDest(WorldLocation& loc)
 {
     m_spell->m_targets.SetDst(loc);
 }
 
-Unit* SpellScript::GetTargetUnit()
+WorldObject* SpellScript::GetExplTargetWorldObject()
+{
+    return m_spell->m_targets.GetObjectTarget();
+}
+
+Unit* SpellScript::GetExplTargetUnit()
 {
     return m_spell->m_targets.GetUnitTarget();
 }
 
-GameObject* SpellScript::GetTargetGObj()
+GameObject* SpellScript::GetExplTargetGObj()
 {
     return m_spell->m_targets.GetGOTarget();
 }
 
-Item* SpellScript::GetTargetItem()
+Item* SpellScript::GetExplTargetItem()
 {
     return m_spell->m_targets.GetItemTarget();
 }
@@ -402,6 +407,16 @@ GameObject* SpellScript::GetHitGObj()
         return NULL;
     }
     return m_spell->gameObjTarget;
+}
+
+WorldLocation* SpellScript::GetHitDest()
+{
+    if (!IsInEffectHook())
+    {
+        sLog->outError("TSCR: Script: `%s` Spell: `%u`: function SpellScript::GetHitGObj was called, but function has no effect in current hook!", m_scriptName->c_str(), m_scriptSpellId);
+        return NULL;
+    }
+    return m_spell->destTarget;
 }
 
 int32 SpellScript::GetHitDamage()
@@ -764,6 +779,7 @@ bool AuraScript::_IsDefaultActionPrevented()
         case AURA_SCRIPT_HOOK_EFFECT_APPLY:
         case AURA_SCRIPT_HOOK_EFFECT_REMOVE:
         case AURA_SCRIPT_HOOK_EFFECT_PERIODIC:
+        case AURA_SCRIPT_HOOK_EFFECT_ABSORB:
             return m_defaultActionPrevented;
         default:
             ASSERT(false && "AuraScript::_IsDefaultActionPrevented is called in a wrong place");
@@ -778,6 +794,7 @@ void AuraScript::PreventDefaultAction()
         case AURA_SCRIPT_HOOK_EFFECT_APPLY:
         case AURA_SCRIPT_HOOK_EFFECT_REMOVE:
         case AURA_SCRIPT_HOOK_EFFECT_PERIODIC:
+        case AURA_SCRIPT_HOOK_EFFECT_ABSORB:
             m_defaultActionPrevented = true;
             break;
         default:

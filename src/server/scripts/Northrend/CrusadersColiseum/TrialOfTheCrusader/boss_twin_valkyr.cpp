@@ -149,14 +149,14 @@ struct boss_twin_baseAI : public ScriptedAI
 {
     boss_twin_baseAI(Creature* creature) : ScriptedAI(creature), Summons(me)
     {
-        m_instance = (InstanceScript*)creature->GetInstanceScript();
+        instance = creature->GetInstanceScript();
         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
         me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_HEALING_PCT, true);
         me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_HEALING_RECEIVED, true);
         me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_SCHOOL_HEAL_ABSORB, true);
     }
 
-    InstanceScript* m_instance;
+    InstanceScript* instance;
     SummonList Summons;
 
     AuraStateType  m_uiAuraState;
@@ -185,7 +185,7 @@ struct boss_twin_baseAI : public ScriptedAI
         me->SetReactState(REACT_PASSIVE);
         me->ModifyAuraState(m_uiAuraState, true);
         /* Uncomment this once that they are flying above the ground
-        me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+        me->SetLevitate(true);
         me->SetFlying(true); */
         m_bIsBerserk = false;
 
@@ -199,20 +199,22 @@ struct boss_twin_baseAI : public ScriptedAI
 
     void JustReachedHome()
     {
-        if (m_instance)
-            m_instance->SetData(TYPE_VALKIRIES, FAIL);
+        if (instance)
+            instance->SetData(TYPE_VALKIRIES, FAIL);
+
         Summons.DespawnAll();
         me->DespawnOrUnsummon();
     }
 
     void MovementInform(uint32 uiType, uint32 uiId)
     {
-        if (uiType != POINT_MOTION_TYPE) return;
+        if (uiType != POINT_MOTION_TYPE)
+            return;
 
         switch (uiId)
         {
             case 1:
-                m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
+                instance->DoUseDoorOrButton(instance->GetData64(GO_MAIN_GATE_DOOR));
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
                 me->SetReactState(REACT_AGGRESSIVE);
                 break;
@@ -224,8 +226,8 @@ struct boss_twin_baseAI : public ScriptedAI
         if (who->GetTypeId() == TYPEID_PLAYER)
         {
             DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, me);
-            if (m_instance)
-                m_instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELEGIBLE, 0);
+            if (instance)
+                instance->SetData(DATA_TRIBUTE_TO_IMMORTALITY_ELEGIBLE, 0);
         }
     }
 
@@ -239,12 +241,12 @@ struct boss_twin_baseAI : public ScriptedAI
         switch (summoned->GetEntry())
         {
             case NPC_LIGHT_ESSENCE:
-                m_instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LIGHT_ESSENCE_HELPER);
-                m_instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_POWERING_UP_HELPER);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LIGHT_ESSENCE_HELPER);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_POWERING_UP_HELPER);
                 break;
             case NPC_DARK_ESSENCE:
-                m_instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_DARK_ESSENCE_HELPER);
-                m_instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_POWERING_UP_HELPER);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_DARK_ESSENCE_HELPER);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_POWERING_UP_HELPER);
                 break;
             case NPC_BULLET_CONTROLLER:
                 me->m_Events.AddEvent(new OrbsDespawner(me), me->m_Events.CalculateTime(100));
@@ -256,7 +258,7 @@ struct boss_twin_baseAI : public ScriptedAI
     void JustDied(Unit* /*killer*/)
     {
         DoScriptText(SAY_DEATH, me);
-        if (m_instance)
+        if (instance)
         {
             if (Creature* pSister = GetSister())
             {
@@ -265,13 +267,13 @@ struct boss_twin_baseAI : public ScriptedAI
                     me->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
                     pSister->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
 
-                    m_instance->SetData(TYPE_VALKIRIES, DONE);
+                    instance->SetData(TYPE_VALKIRIES, DONE);
                     Summons.DespawnAll();
                 }
                 else
                 {
                     me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-                    m_instance->SetData(TYPE_VALKIRIES, SPECIAL);
+                    instance->SetData(TYPE_VALKIRIES, SPECIAL);
                 }
             }
         }
@@ -281,20 +283,20 @@ struct boss_twin_baseAI : public ScriptedAI
     // Called when sister pointer needed
     Creature* GetSister()
     {
-        return Unit::GetCreature((*me), m_instance->GetData64(m_uiSisterNpcId));
+        return Unit::GetCreature((*me), instance->GetData64(m_uiSisterNpcId));
     }
 
     void EnterCombat(Unit* /*who*/)
     {
         me->SetInCombatWithZone();
-        if (m_instance)
+        if (instance)
         {
             if (Creature* pSister = GetSister())
             {
                 me->AddAura(m_uiMyEmphatySpellId, pSister);
                 pSister->SetInCombatWithZone();
             }
-            m_instance->SetData(TYPE_VALKIRIES, IN_PROGRESS);
+            instance->SetData(TYPE_VALKIRIES, IN_PROGRESS);
         }
 
         DoScriptText(SAY_AGGRO, me);
@@ -316,15 +318,16 @@ struct boss_twin_baseAI : public ScriptedAI
 
     void EnableDualWield(bool mode = true)
     {
-        SetEquipmentSlots(false, m_uiWeapon, mode ? m_uiWeapon : EQUIP_UNEQUIP, EQUIP_UNEQUIP);
+        SetEquipmentSlots(false, m_uiWeapon, mode ? m_uiWeapon : int32(EQUIP_UNEQUIP), EQUIP_UNEQUIP);
         me->SetCanDualWield(mode);
         me->UpdateDamagePhysical(mode ? OFF_ATTACK : BASE_ATTACK);
     }
 
     void UpdateAI(const uint32 uiDiff)
     {
-        if (!m_instance || !UpdateVictim())
+        if (!instance || !UpdateVictim())
             return;
+
         switch (m_uiStage)
         {
             case 0:
@@ -421,11 +424,11 @@ public:
     {
         boss_fjolaAI(Creature* creature) : boss_twin_baseAI(creature)
         {
-            m_instance = (InstanceScript*)creature->GetInstanceScript();
+            instance = creature->GetInstanceScript();
             me->ModifyAuraState(AURA_STATE_UNKNOWN22, true);
         }
 
-        InstanceScript* m_instance;
+        InstanceScript* instance;
 
         void Reset() {
             boss_twin_baseAI::Reset();
@@ -444,17 +447,17 @@ public:
             m_uiTouchSpellId = SPELL_LIGHT_TOUCH;
             m_uiSpikeSpellId = SPELL_LIGHT_TWIN_SPIKE;
 
-            if (m_instance)
+            if (instance)
             {
-                m_instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT,  EVENT_START_TWINS_FIGHT);
+                instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT,  EVENT_START_TWINS_FIGHT);
             }
         }
 
         void EnterCombat(Unit* who)
         {
-            if (m_instance)
+            if (instance)
             {
-                m_instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT,  EVENT_START_TWINS_FIGHT);
+                instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT,  EVENT_START_TWINS_FIGHT);
             }
 
             me->SummonCreature(NPC_BULLET_CONTROLLER, ToCCommonLoc[1].GetPositionX(), ToCCommonLoc[1].GetPositionY(), ToCCommonLoc[1].GetPositionZ(), 0.0f, TEMPSUMMON_MANUAL_DESPAWN);
@@ -463,14 +466,14 @@ public:
 
         void EnterEvadeMode()
         {
-            m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
+            instance->DoUseDoorOrButton(instance->GetData64(GO_MAIN_GATE_DOOR));
             boss_twin_baseAI::EnterEvadeMode();
         }
 
         void JustReachedHome()
         {
-            if (m_instance)
-                m_instance->DoUseDoorOrButton(m_instance->GetData64(GO_MAIN_GATE_DOOR));
+            if (instance)
+                instance->DoUseDoorOrButton(instance->GetData64(GO_MAIN_GATE_DOOR));
 
             boss_twin_baseAI::JustReachedHome();
         }
@@ -569,21 +572,23 @@ struct mob_unleashed_ballAI : public ScriptedAI
 {
     mob_unleashed_ballAI(Creature* creature) : ScriptedAI(creature)
     {
-        m_instance = (InstanceScript*)creature->GetInstanceScript();
+        instance = creature->GetInstanceScript();
     }
 
-    InstanceScript* m_instance;
+    InstanceScript* instance;
     uint32 m_uiRangeCheckTimer;
 
     void MoveToNextPoint()
     {
         float x0 = ToCCommonLoc[1].GetPositionX(), y0 = ToCCommonLoc[1].GetPositionY(), r = 47.0f;
         float y = y0;
-        float x = float(urand(uint32(x0 - r), uint32(x0 + r)));
+        float x = frand(x0 - r, x0 + r);
+        float sq = pow(r, 2) - pow(x - x0, 2);
+        float rt = sqrtf(fabs(sq));
         if (urand(0, 1))
-            y = y0 + sqrt(pow(r, 2) - pow((x-x0), 2));
+            y = y0 + rt;
         else
-            y = y0 - sqrt(pow(r, 2) - pow((x-x0), 2));
+            y = y0 - rt;
         me->GetMotionMaster()->MovePoint(0, x, y, me->GetPositionZ());
     }
 
@@ -591,8 +596,8 @@ struct mob_unleashed_ballAI : public ScriptedAI
     {
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
         me->SetReactState(REACT_PASSIVE);
-        me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-        me->SetFlying(true);
+        me->SetDisableGravity(true);
+        me->SetCanFly(true);
         SetCombatMovement(false);
         MoveToNextPoint();
         m_uiRangeCheckTimer = IN_MILLISECONDS;
@@ -600,7 +605,8 @@ struct mob_unleashed_ballAI : public ScriptedAI
 
     void MovementInform(uint32 uiType, uint32 uiId)
     {
-        if (uiType != POINT_MOTION_TYPE) return;
+        if (uiType != POINT_MOTION_TYPE)
+            return;
 
         switch (uiId)
         {
@@ -632,8 +638,7 @@ public:
         {
             if (m_uiRangeCheckTimer < uiDiff)
             {
-                if (Unit* target = me->SelectNearestTarget(2.0f))
-                    if (target->GetTypeId() == TYPEID_PLAYER && target->isAlive())
+                if (me->SelectNearestPlayer(2.0f))
                     {
                         DoCastAOE(SPELL_UNLEASHED_DARK);
                         me->GetMotionMaster()->MoveIdle();
@@ -674,8 +679,7 @@ public:
         {
             if (m_uiRangeCheckTimer < uiDiff)
             {
-                if (Unit* target = me->SelectNearestTarget(2.0f))
-                    if (target->GetTypeId() == TYPEID_PLAYER && target->isAlive())
+                if (me->SelectNearestPlayer(2.0f))
                     {
                         DoCastAOE(SPELL_UNLEASHED_LIGHT);
                         me->GetMotionMaster()->MoveIdle();
@@ -774,7 +778,7 @@ class spell_powering_up : public SpellScriptLoader
 
             uint32 spellId;
 
-            bool Validate(SpellEntry const* /*spellEntry*/)
+            bool Load()
             {
                 spellId = sSpellMgr->GetSpellIdForDifficulty(SPELL_SURGE_OF_SPEED, GetCaster());
                 if (!sSpellMgr->GetSpellInfo(spellId))
@@ -784,7 +788,7 @@ class spell_powering_up : public SpellScriptLoader
 
             void HandleScriptEffect(SpellEffIndex /*effIndex*/)
             {
-                if (Unit* target = GetTargetUnit())
+                if (Unit* target = GetExplTargetUnit())
                     if (urand(0, 99) < 15)
                         target->CastSpell(target, spellId, true);
             }

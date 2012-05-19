@@ -44,6 +44,7 @@ enum eEnums
 
     SPELL_ARCANE_MISSILES               = 33031,
     SPELL_WRATH_OF_THE_ASTROMANCER      = 42783,
+    SPELL_WRATH_OF_THE_ASTROMANCER_DOT  = 42784,
     SPELL_BLINDING_LIGHT                = 33009,
     SPELL_FEAR                          = 34322,
     SPELL_VOID_BOLT                     = 39329,
@@ -151,7 +152,7 @@ class boss_high_astromancer_solarian : public CreatureScript
                 DoScriptText(RAND(SAY_KILL1, SAY_KILL2, SAY_KILL3), me);
             }
 
-            void JustDied(Unit* /*victim*/)
+            void JustDied(Unit* /*killer*/)
             {
                 me->SetFloatValue(OBJECT_FIELD_SCALE_X, defaultsize);
                 me->SetDisplayId(MODEL_HUMAN);
@@ -454,7 +455,7 @@ class mob_solarium_priest : public CreatureScript
                     {
                         case 0:
                             if (instance)
-                                target = Unit::GetUnit((*me), instance->GetData64(DATA_ASTROMANCER));
+                                target = Unit::GetUnit(*me, instance->GetData64(DATA_ASTROMANCER));
                             break;
                         case 1:
                             target = me;
@@ -490,14 +491,79 @@ class mob_solarium_priest : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* Creature) const
+        CreatureAI* GetAI(Creature* creature) const
         {
-            return new mob_solarium_priestAI (Creature);
+            return new mob_solarium_priestAI(creature);
         }
 };
+
+class spell_astromancer_wrath_of_the_astromancer : public SpellScriptLoader
+{
+    public:
+        spell_astromancer_wrath_of_the_astromancer() : SpellScriptLoader("spell_astromancer_wrath_of_the_astromancer") { }
+
+        class spell_astromancer_wrath_of_the_astromancer_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_astromancer_wrath_of_the_astromancer_SpellScript);
+
+            bool Validate(SpellInfo const* /*SpellEntry*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_WRATH_OF_THE_ASTROMANCER_DOT))
+                    return false;
+                return true;
+            }
+
+            bool Load()
+            {
+                _targetCount = 0;
+                return true;
+            }
+
+            void CountTargets(std::list<Unit*>& targetList)
+            {
+                _targetCount = targetList.size();
+            }
+
+            void HandleDummy(SpellEffIndex /* effIndex */)
+            {
+                if (Unit* caster = GetOriginalCaster())
+                    if (Unit* target = GetHitUnit())
+                    {
+                        if (!target->isAlive() || !_targetCount)
+                            return;
+
+                        int32 damage = 10000 / _targetCount;
+
+                        SpellNonMeleeDamage damageInfo(caster, target, GetSpellInfo()->Id, GetSpellInfo()->SchoolMask);
+                        damageInfo.damage = damage;
+
+                        caster->CalcAbsorbResist(target, GetSpellInfo()->GetSchoolMask(), DOT, damage, &damageInfo.absorb, &damageInfo.resist, GetSpellInfo());
+                        caster->DealDamageMods(target, damageInfo.damage, &damageInfo.absorb);
+                        caster->SendSpellNonMeleeDamageLog(&damageInfo);
+                        caster->DealSpellDamage(&damageInfo, false);
+                    }
+            }
+
+        private:
+            int32 _targetCount;
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_astromancer_wrath_of_the_astromancer_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_astromancer_wrath_of_the_astromancer_SpellScript::CountTargets, EFFECT_0, TARGET_DEST_CASTER_RADIUS);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_astromancer_wrath_of_the_astromancer_SpellScript();
+        }
+};
+
 void AddSC_boss_high_astromancer_solarian()
 {
     new boss_high_astromancer_solarian();
     new mob_solarium_priest();
+    new spell_astromancer_wrath_of_the_astromancer();
 }
 
