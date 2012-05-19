@@ -34,12 +34,12 @@
 #include "GameObjectModel.h"
 #include "DynamicTree.h"
 
-GameObject::GameObject() : WorldObject(false), m_goValue(new GameObjectValue), m_AI(NULL), m_model(NULL)
+GameObject::GameObject() : WorldObject(false), m_model(NULL), m_goValue(new GameObjectValue), m_AI(NULL)
 {
     m_objectType |= TYPEMASK_GAMEOBJECT;
     m_objectTypeId = TYPEID_GAMEOBJECT;
 
-    m_updateFlag = (UPDATEFLAG_HIGHGUID | UPDATEFLAG_HAS_POSITION | UPDATEFLAG_POSITION | UPDATEFLAG_ROTATION);
+    m_updateFlag = (UPDATEFLAG_LOWGUID | UPDATEFLAG_STATIONARY_POSITION | UPDATEFLAG_POSITION | UPDATEFLAG_ROTATION);
 
     m_valuesCount = GAMEOBJECT_END;
     m_respawnTime = 0;
@@ -56,6 +56,8 @@ GameObject::GameObject() : WorldObject(false), m_goValue(new GameObjectValue), m
     m_DBTableGuid = 0;
     m_rotation = 0;
 
+    m_lootRecipient = 0;
+    m_lootRecipientGroup = 0;
     m_groupLootTimer = 0;
     lootingGroupLowGUID = 0;
 
@@ -136,10 +138,11 @@ void GameObject::AddToWorld()
                 ASSERT((sPoolMgr->IsSpawnedObject<GameObject>(m_DBTableGuid)));
         sObjectAccessor->AddObject(this);
         bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
-        bool toggledState = (GetGOData() ? GetGOData()->go_state == GO_STATE_ACTIVE : false);
+        // The state can be changed after GameObject::Create but before GameObject::AddToWorld
+        bool toggledState = GetGOData() ? GetGOData()->go_state == GO_STATE_READY : false;
         if (m_model)
             GetMap()->Insert(*m_model);
-        if ((startOpen && !toggledState) || (!startOpen && toggledState))
+        if (startOpen ^ toggledState)
             EnableCollision(false);
 
         WorldObject::AddToWorld();
@@ -223,10 +226,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     // GAMEOBJECT_BYTES_1, index at 0, 1, 2 and 3
     SetGoType(GameobjectTypes(goinfo->type));
     SetGoState(go_state);
-
-    SetGoArtKit(0);                                         // unknown what this is
-    SetByteValue(GAMEOBJECT_BYTES_1, 2, artKit);
-
+    SetGoArtKit(artKit);
 
     switch (goinfo->type)
     {
@@ -256,7 +256,6 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
                 m_invisibility.AddFlag(INVISIBILITY_TRAP);
                 m_invisibility.AddValue(INVISIBILITY_TRAP, 300);
             }
-
             break;
         default:
             SetGoAnimProgress(animprogress);
@@ -687,29 +686,34 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     data.spawnMask = spawnMask;
     data.artKit = GetGoArtKit();
 
-    // update in DB
-    std::ostringstream ss;
-    ss << "INSERT INTO gameobject VALUES ("
-        << m_DBTableGuid << ','
-        << GetEntry() << ','
-        << mapid << ','
-        << uint32(spawnMask) << ','                         // cast to prevent save as symbol
-        << uint16(GetPhaseMask()) << ','                    // prevent out of range error
-        << GetPositionX() << ','
-        << GetPositionY() << ','
-        << GetPositionZ() << ','
-        << GetOrientation() << ','
-        << GetFloatValue(GAMEOBJECT_PARENTROTATION) << ','
-        << GetFloatValue(GAMEOBJECT_PARENTROTATION+1) << ','
-        << GetFloatValue(GAMEOBJECT_PARENTROTATION+2) << ','
-        << GetFloatValue(GAMEOBJECT_PARENTROTATION+3) << ','
-        << m_respawnDelayTime << ','
-        << uint32(GetGoAnimProgress()) << ','
-        << uint32(GetGoState()) << ')';
-
+    // Update in DB
     SQLTransaction trans = WorldDatabase.BeginTransaction();
-    trans->PAppend("DELETE FROM gameobject WHERE guid = '%u'", m_DBTableGuid);
-    trans->Append(ss.str().c_str());
+
+    uint8 index = 0;
+
+    PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_DEL_GAMEOBJECT);
+    stmt->setUInt32(0, m_DBTableGuid);
+    trans->Append(stmt);
+
+    stmt = WorldDatabase.GetPreparedStatement(WORLD_INS_GAMEOBJECT);
+    stmt->setUInt32(index++, m_DBTableGuid);
+    stmt->setUInt32(index++, GetEntry());
+    stmt->setUInt16(index++, uint16(mapid));
+    stmt->setUInt8(index++, spawnMask);
+    stmt->setUInt16(index++, uint16(GetPhaseMask()));
+    stmt->setFloat(index++, GetPositionX());
+    stmt->setFloat(index++, GetPositionY());
+    stmt->setFloat(index++, GetPositionZ());
+    stmt->setFloat(index++, GetOrientation());
+    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_PARENTROTATION));
+    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_PARENTROTATION+1));
+    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_PARENTROTATION+2));
+    stmt->setFloat(index++, GetFloatValue(GAMEOBJECT_PARENTROTATION+3));
+    stmt->setInt32(index++, int32(m_respawnDelayTime));
+    stmt->setUInt8(index++, GetGoAnimProgress());
+    stmt->setUInt8(index++, uint8(GetGoState()));
+    trans->Append(stmt);
+
     WorldDatabase.CommitTransaction(trans);
 }
 
@@ -836,7 +840,9 @@ bool GameObject::IsTransport() const
 {
     // If something is marked as a transport, don't transmit an out of range packet for it.
     GameObjectTemplate const* gInfo = GetGOInfo();
-    if (!gInfo) return false;
+    if (!gInfo)
+        return false;
+
     return gInfo->type == GAMEOBJECT_TYPE_TRANSPORT || gInfo->type == GAMEOBJECT_TYPE_MO_TRANSPORT;
 }
 
@@ -845,7 +851,9 @@ bool GameObject::IsDynTransport() const
 {
     // If something is marked as a transport, don't transmit an out of range packet for it.
     GameObjectTemplate const* gInfo = GetGOInfo();
-    if (!gInfo) return false;
+    if (!gInfo)
+        return false;
+
     return gInfo->type == GAMEOBJECT_TYPE_MO_TRANSPORT || (gInfo->type == GAMEOBJECT_TYPE_TRANSPORT && !gInfo->transport.pause);
 }
 
@@ -1424,7 +1432,7 @@ void GameObject::Use(Unit* user)
                 if (info->summoningRitual.casterTargetSpell && info->summoningRitual.casterTargetSpell != 1) // No idea why this field is a bool in some cases
                     for (uint32 i = 0; i < info->summoningRitual.casterTargetSpellTargets; i++)
                         // m_unique_users can contain only player GUIDs
-                        if (Player* target = ObjectAccessor::GetPlayer(*this, SelectRandomContainerElement(m_unique_users)))
+                        if (Player* target = ObjectAccessor::GetPlayer(*this, Trinity::Containers::SelectRandomContainerElement(m_unique_users)))
                             spellCaster->CastSpell(target, info->summoningRitual.casterTargetSpell, true);
 
                 // finish owners spell
@@ -1817,6 +1825,7 @@ void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player*
                 m_goValue->Building.Health = m_goValue->Building.MaxHealth;
                 SetGoAnimProgress(255);
             }
+            EnableCollision(true);
             break;
         case GO_DESTRUCTIBLE_DAMAGED:
         {
@@ -1873,6 +1882,7 @@ void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player*
                 m_goValue->Building.Health = 0;
                 SetGoAnimProgress(0);
             }
+            EnableCollision(false);
             break;
         }
         case GO_DESTRUCTIBLE_REBUILDING:
@@ -1892,6 +1902,7 @@ void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player*
                 m_goValue->Building.Health = m_goValue->Building.MaxHealth;
                 SetGoAnimProgress(255);
             }
+            EnableCollision(true);
             break;
         }
     }
@@ -1901,12 +1912,14 @@ void GameObject::SetLootState(LootState state, Unit* unit)
 {
     m_lootState = state;
     AI()->OnStateChanged(state, unit);
+    sScriptMgr->OnGameObjectLootStateChanged(this, state, unit);
     if (m_model)
     {
         // startOpen determines whether we are going to add or remove the LoS on activation
         bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
 
-        if (GetGOData() && GetGOData()->go_state == GO_NOT_READY)
+        // Use the current go state
+        if (GetGoState() == GO_STATE_ACTIVE)
             startOpen = !startOpen;
 
         if (state == GO_ACTIVATED || state == GO_JUST_DEACTIVATED)
@@ -1919,6 +1932,7 @@ void GameObject::SetLootState(LootState state, Unit* unit)
 void GameObject::SetGoState(GOState state)
 {
     SetByteValue(GAMEOBJECT_BYTES_1, 0, state);
+    sScriptMgr->OnGameObjectStateChanged(this, state);
     if (m_model)
     {
         if (!IsInWorld())
@@ -1927,7 +1941,7 @@ void GameObject::SetGoState(GOState state)
         // startOpen determines whether we are going to add or remove the LoS on activation
         bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
 
-        if (GetGOData() && GetGOData()->go_state == GO_NOT_READY)
+        if (GetGOData() && GetGOData()->go_state == GO_STATE_READY)
             startOpen = !startOpen;
 
         if (state == GO_STATE_ACTIVE || state == GO_STATE_ACTIVE_ALTERNATIVE)
@@ -1971,4 +1985,58 @@ void GameObject::UpdateModel()
     m_model = GameObjectModel::Create(*this);
     if (m_model)
         GetMap()->Insert(*m_model);
+}
+
+Player* GameObject::GetLootRecipient() const
+{
+    if (!m_lootRecipient)
+        return NULL;
+    return ObjectAccessor::FindPlayer(m_lootRecipient);
+}
+
+Group* GameObject::GetLootRecipientGroup() const
+{
+    if (!m_lootRecipientGroup)
+        return NULL;
+    return sGroupMgr->GetGroupByGUID(m_lootRecipientGroup);
+}
+
+void GameObject::SetLootRecipient(Unit* unit)
+{
+    // set the player whose group should receive the right
+    // to loot the creature after it dies
+    // should be set to NULL after the loot disappears
+
+    if (!unit)
+    {
+        m_lootRecipient = 0;
+        m_lootRecipientGroup = 0;
+        return;
+    }
+
+    if (unit->GetTypeId() != TYPEID_PLAYER && !unit->IsVehicle())
+        return;
+
+    Player* player = unit->GetCharmerOrOwnerPlayerOrPlayerItself();
+    if (!player)                                             // normal creature, no player involved
+        return;
+
+    m_lootRecipient = player->GetGUID();
+    if (Group* group = player->GetGroup())
+        m_lootRecipientGroup = group->GetLowGUID();
+}
+
+bool GameObject::IsLootAllowedFor(Player const* player) const
+{
+    if (!m_lootRecipient && !m_lootRecipientGroup)
+        return true;
+
+    if (player->GetGUID() == m_lootRecipient)
+        return true;
+
+    Group const* playerGroup = player->GetGroup();
+    if (!playerGroup || playerGroup != GetLootRecipientGroup()) // if we dont have a group we arent the recipient
+        return false;                                           // if go doesnt have group bound it means it was solo killed by someone else
+
+    return true;
 }

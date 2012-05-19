@@ -27,6 +27,7 @@
 #include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
+#include "CreatureTextMgr.h"
 #include "icecrown_citadel.h"
 
 enum Texts
@@ -509,15 +510,8 @@ class boss_the_lich_king : public CreatureScript
             {
                 _JustDied();
                 DoCastAOE(SPELL_PLAY_MOVIE, false);
-                me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-                me->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, 0x03);
-                float x, y, z;
-                me->GetPosition(x, y, z);
-                // use larger distance for vmap height search than in most other cases
-                float ground_Z = me->GetMap()->GetHeight(me->GetPhaseMask(), x, y, z, true, MAX_FALL_DISTANCE);
-                if (fabs(ground_Z - z) < 0.1f)
-                    return;
-
+                me->SetDisableGravity(false);
+                me->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
                 me->GetMotionMaster()->MoveFall();
             }
 
@@ -570,7 +564,8 @@ class boss_the_lich_king : public CreatureScript
                 if (Creature* tirion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HIGHLORD_TIRION_FORDRING)))
                     tirion->AI()->EnterEvadeMode();
                 DoCastAOE(SPELL_KILL_FROSTMOURNE_PLAYERS);
-                summons.DoAction(NPC_STRANGULATE_VEHICLE, ACTION_TELEPORT_BACK);
+                EntryCheckPredicate pred(NPC_STRANGULATE_VEHICLE);
+                summons.DoAction(ACTION_TELEPORT_BACK, pred);
             }
 
             void KilledUnit(Unit* victim)
@@ -601,8 +596,8 @@ class boss_the_lich_king : public CreatureScript
                         SendLightOverride(0, 5000);
                         break;
                     case ACTION_BREAK_FROSTMOURNE:
-                        DoCastAOE(SPELL_SUMMON_BROKEN_FROSTMOURNE);
-                        DoCastAOE(SPELL_SUMMON_BROKEN_FROSTMOURNE_2);
+                        me->CastSpell((Unit*)NULL, SPELL_SUMMON_BROKEN_FROSTMOURNE, TRIGGERED_IGNORE_CAST_IN_PROGRESS);
+                        me->CastSpell((Unit*)NULL, SPELL_SUMMON_BROKEN_FROSTMOURNE_2, TRIGGERED_IGNORE_CAST_IN_PROGRESS);
                         SetEquipmentSlots(false, EQUIP_BROKEN_FROSTMOURNE);
                         events.ScheduleEvent(EVENT_OUTRO_TALK_6, 2500, 0, PHASE_OUTRO);
                         break;
@@ -611,12 +606,15 @@ class boss_the_lich_king : public CreatureScript
                         events.ScheduleEvent(EVENT_OUTRO_TALK_8, 17000, 0, PHASE_OUTRO);
                         break;
                     case ACTION_TELEPORT_BACK:
-                        summons.DoAction(NPC_STRANGULATE_VEHICLE, ACTION_TELEPORT_BACK);
+                    {
+                        EntryCheckPredicate pred(NPC_STRANGULATE_VEHICLE);
+                        summons.DoAction(ACTION_TELEPORT_BACK, pred);
                         if (!IsHeroic())
                             Talk(SAY_LK_FROSTMOURNE_ESCAPE);
                         else
                             DoCastAOE(SPELL_TRIGGER_VILE_SPIRIT_HEROIC);
                         break;
+                    }
                     default:
                         break;
                 }
@@ -677,7 +675,7 @@ class boss_the_lich_king : public CreatureScript
                     summons.DespawnAll();
                     SendMusicToPlayers(MUSIC_FURY_OF_FROSTMOURNE);
                     DoCastAOE(SPELL_FURY_OF_FROSTMOURNE);
-                    me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                    me->SetWalk(true);
                     events.ScheduleEvent(EVENT_OUTRO_TALK_1, 2600, 0, PHASE_OUTRO);
                     events.ScheduleEvent(EVENT_OUTRO_EMOTE_TALK, 6600, 0, PHASE_OUTRO);
                     events.ScheduleEvent(EVENT_OUTRO_EMOTE_TALK, 17600, 0, PHASE_OUTRO);
@@ -881,7 +879,7 @@ class boss_the_lich_king : public CreatureScript
                         case EVENT_INTRO_MOVE_1:
                             me->SetSheath(SHEATH_STATE_MELEE);
                             me->RemoveAurasDueToSpell(SPELL_EMOTE_SIT_NO_SHEATH);
-                            me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                            me->SetWalk(true);
                             me->GetMotionMaster()->MovePoint(POINT_LK_INTRO_1, LichKingIntro[0]);
                             break;
                         case EVENT_INTRO_MOVE_2:
@@ -911,7 +909,7 @@ class boss_the_lich_king : public CreatureScript
                             events.ScheduleEvent(EVENT_FINISH_INTRO, 1000, 0, PHASE_INTRO);
                             break;
                         case EVENT_FINISH_INTRO:
-                            me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                            me->SetWalk(false);
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                             me->SetReactState(REACT_AGGRESSIVE);
                             events.SetPhase(PHASE_ONE);
@@ -1082,16 +1080,15 @@ class boss_the_lich_king : public CreatureScript
                             Talk(SAY_LK_OUTRO_6);
                             if (Creature* tirion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HIGHLORD_TIRION_FORDRING)))
                                 tirion->SetFacingToObject(me);
-                            me->ClearUnitState(UNIT_STATE_CASTING);
-                            DoCastAOE(SPELL_SUMMON_BROKEN_FROSTMOURNE_3);
+                            me->CastSpell((Unit*)NULL, SPELL_SUMMON_BROKEN_FROSTMOURNE_3, TRIGGERED_IGNORE_CAST_IN_PROGRESS);
                             SetEquipmentSlots(false, EQUIP_UNEQUIP);
                             break;
                         case EVENT_OUTRO_SOUL_BARRAGE:
-                            DoCastAOE(SPELL_SOUL_BARRAGE);
+                            me->CastSpell((Unit*)NULL, SPELL_SOUL_BARRAGE, TRIGGERED_IGNORE_CAST_IN_PROGRESS);
                             sCreatureTextMgr->SendSound(me, SOUND_PAIN, CHAT_MSG_MONSTER_YELL, 0, TEXT_RANGE_NORMAL, TEAM_OTHER, false);
                             // set flight
-                            me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-                            me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0x03);
+                            me->SetDisableGravity(true);
+                            me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
                             me->GetMotionMaster()->MovePoint(POINT_LK_OUTRO_2, OutroFlying);
                             break;
                         case EVENT_OUTRO_TALK_7:
@@ -1240,11 +1237,11 @@ class npc_tirion_fordring_tft : public CreatureScript
 
             void sGossipSelect(Player* /*player*/, uint32 sender, uint32 action)
             {
-                if (me->GetCreatureInfo()->GossipMenuId == sender && !action)
+                if (me->GetCreatureTemplate()->GossipMenuId == sender && !action)
                 {
                     _events.SetPhase(PHASE_INTRO);
                     me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                    me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                    me->SetWalk(true);
                     me->GetMotionMaster()->MovePoint(POINT_TIRION_INTRO, TirionIntro);
                 }
             }
@@ -1282,7 +1279,7 @@ class npc_tirion_fordring_tft : public CreatureScript
                             me->HandleEmoteCommand(EMOTE_ONESHOT_POINT_NO_SHEATHE);
                             break;
                         case EVENT_INTRO_CHARGE:
-                            me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                            me->SetWalk(false);
                             me->GetMotionMaster()->MovePoint(POINT_TIRION_CHARGE, TirionCharge);
                             break;
                         case EVENT_OUTRO_TALK_1:
@@ -2488,7 +2485,7 @@ class spell_the_lich_king_summon_into_air : public SpellScriptLoader
             void ModDestHeight(SpellEffIndex effIndex)
             {
                 static Position const offset = {0.0f, 0.0f, 15.0f, 0.0f};
-                WorldLocation* dest = const_cast<WorldLocation*>(GetTargetDest());
+                WorldLocation* dest = const_cast<WorldLocation*>(GetExplTargetDest());
                 dest->RelocateOffset(offset);
                 // spirit bombs get higher
                 if (GetSpellInfo()->Effects[effIndex].MiscValue == NPC_SPIRIT_BOMB)
@@ -2572,7 +2569,7 @@ class spell_the_lich_king_valkyr_target_search : public SpellScriptLoader
                 if (unitList.empty())
                     return;
 
-                _target = SelectRandomContainerElement(unitList);
+                _target = Trinity::Containers::SelectRandomContainerElement(unitList);
                 unitList.clear();
                 unitList.push_back(_target);
                 GetCaster()->GetAI()->SetGUID(_target->GetGUID());
@@ -2745,7 +2742,7 @@ class spell_the_lich_king_vile_spirits_visual : public SpellScriptLoader
             void ModDestHeight(SpellEffIndex /*effIndex*/)
             {
                 Position offset = {0.0f, 0.0f, 15.0f, 0.0f};
-                const_cast<WorldLocation*>(GetTargetDest())->RelocateOffset(offset);
+                const_cast<WorldLocation*>(GetExplTargetDest())->RelocateOffset(offset);
             }
 
             void Register()
@@ -2780,7 +2777,7 @@ class spell_the_lich_king_vile_spirit_move_target_search : public SpellScriptLoa
                 if (targets.empty())
                     return;
 
-                _target = SelectRandomContainerElement(targets);
+                _target = Trinity::Containers::SelectRandomContainerElement(targets);
             }
 
             void HandleScript(SpellEffIndex effIndex)

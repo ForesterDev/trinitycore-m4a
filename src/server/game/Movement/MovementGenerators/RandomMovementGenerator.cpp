@@ -36,15 +36,14 @@
 template<>
 void RandomMovementGenerator<Creature>::_setRandomLocation(Creature& creature)
 {
-    float respX, respY, respZ, respO, currZ, destX, destY, destZ, travelDistZ;
+    float respX, respY, respZ, respO, destX, destY, destZ, travelDistZ;
     creature.GetHomePosition(respX, respY, respZ, respO);
-    currZ = creature.GetPositionZ();
     Map const* map = creature.GetBaseMap();
 
     // For 2D/3D system selection
     //bool is_land_ok  = creature.CanWalk();                // not used?
     //bool is_water_ok = creature.CanSwim();                // not used?
-    bool is_air_ok = creature.canFly();
+    bool is_air_ok = creature.CanFly();
 
     const float angle = float(rand_norm()) * static_cast<float>(M_PI*2.0f);
     const float range = float(rand_norm()) * wander_distance;
@@ -129,8 +128,7 @@ void RandomMovementGenerator<Creature>::Initialize(Creature &creature)
 }
 
 template<>
-void
-RandomMovementGenerator<Creature>::Reset(Creature &creature)
+void RandomMovementGenerator<Creature>::Reset(Creature &creature)
 {
     Initialize(creature);
 }
@@ -143,8 +141,7 @@ void RandomMovementGenerator<Creature>::Finalize(Creature &creature)
 }
 
 template<>
-bool
-RandomMovementGenerator<Creature>::Update(Creature &creature, const uint32 diff)
+bool RandomMovementGenerator<Creature>::Update(Creature &creature, const uint32 diff)
 {
     if (creature.HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED | UNIT_STATE_DISTRACTED))
     {

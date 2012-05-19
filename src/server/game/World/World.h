@@ -26,6 +26,7 @@
 #include "Common.h"
 #include "Timer.h"
 #include <ace/Singleton.h>
+#include <ace/Atomic_Op.h>
 #include "SharedDefines.h"
 #include "QueryResult.h"
 #include "Callback.h"
@@ -162,6 +163,7 @@ enum WorldBoolConfigs
     CONFIG_PDUMP_NO_OVERWRITE,
     CONFIG_QUEST_IGNORE_AUTO_ACCEPT,
     CONFIG_QUEST_IGNORE_AUTO_COMPLETE,
+    CONFIG_WARDEN_ENABLED,
     BOOL_CONFIG_VALUE_COUNT
 };
 
@@ -309,6 +311,12 @@ enum WorldIntConfigs
     CONFIG_PRESERVE_CUSTOM_CHANNEL_DURATION,
     CONFIG_PERSISTENT_CHARACTER_CLEAN_FLAGS,
     CONFIG_MAX_INSTANCES_PER_HOUR,
+    CONFIG_WARDEN_CLIENT_RESPONSE_DELAY,
+    CONFIG_WARDEN_CLIENT_CHECK_HOLDOFF,
+    CONFIG_WARDEN_CLIENT_FAIL_ACTION,
+    CONFIG_WARDEN_CLIENT_BAN_DURATION,
+    CONFIG_WARDEN_NUM_MEM_CHECKS,
+    CONFIG_WARDEN_NUM_OTHER_CHECKS,
     INT_CONFIG_VALUE_COUNT
 };
 
@@ -643,7 +651,7 @@ class World
         void ShutdownMsg(bool show = false, Player* player = NULL);
         static uint8 GetExitCode() { return m_ExitCode; }
         static void StopNow(uint8 exitcode) { m_stopEvent = true; m_ExitCode = exitcode; }
-        static bool IsStopped() { return m_stopEvent; }
+        static bool IsStopped() { return m_stopEvent.value(); }
 
         void Update(uint32 diff);
 
@@ -761,7 +769,7 @@ class World
         void ResetWeeklyQuests();
         void ResetRandomBG();
     private:
-        static volatile bool m_stopEvent;
+        static ACE_Atomic_Op<ACE_Thread_Mutex, bool> m_stopEvent;
         static uint8 m_ExitCode;
         uint32 m_ShutdownTimer;
         uint32 m_ShutdownMask;

@@ -298,7 +298,7 @@ class boss_rimefang : public CreatureScript
                 _events.SetPhase(PHASE_NONE);
                 _currentWaypoint = 0;
                 _hoarfrostTargetGUID = 0;
-                me->SetFlying(true);
+                me->SetCanFly(true);
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
@@ -449,9 +449,9 @@ class spell_tyrannus_overlord_brand : public SpellScriptLoader
                 if (!p)
                     return;
                 oldAI = p->GetAI();
+                oldAIState = GetTarget()->IsAIEnabled;
                 p->SetAI(new player_overlord_brandAI(p));
                 p->GetAI()->SetGUID(GetCasterGUID());
-                oldAIState = p->IsAIEnabled;
                 p->IsAIEnabled = true;
                 affected = p;
             }

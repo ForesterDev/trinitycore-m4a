@@ -28,6 +28,10 @@
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
 #include "ScriptedEscortAI.h"
+#include "Cell.h"
+#include "CellImpl.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
 #include "CombatAI.h"
 #include "PassiveAI.h"
 #include "ObjectMgr.h"
@@ -36,6 +40,7 @@
 #include "Vehicle.h"
 #include "VehicleDefines.h"
 #include "ulduar.h"
+#include "Spell.h"
 
 enum Spells
 {
@@ -168,7 +173,7 @@ enum Yells
 
 enum MiscellanousData
 {
-    // Other actions are in Ulduar.h
+    // Other Actions are in Ulduar.h
     ACTION_START_HARD_MODE    = 5,
     ACTION_SPAWN_VEHICLES     = 6,
     // Amount of seats depending on Raid mode
@@ -325,7 +330,7 @@ class boss_flame_leviathan : public CreatureScript
                     DoScriptText(SAY_AGGRO, me);
             }
 
-            void JustDied(Unit* /*victim*/)
+            void JustDied(Unit* /*killer*/)
             {
                 _JustDied();
                 // Set Field Flags 67108928 = 64 | 67108864 = UNIT_FLAG_UNK_6 | UNIT_FLAG_SKINNABLE
@@ -574,7 +579,7 @@ class boss_flame_leviathan_seat : public CreatureScript
             {
                 ASSERT(vehicle);
                 me->SetReactState(REACT_PASSIVE);
-                me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
+                me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
                 instance = creature->GetInstanceScript();
             }
 
@@ -640,7 +645,7 @@ class boss_flame_leviathan_defense_cannon : public CreatureScript
 
             uint32 NapalmTimer;
 
-            void Reset ()
+            void Reset()
             {
                 NapalmTimer = 5*IN_MILLISECONDS;
                 DoCast(me, AURA_STEALTH_DETECTION);
@@ -884,7 +889,7 @@ class npc_colossus : public CreatureScript
 
             InstanceScript* instance;
 
-            void JustDied(Unit* /*Who*/)
+            void JustDied(Unit* /*killer*/)
             {
                 if (me->GetHomePosition().IsInDist(Center, 50.f))
                     instance->SetData(DATA_COLOSSUS, instance->GetData(DATA_COLOSSUS)+1);
@@ -961,8 +966,9 @@ public:
             me->SetReactState(REACT_PASSIVE);
         }
 
-        void WaypointReached(uint32 /*i*/)
+        void WaypointReached(uint32 /*waypointId*/)
         {
+
         }
 
         void Reset()
@@ -1152,7 +1158,7 @@ class npc_lorekeeper : public CreatureScript
             }
         };
 
-        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 action)
+        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
         {
             player->PlayerTalkClass->ClearMenus();
             InstanceScript* instance = creature->GetInstanceScript();
@@ -1225,10 +1231,10 @@ class npc_brann_bronzebeard : public CreatureScript
 public:
     npc_brann_bronzebeard() : CreatureScript("npc_brann_bronzebeard") { }
 
-    //bool OnGossipSelect(Player* player, Creature* creature, uint32 uiSender, uint32 uiAction)
+    //bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
     //{
     //    player->PlayerTalkClass->ClearMenus();
-    //    switch(uiAction)
+    //    switch(action)
     //    {
     //        case GOSSIP_ACTION_INFO_DEF+1:
     //            if (player)
@@ -1269,7 +1275,7 @@ class go_ulduar_tower : public GameObjectScript
     public:
         go_ulduar_tower() : GameObjectScript("go_ulduar_tower") { }
 
-        void OnDestroyed(GameObject* go, Player* /*player*/,  uint32 /*value*/)
+        void OnDestroyed(GameObject* go, Player* /*player*/)
         {
             InstanceScript* instance = go->GetInstanceScript();
             if (!instance)
@@ -1671,10 +1677,10 @@ class spell_pursue : public SpellScriptLoader
                     if (Creature* caster = GetCaster()->ToCreature())
                         caster->AI()->EnterEvadeMode();
                 }
-                else 
+                else
                 {
                     //! In the end, only one target should be selected
-                    _target = SelectRandomContainerElement(targets);
+                    _target = Trinity::Containers::SelectRandomContainerElement(targets);
                     FilterTargetsSubsequently(targets);
                 }
             }
@@ -1682,7 +1688,7 @@ class spell_pursue : public SpellScriptLoader
             void FilterTargetsSubsequently(std::list<Unit*>& targets)
             {
                 targets.clear();
-                if(_target)
+                if (_target)
                     targets.push_back(_target);
             }
 
@@ -1720,6 +1726,71 @@ class spell_pursue : public SpellScriptLoader
         }
 };
 
+class spell_vehicle_throw_passenger : public SpellScriptLoader
+{
+    public:
+        spell_vehicle_throw_passenger() : SpellScriptLoader("spell_vehicle_throw_passenger") {}
+
+        class spell_vehicle_throw_passenger_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_vehicle_throw_passenger_SpellScript);
+            void HandleScript(SpellEffIndex effIndex)
+            {
+                Spell* baseSpell = GetSpell();
+                SpellCastTargets targets = baseSpell->m_targets;
+                int32 damage = GetEffectValue();
+                if (targets.HasTraj())
+                    if (Vehicle* vehicle = GetCaster()->GetVehicleKit())
+                        if (Unit* passenger = vehicle->GetPassenger(damage - 1))
+                        {
+                            // use 99 because it is 3d search
+                            std::list<WorldObject*> targetList;
+                            Trinity::WorldObjectSpellAreaTargetCheck check(99, GetExplTargetDest(), GetCaster(), GetCaster(), GetSpellInfo(), TARGET_CHECK_DEFAULT, NULL);
+                            Trinity::WorldObjectListSearcher<Trinity::WorldObjectSpellAreaTargetCheck> searcher(GetCaster(), targetList, check);
+                            GetCaster()->GetMap()->VisitAll(GetCaster()->m_positionX, GetCaster()->m_positionY, 99, searcher);
+                            float minDist = 99 * 99;
+                            Unit* target = NULL;
+                            for (std::list<WorldObject*>::iterator itr = targetList.begin(); itr != targetList.end(); ++itr)
+                            {
+                                if (Unit* unit = (*itr)->ToUnit())
+                                    if (unit->GetEntry() == NPC_SEAT)
+                                        if (Vehicle* seat = unit->GetVehicleKit())
+                                            if (!seat->GetPassenger(0))
+                                                if (Unit* device = seat->GetPassenger(2))
+                                                    if (!device->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+                                                    {
+                                                        float dist = unit->GetExactDistSq(targets.GetDstPos());
+                                                        if (dist < minDist)
+                                                        {
+                                                            minDist = dist;
+                                                            target = unit;
+                                                        }
+                                                    }
+                            }
+                            if (target && target->IsWithinDist2d(targets.GetDstPos(), GetSpellInfo()->Effects[effIndex].CalcRadius() * 2)) // now we use *2 because the location of the seat is not correct
+                                passenger->EnterVehicle(target, 0);
+                            else
+                            {
+                                passenger->ExitVehicle();
+                                float x, y, z;
+                                targets.GetDstPos()->GetPosition(x, y, z);
+                                passenger->GetMotionMaster()->MoveJump(x, y, z, targets.GetSpeedXY(), targets.GetSpeedZ());
+                            }
+                        }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_vehicle_throw_passenger_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_vehicle_throw_passenger_SpellScript();
+        }
+};
+
 void AddSC_boss_flame_leviathan()
 {
     new boss_flame_leviathan();
@@ -1754,4 +1825,5 @@ void AddSC_boss_flame_leviathan()
     new spell_auto_repair();
     new spell_systems_shutdown();
     new spell_pursue();
+    new spell_vehicle_throw_passenger();
 }

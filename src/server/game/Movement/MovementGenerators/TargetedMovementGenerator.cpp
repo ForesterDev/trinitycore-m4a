@@ -39,15 +39,18 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T &owner)
         return;
 
     float x, y, z;
-
-    if (i_offset && i_target->IsWithinDistInMap(&owner,2*i_offset))
-    {
-        if (!owner.movespline->Finalized())
-            return;
-
-        owner.GetPosition(x, y, z);
-    }
-    else if (!i_offset)
+    //! Following block of code deleted by MrSmite in issue 4891
+    //! Code kept for learning and diagnostical purposes
+//
+//     if (i_offset && i_target->IsWithinDistInMap(&owner,2*i_offset))
+//     {
+//         if (!owner.movespline->Finalized())
+//             return;
+//
+//         owner.GetPosition(x, y, z);
+//     }
+//     else
+    if (!i_offset)
     {
         if (i_target->IsWithinMeleeRange(&owner))
             return;
@@ -76,7 +79,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T &owner)
 
         //We don't update Mob Movement, if the difference between New destination and last destination is < BothObjectSize
         float  bothObjectSize = i_target->GetObjectBoundingRadius() + owner.GetObjectBoundingRadius() + CONTACT_DISTANCE;
-        if( i_destinationHolder.HasDestination() && i_destinationHolder.GetDestinationDiff(x,y,z) < bothObjectSize )
+        if ( i_destinationHolder.HasDestination() && i_destinationHolder.GetDestinationDiff(x,y,z) < bothObjectSize )
             return;
     */
 
@@ -133,7 +136,7 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_
     }
 
     // prevent movement while casting spells with cast time or channel time
-    if (owner.IsNonMeleeSpellCasted(false, false,  true))
+    if (owner.HasUnitState(UNIT_STATE_CASTING))
     {
         if (!owner.IsStopped())
             owner.StopMoving();

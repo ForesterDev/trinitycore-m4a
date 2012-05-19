@@ -165,14 +165,14 @@ public:
                                 DoCast(target, SPELL_FROST_BOLT_VOLLEY);
                         }
                         frostBoltVolleyTimer = urand(5000, 8000);
-                    } 
+                    }
                     else frostBoltVolleyTimer -= diff;
-                    
+
                     if (frostNovaTimer <= diff)
                     {
                         DoCastAOE(SPELL_FROST_NOVA, false);
                         frostNovaTimer = urand(25000, 30000);
-                    } 
+                    }
                     else frostNovaTimer -= diff;
                     break;
                 }
@@ -201,7 +201,7 @@ class npc_morridune : public CreatureScript
 public:
     npc_morridune() : CreatureScript("npc_morridune") { }
 
-    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*Sender*/, uint32 action)
+    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
         switch (action)
@@ -236,9 +236,9 @@ public:
             Start(false, false, 0);
         }
 
-        void WaypointReached(uint32 uiPoint)
+        void WaypointReached(uint32 waypointId)
         {
-            switch (uiPoint)
+            switch (waypointId)
             {
                 case 4:
                     SetEscortPaused(true);

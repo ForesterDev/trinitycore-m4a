@@ -199,8 +199,8 @@ class boss_blood_queen_lana_thel : public CreatureScript
                     if (Creature* minchar = me->FindNearestCreature(NPC_INFILTRATOR_MINCHAR_BQ, 200.0f))
                     {
                         minchar->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-                        minchar->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, 0x01);
-                        minchar->SetFlying(false);
+                        minchar->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+                        minchar->SetCanFly(false);
                         minchar->SendMovementFlagUpdate();
                         minchar->RemoveAllAuras();
                         minchar->GetMotionMaster()->MoveCharge(4629.3711f, 2782.6089f, 401.5301f, SPEED_CHARGE/3.0f);
@@ -217,9 +217,9 @@ class boss_blood_queen_lana_thel : public CreatureScript
                     _killMinchar = true;
                 else
                 {
-                    me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-                    me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0x01);
-                    me->SetFlying(true);
+                    me->SetDisableGravity(true);
+                    me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+                    me->SetCanFly(true);
                     me->SendMovementFlagUpdate();
                     me->GetMotionMaster()->MovePoint(POINT_MINCHAR, mincharPos);
                 }
@@ -231,9 +231,9 @@ class boss_blood_queen_lana_thel : public CreatureScript
                 if (_killMinchar)
                 {
                     _killMinchar = false;
-                    me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-                    me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0x01);
-                    me->SetFlying(true);
+                    me->SetDisableGravity(true);
+                    me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+                    me->SetCanFly(true);
                     me->GetMotionMaster()->MovePoint(POINT_MINCHAR, mincharPos);
                 }
                 else
@@ -245,9 +245,9 @@ class boss_blood_queen_lana_thel : public CreatureScript
 
             void JustReachedHome()
             {
-                me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-                me->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, 0x01);
-                me->SetFlying(false);
+                me->SetDisableGravity(false);
+                me->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+                me->SetCanFly(false);
                 me->SetReactState(REACT_AGGRESSIVE);
                 _JustReachedHome();
                 Talk(SAY_WIPE);
@@ -296,9 +296,9 @@ class boss_blood_queen_lana_thel : public CreatureScript
                         events.ScheduleEvent(EVENT_AIR_FLY_DOWN, 10000);
                         break;
                     case POINT_GROUND:
-                        me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-                        me->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, 0x01);
-                        me->SetFlying(false);
+                        me->SetDisableGravity(false);
+                        me->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+                        me->SetCanFly(false);
                         me->SendMovementFlagUpdate();
                         me->SetReactState(REACT_AGGRESSIVE);
                         if (Unit* victim = me->SelectVictim())
@@ -373,7 +373,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                             break;
                         }
                         case EVENT_DELIRIOUS_SLASH:
-                            if (_offtank && !me->HasByteFlag(UNIT_FIELD_BYTES_1, 3, 0x03))
+                            if (_offtank && !me->HasByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER))
                                 DoCast(_offtank, SPELL_DELIRIOUS_SLASH);
                             events.ScheduleEvent(EVENT_DELIRIOUS_SLASH, urand(20000, 24000), EVENT_GROUP_NORMAL);
                             break;
@@ -387,7 +387,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                                 ++targetCount;
                             if (Is25ManRaid())
                                 ++targetCount;
-                            Trinity::RandomResizeList<Player*>(targets, targetCount);
+                            Trinity::Containers::RandomResizeList<Player*>(targets, targetCount);
                             if (targets.size() > 1)
                             {
                                 Talk(SAY_PACT_OF_THE_DARKFALLEN);
@@ -414,7 +414,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                         {
                             std::list<Player*> targets;
                             SelectRandomTarget(false, &targets);
-                            Trinity::RandomResizeList<Player*>(targets, uint32(Is25ManRaid() ? 4 : 2));
+                            Trinity::Containers::RandomResizeList<Player*>(targets, uint32(Is25ManRaid() ? 4 : 2));
                             for (std::list<Player*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
                                 DoCast(*itr, SPELL_TWILIGHT_BLOODBOLT);
                             DoCast(me, SPELL_TWILIGHT_BLOODBOLT_TARGET);
@@ -429,9 +429,9 @@ class boss_blood_queen_lana_thel : public CreatureScript
                             me->GetMotionMaster()->MovePoint(POINT_CENTER, centerPos);
                             break;
                         case EVENT_AIR_START_FLYING:
-                            me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
-                            me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0x01);
-                            me->SetFlying(true);
+                            me->SetDisableGravity(true);
+                            me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+                            me->SetCanFly(true);
                             me->SendMovementFlagUpdate();
                             me->GetMotionMaster()->MovePoint(POINT_AIR, airPos);
                             break;
@@ -488,7 +488,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                     return tempTargets.front();
                 }
 
-                return SelectRandomContainerElement(tempTargets);
+                return Trinity::Containers::SelectRandomContainerElement(tempTargets);
             }
 
             std::set<uint64> _vampires;
@@ -529,7 +529,7 @@ class spell_blood_queen_vampiric_bite : public SpellScriptLoader
 
             SpellCastResult CheckTarget()
             {
-                if (IsVampire(GetTargetUnit()))
+                if (IsVampire(GetExplTargetUnit()))
                 {
                     SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_CANT_TARGET_VAMPIRES);
                     return SPELL_FAILED_CUSTOM_ERROR;
@@ -667,7 +667,7 @@ class spell_blood_queen_bloodbolt : public SpellScriptLoader
             {
                 uint32 targetCount = (targets.size() + 2) / 3;
                 targets.remove_if (BloodboltHitCheck(static_cast<LanaThelAI*>(GetCaster()->GetAI())));
-                Trinity::RandomResizeList(targets, targetCount);
+                Trinity::Containers::RandomResizeList(targets, targetCount);
                 // mark targets now, effect hook has missile travel time delay (might cast next in that time)
                 for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                     GetCaster()->GetAI()->SetGUID((*itr)->GetGUID(), GUID_BLOODBOLT);

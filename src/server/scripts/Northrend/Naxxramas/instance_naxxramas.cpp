@@ -466,7 +466,6 @@ public:
             playerDied = buff2;
         }
     };
-
 };
 
 void AddSC_instance_naxxramas()

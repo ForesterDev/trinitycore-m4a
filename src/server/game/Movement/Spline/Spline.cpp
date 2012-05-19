@@ -57,7 +57,6 @@ SplineBase::InitMethtod SplineBase::initializers[SplineBase::ModesEnd] =
 };
 
 ///////////
-#pragma region evaluation methtods
 
 using G3D::Matrix4;
 static const Matrix4 s_catmullRomCoeffs(
@@ -200,7 +199,6 @@ float SplineBase::SegLengthBezier3(index_type index) const
     }
     return length;
 }
-#pragma endregion
 
 void SplineBase::init_spline(const Vector3 * controls, index_type count, EvaluationMode m)
 {

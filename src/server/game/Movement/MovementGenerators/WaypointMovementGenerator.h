@@ -42,7 +42,7 @@ template<class T, class P>
 class PathMovementBase
 {
     public:
-        PathMovementBase() : i_currentNode(0), i_path(NULL) {}
+        PathMovementBase() : i_path(NULL), i_currentNode(0) {}
         virtual ~PathMovementBase() {};
 
         // template pattern, not defined .. override required
@@ -58,12 +58,12 @@ template<class T>
 class WaypointMovementGenerator;
 
 template<>
-class WaypointMovementGenerator<Creature>
-: public MovementGeneratorMedium< Creature, WaypointMovementGenerator<Creature> >,
-public PathMovementBase<Creature, WaypointPath const*>
+class WaypointMovementGenerator<Creature> : public MovementGeneratorMedium< Creature, WaypointMovementGenerator<Creature> >,
+    public PathMovementBase<Creature, WaypointPath const*>
 {
     public:
-        WaypointMovementGenerator(uint32 _path_id = 0, bool _repeating = true) : i_nextMoveTime(0), path_id(_path_id), m_isArrivalDone(false), repeating(_repeating)  {}
+        WaypointMovementGenerator(uint32 _path_id = 0, bool _repeating = true)
+            : i_nextMoveTime(0), m_isArrivalDone(false), path_id(_path_id), repeating(_repeating)  {}
         ~WaypointMovementGenerator() { i_path = NULL; }
         void Initialize(Creature &);
         void Finalize(Creature &);
@@ -109,9 +109,8 @@ public PathMovementBase<Creature, WaypointPath const*>
 /** FlightPathMovementGenerator generates movement of the player for the paths
  * and hence generates ground and activities for the player.
  */
-class FlightPathMovementGenerator
-: public MovementGeneratorMedium< Player, FlightPathMovementGenerator >,
-public PathMovementBase<Player, TaxiPathNodeList const*>
+class FlightPathMovementGenerator : public MovementGeneratorMedium< Player, FlightPathMovementGenerator >,
+    public PathMovementBase<Player, TaxiPathNodeList const*>
 {
     public:
         explicit FlightPathMovementGenerator(TaxiPathNodeList const& pathnodes, uint32 startNode = 0)
@@ -122,7 +121,7 @@ public PathMovementBase<Player, TaxiPathNodeList const*>
         void Initialize(Player &);
         void Reset(Player &);
         void Finalize(Player &);
-        bool Update(Player &, const uint32);
+        bool Update(Player &, const uint32&);
         MovementGeneratorType GetMovementGeneratorType() { return FLIGHT_MOTION_TYPE; }
 
         TaxiPathNodeList const& GetPath() { return *i_path; }

@@ -62,7 +62,6 @@ void AddSC_reload_commandscript();
 void AddSC_tele_commandscript();
 void AddSC_titles_commandscript();
 void AddSC_wp_commandscript();
-void AddSC_gps_commandscript();
 
 #ifdef SCRIPTS
 //world
@@ -152,7 +151,6 @@ void AddSC_boss_sulfuron();
 void AddSC_boss_majordomo();
 void AddSC_boss_ragnaros();
 void AddSC_instance_molten_core();
-void AddSC_molten_core();
 void AddSC_the_scarlet_enclave();            //Scarlet Enclave
 void AddSC_the_scarlet_enclave_c1();
 void AddSC_the_scarlet_enclave_c2();
@@ -247,7 +245,6 @@ void AddSC_ironforge();
 void AddSC_isle_of_queldanas();
 void AddSC_loch_modan();
 void AddSC_redridge_mountains();
-void AddSC_searing_gorge();
 void AddSC_silvermoon_city();
 void AddSC_silverpine_forest();
 void AddSC_stormwind_city();
@@ -428,6 +425,7 @@ void AddSC_ulduar_teleporter();
 void AddSC_boss_mimiron();
 void AddSC_boss_hodir();
 void AddSC_boss_freya();
+void AddSC_boss_algalon_the_observer();
 void AddSC_instance_ulduar();
 void AddSC_boss_keleseth();              //Utgarde Keep
 void AddSC_boss_skarvald_dalronn();
@@ -666,7 +664,6 @@ void AddCommandScripts()
     AddSC_tele_commandscript();
     AddSC_titles_commandscript();
     AddSC_wp_commandscript();
-    AddSC_gps_commandscript();
 }
 
 void AddWorldScripts()
@@ -763,7 +760,6 @@ void AddEasternKingdomsScripts()
     AddSC_boss_majordomo();
     AddSC_boss_ragnaros();
     AddSC_instance_molten_core();
-    AddSC_molten_core();
     AddSC_the_scarlet_enclave();            //Scarlet Enclave
     AddSC_the_scarlet_enclave_c1();
     AddSC_the_scarlet_enclave_c2();
@@ -858,7 +854,6 @@ void AddEasternKingdomsScripts()
     AddSC_isle_of_queldanas();
     AddSC_loch_modan();
     AddSC_redridge_mountains();
-    AddSC_searing_gorge();
     AddSC_silvermoon_city();
     AddSC_silverpine_forest();
     AddSC_stormwind_city();
@@ -1134,6 +1129,7 @@ void AddNorthrendScripts()
     AddSC_boss_mimiron();
     AddSC_boss_hodir();
     AddSC_boss_freya();
+    AddSC_boss_algalon_the_observer();
     AddSC_instance_ulduar();
     AddSC_boss_keleseth();              //Utgarde Keep
     AddSC_boss_skarvald_dalronn();
