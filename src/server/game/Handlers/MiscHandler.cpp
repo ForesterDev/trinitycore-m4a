@@ -374,7 +374,6 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
     TRINITY_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
     HashMapHolder<Player>::MapType const& m = sObjectAccessor->GetPlayers();
     HashMapHolder<Player>::MapType::const_iterator itr = m.begin();
-    uint32 count = m.size();
     auto func = [&](Who &who) -> bool
         {
             // 49 is maximum player count sent to client - can be overridden
