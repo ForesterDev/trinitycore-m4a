@@ -30,7 +30,7 @@ if( NOT CMAKE_BUILD_TYPE )
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX)
-  add_definitions(-std=c++0x)
+  add_definitions(-std=gnu++0x)
 endif(CMAKE_COMPILER_IS_GNUCXX)
 
 include(CheckCXXSourceRuns)
