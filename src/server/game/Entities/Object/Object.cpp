@@ -1338,43 +1338,29 @@ bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool
 
 bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
 {
+    if (auto c = dynamic_cast<const Creature *>(obj))
+        if (c->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_IGNORE_LOS)
+            return true;
     if (!IsInMap(obj))
         return false;
 
-    G3D::Vector3 pos_1(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ());
-    G3D::Vector3 pos_2(GetPositionX(), GetPositionY(), GetPositionZ());
-    if (obj->GetTypeId() == TYPEID_UNIT)
-    {
-        auto dist = (pos_2 - pos_1).magnitude();
-        auto combatreach = obj->GetObjectSize();
-        if (G3D::fuzzyLe(dist, combatreach))
-            return true;
-        pos_1 = G3D::Ray::fromOriginAndDirection(pos_1, (pos_2 - pos_1) / dist).bump(combatreach).origin();
-    }
-    return IsWithinLOS(pos_1.x, pos_1.y, pos_1.z);
+    float ox, oy, oz;
+    obj->GetPosition(ox, oy, oz);
+    return IsWithinLOS(ox, oy, oz);
 }
 
 bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
 {
+    if (auto c = dynamic_cast<const Creature *>(this))
+        if (c->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_IGNORE_LOS)
+            return true;
     /*float x, y, z;
     GetPosition(x, y, z);
     VMAP::IVMapManager* vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
     unique_lock<Vmap_mutex> l(vmap_mutex());
     return vMapManager->isInLineOfSight(GetMapId(), x, y, z+2.0f, ox, oy, oz+2.0f);*/
     if (IsInWorld())
-    {
-        G3D::Vector3 pos_1(GetPositionX(), GetPositionY(), GetPositionZ());
-        G3D::Vector3 pos_2(ox, oy, oz);
-        if (GetTypeId() == TYPEID_UNIT)
-        {
-            auto dist = (pos_2 - pos_1).magnitude();
-            auto combatreach = GetObjectSize();
-            if (G3D::fuzzyLe(dist, combatreach))
-                return true;
-            pos_1 = G3D::Ray::fromOriginAndDirection(pos_1, (pos_2 - pos_1) / dist).bump(combatreach).origin();
-        }
-        return GetMap()->isInLineOfSight(pos_1.x, pos_1.y, pos_1.z+2.f, pos_2.x, pos_2.y, pos_2.z+2.f, GetPhaseMask());
-    }
+        return GetMap()->isInLineOfSight(GetPositionX(), GetPositionY(), GetPositionZ()+2.f, ox, oy, oz+2.f, GetPhaseMask());
 
     return true;
 }

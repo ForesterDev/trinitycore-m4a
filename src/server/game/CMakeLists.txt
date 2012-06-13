@@ -222,7 +222,7 @@ add_library(game STATIC ${game_STAT_SRCS})
 
 add_dependencies(game revision.h)
 
-target_link_libraries(game g3dlib ${Boost_LIBRARIES})
+target_link_libraries(game ${Boost_LIBRARIES})
 
 # Generate precompiled header
 if( USE_COREPCH )
