@@ -6,6 +6,7 @@
 #define SC_PRECOMPILED_H
 
 #include <algorithm>
+#include <array>
 #include <functional>
 #include <memory>
 #include <list>
