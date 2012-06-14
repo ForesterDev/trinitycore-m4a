@@ -300,7 +300,7 @@ public:
             for (itr = chained.begin(); itr != chained.end(); ++itr)
             {
                 if (Player* charmed = Unit::GetPlayer(*me, (*itr).first))
-                    charmed->SetFloatValue(OBJECT_FIELD_SCALE_X, (*itr).second);
+                    charmed->SetObjectScale((*itr).second);
             }
 
             chained.clear();
@@ -348,7 +348,7 @@ public:
             for (itr = chained.begin(); itr != chained.end(); ++itr)
             {
                 if (Player* player = Unit::GetPlayer(*me, (*itr).first))
-                    player->SetFloatValue(OBJECT_FIELD_SCALE_X, (*itr).second);
+                    player->SetObjectScale((*itr).second);
             }
             chained.clear();
         }
@@ -513,7 +513,7 @@ public:
                                     DoCast(target, SPELL_CHAINS_OF_KELTHUZAD);
                                     float scale = target->GetFloatValue(OBJECT_FIELD_SCALE_X);
                                     chained.insert(std::make_pair(target->GetGUID(), scale));
-                                    target->SetFloatValue(OBJECT_FIELD_SCALE_X, scale * 2);
+                                    target->SetObjectScale(scale * 2);
                                     events.ScheduleEvent(EVENT_CHAINED_SPELL, 2000); //core has 2000ms to set unit flag charm
                                 }
                             }
@@ -531,7 +531,7 @@ public:
                                 {
                                     if (!player->isCharmed())
                                     {
-                                        player->SetFloatValue(OBJECT_FIELD_SCALE_X, (*itr).second);
+                                        player->SetObjectScale((*itr).second);
                                         std::map<uint64, float>::iterator next = itr;
                                         ++next;
                                         chained.erase(itr);
