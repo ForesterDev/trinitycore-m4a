@@ -213,15 +213,14 @@ class spell_sha_earthbind_totem : public SpellScriptLoader
                 return true;
             }
 
-            void HandleEffectPeriodic(AuraEffect const* aurEff)
+            void HandleEffectPeriodic(AuraEffect const* /*aurEff*/)
             {
-                if (Unit* target = GetTarget())
-                    if (Unit* caster = aurEff->GetBase()->GetCaster())
-                        if (TempSummon* summon = caster->ToTempSummon())
-                            if (Unit* owner = summon->GetOwner())
-                                if (AuraEffect* aur = owner->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 2289, 0))
-                                    if (roll_chance_i(aur->GetBaseAmount()) && target->HasAuraWithMechanic(1 << MECHANIC_SNARE))
-                                        caster->CastSpell(caster, SHAMAN_TOTEM_SPELL_EARTHEN_POWER, true, NULL, aurEff);
+                if (!GetCaster())
+                    return;
+                if (Player* owner = GetCaster()->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    if (AuraEffect* aur = owner->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 2289, 0))
+                        if (roll_chance_i(aur->GetBaseAmount()))
+                            GetTarget()->CastSpell((Unit*)NULL, SHAMAN_TOTEM_SPELL_EARTHEN_POWER, true);
             }
 
             void Apply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
@@ -252,6 +251,46 @@ class spell_sha_earthbind_totem : public SpellScriptLoader
         }
 };
 
+class EarthenPowerTargetSelector
+{
+    public:
+        EarthenPowerTargetSelector() { }
+ 
+        bool operator() (Unit* target)
+        {
+            if (!target->HasAuraWithMechanic(1 << MECHANIC_SNARE))
+                return true;
+
+            return false;
+        }
+};
+
+class spell_sha_earthen_power : public SpellScriptLoader
+{
+    public:
+        spell_sha_earthen_power() : SpellScriptLoader("spell_sha_earthen_power") { }
+
+        class spell_sha_earthen_power_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_sha_earthen_power_SpellScript);
+
+            void FilterTargets(std::list<Unit*>& unitList)
+            {
+                unitList.remove_if(EarthenPowerTargetSelector());
+            }
+
+            void Register()
+            {
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_sha_earthen_power_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_sha_earthen_power_SpellScript();
+        }
+};
+
 class spell_sha_bloodlust : public SpellScriptLoader
 {
     public:
@@ -270,7 +309,7 @@ class spell_sha_bloodlust : public SpellScriptLoader
 
             void RemoveInvalidTargets(std::list<Unit*>& targets)
             {
-                targets.remove_if (Trinity::UnitAuraCheck(true, SHAMAN_SPELL_SATED));
+                targets.remove_if(Trinity::UnitAuraCheck(true, SHAMAN_SPELL_SATED));
             }
 
             void ApplyDebuff()
@@ -449,7 +488,7 @@ class spell_sha_healing_stream_totem : public SpellScriptLoader
                         if (Unit* owner = caster->GetOwner())
                         {
                             if (triggeringSpell)
-                                damage = int32(owner->SpellHealingBonus(target, triggeringSpell, damage, HEAL));
+                                damage = int32(owner->SpellHealingBonusDone(target, triggeringSpell, damage, HEAL));
 
                             // Restorative Totems
                             if (AuraEffect* dummy = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, ICON_ID_RESTORATIVE_TOTEMS, 1))
@@ -458,6 +497,8 @@ class spell_sha_healing_stream_totem : public SpellScriptLoader
                             // Glyph of Healing Stream Totem
                             if (AuraEffect const* aurEff = owner->GetAuraEffect(SPELL_GLYPH_OF_HEALING_STREAM_TOTEM, EFFECT_0))
                                 AddPctN(damage, aurEff->GetAmount());
+
+                            damage = int32(target->SpellHealingBonusTaken(owner, triggeringSpell, damage, HEAL));
                         }
                         caster->CastCustomSpell(target, SPELL_HEALING_STREAM_TOTEM_HEAL, &damage, 0, 0, true, 0, 0, GetOriginalCaster()->GetGUID());
                     }
@@ -617,6 +658,7 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_fire_nova();
     new spell_sha_mana_tide_totem();
     new spell_sha_earthbind_totem();
+    new spell_sha_earthen_power();
     new spell_sha_bloodlust();
     new spell_sha_heroism();
     new spell_sha_ancestral_awakening_proc();

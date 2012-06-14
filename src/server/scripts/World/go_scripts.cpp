@@ -1174,7 +1174,7 @@ class go_gjalerbron_cage : public GameObjectScript
                         player->KilledMonsterCredit(NPC_GJALERBRON_PRISONER, 0);
 
                     prisoner->AI()->Talk(SAY_FREE);
-                    prisoner->ForcedDespawn(6000);
+                    prisoner->DespawnOrUnsummon(6000);
                 }
             }
             return true;
@@ -1201,7 +1201,7 @@ class go_large_gjalerbron_cage : public GameObjectScript
                 {
                     go->UseDoorOrButton();
                     player->KilledMonsterCredit(NPC_GJALERBRON_PRISONER, (*itr)->GetGUID());
-                    (*itr)->ForcedDespawn(6000);
+                    (*itr)->DespawnOrUnsummon(6000);
                     (*itr)->AI()->Talk(SAY_FREE);
                 }
             }
@@ -1235,7 +1235,7 @@ class go_veil_skith_cage : public GameObjectScript
                {
                    go->UseDoorOrButton();
                    player->KilledMonsterCredit(NPC_CAPTIVE_CHILD, (*itr)->GetGUID());
-                   (*itr)->ForcedDespawn(5000);
+                   (*itr)->DespawnOrUnsummon(5000);
                    (*itr)->GetMotionMaster()->MovePoint(1, go->GetPositionX()+5, go->GetPositionY(), go->GetPositionZ());
                    (*itr)->AI()->Talk(SAY_FREE_0);
                    (*itr)->GetMotionMaster()->Clear();
@@ -1243,6 +1243,36 @@ class go_veil_skith_cage : public GameObjectScript
            }
            return false;
        }
+};
+
+/*######
+## go_frostblade_shrine
+######*/
+
+enum TheCleansing
+{
+   QUEST_THE_CLEANSING_HORDE      = 11317,
+   QUEST_THE_CLEANSING_ALLIANCE   = 11322,
+   SPELL_CLEANSING_SOUL           = 43351,
+   SPELL_RECENT_MEDITATION        = 61720,
+};
+
+class go_frostblade_shrine : public GameObjectScript
+{
+public:
+    go_frostblade_shrine() : GameObjectScript("go_frostblade_shrine") { }
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (!player->HasAura(SPELL_RECENT_MEDITATION))
+            if (player->GetQuestStatus(QUEST_THE_CLEANSING_HORDE) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_THE_CLEANSING_ALLIANCE) == QUEST_STATUS_INCOMPLETE)
+            {
+                go->UseDoorOrButton(10);
+                player->CastSpell(player, SPELL_CLEANSING_SOUL);
+                player->SetStandState(UNIT_STAND_STATE_SIT);
+            }
+            return true;
+    }
 };
 
 void AddSC_go_scripts()
@@ -1285,4 +1315,5 @@ void AddSC_go_scripts()
     new go_gjalerbron_cage;
     new go_large_gjalerbron_cage;
     new go_veil_skith_cage;
+    new go_frostblade_shrine;
 }
