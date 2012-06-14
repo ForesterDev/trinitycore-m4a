@@ -346,7 +346,7 @@ class FrostwingGauntletRespawner
 
             if (CreatureData const* data = creature->GetCreatureData())
                 creature->SetPosition(data->posX, data->posY, data->posZ, data->orientation);
-            creature->ForcedDespawn();
+            creature->DespawnOrUnsummon();
 
             creature->SetCorpseDelay(corpseDelay);
             creature->SetRespawnDelay(respawnDelay);
@@ -1290,7 +1290,7 @@ struct npc_argent_captainAI : public ScriptedAI
             if (spell->Id == SPELL_REVIVE_CHAMPION && !IsUndead)
             {
                 IsUndead = true;
-                me->setDeathState(JUST_ALIVED);
+                me->setDeathState(JUST_RESPAWNED);
                 uint32 newEntry = 0;
                 switch (me->GetEntry())
                 {
@@ -1926,7 +1926,7 @@ class spell_svalna_revive_champion : public SpellScriptLoader
                 //pos.m_positionZ = caster->GetBaseMap()->GetHeight(caster->GetPhaseMask(), pos.GetPositionX(), pos.GetPositionY(), caster->GetPositionZ(), true, 50.0f);
                 //pos.m_positionZ += 0.05f;
                 caster->SetHomePosition(pos);
-                caster->GetMotionMaster()->MoveLand(POINT_LAND, pos, caster->GetSpeed(MOVE_FLIGHT));
+                caster->GetMotionMaster()->MoveLand(POINT_LAND, pos);
             }
 
             void Register()

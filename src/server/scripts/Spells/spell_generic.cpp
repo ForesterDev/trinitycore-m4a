@@ -169,7 +169,7 @@ class spell_gen_burn_brutallus : public SpellScriptLoader
         }
 };
 
-enum eCannibalizeSpells
+enum CannibalizeSpells
 {
     SPELL_CANNIBALIZE_TRIGGERED = 20578,
 };
@@ -224,7 +224,7 @@ class spell_gen_cannibalize : public SpellScriptLoader
 };
 
 // 45472 Parachute
-enum eParachuteSpells
+enum ParachuteSpells
 {
     SPELL_PARACHUTE         = 45472,
     SPELL_PARACHUTE_BUFF    = 44795,
@@ -365,7 +365,7 @@ class spell_gen_remove_flight_auras : public SpellScriptLoader
 };
 
 // 66118 Leeching Swarm
-enum eLeechingSwarmSpells
+enum LeechingSwarmSpells
 {
     SPELL_LEECHING_SWARM_DMG    = 66240,
     SPELL_LEECHING_SWARM_HEAL   = 66125,
@@ -481,7 +481,7 @@ class spell_gen_elune_candle : public SpellScriptLoader
 };
 
 // 24750 Trick
-enum eTrickSpells
+enum TrickSpells
 {
     SPELL_PIRATE_COSTUME_MALE           = 24708,
     SPELL_PIRATE_COSTUME_FEMALE         = 24709,
@@ -557,7 +557,7 @@ class spell_gen_trick : public SpellScriptLoader
 };
 
 // 24751 Trick or Treat
-enum eTrickOrTreatSpells
+enum TrickOrTreatSpells
 {
     SPELL_TRICK                 = 24714,
     SPELL_TREAT                 = 24715,
@@ -660,22 +660,16 @@ class spell_pvp_trinket_wotf_shared_cd : public SpellScriptLoader
                 return true;
             }
 
-            void HandleScript(SpellEffIndex /*effIndex*/)
+            void HandleScript()
             {
-                Player* caster = GetCaster()->ToPlayer();
-                SpellInfo const* spellInfo = GetSpellInfo();
-                caster->AddSpellCooldown(spellInfo->Id, 0, time(NULL) + sSpellMgr->GetSpellInfo(SPELL_WILL_OF_THE_FORSAKEN_COOLDOWN_TRIGGER)->GetRecoveryTime() / IN_MILLISECONDS);
-                WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+4);
-                data << uint64(caster->GetGUID());
-                data << uint8(0);
-                data << uint32(spellInfo->Id);
-                data << uint32(0);
-                caster->GetSession()->SendPacket(&data);
+                // This is only needed because spells cast from spell_linked_spell are triggered by default
+                // Spell::SendSpellCooldown() skips all spells with TRIGGERED_IGNORE_SPELL_AND_CATEGORY_CD
+                GetCaster()->ToPlayer()->AddSpellAndCategoryCooldowns(GetSpellInfo(), GetCastItem() ? GetCastItem()->GetEntry() : 0, GetSpell());
             }
 
             void Register()
             {
-                OnEffectHit += SpellEffectFn(spell_pvp_trinket_wotf_shared_cd_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
+                AfterCast += SpellCastFn(spell_pvp_trinket_wotf_shared_cd_SpellScript::HandleScript);
             }
         };
 
@@ -1282,7 +1276,7 @@ class spell_gen_launch : public SpellScriptLoader
 
             void Launch()
             {
-                WorldLocation const* const position = GetTargetDest();
+                WorldLocation const* const position = GetExplTargetDest();
 
                 if (Player* player = GetHitPlayer())
                 {
@@ -1513,7 +1507,7 @@ class spell_gen_luck_of_the_draw : public SpellScriptLoader
                             if (group->isLFGGroup())
                                 if (uint32 dungeonId = sLFGMgr->GetDungeon(group->GetGUID(), true))
                                     if (LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(dungeonId))
-                                        if (uint32(dungeon->map) == map->GetId() && dungeon->difficulty == map->GetDifficulty())
+                                        if (uint32(dungeon->map) == map->GetId() && dungeon->difficulty == uint32(map->GetDifficulty()))
                                             if (randomDungeon && randomDungeon->type == LFG_TYPE_RANDOM)
                                                 return; // in correct dungeon
 
@@ -2052,9 +2046,9 @@ class spell_gen_defend : public SpellScriptLoader
     public:
         spell_gen_defend() : SpellScriptLoader("spell_gen_defend") { }
 
-        class spell_gen_defendAuraScript : public AuraScript
+        class spell_gen_defend_AuraScript : public AuraScript
         {
-            PrepareAuraScript(spell_gen_defendAuraScript);
+            PrepareAuraScript(spell_gen_defend_AuraScript);
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
@@ -2103,26 +2097,26 @@ class spell_gen_defend : public SpellScriptLoader
                 // Defend spells casted by NPCs (add visuals)
                 if (spell->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN)
                 {
-                    AfterEffectApply += AuraEffectApplyFn(spell_gen_defendAuraScript::RefreshVisualShields, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
-                    OnEffectRemove += AuraEffectRemoveFn(spell_gen_defendAuraScript::RemoveVisualShields, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
+                    AfterEffectApply += AuraEffectApplyFn(spell_gen_defend_AuraScript::RefreshVisualShields, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+                    OnEffectRemove += AuraEffectRemoveFn(spell_gen_defend_AuraScript::RemoveVisualShields, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
                 }
 
                 // Remove Defend spell from player when he dismounts
                 if (spell->Effects[EFFECT_2].ApplyAuraName == SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN)
-                    OnEffectRemove += AuraEffectRemoveFn(spell_gen_defendAuraScript::RemoveDummyFromDriver, EFFECT_2, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, AURA_EFFECT_HANDLE_REAL);
+                    OnEffectRemove += AuraEffectRemoveFn(spell_gen_defend_AuraScript::RemoveDummyFromDriver, EFFECT_2, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, AURA_EFFECT_HANDLE_REAL);
 
                 // Defend spells casted by players (add/remove visuals)
                 if (spell->Effects[EFFECT_1].ApplyAuraName == SPELL_AURA_DUMMY)
                 {
-                    AfterEffectApply += AuraEffectApplyFn(spell_gen_defendAuraScript::RefreshVisualShields, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
-                    OnEffectRemove += AuraEffectRemoveFn(spell_gen_defendAuraScript::RemoveVisualShields, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
+                    AfterEffectApply += AuraEffectApplyFn(spell_gen_defend_AuraScript::RefreshVisualShields, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+                    OnEffectRemove += AuraEffectRemoveFn(spell_gen_defend_AuraScript::RemoveVisualShields, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
                 }
             }
         };
 
         AuraScript* GetAuraScript() const
         {
-            return new spell_gen_defendAuraScript();
+            return new spell_gen_defend_AuraScript();
         }
 };
 
@@ -2326,9 +2320,9 @@ class spell_gen_on_tournament_mount : public SpellScriptLoader
     public:
         spell_gen_on_tournament_mount() : SpellScriptLoader("spell_gen_on_tournament_mount") { }
 
-        class spell_gen_on_tournament_mountAuraScript : public AuraScript
+        class spell_gen_on_tournament_mount_AuraScript : public AuraScript
         {
-            PrepareAuraScript(spell_gen_on_tournament_mountAuraScript);
+            PrepareAuraScript(spell_gen_on_tournament_mount_AuraScript);
 
             uint32 _pennantSpellId;
 
@@ -2468,14 +2462,14 @@ class spell_gen_on_tournament_mount : public SpellScriptLoader
 
             void Register()
             {
-                AfterEffectApply += AuraEffectApplyFn(spell_gen_on_tournament_mountAuraScript::HandleApplyEffect, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
-                OnEffectRemove += AuraEffectRemoveFn(spell_gen_on_tournament_mountAuraScript::HandleRemoveEffect, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+                AfterEffectApply += AuraEffectApplyFn(spell_gen_on_tournament_mount_AuraScript::HandleApplyEffect, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+                OnEffectRemove += AuraEffectRemoveFn(spell_gen_on_tournament_mount_AuraScript::HandleRemoveEffect, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
             }
         };
 
         AuraScript* GetAuraScript() const
         {
-            return new spell_gen_on_tournament_mountAuraScript();
+            return new spell_gen_on_tournament_mount_AuraScript();
         }
 };
 
@@ -2484,9 +2478,9 @@ class spell_gen_tournament_pennant : public SpellScriptLoader
     public:
         spell_gen_tournament_pennant() : SpellScriptLoader("spell_gen_tournament_pennant") { }
 
-        class spell_gen_tournament_pennantAuraScript : public AuraScript
+        class spell_gen_tournament_pennant_AuraScript : public AuraScript
         {
-            PrepareAuraScript(spell_gen_tournament_pennantAuraScript);
+            PrepareAuraScript(spell_gen_tournament_pennant_AuraScript);
 
             bool Load()
             {
@@ -2502,13 +2496,13 @@ class spell_gen_tournament_pennant : public SpellScriptLoader
 
             void Register()
             {
-                OnEffectApply += AuraEffectApplyFn(spell_gen_tournament_pennantAuraScript::HandleApplyEffect, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+                OnEffectApply += AuraEffectApplyFn(spell_gen_tournament_pennant_AuraScript::HandleApplyEffect, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
             }
         };
 
         AuraScript* GetAuraScript() const
         {
-            return new spell_gen_tournament_pennantAuraScript();
+            return new spell_gen_tournament_pennant_AuraScript();
         }
 };
 
@@ -2656,6 +2650,95 @@ class spell_gen_count_pct_from_max_hp : public SpellScriptLoader
         int32 _damagePct;
 };
 
+class spell_gen_despawn_self : public SpellScriptLoader
+{
+public:
+    spell_gen_despawn_self() : SpellScriptLoader("spell_gen_despawn_self") { }
+
+    class spell_gen_despawn_self_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gen_despawn_self_SpellScript);
+
+        bool Load()
+        {
+            return GetCaster()->GetTypeId() == TYPEID_UNIT;
+        }
+
+        void HandleDummy(SpellEffIndex effIndex)
+        {
+            if (GetSpellInfo()->Effects[effIndex].Effect == SPELL_EFFECT_DUMMY || GetSpellInfo()->Effects[effIndex].Effect == SPELL_EFFECT_SCRIPT_EFFECT)
+                GetCaster()->ToCreature()->DespawnOrUnsummon();
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_gen_despawn_self_SpellScript::HandleDummy, EFFECT_ALL, SPELL_EFFECT_ANY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gen_despawn_self_SpellScript();
+    }
+};
+
+class spell_gen_touch_the_nightmare : public SpellScriptLoader
+{
+public:
+    spell_gen_touch_the_nightmare() : SpellScriptLoader("spell_gen_touch_the_nightmare") { }
+
+    class spell_gen_touch_the_nightmare_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gen_touch_the_nightmare_SpellScript);
+
+        void HandleDamageCalc(SpellEffIndex /*effIndex*/)
+        {
+            uint32 bp = GetCaster()->GetMaxHealth() * 0.3f;
+            SetHitDamage(bp);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_gen_touch_the_nightmare_SpellScript::HandleDamageCalc, EFFECT_2, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gen_touch_the_nightmare_SpellScript();
+    }
+};
+
+class spell_gen_dream_funnel: public SpellScriptLoader
+{
+public:
+    spell_gen_dream_funnel() : SpellScriptLoader("spell_gen_dream_funnel") { }
+
+    class spell_gen_dream_funnel_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_gen_dream_funnel_AuraScript);
+
+        void HandleEffectCalcAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
+        {
+            if (GetCaster())
+                amount = GetCaster()->GetMaxHealth() * 0.05f;
+
+            canBeRecalculated = false;
+        }
+
+        void Register()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_gen_dream_funnel_AuraScript::HandleEffectCalcAmount, EFFECT_0, SPELL_AURA_PERIODIC_HEAL);
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_gen_dream_funnel_AuraScript::HandleEffectCalcAmount, EFFECT_2, SPELL_AURA_PERIODIC_DAMAGE);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_gen_dream_funnel_AuraScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -2709,4 +2792,7 @@ void AddSC_generic_spell_scripts()
     new spell_gen_wg_water();
     new spell_gen_count_pct_from_max_hp("spell_gen_default_count_pct_from_max_hp");
     new spell_gen_count_pct_from_max_hp("spell_gen_50pct_count_pct_from_max_hp", 50);
+    new spell_gen_despawn_self();
+    new spell_gen_touch_the_nightmare();
+    new spell_gen_dream_funnel();
 }
