@@ -289,9 +289,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Recvd CMSG_WHO Message");
 
     time_t now = time(NULL);
-    if (now - timeLastWhoCommand < 5)
-        return;
-    else timeLastWhoCommand = now;
+    timeLastWhoCommand = now;
 
     uint32 clientcount = 0;
 
