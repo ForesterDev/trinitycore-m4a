@@ -15169,8 +15169,11 @@ float Unit::CalculateDefaultCoefficient(SpellInfo const *spellInfo, DamageEffect
     // Distribute Damage over multiple effects, reduce by AoE
     CastingTime = GetCastingTimeForBonus(spellInfo, damagetype, CastingTime);
 
-    // As wowwiki says: C = (Cast Time / 3.5)
-    return (CastingTime / 3500.0f) * DotFactor;
+    if (spellInfo->SchoolMask != SPELL_SCHOOL_MASK_NORMAL)
+        // As wowwiki says: C = (Cast Time / 3.5)
+        return (CastingTime / 3500.0f) * DotFactor;
+    else
+        return DotFactor;
 }
 
 float Unit::GetAPMultiplier(WeaponAttackType attType, bool normalized)
