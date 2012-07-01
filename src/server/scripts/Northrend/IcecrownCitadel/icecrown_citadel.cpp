@@ -2050,6 +2050,55 @@ class at_icc_start_frostwing_gauntlet : public AreaTriggerScript
         }
 };
 
+namespace
+{
+    struct strength_of_wrynn_aura
+    : AuraScript
+    {
+        PrepareAuraScript(strength_of_wrynn_aura)
+
+        strength_of_wrynn_aura(const PetAura &pet_aura)
+        : pet_aura(&pet_aura)
+        {
+        }
+
+        void Register()
+        {
+            AfterEffectApply += AuraEffectApplyFn(strength_of_wrynn_aura::applied, EFFECT_FIRST_FOUND, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectRemove += AuraEffectApplyFn(strength_of_wrynn_aura::removed, EFFECT_FIRST_FOUND, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, AURA_EFFECT_HANDLE_REAL);
+        }
+
+        void applied(const AuraEffect *, AuraEffectHandleModes)
+        {
+            GetTarget()->AddPetAura(pet_aura);
+        }
+
+        void removed(const AuraEffect *, AuraEffectHandleModes)
+        {
+            GetTarget()->RemovePetAura(pet_aura);
+        }
+
+        const PetAura *pet_aura;
+    };
+
+    struct strength_of_wrynn
+    : SpellScriptLoader
+    {
+        strength_of_wrynn()
+        : SpellScriptLoader("spell_icc_strength_of_wrynn"),
+            pet_aura(0, 73828 /* Strength of Wrynn */, false, 0)
+        {
+        }
+
+        AuraScript *GetAuraScript() const
+        {
+            return new strength_of_wrynn_aura(pet_aura);
+        }
+
+        PetAura pet_aura;
+    };
+}
+
 void AddSC_icecrown_citadel()
 {
     new npc_highlord_tirion_fordring_lh();
@@ -2075,4 +2124,5 @@ void AddSC_icecrown_citadel()
     new at_icc_shutdown_traps();
     new at_icc_start_blood_quickening();
     new at_icc_start_frostwing_gauntlet();
+    new strength_of_wrynn;
 }
