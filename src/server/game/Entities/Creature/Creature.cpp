@@ -333,7 +333,7 @@ bool Creature::InitEntry(uint32 Entry, uint32 /*team*/, const CreatureData* data
     SetSpeed(MOVE_SWIM, 1.0f);      // using 1.0 rate
     SetSpeed(MOVE_FLIGHT, 1.0f);    // using 1.0 rate
 
-    SetFloatValue(OBJECT_FIELD_SCALE_X, cinfo->scale);
+    SetObjectScale(cinfo->scale);
 
     SetFloatValue(UNIT_FIELD_HOVERHEIGHT, cinfo->HoverHeight);
 
@@ -468,9 +468,9 @@ void Creature::Update(uint32 diff)
 
     switch (m_deathState)
     {
-        case JUST_ALIVED:
-            // Must not be called, see Creature::setDeathState JUST_ALIVED -> ALIVE promoting.
-            sLog->outError("Creature (GUID: %u Entry: %u) in wrong state: JUST_ALIVED (4)", GetGUIDLow(), GetEntry());
+        case JUST_RESPAWNED:
+            // Must not be called, see Creature::setDeathState JUST_RESPAWNED -> ALIVE promoting.
+            sLog->outError("Creature (GUID: %u Entry: %u) in wrong state: JUST_RESPAWNED (4)", GetGUIDLow(), GetEntry());
             break;
         case JUST_DIED:
             // Must not be called, see Creature::setDeathState JUST_DIED -> CORPSE promoting.
@@ -486,7 +486,7 @@ void Creature::Update(uint32 diff)
                     break;
 
                 uint64 dbtableHighGuid = MAKE_NEW_GUID(m_DBTableGuid, GetEntry(), HIGHGUID_UNIT);
-                time_t linkedRespawntime = sObjectMgr->GetLinkedRespawnTime(dbtableHighGuid, GetMap()->GetInstanceId());
+                time_t linkedRespawntime = GetMap()->GetLinkedRespawnTime(dbtableHighGuid);
                 if (!linkedRespawntime)             // Can respawn
                     Respawn();
                 else                                // the master is dead
@@ -1303,7 +1303,7 @@ bool Creature::LoadCreatureFromDB(uint32 guid, Map* map, bool addToMap)
     m_respawnDelay = data->spawntimesecs;
     m_deathState = ALIVE;
 
-    m_respawnTime  = sObjectMgr->GetCreatureRespawnTime(m_DBTableGuid, GetInstanceId());
+    m_respawnTime  = GetMap()->GetCreatureRespawnTime(m_DBTableGuid);
     if (m_respawnTime)                          // respawn on Update
     {
         m_deathState = DEAD;
@@ -1398,7 +1398,7 @@ void Creature::DeleteFromDB()
         return;
     }
 
-    sObjectMgr->RemoveCreatureRespawnTime(m_DBTableGuid, GetInstanceId());
+    GetMap()->RemoveCreatureRespawnTime(m_DBTableGuid);
     sObjectMgr->DeleteCreatureData(m_DBTableGuid);
 
     SQLTransaction trans = WorldDatabase.BeginTransaction();
@@ -1555,7 +1555,7 @@ void Creature::setDeathState(DeathState s)
 
         Unit::setDeathState(CORPSE);
     }
-    else if (s == JUST_ALIVED)
+    else if (s == JUST_RESPAWNED)
     {
         //if (isPet())
         //    setActive(true);
@@ -1598,7 +1598,7 @@ void Creature::Respawn(bool force)
     if (getDeathState() == DEAD)
     {
         if (m_DBTableGuid)
-            sObjectMgr->RemoveCreatureRespawnTime(m_DBTableGuid, GetInstanceId());
+            GetMap()->RemoveCreatureRespawnTime(m_DBTableGuid);
 
         sLog->outStaticDebug("Respawning creature %s (GuidLow: %u, Full GUID: " UI64FMTD " Entry: %u)", GetName(), GetGUIDLow(), GetGUID(), GetEntry());
         m_respawnTime = 0;
@@ -1611,7 +1611,7 @@ void Creature::Respawn(bool force)
         CreatureTemplate const* cinfo = GetCreatureTemplate();
         SelectLevel(cinfo);
 
-        setDeathState(JUST_ALIVED);
+        setDeathState(JUST_RESPAWNED);
 
         uint32 displayID = GetNativeDisplayId();
         CreatureModelInfo const* minfo = sObjectMgr->GetCreatureModelRandomGender(&displayID);
@@ -1668,19 +1668,23 @@ bool Creature::IsImmunedToSpell(SpellInfo const* spellInfo)
     if (!spellInfo)
         return false;
 
-    // Spells that don't have effectMechanics.
-    if (!spellInfo->HasAnyEffectMechanic() && GetCreatureTemplate()->MechanicImmuneMask & (1 << (spellInfo->Mechanic - 1)))
+    // Creature is immune to main mechanic of the spell
+    if (GetCreatureTemplate()->MechanicImmuneMask & (1 << (spellInfo->Mechanic - 1)))
         return true;
 
     // This check must be done instead of 'if (GetCreatureTemplate()->MechanicImmuneMask & (1 << (spellInfo->Mechanic - 1)))' for not break
     // the check of mechanic immunity on DB (tested) because GetCreatureTemplate()->MechanicImmuneMask and m_spellImmune[IMMUNITY_MECHANIC] don't have same data.
     bool immunedToAllEffects = true;
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    {
+        if (!spellInfo->Effects[i].IsEffect())
+            continue;
         if (!IsImmunedToSpellEffect(spellInfo, i))
         {
             immunedToAllEffects = false;
             break;
         }
+    }
     if (immunedToAllEffects)
         return true;
 
@@ -2013,7 +2017,7 @@ void Creature::SaveRespawnTime()
     if (isSummon() || !m_DBTableGuid || (m_creatureData && !m_creatureData->dbData))
         return;
 
-    sObjectMgr->SaveCreatureRespawnTime(m_DBTableGuid, GetInstanceId(), m_respawnTime);
+    GetMap()->SaveCreatureRespawnTime(m_DBTableGuid, m_respawnTime);
 }
 
 // this should not be called by petAI or

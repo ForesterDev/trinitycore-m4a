@@ -190,7 +190,7 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
         }
         case CONDITION_OBJECT_ENTRY:
         {
-            if (object->GetTypeId() == ConditionValue1)
+            if (uint32(object->GetTypeId()) == ConditionValue1)
                 condMeets = (!ConditionValue2) || (object->GetEntry() == ConditionValue2);
             break;
         }
@@ -441,7 +441,7 @@ uint32 Condition::GetSearcherTypeMaskForCondition()
 uint32 Condition::GetMaxAvailableConditionTargets()
 {
     // returns number of targets which are available for given source type
-    switch(SourceType)
+    switch (SourceType)
     {
         case CONDITION_SOURCE_TYPE_SPELL:
         case CONDITION_SOURCE_TYPE_SPELL_IMPLICIT_TARGET:
