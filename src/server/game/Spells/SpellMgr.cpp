@@ -17,6 +17,7 @@
  */
 
 #include "gamePCH.h"
+#include "InstanceScript.h"
 #include "SpellMgr.h"
 #include "SpellInfo.h"
 #include "ObjectMgr.h"
@@ -1149,6 +1150,10 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
 
             return false;
         }
+        case 73828 /* Strength of Wrynn */:
+            if (player && const_cast<Player *>(player)->GetInstanceScript()->GetData(27 /* DATA_TEAM_IN_INSTANCE */) != ALLIANCE)
+                return false;
+            break;
     }
 
     return true;
