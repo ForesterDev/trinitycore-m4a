@@ -713,6 +713,12 @@ class npc_volatile_ooze : public CreatureScript
                 _newTargetSelectTimer = 0;
             }
 
+            void IsSummonedBy(Unit *summoner)
+            {
+                if (auto c = Unit::GetCreature(*me, me->GetInstanceScript()->GetData64(DATA_PROFESSOR_PUTRICIDE)))
+                    c->AI()->JustSummoned(me);
+            }
+
             void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
             {
                 if (!_newTargetSelectTimer && spell->Id == sSpellMgr->GetSpellIdForDifficulty(SPELL_OOZE_ERUPTION, me))
@@ -765,6 +771,12 @@ class npc_gas_cloud : public CreatureScript
             npc_gas_cloudAI(Creature* creature) : ScriptedAI(creature)
             {
                 _newTargetSelectTimer = 0;
+            }
+
+            void IsSummonedBy(Unit *summoner)
+            {
+                if (auto c = Unit::GetCreature(*me, me->GetInstanceScript()->GetData64(DATA_PROFESSOR_PUTRICIDE)))
+                    c->AI()->JustSummoned(me);
             }
 
             void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
