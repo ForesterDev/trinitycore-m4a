@@ -10455,6 +10455,18 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                     AddPctN(DoneTotalMod, (*i)->GetAmount());
             }
         }
+        if (isHunterPet())
+            switch (ToPet()->GetHappinessState())
+            {
+            case UNHAPPY:
+                DoneTotalMod *= 0.75f;
+                break;
+            case CONTENT:
+                break;
+            case HAPPY:
+                DoneTotalMod *= 1.25f;
+                break;
+            }
     }
 
     uint32 creatureTypeMask = victim->GetCreatureTypeMask();
