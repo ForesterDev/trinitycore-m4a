@@ -38,6 +38,9 @@
 #include "ScriptMgr.h"
 #include "Vehicle.h"
 
+using boost::math::lround;
+using boost::numeric_cast;
+
 class Aura;
 //
 // EFFECT HANDLER NOTES
@@ -6229,6 +6232,12 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
         damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
 
+        if (m_spellInfo->Effects[m_effIndex].Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA || m_spellInfo->Effects[m_effIndex].IsAreaAuraEffect())
+        {
+            damage = numeric_cast<uint32>(lround(damage * target->GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE, m_spellInfo->SchoolMask)));
+            if (caster->GetTypeId() == TYPEID_UNIT)
+                damage = numeric_cast<uint32>(lround(damage * target->GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_CREATURE_AOE_DAMAGE_AVOIDANCE, m_spellInfo->SchoolMask)));
+        }
         // Calculate armor mitigation
         if (Unit::IsDamageReducedByArmor(GetSpellInfo()->GetSchoolMask(), GetSpellInfo(), GetEffIndex()))
         {
