@@ -353,43 +353,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             return;
                         break;
                     }
-                    case 33671: // gruul's shatter
-                    case 50811: // krystallus shatter ( Normal )
-                    case 61547: // krystallus shatter ( Heroic )
-                    {
-                        // don't damage self and only players
-                        if (unitTarget->GetGUID() == m_caster->GetGUID() || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                            return;
-
-                        float radius = m_spellInfo->Effects[EFFECT_0].CalcRadius(m_caster);
-                        if (!radius)
-                            return;
-                        float distance = m_caster->GetDistance2d(unitTarget);
-                        damage = (distance > radius) ? 0 : int32(m_spellInfo->Effects[EFFECT_0].CalcValue(m_caster) * ((radius - distance)/radius));
-                        break;
-                    }
-                    // Loken Pulsing Shockwave
-                    case 59837:
-                    case 52942:
-                    {
-                        // don't damage self and only players
-                        if (unitTarget->GetGUID() == m_caster->GetGUID() || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                            return;
-
-                        float radius = m_spellInfo->Effects[EFFECT_0].CalcRadius(m_caster);
-                        if (!radius)
-                            return;
-                        float distance = m_caster->GetDistance2d(unitTarget);
-                        damage = (distance > radius) ? 0 : int32(m_spellInfo->Effects[EFFECT_0].CalcValue(m_caster) * distance);
-                        break;
-                    }
-                    // TODO: add spell specific target requirement hook for spells
-                    // Shadowbolts only affects targets with Shadow Mark (Gothik)
-                    case 27831:
-                    case 55638:
-                        if (!unitTarget->HasAura(27825))
-                            return;
-                        break;
                     // Gargoyle Strike
                     case 51963:
                     {
@@ -402,11 +365,8 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_WARRIOR:
             {
-                // Bloodthirst
-                if (m_spellInfo->SpellFamilyFlags[1] & 0x400)
-                    ApplyPctF(damage, m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
                 // Shield Slam
-                else if (m_spellInfo->SpellFamilyFlags[1] & 0x200 && m_spellInfo->Category == 1209)
+                if (m_spellInfo->SpellFamilyFlags[1] & 0x200 && m_spellInfo->Category == 1209)
                 {
                     uint8 level = m_caster->getLevel();
                     uint32 block_value = m_caster->GetShieldBlockValue(uint32(float(level) * 24.5f), uint32(float(level) * 34.5f));
@@ -467,7 +427,8 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     if (aura)
                     {
                         uint32 pdamage = uint32(std::max(aura->GetAmount(), 0));
-                        pdamage = m_caster->SpellDamageBonus(unitTarget, aura->GetSpellInfo(), pdamage, DOT, aura->GetBase()->GetStackAmount());
+                        pdamage = m_caster->SpellDamageBonusDone(unitTarget, aura->GetSpellInfo(), pdamage, DOT, aura->GetBase()->GetStackAmount());
+                        pdamage = unitTarget->SpellDamageBonusTaken(m_caster, aura->GetSpellInfo(), pdamage, DOT, aura->GetBase()->GetStackAmount());
                         uint32 pct_dir = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, (effIndex + 1));
                         uint8 baseTotalTicks = uint8(m_caster->CalcSpellDuration(aura->GetSpellInfo()) / aura->GetSpellInfo()->Effects[EFFECT_0].Amplitude);
                         damage += int32(CalculatePctU(pdamage * baseTotalTicks, pct_dir));
@@ -505,7 +466,8 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                 // Shadow Word: Death - deals damage equal to damage done to caster
                 if (m_spellInfo->SpellFamilyFlags[1] & 0x2)
                 {
-                    int32 back_damage = m_caster->SpellDamageBonus(unitTarget, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
+                    int32 back_damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
+                    back_damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, (uint32)back_damage, SPELL_DIRECT_DAMAGE);
                     // Pain and Suffering reduces damage
                     if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 2874, 0))
                         AddPctN(back_damage, -aurEff->GetAmount());
@@ -712,7 +674,10 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
         }
 
         if (m_originalCaster && damage > 0 && apply_direct_bonus)
-            damage = m_originalCaster->SpellDamageBonus(unitTarget, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
+        {
+            damage = m_originalCaster->SpellDamageBonusDone(unitTarget, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
+            damage = unitTarget->SpellDamageBonusTaken(m_originalCaster, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
+        }
 
         m_damage += damage;
     }
@@ -1391,7 +1356,8 @@ void Spell::EffectPowerDrain(SpellEffIndex effIndex)
         return;
 
     // add spell damage bonus
-    damage = m_caster->SpellDamageBonus(unitTarget, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
+    damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
+    damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
 
     // resilience reduce mana draining effect at spell crit damage reduction (added in 2.4)
     int32 power = damage;
@@ -1554,7 +1520,7 @@ void Spell::EffectHeal(SpellEffIndex /*effIndex*/)
 
             int32 tickheal = targetAura->GetAmount();
             if (Unit* auraCaster = targetAura->GetCaster())
-                tickheal = auraCaster->SpellHealingBonus(unitTarget, targetAura->GetSpellInfo(), tickheal, DOT);
+                tickheal = auraCaster->SpellHealingBonusDone(unitTarget, targetAura->GetSpellInfo(), tickheal, DOT);
             //int32 tickheal = targetAura->GetSpellInfo()->EffectBasePoints[idx] + 1;
             //It is said that talent bonus should not be included
 
@@ -1575,11 +1541,12 @@ void Spell::EffectHeal(SpellEffIndex /*effIndex*/)
             //addhealth += tickheal * tickcount;
             //addhealth = caster->SpellHealingBonus(m_spellInfo, addhealth, HEAL, unitTarget);
         }
-        // Glyph of Nourish
+        // Nourish
         else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID && m_spellInfo->SpellFamilyFlags[1] & 0x2000000)
         {
-            addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, addhealth, HEAL);
+            addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
 
+            // Glyph of Nourish
             if (AuraEffect const* aurEff = m_caster->GetAuraEffect(62971, 0))
             {
                 Unit::AuraEffectList const& Periodic = unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_HEAL);
@@ -1592,9 +1559,11 @@ void Spell::EffectHeal(SpellEffIndex /*effIndex*/)
         }
         // Death Pact - return pct of max health to caster
         else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellInfo->SpellFamilyFlags[0] & 0x00080000)
-            addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, int32(caster->CountPctFromMaxHealth(damage)), HEAL);
+            addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, int32(caster->CountPctFromMaxHealth(damage)), HEAL);
         else
-            addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, addhealth, HEAL);
+            addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
+
+        addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
 
         // Remove Grievious bite if fully healed
         if (unitTarget->HasAura(48920) && (unitTarget->GetHealth() + addhealth >= unitTarget->GetMaxHealth()))
@@ -1620,7 +1589,10 @@ void Spell::EffectHealPct(SpellEffIndex /*effIndex*/)
     if (m_spellInfo->Id == 59754 && unitTarget == m_caster)
         return;
 
-    m_healing += m_originalCaster->SpellHealingBonus(unitTarget, m_spellInfo, unitTarget->CountPctFromMaxHealth(damage), HEAL);
+    uint32 heal = m_originalCaster->SpellHealingBonusDone(unitTarget, m_spellInfo, unitTarget->CountPctFromMaxHealth(damage), HEAL);
+    heal = unitTarget->SpellHealingBonusTaken(m_originalCaster, m_spellInfo, heal, HEAL);
+
+    m_healing += heal;
 }
 
 void Spell::EffectHealMechanical(SpellEffIndex /*effIndex*/)
@@ -1635,7 +1607,9 @@ void Spell::EffectHealMechanical(SpellEffIndex /*effIndex*/)
     if (!m_originalCaster)
         return;
 
-    m_healing += m_originalCaster->SpellHealingBonus(unitTarget, m_spellInfo, uint32(damage), HEAL);
+    uint32 heal = m_originalCaster->SpellHealingBonusDone(unitTarget, m_spellInfo, uint32(damage), HEAL);
+
+    m_healing += unitTarget->SpellHealingBonusTaken(m_originalCaster, m_spellInfo, heal, HEAL);
 }
 
 void Spell::EffectHealthLeech(SpellEffIndex effIndex)
@@ -1646,7 +1620,8 @@ void Spell::EffectHealthLeech(SpellEffIndex effIndex)
     if (!unitTarget || !unitTarget->isAlive() || damage < 0)
         return;
 
-    damage = m_caster->SpellDamageBonus(unitTarget, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
+    damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
+    damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
 
     sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "HealthLeech :%i", damage);
 
@@ -1658,7 +1633,9 @@ void Spell::EffectHealthLeech(SpellEffIndex effIndex)
 
     if (m_caster->isAlive())
     {
-        healthGain = m_caster->SpellHealingBonus(m_caster, m_spellInfo, healthGain, HEAL);
+        healthGain = m_caster->SpellHealingBonusDone(m_caster, m_spellInfo, healthGain, HEAL);
+        healthGain = m_caster->SpellHealingBonusTaken(m_caster, m_spellInfo, healthGain, HEAL);
+
         m_caster->HealBySpell(m_caster, m_spellInfo, uint32(healthGain));
     }
 }
@@ -2833,6 +2810,7 @@ void Spell::EffectEnchantItemPerm(SpellEffIndex effIndex)
         // add new enchanting if equipped
         item_owner->ApplyEnchantment(itemTarget, PERM_ENCHANTMENT_SLOT, true);
 
+        item_owner->RemoveTradeableItem(itemTarget);
         itemTarget->ClearSoulboundTradeable(item_owner);
     }
 }
@@ -2897,6 +2875,7 @@ void Spell::EffectEnchantItemPrismatic(SpellEffIndex effIndex)
     // add new enchanting if equipped
     item_owner->ApplyEnchantment(itemTarget, PRISMATIC_ENCHANTMENT_SLOT, true);
 
+    item_owner->RemoveTradeableItem(itemTarget);
     itemTarget->ClearSoulboundTradeable(item_owner);
 }
 
@@ -3300,6 +3279,14 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                     fixed_bonus += (aur->GetStackAmount() - 1) * CalculateDamage(2, unitTarget);
                 }
             }
+            if (m_spellInfo->SpellFamilyFlags[0] & 0x8000000) // Mocking Blow
+            {
+                if (unitTarget->IsImmunedToSpellEffect(m_spellInfo,EFFECT_1) || unitTarget->GetTypeId() == TYPEID_PLAYER)
+                {
+                    m_damage = 0;
+                    return;
+                }
+            }
             break;
         }
         case SPELLFAMILY_ROGUE:
@@ -3352,7 +3339,7 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
             if (m_spellInfo->Id == 20467)
             {
                 spell_bonus += int32(0.08f * m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
-                spell_bonus += int32(0.13f * m_caster->SpellBaseDamageBonus(m_spellInfo->GetSchoolMask()));
+                spell_bonus += int32(0.13f * m_caster->SpellBaseDamageBonusDone(m_spellInfo->GetSchoolMask()));
             }
             break;
         }
@@ -3400,7 +3387,11 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
             // Blood Strike
             if (m_spellInfo->SpellFamilyFlags[0] & 0x400000)
             {
-                AddPctF(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() * unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) / 2.0f);
+                float bonusPct = m_spellInfo->Effects[EFFECT_2].CalcValue() * unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) / 2.0f;
+                // Death Knight T8 Melee 4P Bonus
+                if (AuraEffect const* aurEff = m_caster->GetAuraEffect(64736, EFFECT_0))
+                    AddPctF(bonusPct, aurEff->GetAmount());
+                AddPctF(totalDamagePercentMod, bonusPct);
 
                 // Glyph of Blood Strike
                 if (m_caster->GetAuraEffect(59332, EFFECT_0))
@@ -3427,7 +3418,11 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                     if (roll_chance_i(aurEff->GetAmount()))
                         consumeDiseases = false;
 
-                AddPctF(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() * unitTarget->GetDiseasesByCaster(m_caster->GetGUID(), consumeDiseases) / 2.0f);
+                float bonusPct = m_spellInfo->Effects[EFFECT_2].CalcValue() * unitTarget->GetDiseasesByCaster(m_caster->GetGUID(), consumeDiseases) / 2.0f;
+                // Death Knight T8 Melee 4P Bonus
+                if (AuraEffect const* aurEff = m_caster->GetAuraEffect(64736, EFFECT_0))
+                    AddPctF(bonusPct, aurEff->GetAmount());
+                AddPctF(totalDamagePercentMod, bonusPct);
                 break;
             }
             // Blood-Caked Strike - Blood-Caked Blade
@@ -3439,7 +3434,12 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
             // Heart Strike
             if (m_spellInfo->SpellFamilyFlags[0] & 0x1000000)
             {
-                AddPctN(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() * unitTarget->GetDiseasesByCaster(m_caster->GetGUID()));
+                float bonusPct = m_spellInfo->Effects[EFFECT_2].CalcValue() * unitTarget->GetDiseasesByCaster(m_caster->GetGUID());
+                // Death Knight T8 Melee 4P Bonus
+                if (AuraEffect const* aurEff = m_caster->GetAuraEffect(64736, EFFECT_0))
+                    AddPctF(bonusPct, aurEff->GetAmount());
+
+                AddPctF(totalDamagePercentMod, bonusPct);
                 break;
             }
             break;
@@ -3521,8 +3521,9 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
     uint32 eff_damage(std::max(weaponDamage, 0));
 
     // Add melee damage bonuses (also check for negative)
-    m_caster->MeleeDamageBonus(unitTarget, &eff_damage, m_attackType, m_spellInfo);
-    m_damage += eff_damage;
+    uint32 damage = m_caster->MeleeDamageBonusDone(unitTarget, eff_damage, m_attackType, m_spellInfo);
+
+    m_damage += unitTarget->MeleeDamageBonusTaken(m_caster, damage, m_attackType, m_spellInfo);
 }
 
 void Spell::EffectThreat(SpellEffIndex /*effIndex*/)
@@ -3547,16 +3548,7 @@ void Spell::EffectHealMaxHealth(SpellEffIndex /*effIndex*/)
     if (!unitTarget || !unitTarget->isAlive())
         return;
 
-    int32 addhealth;
-    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN) // Lay on Hands
-    {
-        if (m_caster->GetGUID() == unitTarget->GetGUID())
-        {
-            m_caster->CastSpell(m_caster, 25771, true); // Forbearance
-            m_caster->CastSpell(m_caster, 61988, true); // Immune shield marker (serverside)
-            m_caster->CastSpell(m_caster, 61987, true); // Avenging Wrath marker
-        }
-    }
+    int32 addhealth = 0;
 
     // damage == 0 - heal for caster max health
     if (damage == 0)
@@ -3564,8 +3556,7 @@ void Spell::EffectHealMaxHealth(SpellEffIndex /*effIndex*/)
     else
         addhealth = unitTarget->GetMaxHealth() - unitTarget->GetHealth();
 
-    if (m_originalCaster)
-         m_healing += m_originalCaster->SpellHealingBonus(unitTarget, m_spellInfo, addhealth, HEAL);
+    m_healing += addhealth;
 }
 
 void Spell::EffectInterruptCast(SpellEffIndex effIndex)
@@ -3788,12 +3779,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     if (!itemTarget && m_caster->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    uint32 spell_id = 0;
-                    switch (urand(1, 5))
-                    {
-                    case 1:  spell_id = 8854; break;
-                    default: spell_id = 8855; break;
-                    }
+                    uint32 spell_id = roll_chance_i(20) ? 8854 : 8855;
 
                     m_caster->CastSpell(m_caster, spell_id, true, NULL);
                     return;
@@ -3840,10 +3826,6 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     unitTarget->HandleEmoteCommand(EMOTE_STATE_DANCE);
                     return;
                 }
-                // Escape artist
-                case 20589:
-                    m_caster->RemoveMovementImpairingAuras();
-                    return;
                 // Decimate
                 case 28374:
                 case 54426:
@@ -3874,15 +3856,8 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         DoCreateItem(effIndex, item);
                     break;
                 }
-                // Improved Sprint
-                case 30918:
-                {
-                    // Removes snares and roots.
-                    unitTarget->RemoveMovementImpairingAuras();
-                    break;
-                }
-                // Spirit Walk
-                case 58876:
+                case 20589: // Escape artist
+                case 30918: // Improved Sprint
                 {
                     // Removes snares and roots.
                     unitTarget->RemoveMovementImpairingAuras();
@@ -3900,96 +3875,6 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         }
                     }
                     break;
-                case 48025:                                     // Headless Horseman's Mount
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // Prevent stacking of mounts and client crashes upon dismounting
-                    unitTarget->RemoveAurasByType(SPELL_AURA_MOUNTED);
-
-                    // Triggered spell id dependent on riding skill and zone
-                    bool canFly = true;
-                    uint32 v_map = GetVirtualMapForMapAndZone(unitTarget->GetMapId(), unitTarget->GetZoneId());
-                    if (v_map != 530 && v_map != 571)
-                        canFly = false;
-
-                    if (canFly && v_map == 571 && !unitTarget->ToPlayer()->HasSpell(54197))
-                        canFly = false;
-
-                    float x, y, z;
-                    unitTarget->GetPosition(x, y, z);
-                    uint32 areaFlag = unitTarget->GetBaseMap()->GetAreaFlag(x, y, z);
-                    AreaTableEntry const* pArea = sAreaStore.LookupEntry(areaFlag);
-                    if (!pArea || (canFly && (pArea->flags & AREA_FLAG_NO_FLY_ZONE)))
-                        canFly = false;
-
-                    switch (unitTarget->ToPlayer()->GetBaseSkillValue(SKILL_RIDING))
-                    {
-                    case 75: unitTarget->CastSpell(unitTarget, 51621, true); break;
-                    case 150: unitTarget->CastSpell(unitTarget, 48024, true); break;
-                    case 225:
-                        {
-                            if (canFly)
-                                unitTarget->CastSpell(unitTarget, 51617, true);
-                            else
-                                unitTarget->CastSpell(unitTarget, 48024, true);
-                        }break;
-                    case 300:
-                        {
-                            if (canFly)
-                                unitTarget->CastSpell(unitTarget, 48023, true);
-                            else
-                                unitTarget->CastSpell(unitTarget, 48024, true);
-                        }break;
-                    }
-                    return;
-                }
-                case 47977:                                     // Magic Broom
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // Prevent stacking of mounts and client crashes upon dismounting
-                    unitTarget->RemoveAurasByType(SPELL_AURA_MOUNTED);
-
-                    // Triggered spell id dependent on riding skill and zone
-                    bool canFly = true;
-                    uint32 v_map = GetVirtualMapForMapAndZone(unitTarget->GetMapId(), unitTarget->GetZoneId());
-                    if (v_map != 530 && v_map != 571)
-                        canFly = false;
-
-                    if (canFly && v_map == 571 && !unitTarget->ToPlayer()->HasSpell(54197))
-                        canFly = false;
-
-                    float x, y, z;
-                    unitTarget->GetPosition(x, y, z);
-                    uint32 areaFlag = unitTarget->GetBaseMap()->GetAreaFlag(x, y, z);
-                    AreaTableEntry const* pArea = sAreaStore.LookupEntry(areaFlag);
-                    if (!pArea || (canFly && (pArea->flags & AREA_FLAG_NO_FLY_ZONE)))
-                        canFly = false;
-
-                    switch (unitTarget->ToPlayer()->GetBaseSkillValue(SKILL_RIDING))
-                    {
-                    case 75: unitTarget->CastSpell(unitTarget, 42680, true); break;
-                    case 150: unitTarget->CastSpell(unitTarget, 42683, true); break;
-                    case 225:
-                        {
-                            if (canFly)
-                                unitTarget->CastSpell(unitTarget, 42667, true);
-                            else
-                                unitTarget->CastSpell(unitTarget, 42683, true);
-                        }break;
-                    case 300:
-                        {
-                            if (canFly)
-                                unitTarget->CastSpell(unitTarget, 42668, true);
-                            else
-                                unitTarget->CastSpell(unitTarget, 42683, true);
-                        }break;
-                    }
-                    return;
-                }
                 // Mug Transformation
                 case 41931:
                 {
@@ -4181,25 +4066,6 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     if (unitTarget)
                         unitTarget->CastSpell(m_caster, damage, true);
                     return;
-                // Winged Steed of the Ebon Blade
-                case 54729:
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // Prevent stacking of mounts and client crashes upon dismounting
-                    unitTarget->RemoveAurasByType(SPELL_AURA_MOUNTED);
-
-                    // Triggered spell id dependent on riding skill
-                    if (uint16 skillval = unitTarget->ToPlayer()->GetSkillValue(SKILL_RIDING))
-                    {
-                        if (skillval >= 300)
-                            unitTarget->CastSpell(unitTarget, 54727, true);
-                        else
-                            unitTarget->CastSpell(unitTarget, 54726, true);
-                    }
-                    return;
-                }
                 case 57347: // Retrieving (Wintergrasp RP-GG pickup spell)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -4280,188 +4146,6 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         m_caster->CastSpell(m_caster, 63914, true);
                     else
                         m_caster->CastSpell(m_caster, 63919, true);
-                    return;
-                }
-                case 71342:                                     // Big Love Rocket
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // Prevent stacking of mounts and client crashes upon dismounting
-                    unitTarget->RemoveAurasByType(SPELL_AURA_MOUNTED);
-
-                    // Triggered spell id dependent on riding skill and zone
-                    bool canFly = true;
-                    uint32 v_map = GetVirtualMapForMapAndZone(unitTarget->GetMapId(), unitTarget->GetZoneId());
-                    if (v_map != 530 && v_map != 571)
-                        canFly = false;
-
-                    if (canFly && v_map == 571 && !unitTarget->ToPlayer()->HasSpell(54197))
-                        canFly = false;
-
-                    float x, y, z;
-                    unitTarget->GetPosition(x, y, z);
-                    uint32 areaFlag = unitTarget->GetBaseMap()->GetAreaFlag(x, y, z);
-                    AreaTableEntry const* pArea = sAreaStore.LookupEntry(areaFlag);
-                    if (!pArea || (canFly && (pArea->flags & AREA_FLAG_NO_FLY_ZONE)))
-                        canFly = false;
-
-                    switch (unitTarget->ToPlayer()->GetBaseSkillValue(SKILL_RIDING))
-                    {
-                    case 0: unitTarget->CastSpell(unitTarget, 71343, true); break;
-                    case 75: unitTarget->CastSpell(unitTarget, 71344, true); break;
-                    case 150: unitTarget->CastSpell(unitTarget, 71345, true); break;
-                    case 225:
-                        {
-                        if (canFly)
-                                unitTarget->CastSpell(unitTarget, 71346, true);
-                            else
-                                unitTarget->CastSpell(unitTarget, 71345, true);
-                        }break;
-                    case 300:
-                        {
-                        if (canFly)
-                            unitTarget->CastSpell(unitTarget, 71347, true);
-                        else
-                            unitTarget->CastSpell(unitTarget, 71345, true);
-                        }break;
-                    }
-                    return;
-                }
-                case 72286:                                     // Invincible
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // Prevent stacking of mounts and client crashes upon dismounting
-                    unitTarget->RemoveAurasByType(SPELL_AURA_MOUNTED);
-
-                    // Triggered spell id dependent on riding skill and zone
-                    bool canFly = true;
-                    uint32 v_map = GetVirtualMapForMapAndZone(unitTarget->GetMapId(), unitTarget->GetZoneId());
-                    if (v_map != 530 && v_map != 571)
-                        canFly = false;
-
-                    if (canFly && v_map == 571 && !unitTarget->ToPlayer()->HasSpell(54197))
-                        canFly = false;
-
-                    float x, y, z;
-                    unitTarget->GetPosition(x, y, z);
-                    uint32 areaFlag = unitTarget->GetBaseMap()->GetAreaFlag(x, y, z);
-                    AreaTableEntry const* pArea = sAreaStore.LookupEntry(areaFlag);
-                    if (!pArea || (canFly && (pArea->flags & AREA_FLAG_NO_FLY_ZONE)))
-                        canFly = false;
-
-                    switch (unitTarget->ToPlayer()->GetBaseSkillValue(SKILL_RIDING))
-                    {
-                    case 75: unitTarget->CastSpell(unitTarget, 72281, true); break;
-                    case 150: unitTarget->CastSpell(unitTarget, 72282, true); break;
-                    case 225:
-                        {
-                        if (canFly)
-                                unitTarget->CastSpell(unitTarget, 72283, true);
-                            else
-                                unitTarget->CastSpell(unitTarget, 72282, true);
-                        }break;
-                    case 300:
-                        {
-                        if (canFly)
-                            unitTarget->CastSpell(unitTarget, 72284, true);
-                        else
-                            unitTarget->CastSpell(unitTarget, 72282, true);
-                        }break;
-                    }
-                    return;
-                }
-                case 74856:                                     // Blazing Hippogryph
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // Prevent stacking of mounts and client crashes upon dismounting
-                    unitTarget->RemoveAurasByType(SPELL_AURA_MOUNTED);
-
-                    // Triggered spell id dependent on riding skill
-                    if (uint16 skillval = unitTarget->ToPlayer()->GetSkillValue(SKILL_RIDING))
-                    {
-                        if (skillval >= 300)
-                            unitTarget->CastSpell(unitTarget, 74855, true);
-                        else
-                            unitTarget->CastSpell(unitTarget, 74854, true);
-                    }
-                    return;
-                }
-                case 75614:                                     // Celestial Steed
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // Prevent stacking of mounts and client crashes upon dismounting
-                    unitTarget->RemoveAurasByType(SPELL_AURA_MOUNTED);
-
-                    // Triggered spell id dependent on riding skill and zone
-                    bool canFly = true;
-                    uint32 v_map = GetVirtualMapForMapAndZone(unitTarget->GetMapId(), unitTarget->GetZoneId());
-                    if (v_map != 530 && v_map != 571)
-                        canFly = false;
-
-                    if (canFly && v_map == 571 && !unitTarget->ToPlayer()->HasSpell(54197))
-                        canFly = false;
-
-                    float x, y, z;
-                    unitTarget->GetPosition(x, y, z);
-                    uint32 areaFlag = unitTarget->GetBaseMap()->GetAreaFlag(x, y, z);
-                    AreaTableEntry const* pArea = sAreaStore.LookupEntry(areaFlag);
-                    if (!pArea || (canFly && (pArea->flags & AREA_FLAG_NO_FLY_ZONE)))
-                        canFly = false;
-
-                    switch (unitTarget->ToPlayer()->GetBaseSkillValue(SKILL_RIDING))
-                    {
-                    case 75: unitTarget->CastSpell(unitTarget, 75619, true); break;
-                    case 150: unitTarget->CastSpell(unitTarget, 75620, true); break;
-                    case 225:
-                        {
-                            if (canFly)
-                                unitTarget->CastSpell(unitTarget, 75617, true);
-                            else
-                                unitTarget->CastSpell(unitTarget, 75620, true);
-                        }break;
-                    case 300:
-                        {
-                            if (canFly)
-                            {
-                                if (unitTarget->ToPlayer()->Has310Flyer(false))
-                                    unitTarget->CastSpell(unitTarget, 76153, true);
-                                else
-                                    unitTarget->CastSpell(unitTarget, 75618, true);
-                            }
-                            else
-                                unitTarget->CastSpell(unitTarget, 75620, true);
-                        }break;
-                    }
-                    return;
-                }
-                case 75973:                                     // X-53 Touring Rocket
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // Prevent stacking of mounts
-                    unitTarget->RemoveAurasByType(SPELL_AURA_MOUNTED);
-
-                    // Triggered spell id dependent on riding skill
-                    if (uint16 skillval = unitTarget->ToPlayer()->GetSkillValue(SKILL_RIDING))
-                    {
-                        if (skillval >= 300)
-                        {
-                            if (unitTarget->ToPlayer()->Has310Flyer(false))
-                                unitTarget->CastSpell(unitTarget, 76154, true);
-                            else
-                                unitTarget->CastSpell(unitTarget, 75972, true);
-                        }
-                        else
-                            unitTarget->CastSpell(unitTarget, 75957, true);
-                    }
                     return;
                 }
                 case 59317:                                 // Teleporting
@@ -5079,16 +4763,14 @@ void Spell::EffectDisEnchant(SpellEffIndex /*effIndex*/)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    Player* p_caster = (Player*)m_caster;
     if (!itemTarget || !itemTarget->GetTemplate()->DisenchantID)
         return;
 
-    p_caster->UpdateCraftSkill(m_spellInfo->Id);
-
-    m_caster->ToPlayer()->SendLoot(itemTarget->GetGUID(), LOOT_DISENCHANTING);
+    if (Player* caster = m_caster->ToPlayer())
+    {
+        caster->UpdateCraftSkill(m_spellInfo->Id);
+        caster->SendLoot(itemTarget->GetGUID(), LOOT_DISENCHANTING);
+    }
 
     // item will be removed at disenchanting end
 }

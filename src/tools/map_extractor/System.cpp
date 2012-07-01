@@ -48,9 +48,9 @@ char output_path[128] = ".";
 char input_path[128] = ".";
 uint32 maxAreaId = 0;
 
-//**************************************************
+// **************************************************
 // Extractor options
-//**************************************************
+// **************************************************
 enum Extract
 {
     EXTRACT_MAP = 1,
@@ -221,7 +221,7 @@ uint32 ReadMapDBC()
         map_ids[x].id = dbc.getRecord(x).getUInt(0);
         strcpy(map_ids[x].name, dbc.getRecord(x).getString(1));
     }
-    printf("Done! (%u maps loaded)\n", map_count);
+    printf("Done! (%zu maps loaded)\n", map_count);
     return map_count;
 }
 
@@ -246,7 +246,7 @@ void ReadAreaTableDBC()
 
     maxAreaId = dbc.getMaxId();
 
-    printf("Done! (%u areas loaded)\n", area_count);
+    printf("Done! (%zu areas loaded)\n", area_count);
 }
 
 void ReadLiquidTypeTableDBC()
@@ -259,15 +259,15 @@ void ReadLiquidTypeTableDBC()
         exit(1);
     }
 
-    size_t LiqType_count = dbc.getRecordCount();
-    size_t LiqType_maxid = dbc.getMaxId();
-    LiqType = new uint16[LiqType_maxid + 1];
-    memset(LiqType, 0xff, (LiqType_maxid + 1) * sizeof(uint16));
+    size_t liqTypeCount = dbc.getRecordCount();
+    size_t liqTypeMaxId = dbc.getMaxId();
+    LiqType = new uint16[liqTypeMaxId + 1];
+    memset(LiqType, 0xff, (liqTypeMaxId + 1) * sizeof(uint16));
 
-    for(uint32 x = 0; x < LiqType_count; ++x)
+    for(uint32 x = 0; x < liqTypeCount; ++x)
         LiqType[dbc.getRecord(x).getUInt(0)] = dbc.getRecord(x).getUInt(3);
 
-    printf("Done! (%u LiqTypes loaded)\n", LiqType_count);
+    printf("Done! (%zu LiqTypes loaded)\n", liqTypeCount);
 }
 
 //
@@ -364,7 +364,7 @@ uint8 liquid_flags[ADT_CELLS_PER_GRID][ADT_CELLS_PER_GRID];
 bool  liquid_show[ADT_GRID_SIZE][ADT_GRID_SIZE];
 float liquid_height[ADT_GRID_SIZE+1][ADT_GRID_SIZE+1];
 
-bool ConvertADT(char *filename, char *filename2, int cell_y, int cell_x, uint32 build)
+bool ConvertADT(char *filename, char *filename2, int /*cell_y*/, int /*cell_x*/, uint32 build)
 {
     ADT_file adt;
 
@@ -572,7 +572,7 @@ bool ConvertADT(char *filename, char *filename2, int cell_y, int cell_x, uint32 
     // Try store as packed in uint16 or uint8 values
     if (!(heightHeader.flags & MAP_HEIGHT_NO_HEIGHT))
     {
-        float step;
+        float step = 0;
         // Try Store as uint values
         if (CONF_allow_float_to_int)
         {
