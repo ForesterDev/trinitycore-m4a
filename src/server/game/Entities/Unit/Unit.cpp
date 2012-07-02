@@ -8031,7 +8031,10 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     for (uint8 i = 1; i < stack; ++i)
                         dmg += mod * stack;
                     if (Unit* caster = triggeredByAura->GetCaster())
+                    {
+                        triggeredByAura->Remove();
                         caster->CastCustomSpell(70701, SPELLVALUE_BASE_POINT0, dmg);
+                    }
                     break;
                 }
                 // Ball of Flames Proc
