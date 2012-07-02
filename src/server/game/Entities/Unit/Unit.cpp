@@ -12703,7 +12703,8 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
         {
             // Set creature speed rate from CreatureInfo
             if (GetTypeId() == TYPEID_UNIT)
-                speed *= ToCreature()->GetCreatureTemplate()->speed_walk;
+                if (mtype == MOVE_RUN)
+                    speed *= ToCreature()->GetCreatureTemplate()->speed_run;
 
             // Normalize speed by 191 aura SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED if need
             // TODO: possible affect only on MOVE_RUN
