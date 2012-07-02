@@ -23,6 +23,7 @@
 #include "Group.h"
 #include "Spell.h"
 #include "icecrown_citadel.h"
+#include "utility.hpp"
 #include "Vehicle.h"
 
 enum ScriptTexts
@@ -714,21 +715,21 @@ class npc_volatile_ooze : public CreatureScript
                 creature->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             }
 
-            void IsSummonedBy(Unit *summoner)
+            void IsSummonedBy(Unit *summoner UNUSED)
             {
                 if (auto c = Unit::GetCreature(*me, me->GetInstanceScript()->GetData64(DATA_PROFESSOR_PUTRICIDE)))
                     c->AI()->JustSummoned(me);
             }
 
-            void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
+            void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell UNUSED)
             {
             }
 
-            void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+            void SpellHit(Unit* /*caster*/, SpellInfo const* spell UNUSED)
             {
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff UNUSED)
             {
                 UpdateVictim();
 
@@ -760,21 +761,21 @@ class npc_gas_cloud : public CreatureScript
                 creature->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             }
 
-            void IsSummonedBy(Unit *summoner)
+            void IsSummonedBy(Unit *summoner UNUSED)
             {
                 if (auto c = Unit::GetCreature(*me, me->GetInstanceScript()->GetData64(DATA_PROFESSOR_PUTRICIDE)))
                     c->AI()->JustSummoned(me);
             }
 
-            void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
+            void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell UNUSED)
             {
             }
 
-            void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+            void SpellHit(Unit* /*caster*/, SpellInfo const* spell UNUSED)
             {
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(uint32 const diff UNUSED)
             {
                 if (UpdateVictim())
                     DoMeleeAttackIfReady();
