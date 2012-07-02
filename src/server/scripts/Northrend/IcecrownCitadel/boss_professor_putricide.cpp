@@ -710,6 +710,8 @@ class npc_volatile_ooze : public CreatureScript
         {
             npc_putricide_oozeAI(Creature* creature) : ScriptedAI(creature)
             {
+                creature->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                creature->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             }
 
             void IsSummonedBy(Unit *summoner)
@@ -754,6 +756,8 @@ class npc_gas_cloud : public CreatureScript
         {
             npc_gas_cloudAI(Creature* creature) : ScriptedAI(creature)
             {
+                creature->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                creature->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             }
 
             void IsSummonedBy(Unit *summoner)
