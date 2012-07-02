@@ -8,6 +8,7 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+include_directories(.)
 include_directories(${Boost_INCLUDE_DIRS})
 # Enable precompiled headers when using the GCC compiler.
 if( USE_SCRIPTPCH )
