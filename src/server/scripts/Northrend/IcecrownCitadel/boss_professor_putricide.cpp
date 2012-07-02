@@ -710,7 +710,6 @@ class npc_volatile_ooze : public CreatureScript
         {
             npc_putricide_oozeAI(Creature* creature) : ScriptedAI(creature)
             {
-                _newTargetSelectTimer = 0;
             }
 
             void IsSummonedBy(Unit *summoner)
@@ -721,34 +720,19 @@ class npc_volatile_ooze : public CreatureScript
 
             void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
             {
-                if (!_newTargetSelectTimer && spell->Id == sSpellMgr->GetSpellIdForDifficulty(SPELL_OOZE_ERUPTION, me))
-                    _newTargetSelectTimer = 1000;
             }
 
             void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
             {
-                if (spell->Id == SPELL_TEAR_GAS_CREATURE)
-                    _newTargetSelectTimer = 1000;
             }
 
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim() && !_newTargetSelectTimer)
-                    return;
+                UpdateVictim();
 
-                if (!_newTargetSelectTimer)
-                    return;
-
-                if (me->HasAura(SPELL_TEAR_GAS_CREATURE))
-                    return;
-
-                if (_newTargetSelectTimer <= diff)
-                {
-                    _newTargetSelectTimer = 0;
-                    me->CastSpell(me, SPELL_VOLATILE_OOZE_ADHESIVE, false);
-                }
-                else
-                    _newTargetSelectTimer -= diff;
+                if (!me->IsNonMeleeSpellCasted(false, false, true))
+                    if (me->GetMotionMaster()->size() - 1 < MOTION_SLOT_CONTROLLED)
+                        me->CastSpell(me, SPELL_VOLATILE_OOZE_ADHESIVE, false);
             }
 
         private:
@@ -770,7 +754,6 @@ class npc_gas_cloud : public CreatureScript
         {
             npc_gas_cloudAI(Creature* creature) : ScriptedAI(creature)
             {
-                _newTargetSelectTimer = 0;
             }
 
             void IsSummonedBy(Unit *summoner)
@@ -781,36 +764,20 @@ class npc_gas_cloud : public CreatureScript
 
             void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
             {
-                if (!_newTargetSelectTimer && spell->Id == sSpellMgr->GetSpellIdForDifficulty(SPELL_EXPUNGED_GAS, me))
-                    _newTargetSelectTimer = 1000;
             }
 
             void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
             {
-                if (spell->Id == SPELL_TEAR_GAS_CREATURE)
-                    _newTargetSelectTimer = 1000;
             }
 
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim() && !_newTargetSelectTimer)
-                    return;
+                if (UpdateVictim())
+                    DoMeleeAttackIfReady();
 
-                DoMeleeAttackIfReady();
-
-                if (!_newTargetSelectTimer)
-                    return;
-
-                if (me->HasAura(SPELL_TEAR_GAS_CREATURE))
-                    return;
-
-                if (_newTargetSelectTimer <= diff)
-                {
-                    _newTargetSelectTimer = 0;
-                    me->CastCustomSpell(SPELL_GASEOUS_BLOAT, SPELLVALUE_AURA_STACK, 10, me, false);
-                }
-                else
-                    _newTargetSelectTimer -= diff;
+                if (!me->IsNonMeleeSpellCasted(false, false, true))
+                    if (me->GetMotionMaster()->size() - 1 < MOTION_SLOT_CONTROLLED)
+                        me->CastCustomSpell(SPELL_GASEOUS_BLOAT, SPELLVALUE_AURA_STACK, 10, me, false);
             }
 
         private:
