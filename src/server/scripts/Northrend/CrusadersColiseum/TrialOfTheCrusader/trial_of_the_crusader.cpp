@@ -29,6 +29,7 @@ EndScriptData */
 
 #include "ScriptPCH.h"
 #include "trial_of_the_crusader.h"
+#include "utility.hpp"
 
 enum eYells
 {
@@ -367,7 +368,7 @@ class npc_fizzlebang_toc : public CreatureScript
             uint64 m_uiPortalGUID;
             uint64 m_uiTriggerGUID;
 
-            void JustDied(Unit* killer)
+            void JustDied(Unit* killer UNUSED)
             {
                 instance->SetData(TYPE_EVENT, 1180);
                 instance->SetData(TYPE_EVENT_TIMER, 4000);

@@ -23,6 +23,7 @@
 #include "ScriptedCreature.h"
 #include "SpellAuraEffects.h"
 #include "icecrown_citadel.h"
+#include "utility.hpp"
 
 using boost::numeric_cast;
 using std::bad_cast;
@@ -1331,7 +1332,7 @@ class spell_sindragosa_ice_tomb : public SpellScriptLoader
                 AfterEffectRemove += AuraEffectRemoveFn(spell_sindragosa_ice_tomb_AuraScript::removed, EFFECT_2, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
             }
 
-            bool Validate(const SpellInfo *spellEntry)
+            bool Validate(const SpellInfo *spellEntry UNUSED)
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_ICE_TOMB_UNTARGETABLE))
                     return false;
@@ -1342,12 +1343,12 @@ class spell_sindragosa_ice_tomb : public SpellScriptLoader
                 return true;
             }
 
-            void applied(const AuraEffect *aurEff, AuraEffectHandleModes mode)
+            void applied(const AuraEffect *aurEff UNUSED, AuraEffectHandleModes mode UNUSED)
             {
                 event_ = event_summon;
             }
 
-            void removed(const AuraEffect *aurEff, AuraEffectHandleModes mode)
+            void removed(const AuraEffect *aurEff UNUSED, AuraEffectHandleModes mode UNUSED)
             {
                 GetTarget()->RemoveAura(SPELL_ICE_TOMB_UNTARGETABLE, GetTarget()->GetGUID());
             }
@@ -1405,7 +1406,7 @@ class MysticBuffetTargetFilter
     public:
         explicit MysticBuffetTargetFilter(Unit* caster) : _caster(caster) { }
 
-        bool operator()(Unit* unit)
+        bool operator()(Unit* unit UNUSED)
         {
             return false;
         }
@@ -1621,7 +1622,7 @@ namespace
             OnUnitTargetSelect += SpellUnitTargetFn(ice_tomb_spell::select_targets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
         }
 
-        bool Validate(const SpellInfo *spellEntry)
+        bool Validate(const SpellInfo *spellEntry UNUSED)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_ICE_TOMB_DUMMY))
                 return false;
