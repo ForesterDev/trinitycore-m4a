@@ -34,6 +34,7 @@
 #include "InstanceScript.h"
 #include "Group.h"
 #include "LFGMgr.h"
+#include "utility.hpp"
 
 class spell_gen_absorb0_hitlimit1 : public SpellScriptLoader
 {
@@ -809,7 +810,7 @@ namespace
                 }
             }
 
-            void applied(const AuraEffect *, AuraEffectHandleModes mode)
+            void applied(const AuraEffect *, AuraEffectHandleModes mode UNUSED)
             {
                 auto &t = target();
                 if (in_area(t))
@@ -827,7 +828,7 @@ namespace
                     );
             }
 
-            void removed(const AuraEffect *, AuraEffectHandleModes mode)
+            void removed(const AuraEffect *, AuraEffectHandleModes mode UNUSED)
             {
                 auto &t = target();
                 t.disconnect_area(std::move(connection));
