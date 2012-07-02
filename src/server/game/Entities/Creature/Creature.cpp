@@ -1607,8 +1607,7 @@ void Creature::Respawn(bool force)
         lootForPickPocketed = false;
         lootForBody         = false;
 
-        if (m_originalEntry != GetEntry())
-            UpdateEntry(m_originalEntry);
+        UpdateEntry(m_originalEntry);
 
         CreatureTemplate const* cinfo = GetCreatureTemplate();
         SelectLevel(cinfo);
