@@ -8027,11 +8027,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     *handled = true;
                     if (victim && victim == triggeredByAura->GetCaster())
                     {
-                        uint32 stack = triggeredByAura->GetStackAmount();
-                        int32 const mod = (GetMap()->GetSpawnMode() & 1) ? 1500 : 1250;
-                        int32 dmg = 0;
-                        for (uint8 i = 1; i < stack; ++i)
-                            dmg += mod * stack;
+                        int32 dmg = triggeredByAura->GetEffect(EFFECT_0)->GetAmount() * 2;
                         triggeredByAura->Remove();
                         victim->CastCustomSpell(70701, SPELLVALUE_BASE_POINT0, dmg);
                     }
