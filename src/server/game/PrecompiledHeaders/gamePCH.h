@@ -1,5 +1,6 @@
 //add here most rarely modified headers to speed up debug build compilation
 
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
