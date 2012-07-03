@@ -223,7 +223,7 @@ class boss_professor_putricide : public CreatureScript
                 summons.DespawnAll();
                 SetPhase(PHASE_COMBAT_1);
                 _experimentState = EXPERIMENT_STATE_OOZE;
-                me->SetReactState(REACT_DEFENSIVE);
+                me->SetReactState(REACT_AGGRESSIVE);
                 me->SetWalk(false);
                 if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
                     me->GetMotionMaster()->MovementExpired();
@@ -602,7 +602,7 @@ class boss_professor_putricide : public CreatureScript
                             DoCast(me, SPELL_TEAR_GAS_PERIODIC_TRIGGER, true);
                             break;
                         case EVENT_RESUME_ATTACK:
-                            me->SetReactState(REACT_DEFENSIVE);
+                            me->SetReactState(REACT_AGGRESSIVE);
                             AttackStart(me->getVictim());
                             // remove Tear Gas
                             me->RemoveAurasDueToSpell(SPELL_TEAR_GAS_PERIODIC_TRIGGER);
