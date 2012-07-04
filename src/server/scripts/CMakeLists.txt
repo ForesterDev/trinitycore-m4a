@@ -39,6 +39,7 @@ set(scripts_STAT_SRCS
   ../game/Scripting/ScriptLoader.cpp
   ../game/Scripting/ScriptMgr.cpp
   ../game/Scripting/ScriptSystem.cpp
+  utility.hpp
 )
 
 if(SCRIPTS)
