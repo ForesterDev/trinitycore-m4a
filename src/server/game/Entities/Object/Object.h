@@ -292,6 +292,8 @@ class Object
 
         uint16 GetValuesCount() const { return m_valuesCount; }
 
+        bool is_object_updated() const;
+
         virtual bool hasQuest(uint32 /* quest_id */) const { return false; }
         virtual bool hasInvolvedQuest(uint32 /* quest_id */) const { return false; }
         virtual void BuildUpdate(UpdateDataMapType&) {}
