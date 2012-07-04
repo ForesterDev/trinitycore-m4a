@@ -3887,6 +3887,19 @@ void Spell::SendSpellStart()
         data << uint32(0);
     }
 
+    if (m_caster->is_object_updated())
+    {
+        UpdateDataMapType update_players;
+        m_caster->BuildUpdate(update_players);
+        m_caster->ClearUpdateMask(true);
+        WorldPacket packet;
+        for (auto &p : update_players)
+        {
+            packet.clear();
+            p.second.BuildPacket(&packet);
+            p.first->GetSession()->SendPacket(&packet);
+        }
+    }
     m_caster->SendMessageToSet(&data, true);
 }
 

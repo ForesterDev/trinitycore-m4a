@@ -763,6 +763,11 @@ void Object::ClearUpdateMask(bool remove)
     }
 }
 
+bool Object::is_object_updated() const
+{
+    return m_objectUpdated;
+}
+
 void Object::BuildFieldsUpdate(Player* player, UpdateDataMapType& data_map) const
 {
     UpdateDataMapType::iterator iter = data_map.find(player);
