@@ -238,6 +238,13 @@ void AIRelocationNotifier::Visit(CreatureMapType &m)
     }
 }
 
+void AIRelocationNotifier::Visit(PlayerMapType &m)
+{
+    for (auto &r : m)
+        if (isCreature)
+            CreatureUnitRelocationWorker(static_cast<Creature *>(&i_unit), r.getSource());
+}
+
 void MessageDistDeliverer::Visit(PlayerMapType &m)
 {
     for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
