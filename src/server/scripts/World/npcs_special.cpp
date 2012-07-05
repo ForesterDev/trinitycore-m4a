@@ -1848,6 +1848,8 @@ public:
         void InitializeAI()
         {
             CasterAI::InitializeAI();
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             Unit* owner = me->GetOwner();
             if (!owner)
                 return;
@@ -1855,8 +1857,6 @@ public:
             owner->CastSpell((Unit*)NULL, 58838, true);
             // here mirror image casts on summoner spell (not present in client dbc) 49866
             // here should be auras (not present in client dbc): 35657, 35658, 35659, 35660 selfcasted by mirror images (stats related?)
-            // Clone Me!
-            owner->CastSpell(me, 45204, true);
         }
 
         // Do not reload Creature templates on evade mode enter - prevent visual lost
@@ -1872,6 +1872,19 @@ public:
             {
                 me->GetMotionMaster()->Clear(false);
                 me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, me->GetFollowAngle(), MOTION_SLOT_ACTIVE);
+            }
+        }
+
+        void SpellHit(Unit *caster, const SpellInfo *spell)
+        {
+            CasterAI::SpellHit(caster, spell);
+            if (spell->HasAura(SPELL_AURA_INITIALIZE_IMAGES))
+            {
+                // Clone Me!
+                caster->CastSpell(me, 45204, true);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                me->SetReactState(REACT_AGGRESSIVE);
+                me->UpdateObjectVisibility();
             }
         }
     };
