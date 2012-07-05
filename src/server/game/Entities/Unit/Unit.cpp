@@ -804,11 +804,6 @@ void Unit::CastSpell(SpellCastTargets const& targets, SpellInfo const* spellInfo
         return;
     }
 
-    // TODO: this is a workaround and needs removal
-    if (!originalCaster && GetTypeId() == TYPEID_UNIT && ToCreature()->isTotem() && IsControlledByPlayer())
-        if (Unit* owner = GetOwner())
-            originalCaster=owner->GetGUID();
-
     // TODO: this is a workaround - not needed anymore, but required for some scripts :(
     if (!originalCaster && triggeredByAura)
         originalCaster = triggeredByAura->GetCasterGUID();
@@ -8205,6 +8200,14 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                             CastSpell(victim, 27526, true, castItem, triggeredByAura);
                         return true;
                     }
+                    // Evasive Maneuvers
+                    case 50240:
+                    {
+                        // Remove a Evasive Charge
+                        Aura* charge = GetAura(50241);
+                        if (charge->ModStackAmount(-1, AURA_REMOVE_BY_ENEMY_SPELL))
+                            RemoveAurasDueToSpell(50240);
+                    }
                 }
                 break;
             case SPELLFAMILY_MAGE:
@@ -11719,10 +11722,11 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* attacker, uint32 pdamage, WeaponAttackT
     float TakenTotalCasterMod = 0.0f;
 
     // get all auras from caster that allow the spell to ignore resistance (sanctified wrath)
+    SpellSchoolMask attackSchoolMask = spellProto ? spellProto->GetSchoolMask() : SPELL_SCHOOL_MASK_NORMAL;
     AuraEffectList const& IgnoreResistAuras = attacker->GetAuraEffectsByType(SPELL_AURA_MOD_IGNORE_TARGET_RESIST);
     for (AuraEffectList::const_iterator i = IgnoreResistAuras.begin(); i != IgnoreResistAuras.end(); ++i)
     {
-        if ((*i)->GetMiscValue() & spellProto->GetSchoolMask())
+        if ((*i)->GetMiscValue() & attackSchoolMask)
             TakenTotalCasterMod += (float((*i)->GetAmount())/100);
     }
 
