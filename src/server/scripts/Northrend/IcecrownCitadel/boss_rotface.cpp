@@ -158,9 +158,11 @@ class boss_rotface : public CreatureScript
                     Talk(SAY_SLIME_SPRAY);
             }
 
-            void MoveInLineOfSight(Unit* /*who*/)
+            void MoveInLineOfSight(Unit* who)
             {
                 // don't enter combat
+                // ...jk
+                BossAI::MoveInLineOfSight(who);
             }
 
             void UpdateAI(const uint32 diff)
