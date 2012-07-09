@@ -295,6 +295,7 @@ class npc_big_ooze : public CreatureScript
                 if (Creature* rotface = Unit::GetCreature(*me, instance->GetData64(DATA_ROTFACE)))
                     rotface->AI()->SummonedCreatureDespawn(me);
                 me->DespawnOrUnsummon();
+               
             }
 
             void DoAction(const int32 action)
@@ -590,7 +591,27 @@ class spell_rotface_large_ooze_combine : public SpellScriptLoader
                     else
                         unstable->ModStackAmount(1);
 
-                    // no idea why, but this does not trigger explosion on retail (only small+large do)
+                    if (unstable->GetStackAmount())
+                    {
+                        GetCaster()->RemoveAurasDueToSpell(SPELL_LARGE_OOZE_BUFF_COMBINE);
+                        GetCaster()->RemoveAurasDueToSpell(SPELL_LARGE_OOZE_COMBINE);
+                        if (InstanceScript* instance = GetCaster()->GetInstanceScript())
+                            if (Creature* rotface = Unit::GetCreature(*GetCaster(), instance->GetData64(DATA_ROTFACE)))
+                                if (rotface->isAlive())
+                                {
+                                    rotface->AI()->Talk(EMOTE_UNSTABLE_EXPLOSION);
+                                    rotface->AI()->Talk(SAY_UNSTABLE_EXPLOSION);
+                                }
+
+                        if (Creature* cre = GetCaster()->ToCreature())
+                        {
+                            cre->AI()->DoAction(EVENT_STICKY_OOZE);
+                            cre->InterruptNonMeleeSpells(EVENT_STICKY_OOZE,true);
+                        }
+                        GetCaster()->CastSpell(GetCaster(), SPELL_UNSTABLE_OOZE_EXPLOSION, false, NULL, NULL, GetCaster()->GetGUID());
+                        if (InstanceScript* instance = GetCaster()->GetInstanceScript())
+                            instance->SetData(DATA_OOZE_DANCE_ACHIEVEMENT, uint32(false));
+                    }
                 }
 
                 // just for safety
@@ -644,7 +665,10 @@ class spell_rotface_large_ooze_buff_combine : public SpellScriptLoader
                                 }
 
                         if (Creature* cre = GetCaster()->ToCreature())
+                        {
                             cre->AI()->DoAction(EVENT_STICKY_OOZE);
+                            cre->InterruptNonMeleeSpells(EVENT_STICKY_OOZE,true);
+                        }
                         GetCaster()->CastSpell(GetCaster(), SPELL_UNSTABLE_OOZE_EXPLOSION, false, NULL, NULL, GetCaster()->GetGUID());
                         if (InstanceScript* instance = GetCaster()->GetInstanceScript())
                             instance->SetData(DATA_OOZE_DANCE_ACHIEVEMENT, uint32(false));
