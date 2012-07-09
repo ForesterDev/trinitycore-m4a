@@ -1100,8 +1100,6 @@ class spell_deathbringer_blood_power : public SpellScriptLoader
 
             bool Load()
             {
-                if (GetUnitOwner()->getPowerType() != POWER_ENERGY)
-                    return false;
                 return true;
             }
         };
