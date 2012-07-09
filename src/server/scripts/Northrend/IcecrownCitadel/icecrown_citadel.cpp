@@ -27,6 +27,7 @@
 #include "SpellAuraEffects.h"
 #include "SmartAI.h"
 #include "icecrown_citadel.h"
+#include "utility.hpp"
 
 // Weekly quest support
 // * Deprogramming                (DONE)
@@ -34,6 +35,8 @@
 // * Residue Rendezvous           (DONE)
 // * Blood Quickening             (DONE)
 // * Respite for a Tormented Soul
+
+using std::bad_cast;
 
 enum Texts
 {
@@ -223,7 +226,7 @@ enum EventTypes
     EVENT_ARNATH_INTRO_2                = 34,
     EVENT_SVALNA_START                  = 35,
     EVENT_SVALNA_RESURRECT              = 36,
-    EVENT_SVALNA_COMBAT                 = 37,
+    EVENT_SVALNA_RESURRECT_FINISH       = 37,
     EVENT_IMPALING_SPEAR                = 38,
     EVENT_AETHER_SHIELD                 = 39,
 
@@ -249,6 +252,9 @@ enum EventTypes
     EVENT_RUPERT_FEL_IRON_BOMB          = 52,
     EVENT_RUPERT_MACHINE_GUN            = 53,
     EVENT_RUPERT_ROCKET_LAUNCH          = 54,
+    EVENT_CAPTAIN_RESURRECTED,
+    EVENT_CROK_COMBAT_SVALNA,
+    EVENT_CROK_CHASE_SVALNA,
 };
 
 enum DataTypesICC
@@ -720,7 +726,8 @@ class boss_sister_svalna : public CreatureScript
         struct boss_sister_svalnaAI : public BossAI
         {
             boss_sister_svalnaAI(Creature* creature) : BossAI(creature, DATA_SISTER_SVALNA),
-                _isEventInProgress(false)
+                _isEventInProgress(false),
+                captain_resurrected(false)
             {
             }
 
@@ -737,6 +744,7 @@ class boss_sister_svalna : public CreatureScript
                 _Reset();
                 me->SetReactState(REACT_DEFENSIVE);
                 _isEventInProgress = false;
+                captain_resurrected = false;
             }
 
             void JustDied(Unit* /*killer*/)
@@ -761,9 +769,7 @@ class boss_sister_svalna : public CreatureScript
             void EnterCombat(Unit* /*attacker*/)
             {
                 _EnterCombat();
-                if (Creature* crok = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CROK_SCOURGEBANE)))
-                    crok->AI()->Talk(SAY_CROK_COMBAT_SVALNA);
-                events.ScheduleEvent(EVENT_SVALNA_COMBAT, 9000);
+                Talk(SAY_SVALNA_AGGRO);
                 events.ScheduleEvent(EVENT_IMPALING_SPEAR, urand(40000, 50000));
                 events.ScheduleEvent(EVENT_AETHER_SHIELD, urand(100000, 110000));
             }
@@ -848,6 +854,7 @@ class boss_sister_svalna : public CreatureScript
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
                 me->SetDisableGravity(false);
                 me->SetHover(false);
+                me->SetReactState(REACT_DEFENSIVE);
             }
 
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
@@ -888,12 +895,13 @@ class boss_sister_svalna : public CreatureScript
                             Talk(SAY_SVALNA_EVENT_START);
                             break;
                         case EVENT_SVALNA_RESURRECT:
-                            Talk(SAY_SVALNA_RESURRECT_CAPTAINS);
-                            me->CastSpell(me, SPELL_REVIVE_CHAMPION, false);
+                            {
+                                auto duration = Talk(SAY_SVALNA_RESURRECT_CAPTAINS);
+                                me->CastSpell(me, SPELL_REVIVE_CHAMPION, false);
+                                events.ScheduleEvent(EVENT_SVALNA_RESURRECT_FINISH, duration);
+                            }
                             break;
-                        case EVENT_SVALNA_COMBAT:
-                            me->SetReactState(REACT_DEFENSIVE);
-                            Talk(SAY_SVALNA_AGGRO);
+                        case EVENT_SVALNA_RESURRECT_FINISH:
                             break;
                         case EVENT_IMPALING_SPEAR:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -SPELL_IMPALING_SPEAR))
@@ -911,8 +919,27 @@ class boss_sister_svalna : public CreatureScript
                 DoMeleeAttackIfReady();
             }
 
+            bool is_captain_resurrected() const
+            {
+                return captain_resurrected;
+            }
+
+            void set_captain_resurrected()
+            {
+                captain_resurrected = true;
+            }
+
+            uint32 resurrect_time_remaining() const
+            {
+                if (auto time = events.GetNextEventTime(EVENT_SVALNA_RESURRECT_FINISH))
+                    return time - events.GetTimer();
+                else
+                    return 0;
+            }
+
         private:
             bool _isEventInProgress;
+            bool captain_resurrected;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -960,7 +987,7 @@ class npc_crok_scourgebane : public CreatureScript
                     _isEventDone = true;
                     // Load Grid with Sister Svalna
                     me->GetMap()->LoadGrid(4356.71f, 2484.33f);
-                    if (Creature* svalna = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SISTER_SVALNA)))
+                    if (Creature* svalna = get_svalna())
                         svalna->AI()->DoAction(ACTION_START_GAUNTLET);
                     Talk(SAY_CROK_INTRO_1);
                     _events.ScheduleEvent(EVENT_ARNATH_INTRO_2, 7000);
@@ -991,10 +1018,8 @@ class npc_crok_scourgebane : public CreatureScript
                         SetEscortPaused(false);
                         if (_currentWPid == 4 && _isEventActive)
                         {
-                            _isEventActive = false;
-                            me->setActive(false);
                             Talk(SAY_CROK_FINAL_WP);
-                            if (Creature* svalna = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SISTER_SVALNA)))
+                            if (Creature* svalna = get_svalna())
                                 svalna->AI()->DoAction(ACTION_RESURRECT_CAPTAINS);
                         }
                     }
@@ -1019,10 +1044,8 @@ class npc_crok_scourgebane : public CreatureScript
                     case 4:
                         if (_aliveTrash.empty() && _isEventActive)
                         {
-                            _isEventActive = false;
-                            me->setActive(false);
                             Talk(SAY_CROK_FINAL_WP);
-                            if (Creature* svalna = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SISTER_SVALNA)))
+                            if (Creature* svalna = get_svalna())
                                 svalna->AI()->DoAction(ACTION_RESURRECT_CAPTAINS);
                         }
                         break;
@@ -1048,7 +1071,7 @@ class npc_crok_scourgebane : public CreatureScript
                             minY -= 50.0f;
                             maxY -= 50.0f;
                             // at waypoints 1 and 2 she kills one captain
-                            if (Creature* svalna = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SISTER_SVALNA)))
+                            if (Creature* svalna = get_svalna())
                                 svalna->AI()->DoAction(ACTION_KILL_CAPTAIN);
                         }
                         else if (waypointId == 4)
@@ -1071,7 +1094,7 @@ class npc_crok_scourgebane : public CreatureScript
                     }
                     // at waypoints 1 and 2 she kills one captain
                     case 2:
-                        if (Creature* svalna = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SISTER_SVALNA)))
+                        if (Creature* svalna = get_svalna())
                             svalna->AI()->DoAction(ACTION_KILL_CAPTAIN);
                         break;
                     default:
@@ -1171,6 +1194,16 @@ class npc_crok_scourgebane : public CreatureScript
                                 _events.ScheduleEvent(EVENT_HEALTH_CHECK, 1000);
                             }
                             break;
+                        case EVENT_CROK_COMBAT_SVALNA:
+                            Talk(SAY_CROK_COMBAT_SVALNA);
+                            AttackStartNoMove(get_svalna());
+                            _events.ScheduleEvent(EVENT_CROK_CHASE_SVALNA, 4000U);
+                            break;
+                        case EVENT_CROK_CHASE_SVALNA:
+                            AttackStart(get_svalna());
+                            _isEventActive = false;
+                            me->setActive(false);
+                            break;
                         default:
                             break;
                     }
@@ -1185,7 +1218,17 @@ class npc_crok_scourgebane : public CreatureScript
                 return (me->GetPositionY() > 2660.0f) == (target->GetPositionY() > 2660.0f);
             }
 
+            void schedule_combat_svalna(uint32 duration)
+            {
+                _events.ScheduleEvent(EVENT_CROK_COMBAT_SVALNA, duration);
+            }
+
         private:
+            Creature *get_svalna() const
+            {
+                return ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SISTER_SVALNA));
+            }
+
             EventMap _events;
             std::set<uint64> _aliveTrash;
             InstanceScript* _instance;
@@ -1286,10 +1329,10 @@ struct npc_argent_captainAI : public ScriptedAI
             Reset();
         }
 
-        void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+        void SpellHit(Unit* caster, SpellInfo const* spell)
         {
             if (spell->Id == SPELL_REVIVE_CHAMPION && !IsUndead)
-            {
+            try {
                 IsUndead = true;
                 me->setDeathState(JUST_RESPAWNED);
                 uint32 newEntry = 0;
@@ -1311,13 +1354,29 @@ struct npc_argent_captainAI : public ScriptedAI
                         return;
                 }
 
-                Talk(SAY_CAPTAIN_RESURRECTED);
                 me->UpdateEntry(newEntry, instance->GetData(DATA_TEAM_IN_INSTANCE), me->GetCreatureData());
                 DoCast(me, SPELL_UNDEATH, true);
+                auto &ai = dynamic_cast<boss_sister_svalna::boss_sister_svalnaAI &>(*caster->GetAI());
+                if (!ai.is_captain_resurrected())
+                {
+                    ai.set_captain_resurrected();
+                    Events.ScheduleEvent(EVENT_CAPTAIN_RESURRECTED, ai.resurrect_time_remaining());
+                }
+            }
+            catch (const bad_cast &e UNUSED) {
             }
         }
 
     protected:
+        void resurrected()
+        try {
+            auto duration = Talk(SAY_CAPTAIN_RESURRECTED);
+            if (Creature* crok = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CROK_SCOURGEBANE)))
+                dynamic_cast<npc_crok_scourgebane::npc_crok_scourgebaneAI &>(*crok->AI()).schedule_combat_svalna(duration);
+        }
+        catch (const bad_cast &e UNUSED) {
+        }
+
         EventMap Events;
         InstanceScript* instance;
         float FollowAngle;
@@ -1351,8 +1410,7 @@ class npc_captain_arnath : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim())
-                    return;
+                UpdateVictim();
 
                 Events.Update(diff);
 
@@ -1371,7 +1429,8 @@ class npc_captain_arnath : public CreatureScript
                         case EVENT_ARNATH_PW_SHIELD:
                         {
                             std::list<Creature*> targets = DoFindFriendlyMissingBuff(40.0f, SPELL_POWER_WORD_SHIELD);
-                            DoCast(Trinity::Containers::SelectRandomContainerElement(targets), SPELL_POWER_WORD_SHIELD);
+                            if (!targets.empty())
+                                DoCast(Trinity::Containers::SelectRandomContainerElement(targets), SPELL_POWER_WORD_SHIELD);
                             Events.ScheduleEvent(EVENT_ARNATH_PW_SHIELD, urand(15000, 20000));
                             break;
                         }
@@ -1383,6 +1442,9 @@ class npc_captain_arnath : public CreatureScript
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                                 DoCast(target, SPELL_DOMINATE_MIND);
                             Events.ScheduleEvent(EVENT_ARNATH_DOMINATE_MIND, urand(28000, 37000));
+                            break;
+                        case EVENT_CAPTAIN_RESURRECTED:
+                            resurrected();
                             break;
                         default:
                             break;
@@ -1432,8 +1494,7 @@ class npc_captain_brandon : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim())
-                    return;
+                UpdateVictim();
 
                 Events.Update(diff);
 
@@ -1461,6 +1522,9 @@ class npc_captain_brandon : public CreatureScript
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                                 DoCast(target, SPELL_HAMMER_OF_BETRAYAL);
                             Events.ScheduleEvent(EVENT_BRANDON_HAMMER_OF_BETRAYAL, urand(45000, 60000));
+                            break;
+                        case EVENT_CAPTAIN_RESURRECTED:
+                            resurrected();
                             break;
                         default:
                             break;
@@ -1500,8 +1564,7 @@ class npc_captain_grondel : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim())
-                    return;
+                UpdateVictim();
 
                 Events.Update(diff);
 
@@ -1528,6 +1591,9 @@ class npc_captain_grondel : public CreatureScript
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                                 DoCast(target, SPELL_CONFLAGRATION);
                             Events.ScheduleEvent(EVENT_GRONDEL_CONFLAGRATION, urand(10000, 15000));
+                            break;
+                        case EVENT_CAPTAIN_RESURRECTED:
+                            resurrected();
                             break;
                         default:
                             break;
@@ -1565,8 +1631,7 @@ class npc_captain_rupert : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim())
-                    return;
+                UpdateVictim();
 
                 Events.Update(diff);
 
@@ -1591,6 +1656,9 @@ class npc_captain_rupert : public CreatureScript
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
                                 DoCast(target, SPELL_ROCKET_LAUNCH);
                             Events.ScheduleEvent(EVENT_RUPERT_ROCKET_LAUNCH, urand(10000, 15000));
+                            break;
+                        case EVENT_CAPTAIN_RESURRECTED:
+                            resurrected();
                             break;
                         default:
                             break;

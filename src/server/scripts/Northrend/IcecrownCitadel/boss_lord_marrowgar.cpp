@@ -146,6 +146,7 @@ class boss_lord_marrowgar : public CreatureScript
                     Talk(SAY_ENTER_ZONE);
                     _introDone = true;
                 }
+                BossAI::MoveInLineOfSight(who);
             }
 
             void UpdateAI(uint32 const diff)
