@@ -3891,7 +3891,7 @@ void Spell::SendSpellStart()
     {
         UpdateDataMapType update_players;
         m_caster->BuildUpdate(update_players);
-        m_caster->ClearUpdateMask(true);
+        sObjectAccessor->RemoveUpdateObject(m_caster);
         WorldPacket packet;
         for (auto &p : update_players)
         {
