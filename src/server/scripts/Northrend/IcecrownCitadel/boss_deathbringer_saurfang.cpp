@@ -469,7 +469,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                             break;
                         case EVENT_BLOOD_NOVA:
                             DoCastAOE(SPELL_BLOOD_NOVA_TRIGGER);
-                            events.ScheduleEvent(EVENT_BLOOD_NOVA, urand(20000, 25000), 0, PHASE_COMBAT);
+                            events.ScheduleEvent(EVENT_BLOOD_NOVA, 20000, 0, PHASE_COMBAT);
                             break;
                         case EVENT_RUNE_OF_BLOOD:
                             DoCastVictim(SPELL_RUNE_OF_BLOOD);
