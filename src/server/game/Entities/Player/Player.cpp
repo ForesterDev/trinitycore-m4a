@@ -1942,6 +1942,7 @@ bool Player::BuildEnumData(PreparedQueryResult result, WorldPacket* data)
     if (atLoginFlags & AT_LOGIN_RENAME)
         charFlags |= CHARACTER_FLAG_RENAME;
     if (!fields[20].is_null())
+    {
         if (!fields[21].GetBool())
             charFlags |= CHARACTER_FLAG_LOCKED_BY_BILLING;
         else
@@ -1952,6 +1953,7 @@ bool Player::BuildEnumData(PreparedQueryResult result, WorldPacket* data)
             stmt->setUInt32(1, fields[20].GetUInt32());
             CharacterDatabase.Execute(stmt);
         }
+    }
     if (sWorld->getBoolConfig(CONFIG_DECLINED_NAMES_USED))
     {
         if (!fields[22].GetString().empty())

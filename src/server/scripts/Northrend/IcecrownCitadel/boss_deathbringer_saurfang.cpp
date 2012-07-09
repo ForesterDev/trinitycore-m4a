@@ -22,6 +22,7 @@
 #include "ScriptedGossip.h"
 #include "SpellAuras.h"
 #include "icecrown_citadel.h"
+#include "utility.hpp"
 
 enum ScriptTexts
 {
@@ -1279,7 +1280,7 @@ class spell_deathbringer_boiling_blood : public SpellScriptLoader
                 return GetCaster()->GetTypeId() == TYPEID_UNIT;
             }
 
-            void FilterTargets(std::list<Unit*>& unitList)
+            void FilterTargets(std::list<Unit*>& unitList UNUSED)
             {
             }
 

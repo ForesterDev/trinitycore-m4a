@@ -1663,10 +1663,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             if (target == caster)
                 if (GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_AURA)
                     if (!(GetSpellInfo()->SpellFamilyFlags[0] & 0x8 /* Retribution Aura */))
+                    {
                         if (apply)
                             target->CastSpell(target, 63531 /* Sanctified Retribution */, true);
                         else
                             target->RemoveAura(63531 /* Sanctified Retribution */);
+                    }
             break;
         case SPELLFAMILY_DEATHKNIGHT:
             if (GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_PRESENCE)
