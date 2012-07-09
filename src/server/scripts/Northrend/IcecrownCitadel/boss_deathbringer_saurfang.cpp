@@ -435,9 +435,10 @@ class boss_deathbringer_saurfang : public CreatureScript
                             Talk(SAY_INTRO_ALLIANCE_3);
                             break;
                         case EVENT_INTRO_ALLIANCE_6:
-                            Talk(SAY_INTRO_ALLIANCE_6);
-                            Talk(SAY_INTRO_ALLIANCE_7);
                             DoCast(me, SPELL_GRIP_OF_AGONY);
+                            break;
+                        case EVENT_INTRO_ALLIANCE_7:
+                            Talk(SAY_INTRO_ALLIANCE_6);
                             break;
                         case EVENT_INTRO_HORDE_2:
                             Talk(SAY_INTRO_HORDE_2);
@@ -539,6 +540,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                             return;
 
                         events.ScheduleEvent(EVENT_INTRO_ALLIANCE_6, 6500+500, 0, PHASE_INTRO_A);
+                        events.ScheduleEvent(EVENT_INTRO_ALLIANCE_7, 6500 + 500 + 2000, 0, PHASE_INTRO_A);
                         events.ScheduleEvent(EVENT_INTRO_FINISH, 6500 + 500 + 2000 + 4000, 0, PHASE_INTRO_A);
 
                         events.ScheduleEvent(EVENT_INTRO_HORDE_4, 6500, 0, PHASE_INTRO_H);
