@@ -473,7 +473,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                             break;
                         case EVENT_RUNE_OF_BLOOD:
                             DoCastVictim(SPELL_RUNE_OF_BLOOD);
-                            events.ScheduleEvent(EVENT_RUNE_OF_BLOOD, urand(20000, 25000), 0, PHASE_COMBAT);
+                            events.ScheduleEvent(EVENT_RUNE_OF_BLOOD, 21000, 0, PHASE_COMBAT);
                             break;
                         case EVENT_BOILING_BLOOD:
                             DoCast(me, SPELL_BOILING_BLOOD);
