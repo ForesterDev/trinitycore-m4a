@@ -3377,8 +3377,10 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
             case 72769: // Scent of Blood (Deathbringer Saurfang)
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_200_YARDS;
-                // no break
+                spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_200_YARDS;
+                break;
             case 72771: // Scent of Blood (Deathbringer Saurfang)
+                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_200_YARDS;
                 spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_200_YARDS;
                 break;
             case 71169 /* Shadow's Fate */:
