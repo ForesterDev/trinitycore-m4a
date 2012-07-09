@@ -3375,6 +3375,12 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_200_YARDS;
                 spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_200_YARDS;
                 break;
+            case 72385 /* Boiling Blood */:
+            case 72441 /* Boiling Blood */:
+            case 72442 /* Boiling Blood */:
+            case 72443 /* Boiling Blood */:
+                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_200_YARDS;
+                break;
             case 72769: // Scent of Blood (Deathbringer Saurfang)
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_200_YARDS;
                 spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_200_YARDS;
