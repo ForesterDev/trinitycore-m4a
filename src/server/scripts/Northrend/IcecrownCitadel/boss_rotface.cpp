@@ -591,7 +591,7 @@ class spell_rotface_large_ooze_combine : public SpellScriptLoader
                     else
                         unstable->ModStackAmount(1);
 
-                    if (unstable->GetStackAmount())
+                    if (unstable->GetStackAmount() >= 5)
                     {
                         GetCaster()->RemoveAurasDueToSpell(SPELL_LARGE_OOZE_BUFF_COMBINE);
                         GetCaster()->RemoveAurasDueToSpell(SPELL_LARGE_OOZE_COMBINE);
