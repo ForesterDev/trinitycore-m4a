@@ -8056,6 +8056,11 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     *handled = true;
                     break;
                 }
+                case 72178 /* Blood Link */:
+                    *handled = true;
+                    if (victim)
+                        victim->CastCustomSpell(72202 /* Blood Link */, SPELLVALUE_BASE_POINT0, 1);
+                    break;
             }
 
             break;

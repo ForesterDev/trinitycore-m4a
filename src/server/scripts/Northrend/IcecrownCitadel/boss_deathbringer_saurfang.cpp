@@ -476,8 +476,13 @@ class boss_deathbringer_saurfang : public CreatureScript
                             events.ScheduleEvent(EVENT_RUNE_OF_BLOOD, 21000, 0, PHASE_COMBAT);
                             break;
                         case EVENT_BOILING_BLOOD:
-                            DoCast(me, SPELL_BOILING_BLOOD);
-                            events.ScheduleEvent(EVENT_BOILING_BLOOD, urand(15000, 20000), 0, PHASE_COMBAT);
+                            if (me->IsNonMeleeSpellCasted(false, false, true))
+                                events.ScheduleEvent(EVENT_BOILING_BLOOD, 1, 0, PHASE_COMBAT);
+                            else
+                            {
+                                me->CastCustomSpell(SPELL_BOILING_BLOOD, SPELLVALUE_MAX_TARGETS, RAID_MODE(1, 3, 1, 3), nullptr, false);
+                                events.ScheduleEvent(EVENT_BOILING_BLOOD, 16000, 0, PHASE_COMBAT);
+                            }
                             break;
                         case EVENT_BERSERK:
                             DoCast(me, SPELL_BERSERK);
@@ -1276,13 +1281,6 @@ class spell_deathbringer_boiling_blood : public SpellScriptLoader
 
             void FilterTargets(std::list<Unit*>& unitList)
             {
-                unitList.remove(GetCaster()->getVictim());
-                if (unitList.empty())
-                    return;
-
-                Unit* target = Trinity::Containers::SelectRandomContainerElement(unitList);
-                unitList.clear();
-                unitList.push_back(target);
             }
 
             void Register()
