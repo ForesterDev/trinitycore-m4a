@@ -338,6 +338,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     {
         // not have spell in spellbook or spell passive and not casted by client
         if (!mover->ToPlayer()->HasActiveSpell (spellId) || spellInfo->IsPassive())
+        {
             if (spellId == 68398)
                 ;
             else
@@ -346,6 +347,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
                 recvPacket.rfinish(); // prevent spam at ignore packet
                 return;
             }
+        }
     }
     else
     {
