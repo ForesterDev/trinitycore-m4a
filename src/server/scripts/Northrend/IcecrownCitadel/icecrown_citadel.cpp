@@ -1363,7 +1363,7 @@ struct npc_argent_captainAI : public ScriptedAI
                     Events.ScheduleEvent(EVENT_CAPTAIN_RESURRECTED, ai.resurrect_time_remaining());
                 }
             }
-            catch (const bad_cast &e UNUSED) {
+            catch (const bad_cast &e) {
             }
         }
 
@@ -1374,7 +1374,7 @@ struct npc_argent_captainAI : public ScriptedAI
             if (Creature* crok = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CROK_SCOURGEBANE)))
                 dynamic_cast<npc_crok_scourgebane::npc_crok_scourgebaneAI &>(*crok->AI()).schedule_combat_svalna(duration);
         }
-        catch (const bad_cast &e UNUSED) {
+        catch (const bad_cast &e) {
         }
 
         EventMap Events;
