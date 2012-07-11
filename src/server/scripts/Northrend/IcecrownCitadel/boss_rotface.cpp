@@ -82,6 +82,7 @@ enum Events
     EVENT_SUMMON_ZOMBIES    = 6,
 
     EVENT_STICKY_OOZE       = 7,
+    EVENT_BERSERK           = 8,
 };
 
 class boss_rotface : public CreatureScript
@@ -100,6 +101,7 @@ class boss_rotface : public CreatureScript
             void Reset()
             {
                 _Reset();
+                events.ScheduleEvent(EVENT_BERSERK, 600000);
                 events.ScheduleEvent(EVENT_SLIME_SPRAY, 20000);
                 events.ScheduleEvent(EVENT_HASTEN_INFECTIONS, 90000);
                 events.ScheduleEvent(EVENT_MUTATED_INFECTION, 14000);
@@ -198,6 +200,11 @@ class boss_rotface : public CreatureScript
                         case EVENT_MUTATED_INFECTION:
                             me->CastCustomSpell(SPELL_MUTATED_INFECTION, SPELLVALUE_MAX_TARGETS, 1, NULL, false);
                             events.ScheduleEvent(EVENT_MUTATED_INFECTION, infectionCooldown);
+                            break;
+                        case EVENT_BERSERK:
+                            me->InterruptNonMeleeSpells(false);
+                            DoCast(me, SPELL_BERSERK2);
+                            Talk(SAY_BERSERK);
                             break;
                         default:
                             break;
@@ -610,7 +617,7 @@ class spell_rotface_large_ooze_combine : public SpellScriptLoader
                         if (Creature* cre = GetCaster()->ToCreature())
                         {
                             cre->AI()->DoAction(EVENT_STICKY_OOZE);
-                            cre->InterruptNonMeleeSpells(EVENT_STICKY_OOZE,true);
+                            cre->InterruptNonMeleeSpells(false);
                         }
                         GetCaster()->CastSpell(GetCaster(), SPELL_UNSTABLE_OOZE_EXPLOSION, false, NULL, NULL, GetCaster()->GetGUID());
                         if (InstanceScript* instance = GetCaster()->GetInstanceScript())
@@ -671,7 +678,7 @@ class spell_rotface_large_ooze_buff_combine : public SpellScriptLoader
                         if (Creature* cre = GetCaster()->ToCreature())
                         {
                             cre->AI()->DoAction(EVENT_STICKY_OOZE);
-                            cre->InterruptNonMeleeSpells(EVENT_STICKY_OOZE,true);
+                            cre->InterruptNonMeleeSpells(false);
                         }
                         GetCaster()->CastSpell(GetCaster(), SPELL_UNSTABLE_OOZE_EXPLOSION, false, NULL, NULL, GetCaster()->GetGUID());
                         if (InstanceScript* instance = GetCaster()->GetInstanceScript())
