@@ -410,6 +410,9 @@ class boss_deathbringer_saurfang : public CreatureScript
                         if (me->GetPower(POWER_ENERGY) != me->GetMaxPower(POWER_ENERGY))
                             target->CastCustomSpell(SPELL_BLOOD_LINK_DUMMY, SPELLVALUE_BASE_POINT0, 1, me, true);
                         break;
+                    case SPELL_RUNE_OF_BLOOD:
+                        events.ScheduleEvent(EVENT_RUNE_OF_BLOOD, 20000, 0, PHASE_COMBAT);
+                        break;
                     default:
                         break;
                 }
@@ -421,6 +424,18 @@ class boss_deathbringer_saurfang : public CreatureScript
                     return;
 
                 events.Update(diff);
+
+                if (!me->HasUnitState(UNIT_STATE_CANNOT_AUTOATTACK))
+                {
+                    auto victim = me->getVictim();
+                    if (me->isAttackReady() && me->IsWithinMeleeRange(victim))
+                    {
+                        me->AttackerStateUpdate(victim);
+                        me->resetAttackTimer();
+                        if (!events.GetNextEventTime(EVENT_RUNE_OF_BLOOD))
+                            DoCastVictim(SPELL_RUNE_OF_BLOOD);
+                    }
+                }
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
@@ -473,17 +488,10 @@ class boss_deathbringer_saurfang : public CreatureScript
                             events.ScheduleEvent(EVENT_BLOOD_NOVA, 20000, 0, PHASE_COMBAT);
                             break;
                         case EVENT_RUNE_OF_BLOOD:
-                            DoCastVictim(SPELL_RUNE_OF_BLOOD);
-                            events.ScheduleEvent(EVENT_RUNE_OF_BLOOD, 21000, 0, PHASE_COMBAT);
                             break;
                         case EVENT_BOILING_BLOOD:
-                            if (me->IsNonMeleeSpellCasted(false, false, true))
-                                events.ScheduleEvent(EVENT_BOILING_BLOOD, 1, 0, PHASE_COMBAT);
-                            else
-                            {
-                                me->CastCustomSpell(SPELL_BOILING_BLOOD, SPELLVALUE_MAX_TARGETS, RAID_MODE(1, 3, 1, 3), nullptr, false);
-                                events.ScheduleEvent(EVENT_BOILING_BLOOD, 16000, 0, PHASE_COMBAT);
-                            }
+                            me->CastCustomSpell(SPELL_BOILING_BLOOD, SPELLVALUE_MAX_TARGETS, RAID_MODE(1, 3, 1, 3), nullptr, false);
+                            events.ScheduleEvent(EVENT_BOILING_BLOOD, 15000, 0, PHASE_COMBAT);
                             break;
                         case EVENT_BERSERK:
                             DoCast(me, SPELL_BERSERK);
@@ -500,8 +508,6 @@ class boss_deathbringer_saurfang : public CreatureScript
                             break;
                     }
                 }
-
-                DoMeleeAttackIfReady();
             }
 
             uint32 GetData(uint32 type)
