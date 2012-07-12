@@ -425,6 +425,18 @@ class boss_deathbringer_saurfang : public CreatureScript
 
                 events.Update(diff);
 
+                if (!me->HasUnitState(UNIT_STATE_CANNOT_AUTOATTACK))
+                {
+                    auto victim = me->getVictim();
+                    if (me->isAttackReady() && me->IsWithinMeleeRange(victim))
+                    {
+                        me->AttackerStateUpdate(victim);
+                        me->resetAttackTimer();
+                        if (!events.GetNextEventTime(EVENT_RUNE_OF_BLOOD))
+                            DoCastVictim(SPELL_RUNE_OF_BLOOD);
+                    }
+                }
+
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
@@ -495,15 +507,6 @@ class boss_deathbringer_saurfang : public CreatureScript
                         default:
                             break;
                     }
-                }
-
-                auto victim = me->getVictim();
-                if (me->isAttackReady() && me->IsWithinMeleeRange(victim))
-                {
-                    me->AttackerStateUpdate(victim);
-                    me->resetAttackTimer();
-                    if (!events.GetNextEventTime(EVENT_RUNE_OF_BLOOD))
-                        DoCastVictim(SPELL_RUNE_OF_BLOOD);
                 }
             }
 
