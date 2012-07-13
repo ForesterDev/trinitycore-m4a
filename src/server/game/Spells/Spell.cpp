@@ -3056,6 +3056,14 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         }
 
         m_caster->SetCurrentCastedSpell(this);
+        switch (GetCurrentContainer())
+        {
+        case CURRENT_GENERIC_SPELL:
+        case CURRENT_CHANNELED_SPELL:
+            if (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT)
+                m_caster->AddUnitState(UNIT_STATE_CASTING_IMMOBILE);
+            break;
+        }
         SendSpellStart();
 
         // set target for proper facing
@@ -3291,7 +3299,14 @@ void Spell::cast(bool skipCheck)
         SetDelayStart(0);
 
         if (m_caster->HasUnitState(UNIT_STATE_CASTING) && !m_caster->IsNonMeleeSpellCasted(false, false, true))
-            m_caster->ClearUnitState(UNIT_STATE_CASTING | UNIT_STATE_CASTING_IMMOBILE);
+            m_caster->ClearUnitState(UNIT_STATE_CASTING);
+        switch (GetCurrentContainer())
+        {
+        case CURRENT_GENERIC_SPELL:
+        case CURRENT_CHANNELED_SPELL:
+            m_caster->ClearUnitState(UNIT_STATE_CASTING_IMMOBILE);
+            break;
+        }
     }
     else
     {
@@ -3333,12 +3348,26 @@ void Spell::handle_immediate()
                 m_caster->ModSpellCastTime(m_spellInfo, duration, this);
 
             m_spellState = SPELL_STATE_CASTING;
+            if (GetCurrentContainer() == CURRENT_CHANNELED_SPELL)
+            {
+                if (m_spellInfo->ChannelInterruptFlags & AURA_INTERRUPT_FLAG_MOVE)
+                    m_caster->AddUnitState(UNIT_STATE_CASTING_IMMOBILE);
+                else
+                    m_caster->ClearUnitState(UNIT_STATE_CASTING_IMMOBILE);
+            }
             m_caster->AddInterruptMask(m_spellInfo->ChannelInterruptFlags);
             SendChannelStart(duration);
         }
         else if (duration == -1)
         {
             m_spellState = SPELL_STATE_CASTING;
+            if (GetCurrentContainer() == CURRENT_CHANNELED_SPELL)
+            {
+                if (m_spellInfo->ChannelInterruptFlags & AURA_INTERRUPT_FLAG_MOVE)
+                    m_caster->AddUnitState(UNIT_STATE_CASTING_IMMOBILE);
+                else
+                    m_caster->ClearUnitState(UNIT_STATE_CASTING_IMMOBILE);
+            }
             m_caster->AddInterruptMask(m_spellInfo->ChannelInterruptFlags);
             SendChannelStart(duration);
         }
@@ -3537,7 +3566,7 @@ void Spell::update(uint32 difftime)
 
     // check if the player caster has moved before the spell finished
     if ((m_caster->GetTypeId() == TYPEID_PLAYER && m_timer != 0) &&
-        m_caster->isMoving() && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT) &&
+        m_caster->isMoving() && (m_spellState == SPELL_STATE_CASTING ? m_spellInfo->ChannelInterruptFlags & AURA_INTERRUPT_FLAG_MOVE : m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT) &&
         (m_spellInfo->Effects[0].Effect != SPELL_EFFECT_STUCK || !m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING_FAR)))
     {
         // don't cancel for melee, autorepeat, triggered and instant spells
@@ -3642,7 +3671,14 @@ void Spell::finish(bool ok)
         m_caster->UpdateInterruptMask();
 
     if (m_caster->HasUnitState(UNIT_STATE_CASTING) && !m_caster->IsNonMeleeSpellCasted(false, false, true))
-        m_caster->ClearUnitState(UNIT_STATE_CASTING | UNIT_STATE_CASTING_IMMOBILE);
+        m_caster->ClearUnitState(UNIT_STATE_CASTING);
+    switch (GetCurrentContainer())
+    {
+    case CURRENT_GENERIC_SPELL:
+    case CURRENT_CHANNELED_SPELL:
+        m_caster->ClearUnitState(UNIT_STATE_CASTING_IMMOBILE);
+        break;
+    }
 
     // Unsummon summon as possessed creatures on spell cancel
     if (m_spellInfo->IsChanneled() && m_caster->GetTypeId() == TYPEID_PLAYER)
