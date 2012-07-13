@@ -779,10 +779,10 @@ namespace
                 return e;
             }
 
-            static bool in_area(Player &t)
+            static bool in_area(Player &t, uint32 zone_id, uint32 area_id)
             {
-                if (t.GetZoneId() == 65 /* Dragonblight */)
-                    switch (t.GetAreaId())
+                if (zone_id == 65 /* Dragonblight */)
+                    switch (area_id)
                     {
                     case 4177 /* Wintergarde Keep */:
                     case 4178 /* Wintergarde Mine */:
@@ -813,17 +813,16 @@ namespace
             void applied(const AuraEffect *, AuraEffectHandleModes mode UNUSED)
             {
                 auto &t = target();
-                if (in_area(t))
+                if (in_area(t, t.GetZoneId(), t.GetAreaId()))
                     ;
                 else
                     apply_warning(t);
-                connection = t.connect_area([this]()
+                connection = t.connect_area([this](Player &player, uint32 zone_id, uint32 area_id)
                         {
-                            auto &t = target();
-                            if (in_area(t))
-                                unapply_warning(t);
+                            if (in_area(player, zone_id, area_id))
+                                unapply_warning(player);
                             else
-                                apply_warning(t);
+                                apply_warning(player);
                         }
                     );
             }

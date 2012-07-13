@@ -1067,7 +1067,7 @@ class Player : public Unit, public GridObject<Player>
     friend void Item::AddToUpdateQueueOf(Player* player);
     friend void Item::RemoveFromUpdateQueueOf(Player* player);
     public:
-        typedef boost::signal<void ()> Area_signal;
+        typedef boost::signal<void (Player &player, uint32 zone_id, uint32 area_id)> Area_signal;
         typedef boost::signals::connection Area_connection;
 
         explicit Player (WorldSession* session);
