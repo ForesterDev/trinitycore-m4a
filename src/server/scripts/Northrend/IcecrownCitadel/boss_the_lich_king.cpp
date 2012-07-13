@@ -888,243 +888,248 @@ class boss_the_lich_king : public CreatureScript
 
                 events.Update(diff);
 
-                // during Remorseless Winter phases The Lich King is channeling a spell, but we must continue casting other spells
-                if (me->HasUnitState(UNIT_STATE_CASTING) && !(events.GetPhaseMask() & PHASE_MASK_NO_CAST_CHECK))
-                    return;
-
-                while (uint32 eventId = events.ExecuteEvent())
+                for (; ; )
                 {
-                    switch (eventId)
-                    {
-                        case EVENT_INTRO_MOVE_1:
-                            me->SetSheath(SHEATH_STATE_MELEE);
-                            me->RemoveAurasDueToSpell(SPELL_EMOTE_SIT_NO_SHEATH);
-                            me->SetWalk(true);
-                            me->GetMotionMaster()->MovePoint(POINT_LK_INTRO_1, LichKingIntro[0]);
-                            break;
-                        case EVENT_INTRO_MOVE_2:
-                            me->GetMotionMaster()->MovePoint(POINT_LK_INTRO_2, LichKingIntro[1]);
-                            break;
-                        case EVENT_INTRO_MOVE_3:
-                            me->GetMotionMaster()->MovePoint(POINT_LK_INTRO_3, LichKingIntro[2]);
-                            break;
-                        case EVENT_INTRO_TALK_1:
-                            Talk(SAY_LK_INTRO_2);
-                            // for some reason blizz sends 2 emotes in row here so (we handle one in Talk)
-                            me->HandleEmoteCommand(EMOTE_ONESHOT_TALK_NO_SHEATHE);
-                            events.ScheduleEvent(EVENT_EMOTE_CAST_SHOUT, 7000, 0, PHASE_INTRO);
-                            events.ScheduleEvent(EVENT_INTRO_EMOTE_1, 13000, 0, PHASE_INTRO);
-                            events.ScheduleEvent(EVENT_EMOTE_CAST_SHOUT, 18000, 0, PHASE_INTRO);
-                            events.ScheduleEvent(EVENT_INTRO_CAST_FREEZE, 31000, 0, PHASE_INTRO);
-                            break;
-                        case EVENT_EMOTE_CAST_SHOUT:
-                            DoCast(me, SPELL_EMOTE_SHOUT_NO_SHEATH, false);
-                            break;
-                        case EVENT_INTRO_EMOTE_1:
-                            me->HandleEmoteCommand(EMOTE_ONESHOT_POINT_NO_SHEATHE);
-                            break;
-                        case EVENT_INTRO_CAST_FREEZE:
-                            Talk(SAY_LK_INTRO_3);
-                            DoCastAOE(SPELL_ICE_LOCK, false);
-                            events.ScheduleEvent(EVENT_FINISH_INTRO, 1000, 0, PHASE_INTRO);
-                            break;
-                        case EVENT_FINISH_INTRO:
-                            me->SetWalk(false);
-                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                            me->SetReactState(REACT_AGGRESSIVE);
-                            events.SetPhase(PHASE_ONE);
-                            me->SetInCombatWithZone();
-                            break;
-                        case EVENT_SUMMON_SHAMBLING_HORROR:
-                            DoCast(me, SPELL_SUMMON_SHAMBLING_HORROR);
-                            SendMusicToPlayers(MUSIC_SPECIAL);
-                            events.ScheduleEvent(EVENT_SUMMON_SHAMBLING_HORROR, 60000, 0, PHASE_ONE);
-                            break;
-                        case EVENT_SUMMON_DRUDGE_GHOUL:
-                            DoCast(me, SPELL_SUMMON_DRUDGE_GHOULS);
-                            events.ScheduleEvent(EVENT_SUMMON_DRUDGE_GHOUL, 30000, 0, PHASE_ONE);
-                            break;
-                        case EVENT_INFEST:
-                            DoCast(me, SPELL_INFEST);
-                            events.ScheduleEvent(EVENT_INFEST, urand(21000, 24000), 0, (events.GetPhaseMask() & PHASE_MASK_ONE) ? PHASE_ONE : PHASE_TWO);
-                            break;
-                        case EVENT_NECROTIC_PLAGUE:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, NecroticPlagueTargetCheck(me, NECROTIC_PLAGUE_LK, NECROTIC_PLAGUE_PLR)))
-                            {
-                                Talk(EMOTE_NECROTIC_PLAGUE_WARNING, target->GetGUID());
-                                DoCast(target, SPELL_NECROTIC_PLAGUE);
-                            }
-                            events.ScheduleEvent(EVENT_NECROTIC_PLAGUE, urand(30000, 33000), 0, PHASE_ONE);
-                            break;
-                        case EVENT_SHADOW_TRAP:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
-                                DoCast(target, SPELL_SHADOW_TRAP);
-                            events.ScheduleEvent(EVENT_SHADOW_TRAP, 15500, 0, PHASE_ONE);
-                            break;
-                        case EVENT_SOUL_REAPER:
-                            DoCastVictim(SPELL_SOUL_REAPER);
-                            events.ScheduleEvent(EVENT_SOUL_REAPER, urand(33000, 35000), 0, PHASE_TWO_THREE);
-                            break;
-                        case EVENT_DEFILE:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -SPELL_HARVEST_SOUL_VALKYR))
-                            {
-                                Talk(EMOTE_DEFILE_WARNING);
-                                DoCast(target, SPELL_DEFILE);
-                            }
-                            events.ScheduleEvent(EVENT_DEFILE, urand(32000, 35000), 0, PHASE_TWO_THREE);
-                            break;
-                        case EVENT_HARVEST_SOUL:
-                            Talk(SAY_LK_HARVEST_SOUL);
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, SpellTargetSelector(me, SPELL_HARVEST_SOUL)))
-                                DoCast(target, SPELL_HARVEST_SOUL);
-                            events.ScheduleEvent(EVENT_HARVEST_SOUL, 75000, 0, PHASE_THREE);
-                            break;
-                        case EVENT_PAIN_AND_SUFFERING:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
-                                me->CastSpell(target, SPELL_PAIN_AND_SUFFERING, TRIGGERED_NONE);
-                            events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, urand(1500, 4000), 0, PHASE_TRANSITION);
-                            break;
-                        case EVENT_SUMMON_ICE_SPHERE:
-                            DoCastAOE(SPELL_SUMMON_ICE_SPHERE);
-                            events.ScheduleEvent(EVENT_SUMMON_ICE_SPHERE, urand(7500, 8500), 0, PHASE_TRANSITION);
-                            break;
-                        case EVENT_SUMMON_RAGING_SPIRIT:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
-                                me->CastSpell(target, SPELL_RAGING_SPIRIT, TRIGGERED_NONE);
-                            events.ScheduleEvent(EVENT_SUMMON_RAGING_SPIRIT, urand(22000, 23000), 0, PHASE_TRANSITION);
-                            break;
-                        case EVENT_QUAKE:
-                            events.SetPhase(PHASE_TWO);
-                            me->InterruptNonMeleeSpells(false, 0, false);
-                            DoCastAOE(SPELL_QUAKE);
-                            SendMusicToPlayers(MUSIC_SPECIAL);
-                            Talk(SAY_LK_QUAKE);
-                            break;
-                        case EVENT_QUAKE_2:
-                            events.SetPhase(PHASE_THREE);
-                            me->InterruptNonMeleeSpells(false, 0, false);
-                            DoCastAOE(SPELL_QUAKE);
-                            SendMusicToPlayers(MUSIC_SPECIAL);
-                            Talk(SAY_LK_QUAKE);
-                            break;
-                        case EVENT_SUMMON_VALKYR:
-                            SendMusicToPlayers(MUSIC_SPECIAL);
-                            Talk(SAY_LK_SUMMON_VALKYR);
-                            DoCastAOE(SUMMON_VALKYR);
-                            events.ScheduleEvent(EVENT_SUMMON_VALKYR, urand(45000, 50000), 0, PHASE_TWO);
-                            break;
-                        case EVENT_START_ATTACK:
-                            me->SetReactState(REACT_AGGRESSIVE);
-                            if (events.GetPhaseMask() & PHASE_MASK_FROSTMOURNE)
-                                events.SetPhase(PHASE_THREE);
-                            break;
-                        case EVENT_VILE_SPIRITS:
-                            SendMusicToPlayers(MUSIC_SPECIAL);
-                            DoCastAOE(SPELL_VILE_SPIRITS);
-                            events.ScheduleEvent(EVENT_VILE_SPIRITS, urand(35000, 40000), EVENT_GROUP_VILE_SPIRITS, PHASE_THREE);
-                            break;
-                        case EVENT_HARVEST_SOULS:
-                            Talk(SAY_LK_HARVEST_SOUL);
-                            DoCastAOE(SPELL_HARVEST_SOULS);
-                            events.ScheduleEvent(EVENT_HARVEST_SOULS, urand(100000, 110000), 0, PHASE_THREE);
-                            events.SetPhase(PHASE_FROSTMOURNE); // will stop running UpdateVictim (no evading)
-                            me->SetReactState(REACT_PASSIVE);
-                            me->AttackStop();
-                            events.DelayEvents(50000, EVENT_GROUP_VILE_SPIRITS);
-                            events.RescheduleEvent(EVENT_DEFILE, 50000, 0, PHASE_THREE);
-                            events.RescheduleEvent(EVENT_SOUL_REAPER, urand(57000, 62000), 0, PHASE_THREE);
-                            events.ScheduleEvent(EVENT_START_ATTACK, 49000);
-                            events.ScheduleEvent(EVENT_FROSTMOURNE_HEROIC, 6500);
-                            break;
-                        case EVENT_FROSTMOURNE_HEROIC:
-                            if (TempSummon* terenas = me->GetMap()->SummonCreature(NPC_TERENAS_MENETHIL_FROSTMOURNE_H, TerenasSpawnHeroic, NULL, 50000))
-                            {
-                                terenas->AI()->DoAction(ACTION_FROSTMOURNE_INTRO);
-                                std::list<Creature*> triggers;
-                                GetCreatureListWithEntryInGrid(triggers, terenas, NPC_WORLD_TRIGGER_INFINITE_AOI, 100.0f);
-                                if (!triggers.empty())
-                                {
-                                    triggers.sort(Trinity::ObjectDistanceOrderPred(terenas, true));
-                                    Creature* spawner = triggers.front();
-                                    spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_1, true);  // summons bombs randomly
-                                    spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_2, true);  // summons bombs on players
-                                    spawner->m_Events.AddEvent(new TriggerWickedSpirit(spawner), spawner->m_Events.CalculateTime(3000));
-                                }
+                    // during Remorseless Winter phases The Lich King is channeling a spell, but we must continue casting other spells
+                    if (me->HasUnitState(UNIT_STATE_CASTING) && !(events.GetPhaseMask() & PHASE_MASK_NO_CAST_CHECK))
+                        return;
 
-                                for (SummonList::iterator i = summons.begin(); i != summons.end(); ++i)
+                    if (uint32 eventId = events.ExecuteEvent())
+                    {
+                        switch (eventId)
+                        {
+                            case EVENT_INTRO_MOVE_1:
+                                me->SetSheath(SHEATH_STATE_MELEE);
+                                me->RemoveAurasDueToSpell(SPELL_EMOTE_SIT_NO_SHEATH);
+                                me->SetWalk(true);
+                                me->GetMotionMaster()->MovePoint(POINT_LK_INTRO_1, LichKingIntro[0]);
+                                break;
+                            case EVENT_INTRO_MOVE_2:
+                                me->GetMotionMaster()->MovePoint(POINT_LK_INTRO_2, LichKingIntro[1]);
+                                break;
+                            case EVENT_INTRO_MOVE_3:
+                                me->GetMotionMaster()->MovePoint(POINT_LK_INTRO_3, LichKingIntro[2]);
+                                break;
+                            case EVENT_INTRO_TALK_1:
+                                Talk(SAY_LK_INTRO_2);
+                                // for some reason blizz sends 2 emotes in row here so (we handle one in Talk)
+                                me->HandleEmoteCommand(EMOTE_ONESHOT_TALK_NO_SHEATHE);
+                                events.ScheduleEvent(EVENT_EMOTE_CAST_SHOUT, 7000, 0, PHASE_INTRO);
+                                events.ScheduleEvent(EVENT_INTRO_EMOTE_1, 13000, 0, PHASE_INTRO);
+                                events.ScheduleEvent(EVENT_EMOTE_CAST_SHOUT, 18000, 0, PHASE_INTRO);
+                                events.ScheduleEvent(EVENT_INTRO_CAST_FREEZE, 31000, 0, PHASE_INTRO);
+                                break;
+                            case EVENT_EMOTE_CAST_SHOUT:
+                                DoCast(me, SPELL_EMOTE_SHOUT_NO_SHEATH, false);
+                                break;
+                            case EVENT_INTRO_EMOTE_1:
+                                me->HandleEmoteCommand(EMOTE_ONESHOT_POINT_NO_SHEATHE);
+                                break;
+                            case EVENT_INTRO_CAST_FREEZE:
+                                Talk(SAY_LK_INTRO_3);
+                                DoCastAOE(SPELL_ICE_LOCK, false);
+                                events.ScheduleEvent(EVENT_FINISH_INTRO, 1000, 0, PHASE_INTRO);
+                                break;
+                            case EVENT_FINISH_INTRO:
+                                me->SetWalk(false);
+                                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                                me->SetReactState(REACT_AGGRESSIVE);
+                                events.SetPhase(PHASE_ONE);
+                                me->SetInCombatWithZone();
+                                break;
+                            case EVENT_SUMMON_SHAMBLING_HORROR:
+                                DoCast(me, SPELL_SUMMON_SHAMBLING_HORROR);
+                                SendMusicToPlayers(MUSIC_SPECIAL);
+                                events.ScheduleEvent(EVENT_SUMMON_SHAMBLING_HORROR, 60000, 0, PHASE_ONE);
+                                break;
+                            case EVENT_SUMMON_DRUDGE_GHOUL:
+                                DoCast(me, SPELL_SUMMON_DRUDGE_GHOULS);
+                                events.ScheduleEvent(EVENT_SUMMON_DRUDGE_GHOUL, 30000, 0, PHASE_ONE);
+                                break;
+                            case EVENT_INFEST:
+                                DoCast(me, SPELL_INFEST);
+                                events.ScheduleEvent(EVENT_INFEST, urand(21000, 24000), 0, (events.GetPhaseMask() & PHASE_MASK_ONE) ? PHASE_ONE : PHASE_TWO);
+                                break;
+                            case EVENT_NECROTIC_PLAGUE:
+                                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, NecroticPlagueTargetCheck(me, NECROTIC_PLAGUE_LK, NECROTIC_PLAGUE_PLR)))
                                 {
-                                    Creature* summon = ObjectAccessor::GetCreature(*me, *i);
-                                    if (summon && summon->GetEntry() == NPC_VILE_SPIRIT)
+                                    Talk(EMOTE_NECROTIC_PLAGUE_WARNING, target->GetGUID());
+                                    DoCast(target, SPELL_NECROTIC_PLAGUE);
+                                }
+                                events.ScheduleEvent(EVENT_NECROTIC_PLAGUE, urand(30000, 33000), 0, PHASE_ONE);
+                                break;
+                            case EVENT_SHADOW_TRAP:
+                                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
+                                    DoCast(target, SPELL_SHADOW_TRAP);
+                                events.ScheduleEvent(EVENT_SHADOW_TRAP, 15500, 0, PHASE_ONE);
+                                break;
+                            case EVENT_SOUL_REAPER:
+                                DoCastVictim(SPELL_SOUL_REAPER);
+                                events.ScheduleEvent(EVENT_SOUL_REAPER, urand(33000, 35000), 0, PHASE_TWO_THREE);
+                                break;
+                            case EVENT_DEFILE:
+                                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -SPELL_HARVEST_SOUL_VALKYR))
+                                {
+                                    Talk(EMOTE_DEFILE_WARNING);
+                                    DoCast(target, SPELL_DEFILE);
+                                }
+                                events.ScheduleEvent(EVENT_DEFILE, urand(32000, 35000), 0, PHASE_TWO_THREE);
+                                break;
+                            case EVENT_HARVEST_SOUL:
+                                Talk(SAY_LK_HARVEST_SOUL);
+                                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, SpellTargetSelector(me, SPELL_HARVEST_SOUL)))
+                                    DoCast(target, SPELL_HARVEST_SOUL);
+                                events.ScheduleEvent(EVENT_HARVEST_SOUL, 75000, 0, PHASE_THREE);
+                                break;
+                            case EVENT_PAIN_AND_SUFFERING:
+                                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                                    me->CastSpell(target, SPELL_PAIN_AND_SUFFERING, TRIGGERED_NONE);
+                                events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, urand(1500, 4000), 0, PHASE_TRANSITION);
+                                break;
+                            case EVENT_SUMMON_ICE_SPHERE:
+                                DoCastAOE(SPELL_SUMMON_ICE_SPHERE);
+                                events.ScheduleEvent(EVENT_SUMMON_ICE_SPHERE, urand(7500, 8500), 0, PHASE_TRANSITION);
+                                break;
+                            case EVENT_SUMMON_RAGING_SPIRIT:
+                                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                                    me->CastSpell(target, SPELL_RAGING_SPIRIT, TRIGGERED_NONE);
+                                events.ScheduleEvent(EVENT_SUMMON_RAGING_SPIRIT, urand(22000, 23000), 0, PHASE_TRANSITION);
+                                break;
+                            case EVENT_QUAKE:
+                                events.SetPhase(PHASE_TWO);
+                                me->InterruptNonMeleeSpells(false, 0, false);
+                                DoCastAOE(SPELL_QUAKE);
+                                SendMusicToPlayers(MUSIC_SPECIAL);
+                                Talk(SAY_LK_QUAKE);
+                                break;
+                            case EVENT_QUAKE_2:
+                                events.SetPhase(PHASE_THREE);
+                                me->InterruptNonMeleeSpells(false, 0, false);
+                                DoCastAOE(SPELL_QUAKE);
+                                SendMusicToPlayers(MUSIC_SPECIAL);
+                                Talk(SAY_LK_QUAKE);
+                                break;
+                            case EVENT_SUMMON_VALKYR:
+                                SendMusicToPlayers(MUSIC_SPECIAL);
+                                Talk(SAY_LK_SUMMON_VALKYR);
+                                DoCastAOE(SUMMON_VALKYR);
+                                events.ScheduleEvent(EVENT_SUMMON_VALKYR, urand(45000, 50000), 0, PHASE_TWO);
+                                break;
+                            case EVENT_START_ATTACK:
+                                me->SetReactState(REACT_AGGRESSIVE);
+                                if (events.GetPhaseMask() & PHASE_MASK_FROSTMOURNE)
+                                    events.SetPhase(PHASE_THREE);
+                                break;
+                            case EVENT_VILE_SPIRITS:
+                                SendMusicToPlayers(MUSIC_SPECIAL);
+                                DoCastAOE(SPELL_VILE_SPIRITS);
+                                events.ScheduleEvent(EVENT_VILE_SPIRITS, urand(35000, 40000), EVENT_GROUP_VILE_SPIRITS, PHASE_THREE);
+                                break;
+                            case EVENT_HARVEST_SOULS:
+                                Talk(SAY_LK_HARVEST_SOUL);
+                                DoCastAOE(SPELL_HARVEST_SOULS);
+                                events.ScheduleEvent(EVENT_HARVEST_SOULS, urand(100000, 110000), 0, PHASE_THREE);
+                                events.SetPhase(PHASE_FROSTMOURNE); // will stop running UpdateVictim (no evading)
+                                me->SetReactState(REACT_PASSIVE);
+                                me->AttackStop();
+                                events.DelayEvents(50000, EVENT_GROUP_VILE_SPIRITS);
+                                events.RescheduleEvent(EVENT_DEFILE, 50000, 0, PHASE_THREE);
+                                events.RescheduleEvent(EVENT_SOUL_REAPER, urand(57000, 62000), 0, PHASE_THREE);
+                                events.ScheduleEvent(EVENT_START_ATTACK, 49000);
+                                events.ScheduleEvent(EVENT_FROSTMOURNE_HEROIC, 6500);
+                                break;
+                            case EVENT_FROSTMOURNE_HEROIC:
+                                if (TempSummon* terenas = me->GetMap()->SummonCreature(NPC_TERENAS_MENETHIL_FROSTMOURNE_H, TerenasSpawnHeroic, NULL, 50000))
+                                {
+                                    terenas->AI()->DoAction(ACTION_FROSTMOURNE_INTRO);
+                                    std::list<Creature*> triggers;
+                                    GetCreatureListWithEntryInGrid(triggers, terenas, NPC_WORLD_TRIGGER_INFINITE_AOI, 100.0f);
+                                    if (!triggers.empty())
                                     {
-                                        summon->m_Events.KillAllEvents(true);
-                                        summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(50000));
-                                        summon->GetMotionMaster()->MoveRandom(10.0f);
-                                        summon->SetReactState(REACT_PASSIVE);
+                                        triggers.sort(Trinity::ObjectDistanceOrderPred(terenas, true));
+                                        Creature* spawner = triggers.front();
+                                        spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_1, true);  // summons bombs randomly
+                                        spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_2, true);  // summons bombs on players
+                                        spawner->m_Events.AddEvent(new TriggerWickedSpirit(spawner), spawner->m_Events.CalculateTime(3000));
+                                    }
+
+                                    for (SummonList::iterator i = summons.begin(); i != summons.end(); ++i)
+                                    {
+                                        Creature* summon = ObjectAccessor::GetCreature(*me, *i);
+                                        if (summon && summon->GetEntry() == NPC_VILE_SPIRIT)
+                                        {
+                                            summon->m_Events.KillAllEvents(true);
+                                            summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(50000));
+                                            summon->GetMotionMaster()->MoveRandom(10.0f);
+                                            summon->SetReactState(REACT_PASSIVE);
+                                        }
                                     }
                                 }
-                            }
-                            break;
-                        case EVENT_OUTRO_TALK_1:
-                            Talk(SAY_LK_OUTRO_1);
-                            DoCastAOE(SPELL_FURY_OF_FROSTMOURNE_NO_REZ, true);
-                            break;
-                        case EVENT_OUTRO_TALK_2:
-                            Talk(SAY_LK_OUTRO_2);
-                            DoCastAOE(SPELL_EMOTE_QUESTION_NO_SHEATH);
-                            break;
-                        case EVENT_OUTRO_EMOTE_TALK:
-                            me->HandleEmoteCommand(EMOTE_ONESHOT_TALK_NO_SHEATHE);
-                            break;
-                        case EVENT_OUTRO_TALK_3:
-                            if (Creature* tirion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HIGHLORD_TIRION_FORDRING)))
-                                me->SetFacingToObject(tirion);
-                            Talk(SAY_LK_OUTRO_3);
-                            break;
-                        case EVENT_OUTRO_MOVE_CENTER:
-                            me->GetMotionMaster()->MovePoint(POINT_LK_OUTRO_1, CenterPosition);
-                            break;
-                        case EVENT_OUTRO_TALK_4:
-                            me->SetFacingTo(0.01745329f);
-                            Talk(SAY_LK_OUTRO_4);
-                            break;
-                        case EVENT_OUTRO_RAISE_DEAD:
-                            DoCastAOE(SPELL_RAISE_DEAD);
-                            me->ClearUnitState(UNIT_STATE_CASTING);
-                            SendMusicToPlayers(MUSIC_FINAL);
-                            break;
-                        case EVENT_OUTRO_TALK_5:
-                            Talk(SAY_LK_OUTRO_5);
-                            if (Creature* tirion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HIGHLORD_TIRION_FORDRING)))
-                                tirion->AI()->DoAction(ACTION_OUTRO);
-                            break;
-                        case EVENT_OUTRO_TALK_6:
-                            Talk(SAY_LK_OUTRO_6);
-                            if (Creature* tirion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HIGHLORD_TIRION_FORDRING)))
-                                tirion->SetFacingToObject(me);
-                            me->CastSpell((Unit*)NULL, SPELL_SUMMON_BROKEN_FROSTMOURNE_3, TRIGGERED_IGNORE_CAST_IN_PROGRESS);
-                            SetEquipmentSlots(false, EQUIP_UNEQUIP);
-                            break;
-                        case EVENT_OUTRO_SOUL_BARRAGE:
-                            me->CastSpell((Unit*)NULL, SPELL_SOUL_BARRAGE, TRIGGERED_IGNORE_CAST_IN_PROGRESS);
-                            sCreatureTextMgr->SendSound(me, SOUND_PAIN, CHAT_MSG_MONSTER_YELL, 0, TEXT_RANGE_NORMAL, TEAM_OTHER, false);
-                            // set flight
-                            me->SetDisableGravity(true);
-                            me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
-                            me->GetMotionMaster()->MovePoint(POINT_LK_OUTRO_2, OutroFlying);
-                            break;
-                        case EVENT_OUTRO_TALK_7:
-                            Talk(SAY_LK_OUTRO_7);
-                            break;
-                        case EVENT_OUTRO_TALK_8:
-                            Talk(SAY_LK_OUTRO_8);
-                            break;
-                        case EVENT_BERSERK:
-                            Talk(SAY_LK_BERSERK);
-                            DoCast(me, SPELL_BERSERK2);
-                            break;
-                        default:
-                            break;
+                                break;
+                            case EVENT_OUTRO_TALK_1:
+                                Talk(SAY_LK_OUTRO_1);
+                                DoCastAOE(SPELL_FURY_OF_FROSTMOURNE_NO_REZ, true);
+                                break;
+                            case EVENT_OUTRO_TALK_2:
+                                Talk(SAY_LK_OUTRO_2);
+                                DoCastAOE(SPELL_EMOTE_QUESTION_NO_SHEATH);
+                                break;
+                            case EVENT_OUTRO_EMOTE_TALK:
+                                me->HandleEmoteCommand(EMOTE_ONESHOT_TALK_NO_SHEATHE);
+                                break;
+                            case EVENT_OUTRO_TALK_3:
+                                if (Creature* tirion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HIGHLORD_TIRION_FORDRING)))
+                                    me->SetFacingToObject(tirion);
+                                Talk(SAY_LK_OUTRO_3);
+                                break;
+                            case EVENT_OUTRO_MOVE_CENTER:
+                                me->GetMotionMaster()->MovePoint(POINT_LK_OUTRO_1, CenterPosition);
+                                break;
+                            case EVENT_OUTRO_TALK_4:
+                                me->SetFacingTo(0.01745329f);
+                                Talk(SAY_LK_OUTRO_4);
+                                break;
+                            case EVENT_OUTRO_RAISE_DEAD:
+                                DoCastAOE(SPELL_RAISE_DEAD);
+                                me->ClearUnitState(UNIT_STATE_CASTING);
+                                SendMusicToPlayers(MUSIC_FINAL);
+                                break;
+                            case EVENT_OUTRO_TALK_5:
+                                Talk(SAY_LK_OUTRO_5);
+                                if (Creature* tirion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HIGHLORD_TIRION_FORDRING)))
+                                    tirion->AI()->DoAction(ACTION_OUTRO);
+                                break;
+                            case EVENT_OUTRO_TALK_6:
+                                Talk(SAY_LK_OUTRO_6);
+                                if (Creature* tirion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HIGHLORD_TIRION_FORDRING)))
+                                    tirion->SetFacingToObject(me);
+                                me->CastSpell((Unit*)NULL, SPELL_SUMMON_BROKEN_FROSTMOURNE_3, TRIGGERED_IGNORE_CAST_IN_PROGRESS);
+                                SetEquipmentSlots(false, EQUIP_UNEQUIP);
+                                break;
+                            case EVENT_OUTRO_SOUL_BARRAGE:
+                                me->CastSpell((Unit*)NULL, SPELL_SOUL_BARRAGE, TRIGGERED_IGNORE_CAST_IN_PROGRESS);
+                                sCreatureTextMgr->SendSound(me, SOUND_PAIN, CHAT_MSG_MONSTER_YELL, 0, TEXT_RANGE_NORMAL, TEAM_OTHER, false);
+                                // set flight
+                                me->SetDisableGravity(true);
+                                me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
+                                me->GetMotionMaster()->MovePoint(POINT_LK_OUTRO_2, OutroFlying);
+                                break;
+                            case EVENT_OUTRO_TALK_7:
+                                Talk(SAY_LK_OUTRO_7);
+                                break;
+                            case EVENT_OUTRO_TALK_8:
+                                Talk(SAY_LK_OUTRO_8);
+                                break;
+                            case EVENT_BERSERK:
+                                Talk(SAY_LK_BERSERK);
+                                DoCast(me, SPELL_BERSERK2);
+                                break;
+                            default:
+                                break;
+                        }
                     }
+                    else
+                        break;
                 }
 
                 DoMeleeAttackIfReady();
