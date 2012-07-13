@@ -2927,8 +2927,6 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
                 m_AutoRepeatFirstCast = true;
             }
             AddUnitState(UNIT_STATE_CASTING);
-            if (pSpell->GetSpellInfo()->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT)
-                AddUnitState(UNIT_STATE_CASTING_IMMOBILE);
         } break;
 
         case CURRENT_CHANNELED_SPELL:
@@ -2941,7 +2939,7 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
             if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL] &&
                 m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 75)
                 InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
-            AddUnitState(UNIT_STATE_CASTING | UNIT_STATE_CASTING_IMMOBILE);
+            AddUnitState(UNIT_STATE_CASTING);
         } break;
 
         case CURRENT_AUTOREPEAT_SPELL:
