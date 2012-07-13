@@ -237,6 +237,11 @@ class boss_professor_putricide : public CreatureScript
                 if (events.GetPhaseMask() & PHASE_MASK_NOT_SELF)
                     return;
 
+                if (who->GetAreaId() != 4890 /* Putricide's Laboratory of Alchemical Horrors and Fun */)
+                {
+                    EnterEvadeMode();
+                    return;
+                }
                 if (!instance->CheckRequiredBosses(DATA_PROFESSOR_PUTRICIDE, who->ToPlayer()))
                 {
                     EnterEvadeMode();
