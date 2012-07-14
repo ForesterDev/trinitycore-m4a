@@ -132,6 +132,7 @@ enum Events
     EVENT_SHOCK_VORTEX          = 10,
     EVENT_BOMB_DESPAWN          = 11,
     EVENT_CONTINUE_FALLING      = 12,
+    EVENT_SHADOW_PRISON,
 };
 
 enum Actions
@@ -401,6 +402,7 @@ class boss_prince_keleseth_icc : public CreatureScript
                 if (IsHeroic())
                 {
                     me->AddAura(SPELL_SHADOW_PRISON, me);
+                    events.ScheduleEvent(EVENT_SHADOW_PRISON, 0U);
                     DoCast(me, SPELL_SHADOW_PRISON_DUMMY);
                 }
             }
@@ -434,8 +436,15 @@ class boss_prince_keleseth_icc : public CreatureScript
 
             void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
             {
-                if (spell->Id == SPELL_INVOCATION_OF_BLOOD_KELESETH)
+                switch (spell->Id)
+                {
+                case SPELL_INVOCATION_OF_BLOOD_KELESETH:
                     DoAction(ACTION_CAST_INVOCATION);
+                    break;
+                case SPELL_SHADOW_PRISON_DUMMY:
+                    events.CancelEvent(EVENT_SHADOW_PRISON);
+                    break;
+                }
             }
 
             void JustSummoned(Creature* summon)
@@ -527,13 +536,15 @@ class boss_prince_keleseth_icc : public CreatureScript
 
                 events.Update(diff);
 
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                while (uint32 eventId = events.ExecuteEvent())
+                for (; ; )
                 {
-                    switch (eventId)
+                    if (me->HasUnitState(UNIT_STATE_CASTING))
+                        return;
+
+                    switch (events.ExecuteEvent())
                     {
+                    case 0U:
+                        goto no_events;
                         case EVENT_BERSERK:
                             DoCast(me, SPELL_BERSERK);
                             Talk(EMOTE_KELESETH_BERSERK);
@@ -550,12 +561,18 @@ class boss_prince_keleseth_icc : public CreatureScript
                                 DoCastVictim(SPELL_SHADOW_LANCE);
                             events.ScheduleEvent(EVENT_SHADOW_LANCE, 2000);
                             break;
+                        case EVENT_SHADOW_PRISON:
+                            events.ScheduleEvent(EVENT_SHADOW_PRISON, 0U);
+                            DoCast(me, SPELL_SHADOW_PRISON_DUMMY);
+                            return;
                         default:
                             break;
                     }
                 }
 
+            no_events:
                 // does not melee
+                ;
             }
 
         private:
