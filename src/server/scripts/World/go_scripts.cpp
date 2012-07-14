@@ -1246,6 +1246,36 @@ class go_veil_skith_cage : public GameObjectScript
 };
 
 /*######
+## go_frostblade_shrine
+######*/
+
+enum TheCleansing
+{
+   QUEST_THE_CLEANSING_HORDE      = 11317,
+   QUEST_THE_CLEANSING_ALLIANCE   = 11322,
+   SPELL_CLEANSING_SOUL           = 43351,
+   SPELL_RECENT_MEDITATION        = 61720,
+};
+
+class go_frostblade_shrine : public GameObjectScript
+{
+public:
+    go_frostblade_shrine() : GameObjectScript("go_frostblade_shrine") { }
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (!player->HasAura(SPELL_RECENT_MEDITATION))
+            if (player->GetQuestStatus(QUEST_THE_CLEANSING_HORDE) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_THE_CLEANSING_ALLIANCE) == QUEST_STATUS_INCOMPLETE)
+            {
+                go->UseDoorOrButton(10);
+                player->CastSpell(player, SPELL_CLEANSING_SOUL);
+                player->SetStandState(UNIT_STAND_STATE_SIT);
+            }
+            return true;
+    }
+};
+
+/*######
 ## go_midsummer_bonfire
 ######*/
 
@@ -1307,5 +1337,6 @@ void AddSC_go_scripts()
     new go_gjalerbron_cage;
     new go_large_gjalerbron_cage;
     new go_veil_skith_cage;
+    new go_frostblade_shrine;
     new go_midsummer_bonfire;
 }

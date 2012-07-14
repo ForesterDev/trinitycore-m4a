@@ -424,7 +424,7 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket & recv_data)
         data << pProto->GemProperties;
         data << pProto->RequiredDisenchantSkill;
         data << pProto->ArmorDamageModifier;
-        data << uint32(abs(pProto->Duration));              // added in 2.4.2.8209, duration (seconds)
+        data << pProto->Duration;                           // added in 2.4.2.8209, duration (seconds)
         data << pProto->ItemLimitCategory;                  // WotLK, ItemLimitCategory
         data << pProto->HolidayId;                          // Holiday.dbc?
         SendPacket(&data);
@@ -1357,6 +1357,7 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
 
     _player->ToggleMetaGemsActive(slot, true);              //turn on all metagems (except for target item)
 
+    _player->RemoveTradeableItem(itemTarget);
     itemTarget->ClearSoulboundTradeable(_player);           // clear tradeable flag
 }
 

@@ -30,6 +30,9 @@ npc_tyrande_whisperwind
 EndContentData */
 
 #include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "hyjalAI.h"
 
 #define GOSSIP_ITEM_BEGIN_ALLY      "My companions and I are with you, Lady Proudmoore."

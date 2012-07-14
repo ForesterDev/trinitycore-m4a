@@ -24,6 +24,8 @@ SDCategory: Blackfathom Deeps
 EndScriptData */
 
 #include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "blackfathom_deeps.h"
 
 #define MAX_ENCOUNTER 4

@@ -646,9 +646,7 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
                         _events.ScheduleEvent(EVENT_OUTRO_HORDE_4, 24000);   // cast
                         _events.ScheduleEvent(EVENT_OUTRO_HORDE_5, 30000);   // move
                         me->SetDisableGravity(false);
-                        me->SendMovementFlagUpdate();
-                        me->Relocate(me->GetPositionX(), me->GetPositionY(), 539.2917f);
-                        me->MonsterMoveWithSpeed(me->GetPositionX(), me->GetPositionY(), 539.2917f, 0.0f);
+                        me->GetMotionMaster()->MoveFall();
                         for (std::list<Creature*>::iterator itr = _guardList.begin(); itr != _guardList.end(); ++itr)
                             (*itr)->AI()->DoAction(ACTION_DESPAWN);
                         break;
@@ -853,9 +851,7 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                         me->RemoveAurasDueToSpell(SPELL_GRIP_OF_AGONY);
                         Talk(SAY_OUTRO_ALLIANCE_1);
                         me->SetDisableGravity(false);
-                        me->SendMovementFlagUpdate();
-                        me->Relocate(me->GetPositionX(), me->GetPositionY(), 539.2917f);
-                        me->MonsterMoveWithSpeed(me->GetPositionX(), me->GetPositionY(), 539.2917f, 0.0f);
+                        me->GetMotionMaster()->MoveFall();
                         for (std::list<Creature*>::iterator itr = _guardList.begin(); itr != _guardList.end(); ++itr)
                             (*itr)->AI()->DoAction(ACTION_DESPAWN);
 
@@ -1215,34 +1211,34 @@ class spell_deathbringer_blood_nova_targeting : public SpellScriptLoader
                 return true;
             }
 
-            void FilterTargetsInitial(std::list<Unit*>& unitList)
+            void FilterTargetsInitial(std::list<WorldObject*>& targets)
             {
-                if (unitList.empty())
+                if (targets.empty())
                     return;
 
                 // select one random target, with preference of ranged targets
                 uint32 targetsAtRange = 0;
                 uint32 const minTargets = uint32(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 10 : 4);
-                unitList.sort(Trinity::ObjectDistanceOrderPred(GetCaster(), false));
+                targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster(), false));
 
                 // get target count at range
-                for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr, ++targetsAtRange)
+                for (std::list<WorldObject*>::iterator itr = targets.begin(); itr != targets.end(); ++itr, ++targetsAtRange)
                     if ((*itr)->GetDistance(GetCaster()) < 12.0f)
                         break;
 
                 // set the upper cap
                 if (targetsAtRange < minTargets)
-                    targetsAtRange = std::min<uint32>(unitList.size() - 1, minTargets);
+                    targetsAtRange = std::min<uint32>(targets.size() - 1, minTargets);
 
-                std::list<Unit*>::const_iterator itr = unitList.begin();
+                std::list<WorldObject*>::const_iterator itr = targets.begin();
                 std::advance(itr, urand(0, targetsAtRange));
                 target = *itr;
-                unitList.clear();
-                unitList.push_back(target);
+                targets.clear();
+                targets.push_back(target);
             }
 
             // use the same target for first and second effect
-            void FilterTargetsSubsequent(std::list<Unit*>& unitList)
+            void FilterTargetsSubsequent(std::list<WorldObject*>& unitList)
             {
                 if (!target)
                     return;
@@ -1258,12 +1254,12 @@ class spell_deathbringer_blood_nova_targeting : public SpellScriptLoader
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_deathbringer_blood_nova_targeting_SpellScript::FilterTargetsInitial, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_deathbringer_blood_nova_targeting_SpellScript::FilterTargetsSubsequent, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_deathbringer_blood_nova_targeting_SpellScript::FilterTargetsInitial, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_deathbringer_blood_nova_targeting_SpellScript::FilterTargetsSubsequent, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
                 OnEffectHitTarget += SpellEffectFn(spell_deathbringer_blood_nova_targeting_SpellScript::HandleForceCast, EFFECT_0, SPELL_EFFECT_FORCE_CAST);
             }
 
-            Unit* target;
+            WorldObject* target;
         };
 
         SpellScript* GetSpellScript() const
@@ -1286,13 +1282,13 @@ class spell_deathbringer_boiling_blood : public SpellScriptLoader
                 return GetCaster()->GetTypeId() == TYPEID_UNIT;
             }
 
-            void FilterTargets(std::list<Unit*>& unitList UNUSED)
+            void FilterTargets(std::list<WorldObject*>& targets UNUSED)
             {
             }
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_deathbringer_boiling_blood_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_deathbringer_boiling_blood_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
             }
         };
 

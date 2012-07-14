@@ -325,7 +325,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket & recv_data)
                         // Send next quest
                         if (Quest const* nextQuest = _player->GetNextQuest(guid, quest))
                         {
-                            if (nextQuest->IsAutoAccept() && _player->CanAddQuest(nextQuest, true) && _player->CanTakeQuest(quest, true))
+                            if (nextQuest->IsAutoAccept() && _player->CanAddQuest(nextQuest, true) && _player->CanTakeQuest(nextQuest, true))
                             {
                                 _player->AddQuest(nextQuest, object);
                                 if (_player->CanCompleteQuest(nextQuest->GetQuestId()))
@@ -344,7 +344,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket & recv_data)
                         // Send next quest
                         if (Quest const* nextQuest = _player->GetNextQuest(guid, quest))
                         {
-                            if (nextQuest->IsAutoAccept() && _player->CanAddQuest(nextQuest, true) && _player->CanTakeQuest(quest, true))
+                            if (nextQuest->IsAutoAccept() && _player->CanAddQuest(nextQuest, true) && _player->CanTakeQuest(nextQuest, true))
                             {
                                 _player->AddQuest(nextQuest, object);
                                 if (_player->CanCompleteQuest(nextQuest->GetQuestId()))

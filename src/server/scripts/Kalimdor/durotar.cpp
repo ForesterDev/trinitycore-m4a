@@ -16,7 +16,10 @@
  */
 
 #include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "Vehicle.h"
+#include "SpellScript.h"
 
 /*######
 ##Quest 5441: Lazy Peons
@@ -50,15 +53,15 @@ public:
     {
         npc_lazy_peonAI(Creature* creature) : ScriptedAI(creature) {}
 
-        uint64 uiPlayerGUID;
+        uint64 PlayerGUID;
 
-        uint32 m_uiRebuffTimer;
+        uint32 RebuffTimer;
         bool work;
 
         void Reset()
         {
-            uiPlayerGUID = 0;
-            m_uiRebuffTimer = 0;
+            PlayerGUID = 0;
+            RebuffTimer = 0;
             work = false;
         }
 
@@ -81,17 +84,17 @@ public:
             }
         }
 
-        void UpdateAI(const uint32 uiDiff)
+        void UpdateAI(const uint32 Diff)
         {
             if (work == true)
                 me->HandleEmoteCommand(EMOTE_ONESHOT_WORK_CHOPWOOD);
-            if (m_uiRebuffTimer <= uiDiff)
+            if (RebuffTimer <= Diff)
             {
                 DoCast(me, SPELL_BUFF_SLEEP);
-                m_uiRebuffTimer = 300000;                 //Rebuff agian in 5 minutes
+                RebuffTimer = 300000;                 //Rebuff agian in 5 minutes
             }
             else
-                m_uiRebuffTimer -= uiDiff;
+                RebuffTimer -= Diff;
             if (!UpdateVictim())
                 return;
             DoMeleeAttackIfReady();

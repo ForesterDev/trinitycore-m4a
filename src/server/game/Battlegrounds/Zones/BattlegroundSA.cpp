@@ -57,6 +57,8 @@ void BattlegroundSA::Reset()
         GateStatus[i] = BG_SA_GATE_OK;
     ShipsStarted = false;
     gateDestroyed = false;
+    _notEvenAScratch[BG_TEAM_ALLIANCE] = true;
+    _notEvenAScratch[BG_TEAM_HORDE] = true;
     Status = BG_SA_WARMUP;
 }
 
@@ -554,13 +556,13 @@ void BattlegroundSA::EventPlayerDamagedGO(Player* /*player*/, GameObject* go, ui
         SendWarningToAll(LANG_BG_SA_IS_UNDER_ATTACK, go->GetGOInfo()->name.c_str());
 }
 
-void BattlegroundSA::HandleKillUnit(Creature* unit, Player* killer)
+void BattlegroundSA::HandleKillUnit(Creature* creature, Player* killer)
 {
-    if (!unit)
-        return;
-
-    if (unit->GetEntry() == NPC_DEMOLISHER_SA)
+    if (creature->GetEntry() == NPC_DEMOLISHER_SA)
+    {
         UpdatePlayerScore(killer, SCORE_DESTROYED_DEMOLISHER, 1);
+        _notEvenAScratch[Attackers] = false;
+    }
 }
 
 /*
@@ -721,8 +723,13 @@ void BattlegroundSA::CaptureGraveyard(BG_SA_Graveyards i, Player* Source)
 
     DelCreature(BG_SA_MAXNPC + i);
     GraveyardStatus[i] = Source->GetTeamId();
-    WorldSafeLocsEntry const* sg = NULL;
-    sg = sWorldSafeLocsStore.LookupEntry(BG_SA_GYEntries[i]);
+    WorldSafeLocsEntry const* sg = sWorldSafeLocsStore.LookupEntry(BG_SA_GYEntries[i]);
+    if (!sg)
+    {
+        sLog->outError("BattlegroundSA::CaptureGraveyard: non-existant GY entry: %u", BG_SA_GYEntries[i]);
+        return;
+    }
+
     AddSpiritGuide(i + BG_SA_MAXNPC, sg->x, sg->y, sg->z, BG_SA_GYOrientation[i], (GraveyardStatus[i] == TEAM_ALLIANCE?  ALLIANCE : HORDE));
     uint32 npc = 0;
     uint32 flag = 0;
@@ -782,7 +789,7 @@ void BattlegroundSA::CaptureGraveyard(BG_SA_Graveyards i, Player* Source)
                 SendWarningToAll(LANG_BG_SA_H_GY_SOUTH);
             break;
         default:
-            ASSERT(0);
+            ASSERT(false);
             break;
     };
 }
