@@ -16,6 +16,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
+#include "InstanceScript.h"
 #include "SpellMgr.h"
 #include "SpellInfo.h"
 #include "ObjectMgr.h"
@@ -30,6 +32,8 @@
 #include "CreatureAI.h"
 #include "MapManager.h"
 #include "BattlegroundIC.h"
+
+using std::forward;
 
 bool IsPrimaryProfessionSkill(uint32 skill)
 {
@@ -1108,6 +1112,17 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
     // Extra conditions -- leaving the possibility add extra conditions...
     switch (spellId)
     {
+    case 48388 /* Call Wintergarde Gryphon */:
+        switch (player->GetAreaId())
+        {
+        case 4177 /* Wintergarde Keep */:
+        case 4178 /* Wintergarde Mine */:
+        case 4188 /* The Carrion Fields */:
+            break;
+        default:
+            return false;
+        }
+        break;
         case 58600: // No fly Zone - Dalaran
         {
             if (!player)
@@ -1135,6 +1150,10 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
 
             return false;
         }
+        case 73828 /* Strength of Wrynn */:
+            if (player && const_cast<Player *>(player)->GetInstanceScript()->GetData(27 /* DATA_TEAM_IN_INSTANCE */) != ALLIANCE)
+                return false;
+            break;
     }
 
     return true;
@@ -3368,11 +3387,22 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_200_YARDS;
                 spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_200_YARDS;
                 break;
+            case 72385 /* Boiling Blood */:
+            case 72441 /* Boiling Blood */:
+            case 72442 /* Boiling Blood */:
+            case 72443 /* Boiling Blood */:
+                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_200_YARDS;
+                break;
             case 72769: // Scent of Blood (Deathbringer Saurfang)
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_200_YARDS;
-                // no break
-            case 72771: // Scent of Blood (Deathbringer Saurfang)
                 spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_200_YARDS;
+                break;
+            case 72771: // Scent of Blood (Deathbringer Saurfang)
+                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_200_YARDS;
+                spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_200_YARDS;
+                break;
+            case 71169 /* Shadow's Fate */:
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                 break;
             case 72723: // Resistant Skin (Deathbringer Saurfang adds)
                 // this spell initially granted Shadow damage immunity, however it was removed but the data was left in client

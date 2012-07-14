@@ -19,6 +19,7 @@
 #ifndef TRINITY_MAP_H
 #define TRINITY_MAP_H
 
+#include <cstdint>
 #include "Define.h"
 #include <ace/RW_Thread_Mutex.h>
 #include <ace/Thread_Mutex.h>
@@ -53,6 +54,8 @@ class Battleground;
 class MapInstanced;
 class InstanceMap;
 namespace Trinity { struct ObjectUpdater; }
+
+typedef uint32 WMO_id;
 
 struct ScriptAction
 {
@@ -340,6 +343,8 @@ class Map : public GridRefManager<NGridType>
             GetZoneAndAreaIdByAreaFlag(zoneid, areaid, GetAreaFlag(x, y, z), GetId());
         }
 
+        WMO_id wmo_id(const Position &p) const;
+
         void MoveAllCreaturesInMoveList();
         void RemoveAllObjectsInRemoveList();
         virtual void RemoveAllPlayers();
@@ -421,6 +426,9 @@ class Map : public GridRefManager<NGridType>
         template<class NOTIFIER> void VisitFirstFound(const float &x, const float &y, float radius, NOTIFIER &notifier);
         template<class NOTIFIER> void VisitWorld(const float &x, const float &y, float radius, NOTIFIER &notifier);
         template<class NOTIFIER> void VisitGrid(const float &x, const float &y, float radius, NOTIFIER &notifier);
+
+        void player_zone_changed(Player &p);
+
         CreatureGroupHolderType CreatureGroupHolder;
 
         void UpdateIteratorBack(Player* player);
@@ -474,6 +482,16 @@ class Map : public GridRefManager<NGridType>
         void DeleteRespawnTimes();
 
         static void DeleteRespawnTimesInDB(uint16 mapId, uint32 instanceId);
+
+        std::int32_t difficulty() const
+        {
+            return difficulty_;
+        }
+
+        std::int32_t dynamic_difficulty() const
+        {
+            return dynamic_difficulty_;
+        }
 
     private:
         void LoadMapAndVMap(int gx, int gy);
@@ -606,6 +624,8 @@ class Map : public GridRefManager<NGridType>
 
         UNORDERED_MAP<uint32 /*dbGUID*/, time_t> _creatureRespawnTimes;
         UNORDERED_MAP<uint32 /*dbGUID*/, time_t> _goRespawnTimes;
+        std::int32_t difficulty_;
+        std::int32_t dynamic_difficulty_;
 };
 
 enum InstanceResetMethod

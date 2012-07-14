@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "CreatureAI.h"
 #include "CreatureAIImpl.h"
 #include "Creature.h"
@@ -38,9 +39,9 @@ void CreatureAI::OnCharmed(bool /*apply*/)
 AISpellInfoType* UnitAI::AISpellInfo;
 AISpellInfoType* GetAISpellInfo(uint32 i) { return &CreatureAI::AISpellInfo[i]; }
 
-void CreatureAI::Talk(uint8 id, uint64 WhisperGuid)
+uint32 CreatureAI::Talk(uint8 id, uint64 WhisperGuid)
 {
-    sCreatureTextMgr->SendChat(me, id, WhisperGuid);
+    return sCreatureTextMgr->SendChat(me, id, WhisperGuid);
 }
 
 void CreatureAI::DoZoneInCombat(Creature* creature /*= NULL*/, float maxRangeToNearestTarget /* = 50.0f*/)

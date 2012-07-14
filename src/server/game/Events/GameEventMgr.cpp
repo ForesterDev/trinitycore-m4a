@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "GameEventMgr.h"
 #include "World.h"
 #include "ObjectMgr.h"
@@ -29,6 +30,8 @@
 #include "BattlegroundMgr.h"
 #include "UnitAI.h"
 #include "GameObjectAI.h"
+
+using std::ostringstream;
 
 bool GameEventMgr::CheckOneGameEvent(uint16 entry) const
 {
@@ -428,6 +431,13 @@ void GameEventMgr::LoadFromDB()
                 uint32 guid    = fields[0].GetUInt32();
                 int16 event_id = fields[1].GetInt8();
 
+                if (sPoolMgr->IsPartOfAPool<GameObject>(guid))
+                {
+                    ostringstream s;
+                    s << "`game_event_gameobject` guid " << guid << " is part of a pool";
+                    sLog->outErrorDb("%s", s.str().c_str());
+                    continue;
+                }
                 int32 internal_event_id = mGameEvent.size() + event_id - 1;
 
                 if (internal_event_id < 0 || internal_event_id >= int32(mGameEventGameobjectGuids.size()))

@@ -29,6 +29,7 @@ EndScriptData */
 
 #include "ScriptPCH.h"
 #include "trial_of_the_crusader.h"
+#include "utility.hpp"
 
 enum eYells
 {
@@ -367,16 +368,10 @@ class npc_fizzlebang_toc : public CreatureScript
             uint64 m_uiPortalGUID;
             uint64 m_uiTriggerGUID;
 
-            void JustDied(Unit* killer)
+            void JustDied(Unit* killer UNUSED)
             {
-                DoScriptText(SAY_STAGE_1_06, me, killer);
                 instance->SetData(TYPE_EVENT, 1180);
-                if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(NPC_JARAXXUS)))
-                {
-                    temp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    temp->SetReactState(REACT_AGGRESSIVE);
-                    temp->SetInCombatWithZone();
-                }
+                instance->SetData(TYPE_EVENT_TIMER, 4000);
             }
 
             void Reset()
@@ -480,7 +475,7 @@ class npc_fizzlebang_toc : public CreatureScript
                             break;
                         case 1142:
                             if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(NPC_JARAXXUS)))
-                                temp->SetTarget(me->GetGUID());
+                                temp->SetFacingToObject(me);
                             if (Creature* pTrigger = Unit::GetCreature(*me, m_uiTriggerGUID))
                                 pTrigger->DespawnOrUnsummon();
                             if (Creature* pPortal = Unit::GetCreature(*me, m_uiPortalGUID))
@@ -495,20 +490,20 @@ class npc_fizzlebang_toc : public CreatureScript
                             m_uiUpdateTimer = 5000;
                             break;
                         case 1150:
+                            DoScriptText(SAY_STAGE_1_06, me, nullptr);
+                            instance->SetData(TYPE_EVENT, 1160);
+                            m_uiUpdateTimer = 1000;
+                            break;
+                        case 1160:
+                            m_uiUpdateTimer = 0;
                             if (Creature* temp = Unit::GetCreature(*me, instance->GetData64(NPC_JARAXXUS)))
-                            {
                                 //1-shot Fizzlebang
                                 temp->CastSpell(me, 67888, false);
-                                me->SetInCombatWith(temp);
-                                temp->AddThreat(me, 1000.0f);
-                                temp->AI()->AttackStart(me);
-                            }
-                            instance->SetData(TYPE_EVENT, 1160);
-                            m_uiUpdateTimer = 3000;
                             break;
                     }
                 } else m_uiUpdateTimer -= uiDiff;
-                instance->SetData(TYPE_EVENT_TIMER, m_uiUpdateTimer);
+                if (me->isAlive())
+                    instance->SetData(TYPE_EVENT_TIMER, m_uiUpdateTimer);
             }
         };
 
@@ -661,7 +656,25 @@ class npc_tirion_toc : public CreatureScript
                             instance->SetData(TYPE_EVENT, 0);
                             break;
                         case 1180:
+                            if (auto p = Unit::GetCreature(*me, instance->GetData64(NPC_JARAXXUS)))
+                            {
+                                p->SetFacingToObject(me);
+                                instance->SetData(TYPE_EVENT, 1181);
+                                m_uiUpdateTimer = 1000;
+                            }
+                            break;
+                        case 1181:
                             DoScriptText(SAY_STAGE_1_07, me);
+                            m_uiUpdateTimer = 6000;
+                            instance->SetData(TYPE_EVENT, 1182);
+                            break;
+                        case 1182:
+                            if (auto p = Unit::GetCreature(*me, instance->GetData64(NPC_JARAXXUS)))
+                            {
+                                p->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                                p->SetReactState(REACT_AGGRESSIVE);
+                                p->SetInCombatWithZone();
+                            }
                             m_uiUpdateTimer = 3000;
                             instance->SetData(TYPE_EVENT, 0);
                             break;

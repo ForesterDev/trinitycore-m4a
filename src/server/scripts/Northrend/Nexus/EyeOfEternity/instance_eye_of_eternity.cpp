@@ -18,6 +18,8 @@
 #include "ScriptPCH.h"
 #include "eye_of_eternity.h"
 
+using std::array;
+
 class instance_eye_of_eternity : public InstanceMapScript
 {
 public:
@@ -164,13 +166,14 @@ public:
                     if (m_threatlist.empty())
                         return;
 
-                    uint8 counter = 0;
                     if (Creature* trigger = instance->GetCreature(*itr_vortex))
                     {
                         // each trigger have to cast the spell to 5 players.
+                        array<Player *, 5> players;
+                        auto last = begin(players);
                         for (std::list<HostileReference*>::const_iterator itr = m_threatlist.begin(); itr!= m_threatlist.end(); ++itr)
                         {
-                            if (counter >= 5)
+                            if (last == end(players))
                                 break;
 
                             if (Unit* target = (*itr)->getTarget())
@@ -180,10 +183,11 @@ public:
                                 if (!player || player->isGameMaster() || player->HasAura(SPELL_VORTEX_4))
                                     continue;
 
-                                player->CastSpell(trigger, SPELL_VORTEX_4, true);
-                                counter++;
+                                *last++ = player;
                             }
                         }
+                        for (auto first = begin(players); first != last; ++first)
+                            (*first)->CastSpell(trigger, SPELL_VORTEX_4, true);
                     }
                 }
             }

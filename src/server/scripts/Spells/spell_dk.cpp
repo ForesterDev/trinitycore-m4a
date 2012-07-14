@@ -21,6 +21,7 @@
  * Scriptnames of files in this file should be prefixed with "spell_dk_".
  */
 
+#include "ScriptPCH.h"
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
@@ -310,7 +311,7 @@ class spell_dk_death_gate : public SpellScriptLoader
             {
                 PreventHitDefaultEffect(effIndex);
                 if (Unit* target = GetHitUnit())
-                    target->CastSpell(target, GetEffectValue(), false);
+                    target->CastSpell(target, GetEffectValue(), true);
             }
 
             void Register()

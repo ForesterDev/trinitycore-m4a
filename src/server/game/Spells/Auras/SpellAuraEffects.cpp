@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
@@ -36,6 +37,9 @@
 #include "CellImpl.h"
 #include "ScriptMgr.h"
 #include "Vehicle.h"
+
+using boost::math::lround;
+using boost::numeric_cast;
 
 class Aura;
 //
@@ -200,7 +204,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNoImmediateEffect,                         //144 SPELL_AURA_SAFE_FALL                         implemented in WorldSession::HandleMovementOpcodes
     &AuraEffect::HandleAuraModPetTalentsPoints,                   //145 SPELL_AURA_MOD_PET_TALENT_POINTS
     &AuraEffect::HandleNoImmediateEffect,                         //146 SPELL_AURA_ALLOW_TAME_PET_TYPE
-    &AuraEffect::HandleModStateImmunityMask,                      //147 SPELL_AURA_MECHANIC_IMMUNITY_MASK
+    &AuraEffect::HandleAddCreatureImmunity,                       //147 SPELL_AURA_ADD_CREATURE_IMMUNITY
     &AuraEffect::HandleAuraRetainComboPoints,                     //148 SPELL_AURA_RETAIN_COMBO_POINTS
     &AuraEffect::HandleNoImmediateEffect,                         //149 SPELL_AURA_REDUCE_PUSHBACK
     &AuraEffect::HandleShieldBlockValue,                          //150 SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT
@@ -651,13 +655,6 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                         AddPctN(amount, m_spellInfo->Effects[EFFECT_2].CalcValue(caster));
                 }
             }
-            // Unholy Blight damage over time effect
-            else if (GetId() == 50536)
-            {
-                m_canBeRecalculated = false;
-                // we're getting total damage on aura apply, change it to be damage per tick
-                amount = int32((float)amount / GetTotalTicks());
-            }
             break;
         case SPELL_AURA_PERIODIC_ENERGIZE:
             switch (m_spellInfo->Id)
@@ -762,7 +759,30 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
         DoneActualBenefit *= caster->CalculateLevelPenalty(GetSpellInfo());
         amount += (int32)DoneActualBenefit;
     }
-
+    if (GetAuraType() == SPELL_AURA_SCHOOL_ABSORB)
+        switch (m_spellInfo->SpellFamilyName)
+        {
+        case SPELLFAMILY_PRIEST:
+            // Power Word: Shield
+            if (GetSpellInfo()->SpellFamilyFlags[0] & 0x1 && GetSpellInfo()->SpellFamilyFlags[2] & 0x400)
+            {
+                auto &owner = *m_base->GetUnitOwner();
+                if (owner.GetMap()->IsBattlegroundOrArena()
+                        || owner.GetZoneId() == 4197 /* Wintergrasp */)
+                    amount = (amount * (100 - 10) + 50) / 100;
+            }
+            break;
+        case SPELLFAMILY_PALADIN:
+            // Sacred Shield
+            if (m_spellInfo->SpellFamilyFlags[1] & 0x80000)
+            {
+                auto &owner = *m_base->GetUnitOwner();
+                if (owner.GetMap()->IsBattlegroundOrArena()
+                        || owner.GetZoneId() == 4197 /* Wintergrasp */)
+                    amount = (amount * (100 - 10) + 50) / 100;
+            }
+            break;
+        }
     GetBase()->CallScriptEffectCalcAmountHandlers(const_cast<AuraEffect const*>(this), amount, m_canBeRecalculated);
     amount *= GetBase()->GetStackAmount();
     return amount;
@@ -3334,7 +3354,7 @@ void AuraEffect::HandleAuraModUseNormalSpeed(AuraApplication const* aurApp, uint
 /***                     IMMUNITY                      ***/
 /*********************************************************/
 
-void AuraEffect::HandleModStateImmunityMask(AuraApplication const* aurApp, uint8 mode, bool apply) const
+void AuraEffect::HandleAddCreatureImmunity(AuraApplication const* aurApp, uint8 mode, bool apply) const
 {
     if (!(mode & AURA_EFFECT_HANDLE_REAL))
         return;
@@ -5663,6 +5683,12 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                              veh->CastSpell(target, 62475, true);
                     }
                     break;
+                case 63050 /* Sanity */:
+                    if (35 < m_base->GetStackAmount())
+                        target->RemoveAura(63752 /* Low Sanity Screen Effect */);
+                    else
+                        target->AddAura(63752 /* Low Sanity Screen Effect */, target);
+                    break;
                 case 64821: // Fuse Armor (Razorscale)
                     if (GetBase()->GetStackAmount() == GetSpellInfo()->StackAmount)
                     {
@@ -6188,6 +6214,12 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
         damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
 
+        if (m_spellInfo->Effects[m_effIndex].Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA || m_spellInfo->Effects[m_effIndex].IsAreaAuraEffect())
+        {
+            damage = numeric_cast<uint32>(lround(damage * target->GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE, m_spellInfo->SchoolMask)));
+            if (caster->GetTypeId() == TYPEID_UNIT)
+                damage = numeric_cast<uint32>(lround(damage * target->GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_CREATURE_AOE_DAMAGE_AVOIDANCE, m_spellInfo->SchoolMask)));
+        }
         // Calculate armor mitigation
         if (Unit::IsDamageReducedByArmor(GetSpellInfo()->GetSchoolMask(), GetSpellInfo(), GetEffIndex()))
         {
@@ -6231,7 +6263,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 case 72854: // Unbound Plague
                 case 72855: // Unbound Plague
                 case 72856: // Unbound Plague
-                    damage *= uint32(pow(1.25f, int32(m_tickNumber)));
+                    damage = numeric_cast<uint32>(lround(damage * std::pow(1.25, m_tickNumber)));
                     break;
                 default:
                     break;

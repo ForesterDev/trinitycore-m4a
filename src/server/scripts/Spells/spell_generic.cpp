@@ -22,6 +22,7 @@
  * Scriptnames of files in this file should be prefixed with "spell_gen_"
  */
 
+#include "ScriptPCH.h"
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
@@ -33,6 +34,7 @@
 #include "InstanceScript.h"
 #include "Group.h"
 #include "LFGMgr.h"
+#include "utility.hpp"
 
 class spell_gen_absorb0_hitlimit1 : public SpellScriptLoader
 {
@@ -333,6 +335,49 @@ class spell_gen_pet_summoned : public SpellScriptLoader
             return new spell_gen_pet_summoned_SpellScript();
         }
 };
+
+namespace
+{
+    struct Purge_vehicle_control
+        : SpellScriptLoader
+    {
+        struct Purge_vehicle_control_SS
+            : SpellScript
+        {
+            typedef Purge_vehicle_control_SS Myt;
+
+			PrepareSpellScript(Myt)
+
+            void Register()
+            {
+				OnEffectHitTarget += SpellEffectFn(Myt::effect_hit_target, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+
+            void effect_hit_target(SpellEffIndex)
+            {
+                if (auto v = GetCaster()->GetVehicleBase())
+                {
+                    auto &auras = v->GetAppliedAuras();
+                    for (auto it = auras.begin(); it != auras.end(); )
+                        if (it->second->IsPositive())
+                            v->RemoveAura(it);
+                        else
+                            ++it;
+                }
+            }
+        };
+
+        Purge_vehicle_control()
+            : SpellScriptLoader("spell_gen_purge_vehicle_control")
+        {
+        }
+
+        SpellScript *GetSpellScript() const
+        {
+            return new Purge_vehicle_control_SS;
+        }
+    };
+}
 
 class spell_gen_remove_flight_auras : public SpellScriptLoader
 {
@@ -678,6 +723,136 @@ class spell_pvp_trinket_wotf_shared_cd : public SpellScriptLoader
             return new spell_pvp_trinket_wotf_shared_cd_SpellScript();
         }
 };
+
+namespace
+{
+    struct Wintergarde_gryphon_commander
+        : SpellScriptLoader
+    {
+        struct Wintergarde_gryphon_commander_AS
+            : AuraScript
+        {
+            typedef Wintergarde_gryphon_commander_AS Myt;
+
+			PrepareAuraScript(Myt)
+
+            void Register()
+            {
+                const auto &i = EFFECT_1;
+                const auto &n = SPELL_AURA_DUMMY;
+                const auto &m = AURA_EFFECT_HANDLE_REAL;
+                OnEffectApply += AuraEffectApplyFn(Myt::applied, i, n, m);
+                OnEffectRemove += AuraEffectRemoveFn(Myt::removed, i, n, m);
+            }
+
+            bool Validate(const SpellInfo *)
+            {
+				if (auto info = sSpellMgr->GetSpellInfo(48366 /* Warning */))
+                {
+                    warning_info() = std::move(info);
+                    return true;
+                }
+                else
+                    return false;
+            }
+
+            bool Load()
+            {
+                if (dynamic_cast<Player *>(GetUnitOwner()))
+                {
+                    warning_applied = false;
+                    return true;
+                }
+                else
+                    return false;
+            }
+
+            static const SpellInfo *&warning_info()
+            {
+                static const SpellInfo *e;
+                return e;
+            }
+
+            static bool in_area(Player &t, uint32 zone_id, uint32 area_id)
+            {
+                if (zone_id == 65 /* Dragonblight */)
+                    switch (area_id)
+                    {
+                    case 4177 /* Wintergarde Keep */:
+                    case 4178 /* Wintergarde Mine */:
+                    case 4188 /* The Carrion Fields */:
+                        return true;
+                    }
+                return false;
+            }
+
+            void apply_warning(Player &t)
+            {
+                if (!warning_applied)
+                {
+                    t.CastSpell(&t, warning_info(), true);
+                    warning_applied = true;
+                }
+            }
+
+            void unapply_warning(Player &t)
+            {
+                if (warning_applied)
+                {
+                    t.RemoveAura(warning_info()->Id);
+                    warning_applied = false;
+                }
+            }
+
+            void applied(const AuraEffect *, AuraEffectHandleModes mode UNUSED)
+            {
+                auto &t = target();
+                if (in_area(t, t.GetZoneId(), t.GetAreaId()))
+                    ;
+                else
+                    apply_warning(t);
+                connection = t.connect_area([this](Player &player, uint32 zone_id, uint32 area_id)
+                        {
+                            if (in_area(player, zone_id, area_id))
+                                unapply_warning(player);
+                            else
+                                apply_warning(player);
+                        }
+                    );
+            }
+
+            void removed(const AuraEffect *, AuraEffectHandleModes mode UNUSED)
+            {
+                auto &t = target();
+                t.disconnect_area(std::move(connection));
+                unapply_warning(t);
+            }
+
+            Player &target()
+            {
+                return *static_cast<Player *>(GetUnitOwner());
+            }
+
+            const Player &target() const
+            {
+                return *static_cast<const Player *>(GetUnitOwner());
+            }
+
+            bool warning_applied;
+            Player::Area_connection connection;
+        };
+
+        Wintergarde_gryphon_commander()
+            : SpellScriptLoader("spell_gen_wintergarde_gryphon_commander")
+        {
+        }
+
+        AuraScript *GetAuraScript() const
+        {
+            return new Wintergarde_gryphon_commander_AS;
+        }
+    };
+}
 
 enum AnimalBloodPoolSpell
 {
@@ -3086,11 +3261,13 @@ void AddSC_generic_spell_scripts()
     new spell_gen_leeching_swarm();
     new spell_gen_parachute();
     new spell_gen_pet_summoned();
+    new Purge_vehicle_control;
     new spell_gen_remove_flight_auras();
     new spell_gen_trick();
     new spell_gen_trick_or_treat();
     new spell_creature_permanent_feign_death();
     new spell_pvp_trinket_wotf_shared_cd();
+    new Wintergarde_gryphon_commander;
     new spell_gen_animal_blood();
     new spell_gen_divine_storm_cd_reset();
     new spell_gen_parachute_ic();

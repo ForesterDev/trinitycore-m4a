@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ScriptPCH.h"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -145,6 +146,7 @@ class boss_lord_marrowgar : public CreatureScript
                     Talk(SAY_ENTER_ZONE);
                     _introDone = true;
                 }
+                BossAI::MoveInLineOfSight(who);
             }
 
             void UpdateAI(uint32 const diff)

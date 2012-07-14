@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ScriptPCH.h"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -81,6 +82,7 @@ enum Events
     EVENT_SUMMON_ZOMBIES    = 6,
 
     EVENT_STICKY_OOZE       = 7,
+    EVENT_BERSERK           = 8,
 };
 
 class boss_rotface : public CreatureScript
@@ -99,6 +101,7 @@ class boss_rotface : public CreatureScript
             void Reset()
             {
                 _Reset();
+                events.ScheduleEvent(EVENT_BERSERK, 600000);
                 events.ScheduleEvent(EVENT_SLIME_SPRAY, 20000);
                 events.ScheduleEvent(EVENT_HASTEN_INFECTIONS, 90000);
                 events.ScheduleEvent(EVENT_MUTATED_INFECTION, 14000);
@@ -157,9 +160,11 @@ class boss_rotface : public CreatureScript
                     Talk(SAY_SLIME_SPRAY);
             }
 
-            void MoveInLineOfSight(Unit* /*who*/)
+            void MoveInLineOfSight(Unit* who)
             {
                 // don't enter combat
+                // ...jk
+                BossAI::MoveInLineOfSight(who);
             }
 
             void UpdateAI(const uint32 diff)
@@ -195,6 +200,11 @@ class boss_rotface : public CreatureScript
                         case EVENT_MUTATED_INFECTION:
                             me->CastCustomSpell(SPELL_MUTATED_INFECTION, SPELLVALUE_MAX_TARGETS, 1, NULL, false);
                             events.ScheduleEvent(EVENT_MUTATED_INFECTION, infectionCooldown);
+                            break;
+                        case EVENT_BERSERK:
+                            me->InterruptNonMeleeSpells(false);
+                            DoCast(me, SPELL_BERSERK2);
+                            Talk(SAY_BERSERK);
                             break;
                         default:
                             break;
@@ -274,6 +284,8 @@ class npc_big_ooze : public CreatureScript
         {
             npc_big_oozeAI(Creature* creature) : ScriptedAI(creature), instance(creature->GetInstanceScript())
             {
+                creature->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                creature->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             }
 
             void IsSummonedBy(Unit* /*summoner*/)
@@ -294,6 +306,7 @@ class npc_big_ooze : public CreatureScript
                 if (Creature* rotface = Unit::GetCreature(*me, instance->GetData64(DATA_ROTFACE)))
                     rotface->AI()->SummonedCreatureDespawn(me);
                 me->DespawnOrUnsummon();
+               
             }
 
             void DoAction(const int32 action)
@@ -346,6 +359,8 @@ class npc_precious_icc : public CreatureScript
             npc_precious_iccAI(Creature* creature) : ScriptedAI(creature), _summons(me)
             {
                 _instance = creature->GetInstanceScript();
+                creature->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                creature->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             }
 
             void Reset()
@@ -371,7 +386,6 @@ class npc_precious_icc : public CreatureScript
 
             void JustDied(Unit* /*killer*/)
             {
-                _summons.DespawnAll();
                 if (Creature* rotface = Unit::GetCreature(*me, _instance->GetData64(DATA_ROTFACE)))
                     if (rotface->isAlive())
                         rotface->AI()->Talk(SAY_PRECIOUS_DIES);
@@ -588,7 +602,27 @@ class spell_rotface_large_ooze_combine : public SpellScriptLoader
                     else
                         unstable->ModStackAmount(1);
 
-                    // no idea why, but this does not trigger explosion on retail (only small+large do)
+                    if (unstable->GetStackAmount() >= 5)
+                    {
+                        GetCaster()->RemoveAurasDueToSpell(SPELL_LARGE_OOZE_BUFF_COMBINE);
+                        GetCaster()->RemoveAurasDueToSpell(SPELL_LARGE_OOZE_COMBINE);
+                        if (InstanceScript* instance = GetCaster()->GetInstanceScript())
+                            if (Creature* rotface = Unit::GetCreature(*GetCaster(), instance->GetData64(DATA_ROTFACE)))
+                                if (rotface->isAlive())
+                                {
+                                    rotface->AI()->Talk(EMOTE_UNSTABLE_EXPLOSION);
+                                    rotface->AI()->Talk(SAY_UNSTABLE_EXPLOSION);
+                                }
+
+                        if (Creature* cre = GetCaster()->ToCreature())
+                        {
+                            cre->AI()->DoAction(EVENT_STICKY_OOZE);
+                            cre->InterruptNonMeleeSpells(false);
+                        }
+                        GetCaster()->CastSpell(GetCaster(), SPELL_UNSTABLE_OOZE_EXPLOSION, false, NULL, NULL, GetCaster()->GetGUID());
+                        if (InstanceScript* instance = GetCaster()->GetInstanceScript())
+                            instance->SetData(DATA_OOZE_DANCE_ACHIEVEMENT, uint32(false));
+                    }
                 }
 
                 // just for safety
@@ -642,7 +676,10 @@ class spell_rotface_large_ooze_buff_combine : public SpellScriptLoader
                                 }
 
                         if (Creature* cre = GetCaster()->ToCreature())
+                        {
                             cre->AI()->DoAction(EVENT_STICKY_OOZE);
+                            cre->InterruptNonMeleeSpells(false);
+                        }
                         GetCaster()->CastSpell(GetCaster(), SPELL_UNSTABLE_OOZE_EXPLOSION, false, NULL, NULL, GetCaster()->GetGUID());
                         if (InstanceScript* instance = GetCaster()->GetInstanceScript())
                             instance->SetData(DATA_OOZE_DANCE_ACHIEVEMENT, uint32(false));

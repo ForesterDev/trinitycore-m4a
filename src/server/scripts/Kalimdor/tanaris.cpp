@@ -33,6 +33,7 @@ npc_OOX17
 npc_tooga
 EndContentData */
 
+#include "ScriptPCH.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"

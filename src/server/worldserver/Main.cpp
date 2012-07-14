@@ -20,6 +20,7 @@
 /// @{
 /// \file
 
+#include "worldPCH.h"
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
 #include <ace/Version.h>

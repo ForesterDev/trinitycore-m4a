@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ScriptPCH.h"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -22,6 +23,7 @@
 #include "Group.h"
 #include "Spell.h"
 #include "icecrown_citadel.h"
+#include "utility.hpp"
 #include "Vehicle.h"
 
 enum ScriptTexts
@@ -221,7 +223,7 @@ class boss_professor_putricide : public CreatureScript
                 summons.DespawnAll();
                 SetPhase(PHASE_COMBAT_1);
                 _experimentState = EXPERIMENT_STATE_OOZE;
-                me->SetReactState(REACT_DEFENSIVE);
+                me->SetReactState(REACT_AGGRESSIVE);
                 me->SetWalk(false);
                 if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
                     me->GetMotionMaster()->MovementExpired();
@@ -235,6 +237,11 @@ class boss_professor_putricide : public CreatureScript
                 if (events.GetPhaseMask() & PHASE_MASK_NOT_SELF)
                     return;
 
+                if (who->GetAreaId() != 4890 /* Putricide's Laboratory of Alchemical Horrors and Fun */)
+                {
+                    EnterEvadeMode();
+                    return;
+                }
                 if (!instance->CheckRequiredBosses(DATA_PROFESSOR_PUTRICIDE, who->ToPlayer()))
                 {
                     EnterEvadeMode();
@@ -294,7 +301,6 @@ class boss_professor_putricide : public CreatureScript
                     case NPC_GAS_CLOUD:
                         // no possible aura seen in sniff adding the aurastate
                         summon->ModifyAuraState(AURA_STATE_UNKNOWN22, true);
-                        summon->CastSpell(summon, SPELL_GASEOUS_BLOAT_PROC, true);
                         summon->CastCustomSpell(SPELL_GASEOUS_BLOAT, SPELLVALUE_AURA_STACK, 10, summon, false);
                         summon->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                         summon->SetReactState(REACT_PASSIVE);
@@ -302,7 +308,6 @@ class boss_professor_putricide : public CreatureScript
                     case NPC_VOLATILE_OOZE:
                         // no possible aura seen in sniff adding the aurastate
                         summon->ModifyAuraState(AURA_STATE_UNKNOWN19, true);
-                        summon->CastSpell(summon, SPELL_OOZE_ERUPTION_SEARCH_PERIODIC, true);
                         summon->CastSpell(summon, SPELL_VOLATILE_OOZE_ADHESIVE, false);
                         summon->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                         summon->SetReactState(REACT_PASSIVE);
@@ -604,7 +609,7 @@ class boss_professor_putricide : public CreatureScript
                             DoCast(me, SPELL_TEAR_GAS_PERIODIC_TRIGGER, true);
                             break;
                         case EVENT_RESUME_ATTACK:
-                            me->SetReactState(REACT_DEFENSIVE);
+                            me->SetReactState(REACT_AGGRESSIVE);
                             AttackStart(me->getVictim());
                             // remove Tear Gas
                             me->RemoveAurasDueToSpell(SPELL_TEAR_GAS_PERIODIC_TRIGGER);
@@ -711,39 +716,36 @@ class npc_volatile_ooze : public CreatureScript
         {
             npc_putricide_oozeAI(Creature* creature) : ScriptedAI(creature)
             {
-                _newTargetSelectTimer = 0;
+                creature->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                creature->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             }
 
-            void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
+            void Reset()
             {
-                if (!_newTargetSelectTimer && spell->Id == sSpellMgr->GetSpellIdForDifficulty(SPELL_OOZE_ERUPTION, me))
-                    _newTargetSelectTimer = 1000;
+                me->CastSpell(me, SPELL_OOZE_ERUPTION_SEARCH_PERIODIC, true);
             }
 
-            void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+            void IsSummonedBy(Unit *summoner UNUSED)
             {
-                if (spell->Id == SPELL_TEAR_GAS_CREATURE)
-                    _newTargetSelectTimer = 1000;
+                if (auto c = Unit::GetCreature(*me, me->GetInstanceScript()->GetData64(DATA_PROFESSOR_PUTRICIDE)))
+                    c->AI()->JustSummoned(me);
             }
 
-            void UpdateAI(uint32 const diff)
+            void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell UNUSED)
             {
-                if (!UpdateVictim() && !_newTargetSelectTimer)
-                    return;
+            }
 
-                if (!_newTargetSelectTimer)
-                    return;
+            void SpellHit(Unit* /*caster*/, SpellInfo const* spell UNUSED)
+            {
+            }
 
-                if (me->HasAura(SPELL_TEAR_GAS_CREATURE))
-                    return;
+            void UpdateAI(uint32 const diff UNUSED)
+            {
+                UpdateVictim();
 
-                if (_newTargetSelectTimer <= diff)
-                {
-                    _newTargetSelectTimer = 0;
-                    me->CastSpell(me, SPELL_VOLATILE_OOZE_ADHESIVE, false);
-                }
-                else
-                    _newTargetSelectTimer -= diff;
+                if (!me->IsNonMeleeSpellCasted(false, false, true))
+                    if (me->GetMotionMaster()->size() - 1 < MOTION_SLOT_CONTROLLED)
+                        me->CastSpell(me, SPELL_VOLATILE_OOZE_ADHESIVE, false);
             }
 
         private:
@@ -765,41 +767,37 @@ class npc_gas_cloud : public CreatureScript
         {
             npc_gas_cloudAI(Creature* creature) : ScriptedAI(creature)
             {
-                _newTargetSelectTimer = 0;
+                creature->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                creature->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             }
 
-            void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
+            void Reset()
             {
-                if (!_newTargetSelectTimer && spell->Id == sSpellMgr->GetSpellIdForDifficulty(SPELL_EXPUNGED_GAS, me))
-                    _newTargetSelectTimer = 1000;
+                me->CastSpell(me, SPELL_GASEOUS_BLOAT_PROC, true);
             }
 
-            void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+            void IsSummonedBy(Unit *summoner UNUSED)
             {
-                if (spell->Id == SPELL_TEAR_GAS_CREATURE)
-                    _newTargetSelectTimer = 1000;
+                if (auto c = Unit::GetCreature(*me, me->GetInstanceScript()->GetData64(DATA_PROFESSOR_PUTRICIDE)))
+                    c->AI()->JustSummoned(me);
             }
 
-            void UpdateAI(uint32 const diff)
+            void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell UNUSED)
             {
-                if (!UpdateVictim() && !_newTargetSelectTimer)
-                    return;
+            }
 
-                DoMeleeAttackIfReady();
+            void SpellHit(Unit* /*caster*/, SpellInfo const* spell UNUSED)
+            {
+            }
 
-                if (!_newTargetSelectTimer)
-                    return;
+            void UpdateAI(uint32 const diff UNUSED)
+            {
+                if (UpdateVictim())
+                    DoMeleeAttackIfReady();
 
-                if (me->HasAura(SPELL_TEAR_GAS_CREATURE))
-                    return;
-
-                if (_newTargetSelectTimer <= diff)
-                {
-                    _newTargetSelectTimer = 0;
-                    me->CastCustomSpell(SPELL_GASEOUS_BLOAT, SPELLVALUE_AURA_STACK, 10, me, false);
-                }
-                else
-                    _newTargetSelectTimer -= diff;
+                if (!me->IsNonMeleeSpellCasted(false, false, true))
+                    if (me->GetMotionMaster()->size() - 1 < MOTION_SLOT_CONTROLLED)
+                        me->CastCustomSpell(SPELL_GASEOUS_BLOAT, SPELLVALUE_AURA_STACK, 10, me, false);
             }
 
         private:

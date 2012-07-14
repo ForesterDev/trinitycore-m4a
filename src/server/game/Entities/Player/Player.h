@@ -19,6 +19,9 @@
 #ifndef _PLAYER_H
 #define _PLAYER_H
 
+#include <array>
+#include <boost/signal.hpp>
+#include <boost/signals/connection.hpp>
 #include "AchievementMgr.h"
 #include "Battleground.h"
 #include "Bag.h"
@@ -487,7 +490,8 @@ enum PlayerExtraFlags
     PLAYER_EXTRA_HAS_310_FLYER      = 0x0040,               // Marks if player already has 310% speed flying mount
 
     // other states
-    PLAYER_EXTRA_PVP_DEATH          = 0x0100                // store PvP death status until corpse creating.
+    PLAYER_EXTRA_PVP_DEATH = 0x0100,   // store PvP death status until corpse creating.
+    PLAYER_EXTRA_hide_armor = 0x8000,
 };
 
 // 2^n values
@@ -1063,8 +1067,16 @@ class Player : public Unit, public GridObject<Player>
     friend void Item::AddToUpdateQueueOf(Player* player);
     friend void Item::RemoveFromUpdateQueueOf(Player* player);
     public:
+        typedef boost::signal<void (Player &player, uint32 zone_id, uint32 area_id)> Area_signal;
+        typedef boost::signals::connection Area_connection;
+
         explicit Player (WorldSession* session);
         ~Player();
+
+        WMO_id wmo_id() const
+        {
+            return wmo_id_;
+        }
 
         void CleanupsBeforeDelete(bool finalCleanup = true);
 
@@ -1662,6 +1674,7 @@ class Player : public Unit, public GridObject<Player>
         void SendTalentsInfoData(bool pet);
         void LearnTalent(uint32 talentId, uint32 talentRank);
         void LearnPetTalent(uint64 petGuid, uint32 talentId, uint32 talentRank);
+        std::array<int, MAX_TALENT_TABS> talent_tab_points_spent(int talent_group) const;
 
         bool AddTalent(uint32 spellId, uint8 spec, bool learning);
         bool HasTalent(uint32 spell_id, uint8 spec) const;
@@ -1670,7 +1683,7 @@ class Player : public Unit, public GridObject<Player>
 
         // Dual Spec
         void UpdateSpecCount(uint8 count);
-        uint32 GetActiveSpec() { return m_activeSpec; }
+        uint32 GetActiveSpec() const { return m_activeSpec; }
         void SetActiveSpec(uint8 spec){ m_activeSpec = spec; }
         uint8 GetSpecsCount() { return m_specsCount; }
         void SetSpecsCount(uint8 count) { m_specsCount = count; }
@@ -1878,6 +1891,7 @@ class Player : public Unit, public GridObject<Player>
         void UpdateDefenseBonusesMod();
         inline void RecalculateRating(CombatRating cr) { ApplyRatingMod(cr, 0, true);}
         float GetMeleeCritFromAgility();
+        float GetBaseDodge();
         void GetDodgeFromAgility(float &diminishing, float &nondiminishing);
         float GetMissPercentageFromDefence() const;
         float GetSpellCritFromIntellect();
@@ -2478,6 +2492,16 @@ class Player : public Unit, public GridObject<Player>
         float GetAverageItemLevel();
         bool isDebugAreaTriggers;
 
+        Area_connection connect_area(Area_signal::slot_function_type subscriber)
+        {
+            return area_sig.connect(std::move(subscriber));
+        }
+
+        void disconnect_area(Area_connection subscriber)
+        {
+            subscriber.disconnect();
+        }
+
         void ClearWhisperWhiteList() { WhisperList.clear(); }
         void AddWhisperWhiteList(uint64 guid) { WhisperList.push_back(guid); }
         bool IsInWhisperWhiteList(uint64 guid);
@@ -2856,10 +2880,13 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_timeSyncTimer;
         uint32 m_timeSyncClient;
         uint32 m_timeSyncServer;
+        WMO_id wmo_id_;
+        Area_signal area_sig;
 
         InstanceTimeMap _instanceResetTimes;
         uint32 _pendingBindId;
         uint32 _pendingBindTimer;
+        std::array<std::array<int, MAX_TALENT_TABS>, MAX_TALENT_SPECS> talent_points_spent;
 };
 
 void AddItemsSetItem(Player*player, Item* item);

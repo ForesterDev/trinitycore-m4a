@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -190,6 +191,7 @@ void Creature::AddToWorld()
         if (IsVehicle())
             GetVehicleKit()->Install();
     }
+    ASSERT(i_AI);
 }
 
 void Creature::RemoveFromWorld()
@@ -1263,8 +1265,11 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 vehId, uint3
 
     if (vehId && !CreateVehicleKit(vehId, Entry))
         vehId = 0;
-
-    Object::_Create(guidlow, Entry, vehId ? HIGHGUID_VEHICLE : HIGHGUID_UNIT);
+    auto guidhigh = vehId ? HIGHGUID_VEHICLE : HIGHGUID_UNIT;
+    if (!GetMap()->GetCreature(MAKE_NEW_GUID(guidlow, Entry, guidhigh)))
+        Object::_Create(guidlow, Entry, std::move(guidhigh));
+    else
+        return false;
 
     if (!UpdateEntry(Entry, team, data))
         return false;
@@ -1284,10 +1289,7 @@ bool Creature::LoadCreatureFromDB(uint32 guid, Map* map, bool addToMap)
 
     m_DBTableGuid = guid;
     if (map->GetInstanceId() == 0)
-    {
-        if (map->GetCreature(MAKE_NEW_GUID(guid, data->id, HIGHGUID_UNIT)))
-            return false;
-    }
+        ;
     else
         guid = sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT);
 
@@ -1519,11 +1521,12 @@ float Creature::GetAttackDistance(Unit const* player) const
 
 void Creature::setDeathState(DeathState s)
 {
+    if (s == JUST_DIED)
+        m_corpseRemoveTime = time(NULL) + m_corpseDelay;
     Unit::setDeathState(s);
 
     if (s == JUST_DIED)
     {
-        m_corpseRemoveTime = time(NULL) + m_corpseDelay;
         m_respawnTime = time(NULL) + m_respawnDelay + m_corpseDelay;
 
         // always save boss respawn time at death to prevent crash cheating
@@ -1605,8 +1608,7 @@ void Creature::Respawn(bool force)
         lootForPickPocketed = false;
         lootForBody         = false;
 
-        if (m_originalEntry != GetEntry())
-            UpdateEntry(m_originalEntry);
+        UpdateEntry(m_originalEntry);
 
         CreatureTemplate const* cinfo = GetCreatureTemplate();
         SelectLevel(cinfo);

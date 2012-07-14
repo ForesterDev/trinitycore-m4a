@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Maraudon
 EndScriptData */
 
+#include "ScriptPCH.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

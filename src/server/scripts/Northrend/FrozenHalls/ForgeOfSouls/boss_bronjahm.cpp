@@ -19,15 +19,18 @@
 #include "SpellAuraEffects.h"
 #include "forge_of_souls.h"
 
-enum Yells
+namespace
 {
-    SAY_AGGRO           = -1632001,
-    SAY_SLAY_1          = -1632002,
-    SAY_SLAY_2          = -1632003,
-    SAY_DEATH           = -1632004,
-    SAY_SOUL_STORM      = -1632005,
-    SAY_CORRUPT_SOUL    = -1632006,
-};
+    enum Yells
+    {
+        SAY_AGGRO           = -1632001,
+        SAY_SLAY_1          = -1632002,
+        SAY_SLAY_2          = -1632003,
+        SAY_DEATH           = -1632004,
+        SAY_SOUL_STORM      = -1632005,
+        SAY_CORRUPT_SOUL    = -1632006,
+    };
+}
 
 enum Spells
 {

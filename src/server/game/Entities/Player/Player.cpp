@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "Language.h"
 #include "DatabaseEnv.h"
@@ -74,6 +75,9 @@
 #include "InstanceScript.h"
 #include <cmath>
 #include "AccountMgr.h"
+
+using std::array;
+using std::ostringstream;
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
@@ -255,7 +259,7 @@ std::string PlayerTaxi::SaveTaxiDestinationsToString()
     if (m_TaxiDestinations.empty())
         return "";
 
-    std::ostringstream ss;
+    ostringstream ss;
 
     for (size_t i=0; i < m_TaxiDestinations.size(); ++i)
         ss << m_TaxiDestinations[i] << ' ';
@@ -276,7 +280,7 @@ uint32 PlayerTaxi::GetCurrentTaxiPath() const
     return path;
 }
 
-std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi)
+ostringstream &operator<<(ostringstream &ss, const PlayerTaxi &taxi)
 {
     for (uint8 i = 0; i < TaxiMaskSize; ++i)
         ss << taxi.m_taximask[i] << ' ';
@@ -637,7 +641,8 @@ UpdateMask Player::updateVisualBits;
 #ifdef _MSC_VER
 #pragma warning(disable:4355)
 #endif
-Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_reputationMgr(this)
+Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_reputationMgr(this),
+    wmo_id_()
 {
 #ifdef _MSC_VER
 #pragma warning(default:4355)
@@ -800,6 +805,7 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
             m_Glyphs[i][g] = 0;
 
         m_talents[i] = new PlayerTalentMap();
+        talent_points_spent[i].fill(int());
     }
 
     for (uint8 i = 0; i < BASEMOD_END; ++i)
@@ -868,7 +874,16 @@ Player::~Player()
 {
     // it must be unloaded already in PlayerLogout and accessed only for loggined player
     //m_social = NULL;
-
+    if (m_itemUpdateQueue.empty())
+        ;
+    else
+    {
+        for (auto it = m_itemUpdateQueue.begin(), last = m_itemUpdateQueue.end();
+                it != last; )
+            if (auto p = *it++)
+                p->RemoveFromUpdateQueueOf(this);
+        m_itemUpdateQueue.clear();
+    }
     // Note: buy back item already deleted from DB when player was saved
     for (uint8 i = 0; i < PLAYER_SLOTS_COUNT; ++i)
         delete m_items[i];
@@ -1868,8 +1883,8 @@ bool Player::BuildEnumData(PreparedQueryResult result, WorldPacket* data)
     //    "SELECT characters.guid, characters.name, characters.race, characters.class, characters.gender, characters.playerBytes, characters.playerBytes2, characters.level, "
     //     8                9               10                     11                     12                     13                    14
     //    "characters.zone, characters.map, characters.position_x, characters.position_y, characters.position_z, guild_member.guildid, characters.playerFlags, "
-    //    15                    16                   17                     18                   19               20                     21
-    //    "characters.at_login, character_pet.entry, character_pet.modelid, character_pet.level, characters.data, character_banned.guid, character_declinedname.genitive "
+    //    15                    16                   17                     18                   19               20                        22
+    //    "characters.at_login, character_pet.entry, character_pet.modelid, character_pet.level, characters.data, character_banned.bandate, character_declinedname.genitive "
 
     Field* fields = result->Fetch();
 
@@ -1926,11 +1941,22 @@ bool Player::BuildEnumData(PreparedQueryResult result, WorldPacket* data)
         charFlags |= CHARACTER_FLAG_GHOST;
     if (atLoginFlags & AT_LOGIN_RENAME)
         charFlags |= CHARACTER_FLAG_RENAME;
-    if (fields[20].GetUInt32())
-        charFlags |= CHARACTER_FLAG_LOCKED_BY_BILLING;
+    if (!fields[20].is_null())
+    {
+        if (!fields[21].GetBool())
+            charFlags |= CHARACTER_FLAG_LOCKED_BY_BILLING;
+        else
+        {
+            // remove expired ban
+            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_EXPIRED_BAN);
+            stmt->setUInt32(0, guid);
+            stmt->setUInt32(1, fields[20].GetUInt32());
+            CharacterDatabase.Execute(stmt);
+        }
+    }
     if (sWorld->getBoolConfig(CONFIG_DECLINED_NAMES_USED))
     {
-        if (!fields[21].GetString().empty())
+        if (!fields[22].GetString().empty())
             charFlags |= CHARACTER_FLAG_DECLINED;
     }
     else
@@ -3476,18 +3502,22 @@ bool Player::AddTalent(uint32 spellId, uint8 spec, bool learning)
         itr->second->state = PLAYERSPELL_UNCHANGED;
     else if (TalentSpellPos const* talentPos = GetTalentSpellPos(spellId))
     {
-        if (TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentPos->talent_id))
+        TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentPos->talent_id);
+        auto tab = sTalentTabStore.LookupEntry(talentInfo->TalentTab);
+        auto tab_index = tab && tab->tabpage < MAX_TALENT_TABS && tab->TalentTabID == GetTalentTabPages(getClass())[tab->tabpage] ? tab->tabpage : MAX_TALENT_TABS;
+        for (uint8 rank = 0; rank < MAX_TALENT_RANK; ++rank)
         {
-            for (uint8 rank = 0; rank < MAX_TALENT_RANK; ++rank)
-            {
-                // skip learning spell and no rank spell case
-                uint32 rankSpellId = talentInfo->RankID[rank];
-                if (!rankSpellId || rankSpellId == spellId)
-                    continue;
+            // skip learning spell and no rank spell case
+            uint32 rankSpellId = talentInfo->RankID[rank];
+            if (!rankSpellId || rankSpellId == spellId)
+                continue;
 
-                itr = m_talents[spec]->find(rankSpellId);
-                if (itr != m_talents[spec]->end())
-                    itr->second->state = PLAYERSPELL_REMOVED;
+            itr = m_talents[spec]->find(rankSpellId);
+            if (itr != m_talents[spec]->end())
+            {
+                itr->second->state = PLAYERSPELL_REMOVED;
+                if (tab_index != MAX_TALENT_TABS)
+                    talent_points_spent[spec][tab_index] -= 1 + rank;
             }
         }
 
@@ -3498,6 +3528,8 @@ bool Player::AddTalent(uint32 spellId, uint8 spec, bool learning)
         newtalent->spec = spec;
 
         (*m_talents[spec])[spellId] = newtalent;
+        if (tab_index != MAX_TALENT_TABS)
+            talent_points_spent[spec][tab_index] += 1 + talentPos->rank;
         return true;
     }
     return false;
@@ -3508,7 +3540,7 @@ bool Player::addSpell(uint32 spellId, bool active, bool learning, bool dependent
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
     if (!spellInfo)
     {
-        // do character spell book cleanup (all characters)
+        // do character spell book cleanup
         if (!IsInWorld() && !learning)                       // spell load case
         {
             sLog->outError("Player::addSpell: Non-existed in SpellStore spell #%u request, deleting for all characters in `character_spell`.", spellId);
@@ -3527,7 +3559,7 @@ bool Player::addSpell(uint32 spellId, bool active, bool learning, bool dependent
 
     if (!SpellMgr::IsSpellValid(spellInfo, this, false))
     {
-        // do character spell book cleanup (all characters)
+        // do character spell book cleanup
         if (!IsInWorld() && !learning)                       // spell load case
         {
             sLog->outError("Player::addSpell: Broken spell #%u learning not allowed, deleting for all characters in `character_spell`.", spellId);
@@ -4148,6 +4180,9 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
 
     if (spell_id == 46917 && m_canTitanGrip)
         SetCanTitanGrip(false);
+    for (int i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        if (spellInfo->Effects[i].Effect == SPELL_EFFECT_TITAN_GRIP)
+            RemoveAura(spellInfo->Effects[i].MiscValue);
     if (spell_id == 674 && m_canDualWield)
         SetCanDualWield(false);
 
@@ -4319,7 +4354,7 @@ void Player::_SaveSpellCooldowns(SQLTransaction& trans)
     time_t infTime = curTime + infinityCooldownDelayCheck;
 
     bool first_round = true;
-    std::ostringstream ss;
+    ostringstream ss;
 
     // remove outdated and save active
     for (SpellCooldowns::iterator itr = m_spellCooldowns.begin(); itr != m_spellCooldowns.end();)
@@ -4428,7 +4463,7 @@ bool Player::resetTalents(bool no_cost)
         // to prevent unexpected lost normal learned spell skip another class talents
         if ((getClassMask() & talentTabInfo->ClassMask) == 0)
             continue;
-
+        auto tab_index = talentTabInfo->tabpage < MAX_TALENT_TABS && talentTabInfo->TalentTabID == GetTalentTabPages(getClass())[talentTabInfo->tabpage] ? talentTabInfo->tabpage : MAX_TALENT_TABS;
         for (int8 rank = MAX_TALENT_RANK-1; rank >= 0; --rank)
         {
             // skip non-existant talent ranks
@@ -4445,7 +4480,11 @@ bool Player::resetTalents(bool no_cost)
             // if this talent rank can be found in the PlayerTalentMap, mark the talent as removed so it gets deleted
             PlayerTalentMap::iterator plrTalent = m_talents[m_activeSpec]->find(talentInfo->RankID[rank]);
             if (plrTalent != m_talents[m_activeSpec]->end())
+            {
                 plrTalent->second->state = PLAYERSPELL_REMOVED;
+                if (tab_index != MAX_TALENT_TABS)
+                    talent_points_spent[m_activeSpec][tab_index] -= 1 + rank;
+            }
         }
     }
 
@@ -5360,14 +5399,15 @@ void Player::CreateCorpse()
     uint32 _cfi;
     for (uint8 i = 0; i < EQUIPMENT_SLOT_END; i++)
     {
-        if (m_items[i])
-        {
-            iDisplayID = m_items[i]->GetTemplate()->DisplayInfoID;
-            iIventoryType = m_items[i]->GetTemplate()->InventoryType;
+        if (GetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + 2 * i))
+            if (m_items[i])
+            {
+                iDisplayID = m_items[i]->GetTemplate()->DisplayInfoID;
+                iIventoryType = m_items[i]->GetTemplate()->InventoryType;
 
-            _cfi = iDisplayID | (iIventoryType << 24);
-            corpse->SetUInt32Value(CORPSE_FIELD_ITEM + i, _cfi);
-        }
+                _cfi = iDisplayID | (iIventoryType << 24);
+                corpse->SetUInt32Value(CORPSE_FIELD_ITEM + i, _cfi);
+            }
     }
 
     // we do not need to save corpses for BG/arenas
@@ -5859,6 +5899,25 @@ float Player::GetMeleeCritFromAgility()
 
     float crit = critBase->base + GetStat(STAT_AGILITY)*critRatio->ratio;
     return crit*100.0f;
+}
+
+float Player::GetBaseDodge()
+{
+    uint32 pclass = getClass();
+    float BaseDodge[MAX_CLASSES] = {
+        3.664f,  // Warrior
+        3.494f,  // Paladin
+        -4.087f, // Hunter
+        2.095f,  // Rogue
+        3.417f,  // Priest
+        3.664f,  // DK?
+        2.108f,  // Shaman
+        3.658f,  // Mage
+        2.421f,  // Warlock
+        0.0f,
+        5.609f   // Druid
+    };
+    return BaseDodge[pclass - 1];
 }
 
 void Player::GetDodgeFromAgility(float &diminishing, float &nondiminishing)
@@ -6902,6 +6961,12 @@ void Player::CheckAreaExploreAndOutdoor()
     if (isInFlight())
         return;
 
+    auto new_wmo_id = GetBaseMap()->wmo_id(*this);
+    if (wmo_id_ != new_wmo_id)
+    {
+        wmo_id_ = new_wmo_id;
+        GetMap()->player_zone_changed(*this);
+    }
     bool isOutdoor;
     uint16 areaFlag = GetBaseMap()->GetAreaFlag(GetPositionX(), GetPositionY(), GetPositionZ(), &isOutdoor);
 
@@ -7503,6 +7568,7 @@ uint32 Player::GetLevelFromDB(uint64 guid)
 
 void Player::UpdateArea(uint32 newArea)
 {
+    SendInitWorldStates(m_zoneUpdateId, newArea);
     // FFA_PVP flags are area and not zone id dependent
     // so apply them accordingly
     m_areaUpdateId    = newArea;
@@ -7531,7 +7597,6 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     {
         sOutdoorPvPMgr->HandlePlayerLeaveZone(this, m_zoneUpdateId);
         sOutdoorPvPMgr->HandlePlayerEnterZone(this, newZone);
-        SendInitWorldStates(newZone, newArea);              // only if really enters to new zone, not just area change, works strange...
     }
 
     // group update
@@ -8200,7 +8265,8 @@ void Player::_ApplyWeaponDependentAuraCritMod(Item* item, WeaponAttackType attac
     // generic not weapon specific case processes in aura code
     if (aura->GetSpellInfo()->EquippedItemClass == -1)
         return;
-
+    if (!CanUseAttackType(attackType))
+        return;
     BaseModGroup mod = BASEMOD_END;
     switch (attackType)
     {
@@ -12484,7 +12550,10 @@ void Player::QuickEquipItem(uint16 pos, Item* pItem)
 
 void Player::SetVisibleItemSlot(uint8 slot, Item* pItem)
 {
-    if (pItem)
+    if (!(m_ExtraFlags & PLAYER_EXTRA_hide_armor
+                && !(slot == EQUIPMENT_SLOT_MAINHAND
+                    || slot == EQUIPMENT_SLOT_OFFHAND
+                    || slot == EQUIPMENT_SLOT_RANGED)) && pItem)
     {
         SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + (slot * 2), pItem->GetEntry());
         SetUInt16Value(PLAYER_VISIBLE_ITEM_1_ENCHANTMENT + (slot * 2), 0, pItem->GetEnchantmentId(PERM_ENCHANTMENT_SLOT));
@@ -17112,7 +17181,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     // load the player's map here if it's not already loaded
     Map* map = sMapMgr->CreateMap(mapId, this);
 
-    if (!map)
+    if (!map || !map->CanEnter(this))
     {
         instanceId = 0;
         AreaTrigger const* at = sObjectMgr->GetGoBackTrigger(mapId);
@@ -17129,14 +17198,14 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         }
 
         map = sMapMgr->CreateMap(mapId, this);
-        if (!map)
+        if (!map || !map->CanEnter(this))
         {
             PlayerInfo const* info = sObjectMgr->GetPlayerInfo(getRace(), getClass());
             mapId = info->mapId;
             Relocate(info->positionX, info->positionY, info->positionZ, 0.0f);
             sLog->outError("Player (guidlow %d) have invalid coordinates (X: %f Y: %f Z: %f O: %f). Teleport to default race/class locations.", guid, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
             map = sMapMgr->CreateMap(mapId, this);
-            if (!map)
+            if (!map || !map->CanEnter(this))
             {
                 sLog->outError("Player (guidlow %d) has invalid default map coordinates (X: %f Y: %f Z: %f O: %f). or instance couldn't be created", guid, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
                 return false;
@@ -17191,7 +17260,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     m_taxi.LoadTaxiMask(fields[17].GetCString());            // must be before InitTaxiNodesForLevel
 
-    uint32 extraflags = fields[31].GetUInt16();
+    m_ExtraFlags = fields[31].GetUInt16();
 
     m_stableSlots = fields[32].GetUInt8();
     if (m_stableSlots > MAX_PET_STABLES)
@@ -17359,7 +17428,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
             case 0:                      break;             // disable
             case 1: SetGameMaster(true); break;             // enable
             case 2:                                         // save state
-                if (extraflags & PLAYER_EXTRA_GM_ON)
+                if (m_ExtraFlags & PLAYER_EXTRA_GM_ON)
                     SetGameMaster(true);
                 break;
         }
@@ -17370,7 +17439,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
             case 0: SetGMVisible(false); break;             // invisible
             case 1:                      break;             // visible
             case 2:                                         // save state
-                if (extraflags & PLAYER_EXTRA_GM_INVISIBLE)
+                if (m_ExtraFlags & PLAYER_EXTRA_GM_INVISIBLE)
                     SetGMVisible(false);
                 break;
         }
@@ -17381,7 +17450,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
             case 0:                  break;                 // disable
             case 1: SetGMChat(true); break;                 // enable
             case 2:                                         // save state
-                if (extraflags & PLAYER_EXTRA_GM_CHAT)
+                if (m_ExtraFlags & PLAYER_EXTRA_GM_CHAT)
                     SetGMChat(true);
                 break;
         }
@@ -17392,7 +17461,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
             case 0:                          break;         // disable
             case 1: SetAcceptWhispers(true); break;         // enable
             case 2:                                         // save state
-                if (extraflags & PLAYER_EXTRA_ACCEPT_WHISPERS)
+                if (m_ExtraFlags & PLAYER_EXTRA_ACCEPT_WHISPERS)
                     SetAcceptWhispers(true);
                 break;
         }
@@ -18628,7 +18697,7 @@ bool Player::CheckInstanceLoginValid()
             return false;
     }
 
-    // do checks for satisfy accessreqs, instance full, encounter in progress (raid), perm bind group != perm bind player
+    // do checks for satisfy accessreqs
     return sMapMgr->CanPlayerEnter(GetMap()->GetId(), this, true);
 }
 
@@ -19204,7 +19273,7 @@ void Player::_SaveInventory(SQLTransaction& trans)
             case ITEM_UNCHANGED:
                 break;
         }
-
+        item->RemoveFromUpdateQueueOf(this);
         item->SaveToDB(trans);                                   // item have unchanged inventory record and can be save standalone
     }
     m_itemUpdateQueue.clear();
@@ -20074,7 +20143,7 @@ void Player::Whisper(const std::string& text, uint32 language, uint64 receiver)
     sScriptMgr->OnPlayerChat(this, CHAT_MSG_WHISPER, language, _text, rPlayer);
 
     // when player you are whispering to is dnd, he cannot receive your message, unless you are in gm mode
-    if (!rPlayer->isDND() || isGameMaster())
+    if (isAddonMessage || !rPlayer->isDND() || isGameMaster())
     {
         WorldPacket data(SMSG_MESSAGECHAT, 200);
         BuildPlayerChat(&data, CHAT_MSG_WHISPER, _text, language);
@@ -20509,8 +20578,18 @@ void Player::RemoveSpellMods(Spell* spell)
 
             // remove from list
             spell->m_appliedMods.erase(iterMod);
-
-            if (mod->ownerAura->DropCharge(AURA_REMOVE_BY_EXPIRE))
+            auto &aura = *mod->ownerAura;
+            bool removed = false;
+            if (aura.GetCharges())
+            {
+                aura.SetCharges(mod->charges == -1 ? 0 : static_cast<uint8>(std::min<int16>(mod->charges, std::numeric_limits<uint8>::max())));
+                if (!aura.GetCharges())
+                {
+                    aura.Remove(AURA_REMOVE_BY_EXPIRE);
+                    removed = true;
+                }
+            }
+            if (removed)
                 itr = m_spellMods[i].begin();
         }
     }
@@ -21468,17 +21547,25 @@ void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 ite
 
 void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time)
 {
-    SpellCooldown sc;
-    sc.end = end_time;
-    sc.itemid = itemid;
-    m_spellCooldowns[spellid] = sc;
+    auto old = m_spellCooldowns.find(spellid);
+    if (old == m_spellCooldowns.end() || old->second.end < end_time)
+    {
+        SpellCooldown sc;
+        sc.end = end_time;
+        sc.itemid = itemid;
+        m_spellCooldowns[spellid] = sc;
+    }
 }
 
 void Player::SendCooldownEvent(SpellInfo const* spellInfo, uint32 itemId /*= 0*/, Spell* spell /*= NULL*/, bool setCooldown /*= true*/)
 {
     // start cooldowns at server side, if any
     if (setCooldown)
+    {
+        RemoveSpellCooldown(spellInfo->Id);
+        RemoveSpellCategoryCooldown(spellInfo->Category);
         AddSpellAndCategoryCooldowns(spellInfo, itemId, spell);
+    }
 
     // Send activate cooldown timer (possible 0) at client side
     WorldPacket data(SMSG_COOLDOWN_EVENT, 4 + 8);
@@ -22178,8 +22265,8 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     // SMSG_INSTANCE_DIFFICULTY
     data.Initialize(SMSG_INSTANCE_DIFFICULTY, 4+4);
-    data << uint32(GetMap()->GetDifficulty());
-    data << uint32(0);
+    data << int32(GetMap()->difficulty());
+    data << int32(GetMap()->dynamic_difficulty());
     GetSession()->SendPacket(&data);
 
     SendInitialSpells();
@@ -22212,6 +22299,13 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
 void Player::SendInitialPacketsAfterAddToMap()
 {
+    if (getRace() == RACE_DRAENEI && getClass() == CLASS_DRUID)
+    {
+        WorldPacket msg(SMSG_LEARNED_SPELL, 4);
+        msg << GetLanguageDescByID(LANG_COMMON)->spell_id;
+        m_session->SendPacket(&msg);
+    }
+
     UpdateVisibilityForPlayer();
 
     // update zone
@@ -22284,6 +22378,8 @@ void Player::SendUpdateToOutOfRangeGroupMembers()
 
 void Player::SendTransferAborted(uint32 mapid, TransferAbortReason reason, uint8 arg)
 {
+    if (m_session->PlayerLoading())
+        return;
     WorldPacket data(SMSG_TRANSFER_ABORTED, 4+2);
     data << uint32(mapid);
     data << uint8(reason);                                 // transfer abort reason
@@ -23211,6 +23307,7 @@ void Player::SetClientControl(Unit* target, uint8 allowMove)
 
 void Player::UpdateZoneDependentAuras(uint32 newZone)
 {
+    area_sig(*this, newZone, m_areaUpdateId);
     // Some spells applied at enter into zone (with subzones), aura removed in UpdateAreaDependentAuras that called always at zone->area update
     SpellAreaForAreaMapBounds saBounds = sSpellMgr->GetSpellAreaForAreaMapBounds(newZone);
     for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
@@ -23221,6 +23318,7 @@ void Player::UpdateZoneDependentAuras(uint32 newZone)
 
 void Player::UpdateAreaDependentAuras(uint32 newArea)
 {
+    area_sig(*this, m_zoneUpdateId, newArea);
     // remove auras from spells with area limitations
     for (AuraMap::iterator iter = m_ownedAuras.begin(); iter != m_ownedAuras.end();)
     {
@@ -23604,7 +23702,7 @@ void Player::SetViewpoint(WorldObject* target, bool apply)
 WorldObject* Player::GetViewpoint() const
 {
     if (uint64 guid = GetUInt64Value(PLAYER_FARSIGHT))
-        return (WorldObject*)ObjectAccessor::GetObjectByTypeMask(*this, guid, TYPEMASK_SEER);
+        return ObjectAccessor::GetWorldObject(*this, guid);
     return NULL;
 }
 
@@ -24543,6 +24641,11 @@ void Player::LearnPetTalent(uint64 petGuid, uint32 talentId, uint32 talentRank)
 
     // update free talent points
     pet->SetFreeTalentPoints(CurTalentPoints - (talentRank - curtalent_maxrank + 1));
+}
+
+array<int, MAX_TALENT_TABS> Player::talent_tab_points_spent(int talent_group) const
+{
+    return talent_points_spent[talent_group];
 }
 
 void Player::AddKnownCurrency(uint32 itemId)
@@ -25493,7 +25596,7 @@ void Player::RefundItem(Item* item)
         {
             ItemPosCountVec dest;
             InventoryResult msg = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemid, count);
-            ASSERT(msg == EQUIP_ERR_OK) /// Already checked before
+            ASSERT(msg == EQUIP_ERR_OK);    /// Already checked before
             Item* it = StoreNewItem(dest, itemid, true);
             SendNewItem(it, count, true, false, true);
         }

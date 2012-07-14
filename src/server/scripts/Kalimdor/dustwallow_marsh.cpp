@@ -31,6 +31,7 @@ npc_private_hendel
 npc_cassa_crimsonwing - handled by npc_taxi
 EndContentData */
 
+#include "ScriptPCH.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"

@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ScriptPCH.h"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -70,115 +71,118 @@ enum Texts
     SAY_TERENAS_INTRO_3             = 2,
 };
 
-enum Spells
+namespace
 {
-    // The Lich King
-    SPELL_PLAGUE_AVOIDANCE              = 72846,    // raging spirits also get it
-    SPELL_EMOTE_SIT_NO_SHEATH           = 73220,
-    SPELL_BOSS_HITTIN_YA                = 73878,
-    SPELL_EMOTE_SHOUT_NO_SHEATH         = 73213,
-    SPELL_ICE_LOCK                      = 71614,
+    enum Spells
+    {
+        // The Lich King
+        SPELL_PLAGUE_AVOIDANCE              = 72846,    // raging spirits also get it
+        SPELL_EMOTE_SIT_NO_SHEATH           = 73220,
+        SPELL_BOSS_HITTIN_YA                = 73878,
+        SPELL_EMOTE_SHOUT_NO_SHEATH         = 73213,
+        SPELL_ICE_LOCK                      = 71614,
 
-    // Phase 1
-    SPELL_SUMMON_SHAMBLING_HORROR       = 70372,
-    SPELL_RISEN_WITCH_DOCTOR_SPAWN      = 69639,
-    SPELL_SUMMON_DRUDGE_GHOULS          = 70358,
-    SPELL_INFEST                        = 70541,
-    SPELL_NECROTIC_PLAGUE               = 70337,
-    SPELL_NECROTIC_PLAGUE_JUMP          = 70338,
-    SPELL_PLAGUE_SIPHON                 = 74074,
-    SPELL_SHADOW_TRAP                   = 73539,
-    SPELL_SHADOW_TRAP_AURA              = 73525,
-    SPELL_SHADOW_TRAP_KNOCKBACK         = 73529,
+        // Phase 1
+        SPELL_SUMMON_SHAMBLING_HORROR       = 70372,
+        SPELL_RISEN_WITCH_DOCTOR_SPAWN      = 69639,
+        SPELL_SUMMON_DRUDGE_GHOULS          = 70358,
+        SPELL_INFEST                        = 70541,
+        SPELL_NECROTIC_PLAGUE               = 70337,
+        SPELL_NECROTIC_PLAGUE_JUMP          = 70338,
+        SPELL_PLAGUE_SIPHON                 = 74074,
+        SPELL_SHADOW_TRAP                   = 73539,
+        SPELL_SHADOW_TRAP_AURA              = 73525,
+        SPELL_SHADOW_TRAP_KNOCKBACK         = 73529,
 
-    // Phase Transition
-    SPELL_REMORSELESS_WINTER_1          = 68981,
-    SPELL_REMORSELESS_WINTER_2          = 72259,
-    SPELL_PAIN_AND_SUFFERING            = 72133,
-    SPELL_SUMMON_ICE_SPHERE             = 69104,
-    SPELL_ICE_SPHERE                    = 69090,
-    SPELL_ICE_BURST_TARGET_SEARCH       = 69109,
-    SPELL_ICE_PULSE                     = 69091,
-    SPELL_ICE_BURST                     = 69108,
-    SPELL_RAGING_SPIRIT                 = 69200,
-    SPELL_RAGING_SPIRIT_VISUAL          = 69197,
-    SPELL_RAGING_SPIRIT_VISUAL_CLONE    = 69198,
-    SPELL_SOUL_SHRIEK                   = 69242,
-    SPELL_QUAKE                         = 72262,
+        // Phase Transition
+        SPELL_REMORSELESS_WINTER_1          = 68981,
+        SPELL_REMORSELESS_WINTER_2          = 72259,
+        SPELL_PAIN_AND_SUFFERING            = 72133,
+        SPELL_SUMMON_ICE_SPHERE             = 69104,
+        SPELL_ICE_SPHERE                    = 69090,
+        SPELL_ICE_BURST_TARGET_SEARCH       = 69109,
+        SPELL_ICE_PULSE                     = 69091,
+        SPELL_ICE_BURST                     = 69108,
+        SPELL_RAGING_SPIRIT                 = 69200,
+        SPELL_RAGING_SPIRIT_VISUAL          = 69197,
+        SPELL_RAGING_SPIRIT_VISUAL_CLONE    = 69198,
+        SPELL_SOUL_SHRIEK                   = 69242,
+        SPELL_QUAKE                         = 72262,
 
-    // Phase 2
-    SPELL_DEFILE                        = 72762,
-    SPELL_DEFILE_AURA                   = 72743,
-    SPELL_DEFILE_GROW                   = 72756,
-    SPELL_SUMMON_VALKYR                 = 69037,
-    SPELL_SUMMON_VALKYR_PERIODIC        = 74361,
-    SPELL_HARVEST_SOUL_VALKYR           = 68985,    // Val'kyr Shadowguard vehicle aura
-    SPELL_SOUL_REAPER                   = 69409,
-    SPELL_SOUL_REAPER_BUFF              = 69410,
-    SPELL_WINGS_OF_THE_DAMNED           = 74352,
-    SPELL_VALKYR_TARGET_SEARCH          = 69030,
-    SPELL_CHARGE                        = 74399,    // cast on selected target
-    SPELL_VALKYR_CARRY                  = 74445,    // removes unselectable flag
-    SPELL_LIFE_SIPHON                   = 73488,
-    SPELL_LIFE_SIPHON_HEAL              = 73489,
-    SPELL_EJECT_ALL_PASSENGERS          = 68576,
+        // Phase 2
+        SPELL_DEFILE                        = 72762,
+        SPELL_DEFILE_AURA                   = 72743,
+        SPELL_DEFILE_GROW                   = 72756,
+        SPELL_SUMMON_VALKYR                 = 69037,
+        SPELL_SUMMON_VALKYR_PERIODIC        = 74361,
+        SPELL_HARVEST_SOUL_VALKYR           = 68985,    // Val'kyr Shadowguard vehicle aura
+        SPELL_SOUL_REAPER                   = 69409,
+        SPELL_SOUL_REAPER_BUFF              = 69410,
+        SPELL_WINGS_OF_THE_DAMNED           = 74352,
+        SPELL_VALKYR_TARGET_SEARCH          = 69030,
+        SPELL_CHARGE                        = 74399,    // cast on selected target
+        SPELL_VALKYR_CARRY                  = 74445,    // removes unselectable flag
+        SPELL_LIFE_SIPHON                   = 73488,
+        SPELL_LIFE_SIPHON_HEAL              = 73489,
+        SPELL_EJECT_ALL_PASSENGERS          = 68576,
 
-    // Phase 3
-    SPELL_VILE_SPIRITS                  = 70498,
-    SPELL_VILE_SPIRIT_MOVE_SEARCH       = 70501,
-    SPELL_VILE_SPIRIT_DAMAGE_SEARCH     = 70502,
-    SPELL_SPIRIT_BURST                  = 70503,
-    SPELL_HARVEST_SOUL                  = 68980,
-    SPELL_HARVEST_SOULS                 = 73654,    // Heroic version, weird because it has all 4 difficulties just like above spell
-    SPELL_HARVEST_SOUL_VEHICLE          = 68984,
-    SPELL_HARVEST_SOUL_VISUAL           = 71372,
-    SPELL_HARVEST_SOUL_TELEPORT         = 72546,
-    SPELL_HARVEST_SOULS_TELEPORT        = 73655,
-    SPELL_HARVEST_SOUL_TELEPORT_BACK    = 72597,
-    SPELL_IN_FROSTMOURNE_ROOM           = 74276,
-    SPELL_KILL_FROSTMOURNE_PLAYERS      = 75127,
-    SPELL_HARVESTED_SOUL                = 72679,
-    SPELL_TRIGGER_VILE_SPIRIT_HEROIC    = 73582,    // TODO: Cast every 3 seconds during Frostmourne phase, targets a Wicked Spirit amd activates it
+        // Phase 3
+        SPELL_VILE_SPIRITS                  = 70498,
+        SPELL_VILE_SPIRIT_MOVE_SEARCH       = 70501,
+        SPELL_VILE_SPIRIT_DAMAGE_SEARCH     = 70502,
+        SPELL_SPIRIT_BURST                  = 70503,
+        SPELL_HARVEST_SOUL                  = 68980,
+        SPELL_HARVEST_SOULS                 = 73654,    // Heroic version, weird because it has all 4 difficulties just like above spell
+        SPELL_HARVEST_SOUL_VEHICLE          = 68984,
+        SPELL_HARVEST_SOUL_VISUAL           = 71372,
+        SPELL_HARVEST_SOUL_TELEPORT         = 72546,
+        SPELL_HARVEST_SOULS_TELEPORT        = 73655,
+        SPELL_HARVEST_SOUL_TELEPORT_BACK    = 72597,
+        SPELL_IN_FROSTMOURNE_ROOM           = 74276,
+        SPELL_KILL_FROSTMOURNE_PLAYERS      = 75127,
+        SPELL_HARVESTED_SOUL                = 72679,
+        SPELL_TRIGGER_VILE_SPIRIT_HEROIC    = 73582,    // TODO: Cast every 3 seconds during Frostmourne phase, targets a Wicked Spirit amd activates it
 
-    // Frostmourne
-    SPELL_LIGHTS_FAVOR                  = 69382,
-    SPELL_RESTORE_SOUL                  = 72595,
-    SPELL_RESTORE_SOULS                 = 73650,    // Heroic
-    SPELL_DARK_HUNGER                   = 69383,    // Passive proc healing
-    SPELL_DESTROY_SOUL                  = 74086,    // Used when Terenas Menethil dies
-    SPELL_SOUL_RIP                      = 69397,    // Deals increasing damage
-    SPELL_SOUL_RIP_DAMAGE               = 69398,
-    SPELL_TERENAS_LOSES_INSIDE          = 72572,
-    SPELL_SUMMON_SPIRIT_BOMB_1          = 73581,    // (Heroic)
-    SPELL_SUMMON_SPIRIT_BOMB_2          = 74299,    // (Heroic)
-    SPELL_EXPLOSION                     = 73576,    // Spirit Bomb (Heroic)
-    SPELL_HARVEST_SOUL_DAMAGE_AURA      = 73655,
+        // Frostmourne
+        SPELL_LIGHTS_FAVOR                  = 69382,
+        SPELL_RESTORE_SOUL                  = 72595,
+        SPELL_RESTORE_SOULS                 = 73650,    // Heroic
+        SPELL_DARK_HUNGER                   = 69383,    // Passive proc healing
+        SPELL_DESTROY_SOUL                  = 74086,    // Used when Terenas Menethil dies
+        SPELL_SOUL_RIP                      = 69397,    // Deals increasing damage
+        SPELL_SOUL_RIP_DAMAGE               = 69398,
+        SPELL_TERENAS_LOSES_INSIDE          = 72572,
+        SPELL_SUMMON_SPIRIT_BOMB_1          = 73581,    // (Heroic)
+        SPELL_SUMMON_SPIRIT_BOMB_2          = 74299,    // (Heroic)
+        SPELL_EXPLOSION                     = 73576,    // Spirit Bomb (Heroic)
+        SPELL_HARVEST_SOUL_DAMAGE_AURA      = 73655,
 
-    // Outro
-    SPELL_FURY_OF_FROSTMOURNE           = 72350,
-    SPELL_FURY_OF_FROSTMOURNE_NO_REZ    = 72351,
-    SPELL_EMOTE_QUESTION_NO_SHEATH      = 73330,
-    SPELL_RAISE_DEAD                    = 71769,
-    SPELL_LIGHTS_BLESSING               = 71797,
-    SPELL_JUMP                          = 71809,
-    SPELL_JUMP_TRIGGERED                = 71811,
-    SPELL_JUMP_2                        = 72431,
-    SPELL_SUMMON_BROKEN_FROSTMOURNE     = 74081,    // visual
-    SPELL_SUMMON_BROKEN_FROSTMOURNE_2   = 72406,    // animation
-    SPELL_SUMMON_BROKEN_FROSTMOURNE_3   = 73017,    // real summon
-    SPELL_BROKEN_FROSTMOURNE            = 72398,
-    SPELL_BROKEN_FROSTMOURNE_KNOCK      = 72405,
-    SPELL_SOUL_BARRAGE                  = 72305,
-    SPELL_SUMMON_TERENAS                = 72420,
-    SPELL_MASS_RESURRECTION             = 72429,
-    SPELL_MASS_RESURRECTION_REAL        = 72423,
-    SPELL_PLAY_MOVIE                    = 73159,
+        // Outro
+        SPELL_FURY_OF_FROSTMOURNE           = 72350,
+        SPELL_FURY_OF_FROSTMOURNE_NO_REZ    = 72351,
+        SPELL_EMOTE_QUESTION_NO_SHEATH      = 73330,
+        SPELL_RAISE_DEAD                    = 71769,
+        SPELL_LIGHTS_BLESSING               = 71797,
+        SPELL_JUMP                          = 71809,
+        SPELL_JUMP_TRIGGERED                = 71811,
+        SPELL_JUMP_2                        = 72431,
+        SPELL_SUMMON_BROKEN_FROSTMOURNE     = 74081,    // visual
+        SPELL_SUMMON_BROKEN_FROSTMOURNE_2   = 72406,    // animation
+        SPELL_SUMMON_BROKEN_FROSTMOURNE_3   = 73017,    // real summon
+        SPELL_BROKEN_FROSTMOURNE            = 72398,
+        SPELL_BROKEN_FROSTMOURNE_KNOCK      = 72405,
+        SPELL_SOUL_BARRAGE                  = 72305,
+        SPELL_SUMMON_TERENAS                = 72420,
+        SPELL_MASS_RESURRECTION             = 72429,
+        SPELL_MASS_RESURRECTION_REAL        = 72423,
+        SPELL_PLAY_MOVIE                    = 73159,
 
-    // Shambling Horror
-    SPELL_SHOCKWAVE                     = 72149,
-    SPELL_ENRAGE                        = 72143,
-    SPELL_FRENZY                        = 28747,
-};
+        // Shambling Horror
+        SPELL_SHOCKWAVE                     = 72149,
+        SPELL_ENRAGE                        = 72143,
+        SPELL_FRENZY                        = 28747,
+    };
+}
 
 #define NECROTIC_PLAGUE_LK   RAID_MODE<uint32>(70337, 73912, 73913, 73914)
 #define NECROTIC_PLAGUE_PLR  RAID_MODE<uint32>(70338, 73785, 73786, 73787)
@@ -187,82 +191,85 @@ enum Spells
 #define SUMMON_VALKYR        RAID_MODE<uint32>(69037, 74361, 69037, 74361)
 #define HARVEST_SOUL         RAID_MODE<uint32>(68980, 74325, 74296, 74297)
 
-enum Events
+namespace
 {
-    // The Lich King
-    // intro events
-    EVENT_INTRO_MOVE_1              = 1,
-    EVENT_INTRO_MOVE_2              = 2,
-    EVENT_INTRO_MOVE_3              = 3,
-    EVENT_INTRO_TALK_1              = 4,
-    EVENT_EMOTE_CAST_SHOUT          = 5,
-    EVENT_INTRO_EMOTE_1             = 6,
-    EVENT_INTRO_CHARGE              = 7,
-    EVENT_INTRO_CAST_FREEZE         = 8,
-    EVENT_FINISH_INTRO              = 9,
+    enum Events
+    {
+        // The Lich King
+        // intro events
+        EVENT_INTRO_MOVE_1              = 1,
+        EVENT_INTRO_MOVE_2              = 2,
+        EVENT_INTRO_MOVE_3              = 3,
+        EVENT_INTRO_TALK_1              = 4,
+        EVENT_EMOTE_CAST_SHOUT          = 5,
+        EVENT_INTRO_EMOTE_1             = 6,
+        EVENT_INTRO_CHARGE              = 7,
+        EVENT_INTRO_CAST_FREEZE         = 8,
+        EVENT_FINISH_INTRO              = 9,
 
-    // combat events
-    EVENT_SUMMON_SHAMBLING_HORROR   = 10,
-    EVENT_SUMMON_DRUDGE_GHOUL       = 11,
-    EVENT_INFEST                    = 12,
-    EVENT_NECROTIC_PLAGUE           = 13,
-    EVENT_SHADOW_TRAP               = 14,   // heroic only
-    EVENT_SOUL_REAPER               = 15,
-    EVENT_DEFILE                    = 16,
-    EVENT_HARVEST_SOUL              = 17,   // normal mode only
-    EVENT_PAIN_AND_SUFFERING        = 18,
-    EVENT_SUMMON_ICE_SPHERE         = 19,
-    EVENT_SUMMON_RAGING_SPIRIT      = 20,
-    EVENT_QUAKE                     = 21,
-    EVENT_SUMMON_VALKYR             = 22,
-    EVENT_GRAB_PLAYER               = 23,
-    EVENT_MOVE_TO_DROP_POS          = 24,
-    EVENT_LIFE_SIPHON               = 25,   // heroic only
-    EVENT_START_ATTACK              = 26,
-    EVENT_QUAKE_2                   = 27,
-    EVENT_VILE_SPIRITS              = 28,
-    EVENT_HARVEST_SOULS             = 29,   // heroic only
-    EVENT_BERSERK                   = 30,
-    EVENT_SOUL_RIP                  = 31,
-    EVENT_DESTROY_SOUL              = 32,
-    EVENT_FROSTMOURNE_TALK_1        = 33,
-    EVENT_FROSTMOURNE_TALK_2        = 34,
-    EVENT_FROSTMOURNE_TALK_3        = 35,
-    EVENT_TELEPORT_BACK             = 36,
-    EVENT_FROSTMOURNE_HEROIC        = 37,
-    EVENT_OUTRO_TALK_1              = 38,
-    EVENT_OUTRO_TALK_2              = 39,
-    EVENT_OUTRO_EMOTE_TALK          = 40,
-    EVENT_OUTRO_TALK_3              = 41,
-    EVENT_OUTRO_MOVE_CENTER         = 42,
-    EVENT_OUTRO_TALK_4              = 43,
-    EVENT_OUTRO_RAISE_DEAD          = 44,
-    EVENT_OUTRO_TALK_5              = 45,
-    EVENT_OUTRO_BLESS               = 46,
-    EVENT_OUTRO_REMOVE_ICE          = 47,
-    EVENT_OUTRO_MOVE_1              = 48,
-    EVENT_OUTRO_JUMP                = 49,
-    EVENT_OUTRO_TALK_6              = 50,
-    EVENT_OUTRO_KNOCK_BACK          = 51,
-    EVENT_OUTRO_SOUL_BARRAGE        = 52,
-    EVENT_OUTRO_SUMMON_TERENAS      = 53,
-    EVENT_OUTRO_TERENAS_TALK_1      = 54,
-    EVENT_OUTRO_TERENAS_TALK_2      = 55,
-    EVENT_OUTRO_TALK_7              = 56,
-    EVENT_OUTRO_TALK_8              = 57,
+        // combat events
+        EVENT_SUMMON_SHAMBLING_HORROR   = 10,
+        EVENT_SUMMON_DRUDGE_GHOUL       = 11,
+        EVENT_INFEST                    = 12,
+        EVENT_NECROTIC_PLAGUE           = 13,
+        EVENT_SHADOW_TRAP               = 14,   // heroic only
+        EVENT_SOUL_REAPER               = 15,
+        EVENT_DEFILE                    = 16,
+        EVENT_HARVEST_SOUL              = 17,   // normal mode only
+        EVENT_PAIN_AND_SUFFERING        = 18,
+        EVENT_SUMMON_ICE_SPHERE         = 19,
+        EVENT_SUMMON_RAGING_SPIRIT      = 20,
+        EVENT_QUAKE                     = 21,
+        EVENT_SUMMON_VALKYR             = 22,
+        EVENT_GRAB_PLAYER               = 23,
+        EVENT_MOVE_TO_DROP_POS          = 24,
+        EVENT_LIFE_SIPHON               = 25,   // heroic only
+        EVENT_START_ATTACK              = 26,
+        EVENT_QUAKE_2                   = 27,
+        EVENT_VILE_SPIRITS              = 28,
+        EVENT_HARVEST_SOULS             = 29,   // heroic only
+        EVENT_BERSERK                   = 30,
+        EVENT_SOUL_RIP                  = 31,
+        EVENT_DESTROY_SOUL              = 32,
+        EVENT_FROSTMOURNE_TALK_1        = 33,
+        EVENT_FROSTMOURNE_TALK_2        = 34,
+        EVENT_FROSTMOURNE_TALK_3        = 35,
+        EVENT_TELEPORT_BACK             = 36,
+        EVENT_FROSTMOURNE_HEROIC        = 37,
+        EVENT_OUTRO_TALK_1              = 38,
+        EVENT_OUTRO_TALK_2              = 39,
+        EVENT_OUTRO_EMOTE_TALK          = 40,
+        EVENT_OUTRO_TALK_3              = 41,
+        EVENT_OUTRO_MOVE_CENTER         = 42,
+        EVENT_OUTRO_TALK_4              = 43,
+        EVENT_OUTRO_RAISE_DEAD          = 44,
+        EVENT_OUTRO_TALK_5              = 45,
+        EVENT_OUTRO_BLESS               = 46,
+        EVENT_OUTRO_REMOVE_ICE          = 47,
+        EVENT_OUTRO_MOVE_1              = 48,
+        EVENT_OUTRO_JUMP                = 49,
+        EVENT_OUTRO_TALK_6              = 50,
+        EVENT_OUTRO_KNOCK_BACK          = 51,
+        EVENT_OUTRO_SOUL_BARRAGE        = 52,
+        EVENT_OUTRO_SUMMON_TERENAS      = 53,
+        EVENT_OUTRO_TERENAS_TALK_1      = 54,
+        EVENT_OUTRO_TERENAS_TALK_2      = 55,
+        EVENT_OUTRO_TALK_7              = 56,
+        EVENT_OUTRO_TALK_8              = 57,
 
-    // Shambling Horror
-    EVENT_SHOCKWAVE                 = 58,
-    EVENT_ENRAGE                    = 59,
+        // Shambling Horror
+        EVENT_SHOCKWAVE                 = 58,
+        EVENT_ENRAGE                    = 59,
 
-    // Raging Spirit
-    EVENT_SOUL_SHRIEK               = 60,
+        // Raging Spirit
+        EVENT_SOUL_SHRIEK               = 60,
 
-    // Strangulate Vehicle (Harvest Soul)
-    EVENT_TELEPORT                  = 61,
-    EVENT_MOVE_TO_LICH_KING         = 62,
-    EVENT_DESPAWN_SELF              = 63,
-};
+        // Strangulate Vehicle (Harvest Soul)
+        EVENT_TELEPORT                  = 61,
+        EVENT_MOVE_TO_LICH_KING         = 62,
+        EVENT_DESPAWN_SELF              = 63,
+    };
+}
 
 enum EventGroups
 {
@@ -270,26 +277,29 @@ enum EventGroups
     EVENT_GROUP_VILE_SPIRITS    = 2,
 };
 
-enum Phases
+namespace
 {
-    PHASE_INTRO                 = 1,
-    PHASE_ONE                   = 2,
-    PHASE_TWO                   = 3,
-    PHASE_THREE                 = 4,
-    PHASE_TRANSITION            = 5,
-    PHASE_FROSTMOURNE           = 6,    // only set on heroic mode when all players are sent into frostmourne
-    PHASE_OUTRO                 = 7,
+    enum Phases
+    {
+        PHASE_INTRO                 = 1,
+        PHASE_ONE                   = 2,
+        PHASE_TWO                   = 3,
+        PHASE_THREE                 = 4,
+        PHASE_TRANSITION            = 5,
+        PHASE_FROSTMOURNE           = 6,    // only set on heroic mode when all players are sent into frostmourne
+        PHASE_OUTRO                 = 7,
 
-    PHASE_MASK_INTRO            = 1 << PHASE_INTRO,
-    PHASE_MASK_ONE              = 1 << PHASE_ONE,
-    PHASE_MASK_TWO              = 1 << PHASE_TWO,
-    PHASE_MASK_THREE            = 1 << PHASE_THREE,
-    PHASE_MASK_TRANSITION       = 1 << PHASE_TRANSITION,
-    PHASE_MASK_NO_CAST_CHECK    = (1 << PHASE_TRANSITION) | (1 << PHASE_FROSTMOURNE) | (1 << PHASE_OUTRO),
-    PHASE_MASK_FROSTMOURNE      = 1 << PHASE_FROSTMOURNE,
-    PHASE_MASK_OUTRO            = 1 << PHASE_OUTRO,
-    PHASE_MASK_NO_VICTIM        = (1 << PHASE_INTRO) | (1 << PHASE_OUTRO) | (1 << PHASE_FROSTMOURNE),
-};
+        PHASE_MASK_INTRO            = 1 << PHASE_INTRO,
+        PHASE_MASK_ONE              = 1 << PHASE_ONE,
+        PHASE_MASK_TWO              = 1 << PHASE_TWO,
+        PHASE_MASK_THREE            = 1 << PHASE_THREE,
+        PHASE_MASK_TRANSITION       = 1 << PHASE_TRANSITION,
+        PHASE_MASK_NO_CAST_CHECK    = (1 << PHASE_TRANSITION) | (1 << PHASE_FROSTMOURNE) | (1 << PHASE_OUTRO),
+        PHASE_MASK_FROSTMOURNE      = 1 << PHASE_FROSTMOURNE,
+        PHASE_MASK_OUTRO            = 1 << PHASE_OUTRO,
+        PHASE_MASK_NO_VICTIM        = (1 << PHASE_INTRO) | (1 << PHASE_OUTRO) | (1 << PHASE_FROSTMOURNE),
+    };
+}
 
 #define PHASE_TWO_THREE  (events.GetPhaseMask() & PHASE_MASK_TWO ? PHASE_TWO : PHASE_THREE)
 
@@ -878,242 +888,248 @@ class boss_the_lich_king : public CreatureScript
 
                 events.Update(diff);
 
-                // during Remorseless Winter phases The Lich King is channeling a spell, but we must continue casting other spells
-                if (me->HasUnitState(UNIT_STATE_CASTING) && !(events.GetPhaseMask() & PHASE_MASK_NO_CAST_CHECK))
-                    return;
-
-                while (uint32 eventId = events.ExecuteEvent())
+                for (; ; )
                 {
-                    switch (eventId)
-                    {
-                        case EVENT_INTRO_MOVE_1:
-                            me->SetSheath(SHEATH_STATE_MELEE);
-                            me->RemoveAurasDueToSpell(SPELL_EMOTE_SIT_NO_SHEATH);
-                            me->SetWalk(true);
-                            me->GetMotionMaster()->MovePoint(POINT_LK_INTRO_1, LichKingIntro[0]);
-                            break;
-                        case EVENT_INTRO_MOVE_2:
-                            me->GetMotionMaster()->MovePoint(POINT_LK_INTRO_2, LichKingIntro[1]);
-                            break;
-                        case EVENT_INTRO_MOVE_3:
-                            me->GetMotionMaster()->MovePoint(POINT_LK_INTRO_3, LichKingIntro[2]);
-                            break;
-                        case EVENT_INTRO_TALK_1:
-                            Talk(SAY_LK_INTRO_2);
-                            // for some reason blizz sends 2 emotes in row here so (we handle one in Talk)
-                            me->HandleEmoteCommand(EMOTE_ONESHOT_TALK_NO_SHEATHE);
-                            events.ScheduleEvent(EVENT_EMOTE_CAST_SHOUT, 7000, 0, PHASE_INTRO);
-                            events.ScheduleEvent(EVENT_INTRO_EMOTE_1, 13000, 0, PHASE_INTRO);
-                            events.ScheduleEvent(EVENT_EMOTE_CAST_SHOUT, 18000, 0, PHASE_INTRO);
-                            events.ScheduleEvent(EVENT_INTRO_CAST_FREEZE, 31000, 0, PHASE_INTRO);
-                            break;
-                        case EVENT_EMOTE_CAST_SHOUT:
-                            DoCast(me, SPELL_EMOTE_SHOUT_NO_SHEATH, false);
-                            break;
-                        case EVENT_INTRO_EMOTE_1:
-                            me->HandleEmoteCommand(EMOTE_ONESHOT_POINT_NO_SHEATHE);
-                            break;
-                        case EVENT_INTRO_CAST_FREEZE:
-                            Talk(SAY_LK_INTRO_3);
-                            DoCastAOE(SPELL_ICE_LOCK, false);
-                            events.ScheduleEvent(EVENT_FINISH_INTRO, 1000, 0, PHASE_INTRO);
-                            break;
-                        case EVENT_FINISH_INTRO:
-                            me->SetWalk(false);
-                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                            me->SetReactState(REACT_AGGRESSIVE);
-                            events.SetPhase(PHASE_ONE);
-                            break;
-                        case EVENT_SUMMON_SHAMBLING_HORROR:
-                            DoCast(me, SPELL_SUMMON_SHAMBLING_HORROR);
-                            SendMusicToPlayers(MUSIC_SPECIAL);
-                            events.ScheduleEvent(EVENT_SUMMON_SHAMBLING_HORROR, 60000, 0, PHASE_ONE);
-                            break;
-                        case EVENT_SUMMON_DRUDGE_GHOUL:
-                            DoCast(me, SPELL_SUMMON_DRUDGE_GHOULS);
-                            events.ScheduleEvent(EVENT_SUMMON_DRUDGE_GHOUL, 30000, 0, PHASE_ONE);
-                            break;
-                        case EVENT_INFEST:
-                            DoCast(me, SPELL_INFEST);
-                            events.ScheduleEvent(EVENT_INFEST, urand(21000, 24000), 0, (events.GetPhaseMask() & PHASE_MASK_ONE) ? PHASE_ONE : PHASE_TWO);
-                            break;
-                        case EVENT_NECROTIC_PLAGUE:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, NecroticPlagueTargetCheck(me, NECROTIC_PLAGUE_LK, NECROTIC_PLAGUE_PLR)))
-                            {
-                                Talk(EMOTE_NECROTIC_PLAGUE_WARNING, target->GetGUID());
-                                DoCast(target, SPELL_NECROTIC_PLAGUE);
-                            }
-                            events.ScheduleEvent(EVENT_NECROTIC_PLAGUE, urand(30000, 33000), 0, PHASE_ONE);
-                            break;
-                        case EVENT_SHADOW_TRAP:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
-                                DoCast(target, SPELL_SHADOW_TRAP);
-                            events.ScheduleEvent(EVENT_SHADOW_TRAP, 15500, 0, PHASE_ONE);
-                            break;
-                        case EVENT_SOUL_REAPER:
-                            DoCastVictim(SPELL_SOUL_REAPER);
-                            events.ScheduleEvent(EVENT_SOUL_REAPER, urand(33000, 35000), 0, PHASE_TWO_THREE);
-                            break;
-                        case EVENT_DEFILE:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -SPELL_HARVEST_SOUL_VALKYR))
-                            {
-                                Talk(EMOTE_DEFILE_WARNING);
-                                DoCast(target, SPELL_DEFILE);
-                            }
-                            events.ScheduleEvent(EVENT_DEFILE, urand(32000, 35000), 0, PHASE_TWO_THREE);
-                            break;
-                        case EVENT_HARVEST_SOUL:
-                            Talk(SAY_LK_HARVEST_SOUL);
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, SpellTargetSelector(me, SPELL_HARVEST_SOUL)))
-                                DoCast(target, SPELL_HARVEST_SOUL);
-                            events.ScheduleEvent(EVENT_HARVEST_SOUL, 75000, 0, PHASE_THREE);
-                            break;
-                        case EVENT_PAIN_AND_SUFFERING:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
-                                me->CastSpell(target, SPELL_PAIN_AND_SUFFERING, TRIGGERED_NONE);
-                            events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, urand(1500, 4000), 0, PHASE_TRANSITION);
-                            break;
-                        case EVENT_SUMMON_ICE_SPHERE:
-                            DoCastAOE(SPELL_SUMMON_ICE_SPHERE);
-                            events.ScheduleEvent(EVENT_SUMMON_ICE_SPHERE, urand(7500, 8500), 0, PHASE_TRANSITION);
-                            break;
-                        case EVENT_SUMMON_RAGING_SPIRIT:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
-                                me->CastSpell(target, SPELL_RAGING_SPIRIT, TRIGGERED_NONE);
-                            events.ScheduleEvent(EVENT_SUMMON_RAGING_SPIRIT, urand(22000, 23000), 0, PHASE_TRANSITION);
-                            break;
-                        case EVENT_QUAKE:
-                            events.SetPhase(PHASE_TWO);
-                            me->ClearUnitState(UNIT_STATE_CASTING);  // clear state to ensure check in DoCastAOE passes
-                            DoCastAOE(SPELL_QUAKE);
-                            SendMusicToPlayers(MUSIC_SPECIAL);
-                            Talk(SAY_LK_QUAKE);
-                            break;
-                        case EVENT_QUAKE_2:
-                            events.SetPhase(PHASE_THREE);
-                            me->ClearUnitState(UNIT_STATE_CASTING);  // clear state to ensure check in DoCastAOE passes
-                            DoCastAOE(SPELL_QUAKE);
-                            SendMusicToPlayers(MUSIC_SPECIAL);
-                            Talk(SAY_LK_QUAKE);
-                            break;
-                        case EVENT_SUMMON_VALKYR:
-                            SendMusicToPlayers(MUSIC_SPECIAL);
-                            Talk(SAY_LK_SUMMON_VALKYR);
-                            DoCastAOE(SUMMON_VALKYR);
-                            events.ScheduleEvent(EVENT_SUMMON_VALKYR, urand(45000, 50000), 0, PHASE_TWO);
-                            break;
-                        case EVENT_START_ATTACK:
-                            me->SetReactState(REACT_AGGRESSIVE);
-                            if (events.GetPhaseMask() & PHASE_MASK_FROSTMOURNE)
-                                events.SetPhase(PHASE_THREE);
-                            break;
-                        case EVENT_VILE_SPIRITS:
-                            SendMusicToPlayers(MUSIC_SPECIAL);
-                            DoCastAOE(SPELL_VILE_SPIRITS);
-                            events.ScheduleEvent(EVENT_VILE_SPIRITS, urand(35000, 40000), EVENT_GROUP_VILE_SPIRITS, PHASE_THREE);
-                            break;
-                        case EVENT_HARVEST_SOULS:
-                            Talk(SAY_LK_HARVEST_SOUL);
-                            DoCastAOE(SPELL_HARVEST_SOULS);
-                            events.ScheduleEvent(EVENT_HARVEST_SOULS, urand(100000, 110000), 0, PHASE_THREE);
-                            events.SetPhase(PHASE_FROSTMOURNE); // will stop running UpdateVictim (no evading)
-                            me->SetReactState(REACT_PASSIVE);
-                            me->AttackStop();
-                            events.DelayEvents(50000, EVENT_GROUP_VILE_SPIRITS);
-                            events.RescheduleEvent(EVENT_DEFILE, 50000, 0, PHASE_THREE);
-                            events.RescheduleEvent(EVENT_SOUL_REAPER, urand(57000, 62000), 0, PHASE_THREE);
-                            events.ScheduleEvent(EVENT_START_ATTACK, 49000);
-                            events.ScheduleEvent(EVENT_FROSTMOURNE_HEROIC, 6500);
-                            break;
-                        case EVENT_FROSTMOURNE_HEROIC:
-                            if (TempSummon* terenas = me->GetMap()->SummonCreature(NPC_TERENAS_MENETHIL_FROSTMOURNE_H, TerenasSpawnHeroic, NULL, 50000))
-                            {
-                                terenas->AI()->DoAction(ACTION_FROSTMOURNE_INTRO);
-                                std::list<Creature*> triggers;
-                                GetCreatureListWithEntryInGrid(triggers, terenas, NPC_WORLD_TRIGGER_INFINITE_AOI, 100.0f);
-                                if (!triggers.empty())
-                                {
-                                    triggers.sort(Trinity::ObjectDistanceOrderPred(terenas, true));
-                                    Creature* spawner = triggers.front();
-                                    spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_1, true);  // summons bombs randomly
-                                    spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_2, true);  // summons bombs on players
-                                    spawner->m_Events.AddEvent(new TriggerWickedSpirit(spawner), spawner->m_Events.CalculateTime(3000));
-                                }
+                    // during Remorseless Winter phases The Lich King is channeling a spell, but we must continue casting other spells
+                    if (me->HasUnitState(UNIT_STATE_CASTING) && !(events.GetPhaseMask() & PHASE_MASK_NO_CAST_CHECK))
+                        return;
 
-                                for (SummonList::iterator i = summons.begin(); i != summons.end(); ++i)
+                    if (uint32 eventId = events.ExecuteEvent())
+                    {
+                        switch (eventId)
+                        {
+                            case EVENT_INTRO_MOVE_1:
+                                me->SetSheath(SHEATH_STATE_MELEE);
+                                me->RemoveAurasDueToSpell(SPELL_EMOTE_SIT_NO_SHEATH);
+                                me->SetWalk(true);
+                                me->GetMotionMaster()->MovePoint(POINT_LK_INTRO_1, LichKingIntro[0]);
+                                break;
+                            case EVENT_INTRO_MOVE_2:
+                                me->GetMotionMaster()->MovePoint(POINT_LK_INTRO_2, LichKingIntro[1]);
+                                break;
+                            case EVENT_INTRO_MOVE_3:
+                                me->GetMotionMaster()->MovePoint(POINT_LK_INTRO_3, LichKingIntro[2]);
+                                break;
+                            case EVENT_INTRO_TALK_1:
+                                Talk(SAY_LK_INTRO_2);
+                                // for some reason blizz sends 2 emotes in row here so (we handle one in Talk)
+                                me->HandleEmoteCommand(EMOTE_ONESHOT_TALK_NO_SHEATHE);
+                                events.ScheduleEvent(EVENT_EMOTE_CAST_SHOUT, 7000, 0, PHASE_INTRO);
+                                events.ScheduleEvent(EVENT_INTRO_EMOTE_1, 13000, 0, PHASE_INTRO);
+                                events.ScheduleEvent(EVENT_EMOTE_CAST_SHOUT, 18000, 0, PHASE_INTRO);
+                                events.ScheduleEvent(EVENT_INTRO_CAST_FREEZE, 31000, 0, PHASE_INTRO);
+                                break;
+                            case EVENT_EMOTE_CAST_SHOUT:
+                                DoCast(me, SPELL_EMOTE_SHOUT_NO_SHEATH, false);
+                                break;
+                            case EVENT_INTRO_EMOTE_1:
+                                me->HandleEmoteCommand(EMOTE_ONESHOT_POINT_NO_SHEATHE);
+                                break;
+                            case EVENT_INTRO_CAST_FREEZE:
+                                Talk(SAY_LK_INTRO_3);
+                                DoCastAOE(SPELL_ICE_LOCK, false);
+                                events.ScheduleEvent(EVENT_FINISH_INTRO, 1000, 0, PHASE_INTRO);
+                                break;
+                            case EVENT_FINISH_INTRO:
+                                me->SetWalk(false);
+                                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                                me->SetReactState(REACT_AGGRESSIVE);
+                                events.SetPhase(PHASE_ONE);
+                                me->SetInCombatWithZone();
+                                break;
+                            case EVENT_SUMMON_SHAMBLING_HORROR:
+                                DoCast(me, SPELL_SUMMON_SHAMBLING_HORROR);
+                                SendMusicToPlayers(MUSIC_SPECIAL);
+                                events.ScheduleEvent(EVENT_SUMMON_SHAMBLING_HORROR, 60000, 0, PHASE_ONE);
+                                break;
+                            case EVENT_SUMMON_DRUDGE_GHOUL:
+                                DoCast(me, SPELL_SUMMON_DRUDGE_GHOULS);
+                                events.ScheduleEvent(EVENT_SUMMON_DRUDGE_GHOUL, 30000, 0, PHASE_ONE);
+                                break;
+                            case EVENT_INFEST:
+                                DoCast(me, SPELL_INFEST);
+                                events.ScheduleEvent(EVENT_INFEST, urand(21000, 24000), 0, (events.GetPhaseMask() & PHASE_MASK_ONE) ? PHASE_ONE : PHASE_TWO);
+                                break;
+                            case EVENT_NECROTIC_PLAGUE:
+                                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, NecroticPlagueTargetCheck(me, NECROTIC_PLAGUE_LK, NECROTIC_PLAGUE_PLR)))
                                 {
-                                    Creature* summon = ObjectAccessor::GetCreature(*me, *i);
-                                    if (summon && summon->GetEntry() == NPC_VILE_SPIRIT)
+                                    Talk(EMOTE_NECROTIC_PLAGUE_WARNING, target->GetGUID());
+                                    DoCast(target, SPELL_NECROTIC_PLAGUE);
+                                }
+                                events.ScheduleEvent(EVENT_NECROTIC_PLAGUE, urand(30000, 33000), 0, PHASE_ONE);
+                                break;
+                            case EVENT_SHADOW_TRAP:
+                                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
+                                    DoCast(target, SPELL_SHADOW_TRAP);
+                                events.ScheduleEvent(EVENT_SHADOW_TRAP, 15500, 0, PHASE_ONE);
+                                break;
+                            case EVENT_SOUL_REAPER:
+                                DoCastVictim(SPELL_SOUL_REAPER);
+                                events.ScheduleEvent(EVENT_SOUL_REAPER, urand(33000, 35000), 0, PHASE_TWO_THREE);
+                                break;
+                            case EVENT_DEFILE:
+                                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -SPELL_HARVEST_SOUL_VALKYR))
+                                {
+                                    Talk(EMOTE_DEFILE_WARNING);
+                                    DoCast(target, SPELL_DEFILE);
+                                }
+                                events.ScheduleEvent(EVENT_DEFILE, urand(32000, 35000), 0, PHASE_TWO_THREE);
+                                break;
+                            case EVENT_HARVEST_SOUL:
+                                Talk(SAY_LK_HARVEST_SOUL);
+                                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, SpellTargetSelector(me, SPELL_HARVEST_SOUL)))
+                                    DoCast(target, SPELL_HARVEST_SOUL);
+                                events.ScheduleEvent(EVENT_HARVEST_SOUL, 75000, 0, PHASE_THREE);
+                                break;
+                            case EVENT_PAIN_AND_SUFFERING:
+                                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                                    me->CastSpell(target, SPELL_PAIN_AND_SUFFERING, TRIGGERED_NONE);
+                                events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, urand(1500, 4000), 0, PHASE_TRANSITION);
+                                break;
+                            case EVENT_SUMMON_ICE_SPHERE:
+                                DoCastAOE(SPELL_SUMMON_ICE_SPHERE);
+                                events.ScheduleEvent(EVENT_SUMMON_ICE_SPHERE, urand(7500, 8500), 0, PHASE_TRANSITION);
+                                break;
+                            case EVENT_SUMMON_RAGING_SPIRIT:
+                                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                                    me->CastSpell(target, SPELL_RAGING_SPIRIT, TRIGGERED_NONE);
+                                events.ScheduleEvent(EVENT_SUMMON_RAGING_SPIRIT, urand(22000, 23000), 0, PHASE_TRANSITION);
+                                break;
+                            case EVENT_QUAKE:
+                                events.SetPhase(PHASE_TWO);
+                                me->InterruptNonMeleeSpells(false, 0, false);
+                                DoCastAOE(SPELL_QUAKE);
+                                SendMusicToPlayers(MUSIC_SPECIAL);
+                                Talk(SAY_LK_QUAKE);
+                                break;
+                            case EVENT_QUAKE_2:
+                                events.SetPhase(PHASE_THREE);
+                                me->InterruptNonMeleeSpells(false, 0, false);
+                                DoCastAOE(SPELL_QUAKE);
+                                SendMusicToPlayers(MUSIC_SPECIAL);
+                                Talk(SAY_LK_QUAKE);
+                                break;
+                            case EVENT_SUMMON_VALKYR:
+                                SendMusicToPlayers(MUSIC_SPECIAL);
+                                Talk(SAY_LK_SUMMON_VALKYR);
+                                DoCastAOE(SUMMON_VALKYR);
+                                events.ScheduleEvent(EVENT_SUMMON_VALKYR, urand(45000, 50000), 0, PHASE_TWO);
+                                break;
+                            case EVENT_START_ATTACK:
+                                me->SetReactState(REACT_AGGRESSIVE);
+                                if (events.GetPhaseMask() & PHASE_MASK_FROSTMOURNE)
+                                    events.SetPhase(PHASE_THREE);
+                                break;
+                            case EVENT_VILE_SPIRITS:
+                                SendMusicToPlayers(MUSIC_SPECIAL);
+                                DoCastAOE(SPELL_VILE_SPIRITS);
+                                events.ScheduleEvent(EVENT_VILE_SPIRITS, urand(35000, 40000), EVENT_GROUP_VILE_SPIRITS, PHASE_THREE);
+                                break;
+                            case EVENT_HARVEST_SOULS:
+                                Talk(SAY_LK_HARVEST_SOUL);
+                                DoCastAOE(SPELL_HARVEST_SOULS);
+                                events.ScheduleEvent(EVENT_HARVEST_SOULS, urand(100000, 110000), 0, PHASE_THREE);
+                                events.SetPhase(PHASE_FROSTMOURNE); // will stop running UpdateVictim (no evading)
+                                me->SetReactState(REACT_PASSIVE);
+                                me->AttackStop();
+                                events.DelayEvents(50000, EVENT_GROUP_VILE_SPIRITS);
+                                events.RescheduleEvent(EVENT_DEFILE, 50000, 0, PHASE_THREE);
+                                events.RescheduleEvent(EVENT_SOUL_REAPER, urand(57000, 62000), 0, PHASE_THREE);
+                                events.ScheduleEvent(EVENT_START_ATTACK, 49000);
+                                events.ScheduleEvent(EVENT_FROSTMOURNE_HEROIC, 6500);
+                                break;
+                            case EVENT_FROSTMOURNE_HEROIC:
+                                if (TempSummon* terenas = me->GetMap()->SummonCreature(NPC_TERENAS_MENETHIL_FROSTMOURNE_H, TerenasSpawnHeroic, NULL, 50000))
+                                {
+                                    terenas->AI()->DoAction(ACTION_FROSTMOURNE_INTRO);
+                                    std::list<Creature*> triggers;
+                                    GetCreatureListWithEntryInGrid(triggers, terenas, NPC_WORLD_TRIGGER_INFINITE_AOI, 100.0f);
+                                    if (!triggers.empty())
                                     {
-                                        summon->m_Events.KillAllEvents(true);
-                                        summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(50000));
-                                        summon->GetMotionMaster()->MoveRandom(10.0f);
-                                        summon->SetReactState(REACT_PASSIVE);
+                                        triggers.sort(Trinity::ObjectDistanceOrderPred(terenas, true));
+                                        Creature* spawner = triggers.front();
+                                        spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_1, true);  // summons bombs randomly
+                                        spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_2, true);  // summons bombs on players
+                                        spawner->m_Events.AddEvent(new TriggerWickedSpirit(spawner), spawner->m_Events.CalculateTime(3000));
+                                    }
+
+                                    for (SummonList::iterator i = summons.begin(); i != summons.end(); ++i)
+                                    {
+                                        Creature* summon = ObjectAccessor::GetCreature(*me, *i);
+                                        if (summon && summon->GetEntry() == NPC_VILE_SPIRIT)
+                                        {
+                                            summon->m_Events.KillAllEvents(true);
+                                            summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(50000));
+                                            summon->GetMotionMaster()->MoveRandom(10.0f);
+                                            summon->SetReactState(REACT_PASSIVE);
+                                        }
                                     }
                                 }
-                            }
-                            break;
-                        case EVENT_OUTRO_TALK_1:
-                            Talk(SAY_LK_OUTRO_1);
-                            DoCastAOE(SPELL_FURY_OF_FROSTMOURNE_NO_REZ, true);
-                            break;
-                        case EVENT_OUTRO_TALK_2:
-                            Talk(SAY_LK_OUTRO_2);
-                            DoCastAOE(SPELL_EMOTE_QUESTION_NO_SHEATH);
-                            break;
-                        case EVENT_OUTRO_EMOTE_TALK:
-                            me->HandleEmoteCommand(EMOTE_ONESHOT_TALK_NO_SHEATHE);
-                            break;
-                        case EVENT_OUTRO_TALK_3:
-                            if (Creature* tirion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HIGHLORD_TIRION_FORDRING)))
-                                me->SetFacingToObject(tirion);
-                            Talk(SAY_LK_OUTRO_3);
-                            break;
-                        case EVENT_OUTRO_MOVE_CENTER:
-                            me->GetMotionMaster()->MovePoint(POINT_LK_OUTRO_1, CenterPosition);
-                            break;
-                        case EVENT_OUTRO_TALK_4:
-                            me->SetFacingTo(0.01745329f);
-                            Talk(SAY_LK_OUTRO_4);
-                            break;
-                        case EVENT_OUTRO_RAISE_DEAD:
-                            DoCastAOE(SPELL_RAISE_DEAD);
-                            me->ClearUnitState(UNIT_STATE_CASTING);
-                            SendMusicToPlayers(MUSIC_FINAL);
-                            break;
-                        case EVENT_OUTRO_TALK_5:
-                            Talk(SAY_LK_OUTRO_5);
-                            if (Creature* tirion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HIGHLORD_TIRION_FORDRING)))
-                                tirion->AI()->DoAction(ACTION_OUTRO);
-                            break;
-                        case EVENT_OUTRO_TALK_6:
-                            Talk(SAY_LK_OUTRO_6);
-                            if (Creature* tirion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HIGHLORD_TIRION_FORDRING)))
-                                tirion->SetFacingToObject(me);
-                            me->CastSpell((Unit*)NULL, SPELL_SUMMON_BROKEN_FROSTMOURNE_3, TRIGGERED_IGNORE_CAST_IN_PROGRESS);
-                            SetEquipmentSlots(false, EQUIP_UNEQUIP);
-                            break;
-                        case EVENT_OUTRO_SOUL_BARRAGE:
-                            me->CastSpell((Unit*)NULL, SPELL_SOUL_BARRAGE, TRIGGERED_IGNORE_CAST_IN_PROGRESS);
-                            sCreatureTextMgr->SendSound(me, SOUND_PAIN, CHAT_MSG_MONSTER_YELL, 0, TEXT_RANGE_NORMAL, TEAM_OTHER, false);
-                            // set flight
-                            me->SetDisableGravity(true);
-                            me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
-                            me->GetMotionMaster()->MovePoint(POINT_LK_OUTRO_2, OutroFlying);
-                            break;
-                        case EVENT_OUTRO_TALK_7:
-                            Talk(SAY_LK_OUTRO_7);
-                            break;
-                        case EVENT_OUTRO_TALK_8:
-                            Talk(SAY_LK_OUTRO_8);
-                            break;
-                        case EVENT_BERSERK:
-                            Talk(SAY_LK_BERSERK);
-                            DoCast(me, SPELL_BERSERK2);
-                            break;
-                        default:
-                            break;
+                                break;
+                            case EVENT_OUTRO_TALK_1:
+                                Talk(SAY_LK_OUTRO_1);
+                                DoCastAOE(SPELL_FURY_OF_FROSTMOURNE_NO_REZ, true);
+                                break;
+                            case EVENT_OUTRO_TALK_2:
+                                Talk(SAY_LK_OUTRO_2);
+                                DoCastAOE(SPELL_EMOTE_QUESTION_NO_SHEATH);
+                                break;
+                            case EVENT_OUTRO_EMOTE_TALK:
+                                me->HandleEmoteCommand(EMOTE_ONESHOT_TALK_NO_SHEATHE);
+                                break;
+                            case EVENT_OUTRO_TALK_3:
+                                if (Creature* tirion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HIGHLORD_TIRION_FORDRING)))
+                                    me->SetFacingToObject(tirion);
+                                Talk(SAY_LK_OUTRO_3);
+                                break;
+                            case EVENT_OUTRO_MOVE_CENTER:
+                                me->GetMotionMaster()->MovePoint(POINT_LK_OUTRO_1, CenterPosition);
+                                break;
+                            case EVENT_OUTRO_TALK_4:
+                                me->SetFacingTo(0.01745329f);
+                                Talk(SAY_LK_OUTRO_4);
+                                break;
+                            case EVENT_OUTRO_RAISE_DEAD:
+                                DoCastAOE(SPELL_RAISE_DEAD);
+                                me->ClearUnitState(UNIT_STATE_CASTING);
+                                SendMusicToPlayers(MUSIC_FINAL);
+                                break;
+                            case EVENT_OUTRO_TALK_5:
+                                Talk(SAY_LK_OUTRO_5);
+                                if (Creature* tirion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HIGHLORD_TIRION_FORDRING)))
+                                    tirion->AI()->DoAction(ACTION_OUTRO);
+                                break;
+                            case EVENT_OUTRO_TALK_6:
+                                Talk(SAY_LK_OUTRO_6);
+                                if (Creature* tirion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HIGHLORD_TIRION_FORDRING)))
+                                    tirion->SetFacingToObject(me);
+                                me->CastSpell((Unit*)NULL, SPELL_SUMMON_BROKEN_FROSTMOURNE_3, TRIGGERED_IGNORE_CAST_IN_PROGRESS);
+                                SetEquipmentSlots(false, EQUIP_UNEQUIP);
+                                break;
+                            case EVENT_OUTRO_SOUL_BARRAGE:
+                                me->CastSpell((Unit*)NULL, SPELL_SOUL_BARRAGE, TRIGGERED_IGNORE_CAST_IN_PROGRESS);
+                                sCreatureTextMgr->SendSound(me, SOUND_PAIN, CHAT_MSG_MONSTER_YELL, 0, TEXT_RANGE_NORMAL, TEAM_OTHER, false);
+                                // set flight
+                                me->SetDisableGravity(true);
+                                me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
+                                me->GetMotionMaster()->MovePoint(POINT_LK_OUTRO_2, OutroFlying);
+                                break;
+                            case EVENT_OUTRO_TALK_7:
+                                Talk(SAY_LK_OUTRO_7);
+                                break;
+                            case EVENT_OUTRO_TALK_8:
+                                Talk(SAY_LK_OUTRO_8);
+                                break;
+                            case EVENT_BERSERK:
+                                Talk(SAY_LK_BERSERK);
+                                DoCast(me, SPELL_BERSERK2);
+                                break;
+                            default:
+                                break;
+                        }
                     }
+                    else
+                        break;
                 }
 
                 DoMeleeAttackIfReady();
@@ -2111,7 +2127,7 @@ class spell_the_lich_king_necrotic_plague : public SpellScriptLoader
 
                 CustomSpellValues values;
                 //values.AddSpellMod(SPELLVALUE_AURA_STACK, 2);
-                values.AddSpellMod(SPELLVALUE_MAX_TARGETS, 1);
+                values.AddSpellMod(SPELLVALUE_MAX_TARGETS, 0);
                 GetTarget()->CastCustomSpell(SPELL_NECROTIC_PLAGUE_JUMP, values, NULL, true, NULL, NULL, GetCasterGUID());
                 if (Unit* caster = GetCaster())
                     caster->CastSpell(caster, SPELL_PLAGUE_SIPHON, true);
@@ -2144,7 +2160,7 @@ class spell_the_lich_king_necrotic_plague_jump : public SpellScriptLoader
                 return true;
             }
 
-            void SelectTarget(std::list<Unit*>& targets)
+            void SelectTarget(std::list<WorldObject*>& targets)
             {
                 targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster()));
                 if (targets.size() < 2)
@@ -2167,6 +2183,7 @@ class spell_the_lich_king_necrotic_plague_jump : public SpellScriptLoader
 
             void Register()
             {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_the_lich_king_necrotic_plague_SpellScript::SelectTarget, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
                 BeforeHit += SpellHitFn(spell_the_lich_king_necrotic_plague_SpellScript::CheckAura);
                 OnHit += SpellHitFn(spell_the_lich_king_necrotic_plague_SpellScript::AddMissingStack);
             }
@@ -2187,7 +2204,8 @@ class spell_the_lich_king_necrotic_plague_jump : public SpellScriptLoader
             void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
-                    caster->GetAI()->SetData(DATA_PLAGUE_STACK, GetStackAmount());
+                    if (auto ai = caster->GetAI())
+                        ai->SetData(DATA_PLAGUE_STACK, GetStackAmount());
             }
 
             void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
@@ -2203,6 +2221,7 @@ class spell_the_lich_king_necrotic_plague_jump : public SpellScriptLoader
                 }
 
                 CustomSpellValues values;
+                values.AddSpellMod(SPELLVALUE_MAX_TARGETS, 0);
                 values.AddSpellMod(SPELLVALUE_AURA_STACK, GetStackAmount());
                 GetTarget()->CastCustomSpell(SPELL_NECROTIC_PLAGUE_JUMP, values, NULL, true, NULL, NULL, GetCasterGUID());
                 if (Unit* caster = GetCaster())
@@ -2221,6 +2240,7 @@ class spell_the_lich_king_necrotic_plague_jump : public SpellScriptLoader
                     return;
 
                 CustomSpellValues values;
+                values.AddSpellMod(SPELLVALUE_MAX_TARGETS, 0);
                 values.AddSpellMod(SPELLVALUE_AURA_STACK, GetStackAmount());
                 values.AddSpellMod(SPELLVALUE_BASE_POINT1, AURA_REMOVE_BY_ENEMY_SPELL); // add as marker (spell has no effect 1)
                 GetTarget()->CastCustomSpell(SPELL_NECROTIC_PLAGUE_JUMP, values, NULL, true, NULL, NULL, GetCasterGUID());

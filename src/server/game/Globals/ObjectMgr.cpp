@@ -16,11 +16,13 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "Log.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
+#include <boost/thread/locks.hpp>
 #include "ArenaTeamMgr.h"
 #include "GuildMgr.h"
 #include "GroupMgr.h"
@@ -45,6 +47,9 @@
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 #include "PoolMgr.h"
+
+using boost::unique_lock;
+using boost::mutex;
 
 ScriptMapMap sQuestEndScripts;
 ScriptMapMap sQuestStartScripts;
@@ -6195,6 +6200,7 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
         }
         case HIGHGUID_UNIT:
         {
+            unique_lock<mutex> l(hi_creature_guid_mutex);
             ASSERT(_hiCreatureGuid < 0x00FFFFFE && "Creature guid overflow!");
             return _hiCreatureGuid++;
         }
@@ -6215,6 +6221,7 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
         }
         case HIGHGUID_GAMEOBJECT:
         {
+            unique_lock<mutex> l(hi_go_guid_mutex);
             ASSERT(_hiGoGuid < 0x00FFFFFE && "Gameobject guid overflow!");
             return _hiGoGuid++;
         }
@@ -6225,6 +6232,7 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
         }
         case HIGHGUID_DYNAMICOBJECT:
         {
+            unique_lock<mutex> l(hi_do_guid_mutex);
             ASSERT(_hiDoGuid < 0xFFFFFFFE && "DynamicObject guid overflow!");
             return _hiDoGuid++;
         }

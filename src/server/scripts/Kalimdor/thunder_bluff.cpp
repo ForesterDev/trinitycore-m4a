@@ -23,6 +23,7 @@ SDComment: Quest support: 925
 SDCategory: Thunder Bluff
 EndScriptData */
 
+#include "ScriptPCH.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"

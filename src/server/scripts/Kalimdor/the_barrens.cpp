@@ -32,6 +32,7 @@ npc_twiggy_flathead
 npc_wizzlecrank_shredder
 EndContentData */
 
+#include "ScriptPCH.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"

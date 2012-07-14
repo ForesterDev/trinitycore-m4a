@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "GameObjectAI.h"
 #include "ObjectMgr.h"
 #include "GroupMgr.h"
@@ -132,6 +133,9 @@ void GameObject::AddToWorld()
         if (m_zoneScript)
             m_zoneScript->OnGameObjectCreate(this);
 
+        if (m_DBTableGuid)
+            if (sPoolMgr->IsPartOfAPool<GameObject>(m_DBTableGuid))
+                ASSERT((sPoolMgr->IsSpawnedObject<GameObject>(m_DBTableGuid)));
         sObjectAccessor->AddObject(this);
         bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
         // The state can be changed after GameObject::Create but before GameObject::AddToWorld
@@ -559,6 +563,11 @@ void GameObject::Update(uint32 diff)
                 Delete();
                 return;
             }
+            if (!m_spawnedByDefault)
+            {
+                Delete();
+                return;
+            }
 
             SetLootState(GO_READY);
 
@@ -572,13 +581,6 @@ void GameObject::Update(uint32 diff)
 
             if (!m_respawnDelayTime)
                 return;
-
-            if (!m_spawnedByDefault)
-            {
-                m_respawnTime = 0;
-                UpdateObjectVisibility();
-                return;
-            }
 
             m_respawnTime = time(NULL) + m_respawnDelayTime;
 

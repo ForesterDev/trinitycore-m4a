@@ -16,9 +16,11 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "authPCH.h"
 #include <algorithm>
 #include <openssl/md5.h>
 
+#include "authPCH.h"
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "ByteBuffer.h"
@@ -367,6 +369,8 @@ bool AuthSocket::_HandleLogonChallenge()
         pkt << (uint8)WOW_FAIL_BANNED;
         sLog->outBasic("'%s:%d' [AuthChallenge] Banned ip tries to login!",socket().getRemoteAddress().c_str(), socket().getRemotePort());
     }
+    else if (_build != 12340)
+        pkt << static_cast<uint8>(WOW_FAIL_VERSION_INVALID);
     else
     {
         // Get the account details from the account table
@@ -400,27 +404,44 @@ bool AuthSocket::_HandleLogonChallenge()
 
             if (!locked)
             {
-                //set expired bans to inactive
-                LoginDatabase.Execute(LoginDatabase.GetPreparedStatement(LOGIN_UPD_EXPIRED_ACCOUNT_BANS));
-
                 // If the account is banned, reject the logon attempt
+                auto banned = false;
                 stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_BANNED);
-                stmt->setUInt32(0, fields[1].GetUInt32());
+                auto id = fields[1].GetUInt32();
+                stmt->setUInt32(0, id);
                 PreparedQueryResult banresult = LoginDatabase.Query(stmt);
                 if (banresult)
-                {
-                    if ((*banresult)[0].GetUInt64() == (*banresult)[1].GetUInt64())
+                    do
                     {
-                        pkt << (uint8)WOW_FAIL_BANNED;
-                        sLog->outBasic("'%s:%d' [AuthChallenge] Banned account %s tried to login!", socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str ());
+                        auto fields_ = banresult->Fetch();
+                        if (!fields_[2].GetBool())
+                        {
+                            if (!banned)
+                            {
+                                banned = true;
+                                if (fields_[0].GetUInt64() == fields_[1].GetUInt64())
+                                {
+                                    pkt << (uint8)WOW_FAIL_BANNED;
+                                    sLog->outBasic("'%s:%d' [AuthChallenge] Banned account %s tried to login!", socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str ());
+                                }
+                                else
+                                {
+                                    pkt << (uint8)WOW_FAIL_SUSPENDED;
+                                    sLog->outBasic("'%s:%d' [AuthChallenge] Temporarily banned account %s tried to login!", socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str ());
+                                }
+                            }
+                        }
+                        else
+                        {
+                            //set expired ban to inactive
+                            stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_EXPIRED_ACCOUNT_BAN);
+                            stmt->setUInt32(0, id);
+                            stmt->setInt64(1, fields_[0].GetInt64());
+                            LoginDatabase.Execute(stmt);
+                        }
                     }
-                    else
-                    {
-                        pkt << (uint8)WOW_FAIL_SUSPENDED;
-                        sLog->outBasic("'%s:%d' [AuthChallenge] Temporarily banned account %s tried to login!", socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str ());
-                    }
-                }
-                else
+                    while (banresult->NextRow());
+                if (!banned)
                 {
                     // Get the password from the account table, upper it, and make the SRP6 calculation
                     std::string rI = fields[0].GetString();
@@ -612,7 +633,7 @@ bool AuthSocket::_HandleLogonProof()
         stmt->setUInt32(2, GetLocaleByName(_localizationName));
         stmt->setString(3, _os);
         stmt->setString(4, _login);
-        LoginDatabase.Execute(stmt);
+        LoginDatabase.DirectExecute(stmt);
 
         OPENSSL_free((void*)K_hex);
 
@@ -849,10 +870,13 @@ bool AuthSocket::_HandleRealmList()
     for (RealmList::RealmMap::const_iterator i = sRealmList->begin(); i != sRealmList->end(); ++i)
     {
         // don't work with realms which not compatible with the client
-        if ((_expversion & POST_BC_EXP_FLAG) && i->second.gamebuild != _build)
-            continue;
-        else if ((_expversion & PRE_BC_EXP_FLAG) && !AuthHelper::IsPreBCAcceptedClientBuild(i->second.gamebuild))
+        if (_expversion & POST_BC_EXP_FLAG) // 2.4.3 and 3.1.3 cliens
+            ;
+        else if (_expversion & PRE_BC_EXP_FLAG) // 1.12.1 and 1.12.2 clients are compatible with eachother
+        {
+            if (!AuthHelper::IsPreBCAcceptedClientBuild(i->second.gamebuild))
                 continue;
+        }
 
         uint8 AmountOfCharacters;
 

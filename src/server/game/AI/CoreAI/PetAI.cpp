@@ -16,8 +16,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gamePCH.h"
 #include "PetAI.h"
-#include "Errors.h"
+#include <Debugging/Errors.h>
 #include "Pet.h"
 #include "Player.h"
 #include "DBCStores.h"

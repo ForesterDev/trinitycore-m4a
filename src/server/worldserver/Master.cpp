@@ -20,6 +20,7 @@
     \ingroup Trinityd
 */
 
+#include "worldPCH.h"
 #include <ace/Sig_Handler.h>
 
 #include "Common.h"
@@ -43,7 +44,7 @@
 #include "AuthSocket.h"
 #include "RealmList.h"
 
-#include "BigNumber.h"
+#include <Cryptography/BigNumber.h>
 
 #ifdef _WIN32
 #include "ServiceWin32.h"

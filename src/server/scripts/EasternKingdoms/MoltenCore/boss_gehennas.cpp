@@ -23,6 +23,7 @@ SDComment: Adds MC NYI
 SDCategory: Molten Core
 EndScriptData */
 
+#include "ScriptPCH.h"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"

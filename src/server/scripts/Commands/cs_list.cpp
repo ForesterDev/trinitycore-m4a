@@ -22,11 +22,14 @@ Comment: All list related commands
 Category: commandscripts
 EndScriptData */
 
+#include "ScriptPCH.h"
 #include "ScriptMgr.h"
 #include "Chat.h"
 #include "SpellAuraEffects.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
+
+using boost::optional;
 
 class list_commandscript : public CommandScript
 {
@@ -441,7 +444,7 @@ public:
             ss_name << "|cffffffff|Hspell:" << aura->GetId() << "|h[" << name << "]|h|r";
 
             handler->PSendSysMessage(LANG_COMMAND_TARGET_AURADETAIL, aura->GetId(), (handler->GetSession() ? ss_name.str().c_str() : name),
-                aurApp->GetEffectMask(), aura->GetCharges(), aura->GetStackAmount(), aurApp->GetSlot(),
+                aurApp->GetEffectMask(), aura->GetCharges(), aura->GetStackAmount(), optional<int>(aurApp->GetSlot()).get_value_or(-1),
                 aura->GetDuration(), aura->GetMaxDuration(), (aura->IsPassive() ? passiveStr : ""),
                 (talent ? talentStr : ""), IS_PLAYER_GUID(aura->GetCasterGUID()) ? "player" : "creature",
                 GUID_LOPART(aura->GetCasterGUID()));
