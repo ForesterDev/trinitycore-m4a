@@ -3002,7 +3002,6 @@ class spell_the_lich_king_restore_soul : public SpellScriptLoader
                 GetCaster()->GetCreatureListWithEntryInGrid(spirits, NPC_WICKED_SPIRIT, 200.0f);
                 for (std::list<Creature*>::iterator itr = spirits.begin(); itr != spirits.end(); ++itr)
                 {
-                    (*itr)->m_Events.KillAllEvents(true);
                     (*itr)->SetReactState(REACT_PASSIVE);
                     (*itr)->AI()->EnterEvadeMode();
                 }
