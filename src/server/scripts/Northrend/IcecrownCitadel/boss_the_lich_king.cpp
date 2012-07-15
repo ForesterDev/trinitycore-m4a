@@ -1342,6 +1342,7 @@ class npc_shambling_horror_icc : public CreatureScript
             npc_shambling_horror_iccAI(Creature* creature) : ScriptedAI(creature)
             {
                 _frenzied = false;
+                creature->SetReactState(REACT_PASSIVE);
             }
 
             void Reset()
