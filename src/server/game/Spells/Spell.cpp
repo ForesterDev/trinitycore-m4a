@@ -3078,6 +3078,8 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
             if (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT)
                 m_caster->AddUnitState(UNIT_STATE_CASTING_IMMOBILE);
             break;
+        default:
+            break;
         }
         SendSpellStart();
 
@@ -3321,6 +3323,8 @@ void Spell::cast(bool skipCheck)
             case CURRENT_GENERIC_SPELL:
             case CURRENT_CHANNELED_SPELL:
                 m_caster->ClearUnitState(UNIT_STATE_CASTING_IMMOBILE);
+                break;
+            default:
                 break;
             }
     }
@@ -3696,6 +3700,8 @@ void Spell::finish(bool ok)
         case CURRENT_GENERIC_SPELL:
         case CURRENT_CHANNELED_SPELL:
             m_caster->ClearUnitState(UNIT_STATE_CASTING_IMMOBILE);
+            break;
+        default:
             break;
         }
 
