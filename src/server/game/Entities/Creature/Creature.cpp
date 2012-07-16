@@ -1604,10 +1604,14 @@ void Creature::Respawn(bool force)
             GetMap()->RemoveCreatureRespawnTime(m_DBTableGuid);
 
         sLog->outStaticDebug("Respawning creature %s (GuidLow: %u, Full GUID: " UI64FMTD " Entry: %u)", GetName(), GetGUIDLow(), GetGUID(), GetEntry());
+        CleanupBeforeRemoveFromMap(false);
+        auto map = GetMap();
+        map->RemoveFromMap(this, false);
         m_respawnTime = 0;
         lootForPickPocketed = false;
         lootForBody         = false;
 
+        SetMap(map);
         UpdateEntry(m_originalEntry);
 
         CreatureTemplate const* cinfo = GetCreatureTemplate();
@@ -1636,9 +1640,10 @@ void Creature::Respawn(bool force)
 
         //Re-initialize reactstate that could be altered by movementgenerators
         InitializeReactState();
+        GetMap()->AddToMap(this);
     }
-
-    UpdateObjectVisibility();
+    else
+        UpdateObjectVisibility();
 }
 
 void Creature::ForcedDespawn(uint32 timeMSToDespawn)
