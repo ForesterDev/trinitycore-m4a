@@ -168,7 +168,7 @@ public:
         return ptr;
     }
 
-    T &operator*() const
+    typename std::add_lvalue_reference<T>::type operator*() const
     {
         return *ptr;
     }
