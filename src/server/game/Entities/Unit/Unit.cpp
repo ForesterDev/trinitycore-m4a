@@ -292,6 +292,7 @@ Unit::~Unit()
     _DeleteRemovedAuras();
 
     delete m_charmInfo;
+    delete m_vehicleKit;
     delete movespline;
 
     ASSERT(!m_duringRemoveFromWorld);
@@ -13781,7 +13782,7 @@ void Unit::RemoveFromWorld()
     {
         m_duringRemoveFromWorld = true;
         if (IsVehicle())
-            RemoveVehicleKit();
+            GetVehicleKit()->Uninstall();
 
         RemoveCharmAuras();
         RemoveBindSightAuras();
