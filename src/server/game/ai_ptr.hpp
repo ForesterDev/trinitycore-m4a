@@ -168,7 +168,7 @@ public:
         return ptr;
     }
 
-    typename std::add_reference<T>::type operator*() const
+    T &operator*() const
     {
         return *ptr;
     }
