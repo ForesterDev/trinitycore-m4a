@@ -119,6 +119,7 @@ set(game_STAT_SRCS
   ${sources_Warden}
   ${sources_Weather}
   ${sources_World}
+  ai_ptr.hpp
   utility.hpp
 )
 

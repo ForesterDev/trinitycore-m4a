@@ -672,7 +672,7 @@ public:
         if (!pKelthuzad)
             return false;
 
-        boss_kelthuzad::boss_kelthuzadAI* pKelthuzadAI = CAST_AI(boss_kelthuzad::boss_kelthuzadAI, pKelthuzad->AI());
+        auto pKelthuzadAI = CAST_AI(boss_kelthuzad::boss_kelthuzadAI, pKelthuzad->AI());
         if (!pKelthuzadAI)
             return false;
 

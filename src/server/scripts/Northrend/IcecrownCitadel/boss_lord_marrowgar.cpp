@@ -301,7 +301,7 @@ class npc_coldflame : public CreatureScript
                 // random target case
                 if (owner->HasAura(SPELL_BONE_STORM))
                 {
-                    if (MarrowgarAI* marrowgarAI = CAST_AI(MarrowgarAI, creOwner->AI()))
+                    if (auto marrowgarAI = CAST_AI(MarrowgarAI, creOwner->AI()))
                     {
                         Position const* ownerPos = marrowgarAI->GetLastColdflamePosition();
                         float ang = me->GetAngle(ownerPos) - static_cast<float>(M_PI);
@@ -527,7 +527,7 @@ class spell_marrowgar_bone_spike_graveyard : public SpellScriptLoader
                 if (Creature* marrowgar = GetCaster()->ToCreature())
                 {
                     bool didHit = false;
-                    CreatureAI* marrowgarAI = marrowgar->AI();
+                    auto marrowgarAI = marrowgar->AI();
                     uint8 boneSpikeCount = uint8(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 3 : 1);
                     for (uint8 i = 0; i < boneSpikeCount; ++i)
                     {

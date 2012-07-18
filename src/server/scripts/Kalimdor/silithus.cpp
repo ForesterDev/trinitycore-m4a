@@ -989,7 +989,7 @@ public:
 
                     if (WaveCount < 5) //1-4 Wave
                     {
-                        if (mob_qiraj_war_spawn::mob_qiraj_war_spawnAI* spawnAI = CAST_AI(mob_qiraj_war_spawn::mob_qiraj_war_spawnAI, spawn->AI()))
+                        if (auto spawnAI = CAST_AI(mob_qiraj_war_spawn::mob_qiraj_war_spawnAI, spawn->AI()))
                         {
                             spawnAI->MobGUID = me->GetGUID();
                             spawnAI->PlayerGUID = PlayerGUID;
@@ -1080,7 +1080,7 @@ void mob_qiraj_war_spawn::mob_qiraj_war_spawnAI::JustDied(Unit* /*slayer*/)
         return;
 
     if (Creature* mob = Unit::GetCreature(*me, MobGUID))
-        if (npc_anachronos_quest_trigger::npc_anachronos_quest_triggerAI* triggerAI = CAST_AI(npc_anachronos_quest_trigger::npc_anachronos_quest_triggerAI, mob->AI()))
+        if (auto triggerAI = CAST_AI(npc_anachronos_quest_trigger::npc_anachronos_quest_triggerAI, mob->AI()))
             triggerAI->LiveCounter();
 
 };
@@ -1132,10 +1132,10 @@ public:
 
                 if (Anachronos)
                 {
-                    if (npc_anachronos_the_ancient::npc_anachronos_the_ancientAI* anachronosAI = CAST_AI(npc_anachronos_the_ancient::npc_anachronos_the_ancientAI, Anachronos->AI()))
+                    if (auto anachronosAI = CAST_AI(npc_anachronos_the_ancient::npc_anachronos_the_ancientAI, Anachronos->AI()))
                         anachronosAI->PlayerGUID = player->GetGUID();
 
-                    if (npc_anachronos_quest_trigger::npc_anachronos_quest_triggerAI* triggerAI = CAST_AI(npc_anachronos_quest_trigger::npc_anachronos_quest_triggerAI, trigger->AI()))
+                    if (auto triggerAI = CAST_AI(npc_anachronos_quest_trigger::npc_anachronos_quest_triggerAI, trigger->AI()))
                     {
                         triggerAI->Failed = false;
                         triggerAI->PlayerGUID = player->GetGUID();

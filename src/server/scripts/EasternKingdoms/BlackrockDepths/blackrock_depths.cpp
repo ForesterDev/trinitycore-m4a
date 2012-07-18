@@ -1214,7 +1214,7 @@ public:
                 DoScriptText(SAY_GOT_BEER, creature);
                 creature->CastSpell(creature, SPELL_DRUNKEN_RAGE, false);
 
-                if (npc_escortAI* escortAI = CAST_AI(npc_rocknot::npc_rocknotAI, creature->AI()))
+                if (auto escortAI = CAST_AI(npc_rocknot::npc_rocknotAI, creature->AI()))
                     escortAI->Start(false, false);
             }
         }

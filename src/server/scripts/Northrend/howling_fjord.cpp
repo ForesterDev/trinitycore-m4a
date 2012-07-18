@@ -352,7 +352,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_DEFEAT_AT_RING)
         {
-            if (npc_daegarnAI* pDaegarnAI = CAST_AI(npc_daegarn::npc_daegarnAI, creature->AI()))
+            if (auto pDaegarnAI = CAST_AI(npc_daegarn::npc_daegarnAI, creature->AI()))
                 pDaegarnAI->StartEvent(player->GetGUID());
         }
 

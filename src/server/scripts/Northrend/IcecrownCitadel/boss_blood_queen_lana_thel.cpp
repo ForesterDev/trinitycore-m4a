@@ -638,7 +638,7 @@ class spell_blood_queen_frenzied_bloodthirst : public SpellScriptLoader
 class BloodboltHitCheck
 {
     public:
-        explicit BloodboltHitCheck(LanaThelAI* ai) : _ai(ai) {}
+        explicit BloodboltHitCheck(ai_ptr<LanaThelAI> ai) : _ai(ai) {}
 
         bool operator()(WorldObject* object) const
         {
@@ -646,7 +646,7 @@ class BloodboltHitCheck
         }
 
     private:
-        LanaThelAI* _ai;
+        ai_ptr<LanaThelAI> _ai;
 };
 
 class spell_blood_queen_bloodbolt : public SpellScriptLoader
@@ -673,7 +673,7 @@ class spell_blood_queen_bloodbolt : public SpellScriptLoader
             void FilterTargets(std::list<WorldObject*>& targets)
             {
                 uint32 targetCount = (targets.size() + 2) / 3;
-                targets.remove_if(BloodboltHitCheck(static_cast<LanaThelAI*>(GetCaster()->GetAI())));
+                targets.remove_if(BloodboltHitCheck(static_pointer_cast<LanaThelAI>(GetCaster()->GetAI())));
                 Trinity::Containers::RandomResizeList(targets, targetCount);
                 // mark targets now, effect hook has missile travel time delay (might cast next in that time)
                 for (std::list<WorldObject*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
@@ -822,7 +822,7 @@ class achievement_once_bitten_twice_shy_n : public AchievementCriteriaScript
             if (!target)
                 return false;
 
-            if (LanaThelAI* lanaThelAI = CAST_AI(LanaThelAI, target->GetAI()))
+            if (auto lanaThelAI = CAST_AI(LanaThelAI, target->GetAI()))
                 return !lanaThelAI->WasVampire(source->GetGUID());
             return false;
         }
@@ -838,7 +838,7 @@ class achievement_once_bitten_twice_shy_v : public AchievementCriteriaScript
             if (!target)
                 return false;
 
-            if (LanaThelAI* lanaThelAI = CAST_AI(LanaThelAI, target->GetAI()))
+            if (auto lanaThelAI = CAST_AI(LanaThelAI, target->GetAI()))
                 return lanaThelAI->WasVampire(source->GetGUID());
             return false;
         }

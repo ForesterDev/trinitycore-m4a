@@ -198,7 +198,7 @@ class example_escort : public CreatureScript
         bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
         {
             player->PlayerTalkClass->ClearMenus();
-            npc_escortAI* pEscortAI = CAST_AI(example_escort::example_escortAI, creature->AI());
+            auto pEscortAI = CAST_AI(example_escort::example_escortAI, creature->AI());
 
             switch (action)
             {

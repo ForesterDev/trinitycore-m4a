@@ -310,7 +310,7 @@ class achievement_snakes_whyd_it_have_to_be_snakes : public AchievementCriteriaS
             if (!target)
                 return false;
 
-            if (boss_slad_ran::boss_slad_ranAI* sladRanAI = CAST_AI(boss_slad_ran::boss_slad_ranAI, target->GetAI()))
+            if (auto sladRanAI = CAST_AI(boss_slad_ran::boss_slad_ranAI, target->GetAI()))
                 return !sladRanAI->WasWrapped(player->GetGUID());
             return false;
         }
