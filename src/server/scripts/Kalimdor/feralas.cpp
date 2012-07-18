@@ -111,7 +111,7 @@ public:
             if (player->GetTeam() == HORDE)
                 creature->setFaction(FACTION_ESCORTEE_H);
 
-            if (npc_escortAI* pEscortAI = CAST_AI(npc_oox22fe::npc_oox22feAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_oox22fe::npc_oox22feAI, creature->AI()))
                 pEscortAI->Start(true, false, player->GetGUID());
 
         }

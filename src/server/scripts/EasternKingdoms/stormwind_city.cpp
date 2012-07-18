@@ -433,7 +433,7 @@ public:
                 Unit* summoner = me->ToTempSummon()->GetSummoner();
                 if (summoner && summoner->GetTypeId() == TYPEID_UNIT && summoner->IsAIEnabled)
                 {
-                    npc_lord_gregor_lescovar::npc_lord_gregor_lescovarAI* ai =
+                    auto ai =
                         CAST_AI(npc_lord_gregor_lescovar::npc_lord_gregor_lescovarAI, summoner->GetAI());
                     if (ai)
                     {

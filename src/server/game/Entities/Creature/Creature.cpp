@@ -145,7 +145,7 @@ lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGrou
 m_PlayerDamageReq(0), m_lootRecipient(0), m_lootRecipientGroup(0), m_corpseRemoveTime(0), m_respawnTime(0),
 m_respawnDelay(300), m_corpseDelay(60), m_respawnradius(0.0f), m_reactState(REACT_AGGRESSIVE),
 m_defaultMovementType(IDLE_MOTION_TYPE), m_DBTableGuid(0), m_equipmentId(0), m_AlreadyCallAssistance(false),
-m_AlreadySearchedAssistance(false), m_regenHealth(true), m_AI_locked(false), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),
+m_AlreadySearchedAssistance(false), m_regenHealth(true), ai_rep(), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),
 m_creatureInfo(NULL), m_creatureData(NULL), m_path_id(0), m_formation(NULL)
 {
     m_regenTimer = CREATURE_REGEN_INTERVAL;
@@ -547,12 +547,8 @@ void Creature::Update(uint32 diff)
             }
 
             if (!IsInEvadeMode() && IsAIEnabled)
-            {
                 // do not allow the AI to be changed during update
-                m_AI_locked = true;
-                i_AI->UpdateAI(diff);
-                m_AI_locked = false;
-            }
+                AI()->UpdateAI(diff);
 
             // creature can be dead after UpdateAI call
             // CORPSE/DEAD state will processed at next tick (in other case death timer will be updated unexpectedly)
@@ -712,21 +708,22 @@ void Creature::DoFleeToGetAssistance()
 
 bool Creature::AIM_Initialize(CreatureAI* ai)
 {
+    auto oldAI = AI();
+
     // make sure nothing can change the AI during AI update
-    if (m_AI_locked)
+    if (!oldAI.unique())
     {
         sLog->outDebug(LOG_FILTER_TSCR, "AIM_Initialize: failed to init, locked.");
         return false;
     }
 
-    UnitAI* oldAI = i_AI;
-
     Motion_Initialize();
 
     i_AI = ai ? ai : FactorySelector::selectAI(this);
-    delete oldAI;
+    delete oldAI.get();
+    oldAI.reset();
     IsAIEnabled = true;
-    i_AI->InitializeAI();
+    AI()->InitializeAI();
     // Initialize vehicle
     if (GetVehicleKit())
         GetVehicleKit()->Reset();

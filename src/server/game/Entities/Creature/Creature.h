@@ -20,6 +20,7 @@
 #define TRINITYCORE_CREATURE_H
 
 #include "Common.h"
+#include "ai_ptr.hpp"
 #include "Unit.h"
 #include "UpdateMask.h"
 #include "ItemPrototype.h"
@@ -521,7 +522,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         void Motion_Initialize();
 
         void AI_SendMoveToPacket(float x, float y, float z, uint32 time, uint32 MovementFlags, uint8 type);
-        CreatureAI* AI() const { return (CreatureAI*)i_AI; }
+        ai_ptr<CreatureAI> AI() const { return ai_ptr<CreatureAI>((CreatureAI*)i_AI, &ai_rep); }
 
         bool SetWalk(bool enable);
         bool SetDisableGravity(bool disable, bool packetOnly = false);
@@ -750,7 +751,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         bool m_AlreadyCallAssistance;
         bool m_AlreadySearchedAssistance;
         bool m_regenHealth;
-        bool m_AI_locked;
+        mutable ai_ref_count ai_rep;
 
         SpellSchoolMask m_meleeDamageSchoolMask;
         uint32 m_originalEntry;

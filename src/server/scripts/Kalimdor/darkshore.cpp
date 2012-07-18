@@ -77,7 +77,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_SLEEPER_AWAKENED)
         {
-            if (npc_kerlonianAI* pKerlonianAI = CAST_AI(npc_kerlonian::npc_kerlonianAI, creature->AI()))
+            if (auto pKerlonianAI = CAST_AI(npc_kerlonian::npc_kerlonianAI, creature->AI()))
             {
                 creature->SetStandState(UNIT_STAND_STATE_STAND);
                 DoScriptText(SAY_KER_START, creature, player);
@@ -216,7 +216,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_ABSENT_MINDED_PT2)
         {
-            if (npc_escortAI* pEscortAI = CAST_AI(npc_prospector_remtravel::npc_prospector_remtravelAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_prospector_remtravel::npc_prospector_remtravelAI, creature->AI()))
                 pEscortAI->Start(false, false, player->GetGUID());
 
             creature->setFaction(FACTION_ESCORTEE);
@@ -339,7 +339,7 @@ public:
         {
             player->CLOSE_GOSSIP_MENU();
 
-            if (npc_threshwackonatorAI* pThreshAI = CAST_AI(npc_threshwackonator::npc_threshwackonatorAI, creature->AI()))
+            if (auto pThreshAI = CAST_AI(npc_threshwackonator::npc_threshwackonatorAI, creature->AI()))
             {
                 DoScriptText(EMOTE_START, creature);
                 pThreshAI->StartFollow(player);

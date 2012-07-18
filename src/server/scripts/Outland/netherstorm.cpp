@@ -1023,7 +1023,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_MARK_V_IS_ALIVE)
         {
-            if (npc_maxx_a_million_escortAI* pEscortAI = CAST_AI(npc_maxx_a_million_escort::npc_maxx_a_million_escortAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_maxx_a_million_escort::npc_maxx_a_million_escortAI, creature->AI()))
             {
                 creature->setFaction(113);
                 pEscortAI->Start(false, false, player->GetGUID());

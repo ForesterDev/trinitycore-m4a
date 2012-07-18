@@ -648,7 +648,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_ESCAPING_THE_TOMB)
         {
-            if (npc_akunoAI* pEscortAI = CAST_AI(npc_akuno::npc_akunoAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_akuno::npc_akunoAI, creature->AI()))
                 pEscortAI->Start(false, false, player->GetGUID());
 
             if (player->GetTeamId() == TEAM_ALLIANCE)

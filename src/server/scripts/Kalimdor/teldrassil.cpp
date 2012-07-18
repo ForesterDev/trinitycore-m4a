@@ -53,7 +53,7 @@ public:
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
     {
         if (quest->GetQuestId() == QUEST_MIST)
-            if (npc_mistAI* pMistAI = CAST_AI(npc_mist::npc_mistAI, creature->AI()))
+            if (auto pMistAI = CAST_AI(npc_mist::npc_mistAI, creature->AI()))
                 pMistAI->StartFollow(player, FACTION_DARNASSUS, quest);
 
         return true;

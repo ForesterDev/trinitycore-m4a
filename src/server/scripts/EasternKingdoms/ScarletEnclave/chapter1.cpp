@@ -374,7 +374,7 @@ public:
             if (player->isInCombat() || creature->isInCombat())
                 return true;
 
-            if (npc_death_knight_initiateAI* pInitiateAI = CAST_AI(npc_death_knight_initiate::npc_death_knight_initiateAI, creature->AI()))
+            if (auto pInitiateAI = CAST_AI(npc_death_knight_initiate::npc_death_knight_initiateAI, creature->AI()))
             {
                 if (pInitiateAI->m_bIsDuelInProgress)
                     return true;

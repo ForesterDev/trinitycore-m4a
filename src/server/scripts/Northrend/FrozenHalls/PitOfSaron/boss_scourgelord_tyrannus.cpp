@@ -448,7 +448,7 @@ class spell_tyrannus_overlord_brand : public SpellScriptLoader
                 auto p = GetTarget()->ToPlayer();
                 if (!p)
                     return;
-                oldAI = p->GetAI();
+                oldAI = p->GetAI().get();
                 oldAIState = GetTarget()->IsAIEnabled;
                 p->SetAI(new player_overlord_brandAI(p));
                 p->GetAI()->SetGUID(GetCasterGUID());
@@ -474,7 +474,7 @@ class spell_tyrannus_overlord_brand : public SpellScriptLoader
 
             void remove()
             {
-                delete affected->GetAI();
+                delete affected->GetAI().get();
                 affected->SetAI(oldAI);
                 affected->IsAIEnabled = oldAIState;
                 affected = nullptr;

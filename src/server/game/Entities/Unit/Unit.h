@@ -20,6 +20,7 @@
 #define __UNIT_H
 
 #include "Common.h"
+#include "ai_ptr.hpp"
 #include "Object.h"
 #include "Opcodes.h"
 #include "SpellAuraDefines.h"
@@ -1229,7 +1230,7 @@ class Unit : public WorldObject
 
         virtual ~Unit();
 
-        UnitAI* GetAI() { return i_AI; }
+        ai_ptr<UnitAI> GetAI() { return ai_ptr<UnitAI>(i_AI, nullptr); }
         void SetAI(UnitAI* newAI) { i_AI = newAI; }
 
         void AddToWorld();

@@ -75,7 +75,7 @@ public:
         {
             player->CLOSE_GOSSIP_MENU();
 
-            if (npc_escortAI* pEscortAI = CAST_AI(npc_shadowfang_prisoner::npc_shadowfang_prisonerAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_shadowfang_prisoner::npc_shadowfang_prisonerAI, creature->AI()))
                 pEscortAI->Start(false, false);
         }
         return true;

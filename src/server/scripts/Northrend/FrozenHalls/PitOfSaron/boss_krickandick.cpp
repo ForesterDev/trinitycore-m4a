@@ -636,7 +636,7 @@ class spell_krick_pursuit : public SpellScriptLoader
                     return;
 
                 Unit* caster = GetCaster();
-                CreatureAI* ickAI = caster->ToCreature()->AI();
+                auto ickAI = caster->ToCreature()->AI();
                 if (Unit* target = ickAI->SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
                 {
                     DoScriptText(SAY_ICK_CHASE_1, caster, target);

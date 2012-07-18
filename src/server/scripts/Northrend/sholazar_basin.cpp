@@ -437,7 +437,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_DISASTER)
         {
-            if (npc_engineer_heliceAI* pEscortAI = CAST_AI(npc_engineer_helice::npc_engineer_heliceAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_engineer_helice::npc_engineer_heliceAI, creature->AI()))
             {
                 creature->GetMotionMaster()->MoveJumpTo(0, 0.4f, 0.4f);
                 creature->setFaction(113);

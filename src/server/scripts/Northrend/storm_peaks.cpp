@@ -442,7 +442,7 @@ public:
     bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        npc_escortAI* pEscortAI = CAST_AI(npc_injured_goblin::npc_injured_goblinAI, creature->AI());
+        auto pEscortAI = CAST_AI(npc_injured_goblin::npc_injured_goblinAI, creature->AI());
 
         if (action == GOSSIP_ACTION_INFO_DEF+1)
         {
