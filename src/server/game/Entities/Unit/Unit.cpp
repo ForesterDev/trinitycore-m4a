@@ -10804,9 +10804,9 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
         if (TakenTotal < 0)
         {
             if (TakenTotalMod < 1)
-                tmpDamage = ((float(CalculatePctF(pdamage, TakenTotalCasterMod) + TakenTotal) * TakenTotalMod) + CalculatePctF(pdamage, TakenTotalCasterMod));
+                tmpDamage = (((CalculatePctF(float(pdamage), TakenTotalCasterMod) + TakenTotal) * TakenTotalMod) + CalculatePctF(float(pdamage), TakenTotalCasterMod));
             else
-                tmpDamage = ((float(CalculatePctF(pdamage, TakenTotalCasterMod) + TakenTotal) + CalculatePctF(pdamage, TakenTotalCasterMod)) * TakenTotalMod);
+                tmpDamage = (((CalculatePctF(float(pdamage), TakenTotalCasterMod) + TakenTotal) + CalculatePctF(float(pdamage), TakenTotalCasterMod)) * TakenTotalMod);
         }
         else if (TakenTotalMod < 1)
             tmpDamage = ((CalculatePctF(float(pdamage) + TakenTotal, TakenTotalCasterMod) * TakenTotalMod) + CalculatePctF(float(pdamage) + TakenTotal, TakenTotalCasterMod));
@@ -11847,9 +11847,9 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* attacker, uint32 pdamage, WeaponAttackT
         if (TakenFlatBenefit < 0)
         {
             if (TakenTotalMod < 1)
-                tmpDamage = ((float(CalculatePctF(pdamage, TakenTotalCasterMod) + TakenFlatBenefit) * TakenTotalMod) + CalculatePctF(pdamage, TakenTotalCasterMod));
+                tmpDamage = (((CalculatePctF(float(pdamage), TakenTotalCasterMod) + TakenFlatBenefit) * TakenTotalMod) + CalculatePctF(float(pdamage), TakenTotalCasterMod));
             else
-                tmpDamage = ((float(CalculatePctF(pdamage, TakenTotalCasterMod) + TakenFlatBenefit) + CalculatePctF(pdamage, TakenTotalCasterMod)) * TakenTotalMod);
+                tmpDamage = (((CalculatePctF(float(pdamage), TakenTotalCasterMod) + TakenFlatBenefit) + CalculatePctF(float(pdamage), TakenTotalCasterMod)) * TakenTotalMod);
         }
         else if (TakenTotalMod < 1)
             tmpDamage = ((CalculatePctF(float(pdamage) + TakenFlatBenefit, TakenTotalCasterMod) * TakenTotalMod) + CalculatePctF(float(pdamage) + TakenFlatBenefit, TakenTotalCasterMod));
