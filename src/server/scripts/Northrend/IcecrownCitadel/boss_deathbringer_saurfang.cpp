@@ -1228,10 +1228,10 @@ class spell_deathbringer_blood_nova_targeting : public SpellScriptLoader
 
                 // set the upper cap
                 if (targetsAtRange < minTargets)
-                    targetsAtRange = std::min<uint32>(targets.size() - 1, minTargets);
+                    targetsAtRange = std::min<uint32>(targets.size(), minTargets);
 
                 std::list<WorldObject*>::const_iterator itr = targets.begin();
-                std::advance(itr, urand(0, targetsAtRange));
+                std::advance(itr, urand(0, targetsAtRange - 1));
                 target = *itr;
                 targets.clear();
                 targets.push_back(target);
