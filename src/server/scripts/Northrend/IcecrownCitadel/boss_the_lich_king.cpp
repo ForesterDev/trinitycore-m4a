@@ -1539,8 +1539,14 @@ class npc_valkyr_shadowguard : public CreatureScript
                 switch (id)
                 {
                     case POINT_DROP_PLAYER:
-                        DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
-                        me->DespawnOrUnsummon(1000);
+                        if (me->HasAuraType(SPELL_AURA_CONTROL_VEHICLE))
+                            if (me->GetDistance(_dropPoint) < 0.5F)
+                            {
+                                DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
+                                me->DespawnOrUnsummon(1000);
+                            }
+                            else
+                                _events.ScheduleEvent(EVENT_MOVE_TO_DROP_POS, 0U);
                         break;
                     case POINT_CHARGE:
                         if (Player* target = ObjectAccessor::GetPlayer(*me, _grabbedPlayer))
