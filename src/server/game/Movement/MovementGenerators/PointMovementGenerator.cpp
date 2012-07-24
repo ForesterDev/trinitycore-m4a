@@ -35,6 +35,11 @@ void PointMovementGenerator<T>::Initialize(T &unit)
 
     unit.AddUnitState(UNIT_STATE_ROAMING|UNIT_STATE_ROAMING_MOVE);
     i_recalculateSpeed = false;
+    if (unit.HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
+    {
+        unit.ClearUnitState(UNIT_STATE_ROAMING_MOVE);
+        return;
+    }
     Movement::MoveSplineInit init(unit);
     init.MoveTo(i_x, i_y, i_z);
     if (speed > 0.0f)
