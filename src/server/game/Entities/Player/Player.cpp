@@ -24066,6 +24066,8 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
 
     ItemPosCountVec dest;
     InventoryResult msg = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, item->itemid, item->count);
+    if (item->follow_loot_rules && !item->AllowedForPlayer(this))
+        msg = EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
     if (msg == EQUIP_ERR_OK)
     {
         AllowedLooterSet looters = item->GetAllowedLooters();
