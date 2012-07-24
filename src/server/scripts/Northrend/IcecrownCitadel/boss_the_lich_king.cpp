@@ -1409,6 +1409,7 @@ class npc_raging_spirit : public CreatureScript
             npc_raging_spiritAI(Creature* creature) : ScriptedAI(creature),
                 _instance(creature->GetInstanceScript())
             {
+                creature->SetReactState(REACT_PASSIVE);
             }
 
             void Reset()
@@ -1417,17 +1418,22 @@ class npc_raging_spirit : public CreatureScript
                 _events.ScheduleEvent(EVENT_SOUL_SHRIEK, urand(12000, 15000));
                 DoCast(me, SPELL_PLAGUE_AVOIDANCE, true);
                 DoCast(me, SPELL_RAGING_SPIRIT_VISUAL, true);
-                if (TempSummon* summon = me->ToTempSummon())
-                    if (Unit* summoner = summon->GetSummoner())
-                        summoner->CastSpell(me, SPELL_RAGING_SPIRIT_VISUAL_CLONE, true);
-                DoCast(me, SPELL_BOSS_HITTIN_YA, true);
             }
 
-            void IsSummonedBy(Unit* /*summoner*/)
+            void EnterEvadeMode()
             {
+            }
+
+            void IsSummonedBy(Unit* summoner)
+            {
+                summoner->CastSpell(me, SPELL_RAGING_SPIRIT_VISUAL_CLONE, true);
+                DoCast(me, SPELL_BOSS_HITTIN_YA, true);
                 // player is the spellcaster so register summon manually
                 if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_THE_LICH_KING)))
+                {
+                    me->m_Events.AddEvent(new StartMovementEvent(lichKing, me), me->m_Events.CalculateTime(3000U));
                     lichKing->AI()->JustSummoned(me);
+                }
             }
 
             void JustDied(Unit* /*killer*/)
