@@ -182,6 +182,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                         if (TeamInInstance == ALLIANCE)
                             creature->UpdateEntry(NPC_ALLIANCE_COMMANDER, ALLIANCE);
                         break;
+                    case NPC_DRUDGE_GHOUL:
                     case NPC_VILE_SPIRIT:
                         creature->SetReactState(REACT_PASSIVE);
                         break;

@@ -728,7 +728,6 @@ class boss_the_lich_king : public CreatureScript
                     case NPC_SHAMBLING_HORROR:
                     case NPC_DRUDGE_GHOUL:
                         summon->CastSpell(summon, SPELL_RISEN_WITCH_DOCTOR_SPAWN, true);
-                        summon->SetReactState(REACT_PASSIVE);
                         summon->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
                         summon->m_Events.AddEvent(new StartMovementEvent(me, summon), summon->m_Events.CalculateTime(5000));
                         break;
