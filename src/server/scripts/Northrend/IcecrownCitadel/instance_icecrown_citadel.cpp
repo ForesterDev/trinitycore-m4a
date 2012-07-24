@@ -182,6 +182,9 @@ class instance_icecrown_citadel : public InstanceMapScript
                         if (TeamInInstance == ALLIANCE)
                             creature->UpdateEntry(NPC_ALLIANCE_COMMANDER, ALLIANCE);
                         break;
+                    case NPC_VILE_SPIRIT:
+                        creature->SetReactState(REACT_PASSIVE);
+                        break;
                     case NPC_KOR_KRON_LIEUTENANT:
                         if (TeamInInstance == ALLIANCE)
                             creature->UpdateEntry(NPC_SKYBREAKER_LIEUTENANT, ALLIANCE);

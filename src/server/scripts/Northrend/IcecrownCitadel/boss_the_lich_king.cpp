@@ -764,7 +764,6 @@ class boss_the_lich_king : public CreatureScript
                     case NPC_VILE_SPIRIT:
                     {
                         summons.Summon(summon);
-                        summon->SetReactState(REACT_PASSIVE);
                         summon->GetMotionMaster()->MoveRandom(10.0f);
                         if (!(events.GetPhaseMask() & PHASE_MASK_FROSTMOURNE))
                             summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(15000));
