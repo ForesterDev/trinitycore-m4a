@@ -26,6 +26,8 @@
 #include "GridNotifiersImpl.h"
 #include "icecrown_citadel.h"
 
+using std::vector;
+
 enum Texts
 {
     // The Lich King
@@ -224,10 +226,12 @@ class ValithriaDespawner : public BasicEvent
         {
             Trinity::CreatureWorker<ValithriaDespawner> worker(_creature, *this);
             _creature->VisitNearbyGridObject(333.0f, worker);
+            for (auto creature : trash)
+                creature->Respawn(true);
             return true;
         }
 
-        void operator()(Creature* creature) const
+        void operator()(Creature* creature)
         {
             switch (creature->GetEntry())
             {
@@ -250,7 +254,7 @@ class ValithriaDespawner : public BasicEvent
                         creature->DespawnOrUnsummon();
                         return;
                     }
-                    creature->Respawn(true);
+                    trash.push_back(creature);
                     break;
                 default:
                     return;
@@ -271,6 +275,7 @@ class ValithriaDespawner : public BasicEvent
 
     private:
         Creature* _creature;
+        vector<Creature *> trash;
 };
 
 class boss_valithria_dreamwalker : public CreatureScript

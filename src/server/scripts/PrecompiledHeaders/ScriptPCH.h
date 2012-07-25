@@ -13,6 +13,7 @@
 #include <stdexcept>
 #include <typeinfo>
 #include <utility>
+#include <vector>
 #include <boost/numeric/conversion/cast.hpp>
 #include "ScriptMgr.h"
 #include "Cell.h"
