@@ -12622,10 +12622,6 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
         case MOVE_SWIM:
         case MOVE_FLIGHT:
         {
-            // Set creature speed rate from CreatureInfo
-            if (GetTypeId() == TYPEID_UNIT)
-                speed *= ToCreature()->GetCreatureTemplate()->speed_run;
-
             // Normalize speed by 191 aura SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED if need
             // TODO: possible affect only on MOVE_RUN
             if (int32 normalization = GetMaxPositiveAuraModifier(SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED))
@@ -12660,6 +12656,18 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
                 speed = min_speed;
         }
     }
+    // Set creature speed rate from CreatureInfo
+    if (GetTypeId() == TYPEID_UNIT)
+        switch (mtype)
+        {
+        case MOVE_RUN:
+        case MOVE_SWIM:
+        case MOVE_FLIGHT:
+            speed *= ToCreature()->GetCreatureTemplate()->speed_run;
+            break;
+        default:
+            break;
+        }
     SetSpeed(mtype, speed, forced);
 }
 
