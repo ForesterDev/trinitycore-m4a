@@ -340,11 +340,11 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
         }
     }
 
-    if (seat->second.SeatInfo->m_flags && !(seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_ALLOW_TURNING))
+    VehicleSeatEntry const* veSeat = seat->second.SeatInfo;
+    if (veSeat->m_flags && !(veSeat->m_flags & VEHICLE_SEAT_FLAG_ALLOW_TURNING) && !(veSeat->m_flagsB & VEHICLE_SEAT_FLAG_B_USABLE_FORCED_4))
         unit->AddUnitState(UNIT_STATE_ONVEHICLE);
 
     unit->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT);
-    VehicleSeatEntry const* veSeat = seat->second.SeatInfo;
     unit->m_movementInfo.t_pos.m_positionX = veSeat->m_attachmentOffsetX;
     unit->m_movementInfo.t_pos.m_positionY = veSeat->m_attachmentOffsetY;
     unit->m_movementInfo.t_pos.m_positionZ = veSeat->m_attachmentOffsetZ;
