@@ -22,6 +22,7 @@
 #include "G3D/Table.h"
 #include "G3D/Array.h"
 #include "G3D/Set.h"
+#include <Errors.h>
 #include "BoundingIntervalHierarchy.h"
 
 
@@ -76,6 +77,7 @@ public:
             m_objects[Idx] = NULL;
         else
             m_objects_to_push.remove(&obj);
+        ASSERT(!m_objects.contains(&obj));
     }
 
     void balance()
