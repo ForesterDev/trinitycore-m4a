@@ -57,6 +57,7 @@ public:
         Vector3 pos;
         PositionFunc::getPosition(value, pos);
         Node& node = getGridFor(pos.x, pos.y);
+        ASSERT(!memberTable.containsKey(&value) || &node == memberTable[&value]);
         node.insert(value);
         memberTable.set(&value, &node);
     }
