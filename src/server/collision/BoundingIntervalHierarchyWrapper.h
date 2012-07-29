@@ -19,6 +19,7 @@
 #ifndef _BIH_WRAP
 #define _BIH_WRAP
 
+#include <iterator>
 #include "G3D/Table.h"
 #include "G3D/Array.h"
 #include "G3D/Set.h"
@@ -64,8 +65,14 @@ public:
 
     void insert(const T& obj)
     {
-        ++unbalanced_times;
-        m_objects_to_push.insert(&obj);
+        if (!m_obj2Idx.containsKey(&obj))
+        {
+            auto n = m_objects.size();
+            m_objects.resize(n + 1);
+            m_obj2Idx.set(&obj, n);
+            m_objects[n] = &obj;
+            ++unbalanced_times;
+        }
     }
 
     void remove(const T& obj)
@@ -75,8 +82,6 @@ public:
         const T * temp;
         if (m_obj2Idx.getRemove(&obj, temp, Idx))
             m_objects[Idx] = NULL;
-        else
-            m_objects_to_push.remove(&obj);
         ASSERT(!m_objects.contains(&obj));
     }
 
@@ -86,9 +91,19 @@ public:
             return;
 
         unbalanced_times = 0;
-        m_objects.fastClear();
-        m_obj2Idx.getKeys(m_objects);
-        m_objects_to_push.getMembers(m_objects);
+        auto it = m_objects.find(nullptr);
+        if (it != m_objects.end())
+        {
+            int n = it - m_objects.begin();
+            for (auto first = std::next(it), last = m_objects.end(); first != last; ++first)
+                if (auto obj = *first)
+                {
+                    m_obj2Idx[obj] = n;
+                    *it++ = obj;
+                    ++n;
+                }
+            m_objects.resize(n);
+        }
 
         m_tree.build(m_objects, BoundsFunc::getBounds2);
     }
