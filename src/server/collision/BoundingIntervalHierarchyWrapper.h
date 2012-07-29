@@ -67,21 +67,23 @@ public:
     {
         if (!m_obj2Idx.containsKey(&obj))
         {
+            ++unbalanced_times;
             auto n = m_objects.size();
             m_objects.resize(n + 1);
             m_obj2Idx.set(&obj, n);
             m_objects[n] = &obj;
-            ++unbalanced_times;
         }
     }
 
     void remove(const T& obj)
     {
-        ++unbalanced_times;
         uint32 Idx = 0;
         const T * temp;
         if (m_obj2Idx.getRemove(&obj, temp, Idx))
+        {
+            ++unbalanced_times;
             m_objects[Idx] = NULL;
+        }
         ASSERT(!m_objects.contains(&obj));
     }
 
@@ -90,7 +92,6 @@ public:
         if (unbalanced_times == 0)
             return;
 
-        unbalanced_times = 0;
         auto it = m_objects.find(nullptr);
         if (it != m_objects.end())
         {
@@ -106,6 +107,7 @@ public:
         }
 
         m_tree.build(m_objects, BoundsFunc::getBounds2);
+        unbalanced_times = 0;
     }
 
     template<typename RayCallback>
