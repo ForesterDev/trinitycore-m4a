@@ -294,7 +294,7 @@ namespace
         PHASE_MASK_TWO              = 1 << PHASE_TWO,
         PHASE_MASK_THREE            = 1 << PHASE_THREE,
         PHASE_MASK_TRANSITION       = 1 << PHASE_TRANSITION,
-        PHASE_MASK_NO_CAST_CHECK    = (1 << PHASE_TRANSITION) | (1 << PHASE_FROSTMOURNE) | (1 << PHASE_OUTRO),
+        PHASE_MASK_NO_CAST_CHECK    = (1 << PHASE_FROSTMOURNE) | (1 << PHASE_OUTRO),
         PHASE_MASK_FROSTMOURNE      = 1 << PHASE_FROSTMOURNE,
         PHASE_MASK_OUTRO            = 1 << PHASE_OUTRO,
         PHASE_MASK_NO_VICTIM        = (1 << PHASE_INTRO) | (1 << PHASE_OUTRO) | (1 << PHASE_FROSTMOURNE),
@@ -994,14 +994,12 @@ class boss_the_lich_king : public CreatureScript
                                 break;
                             case EVENT_QUAKE:
                                 events.SetPhase(PHASE_TWO);
-                                me->InterruptNonMeleeSpells(false, 0, false);
                                 DoCastAOE(SPELL_QUAKE);
                                 SendMusicToPlayers(MUSIC_SPECIAL);
                                 Talk(SAY_LK_QUAKE);
                                 break;
                             case EVENT_QUAKE_2:
                                 events.SetPhase(PHASE_THREE);
-                                me->InterruptNonMeleeSpells(false, 0, false);
                                 DoCastAOE(SPELL_QUAKE);
                                 SendMusicToPlayers(MUSIC_SPECIAL);
                                 Talk(SAY_LK_QUAKE);
