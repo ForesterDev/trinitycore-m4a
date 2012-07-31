@@ -1068,12 +1068,8 @@ void Map::UnloadAll()
     // clear all delayed moves, useless anyway do this moves before map unload.
     _creaturesToMove.clear();
 
-    for (GridRefManager<NGridType>::iterator i = GridRefManager<NGridType>::begin(); i != GridRefManager<NGridType>::end();)
-    {
-        NGridType &grid(*i->getSource());
-        ++i;
-        UnloadGrid(grid, true);       // deletes the grid and removes it from the GridRefManager
-    }
+    while (auto ref = GridRefManager::getFirst())
+        UnloadGrid(*ref->getSource(), true);       // deletes the grid and removes it from the GridRefManager
 }
 
 // *****************************
