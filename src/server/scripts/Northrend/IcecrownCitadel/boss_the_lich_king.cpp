@@ -2613,6 +2613,7 @@ class spell_the_lich_king_valkyr_target_search : public SpellScriptLoader
                     return;
 
                 targets.remove_if(Trinity::UnitAuraCheck(true, GetSpellInfo()->Id));
+                targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_HARVEST_SOUL_VALKYR));
                 if (targets.empty())
                     return;
 
