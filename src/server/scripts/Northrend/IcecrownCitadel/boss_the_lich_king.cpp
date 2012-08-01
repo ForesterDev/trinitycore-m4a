@@ -803,10 +803,21 @@ class boss_the_lich_king : public CreatureScript
 
             void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
             {
-                if (spell->Id == REMORSELESS_WINTER_1 || spell->Id == REMORSELESS_WINTER_2)
+                switch (spell->Id)
                 {
-                    SendLightOverride(LIGHT_SNOWSTORM, 5000);
-                    SendWeather(WEATHER_STATE_LIGHT_SNOW);
+                case SPELL_PAIN_AND_SUFFERING:
+                case 73788 /* Pain and Suffering */:
+                case 73789 /* Pain and Suffering */:
+                case 73790 /* Pain and Suffering */:
+                    events.RescheduleEvent(EVENT_PAIN_AND_SUFFERING, 700U, 0, PHASE_TRANSITION);
+                    break;
+                default:
+                    if (spell->Id == REMORSELESS_WINTER_1 || spell->Id == REMORSELESS_WINTER_2)
+                    {
+                        SendLightOverride(LIGHT_SNOWSTORM, 5000);
+                        SendWeather(WEATHER_STATE_LIGHT_SNOW);
+                    }
+                    break;
                 }
             }
 
@@ -979,9 +990,9 @@ class boss_the_lich_king : public CreatureScript
                                 events.ScheduleEvent(EVENT_HARVEST_SOUL, 75000, 0, PHASE_THREE);
                                 break;
                             case EVENT_PAIN_AND_SUFFERING:
+                                events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, 1U, 0, PHASE_TRANSITION);
                                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                                     me->CastSpell(target, SPELL_PAIN_AND_SUFFERING, TRIGGERED_NONE);
-                                events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, urand(1500, 4000), 0, PHASE_TRANSITION);
                                 break;
                             case EVENT_SUMMON_ICE_SPHERE:
                                 DoCastAOE(SPELL_SUMMON_ICE_SPHERE);
