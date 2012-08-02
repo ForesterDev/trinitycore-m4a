@@ -850,9 +850,6 @@ class boss_the_lich_king : public CreatureScript
                         events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, 4000, 0, PHASE_TRANSITION);
                         events.ScheduleEvent(EVENT_SUMMON_ICE_SPHERE, 8000, 0, PHASE_TRANSITION);
                         events.ScheduleEvent(EVENT_SUMMON_RAGING_SPIRIT, 3000, 0, PHASE_TRANSITION);
-                        events.ScheduleEvent(EVENT_SUMMON_VALKYR, 78000, 0, PHASE_TWO);
-                        events.ScheduleEvent(EVENT_INFEST, 70000, 0, PHASE_TWO);
-                        events.ScheduleEvent(EVENT_DEFILE, 97000, 0, PHASE_TWO);
                         events.ScheduleEvent(EVENT_SOUL_REAPER, 94000, 0, PHASE_TWO);
                         break;
                     case POINT_CENTER_2:
@@ -981,7 +978,10 @@ class boss_the_lich_king : public CreatureScript
                                     Talk(EMOTE_DEFILE_WARNING);
                                     DoCast(target, SPELL_DEFILE);
                                 }
-                                events.ScheduleEvent(EVENT_DEFILE, urand(32000, 35000), 0, PHASE_TWO_THREE);
+                                if (auto time = events.GetNextEventTime(EVENT_SUMMON_VALKYR))
+                                    if (time < events.GetTimer() + 6000U)
+                                        events.RescheduleEvent(EVENT_SUMMON_VALKYR, 6000U, 0U, PHASE_TWO);
+                                events.ScheduleEvent(EVENT_DEFILE, 32500U, 0, PHASE_TWO_THREE);
                                 break;
                             case EVENT_HARVEST_SOUL:
                                 Talk(SAY_LK_HARVEST_SOUL);
@@ -1008,6 +1008,9 @@ class boss_the_lich_king : public CreatureScript
                                 DoCastAOE(SPELL_QUAKE);
                                 SendMusicToPlayers(MUSIC_SPECIAL);
                                 Talk(SAY_LK_QUAKE);
+                                events.ScheduleEvent(EVENT_INFEST, 13300U, 0U, PHASE_TWO);
+                                events.ScheduleEvent(EVENT_SUMMON_VALKYR, urand(19250U, 21750U), 0U, PHASE_TWO);
+                                events.ScheduleEvent(EVENT_DEFILE, 38600U, 0U, PHASE_TWO);
                                 break;
                             case EVENT_QUAKE_2:
                                 events.SetPhase(PHASE_THREE);
@@ -1019,7 +1022,9 @@ class boss_the_lich_king : public CreatureScript
                                 SendMusicToPlayers(MUSIC_SPECIAL);
                                 Talk(SAY_LK_SUMMON_VALKYR);
                                 DoCastAOE(SUMMON_VALKYR);
-                                events.ScheduleEvent(EVENT_SUMMON_VALKYR, urand(45000, 50000), 0, PHASE_TWO);
+                                if (events.GetNextEventTime(EVENT_DEFILE) < events.GetTimer() + 6000U)
+                                    events.RescheduleEvent(EVENT_DEFILE, 6000U, 0U, PHASE_TWO);
+                                events.ScheduleEvent(EVENT_SUMMON_VALKYR, urand(47000U, 50000U), 0, PHASE_TWO);
                                 break;
                             case EVENT_START_ATTACK:
                                 me->SetReactState(REACT_AGGRESSIVE);
