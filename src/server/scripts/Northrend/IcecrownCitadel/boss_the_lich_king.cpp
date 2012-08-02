@@ -1561,7 +1561,10 @@ class npc_valkyr_shadowguard : public CreatureScript
                             if (me->GetDistance(_dropPoint) < 0.5F)
                             {
                                 DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
-                                me->DespawnOrUnsummon(1000);
+                                if (IsHeroic())
+                                    move_to_home();
+                                else
+                                    me->DespawnOrUnsummon(1000);
                             }
                             else
                                 _events.ScheduleEvent(EVENT_MOVE_TO_DROP_POS, 0U);
