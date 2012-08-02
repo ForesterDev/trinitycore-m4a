@@ -1527,17 +1527,21 @@ class npc_valkyr_shadowguard : public CreatureScript
                 {
                     _events.Reset();
                     DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
-                    me->GetMotionMaster()->MoveTargetedHome();
-                    me->ClearUnitState(UNIT_STATE_EVADE);
+                    move_to_home();
                 }
             }
 
             void JustReachedHome()
             {
-                // schedule siphon life event (heroic only)
-                DoZoneInCombat();
-                _events.Reset();
-                _events.ScheduleEvent(EVENT_LIFE_SIPHON, 2000);
+                if (me->GetDistance(me->GetHomePosition()) < 0.5F)
+                {
+                    // schedule siphon life event (heroic only)
+                    DoZoneInCombat();
+                    _events.Reset();
+                    _events.ScheduleEvent(EVENT_LIFE_SIPHON, 2000);
+                }
+                else
+                    move_to_home();
             }
 
             void AttackStart(Unit* /*target*/)
@@ -1633,6 +1637,12 @@ class npc_valkyr_shadowguard : public CreatureScript
             }
 
         private:
+            void move_to_home()
+            {
+                me->GetMotionMaster()->MoveTargetedHome();
+                me->ClearUnitState(UNIT_STATE_EVADE);
+            }
+
             EventMap _events;
             Position _dropPoint;
             uint64 _grabbedPlayer;
