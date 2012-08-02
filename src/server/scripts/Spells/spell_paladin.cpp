@@ -409,7 +409,7 @@ class spell_pal_divine_storm_dummy : public SpellScriptLoader
                 return true;
             }
 
-            void CountTargets(std::list<Unit*>& targetList)
+            void CountTargets(std::list<WorldObject*>& targetList)
             {
                 _targetCount = targetList.size();
             }
@@ -428,7 +428,7 @@ class spell_pal_divine_storm_dummy : public SpellScriptLoader
             void Register()
             {
                 OnEffectHitTarget += SpellEffectFn(spell_pal_divine_storm_dummy_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_pal_divine_storm_dummy_SpellScript::CountTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_RAID);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_divine_storm_dummy_SpellScript::CountTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_RAID);
             }
         };
 
@@ -462,19 +462,10 @@ class spell_pal_lay_on_hands : public SpellScriptLoader
             {
                 Unit* caster = GetCaster();
                 if (Unit* target = GetExplTargetUnit())
-                {
                     if (caster == target)
-                    {
-                        if (target->HasAura(SPELL_FORBEARANCE))
+                        if (target->HasAura(SPELL_FORBEARANCE) || target->HasAura(SPELL_AVENGING_WRATH_MARKER) || target->HasAura(SPELL_IMMUNE_SHIELD_MARKER))
                             return SPELL_FAILED_TARGET_AURASTATE;
 
-                        if (target->HasAura(SPELL_AVENGING_WRATH_MARKER))
-                            return SPELL_FAILED_TARGET_AURASTATE;
-
-                        if (target->HasAura(SPELL_IMMUNE_SHIELD_MARKER))
-                            return SPELL_FAILED_TARGET_AURASTATE;
-                    }
-                }
                 return SPELL_CAST_OK;
             }
 

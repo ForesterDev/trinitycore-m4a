@@ -132,14 +132,14 @@ class spell_pri_mind_sear : public SpellScriptLoader
         {
             PrepareSpellScript(spell_pri_mind_sear_SpellScript);
 
-            void FilterTargets(std::list<Unit*>& unitList)
+            void FilterTargets(std::list<WorldObject*>& unitList)
             {
-                unitList.remove_if (Trinity::ObjectGUIDCheck(GetCaster()->GetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT)));
+                unitList.remove_if(Trinity::ObjectGUIDCheck(GetCaster()->GetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT)));
             }
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_pri_mind_sear_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pri_mind_sear_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
             }
         };
 
@@ -352,17 +352,13 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
             void HandleDispel(DispelInfo* /*dispelInfo*/)
             {
                 if (Unit* caster = GetCaster())
-                {
                     if (Unit* target = GetUnitOwner())
-                    {
                         if (AuraEffect const* aurEff = GetEffect(EFFECT_1))
                         {
                             int32 damage = aurEff->GetAmount() * 8;
                             // backfire damage
                             caster->CastCustomSpell(target, PRIEST_SPELL_VAMPIRIC_TOUCH_DISPEL, &damage, NULL, NULL, true, NULL, aurEff);
                         }
-                    }
-                }
             }
 
             void Register()
