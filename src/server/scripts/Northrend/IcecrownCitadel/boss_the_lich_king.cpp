@@ -816,6 +816,7 @@ class boss_the_lich_king : public CreatureScript
                     {
                         SendLightOverride(LIGHT_SNOWSTORM, 5000);
                         SendWeather(WEATHER_STATE_LIGHT_SNOW);
+                        summons.DespawnEntry(39137 /* Shadow Trap */);
                     }
                     break;
                 }
