@@ -298,7 +298,7 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint16 spellid
             }
 
             if (spellInfo->StartRecoveryCategory > 0)
-                if (pet->GetCharmInfo() && pet->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
+                if (pet->GetCharmInfo() && pet->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo, pet->spell_start_recovery_offset()))
                     return;
 
             for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
@@ -775,7 +775,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     }
 
     if (spellInfo->StartRecoveryCategory > 0) // Check if spell is affected by GCD
-        if (caster->GetTypeId() == TYPEID_UNIT && caster->GetCharmInfo() && caster->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
+        if (caster->GetTypeId() == TYPEID_UNIT && caster->GetCharmInfo() && caster->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo, caster->spell_start_recovery_offset()))
         {
             caster->SendPetCastFail(spellId, SPELL_FAILED_NOT_READY);
             return;

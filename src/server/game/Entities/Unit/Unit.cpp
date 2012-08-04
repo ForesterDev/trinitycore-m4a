@@ -261,10 +261,10 @@ m_HostileRefManager(this)
 
 ////////////////////////////////////////////////////////////
 // Methods of class GlobalCooldownMgr
-bool GlobalCooldownMgr::HasGlobalCooldown(SpellInfo const* spellInfo) const
+bool GlobalCooldownMgr::HasGlobalCooldown(SpellInfo const* spellInfo, int offset) const
 {
     GlobalCooldownList::const_iterator itr = m_GlobalCooldowns.find(spellInfo->StartRecoveryCategory);
-    return itr != m_GlobalCooldowns.end() && itr->second.duration && getMSTimeDiff(itr->second.cast_time, getMSTime()) < itr->second.duration;
+    return itr != m_GlobalCooldowns.end() && itr->second.duration && getMSTimeDiff(itr->second.cast_time, getMSTime()) + offset < itr->second.duration;
 }
 
 void GlobalCooldownMgr::AddGlobalCooldown(SpellInfo const* spellInfo, uint32 gcd)
@@ -17465,6 +17465,11 @@ void Unit::OutDebugInfo() const
 
     if (GetVehicle())
         sLog->outString("On vehicle %u.", GetVehicleBase()->GetEntry());
+}
+
+int Unit::spell_start_recovery_offset() const
+{
+    return IsControlledByPlayer() ? 400 : 0;
 }
 
 uint32 Unit::GetRemainingPeriodicAmount(uint64 caster, uint32 spellId, AuraType auraType, uint8 effectIndex) const

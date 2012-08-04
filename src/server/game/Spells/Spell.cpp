@@ -496,7 +496,8 @@ Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags,
 m_spellInfo(sSpellMgr->GetSpellForDifficultyFromSpell(info, caster)),
 m_caster((info->AttributesEx6 & SPELL_ATTR6_CAST_BY_CHARMER && caster->GetCharmerOrOwner()) ? caster->GetCharmerOrOwner() : caster)
 , m_spellValue(new SpellValue(m_spellInfo)),
-    use_count()
+    use_count(),
+    prepared(false)
 {
     m_customError = SPELL_CUSTOM_ERROR_NONE;
     m_skipCheck = skipCheck;
@@ -2943,48 +2944,53 @@ bool Spell::UpdateChanneledTargetList()
 void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggeredByAura)
 {
     Use use(*this);
-    if (m_CastItem)
-        m_castItemGUID = m_CastItem->GetGUID();
-    else
-        m_castItemGUID = 0;
-
-    InitExplicitTargets(*targets);
-
-    // Fill aura scaling information
-    if (m_caster->IsControlledByPlayer() && !m_spellInfo->IsPassive() && m_spellInfo->SpellLevel && !m_spellInfo->IsChanneled() && !(_triggeredCastFlags & TRIGGERED_IGNORE_AURA_SCALING))
+    if (!prepared)
     {
-        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        if (m_CastItem)
+            m_castItemGUID = m_CastItem->GetGUID();
+        else
+            m_castItemGUID = 0;
+
+        InitExplicitTargets(*targets);
+
+        // Fill aura scaling information
+        if (m_caster->IsControlledByPlayer() && !m_spellInfo->IsPassive() && m_spellInfo->SpellLevel && !m_spellInfo->IsChanneled() && !(_triggeredCastFlags & TRIGGERED_IGNORE_AURA_SCALING))
         {
-            if (m_spellInfo->Effects[i].Effect == SPELL_EFFECT_APPLY_AURA)
+            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             {
-                // Change aura with ranks only if basepoints are taken from spellInfo and aura is positive
-                if (m_spellInfo->IsPositiveEffect(i))
+                if (m_spellInfo->Effects[i].Effect == SPELL_EFFECT_APPLY_AURA)
                 {
-                    m_auraScaleMask |= (1 << i);
-                    if (m_spellValue->EffectBasePoints[i] != m_spellInfo->Effects[i].BasePoints)
+                    // Change aura with ranks only if basepoints are taken from spellInfo and aura is positive
+                    if (m_spellInfo->IsPositiveEffect(i))
                     {
-                        m_auraScaleMask = 0;
-                        break;
+                        m_auraScaleMask |= (1 << i);
+                        if (m_spellValue->EffectBasePoints[i] != m_spellInfo->Effects[i].BasePoints)
+                        {
+                            m_auraScaleMask = 0;
+                            break;
+                        }
                     }
                 }
             }
         }
+
+        if (triggeredByAura)
+            m_triggeredByAuraSpell  = triggeredByAura->GetSpellInfo();
+
+        // create and add update event for this spell
+        SpellEvent* Event = new SpellEvent(this);
+        m_caster->m_Events.AddEvent(Event, m_caster->m_Events.CalculateTime(1));
+        prepared = true;
     }
-
-    m_spellState = SPELL_STATE_PREPARING;
-
-    if (triggeredByAura)
-        m_triggeredByAuraSpell  = triggeredByAura->GetSpellInfo();
-
-    // create and add update event for this spell
-    SpellEvent* Event = new SpellEvent(this);
-    m_caster->m_Events.AddEvent(Event, m_caster->m_Events.CalculateTime(1));
 
     //Prevent casting at cast another spell (ServerSide check)
     if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CAST_IN_PROGRESS) && m_caster->IsNonMeleeSpellCasted(false, true, true))
     {
-        SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
-        finish(false);
+        if (m_caster->GetCurrentSpell(CURRENT_GENERIC_SPELL)->m_timer > m_caster->spell_start_recovery_offset())
+        {
+            SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
+            finish(false);
+        }
         return;
     }
 
@@ -3044,6 +3050,8 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         finish(false);
         return;
     }
+
+    m_spellState = SPELL_STATE_PREPARING;
 
     // set timer base at cast time
     ReSetTimer();
@@ -3598,6 +3606,9 @@ void Spell::update(uint32 difftime)
 
     switch (m_spellState)
     {
+    case SPELL_STATE_NULL:
+        prepare(&m_targets);
+        break;
         case SPELL_STATE_PREPARING:
         {
             if (m_timer > 0)
@@ -7269,9 +7280,9 @@ bool Spell::HasGlobalCooldown() const
 {
     // Only player or controlled units have global cooldown
     if (m_caster->GetCharmInfo())
-        return m_caster->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(m_spellInfo);
+        return m_caster->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(m_spellInfo, m_caster->spell_start_recovery_offset());
     else if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        return m_caster->ToPlayer()->GetGlobalCooldownMgr().HasGlobalCooldown(m_spellInfo);
+        return m_caster->ToPlayer()->GetGlobalCooldownMgr().HasGlobalCooldown(m_spellInfo, m_caster->spell_start_recovery_offset());
     else
         return false;
 }
