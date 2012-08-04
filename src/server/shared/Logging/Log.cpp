@@ -430,9 +430,7 @@ void Log::outString(const char * str, ...)
         fprintf(logfile, "\n");
         va_end(ap);
 
-        fflush(logfile);
     }
-    fflush(stdout);
 }
 
 void Log::outString()
@@ -442,9 +440,7 @@ void Log::outString()
     {
         outTimestamp(logfile);
         fprintf(logfile, "\n");
-        fflush(logfile);
     }
-    fflush(stdout);
 }
 
 void Log::outCrash(const char * err, ...)
@@ -485,9 +481,7 @@ void Log::outCrash(const char * err, ...)
         va_end(ap);
 
         fprintf(logfile, "\n");
-        fflush(logfile);
     }
-    fflush(stderr);
 }
 
 void Log::outError(const char * err, ...)
@@ -528,9 +522,7 @@ void Log::outError(const char * err, ...)
         va_end(ap);
 
         fprintf(logfile, "\n");
-        fflush(logfile);
     }
-    fflush(stderr);
 }
 
 void Log::outArena(const char * str, ...)
@@ -546,7 +538,6 @@ void Log::outArena(const char * str, ...)
         vfprintf(arenaLogFile, str, ap);
         fprintf(arenaLogFile, "\n");
         va_end(ap);
-        fflush(arenaLogFile);
     }
 }
 
@@ -572,10 +563,7 @@ void Log::outSQLDriver(const char* str, ...)
         va_end(apSQL);
 
         fprintf(sqlLogFile, "\n");
-        fflush(sqlLogFile);
     }
-
-    fflush(stdout);
 }
 
 void Log::outErrorDb(const char * err, ...)
@@ -607,7 +595,6 @@ void Log::outErrorDb(const char * err, ...)
         va_end(ap);
 
         fprintf(logfile, "\n" );
-        fflush(logfile);
     }
 
     if (dberLogfile)
@@ -618,9 +605,7 @@ void Log::outErrorDb(const char * err, ...)
         va_end(ap);
 
         fprintf(dberLogfile, "\n" );
-        fflush(dberLogfile);
     }
-    fflush(stderr);
 }
 
 void Log::outBasic(const char * str, ...)
@@ -661,10 +646,8 @@ void Log::outBasic(const char * str, ...)
             vfprintf(logfile, str, ap2);
             fprintf(logfile, "\n" );
             va_end(ap2);
-            fflush(logfile);
         }
     }
-    fflush(stdout);
 }
 
 void Log::outDetail(const char * str, ...)
@@ -706,11 +689,8 @@ void Log::outDetail(const char * str, ...)
             va_end(ap2);
 
             fprintf(logfile, "\n");
-            fflush(logfile);
         }
     }
-
-    fflush(stdout);
 }
 
 void Log::outDebugInLine(const char * str, ...)
@@ -758,10 +738,7 @@ void Log::outSQLDev(const char* str, ...)
         va_end(ap2);
 
         fprintf(sqlDevLogFile, "\n");
-        fflush(sqlDevLogFile);
     }
-
-    fflush(stdout);
 }
 
 void Log::outDebug(DebugLogFilters f, const char * str, ...)
@@ -806,10 +783,8 @@ void Log::outDebug(DebugLogFilters f, const char * str, ...)
             va_end(ap2);
 
             fprintf(logfile, "\n" );
-            fflush(logfile);
         }
     }
-    fflush(stdout);
 }
 
 void Log::outStaticDebug(const char * str, ...)
@@ -851,10 +826,8 @@ void Log::outStaticDebug(const char * str, ...)
             va_end(ap2);
 
             fprintf(logfile, "\n" );
-            fflush(logfile);
         }
     }
-    fflush(stdout);
 }
 
 void Log::outStringInLine(const char * str, ...)
@@ -915,7 +888,6 @@ void Log::outCommand(uint32 account, const char * str, ...)
             vfprintf(logfile, str, ap2);
             fprintf(logfile, "\n" );
             va_end(ap2);
-            fflush(logfile);
         }
     }
 
@@ -940,10 +912,7 @@ void Log::outCommand(uint32 account, const char * str, ...)
         vfprintf(gmLogfile, str, ap);
         fprintf(gmLogfile, "\n" );
         va_end(ap);
-        fflush(gmLogfile);
     }
-
-    fflush(stdout);
 }
 
 void Log::outChar(const char * str, ...)
@@ -969,7 +938,6 @@ void Log::outChar(const char * str, ...)
         vfprintf(charLogfile, str, ap);
         fprintf(charLogfile, "\n" );
         va_end(ap);
-        fflush(charLogfile);
     }
 }
 
@@ -990,7 +958,6 @@ void Log::outCharDump(const char * str, uint32 account_id, uint32 guid, const ch
     {
         fprintf(file, "== START DUMP == (account: %u guid: %u name: %s )\n%s\n== END DUMP ==\n",
             account_id, guid, name, str);
-        fflush(file);
         if (m_charLog_Dump_Separate)
             fclose(file);
     }
@@ -1019,7 +986,6 @@ void Log::outRemote(const char * str, ...)
         vfprintf(raLogfile, str, ap);
         fprintf(raLogfile, "\n" );
         va_end(ap);
-        fflush(raLogfile);
     }
 }
 
@@ -1045,7 +1011,6 @@ void Log::outChat(const char * str, ...)
         va_start(ap, str);
         vfprintf(chatLogfile, str, ap);
         fprintf(chatLogfile, "\n" );
-        fflush(chatLogfile);
         va_end(ap);
     }
 }
@@ -1074,7 +1039,6 @@ void Log::outWarden(const char * str, ...)
         va_start(ap, str);
         vfprintf(wardenLogFile, str, ap);
         fprintf(wardenLogFile, "\n" );
-        fflush(wardenLogFile);
         va_end(ap);
     }
 }
