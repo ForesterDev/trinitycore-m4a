@@ -1017,7 +1017,7 @@ public:
     GlobalCooldownMgr() {}
 
 public:
-    bool HasGlobalCooldown(SpellInfo const* spellInfo) const;
+    bool HasGlobalCooldown(SpellInfo const* spellInfo, int offset) const;
     void AddGlobalCooldown(SpellInfo const* spellInfo, uint32 gcd);
     void CancelGlobalCooldown(SpellInfo const* spellInfo);
 
@@ -2246,6 +2246,8 @@ class Unit : public WorldObject
 
         // Movement info
         Movement::MoveSpline * movespline;
+
+        int spell_start_recovery_offset() const;
 
     protected:
         explicit Unit (bool isWorldObject);

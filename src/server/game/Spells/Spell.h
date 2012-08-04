@@ -759,6 +759,7 @@ private:
     };
 
     int use_count;
+    bool prepared;
 };
 
 namespace Trinity
