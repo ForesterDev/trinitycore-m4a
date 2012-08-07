@@ -13241,7 +13241,7 @@ int32 Unit::ModSpellDuration(SpellInfo const* spellProto, Unit const* target, in
     return std::max(duration, 0);
 }
 
-void Unit::ModSpellCastTime(SpellInfo const* spellProto, int32 & castTime, Spell* spell)
+void Unit::ModSpellCastTime(SpellInfo const* spellProto, int32 & castTime, Spell* spell, bool round_toward_infinity)
 {
     if (!spellProto || castTime < 0)
         return;
@@ -13250,7 +13250,10 @@ void Unit::ModSpellCastTime(SpellInfo const* spellProto, int32 & castTime, Spell
         modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CASTING_TIME, castTime, spell);
 
     if (!(spellProto->Attributes & (SPELL_ATTR0_ABILITY|SPELL_ATTR0_TRADESPELL)) && ((GetTypeId() == TYPEID_PLAYER && spellProto->SpellFamilyName) || GetTypeId() == TYPEID_UNIT))
-        castTime = int32(float(castTime) * GetFloatValue(UNIT_MOD_CAST_SPEED));
+    {
+        auto tmp = float(castTime) * GetFloatValue(UNIT_MOD_CAST_SPEED);
+        castTime = round_toward_infinity ? int32(std::ceil(tmp)) : int32(tmp);
+    }
     else if (spellProto->Attributes & SPELL_ATTR0_REQ_AMMO && !(spellProto->AttributesEx2 & SPELL_ATTR2_AUTOREPEAT_FLAG))
         castTime = int32(float(castTime) * m_modAttackSpeedPct[RANGED_ATTACK]);
     else if (spellProto->SpellVisual[0] == 3881 && HasAura(67556)) // cooking with Chef Hat.
