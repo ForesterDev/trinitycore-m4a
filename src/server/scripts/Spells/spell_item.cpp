@@ -1535,7 +1535,7 @@ class spell_item_impale_leviroth : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /* effIndex */)
             {
                 if (Unit* target = GetHitCreature())
-                    if (target->GetEntry() == NPC_LEVIROTH && target->HealthBelowPct(95))
+                    if (target->GetEntry() == NPC_LEVIROTH && !target->HealthBelowPct(95))
                         target->CastSpell(target, SPELL_LEVIROTH_SELF_IMPALE, true);
             }
 
@@ -1748,8 +1748,16 @@ class spell_item_rocket_boots : public SpellScriptLoader
                 caster->CastSpell(caster, SPELL_ROCKET_BOOTS_PROC, true, NULL);
             }
 
+            SpellCastResult CheckCast()
+            {
+                if (GetCaster()->IsInWater())
+                    return SPELL_FAILED_ONLY_ABOVEWATER;
+                return SPELL_CAST_OK;
+            }
+
             void Register()
             {
+                OnCheckCast += SpellCheckCastFn(spell_item_rocket_boots_SpellScript::CheckCast);
                 OnEffectHitTarget += SpellEffectFn(spell_item_rocket_boots_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
@@ -1837,60 +1845,6 @@ class spell_item_unusual_compass : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_item_unusual_compass_SpellScript();
-        }
-};
-
-enum UDED
-{
-    NPC_IRONWOOL_MAMMOTH        = 53806,
-    SPELL_MAMMOTH_CARCASS       = 57444,
-    SPELL_MAMMOTH_MEAT          = 54625,
-};
-
-class spell_item_uded : public SpellScriptLoader
-{
-    public:
-        spell_item_uded() : SpellScriptLoader("spell_item_uded") { }
-
-        class spell_item_uded_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_item_uded_SpellScript);
-
-            bool Load()
-            {
-                if (GetHitCreature() && GetHitCreature()->GetEntry() == NPC_IRONWOOL_MAMMOTH)
-                    return true;
-                return false;
-            }
-
-            bool Validate(SpellInfo const* /*spell*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_MAMMOTH_CARCASS) || !sSpellMgr->GetSpellInfo(SPELL_MAMMOTH_MEAT))
-                    return false;
-                return true;
-            }
-
-            void HandleDummy(SpellEffIndex /* effIndex */)
-            {
-                Unit* caster = GetCaster();
-                Creature* creature = GetHitCreature();
-                caster->CastSpell(caster,SPELL_MAMMOTH_CARCASS,true);
-
-                for (uint8 i = 0; i < 4; ++i)
-                    caster->CastSpell(caster,SPELL_MAMMOTH_MEAT,true);
-
-                creature->Kill(creature);
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_item_uded_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_item_uded_SpellScript();
         }
 };
 
@@ -2036,7 +1990,7 @@ public:
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
-            if (Unit* target = GetHitUnit())
+            if (GetHitUnit())
                 GetCaster()->CastSpell(GetCaster(),SPELL_FORCE_CAST_SUMMON_GNOME_SOUL);
         }
 
@@ -2101,7 +2055,6 @@ void AddSC_item_spell_scripts()
     new spell_item_rocket_boots();
     new spell_item_pygmy_oil();
     new spell_item_unusual_compass();
-    new spell_item_uded();
     new spell_item_chicken_cover();
     new spell_item_muisek_vessel();
     new spell_item_greatmothers_soulcatcher();

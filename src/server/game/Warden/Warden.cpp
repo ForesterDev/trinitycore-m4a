@@ -105,7 +105,7 @@ void Warden::Update()
                 // Kick player if client response delays more than set in config
                 if (_clientResponseTimer > maxClientResponseDelay * IN_MILLISECONDS)
                 {
-                    sLog->outWarden("WARDEN: Player %s (guid: %u, account: %u, latency: %u, IP: %s) exceeded Warden module response delay for more than %s - disconnecting client",
+                    sLog->outDebug(LOG_FILTER_WARDEN, "WARDEN: Player %s (guid: %u, account: %u, latency: %u, IP: %s) exceeded Warden module response delay for more than %s - disconnecting client",
                                    _session->GetPlayerName(), _session->GetGuidLow(), _session->GetAccountId(), _session->GetLatency(), _session->GetRemoteAddress().c_str(),
                                    secsToTimeString(maxClientResponseDelay, true).c_str());
                     _session->KickPlayer();
@@ -188,11 +188,14 @@ std::string Warden::Penalty(WardenCheck* check /*= NULL*/)
             std::string accountName;
             AccountMgr::GetName(_session->GetAccountId(), accountName);
             std::stringstream banReason;
-            banReason << "Warden Anticheat Violation: " << check->Comment << " (CheckId: " << check->CheckId << ")";
+            banReason << "Warden Anticheat Violation";
+            // Check can be NULL, for example if the client sent a wrong signature in the warden packet (CHECKSUM FAIL)
+            if (check)
+                banReason << ": " << check->Comment << " (CheckId: " << check->CheckId << ")";
+
             sWorld->BanAccount(BAN_ACCOUNT, accountName, duration.str(), banReason.str(),"Server");
 
             return "Ban";
-            break;
         }
     default:
         break;
@@ -208,7 +211,7 @@ void WorldSession::HandleWardenDataOpcode(WorldPacket& recvData)
     sLog->outDebug(LOG_FILTER_WARDEN, "Got packet, opcode %02X, size %u", opcode, uint32(recvData.size()));
     recvData.hexlike();
 
-    switch(opcode)
+    switch (opcode)
     {
         case WARDEN_CMSG_MODULE_MISSING:
             _warden->SendModuleToClient();

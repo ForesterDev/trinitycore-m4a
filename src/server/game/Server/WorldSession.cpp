@@ -139,7 +139,7 @@ WorldSession::~WorldSession()
 
 void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
 {
-    sLog->outError("Client (account %u) send packet %s (%u) with size " SIZEFMTD " but expected %u (attempt to crash server?), skipped",
+    sLog->outError(LOG_FILTER_GENERAL, "Client (account %u) send packet %s (%u) with size " SIZEFMTD " but expected %u (attempt to crash server?), skipped",
         GetAccountId(), LookupOpcodeName(packet.GetOpcode()), packet.GetOpcode(), packet.size(), size);
 }
 
@@ -186,8 +186,8 @@ void WorldSession::SendPacket(WorldPacket const* packet)
     {
         uint64 minTime = uint64(cur_time - lastTime);
         uint64 fullTime = uint64(lastTime - firstTime);
-        sLog->outDetail("Send all time packets count: " UI64FMTD " bytes: " UI64FMTD " avr.count/sec: %f avr.bytes/sec: %f time: %u", sendPacketCount, sendPacketBytes, float(sendPacketCount)/fullTime, float(sendPacketBytes)/fullTime, uint32(fullTime));
-        sLog->outDetail("Send last min packets count: " UI64FMTD " bytes: " UI64FMTD " avr.count/sec: %f avr.bytes/sec: %f", sendLastPacketCount, sendLastPacketBytes, float(sendLastPacketCount)/minTime, float(sendLastPacketBytes)/minTime);
+        sLog->outInfo(LOG_FILTER_GENERAL, "Send all time packets count: " UI64FMTD " bytes: " UI64FMTD " avr.count/sec: %f avr.bytes/sec: %f time: %u", sendPacketCount, sendPacketBytes, float(sendPacketCount)/fullTime, float(sendPacketBytes)/fullTime, uint32(fullTime));
+        sLog->outInfo(LOG_FILTER_GENERAL, "Send last min packets count: " UI64FMTD " bytes: " UI64FMTD " avr.count/sec: %f avr.bytes/sec: %f", sendLastPacketCount, sendLastPacketBytes, float(sendLastPacketCount)/minTime, float(sendLastPacketBytes)/minTime);
 
         lastTime = cur_time;
         sendLastPacketCount = 1;
@@ -208,7 +208,7 @@ void WorldSession::QueuePacket(WorldPacket* new_packet)
 /// Logging helper for unexpected opcodes
 void WorldSession::LogUnexpectedOpcode(WorldPacket* packet, const char* status, const char *reason)
 {
-    sLog->outError("SESSION (account: %u, guidlow: %u, char: %s): received unexpected opcode %s (0x%.4X, status: %s) %s",
+    sLog->outDebug(LOG_FILTER_NETWORKIO, "SESSION (account: %u, guidlow: %u, char: %s): received unexpected opcode %s (0x%.4X, status: %s) %s",
         GetAccountId(), m_GUIDLow, _player ? _player->GetName() : "<none>",
         LookupOpcodeName(packet->GetOpcode()), packet->GetOpcode(), status, reason);
 }
@@ -216,7 +216,7 @@ void WorldSession::LogUnexpectedOpcode(WorldPacket* packet, const char* status, 
 /// Logging helper for unexpected opcodes
 void WorldSession::LogUnprocessedTail(WorldPacket* packet)
 {
-    sLog->outError("SESSION: opcode %s (0x%.4X) have unprocessed tail data (read stop at %u from %u)",
+    sLog->outDebug(LOG_FILTER_NETWORKIO, "SESSION: opcode %s (0x%.4X) have unprocessed tail data (read stop at %u from %u)",
         LookupOpcodeName(packet->GetOpcode()), packet->GetOpcode(), uint32(packet->rpos()), uint32(packet->wpos()));
     packet->print_storage();
 }
@@ -250,7 +250,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
     {
         if (packet->GetOpcode() >= NUM_MSG_TYPES)
         {
-            sLog->outError("SESSION: received non-existed opcode %s (0x%.4X)", LookupOpcodeName(packet->GetOpcode()), packet->GetOpcode());
+            sLog->outError(LOG_FILTER_GENERAL, "SESSION: received non-existed opcode %s (0x%.4X)", LookupOpcodeName(packet->GetOpcode()), packet->GetOpcode());
             sScriptMgr->OnUnknownPacketReceive(m_Socket, WorldPacket(*packet));
         }
         else
@@ -284,13 +284,13 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                         {
                             sScriptMgr->OnPacketReceive(m_Socket, WorldPacket(*packet));
                             (this->*opHandle.handler)(*packet);
-                            if (sLog->IsOutDebug() && packet->rpos() < packet->wpos())
+                            if (sLog->ShouldLog(LOG_FILTER_NETWORKIO, LOG_LEVEL_TRACE) && packet->rpos() < packet->wpos())
                                 LogUnprocessedTail(packet);
                         }
                         // lag can cause STATUS_LOGGEDIN opcodes to arrive after the player started a transfer
                         break;
                     case STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT:
-                        if (!_player && !m_playerRecentlyLogout)
+                        if (!_player && !m_playerRecentlyLogout && !m_playerLogout) // There's a short delay between _player = null and m_playerRecentlyLogout = true during logout
                             LogUnexpectedOpcode(packet, "STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT",
                                 "the player has not logged in yet and not recently logout");
                         else
@@ -298,7 +298,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                             // not expected _player or must checked in packet handler
                             sScriptMgr->OnPacketReceive(m_Socket, WorldPacket(*packet));
                             (this->*opHandle.handler)(*packet);
-                            if (sLog->IsOutDebug() && packet->rpos() < packet->wpos())
+                            if (sLog->ShouldLog(LOG_FILTER_NETWORKIO, LOG_LEVEL_TRACE) && packet->rpos() < packet->wpos())
                                 LogUnprocessedTail(packet);
                         }
                         break;
@@ -311,7 +311,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                         {
                             sScriptMgr->OnPacketReceive(m_Socket, WorldPacket(*packet));
                             (this->*opHandle.handler)(*packet);
-                            if (sLog->IsOutDebug() && packet->rpos() < packet->wpos())
+                            if (sLog->ShouldLog(LOG_FILTER_NETWORKIO, LOG_LEVEL_TRACE) && packet->rpos() < packet->wpos())
                                 LogUnprocessedTail(packet);
                         }
                         break;
@@ -323,18 +323,18 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                             break;
                         }
 
-                        // single from authed time opcodes send in to after logout time
-                        // and before other STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT opcodes.
-                        if (packet->GetOpcode() != CMSG_SET_ACTIVE_VOICE_CHANNEL)
+                        // some auth opcodes can be recieved before STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT opcodes
+                        // however when we recieve CMSG_CHAR_ENUM we are surely no longer during the logout process.
+                        if (packet->GetOpcode() == CMSG_CHAR_ENUM)
                             m_playerRecentlyLogout = false;
 
                         sScriptMgr->OnPacketReceive(m_Socket, WorldPacket(*packet));
                         (this->*opHandle.handler)(*packet);
-                        if (sLog->IsOutDebug() && packet->rpos() < packet->wpos())
+                        if (sLog->ShouldLog(LOG_FILTER_NETWORKIO, LOG_LEVEL_TRACE) && packet->rpos() < packet->wpos())
                             LogUnprocessedTail(packet);
                         break;
                     case STATUS_NEVER:
-                        sLog->outError("SESSION (account: %u, guidlow: %u, char: %s): received not allowed opcode %s (0x%.4X)",
+                        sLog->outDebug(LOG_FILTER_NETWORKIO, "SESSION (account: %u, guidlow: %u, char: %s): received not allowed opcode %s (0x%.4X)",
                             GetAccountId(), m_GUIDLow, _player ? _player->GetName() : "<none>",
                             LookupOpcodeName(packet->GetOpcode()), packet->GetOpcode());
                         break;
@@ -347,13 +347,10 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
             }
             catch(ByteBufferException &)
             {
-                sLog->outError("WorldSession::Update ByteBufferException occured while parsing a packet (opcode: %u) from client %s, accountid=%i. Skipped packet.",
+                sLog->outError(LOG_FILTER_GENERAL, "WorldSession::Update ByteBufferException occured while parsing a packet (opcode: %u) from client %s, accountid=%i. Skipped packet.",
                         packet->GetOpcode(), GetRemoteAddress().c_str(), GetAccountId());
-                if (sLog->IsOutDebug())
-                {
-                    sLog->outDebug(LOG_FILTER_NETWORKIO, "Dumping error causing packet:");
-                    packet->hexlike();
-                }
+                sLog->outTrace(LOG_FILTER_NETWORKIO, "Dumping error causing packet:");
+                packet->hexlike();
             }
         }
 
@@ -404,7 +401,7 @@ void WorldSession::LogoutPlayer(bool Save)
 
     if (_player)
     {
-        if (uint64 lguid = GetPlayer()->GetLootGUID())
+        if (uint64 lguid = _player->GetLootGUID())
             DoLootRelease(lguid);
 
         ///- If the player just died before logging out, make him appear as a ghost
@@ -518,44 +515,41 @@ void WorldSession::LogoutPlayer(bool Save)
         if (_player->GetGroup() && !_player->GetGroup()->isRaidGroup() && m_Socket)
             _player->RemoveFromGroup();
 
-        ///- Send update to group and reset stored max enchanting level
+        //! Send update to group and reset stored max enchanting level
         if (_player->GetGroup())
         {
             _player->GetGroup()->SendUpdate();
             _player->GetGroup()->ResetMaxEnchantingLevel();
         }
 
-        ///- Broadcast a logout message to the player's friends
+        //! Broadcast a logout message to the player's friends
         sSocialMgr->SendFriendStatus(_player, FRIEND_OFFLINE, _player->GetGUIDLow(), true);
         sSocialMgr->RemovePlayerSocial(_player->GetGUIDLow());
 
-        // Call script hook before deletion
-        sScriptMgr->OnPlayerLogout(GetPlayer());
+        //! Call script hook before deletion
+        sScriptMgr->OnPlayerLogout(_player);
 
-        ///- Remove the player from the world
+        //! Remove the player from the world
         // the player may not be in the world when logging out
         // e.g if he got disconnected during a transfer to another map
         // calls to GetMap in this case may cause crashes
         _player->CleanupsBeforeDelete();
-        sLog->outChar("Account: %d (IP: %s) Logout Character:[%s] (GUID: %u) Level: %d", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName(), _player->GetGUIDLow(), _player->getLevel());
+        sLog->outInfo(LOG_FILTER_CHARACTER, "Account: %d (IP: %s) Logout Character:[%s] (GUID: %u) Level: %d", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName(), _player->GetGUIDLow(), _player->getLevel());
         if (Map* _map = _player->FindMap())
             _map->RemovePlayerFromMap(_player, true);
-        SetPlayer(NULL);                                    // deleted in Remove call
 
-        ///- Send the 'logout complete' packet to the client
+        SetPlayer(NULL); //! Pointer already deleted during RemovePlayerFromMap
+
+        //! Send the 'logout complete' packet to the client
+        //! Client will respond by sending 3x CMSG_CANCEL_TRADE, which we currently dont handle
         WorldPacket data(SMSG_LOGOUT_COMPLETE, 0);
         SendPacket(&data);
-
-        ///- Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
-        //No SQL injection as AccountId is uint32
-
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_ACCOUNT_ONLINE);
-
-        stmt->setUInt32(0, GetAccountId());
-
-        CharacterDatabase.Execute(stmt);
-
         sLog->outDebug(LOG_FILTER_NETWORKIO, "SESSION: Sent SMSG_LOGOUT_COMPLETE Message");
+
+        //! Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_ACCOUNT_ONLINE);
+        stmt->setUInt32(0, GetAccountId());
+        CharacterDatabase.Execute(stmt);
     }
 
     m_playerLogout = false;
@@ -613,22 +607,30 @@ const char *WorldSession::GetTrinityString(int32 entry) const
 
 void WorldSession::Handle_NULL(WorldPacket& recvPacket)
 {
-    sLog->outError("SESSION: received unhandled opcode %s (0x%.4X)", LookupOpcodeName(recvPacket.GetOpcode()), recvPacket.GetOpcode());
+    sLog->outError(LOG_FILTER_GENERAL, "SESSION: received unhandled opcode %s (0x%.4X)",
+        LookupOpcodeName(recvPacket.GetOpcode()),
+        recvPacket.GetOpcode());
 }
 
 void WorldSession::Handle_EarlyProccess(WorldPacket& recvPacket)
 {
-    sLog->outError("SESSION: received opcode %s (0x%.4X) that must be processed in WorldSocket::OnRead", LookupOpcodeName(recvPacket.GetOpcode()), recvPacket.GetOpcode());
+    sLog->outError(LOG_FILTER_GENERAL, "SESSION: received opcode %s (0x%.4X) that must be processed in WorldSocket::OnRead",
+        LookupOpcodeName(recvPacket.GetOpcode()),
+        recvPacket.GetOpcode());
 }
 
 void WorldSession::Handle_ServerSide(WorldPacket& recvPacket)
 {
-    sLog->outError("SESSION: received server-side opcode %s (0x%.4X)", LookupOpcodeName(recvPacket.GetOpcode()), recvPacket.GetOpcode());
+    sLog->outError(LOG_FILTER_GENERAL, "SESSION: received server-side opcode %s (0x%.4X)",
+        LookupOpcodeName(recvPacket.GetOpcode()),
+        recvPacket.GetOpcode());
 }
 
 void WorldSession::Handle_Deprecated(WorldPacket& recvPacket)
 {
-    sLog->outError("SESSION: received deprecated opcode %s (0x%.4X)", LookupOpcodeName(recvPacket.GetOpcode()), recvPacket.GetOpcode());
+    sLog->outError(LOG_FILTER_GENERAL, "SESSION: received deprecated opcode %s (0x%.4X)",
+        LookupOpcodeName(recvPacket.GetOpcode()),
+        recvPacket.GetOpcode());
 }
 
 void WorldSession::SendAuthWaitQue(uint32 position)
@@ -671,13 +673,15 @@ void WorldSession::LoadAccountData(PreparedQueryResult result, uint32 mask)
         uint32 type = fields[0].GetUInt8();
         if (type >= NUM_ACCOUNT_DATA_TYPES)
         {
-            sLog->outError("Table `%s` have invalid account data type (%u), ignore.", mask == GLOBAL_CACHE_MASK ? "account_data" : "character_account_data", type);
+            sLog->outError(LOG_FILTER_GENERAL, "Table `%s` have invalid account data type (%u), ignore.",
+                mask == GLOBAL_CACHE_MASK ? "account_data" : "character_account_data", type);
             continue;
         }
 
         if ((mask & (1 << type)) == 0)
         {
-            sLog->outError("Table `%s` have non appropriate for table  account data type (%u), ignore.", mask == GLOBAL_CACHE_MASK ? "account_data" : "character_account_data", type);
+            sLog->outError(LOG_FILTER_GENERAL, "Table `%s` have non appropriate for table  account data type (%u), ignore.",
+                mask == GLOBAL_CACHE_MASK ? "account_data" : "character_account_data", type);
             continue;
         }
 
@@ -931,7 +935,7 @@ void WorldSession::ReadAddonsInfo(WorldPacket &data)
 
     if (size > 0xFFFFF)
     {
-        sLog->outError("WorldSession::ReadAddonsInfo addon info too big, size %u", size);
+        sLog->outError(LOG_FILTER_GENERAL, "WorldSession::ReadAddonsInfo addon info too big, size %u", size);
         return;
     }
 
@@ -961,7 +965,7 @@ void WorldSession::ReadAddonsInfo(WorldPacket &data)
 
             addonInfo >> enabled >> crc >> unk1;
 
-            sLog->outDetail("ADDON: Name: %s, Enabled: 0x%x, CRC: 0x%x, Unknown2: 0x%x", addonName.c_str(), enabled, crc, unk1);
+            sLog->outInfo(LOG_FILTER_GENERAL, "ADDON: Name: %s, Enabled: 0x%x, CRC: 0x%x, Unknown2: 0x%x", addonName.c_str(), enabled, crc, unk1);
 
             AddonInfo addon(addonName, enabled, crc, 2, true);
 
@@ -974,15 +978,15 @@ void WorldSession::ReadAddonsInfo(WorldPacket &data)
                     match = false;
 
                 if (!match)
-                    sLog->outDetail("ADDON: %s was known, but didn't match known CRC (0x%x)!", addon.Name.c_str(), savedAddon->CRC);
+                    sLog->outInfo(LOG_FILTER_GENERAL, "ADDON: %s was known, but didn't match known CRC (0x%x)!", addon.Name.c_str(), savedAddon->CRC);
                 else
-                    sLog->outDetail("ADDON: %s was known, CRC is correct (0x%x)", addon.Name.c_str(), savedAddon->CRC);
+                    sLog->outInfo(LOG_FILTER_GENERAL, "ADDON: %s was known, CRC is correct (0x%x)", addon.Name.c_str(), savedAddon->CRC);
             }
             else
             {
                 AddonMgr::SaveAddon(addon);
 
-                sLog->outDetail("ADDON: %s (0x%x) was not known, saving...", addon.Name.c_str(), addon.CRC);
+                sLog->outInfo(LOG_FILTER_GENERAL, "ADDON: %s (0x%x) was not known, saving...", addon.Name.c_str(), addon.CRC);
             }
 
             // TODO: Find out when to not use CRC/pubkey, and other possible states.
@@ -997,7 +1001,7 @@ void WorldSession::ReadAddonsInfo(WorldPacket &data)
             sLog->outDebug(LOG_FILTER_NETWORKIO, "packet under-read!");
     }
     else
-        sLog->outError("Addon packet uncompress error!");
+        sLog->outError(LOG_FILTER_GENERAL, "Addon packet uncompress error!");
 }
 
 void WorldSession::SendAddonsInfo()
@@ -1036,7 +1040,7 @@ void WorldSession::SendAddonsInfo()
             data << uint8(usepk);
             if (usepk)                                      // if CRC is wrong, add public key (client need it)
             {
-                sLog->outDetail("ADDON: CRC (0x%x) for addon %s is wrong (does not match expected 0x%x), sending pubkey",
+                sLog->outInfo(LOG_FILTER_GENERAL, "ADDON: CRC (0x%x) for addon %s is wrong (does not match expected 0x%x), sending pubkey",
                     itr->CRC, itr->Name.c_str(), STANDARD_ADDON_CRC);
 
                 data.append(addonPublicKey, sizeof(addonPublicKey));

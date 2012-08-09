@@ -42,11 +42,22 @@ npc_locksmith            75%    list of keys needs to be confirmed
 npc_firework            100%    NPC's summoned by rockets and rocket clusters, for making them cast visual
 EndContentData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "ScriptedEscortAI.h"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "World.h"
+#include "PetAI.h"
+#include "PassiveAI.h"
+#include "CombatAI.h"
+#include "GameEventMgr.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "Cell.h"
+#include "CellImpl.h"
+#include "SpellAuras.h"
 
 /*########
 # npc_air_force_bots
@@ -130,14 +141,14 @@ public:
             }
 
             if (!SpawnAssoc)
-                sLog->outErrorDb("TCSR: Creature template entry %u has ScriptName npc_air_force_bots, but it's not handled by that script", creature->GetEntry());
+                sLog->outError(LOG_FILTER_SQL, "TCSR: Creature template entry %u has ScriptName npc_air_force_bots, but it's not handled by that script", creature->GetEntry());
             else
             {
                 CreatureTemplate const* spawnedTemplate = sObjectMgr->GetCreatureTemplate(SpawnAssoc->spawnedCreatureEntry);
 
                 if (!spawnedTemplate)
                 {
-                    sLog->outErrorDb("TCSR: Creature template entry %u does not exist in DB, which is required by npc_air_force_bots", SpawnAssoc->spawnedCreatureEntry);
+                    sLog->outError(LOG_FILTER_SQL, "TCSR: Creature template entry %u does not exist in DB, which is required by npc_air_force_bots", SpawnAssoc->spawnedCreatureEntry);
                     SpawnAssoc = NULL;
                     return;
                 }
@@ -157,7 +168,7 @@ public:
                 SpawnedGUID = summoned->GetGUID();
             else
             {
-                sLog->outErrorDb("TCSR: npc_air_force_bots: wasn't able to spawn Creature %u", SpawnAssoc->spawnedCreatureEntry);
+                sLog->outError(LOG_FILTER_SQL, "TCSR: npc_air_force_bots: wasn't able to spawn Creature %u", SpawnAssoc->spawnedCreatureEntry);
                 SpawnAssoc = NULL;
             }
 
@@ -835,7 +846,7 @@ void npc_doctor::npc_doctorAI::UpdateAI(uint32 const diff)
                     patientEntry = HordeSoldierId[rand() % 3];
                     break;
                 default:
-                    sLog->outError("TSCR: Invalid entry for Triage doctor. Please check your database");
+                    sLog->outError(LOG_FILTER_TSCR, "Invalid entry for Triage doctor. Please check your database");
                     return;
             }
 
@@ -2100,16 +2111,18 @@ class npc_shadowfiend : public CreatureScript
     public:
         npc_shadowfiend() : CreatureScript("npc_shadowfiend") { }
 
-        struct npc_shadowfiendAI : public ScriptedAI
+        struct npc_shadowfiendAI : public PetAI
         {
-            npc_shadowfiendAI(Creature* creature) : ScriptedAI(creature) {}
+            npc_shadowfiendAI(Creature* creature) : PetAI(creature) {}
 
-            void DamageTaken(Unit* /*killer*/, uint32& damage)
+            void JustDied(Unit* killer)
             {
                 if (me->isSummon())
                     if (Unit* owner = me->ToTempSummon()->GetSummoner())
-                        if (owner->HasAura(GLYPH_OF_SHADOWFIEND) && damage >= me->GetHealth())
+                        if (owner->HasAura(GLYPH_OF_SHADOWFIEND))
                             owner->CastSpell(owner, GLYPH_OF_SHADOWFIEND_MANA, true);
+
+                PetAI::JustDied(killer);
             }
         };
 
@@ -2988,6 +3001,31 @@ public:
     };
 };
 
+/*######
+## npc_generic_harpoon_cannon
+######*/
+
+class npc_generic_harpoon_cannon : public CreatureScript
+{
+public:
+    npc_generic_harpoon_cannon() : CreatureScript("npc_generic_harpoon_cannon") { }
+
+    struct npc_generic_harpoon_cannonAI : public ScriptedAI
+    {
+        npc_generic_harpoon_cannonAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void Reset()
+        {
+            me->SetUnitMovementFlags(MOVEMENTFLAG_ROOT);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_generic_harpoon_cannonAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -3020,4 +3058,5 @@ void AddSC_npcs_special()
     new npc_earth_elemental();
     new npc_firework();
     new npc_spring_rabbit();
+    new npc_generic_harpoon_cannon();
 }
