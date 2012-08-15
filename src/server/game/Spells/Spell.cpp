@@ -3586,6 +3586,12 @@ void Spell::update(uint32 difftime)
 {
     // update pointers based at it's GUIDs
     UpdatePointers();
+    if (m_spellState == SPELL_STATE_NULL)
+    {
+        prepare(&m_targets);
+        if (m_spellState == SPELL_STATE_FINISHED)
+            return;
+    }
 
     if (m_targets.GetUnitTargetGUID() && !m_targets.GetUnitTarget())
     {
@@ -6661,8 +6667,6 @@ SpellEvent::~SpellEvent()
 
 bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
 {
-    if (m_Spell->getState() == SPELL_STATE_NULL)
-        m_Spell->prepare(&m_Spell->m_targets);
     // update spell if it is not finished
     if (m_Spell->getState() != SPELL_STATE_FINISHED)
         m_Spell->update(p_time);
