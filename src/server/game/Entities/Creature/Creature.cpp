@@ -1255,7 +1255,7 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 vehId, uint3
         return false;
     }
 
-    SetOriginalEntry(Entry);
+    SetOriginalEntry(Entry, team);
 
     if (!vehId)
         vehId = cinfo->VehicleId;
@@ -1609,7 +1609,7 @@ void Creature::Respawn(bool force)
         lootForBody         = false;
 
         SetMap(map);
-        UpdateEntry(m_originalEntry);
+        UpdateEntry(m_originalEntry, original_team);
 
         CreatureTemplate const* cinfo = GetCreatureTemplate();
         SelectLevel(cinfo);
