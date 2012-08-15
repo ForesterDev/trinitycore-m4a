@@ -3606,9 +3606,6 @@ void Spell::update(uint32 difftime)
 
     switch (m_spellState)
     {
-    case SPELL_STATE_NULL:
-        prepare(&m_targets);
-        break;
         case SPELL_STATE_PREPARING:
         {
             if (m_timer > 0)
@@ -6664,6 +6661,8 @@ SpellEvent::~SpellEvent()
 
 bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
 {
+    if (m_Spell->getState() == SPELL_STATE_NULL)
+        m_Spell->prepare(&m_Spell->m_targets);
     // update spell if it is not finished
     if (m_Spell->getState() != SPELL_STATE_FINISHED)
         m_Spell->update(p_time);
