@@ -708,7 +708,11 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         uint32 m_PlayerDamageReq;
 
         uint32 GetOriginalEntry() const { return m_originalEntry; }
-        void SetOriginalEntry(uint32 entry) { m_originalEntry = entry; }
+        void SetOriginalEntry(uint32 entry, uint32 team)
+        {
+            m_originalEntry = entry;
+            original_team = team;
+        }
 
         static float _GetDamageMod(int32 Rank);
 
@@ -779,6 +783,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         //Formation var
         CreatureGroup* m_formation;
         bool TriggerJustRespawned;
+        uint32 original_team;
 };
 
 class AssistDelayEvent : public BasicEvent
