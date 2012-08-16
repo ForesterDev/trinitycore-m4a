@@ -228,8 +228,8 @@ bool InstanceScript::SetBossState(uint32 id, EncounterState state)
             for (DoorSet::iterator i = bossInfo->door[type].begin(); i != bossInfo->door[type].end(); ++i)
                 UpdateDoorState(*i);
 
-        for (MinionSet::iterator i = bossInfo->minion.begin(); i != bossInfo->minion.end(); ++i)
-            UpdateMinionState(*i, state);
+        for (MinionSet::iterator i = bossInfo->minion.begin(); i != bossInfo->minion.end(); )
+            UpdateMinionState(*i++, state);
 
         return true;
     }
