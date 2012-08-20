@@ -47,6 +47,11 @@ enum Spells
     // Rotface
     SPELL_SLIME_SPRAY                       = 69508,    // every 20 seconds
     SPELL_MUTATED_INFECTION                 = 69674,    // hastens every 1:30
+    SPELL_MUTATED_INFECTION_TRIGGER_14      = 70090,
+    SPELL_MUTATED_INFECTION_TRIGGER_12      = 70003,
+    SPELL_MUTATED_INFECTION_TRIGGER_10      = 70004,
+    SPELL_MUTATED_INFECTION_TRIGGER_8       = 70005,
+    SPELL_MUTATED_INFECTION_TRIGGER_6       = 70006,
 
     // Oozes
     SPELL_LITTLE_OOZE_COMBINE               = 69537,    // combine 2 Small Oozes
@@ -68,6 +73,7 @@ enum Spells
 };
 
 #define MUTATED_INFECTION RAID_MODE<int32>(69674, 71224, 73022, 73023)
+
 
 enum Events
 {
@@ -95,18 +101,17 @@ class boss_rotface : public CreatureScript
             boss_rotfaceAI(Creature* creature) : BossAI(creature, DATA_ROTFACE)
             {
                 infectionStage = 0;
-                infectionCooldown = 14000;
+                infectionCount = 0;
             }
 
             void Reset()
             {
                 _Reset();
+                DoCast(me,SPELL_GREEN_ABOMINATION_HITTIN__YA_PROC);
                 events.ScheduleEvent(EVENT_BERSERK, 600000);
                 events.ScheduleEvent(EVENT_SLIME_SPRAY, 20000);
-                events.ScheduleEvent(EVENT_HASTEN_INFECTIONS, 90000);
-                events.ScheduleEvent(EVENT_MUTATED_INFECTION, 14000);
                 infectionStage = 0;
-                infectionCooldown = 14000;
+                infectionCount = 0;
             }
 
             void EnterCombat(Unit* who)
@@ -119,6 +124,7 @@ class boss_rotface : public CreatureScript
                 }
 
                 me->setActive(true);
+                DoCast(me, SPELL_MUTATED_INFECTION_TRIGGER_14);
                 Talk(SAY_AGGRO);
                 if (Creature* professor = Unit::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
                     professor->AI()->DoAction(ACTION_ROTFACE_COMBAT);
@@ -158,6 +164,38 @@ class boss_rotface : public CreatureScript
             {
                 if (spell->Id == SPELL_SLIME_SPRAY)
                     Talk(SAY_SLIME_SPRAY);
+                else if(spell->Id == MUTATED_INFECTION)
+                {
+
+                  if(infectionStage >= 4)
+                    return;
+
+                  infectionCount++;
+                  if(infectionCount == 4)
+                  {
+                    infectionCount = 0;
+                    switch(infectionStage++)
+                            {
+                              case 0:
+                                me->RemoveAurasDueToSpell(SPELL_MUTATED_INFECTION_TRIGGER_14);
+                                DoCast(me,SPELL_MUTATED_INFECTION_TRIGGER_12);
+                                break;
+                              case 1:
+                                me->RemoveAurasDueToSpell(SPELL_MUTATED_INFECTION_TRIGGER_12);
+                                DoCast(me,SPELL_MUTATED_INFECTION_TRIGGER_10);
+                                break;
+                              case 2:
+                                me->RemoveAurasDueToSpell(SPELL_MUTATED_INFECTION_TRIGGER_10);
+                                DoCast(me,SPELL_MUTATED_INFECTION_TRIGGER_8);
+                                break;
+                              case 3:
+                                me->RemoveAurasDueToSpell(SPELL_MUTATED_INFECTION_TRIGGER_8);
+                                DoCast(me,SPELL_MUTATED_INFECTION_TRIGGER_6);
+                                break;
+                            }
+                  }
+                }
+
             }
 
             void MoveInLineOfSight(Unit* who)
@@ -182,25 +220,14 @@ class boss_rotface : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_SLIME_SPRAY:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))                        
                             {
                                 DoSummon(NPC_OOZE_SPRAY_STALKER, *target, 8000, TEMPSUMMON_TIMED_DESPAWN);
                                 Talk(EMOTE_SLIME_SPRAY);
                                 DoCast(me, SPELL_SLIME_SPRAY);
                             }
                             events.ScheduleEvent(EVENT_SLIME_SPRAY, 20000);
-                            break;
-                        case EVENT_HASTEN_INFECTIONS:
-                            if (infectionStage++ < 4)
-                            {
-                                infectionCooldown -= 2000;
-                                events.ScheduleEvent(EVENT_HASTEN_INFECTIONS, 90000);
-                            }
-                            break;
-                        case EVENT_MUTATED_INFECTION:
-                            me->CastCustomSpell(SPELL_MUTATED_INFECTION, SPELLVALUE_MAX_TARGETS, 1, NULL, false);
-                            events.ScheduleEvent(EVENT_MUTATED_INFECTION, infectionCooldown);
-                            break;
+                            break;              
                         case EVENT_BERSERK:
                             me->InterruptNonMeleeSpells(false);
                             DoCast(me, SPELL_BERSERK2);
@@ -215,7 +242,7 @@ class boss_rotface : public CreatureScript
             }
 
         private:
-            uint32 infectionCooldown;
+            uint32 infectionCount;
             uint32 infectionStage;
         };
 
