@@ -23,7 +23,6 @@
 #include "G3D/Table.h"
 #include "G3D/Array.h"
 #include "G3D/Set.h"
-#include <Errors.h>
 #include "BoundingIntervalHierarchy.h"
 
 
@@ -84,7 +83,6 @@ public:
             ++unbalanced_times;
             m_objects[Idx] = NULL;
         }
-        ASSERT(!m_objects.contains(&obj));
     }
 
     void balance()
