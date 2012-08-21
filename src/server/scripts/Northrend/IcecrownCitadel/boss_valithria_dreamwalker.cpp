@@ -602,11 +602,11 @@ class npc_the_lich_king_controller : public CreatureScript
             void Reset()
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_GLUTTONOUS_ABOMINATION_SUMMONER, 5000);
-                _events.ScheduleEvent(EVENT_SUPPRESSER_SUMMONER, 10000);
+                _events.ScheduleEvent(EVENT_GLUTTONOUS_ABOMINATION_SUMMONER, 23000);
+                _events.ScheduleEvent(EVENT_SUPPRESSER_SUMMONER, IsHeroic() ? 14000 : 29000);
                 _events.ScheduleEvent(EVENT_BLISTERING_ZOMBIE_SUMMONER, 15000);
                 _events.ScheduleEvent(EVENT_RISEN_ARCHMAGE_SUMMONER, 20000);
-                _events.ScheduleEvent(EVENT_BLAZING_SKELETON_SUMMONER, 30000);
+                _events.ScheduleEvent(EVENT_BLAZING_SKELETON_SUMMONER, 50000);
                 me->SetReactState(REACT_PASSIVE);
             }
 
@@ -1239,6 +1239,40 @@ class spell_dreamwalker_summoner : public SpellScriptLoader
         }
 };
 
+namespace
+{
+    void summon_suppressers(Unit *caster)
+    {
+        std::list<Creature*> summoners;
+        GetCreatureListWithEntryInGrid(summoners, caster, NPC_WORLD_TRIGGER, 100.0f);
+        summoners.remove_if(Trinity::UnitAuraCheck(true, SPELL_RECENTLY_SPAWNED));
+        Trinity::Containers::RandomResizeList(summoners, 2);
+        if (summoners.empty())
+            return;
+
+        for (uint32 i = 0; i < 3; ++i)
+            caster->CastSpell(summoners.front(), SPELL_SUMMON_SUPPRESSER, true);
+        for (uint32 i = 0; i < 3; ++i)
+            caster->CastSpell(summoners.back(), SPELL_SUMMON_SUPPRESSER, true);
+    }
+
+    struct summon_timer_suppresser_spell
+    : SpellScript
+    {
+        PrepareSpellScript(summon_timer_suppresser_spell)
+
+        void Register()
+        {
+            AfterHit += SpellHitFn(summon_timer_suppresser_spell::after_hit);
+        }
+
+        void after_hit()
+        {
+            summon_suppressers(GetCaster());
+        }
+    };
+}
+
 class spell_dreamwalker_summon_suppresser : public SpellScriptLoader
 {
     public:
@@ -1255,24 +1289,25 @@ class spell_dreamwalker_summon_suppresser : public SpellScriptLoader
                 if (!caster)
                     return;
 
-                std::list<Creature*> summoners;
-                GetCreatureListWithEntryInGrid(summoners, caster, NPC_WORLD_TRIGGER, 100.0f);
-                summoners.remove_if(Trinity::UnitAuraCheck(true, SPELL_RECENTLY_SPAWNED));
-                Trinity::Containers::RandomResizeList(summoners, 2);
-                if (summoners.empty())
-                    return;
+                summon_suppressers(caster);
+            }
 
-                for (uint32 i = 0; i < 3; ++i)
-                    caster->CastSpell(summoners.front(), SPELL_SUMMON_SUPPRESSER, true);
-                for (uint32 i = 0; i < 3; ++i)
-                    caster->CastSpell(summoners.back(), SPELL_SUMMON_SUPPRESSER, true);
+            void calc_periodic(const AuraEffect *, bool &, int32 &amplitude)
+            {
+                amplitude = GetOwner()->GetMap()->IsHeroic() ? 31000 : 58000;
             }
 
             void Register()
             {
                 OnEffectPeriodic += AuraEffectPeriodicFn(spell_dreamwalker_summon_suppresser_AuraScript::PeriodicTick, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+                DoEffectCalcPeriodic += AuraEffectCalcPeriodicFn(spell_dreamwalker_summon_suppresser_AuraScript::calc_periodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
             }
         };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new summon_timer_suppresser_spell;
+        }
 
         AuraScript* GetAuraScript() const
         {
