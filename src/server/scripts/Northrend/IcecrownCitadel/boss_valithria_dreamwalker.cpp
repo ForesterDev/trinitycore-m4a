@@ -1152,17 +1152,27 @@ class spell_dreamwalker_decay_periodic_timer : public SpellScriptLoader
 
             bool Load()
             {
-                _decayRate = GetId() != SPELL_TIMER_BLAZING_SKELETON ? 1000 : 5000;
+                switch (GetId())
+                {
+                default:
+                    _decayRate = 1000;
+                    min_amplitude = 20000;
+                    break;
+                case SPELL_TIMER_BLAZING_SKELETON:
+                    _decayRate = 5000;
+                    min_amplitude = 5000;
+                    break;
+                case SPELL_TIMER_GLUTTONOUS_ABOMINATION:
+                    _decayRate = 5000;
+                    min_amplitude = 55000;
+                    break;
+                }
                 return true;
             }
 
             void DecayPeriodicTimer(AuraEffect* aurEff)
             {
-                int32 timer = aurEff->GetPeriodicTimer();
-                if (timer <= 5)
-                    return;
-
-                aurEff->SetPeriodicTimer(timer - _decayRate);
+                aurEff->SetPeriodicTimer(aurEff->GetPeriodicTimer() - std::min(_decayRate * static_cast<int32>(aurEff->GetTickNumber()), aurEff->GetAmplitude() - min_amplitude));
             }
 
             void Register()
@@ -1171,6 +1181,7 @@ class spell_dreamwalker_decay_periodic_timer : public SpellScriptLoader
             }
 
             int32 _decayRate;
+            int min_amplitude;
         };
 
         AuraScript* GetAuraScript() const
