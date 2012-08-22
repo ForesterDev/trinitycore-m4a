@@ -931,18 +931,50 @@ class npc_blistering_zombie : public CreatureScript
             {
             }
 
+            void InitializeAI()
+            {
+                ScriptedAI::InitializeAI();
+                burst = false;
+            }
+
+            void DamageTaken(Unit *, uint32 &damage)
+            {
+                if (damage >= me->GetHealth())
+                    damage = me->GetHealth() - 1;
+            }
+
             void JustDied(Unit* /*killer*/)
             {
-                DoCast(me, SPELL_ACID_BURST, true);
             }
 
             void UpdateAI(uint32 const /*diff*/)
             {
+                if (!burst)
+                    if (me->GetHealth() < 10000)
+                    {
+                        me->SetReactState(REACT_PASSIVE);
+                        me->AttackStop();
+                        if (me->IsNonMeleeSpellCasted(false))
+                            me->InterruptNonMeleeSpells(false);
+                        me->GetMotionMaster()->Clear(false);
+                        me->GetMotionMaster()->MoveIdle();
+                        me->StopMoving();
+                        me->SetTarget(0);
+                        burst = true;
+                    }
+                if (burst)
+                {
+                    if (!me->HasUnitState(UNIT_STATE_CASTING))
+                        DoCastAOE(SPELL_ACID_BURST);
+                    return;
+                }
                 if (!UpdateVictim())
                     return;
 
                 DoMeleeAttackIfReady();
             }
+
+            bool burst;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1477,6 +1509,44 @@ class spell_dreamwalker_twisted_nightmares : public SpellScriptLoader
         }
 };
 
+namespace
+{
+    struct acid_burst_spell
+    : SpellScript
+    {
+        PrepareSpellScript(acid_burst_spell)
+
+        void Register()
+        {
+            AfterCast += SpellCastFn(acid_burst_spell::after_cast);
+        }
+
+        void after_cast()
+        {
+            if (auto caster = dynamic_cast<Creature *>(GetCaster()))
+            {
+                caster->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                caster->DespawnOrUnsummon(3000U);
+                caster->IsAIEnabled = false;
+            }
+        }
+    };
+
+    struct acid_burst_script
+    : SpellScriptLoader
+    {
+        acid_burst_script()
+        : SpellScriptLoader("spell_dreamwalker_acid_burst")
+        {
+        }
+
+        SpellScript *GetSpellScript() const
+        {
+            return new acid_burst_spell;
+        }
+    };
+}
+
 class achievement_portal_jockey : public AchievementCriteriaScript
 {
     public:
@@ -1509,5 +1579,6 @@ void AddSC_boss_valithria_dreamwalker()
     new spell_dreamwalker_summon_nightmare_portal();
     new spell_dreamwalker_nightmare_cloud();
     new spell_dreamwalker_twisted_nightmares();
+    new acid_burst_script;
     new achievement_portal_jockey();
 }
