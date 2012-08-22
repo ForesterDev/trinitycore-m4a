@@ -1209,11 +1209,13 @@ class spell_dreamwalker_summoner : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& targets)
             {
-                targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_RECENTLY_SPAWNED));
                 if (targets.empty())
                     return;
+                std::vector<WorldObject *> clean_targets;
+                std::copy_if(begin(targets), end(targets), std::back_inserter(clean_targets), Trinity::UnitAuraCheck(false, SPELL_RECENTLY_SPAWNED));
 
-                WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+                using Trinity::Containers::SelectRandomContainerElement;
+                WorldObject* target = !clean_targets.empty() ? SelectRandomContainerElement(clean_targets) : SelectRandomContainerElement(targets);
                 targets.clear();
                 targets.push_back(target);
             }
@@ -1246,7 +1248,6 @@ namespace
     {
         std::list<Creature*> summoners;
         GetCreatureListWithEntryInGrid(summoners, caster, NPC_WORLD_TRIGGER, 100.0f);
-        summoners.remove_if(Trinity::UnitAuraCheck(true, SPELL_RECENTLY_SPAWNED));
         Trinity::Containers::RandomResizeList(summoners, 2);
         if (summoners.empty())
             return;
