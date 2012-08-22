@@ -937,6 +937,11 @@ class npc_blistering_zombie : public CreatureScript
                 burst = false;
             }
 
+            void Reset()
+            {
+                me->CastSpell(me, 70749 /* Corrosion */, true);
+            }
+
             void DamageTaken(Unit *, uint32 &damage)
             {
                 if (damage >= me->GetHealth())
