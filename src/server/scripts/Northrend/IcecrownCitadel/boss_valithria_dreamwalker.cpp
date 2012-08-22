@@ -602,10 +602,10 @@ class npc_the_lich_king_controller : public CreatureScript
             void Reset()
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_GLUTTONOUS_ABOMINATION_SUMMONER, 23000);
-                _events.ScheduleEvent(EVENT_SUPPRESSER_SUMMONER, IsHeroic() ? 14000 : 29000);
-                _events.ScheduleEvent(EVENT_BLISTERING_ZOMBIE_SUMMONER, 15000);
-                _events.ScheduleEvent(EVENT_RISEN_ARCHMAGE_SUMMONER, 20000);
+                _events.ScheduleEvent(EVENT_GLUTTONOUS_ABOMINATION_SUMMONER, 21000);
+                _events.ScheduleEvent(EVENT_SUPPRESSER_SUMMONER, 26000);
+                _events.ScheduleEvent(EVENT_BLISTERING_ZOMBIE_SUMMONER, 32000);
+                _events.ScheduleEvent(EVENT_RISEN_ARCHMAGE_SUMMONER, 38000);
                 _events.ScheduleEvent(EVENT_BLAZING_SKELETON_SUMMONER, 50000);
                 me->SetReactState(REACT_PASSIVE);
             }
@@ -1154,25 +1154,27 @@ class spell_dreamwalker_decay_periodic_timer : public SpellScriptLoader
             {
                 switch (GetId())
                 {
-                default:
-                    _decayRate = 1000;
-                    min_amplitude = 20000;
+                case SPELL_TIMER_SUPPRESSER:
+                    _decayRate = 2000;
                     break;
                 case SPELL_TIMER_BLAZING_SKELETON:
                     _decayRate = 5000;
-                    min_amplitude = 5000;
                     break;
                 case SPELL_TIMER_GLUTTONOUS_ABOMINATION:
-                    _decayRate = 5000;
-                    min_amplitude = 55000;
+                    _decayRate = 3000;
                     break;
+                case SPELL_TIMER_RISEN_ARCHMAGE:
+                    _decayRate = 1000;
+                    break;
+                default:
+                    return false;
                 }
                 return true;
             }
 
             void DecayPeriodicTimer(AuraEffect* aurEff)
             {
-                aurEff->SetPeriodicTimer(aurEff->GetPeriodicTimer() - std::min(_decayRate * static_cast<int32>(aurEff->GetTickNumber()), aurEff->GetAmplitude() - min_amplitude));
+                aurEff->SetPeriodicTimer(aurEff->GetPeriodicTimer() - std::min(_decayRate * static_cast<int32>(aurEff->GetTickNumber()), aurEff->GetAmplitude() - _decayRate));
             }
 
             void Register()
@@ -1181,7 +1183,6 @@ class spell_dreamwalker_decay_periodic_timer : public SpellScriptLoader
             }
 
             int32 _decayRate;
-            int min_amplitude;
         };
 
         AuraScript* GetAuraScript() const
@@ -1292,15 +1293,9 @@ class spell_dreamwalker_summon_suppresser : public SpellScriptLoader
                 summon_suppressers(caster);
             }
 
-            void calc_periodic(const AuraEffect *, bool &, int32 &amplitude)
-            {
-                amplitude = GetOwner()->GetMap()->IsHeroic() ? 31000 : 58000;
-            }
-
             void Register()
             {
                 OnEffectPeriodic += AuraEffectPeriodicFn(spell_dreamwalker_summon_suppresser_AuraScript::PeriodicTick, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
-                DoEffectCalcPeriodic += AuraEffectCalcPeriodicFn(spell_dreamwalker_summon_suppresser_AuraScript::calc_periodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
             }
         };
 
