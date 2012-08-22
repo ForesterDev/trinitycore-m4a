@@ -945,7 +945,7 @@ class npc_blistering_zombie : public CreatureScript
             void DamageTaken(Unit *, uint32 &damage)
             {
                 if (damage >= me->GetHealth())
-                    damage = me->GetHealth() - 1;
+                    damage = me->GetHealth() - 1U;
             }
 
             void JustDied(Unit* /*killer*/)
@@ -955,7 +955,7 @@ class npc_blistering_zombie : public CreatureScript
             void UpdateAI(uint32 const /*diff*/)
             {
                 if (!burst)
-                    if (me->GetHealth() < 10000)
+                    if (me->GetHealth() == 1U)
                     {
                         me->SetReactState(REACT_PASSIVE);
                         me->AttackStop();
@@ -969,8 +969,7 @@ class npc_blistering_zombie : public CreatureScript
                     }
                 if (burst)
                 {
-                    if (!me->HasUnitState(UNIT_STATE_CASTING))
-                        DoCastAOE(SPELL_ACID_BURST);
+                    DoCastAOE(SPELL_ACID_BURST);
                     return;
                 }
                 if (!UpdateVictim())
@@ -1531,7 +1530,7 @@ namespace
             if (auto caster = dynamic_cast<Creature *>(GetCaster()))
             {
                 caster->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                caster->DespawnOrUnsummon(3000U);
+                caster->DespawnOrUnsummon(4000U);
                 caster->IsAIEnabled = false;
             }
         }
