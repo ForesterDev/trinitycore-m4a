@@ -969,7 +969,8 @@ class npc_blistering_zombie : public CreatureScript
                     }
                 if (burst)
                 {
-                    DoCastAOE(SPELL_ACID_BURST);
+                    if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                        DoCastAOE(SPELL_ACID_BURST);
                     return;
                 }
                 if (!UpdateVictim())
@@ -1531,7 +1532,6 @@ namespace
             {
                 caster->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 caster->DespawnOrUnsummon(4000U);
-                caster->IsAIEnabled = false;
             }
         }
     };
