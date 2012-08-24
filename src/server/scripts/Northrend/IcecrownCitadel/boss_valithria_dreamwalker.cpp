@@ -809,8 +809,8 @@ class npc_blazing_skeleton : public CreatureScript
             void Reset()
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_FIREBALL, urand(2000, 4000));
-                _events.ScheduleEvent(EVENT_LEY_WASTE, urand(15000, 20000));
+                _events.ScheduleEvent(EVENT_FIREBALL, 5000U);
+                _events.ScheduleEvent(EVENT_LEY_WASTE, 10000U);
             }
 
             void UpdateAI(uint32 const diff)
@@ -834,7 +834,7 @@ class npc_blazing_skeleton : public CreatureScript
                             break;
                         case EVENT_LEY_WASTE:
                             DoCast(me, SPELL_LEY_WASTE);
-                            _events.ScheduleEvent(EVENT_LEY_WASTE, urand(15000, 20000));
+                            _events.ScheduleEvent(EVENT_LEY_WASTE, 15000U);
                             break;
                         default:
                             break;
