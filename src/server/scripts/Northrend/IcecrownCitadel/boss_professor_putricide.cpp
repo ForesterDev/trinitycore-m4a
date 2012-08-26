@@ -720,12 +720,12 @@ class npc_volatile_ooze : public CreatureScript
                 creature->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             }
 
-            void Reset()
+            void Reset() override
             {
                 me->CastSpell(me, SPELL_OOZE_ERUPTION_SEARCH_PERIODIC, true);
             }
 
-            void IsSummonedBy(Unit *summoner UNUSED)
+            void IsSummonedBy(Unit *summoner UNUSED) override
             {
                 if (auto c = Unit::GetCreature(*me, me->GetInstanceScript()->GetData64(DATA_PROFESSOR_PUTRICIDE)))
                     c->AI()->JustSummoned(me);
@@ -771,12 +771,12 @@ class npc_gas_cloud : public CreatureScript
                 creature->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             }
 
-            void Reset()
+            void Reset() override
             {
                 me->CastSpell(me, SPELL_GASEOUS_BLOAT_PROC, true);
             }
 
-            void IsSummonedBy(Unit *summoner UNUSED)
+            void IsSummonedBy(Unit *summoner UNUSED) override
             {
                 if (auto c = Unit::GetCreature(*me, me->GetInstanceScript()->GetData64(DATA_PROFESSOR_PUTRICIDE)))
                     c->AI()->JustSummoned(me);

@@ -177,7 +177,7 @@ struct npc_reanimated_frost_wormAI : public ScriptedAI
 {
     npc_reanimated_frost_wormAI(Creature *c) : ScriptedAI(c) {}
 
-    void SpellHit(Unit *hitter, const SpellEntry *spell)
+    void SpellHit(Unit *hitter, const SpellInfo *spell) override
     {
         if ((spell->Id == SPELL_SEEDS_OF_NATURES_WRATH) &&
             (hitter->GetTypeId() == TYPEID_PLAYER) &&
@@ -192,7 +192,7 @@ struct npc_turgid_the_vileAI : public ScriptedAI
 {
     npc_turgid_the_vileAI(Creature *c) : ScriptedAI(c) {}
 
-    void SpellHit(Unit *hitter, const SpellEntry *spell)
+    void SpellHit(Unit *hitter, const SpellInfo *spell) override
     {
         if ((spell->Id == SPELL_SEEDS_OF_NATURES_WRATH) &&
             (hitter->GetTypeId() == TYPEID_PLAYER) &&
@@ -207,7 +207,7 @@ struct npc_overseer_deathgazeAI : public ScriptedAI
 {
     npc_overseer_deathgazeAI(Creature *c) : ScriptedAI(c) {}
 
-    void SpellHit(Unit *hitter, const SpellEntry *spell)
+    void SpellHit(Unit *hitter, const SpellInfo *spell) override
     {
         if ((spell->Id == SPELL_SEEDS_OF_NATURES_WRATH) &&
             (hitter->GetTypeId() == TYPEID_PLAYER) &&
@@ -231,7 +231,7 @@ void AddSC_dragonblight()
         {
         }
 
-        CreatureAI *GetAI(Creature *creature) const
+        CreatureAI *GetAI(Creature *creature) const override
         {
             return new npc_reanimated_frost_wormAI(std::move(creature));
         }
@@ -246,7 +246,7 @@ void AddSC_dragonblight()
         {
         }
 
-        CreatureAI *GetAI(Creature *creature) const
+        CreatureAI *GetAI(Creature *creature) const override
         {
             return new npc_turgid_the_vileAI(std::move(creature));
         }
@@ -261,7 +261,7 @@ void AddSC_dragonblight()
         {
         }
 
-        CreatureAI *GetAI(Creature *creature) const
+        CreatureAI *GetAI(Creature *creature) const override
         {
             return new npc_overseer_deathgazeAI(std::move(creature));
         }

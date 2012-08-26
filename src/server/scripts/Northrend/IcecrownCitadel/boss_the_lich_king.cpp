@@ -1433,7 +1433,7 @@ class npc_raging_spirit : public CreatureScript
                 DoCast(me, SPELL_RAGING_SPIRIT_VISUAL, true);
             }
 
-            void EnterEvadeMode()
+            void EnterEvadeMode() override
             {
             }
 
