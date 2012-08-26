@@ -4340,6 +4340,7 @@ void Spell::SendChannelUpdate(uint32 time)
 {
     if (time == 0)
     {
+        m_caster->ClearUnitState(UNIT_STATE_TRACKING_CHANNEL_OBJECT);
         m_caster->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, 0);
         m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, 0);
     }
@@ -4354,6 +4355,8 @@ void Spell::SendChannelUpdate(uint32 time)
 void Spell::SendChannelStart(uint32 duration)
 {
     uint64 channelTarget = m_targets.GetObjectTargetGUID();
+    if (m_spellInfo->AttributesEx & SPELL_ATTR1_CHANNEL_TRACK_TARGET)
+        m_caster->AddUnitState(UNIT_STATE_TRACKING_CHANNEL_OBJECT);
 
     WorldPacket data(MSG_CHANNEL_START, (8+4+4));
     data.append(m_caster->GetPackGUID());

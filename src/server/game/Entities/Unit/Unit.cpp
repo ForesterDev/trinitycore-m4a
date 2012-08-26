@@ -13042,10 +13042,7 @@ Unit* Creature::SelectVictim()
         return NULL;
 
     if (target && _IsTargetAcceptable(target) && canCreatureAttack(target))
-    {
-        SetInFront(target);
         return target;
-    }
 
     // last case when creature must not go to evade mode:
     // it in combat but attacker not make any damage and not enter to aggro radius to have record in threat list

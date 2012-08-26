@@ -220,11 +220,22 @@ class boss_rotface : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_SLIME_SPRAY:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))                        
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0U, 0.0f, true))                        
                             {
-                                DoSummon(NPC_OOZE_SPRAY_STALKER, *target, 8000, TEMPSUMMON_TIMED_DESPAWN);
+                                auto stalker = DoSummon(NPC_OOZE_SPRAY_STALKER, *target, 8000, TEMPSUMMON_TIMED_DESPAWN);
                                 Talk(EMOTE_SLIME_SPRAY);
-                                DoCast(me, SPELL_SLIME_SPRAY);
+                                if (!me->HasUnitState(UNIT_STATE_CASTING))
+                                    if (auto info = sSpellMgr->GetSpellInfo(SPELL_SLIME_SPRAY))
+                                    {
+                                        SpellCastTargets targets;
+                                        auto spell = new Spell(me, info, TRIGGERED_NONE);
+                                        spell->prepare(&targets);
+                                        if (spell->getState() != SPELL_STATE_FINISHED)
+                                        {
+                                            spell->m_targets.SetUnitTarget(stalker);
+                                            me->FocusTarget(spell, stalker->GetGUID());
+                                        }
+                                    }
                             }
                             events.ScheduleEvent(EVENT_SLIME_SPRAY, 20000);
                             break;              
