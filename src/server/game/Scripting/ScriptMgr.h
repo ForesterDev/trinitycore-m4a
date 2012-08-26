@@ -218,7 +218,7 @@ inline void load_spell_script(const char *name)
         {
         }
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const override
         {
             return new spell_script();
         }

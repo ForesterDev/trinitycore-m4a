@@ -2216,7 +2216,7 @@ namespace
         {
         }
 
-        void Register()
+        void Register() override
         {
             AfterEffectApply += AuraEffectApplyFn(strength_of_wrynn_aura::applied, EFFECT_FIRST_FOUND, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, AURA_EFFECT_HANDLE_REAL);
             AfterEffectRemove += AuraEffectApplyFn(strength_of_wrynn_aura::removed, EFFECT_FIRST_FOUND, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, AURA_EFFECT_HANDLE_REAL);
@@ -2244,7 +2244,7 @@ namespace
         {
         }
 
-        AuraScript *GetAuraScript() const
+        AuraScript *GetAuraScript() const override
         {
             return new strength_of_wrynn_aura(pet_aura);
         }

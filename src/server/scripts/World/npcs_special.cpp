@@ -1876,7 +1876,7 @@ public:
             }
         }
 
-        void SpellHit(Unit *caster, const SpellInfo *spell)
+        void SpellHit(Unit *caster, const SpellInfo *spell) override
         {
             CasterAI::SpellHit(caster, spell);
             if (spell->HasAura(SPELL_AURA_INITIALIZE_IMAGES))

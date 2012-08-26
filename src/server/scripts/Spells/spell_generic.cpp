@@ -348,7 +348,7 @@ namespace
 
 			PrepareSpellScript(Myt)
 
-            void Register()
+            void Register() override
             {
 				OnEffectHitTarget += SpellEffectFn(Myt::effect_hit_target, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
@@ -372,7 +372,7 @@ namespace
         {
         }
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const override
         {
             return new Purge_vehicle_control_SS;
         }
@@ -736,7 +736,7 @@ namespace
 
 			PrepareAuraScript(Myt)
 
-            void Register()
+            void Register() override
             {
                 const auto &i = EFFECT_1;
                 const auto &n = SPELL_AURA_DUMMY;
@@ -745,7 +745,7 @@ namespace
                 OnEffectRemove += AuraEffectRemoveFn(Myt::removed, i, n, m);
             }
 
-            bool Validate(const SpellInfo *)
+            bool Validate(const SpellInfo *) override
             {
 				if (auto info = sSpellMgr->GetSpellInfo(48366 /* Warning */))
                 {
@@ -756,7 +756,7 @@ namespace
                     return false;
             }
 
-            bool Load()
+            bool Load() override
             {
                 if (dynamic_cast<Player *>(GetUnitOwner()))
                 {
@@ -847,7 +847,7 @@ namespace
         {
         }
 
-        AuraScript *GetAuraScript() const
+        AuraScript *GetAuraScript() const override
         {
             return new Wintergarde_gryphon_commander_AS;
         }

@@ -353,7 +353,7 @@ public:
             summoned->SetCorpseDelay(0);
         }
 
-        void SummonedCreatureDespawn(Creature *unit)
+        void SummonedCreatureDespawn(Creature *unit) override
         {
             if (auto p = dynamic_cast<Creature *>(me().GetSummoner()))
                 if (p->IsAIEnabled)

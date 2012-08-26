@@ -1365,7 +1365,7 @@ class spell_sindragosa_ice_tomb : public SpellScriptLoader
                 AfterEffectRemove += AuraEffectRemoveFn(spell_sindragosa_ice_tomb_AuraScript::removed, EFFECT_2, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
             }
 
-            bool Validate(const SpellInfo *spellEntry UNUSED)
+            bool Validate(const SpellInfo *spellEntry UNUSED) override
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_ICE_TOMB_UNTARGETABLE))
                     return false;
@@ -1642,13 +1642,13 @@ namespace
         PrepareSpellScript(ice_tomb_spell);
 
     public:
-        void Register()
+        void Register() override
         {
             AfterHit += SpellHitFn(ice_tomb_spell::unit_hit);
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(ice_tomb_spell::select_targets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
         }
 
-        bool Validate(const SpellInfo *spellEntry UNUSED)
+        bool Validate(const SpellInfo *spellEntry UNUSED) override
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_ICE_TOMB_DUMMY))
                 return false;

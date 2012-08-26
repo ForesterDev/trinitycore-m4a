@@ -931,18 +931,18 @@ class npc_blistering_zombie : public CreatureScript
             {
             }
 
-            void InitializeAI()
+            void InitializeAI() override
             {
                 ScriptedAI::InitializeAI();
                 burst = false;
             }
 
-            void Reset()
+            void Reset() override
             {
                 me->CastSpell(me, 70749 /* Corrosion */, true);
             }
 
-            void DamageTaken(Unit *, uint32 &damage)
+            void DamageTaken(Unit *, uint32 &damage) override
             {
                 if (damage >= me->GetHealth())
                     damage = me->GetHealth() - 1U;
@@ -1300,7 +1300,7 @@ namespace
     {
         PrepareSpellScript(summon_timer_suppresser_spell)
 
-        void Register()
+        void Register() override
         {
             AfterHit += SpellHitFn(summon_timer_suppresser_spell::after_hit);
         }
@@ -1337,7 +1337,7 @@ class spell_dreamwalker_summon_suppresser : public SpellScriptLoader
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const override
         {
             return new summon_timer_suppresser_spell;
         }
@@ -1521,7 +1521,7 @@ namespace
     {
         PrepareSpellScript(acid_burst_spell)
 
-        void Register()
+        void Register() override
         {
             AfterCast += SpellCastFn(acid_burst_spell::after_cast);
         }
@@ -1544,7 +1544,7 @@ namespace
         {
         }
 
-        SpellScript *GetSpellScript() const
+        SpellScript *GetSpellScript() const override
         {
             return new acid_burst_spell;
         }
