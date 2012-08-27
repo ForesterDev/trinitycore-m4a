@@ -19,6 +19,7 @@
 #ifndef __EVENTPROCESSOR_H
 #define __EVENTPROCESSOR_H
 
+#include <utility>
 #include "Define.h"
 
 #include<map>
@@ -67,5 +68,31 @@ class EventProcessor
         EventList m_events;
         bool m_aborting;
 };
+
+template<class Fn>
+class simple_event
+: public BasicEvent
+{
+public:
+    explicit simple_event(Fn f)
+    : f(std::move(f))
+    {
+    }
+
+    bool Execute(uint64, uint32) override
+    {
+        std::move(f)();
+        return true;
+    }
+
+private:
+    Fn f;
+};
+
+template<class Fn>
+inline void add_simple_event(EventProcessor &events, Fn f, uint64 duration)
+{
+    events.AddEvent(new simple_event<Fn>(std::move(f)), events.CalculateTime(duration));
+}
 #endif
 
