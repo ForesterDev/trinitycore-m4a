@@ -456,6 +456,27 @@ class CreatureScript : public ScriptObject, public UpdatableScript<Creature>
         virtual CreatureAI* GetAI(Creature* /*creature*/) const { return NULL; }
 };
 
+template<CreatureAI *(*GetAIFn)(Creature *creature)>
+struct creature_script_loader
+: CreatureScript
+{
+    creature_script_loader(const char *name)
+    : CreatureScript(name)
+    {
+    }
+
+    CreatureAI *GetAI(Creature *creature) const override
+    {
+        return GetAIFn(creature);
+    }
+};
+
+template<CreatureAI *(*GetAIFn)(Creature *creature)>
+inline void load_creature_script(const char *name)
+{
+    new creature_script_loader<GetAIFn>(name);
+}
+
 class GameObjectScript : public ScriptObject, public UpdatableScript<GameObject>
 {
     protected:

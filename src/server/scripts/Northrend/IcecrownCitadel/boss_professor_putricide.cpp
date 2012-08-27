@@ -56,14 +56,14 @@ enum Spells
     SPELL_GASEOUS_BLIGHT_LARGE          = 69157,
     SPELL_GASEOUS_BLIGHT_MEDIUM         = 69162,
     SPELL_GASEOUS_BLIGHT_SMALL          = 69164,
-    SPELL_MALLABLE_GOO_H                = 70852,
+    SPELL_MALLABLE_GOO_H                = 72296,
 
     // Rotface
     SPELL_VILE_GAS_H                    = 69240,
 
     // Professor Putricide
     SPELL_SLIME_PUDDLE_TRIGGER          = 70341,
-    SPELL_MALLEABLE_GOO                 = 70852,
+    SPELL_MALLEABLE_GOO                 = 72295,
     SPELL_UNSTABLE_EXPERIMENT           = 70351,
     SPELL_TEAR_GAS                      = 71617,    // phase transition
     SPELL_TEAR_GAS_CREATURE             = 71618,
@@ -556,11 +556,14 @@ class boss_professor_putricide : public CreatureScript
 
                 events.Update(diff);
 
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                while (uint32 eventId = events.ExecuteEvent())
+                for (; ; )
                 {
+                    if (me->HasUnitState(UNIT_STATE_CASTING))
+                        return;
+
+                    uint32 eventId = events.ExecuteEvent();
+                    if (!eventId)
+                        break;
                     switch (eventId)
                     {
                         case EVENT_FESTERGUT_DIES:
@@ -568,9 +571,8 @@ class boss_professor_putricide : public CreatureScript
                             EnterEvadeMode();
                             break;
                         case EVENT_FESTERGUT_GOO:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
-                                DoCast(target, SPELL_MALLABLE_GOO_H, true); // triggered, to skip LoS check
-                            events.ScheduleEvent(EVENT_FESTERGUT_GOO, urand(15000, 20000), 0, PHASE_FESTERGUT);
+                            me->CastCustomSpell(72299 /* Malleable Goo Summon Trigger */, SPELLVALUE_MAX_TARGETS, 1, nullptr, false);
+                            events.ScheduleEvent(EVENT_FESTERGUT_GOO, Is25ManRaid() ? 10000U : 16000U, 0, PHASE_FESTERGUT);
                             break;
                         case EVENT_ROTFACE_DIES:
                             Talk(SAY_ROTFACE_DEATH);
@@ -619,26 +621,9 @@ class boss_professor_putricide : public CreatureScript
                             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_OOZE_VARIABLE);
                             break;
                         case EVENT_MALLEABLE_GOO:
-                            if (Is25ManRaid())
-                            {
-                                std::list<Unit*> targets;
-                                SelectTargetList(targets, 2, SELECT_TARGET_RANDOM, -7.0f, true);
-                                if (!targets.empty())
-                                {
-                                    Talk(EMOTE_MALLEABLE_GOO);
-                                    for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
-                                        DoCast(*itr, SPELL_MALLEABLE_GOO);
-                                }
-                            }
-                            else
-                            {
-                                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, -7.0f, true))
-                                {
-                                    Talk(EMOTE_MALLEABLE_GOO);
-                                    DoCast(target, SPELL_MALLEABLE_GOO);
-                                }
-                            }
-                            events.ScheduleEvent(EVENT_MALLEABLE_GOO, urand(25000, 30000));
+                            Talk(EMOTE_MALLEABLE_GOO);
+                            DoCastAOE(SPELL_MALLEABLE_GOO);
+                            events.ScheduleEvent(EVENT_MALLEABLE_GOO, !IsHeroic() ? 25000U : 20000U);
                             break;
                         case EVENT_CHOKING_GAS_BOMB:
                             Talk(EMOTE_CHOKING_GAS_BOMB);
@@ -809,6 +794,24 @@ class npc_gas_cloud : public CreatureScript
             return GetIcecrownCitadelAI<npc_gas_cloudAI>(creature);
         }
 };
+
+namespace
+{
+    struct malleable_ooze_stalker_ai
+    : ScriptedAI
+    {
+        explicit malleable_ooze_stalker_ai(Creature *creature)
+        : ScriptedAI(creature)
+        {
+        }
+
+        void IsSummonedBy(Unit *summoner UNUSED) override
+        {
+            if (auto putricide = me->GetMap()->GetCreature(static_cast<InstanceMap *>(me->GetMap())->GetInstanceScript()->GetData64(DATA_PROFESSOR_PUTRICIDE)))
+                putricide->CastSpell(me, SPELL_MALLABLE_GOO_H, true);
+        }
+    };
+}
 
 class spell_putricide_gaseous_bloat : public SpellScriptLoader
 {
@@ -1562,11 +1565,73 @@ class spell_stinky_precious_decimate : public SpellScriptLoader
         }
 };
 
+namespace
+{
+    template<std::size_t Size>
+    struct malleable_goo_spell
+    : SpellScript
+    {
+        PrepareSpellScript(malleable_goo_spell)
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(malleable_goo_spell::effect_hit_target, EFFECT_0, SPELL_EFFECT_DUMMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(malleable_goo_spell::object_area_target_select, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+
+        void effect_hit_target(SpellEffIndex index UNUSED)
+        {
+            auto caster = GetCaster();
+            auto target = GetHitUnit();
+            caster->CastSpell(target, GetEffectValue(), true);
+            add_simple_event(caster->m_Events, [caster]
+                    {
+                        caster->ReleaseFocus(nullptr);
+                    },
+                700U);
+            caster->FocusTarget(nullptr, target->GetGUID());
+        }
+
+        void object_area_target_select(std::list<WorldObject *> &targets)
+        {
+            std::vector<WorldObject *> far_targets;
+            std::vector<WorldObject *> near_targets;
+            std::partition_copy(begin(targets), end(targets), std::back_inserter(far_targets), std::back_inserter(near_targets), [this](WorldObject *target)
+                    {
+                        return !GetCaster()->IsWithinCombatRange(dynamic_cast<Unit *>(target), 7.0F);
+                    }
+                );
+            auto it = begin(targets);
+            if (far_targets.size() > Size)
+            {
+                std::random_shuffle(begin(far_targets), end(far_targets));
+                it = std::copy_n(begin(far_targets), Size, it);
+            }
+            else
+            {
+                it = std::copy(begin(far_targets), end(far_targets), it);
+                if (far_targets.size() < Size)
+                {
+                    if (near_targets.size() > Size - far_targets.size())
+                    {
+                        std::random_shuffle(begin(near_targets), end(near_targets));
+                        it = std::copy_n(begin(near_targets), Size - far_targets.size(), it);
+                    }
+                    else
+                        it = std::copy(begin(near_targets), end(near_targets), it);
+                }
+            }
+            targets.erase(it, end(targets));
+        }
+    };
+}
+
 void AddSC_boss_professor_putricide()
 {
     new boss_professor_putricide();
     new npc_volatile_ooze();
     new npc_gas_cloud();
+    load_creature_script<GetIcecrownCitadelAI<malleable_ooze_stalker_ai>>("npc_malleable_ooze_stalker");
     new spell_putricide_gaseous_bloat();
     new spell_putricide_ooze_channel();
     new spell_putricide_slime_puddle();
@@ -1584,4 +1649,7 @@ void AddSC_boss_professor_putricide()
     new spell_putricide_regurgitated_ooze();
     new spell_putricide_clear_aura_effect_value();
     new spell_stinky_precious_decimate();
+    load_spell_script<malleable_goo_spell<1U>>("spell_putricide_malleable_goo_1");
+    load_spell_script<malleable_goo_spell<2U>>("spell_putricide_malleable_goo_2");
+    load_spell_script<malleable_goo_spell<3U>>("spell_putricide_malleable_goo_3");
 }
