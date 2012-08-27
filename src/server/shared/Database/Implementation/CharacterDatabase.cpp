@@ -26,16 +26,16 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PREPARE_STATEMENT(CHAR_DEL_QUEST_POOL_SAVE, "DELETE FROM pool_quest_save WHERE pool_id = ?", CONNECTION_ASYNC)
     PREPARE_STATEMENT(CHAR_INS_QUEST_POOL_SAVE, "INSERT INTO pool_quest_save (pool_id, quest_id) VALUES (?, ?)", CONNECTION_ASYNC)
     PREPARE_STATEMENT(CHAR_DEL_NONEXISTENT_GUILD_BANK_ITEM, "DELETE FROM guild_bank_item WHERE guildid = ? AND TabId = ? AND SlotId = ?", CONNECTION_ASYNC)
-    PREPARE_STATEMENT(CHAR_DEL_EXPIRED_BAN, "UPDATE character_banned SET active = 0 WHERE guid=? and bandate=? and unbandate <= UNIX_TIMESTAMP() AND unbandate <> bandate", CONNECTION_ASYNC)
+    PREPARE_STATEMENT(CHAR_DEL_EXPIRED_BAN, "UPDATE character_banned SET active = 0 WHERE guid=? and bandate=?", CONNECTION_ASYNC)
     PREPARE_STATEMENT(CHAR_SEL_GUID_BY_NAME, "SELECT guid FROM characters WHERE name = ?", CONNECTION_BOTH);
     PREPARE_STATEMENT(CHAR_SEL_CHECK_NAME, "SELECT 1 FROM characters WHERE name = ?", CONNECTION_BOTH);
     PREPARE_STATEMENT(CHAR_SEL_CHECK_GUID, "SELECT 1 FROM characters WHERE guid = ?", CONNECTION_SYNCH);
     PREPARE_STATEMENT(CHAR_SEL_SUM_CHARS, "SELECT COUNT(guid) FROM characters WHERE account = ?", CONNECTION_BOTH);
     PREPARE_STATEMENT(CHAR_SEL_CHAR_CREATE_INFO, "SELECT level, race, class FROM characters WHERE account = ? LIMIT 0, ?", CONNECTION_ASYNC);
     PREPARE_STATEMENT(CHAR_INS_CHARACTER_BAN, "INSERT INTO character_banned VALUES (?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+?, ?, ?, 1)", CONNECTION_ASYNC)
-    PREPARE_STATEMENT(CHAR_UPD_CHARACTER_BAN, "UPDATE character_banned SET active = 0 WHERE guid = ? AND active != 0", CONNECTION_ASYNC)
+    PREPARE_STATEMENT(CHAR_UPD_CHARACTER_BAN, "UPDATE character_banned SET active = 0 WHERE guid = ? AND active = 1", CONNECTION_ASYNC)
     PREPARE_STATEMENT(CHAR_DEL_CHARACTER_BAN, "DELETE cb FROM character_banned cb INNER JOIN characters c ON c.guid = cb.guid WHERE c.account = ?", CONNECTION_ASYNC);
-    PREPARE_STATEMENT(CHAR_SEL_BANINFO, "SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM character_banned WHERE guid = ? ORDER BY bandate ASC", CONNECTION_SYNCH)
+    PREPARE_STATEMENT(CHAR_SEL_BANINFO, "SELECT cast(FROM_UNIXTIME(bandate) as char), unbandate-bandate, active, unbandate, banreason, bannedby FROM character_banned WHERE guid = ? ORDER BY bandate ASC", CONNECTION_SYNCH)
     PREPARE_STATEMENT(CHAR_SEL_GUID_BY_NAME_FILTER, "SELECT guid, name FROM characters WHERE name LIKE CONCAT('%%', ?, '%%')", CONNECTION_SYNCH)
     PREPARE_STATEMENT(CHAR_SEL_BANINFO_LIST, "SELECT bandate, unbandate, bannedby, banreason FROM character_banned WHERE guid = ? ORDER BY unbandate", CONNECTION_SYNCH)
     PREPARE_STATEMENT(CHAR_SEL_BANNED_NAME, "SELECT characters.name FROM characters, character_banned WHERE character_banned.guid = ? AND character_banned.guid = characters.guid", CONNECTION_SYNCH)
@@ -102,7 +102,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PREPARE_STATEMENT(CHAR_SEL_CHARACTER_TALENTS, "SELECT spell, spec FROM character_talent WHERE guid = ?", CONNECTION_ASYNC)
     PREPARE_STATEMENT(CHAR_SEL_CHARACTER_SKILLS, "SELECT skill, value, max FROM character_skills WHERE guid = ?", CONNECTION_ASYNC)
     PREPARE_STATEMENT(CHAR_SEL_CHARACTER_RANDOMBG, "SELECT guid FROM character_battleground_random WHERE guid = ?", CONNECTION_ASYNC)
-    PREPARE_STATEMENT(CHAR_SEL_CHARACTER_BANNED, "SELECT guid FROM character_banned WHERE guid = ? AND active = 1", CONNECTION_ASYNC)
+    PREPARE_STATEMENT(CHAR_SEL_CHARACTER_BANNED, "SELECT guid FROM character_banned WHERE guid = ? AND active = 1 and (unbandate=bandate or unbandate>UNIX_TIMESTAMP())", CONNECTION_ASYNC)
     PREPARE_STATEMENT(CHAR_SEL_CHARACTER_QUESTSTATUSREW, "SELECT quest FROM character_queststatus_rewarded WHERE guid = ?", CONNECTION_ASYNC)
     PREPARE_STATEMENT(CHAR_SEL_ACCOUNT_INSTANCELOCKTIMES, "SELECT instanceId, releaseTime FROM account_instance_times WHERE accountId = ?", CONNECTION_ASYNC)
     // End LoginQueryHolder content
@@ -416,7 +416,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PREPARE_STATEMENT(CHAR_SEL_CHAR_DEL_INFO, "SELECT guid, deleteInfos_Name, deleteInfos_Account, deleteDate FROM characters WHERE deleteDate IS NOT NULL", CONNECTION_SYNCH);
     PREPARE_STATEMENT(CHAR_SEL_CHARS_BY_ACCOUNT_ID, "SELECT guid FROM characters WHERE account = ?", CONNECTION_SYNCH);
     PREPARE_STATEMENT(CHAR_SEL_CHAR_PINFO, "SELECT totaltime, level, money, account, race, class, map, zone FROM characters WHERE guid = ?", CONNECTION_SYNCH);
-    PREPARE_STATEMENT(CHAR_SEL_PINFO_BANS, "SELECT unbandate, bandate = unbandate, bannedby, banreason FROM character_banned WHERE guid = ? AND active ORDER BY bandate ASC LIMIT 1", CONNECTION_SYNCH);
+    PREPARE_STATEMENT(CHAR_SEL_PINFO_BANS, "SELECT unbandate, bandate = unbandate, bannedby, banreason FROM character_banned WHERE guid = ? AND active = 1 and (unbandate=bandate or unbandate>UNIX_TIMESTAMP()) ORDER BY bandate ASC LIMIT 1", CONNECTION_SYNCH);
     PREPARE_STATEMENT(CHAR_SEL_CHAR_HOMEBIND, "SELECT mapId, zoneId, posX, posY, posZ FROM character_homebind WHERE guid = ?", CONNECTION_SYNCH);
     PREPARE_STATEMENT(CHAR_SEL_CHAR_GUID_NAME_BY_ACC, "SELECT guid, name FROM characters WHERE account = ?", CONNECTION_SYNCH);
     PREPARE_STATEMENT(CHAR_SEL_POOL_QUEST_SAVE, "SELECT quest_id FROM pool_quest_save WHERE pool_id = ?", CONNECTION_SYNCH);

@@ -1943,14 +1943,14 @@ bool Player::BuildEnumData(PreparedQueryResult result, WorldPacket* data)
         charFlags |= CHARACTER_FLAG_RENAME;
     if (!fields[20].is_null())
     {
-        if (!fields[21].GetBool())
+        if (!fields[21].GetInt64())
             charFlags |= CHARACTER_FLAG_LOCKED_BY_BILLING;
         else
         {
             // remove expired ban
             PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_EXPIRED_BAN);
             stmt->setUInt32(0, guid);
-            stmt->setUInt32(1, fields[20].GetUInt32());
+            stmt->setInt64(1, fields[20].GetInt64());
             CharacterDatabase.Execute(stmt);
         }
     }
