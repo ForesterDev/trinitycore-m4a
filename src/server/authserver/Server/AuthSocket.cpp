@@ -414,12 +414,12 @@ bool AuthSocket::_HandleLogonChallenge()
                     do
                     {
                         auto fields_ = banresult->Fetch();
-                        if (!fields_[2].GetBool())
+                        if (!fields_[2].GetInt64())
                         {
                             if (!banned)
                             {
                                 banned = true;
-                                if (fields_[0].GetUInt64() == fields_[1].GetUInt64())
+                                if (fields_[0].GetInt64() == fields_[1].GetInt64())
                                 {
                                     pkt << (uint8)WOW_FAIL_BANNED;
                                     sLog->outBasic("'%s:%d' [AuthChallenge] Banned account %s tried to login!", socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str ());

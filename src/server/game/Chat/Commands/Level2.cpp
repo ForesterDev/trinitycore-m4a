@@ -387,16 +387,17 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
     if (result2)
     {
         Field* fields = result2->Fetch();
-        banTime       = int64(fields[1].GetBool() ? 0 : fields[0].GetUInt32());
+        banTime       = fields[1].GetInt64() ? 0 : fields[0].GetInt64();
         bannedby      = fields[2].GetString();
         banreason     = fields[3].GetString();
     }
 
-    if (muteTime > 0)
-        PSendSysMessage(LANG_PINFO_MUTE, secsToTimeString(muteTime - time(NULL), true).c_str());
+    auto timestamp = time(NULL);
+    if (muteTime > 0 && muteTime > timestamp)
+        PSendSysMessage(LANG_PINFO_MUTE, secsToTimeString(muteTime - timestamp, true).c_str());
 
-    if (banTime >= 0)
-        PSendSysMessage(LANG_PINFO_BAN, banTime > 0 ? secsToTimeString(banTime - time(NULL), true).c_str() : "permanently", bannedby.c_str(), banreason.c_str());
+    if (banTime >= 0 && banTime > timestamp)
+        PSendSysMessage(LANG_PINFO_BAN, banTime > 0 ? secsToTimeString(banTime - timestamp, true).c_str() : "permanently", bannedby.c_str(), banreason.c_str());
 
     std::string race_s, Class_s;
     switch (race)

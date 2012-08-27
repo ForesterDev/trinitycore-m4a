@@ -1227,12 +1227,12 @@ bool ChatHandler::HandleBanInfoCharacterCommand(const char *args)
     do
     {
         Field* fields = result->Fetch();
-        time_t unbandate = time_t(fields[3].GetUInt32());
+        time_t unbandate = time_t(fields[3].GetInt64());
         bool active = false;
-        if (fields[2].GetUInt8() && (!fields[1].GetUInt32() || unbandate >= time(NULL)))
+        if (fields[2].GetUInt8() && (!fields[1].GetInt64() || unbandate >= time(NULL)))
             active = true;
-        bool permanent = (fields[1].GetUInt32() == uint32(0));
-        std::string bantime = permanent ? GetTrinityString(LANG_BANINFO_INFINITE) : secsToTimeString(fields[1].GetUInt32(), true);
+        bool permanent = (fields[1].GetInt64() == 0);
+        std::string bantime = permanent ? GetTrinityString(LANG_BANINFO_INFINITE) : secsToTimeString(fields[1].GetInt64(), true);
         PSendSysMessage(LANG_BANINFO_HISTORYENTRY,
             fields[0].GetCString(), bantime.c_str(), active ? GetTrinityString(LANG_BANINFO_YES) : GetTrinityString(LANG_BANINFO_NO), fields[4].GetCString(), fields[5].GetCString());
     }
@@ -1243,7 +1243,7 @@ bool ChatHandler::HandleBanInfoCharacterCommand(const char *args)
 
 bool ChatHandler::HandleBanInfoHelper(uint32 accountid, char const* accountname)
 {
-    QueryResult result = LoginDatabase.PQuery("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM account_banned WHERE id = '%u' ORDER BY bandate ASC", accountid);
+    QueryResult result = LoginDatabase.PQuery("SELECT cast(FROM_UNIXTIME(bandate) as char), unbandate-bandate, active, unbandate, banreason, bannedby FROM account_banned WHERE id = '%u' ORDER BY bandate ASC", accountid);
     if (!result)
     {
         PSendSysMessage(LANG_BANINFO_NOACCOUNTBAN, accountname);
@@ -1255,12 +1255,12 @@ bool ChatHandler::HandleBanInfoHelper(uint32 accountid, char const* accountname)
     {
         Field* fields = result->Fetch();
 
-        time_t unbandate = time_t(fields[3].GetUInt64());
+        time_t unbandate = time_t(fields[3].GetInt64());
         bool active = false;
-        if (fields[2].GetBool() && (fields[1].GetUInt64() == (uint64)0 ||unbandate >= time(NULL)))
+        if (fields[2].GetBool() && (fields[1].GetInt64() == 0 ||unbandate >= time(NULL)))
             active = true;
-        bool permanent = (fields[1].GetUInt64() == (uint64)0);
-        std::string bantime = permanent ? GetTrinityString(LANG_BANINFO_INFINITE) : secsToTimeString(fields[1].GetUInt64(), true);
+        bool permanent = (fields[1].GetInt64() == 0);
+        std::string bantime = permanent ? GetTrinityString(LANG_BANINFO_INFINITE) : secsToTimeString(fields[1].GetInt64(), true);
         PSendSysMessage(LANG_BANINFO_HISTORYENTRY,
             fields[0].GetCString(), bantime.c_str(), active ? GetTrinityString(LANG_BANINFO_YES) : GetTrinityString(LANG_BANINFO_NO), fields[4].GetCString(), fields[5].GetCString());
     } while (result->NextRow());
@@ -1283,7 +1283,7 @@ bool ChatHandler::HandleBanInfoIPCommand(const char *args)
     std::string IP = cIP;
 
     LoginDatabase.EscapeString(IP);
-    QueryResult result = LoginDatabase.PQuery("SELECT ip, FROM_UNIXTIME(bandate), FROM_UNIXTIME(unbandate), unbandate-UNIX_TIMESTAMP(), banreason, bannedby, unbandate-bandate FROM ip_banned WHERE ip = '%s'", IP.c_str());
+    QueryResult result = LoginDatabase.PQuery("SELECT ip, cast(FROM_UNIXTIME(bandate) as char), FROM_UNIXTIME(unbandate), unbandate-UNIX_TIMESTAMP(), banreason, bannedby, unbandate-bandate FROM ip_banned WHERE ip = '%s'", IP.c_str());
     if (!result)
     {
         PSendSysMessage(LANG_BANINFO_NOIP);
@@ -1353,13 +1353,13 @@ bool ChatHandler::HandleBanListCharacterCommand(const char *args)
             PreparedQueryResult banInfo = CharacterDatabase.Query(stmt2);
             if (banInfo)
             {
-                Field* banFields = banInfo->Fetch();
                 do
                 {
-                    time_t t_ban = time_t(banFields[0].GetUInt32());
+                    Field* banFields = banInfo->Fetch();
+                    time_t t_ban = time_t(banFields[0].GetInt64());
                     tm* aTm_ban = localtime(&t_ban);
 
-                    if (banFields[0].GetUInt32() == banFields[1].GetUInt32())
+                    if (banFields[0].GetInt64() == banFields[1].GetInt64())
                     {
                         PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|   permanent  |%-15.15s|%-15.15s|",
                             char_name.c_str(), aTm_ban->tm_year%100, aTm_ban->tm_mon+1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
@@ -1367,7 +1367,9 @@ bool ChatHandler::HandleBanListCharacterCommand(const char *args)
                     }
                     else
                     {
-                        time_t t_unban = time_t(banFields[1].GetUInt32());
+                        time_t t_unban = time_t(banFields[1].GetInt64());
+                        tm ban = *aTm_ban;
+                        aTm_ban = &ban;
                         tm* aTm_unban = localtime(&t_unban);
                         PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|%02d-%02d-%02d %02d:%02d|%-15.15s|%-15.15s|",
                             char_name.c_str(), aTm_ban->tm_year%100, aTm_ban->tm_mon+1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
@@ -1467,10 +1469,10 @@ bool ChatHandler::HandleBanListHelper(PreparedQueryResult result)
                 Field* fields2 = banInfo->Fetch();
                 do
                 {
-                    time_t t_ban = fields2[0].GetUInt64();
+                    time_t t_ban = fields2[0].GetInt64();
                     tm* aTm_ban = localtime(&t_ban);
 
-                    if (fields2[0].GetUInt64() == fields2[1].GetUInt64())
+                    if (fields2[0].GetInt64() == fields2[1].GetInt64())
                     {
                         PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|   permanent  |%-15.15s|%-15.15s|",
                             account_name.c_str(), aTm_ban->tm_year%100, aTm_ban->tm_mon+1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
@@ -1478,7 +1480,9 @@ bool ChatHandler::HandleBanListHelper(PreparedQueryResult result)
                     }
                     else
                     {
-                        time_t t_unban = fields2[1].GetUInt64();
+                        time_t t_unban = fields2[1].GetInt64();
+                        tm ban = *aTm_ban;
+                        aTm_ban = &ban;
                         tm* aTm_unban = localtime(&t_unban);
                         PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|%02d-%02d-%02d %02d:%02d|%-15.15s|%-15.15s|",
                             account_name.c_str(), aTm_ban->tm_year%100, aTm_ban->tm_mon+1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
@@ -1556,6 +1560,8 @@ bool ChatHandler::HandleBanListIPCommand(const char *args)
             else
             {
                 time_t t_unban = fields[2].GetUInt64();
+                tm ban = *aTm_ban;
+                aTm_ban = &ban;
                 tm* aTm_unban = localtime(&t_unban);
                 PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|%02d-%02d-%02d %02d:%02d|%-15.15s|%-15.15s|",
                     fields[0].GetCString(), aTm_ban->tm_year%100, aTm_ban->tm_mon+1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min,
