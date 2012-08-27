@@ -449,9 +449,10 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData* data)
 
 void Creature::Update(uint32 diff)
 {
-    if (auto target = HasUnitState(UNIT_STATE_TRACKING_CHANNEL_OBJECT) ? GetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT) : GetUInt64Value(UNIT_FIELD_TARGET))
-        if (auto unit = ObjectAccessor::GetUnit(*this, target))
-            SetInFront(unit);
+    if (movespline->Finalized())
+        if (auto target = HasUnitState(UNIT_STATE_TRACKING_CHANNEL_OBJECT) ? GetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT) : GetUInt64Value(UNIT_FIELD_TARGET))
+            if (auto unit = ObjectAccessor::GetUnit(*this, target))
+                SetInFront(unit);
     if (IsAIEnabled && TriggerJustRespawned)
     {
         TriggerJustRespawned = false;
