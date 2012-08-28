@@ -820,11 +820,14 @@ class npc_blazing_skeleton : public CreatureScript
 
                 _events.Update(diff);
 
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                while (uint32 eventId = _events.ExecuteEvent())
+                for (; ; )
                 {
+                    if (me->HasUnitState(UNIT_STATE_CASTING))
+                        return;
+
+                    uint32 eventId = _events.ExecuteEvent();
+                    if (!eventId)
+                        break;
                     switch (eventId)
                     {
                         case EVENT_FIREBALL:
