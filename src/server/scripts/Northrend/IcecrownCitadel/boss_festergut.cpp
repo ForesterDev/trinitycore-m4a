@@ -97,7 +97,7 @@ class boss_festergut : public CreatureScript
                 events.ScheduleEvent(EVENT_BERSERK, 300000);
                 events.ScheduleEvent(EVENT_INHALE_BLIGHT, urand(25000, 30000));
                 events.ScheduleEvent(EVENT_GAS_SPORE, urand(20000, 25000));
-                events.ScheduleEvent(EVENT_GASTRIC_BLOAT, urand(12500, 15000));
+                events.ScheduleEvent(EVENT_GASTRIC_BLOAT, 0U);
                 _maxInoculatedStack = 0;
                 _inhaleCounter = 0;
                 me->RemoveAurasDueToSpell(SPELL_BERSERK2);
@@ -227,7 +227,7 @@ class boss_festergut : public CreatureScript
                             break;
                         case EVENT_GASTRIC_BLOAT:
                             DoCastVictim(SPELL_GASTRIC_BLOAT);
-                            events.ScheduleEvent(EVENT_GASTRIC_BLOAT, urand(15000, 17500));
+                            events.ScheduleEvent(EVENT_GASTRIC_BLOAT, 10000U);
                             break;
                         case EVENT_BERSERK:
                             DoCast(me, SPELL_BERSERK2);
