@@ -3701,6 +3701,26 @@ void Spell::finish(bool ok)
 
     if (m_spellState == SPELL_STATE_FINISHED)
         return;
+    switch (m_spellState)
+    {
+    case SPELL_STATE_PREPARING:
+        if (!(_triggeredCastFlags & TRIGGERED_CAST_DIRECTLY))
+            switch (GetCurrentContainer())
+            {
+            case CURRENT_GENERIC_SPELL:
+            case CURRENT_CHANNELED_SPELL:
+                m_caster->ClearUnitState(UNIT_STATE_CASTING_IMMOBILE);
+                break;
+            default:
+                break;
+            }
+        break;
+    case SPELL_STATE_CASTING:
+        if (!(_triggeredCastFlags & TRIGGERED_CAST_DIRECTLY))
+            if (GetCurrentContainer() == CURRENT_CHANNELED_SPELL)
+                m_caster->ClearUnitState(UNIT_STATE_CASTING_IMMOBILE);
+        break;
+    }
     m_spellState = SPELL_STATE_FINISHED;
 
     if (m_spellInfo->IsChanneled())
@@ -3708,16 +3728,6 @@ void Spell::finish(bool ok)
 
     if (m_caster->HasUnitState(UNIT_STATE_CASTING) && !m_caster->IsNonMeleeSpellCasted(false, false, true))
         m_caster->ClearUnitState(UNIT_STATE_CASTING);
-    if (!(_triggeredCastFlags & TRIGGERED_CAST_DIRECTLY))
-        switch (GetCurrentContainer())
-        {
-        case CURRENT_GENERIC_SPELL:
-        case CURRENT_CHANNELED_SPELL:
-            m_caster->ClearUnitState(UNIT_STATE_CASTING_IMMOBILE);
-            break;
-        default:
-            break;
-        }
 
     // Unsummon summon as possessed creatures on spell cancel
     if (m_spellInfo->IsChanneled() && m_caster->GetTypeId() == TYPEID_PLAYER)
