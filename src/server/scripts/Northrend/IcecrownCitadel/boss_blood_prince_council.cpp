@@ -1006,11 +1006,8 @@ class boss_prince_valanar_icc : public CreatureScript
                             Talk(SAY_VALANAR_BERSERK);
                             break;
                         case EVENT_KINETIC_BOMB:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
-                            {
-                                DoCast(target, SPELL_KINETIC_BOMB_TARGET);
-                                Talk(SAY_VALANAR_SPECIAL);
-                            }
+                            DoCastAOE(SPELL_KINETIC_BOMB_TARGET);
+                            Talk(SAY_VALANAR_SPECIAL);
                             events.ScheduleEvent(EVENT_KINETIC_BOMB, urand(18000, 24000));
                             break;
                         case EVENT_SHOCK_VORTEX:
