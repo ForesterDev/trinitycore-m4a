@@ -896,10 +896,6 @@ class boss_prince_valanar_icc : public CreatureScript
                         break;
                     case NPC_KINETIC_BOMB:
                     {
-                        float x, y, z;
-                        summon->GetPosition(x, y, z);
-                        float ground_Z = summon->GetMap()->GetHeight(summon->GetPhaseMask(), x, y, z, true, 500.0f);
-                        summon->GetMotionMaster()->MovePoint(POINT_KINETIC_BOMB_IMPACT, x, y, ground_Z);
                         summon->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                         break;
                     }
@@ -1247,6 +1243,7 @@ class npc_kinetic_bomb : public CreatureScript
                 me->GetPosition(_x, _y, _groundZ);
                 me->DespawnOrUnsummon(60000);
                 _groundZ = me->GetMap()->GetHeight(me->GetPhaseMask(), _x, _y, _groundZ, true, 500.0f);
+                _events.ScheduleEvent(EVENT_CONTINUE_FALLING, 0U);
             }
 
             void DoAction(int32 const action)
@@ -1256,7 +1253,11 @@ class npc_kinetic_bomb : public CreatureScript
                 else if (action == ACTION_KINETIC_BOMB_JUMP)
                 {
                     if (!me->HasAura(SPELL_KINETIC_BOMB_KNOCKBACK))
-                        me->GetMotionMaster()->MoveCharge(_x, _y, me->GetPositionZ() + 100.0f, me->GetSpeed(MOVE_RUN), 0);
+                    {
+                        auto motion_master = me->GetMotionMaster();
+                        motion_master->Clear(false);
+                        motion_master->MoveCharge(_x, _y, me->GetPositionZ() + 100.0f, me->GetSpeed(MOVE_RUN), 0);
+                    }
                     _events.RescheduleEvent(EVENT_CONTINUE_FALLING, 3000);
                 }
             }
@@ -1277,7 +1278,7 @@ class npc_kinetic_bomb : public CreatureScript
                             {
                                 auto motion_master = me->GetMotionMaster();
                                 motion_master->Clear(false);
-                                motion_master->MovePoint(POINT_KINETIC_BOMB_IMPACT, _x, _y, _groundZ);
+                                motion_master->MoveCharge(_x, _y, _groundZ, me->GetSpeed(MOVE_WALK), POINT_KINETIC_BOMB_IMPACT);
                             }
                             break;
                         default:
