@@ -3785,7 +3785,7 @@ void Unit::RemoveAurasWithInterruptFlags(uint32 flag, uint32 except)
     // interrupt channeled spell
     if (Spell* spell = m_currentSpells[CURRENT_CHANNELED_SPELL])
         if (spell->getState() == SPELL_STATE_CASTING
-            && (spell->m_spellInfo->ChannelInterruptFlags & flag)
+            && (spell->m_spellInfo->ChannelInterruptFlags & flag & ~AURA_INTERRUPT_FLAG_MOVE)
             && spell->m_spellInfo->Id != except)
             InterruptNonMeleeSpells(false);
 
