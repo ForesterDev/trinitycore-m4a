@@ -1307,6 +1307,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         if (caster)
                             caster->Kill(target);
                         break;
+                    case 69674 /* Mutated Infection */:
+                    case 71224 /* Mutated Infection */:
+                    case 73022 /* Mutated Infection */:
+                    case 73023 /* Mutated Infection */:
+                        if (removeMode != AURA_REMOVE_BY_DEFAULT)
+                            target->CastSpell(target, m_spellInfo->Effects[2].CalcValue(), true);
+                        break;
                     case 72368: // Shared Suffering
                     case 72369:
                         if (caster)
