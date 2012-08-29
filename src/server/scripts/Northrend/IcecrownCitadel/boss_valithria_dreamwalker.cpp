@@ -224,6 +224,8 @@ class ValithriaDespawner : public BasicEvent
 
         bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
         {
+            if (Creature* lichKing = ObjectAccessor::GetCreature(*_creature, static_cast<InstanceMap *>(_creature->GetMap())->GetInstanceScript()->GetData64(DATA_VALITHRIA_LICH_KING)))
+                lichKing->AI()->EnterEvadeMode();
             Trinity::CreatureWorker<ValithriaDespawner> worker(_creature, *this);
             _creature->VisitNearbyGridObject(333.0f, worker);
             for (auto creature : trash)
