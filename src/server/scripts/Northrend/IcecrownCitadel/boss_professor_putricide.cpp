@@ -470,6 +470,8 @@ class boss_professor_putricide : public CreatureScript
                         me->AttackStop();
                         if (!IsHeroic())
                         {
+                            if (me->HasUnitState(UNIT_STATE_CASTING))
+                                me->InterruptNonMeleeSpells(false, 0U, false);
                             DoCast(me, SPELL_TEAR_GAS);
                             events.ScheduleEvent(EVENT_TEAR_GAS, 2500);
                         }
