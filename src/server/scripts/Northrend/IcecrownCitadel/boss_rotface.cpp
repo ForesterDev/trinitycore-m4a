@@ -276,6 +276,9 @@ class npc_little_ooze : public CreatureScript
 
             void IsSummonedBy(Unit* summoner)
             {
+                // register in Rotface's summons - not summoned with Rotface as owner
+                if (Creature* rotface = Unit::GetCreature(*me, me->GetInstanceScript()->GetData64(DATA_ROTFACE)))
+                    rotface->AI()->JustSummoned(me);
                 DoCast(me, SPELL_LITTLE_OOZE_COMBINE, true);
                 DoCast(me, SPELL_WEAK_RADIATING_OOZE, true);
                 events.ScheduleEvent(EVENT_STICKY_OOZE, 5000);
