@@ -873,6 +873,15 @@ class spell_putricide_ooze_channel : public SpellScriptLoader
 
             void SelectTarget(std::list<WorldObject*>& targets)
             {
+                switch (GetSpellInfo()->ExcludeTargetAuraSpell)
+                {
+                case 70530 /* Volatile Ooze Beam Protection */:
+                    targets.remove_if(Trinity::UnitAuraCheck(true, 74119 /* Gas Variable */));
+                    break;
+                case 70812 /* Gaseous Bloat Protection */:
+                    targets.remove_if(Trinity::UnitAuraCheck(true, 74118 /* Ooze Variable */));
+                    break;
+                }
                 if (targets.empty())
                 {
                     FinishCast(SPELL_FAILED_NO_VALID_TARGETS);
