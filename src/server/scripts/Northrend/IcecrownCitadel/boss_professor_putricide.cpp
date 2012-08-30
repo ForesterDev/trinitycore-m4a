@@ -878,10 +878,10 @@ class spell_putricide_ooze_channel : public SpellScriptLoader
                 switch (GetSpellInfo()->ExcludeTargetAuraSpell)
                 {
                 case 70530 /* Volatile Ooze Beam Protection */:
-                    targets.remove_if(Trinity::UnitAuraCheck(true, 74119 /* Gas Variable */));
+                    targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_GAS_VARIABLE));
                     break;
                 case 70812 /* Gaseous Bloat Protection */:
-                    targets.remove_if(Trinity::UnitAuraCheck(true, 74118 /* Ooze Variable */));
+                    targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_OOZE_VARIABLE));
                     break;
                 }
                 if (targets.empty())
