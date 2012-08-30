@@ -3382,6 +3382,10 @@ void SpellMgr::LoadDbcDataCorrections()
             case 71123: // Decimate (Stinky & Precious)
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_100_YARDS;   // 100yd
                 break;
+            case 72015 /* Frostbolt Volley */:
+            case 72016 /* Frostbolt Volley */:
+                spellInfo->EffectRadiusIndex[2] = spellInfo->EffectRadiusIndex[1];
+                break;
             case 72378: // Blood Nova (Deathbringer Saurfang)
             case 73058: // Blood Nova (Deathbringer Saurfang)
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_200_YARDS;
