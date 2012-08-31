@@ -396,7 +396,7 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
     if (muteTime > 0 && muteTime > timestamp)
         PSendSysMessage(LANG_PINFO_MUTE, secsToTimeString(muteTime - timestamp, true).c_str());
 
-    if (banTime >= 0 && banTime > timestamp)
+    if (banTime > 0 && banTime > timestamp || banTime == 0)
         PSendSysMessage(LANG_PINFO_BAN, banTime > 0 ? secsToTimeString(banTime - timestamp, true).c_str() : "permanently", bannedby.c_str(), banreason.c_str());
 
     std::string race_s, Class_s;
