@@ -517,7 +517,6 @@ class boss_professor_putricide : public CreatureScript
                                 SetPhase(PHASE_COMBAT_3);
                                 events.ScheduleEvent(EVENT_MUTATED_PLAGUE, 25000);
                                 events.CancelEvent(EVENT_UNSTABLE_EXPERIMENT);
-                                summons.remove_if(AbominationDespawner(me));
                                 break;
                             default:
                                 break;
@@ -600,7 +599,7 @@ class boss_professor_putricide : public CreatureScript
                             if (!targets.empty())
                                 for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
                                     DoCast(*itr, SPELL_SLIME_PUDDLE_TRIGGER);
-                            events.ScheduleEvent(EVENT_SLIME_PUDDLE, 35000);
+                            events.ScheduleEvent(EVENT_SLIME_PUDDLE, _phase == PHASE_COMBAT_3 ? 30000 : 35000);
                             break;
                         }
                         case EVENT_UNSTABLE_EXPERIMENT:
@@ -619,6 +618,8 @@ class boss_professor_putricide : public CreatureScript
                             me->RemoveAurasDueToSpell(SPELL_TEAR_GAS_PERIODIC_TRIGGER);
                             instance->DoRemoveAurasDueToSpellOnPlayers(71615);
                             DoCastAOE(SPELL_TEAR_GAS_CANCEL);
+                            if (_phase == PHASE_COMBAT_3)
+                                summons.remove_if(AbominationDespawner(me));
                             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_GAS_VARIABLE);
                             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_OOZE_VARIABLE);
                             break;
@@ -1302,7 +1303,7 @@ class spell_putricide_mutation_init : public SpellScriptLoader
                 if (!professor)
                     return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
 
-                if (professor->AI()->GetData(DATA_PHASE) == PHASE_COMBAT_3 || !professor->isAlive())
+                if (professor->AI()->GetData(DATA_PHASE) == PHASE_COMBAT_3 && professor->GetReactState() == REACT_AGGRESSIVE || !professor->isAlive())
                 {
                     extendedError = SPELL_CUSTOM_ERROR_ALL_POTIONS_USED;
                     return SPELL_FAILED_CUSTOM_ERROR;
