@@ -252,10 +252,10 @@ class boss_professor_putricide : public CreatureScript
                 me->setActive(true);
                 events.Reset();
                 events.ScheduleEvent(EVENT_BERSERK, 600000);
-                events.ScheduleEvent(EVENT_SLIME_PUDDLE, 10000);
-                events.ScheduleEvent(EVENT_UNSTABLE_EXPERIMENT, urand(25000, 30000));
+                events.ScheduleEvent(EVENT_SLIME_PUDDLE, 10000, 0U, PHASE_COMBAT_1);
                 if (IsHeroic())
-                    events.ScheduleEvent(EVENT_UNBOUND_PLAGUE, 20000);
+                    events.ScheduleEvent(EVENT_UNBOUND_PLAGUE, 10000U, 0U, PHASE_COMBAT_1);
+                events.ScheduleEvent(EVENT_UNSTABLE_EXPERIMENT, 25000U, 0U, PHASE_COMBAT_1);
 
                 SetPhase(PHASE_COMBAT_1);
                 Talk(SAY_AGGRO);
@@ -368,6 +368,8 @@ class boss_professor_putricide : public CreatureScript
                         events.ScheduleEvent(EVENT_ROTFACE_OOZE_FLOOD, 25000, 0, PHASE_ROTFACE);
                         break;
                     case POINT_TABLE:
+                        if (IsHeroic())
+                            Talk(SAY_PHASE_TRANSITION_HEROIC);
                         // stop attack
                         me->GetMotionMaster()->MoveIdle();
                         me->SetSpeed(MOVE_RUN, _baseSpeed, true);
@@ -466,57 +468,19 @@ class boss_professor_putricide : public CreatureScript
                         break;
                     case ACTION_CHANGE_PHASE:
                         me->SetSpeed(MOVE_RUN, _baseSpeed*2.0f, true);
-                        events.DelayEvents(30000);
                         me->AttackStop();
-                        if (!IsHeroic())
-                        {
-                            if (me->HasUnitState(UNIT_STATE_CASTING))
-                                me->InterruptNonMeleeSpells(false, 0U, false);
-                            DoCast(me, SPELL_TEAR_GAS);
-                            events.ScheduleEvent(EVENT_TEAR_GAS, 2500);
-                        }
-                        else
-                        {
-                            Talk(SAY_PHASE_TRANSITION_HEROIC);
-                            DoCast(me, SPELL_UNSTABLE_EXPERIMENT, true);
-                            DoCast(me, SPELL_UNSTABLE_EXPERIMENT, true);
-                            // cast variables
-                            if (Is25ManRaid())
-                            {
-                                std::list<Unit*> targetList;
-                                {
-                                    const std::list<HostileReference*>& threatlist = me->getThreatManager().getThreatList();
-                                    for (std::list<HostileReference*>::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
-                                        if ((*itr)->getTarget()->GetTypeId() == TYPEID_PLAYER)
-                                            targetList.push_back((*itr)->getTarget());
-                                }
-
-                                size_t half = targetList.size()/2;
-                                // half gets ooze variable
-                                while (half < targetList.size())
-                                {
-                                    std::list<Unit*>::iterator itr = targetList.begin();
-                                    advance(itr, urand(0, targetList.size() - 1));
-                                    (*itr)->CastSpell(*itr, SPELL_OOZE_VARIABLE, true);
-                                    targetList.erase(itr);
-                                }
-                                // and half gets gas
-                                for (std::list<Unit*>::iterator itr = targetList.begin(); itr != targetList.end(); ++itr)
-                                    (*itr)->CastSpell(*itr, SPELL_GAS_VARIABLE, true);
-                            }
-                            me->GetMotionMaster()->MovePoint(POINT_TABLE, tablePos);
-                        }
+                        if (me->HasUnitState(UNIT_STATE_CASTING))
+                            me->InterruptNonMeleeSpells(false, 0U, false);
+                        DoCastAOE(!IsHeroic() ? SPELL_TEAR_GAS : 72840 /* Volatile Experiment */);
+                        events.ScheduleEvent(EVENT_TEAR_GAS, 2500);
                         switch (_phase)
                         {
                             case PHASE_COMBAT_1:
                                 SetPhase(PHASE_COMBAT_2);
-                                events.ScheduleEvent(EVENT_MALLEABLE_GOO, urand(21000, 26000));
-                                events.ScheduleEvent(EVENT_CHOKING_GAS_BOMB, urand(35000, 40000));
                                 break;
                             case PHASE_COMBAT_2:
                                 SetPhase(PHASE_COMBAT_3);
                                 events.ScheduleEvent(EVENT_MUTATED_PLAGUE, 25000);
-                                events.CancelEvent(EVENT_UNSTABLE_EXPERIMENT);
                                 break;
                             default:
                                 break;
@@ -599,17 +563,18 @@ class boss_professor_putricide : public CreatureScript
                             if (!targets.empty())
                                 for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
                                     DoCast(*itr, SPELL_SLIME_PUDDLE_TRIGGER);
-                            events.ScheduleEvent(EVENT_SLIME_PUDDLE, _phase == PHASE_COMBAT_3 ? 30000 : 35000);
+                            events.ScheduleEvent(EVENT_SLIME_PUDDLE, _phase == PHASE_COMBAT_3 ? 30000 : 35000, 0U, _phase);
                             break;
                         }
                         case EVENT_UNSTABLE_EXPERIMENT:
                             Talk(EMOTE_UNSTABLE_EXPERIMENT);
                             DoCast(me, SPELL_UNSTABLE_EXPERIMENT);
-                            events.ScheduleEvent(EVENT_UNSTABLE_EXPERIMENT, urand(35000, 40000));
+                            events.ScheduleEvent(EVENT_UNSTABLE_EXPERIMENT, 38000U, 0U, _phase);
                             break;
                         case EVENT_TEAR_GAS:
                             me->GetMotionMaster()->MovePoint(POINT_TABLE, tablePos);
-                            DoCast(me, SPELL_TEAR_GAS_PERIODIC_TRIGGER, true);
+                            if (!IsHeroic())
+                                DoCast(me, SPELL_TEAR_GAS_PERIODIC_TRIGGER, true);
                             break;
                         case EVENT_RESUME_ATTACK:
                             me->SetReactState(REACT_AGGRESSIVE);
@@ -619,19 +584,33 @@ class boss_professor_putricide : public CreatureScript
                             instance->DoRemoveAurasDueToSpellOnPlayers(71615);
                             DoCastAOE(SPELL_TEAR_GAS_CANCEL);
                             if (_phase == PHASE_COMBAT_3)
+                            {
                                 summons.remove_if(AbominationDespawner(me));
+                                events.ScheduleEvent(EVENT_MALLEABLE_GOO, urand(5000U, 10000U), 0U, PHASE_COMBAT_3);
+                                events.ScheduleEvent(EVENT_CHOKING_GAS_BOMB, urand(10000U, 15000U), 0U, PHASE_COMBAT_3);
+                                events.ScheduleEvent(EVENT_SLIME_PUDDLE, 15000U, 0U, PHASE_COMBAT_3);
+                            }
+                            else
+                            {
+                                events.ScheduleEvent(EVENT_MALLEABLE_GOO, urand(5000U, 10000U), 0U, PHASE_COMBAT_2);
+                                events.ScheduleEvent(EVENT_SLIME_PUDDLE, 10000U, 0U, PHASE_COMBAT_2);
+                                events.ScheduleEvent(EVENT_CHOKING_GAS_BOMB, urand(10000U, 15000U), 0U, PHASE_COMBAT_2);
+                                events.ScheduleEvent(EVENT_UNSTABLE_EXPERIMENT, 20000U, 0U, PHASE_COMBAT_2);
+                            }
+                            if (IsHeroic())
+                                events.ScheduleEvent(EVENT_UNBOUND_PLAGUE, 50000U, 0U, _phase);
                             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_GAS_VARIABLE);
                             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_OOZE_VARIABLE);
                             break;
                         case EVENT_MALLEABLE_GOO:
                             Talk(EMOTE_MALLEABLE_GOO);
                             DoCastAOE(SPELL_MALLEABLE_GOO);
-                            events.ScheduleEvent(EVENT_MALLEABLE_GOO, !IsHeroic() ? 25000U : 20000U);
+                            events.ScheduleEvent(EVENT_MALLEABLE_GOO, !IsHeroic() ? 25000U : 20000U, 0U, _phase);
                             break;
                         case EVENT_CHOKING_GAS_BOMB:
                             Talk(EMOTE_CHOKING_GAS_BOMB);
                             DoCast(me, SPELL_CHOKING_GAS_BOMB);
-                            events.ScheduleEvent(EVENT_CHOKING_GAS_BOMB, urand(35000, 40000));
+                            events.ScheduleEvent(EVENT_CHOKING_GAS_BOMB, 36000U, 0U, _phase);
                             break;
                         case EVENT_UNBOUND_PLAGUE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
@@ -639,7 +618,7 @@ class boss_professor_putricide : public CreatureScript
                                 me->CastCustomSpell(SPELL_UNBOUND_PLAGUE, SPELLVALUE_BASE_POINT0, 775, target);
                                 DoCast(target, SPELL_UNBOUND_PLAGUE_SEARCHER);
                             }
-                            events.ScheduleEvent(EVENT_UNBOUND_PLAGUE, 90000);
+                            events.ScheduleEvent(EVENT_UNBOUND_PLAGUE, 60000U, 0U, _phase);
                             break;
                         case EVENT_MUTATED_PLAGUE:
                             DoCastVictim(SPELL_MUTATED_PLAGUE);
@@ -1636,6 +1615,54 @@ namespace
             targets.erase(it, end(targets));
         }
     };
+
+    template<bool Variables>
+    struct volatile_experiment_spell
+    : SpellScript
+    {
+        PrepareSpellScript(volatile_experiment_spell)
+
+        void Register() override
+        {
+            AfterCast += SpellCastFn(volatile_experiment_spell::after_cast);
+            OnEffectHitTarget += SpellEffectFn(volatile_experiment_spell::effect_hit_target, EFFECT_0, SPELL_EFFECT_DUMMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(volatile_experiment_spell::object_area_target_select, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+
+        bool Load() override
+        {
+            which = false;
+            return true;
+        }
+
+        void after_cast()
+        {
+            auto caster = GetCaster();
+            caster->CastSpell(static_cast<Unit *>(nullptr), SPELL_UNSTABLE_EXPERIMENT, true);
+            caster->CastSpell(static_cast<Unit *>(nullptr), SPELL_UNSTABLE_EXPERIMENT, true);
+        }
+
+        void effect_hit_target(SpellEffIndex index UNUSED)
+        {
+            auto target = GetHitUnit();
+            target->CastSpell(target, which ? SPELL_OOZE_VARIABLE : SPELL_GAS_VARIABLE, true);
+            which = !which;
+        }
+
+        void object_area_target_select(std::list<WorldObject *> &targets)
+        {
+            if (Variables)
+            {
+                std::vector<WorldObject *> tmp(begin(targets), end(targets));
+                std::random_shuffle(begin(tmp), end(tmp));
+                targets.assign(begin(tmp), end(tmp));
+            }
+            else
+                targets.clear();
+        }
+
+        bool which;
+    };
 }
 
 void AddSC_boss_professor_putricide()
@@ -1664,4 +1691,6 @@ void AddSC_boss_professor_putricide()
     load_spell_script<malleable_goo_spell<1U>>("spell_putricide_malleable_goo_1");
     load_spell_script<malleable_goo_spell<2U>>("spell_putricide_malleable_goo_2");
     load_spell_script<malleable_goo_spell<3U>>("spell_putricide_malleable_goo_3");
+    load_spell_script<volatile_experiment_spell<false>>("spell_putricide_volatile_experiment_false");
+    load_spell_script<volatile_experiment_spell<true>>("spell_putricide_volatile_experiment_true");
 }
