@@ -220,7 +220,7 @@ class boss_festergut : public CreatureScript
                               std::list<Unit*>::iterator itr = targets.begin();
                               std::advance(itr, urand(0, targets.size() - 1));                           
                               DoCast(*itr, SPELL_VILE_GAS);
-                              targets.remove(*itr);
+                              targets.erase(itr);
                             }
                             events.ScheduleEvent(EVENT_VILE_GAS, 20500U);
                             break;
