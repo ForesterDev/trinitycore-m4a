@@ -209,16 +209,22 @@ class boss_festergut : public CreatureScript
                         {
                             std::list<Unit*> targets;
                             uint32 minTargets = RAID_MODE<uint32>(3, 8, 3, 8);
+                            uint32 vileGasCount = RAID_MODE<uint32>(1, 3, 1, 3);
                             SelectTargetList(targets, minTargets, SELECT_TARGET_RANDOM, -5.0f, true);
-                            float minDist = 0.0f;
                             if (targets.size() >= minTargets)
-                                minDist = -5.0f;
 
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, minDist, true))
-                                DoCast(target, SPELL_VILE_GAS);
+                                SelectTargetList(targets, minTargets, SELECT_TARGET_RANDOM, 0, true);
+                            
+                            for(uint8 i = 0 ; i < vileGasCount; i++)
+                            {
+                              std::list<Unit*>::iterator itr = targets.begin();
+                              std::advance(itr, urand(0, targets.size() - 1));                           
+                              DoCast(*itr, SPELL_VILE_GAS);
+                              targets.remove(*itr);
+                            }
                             events.ScheduleEvent(EVENT_VILE_GAS, 20500U);
                             break;
-                        }
+                        }                                                  
                         case EVENT_GAS_SPORE:
                             Talk(EMOTE_WARN_GAS_SPORE);
                             Talk(EMOTE_GAS_SPORE);
