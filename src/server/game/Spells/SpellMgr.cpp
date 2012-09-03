@@ -2918,6 +2918,12 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
                 break;
+            case 69290 /* Blighted Spores */:
+            case 71222 /* Blighted Spores */:
+            case 73033 /* Blighted Spores */:
+            case 73034 /* Blighted Spores */:
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_STACK_DIFF_CASTERS;
+                break;
             case 72293: // Mark of the Fallen Champion (Deathbringer Saurfang)
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
                 break;
@@ -3356,6 +3362,12 @@ void SpellMgr::LoadDbcDataCorrections()
             //
             // ICECROWN CITADEL SPELLS
             //
+            case 69290 /* Blighted Spores */:
+            case 71222 /* Blighted Spores */:
+            case 73033 /* Blighted Spores */:
+            case 73034 /* Blighted Spores */:
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+                break;
             // THESE SPELLS ARE WORKING CORRECTLY EVEN WITHOUT THIS HACK
             // THE ONLY REASON ITS HERE IS THAT CURRENT GRID SYSTEM
             // DOES NOT ALLOW FAR OBJECT SELECTION (dist > 333)
