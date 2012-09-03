@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <memory>
 #include <algorithm>
+#include <stdexcept>
 #include <utility>
 #include <functional>
 #include <array>
