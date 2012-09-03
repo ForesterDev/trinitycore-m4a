@@ -211,11 +211,10 @@ class boss_festergut : public CreatureScript
                             uint32 minTargets = RAID_MODE<uint32>(3, 8, 3, 8);
                             uint32 vileGasCount = RAID_MODE<uint32>(1, 3, 1, 3);
                             SelectTargetList(targets, minTargets, SELECT_TARGET_RANDOM, -5.0f, true);
-                            if (targets.size() >= minTargets)
-
-                                SelectTargetList(targets, minTargets, SELECT_TARGET_RANDOM, 0, true);
+                            if (targets.size() < minTargets)
+                              SelectTargetList(targets, minTargets, SELECT_TARGET_RANDOM, 5.0f, true);
                             
-                            for(uint8 i = 0 ; i < vileGasCount; i++)
+                            for(uint8 i = 0 ; (i < vileGasCount) && (targets.size() > 0); i++)
                             {
                               std::list<Unit*>::iterator itr = targets.begin();
                               std::advance(itr, urand(0, targets.size() - 1));                           
