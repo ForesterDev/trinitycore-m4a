@@ -5533,19 +5533,142 @@ void Player::DurabilityPointLossForEquipSlot(EquipmentSlots slot)
         DurabilityPointsLoss(pItem, 1);
 }
 
+namespace
+{
+    struct repair_error
+    : std::runtime_error
+    {
+        repair_error()
+        : runtime_error("repair error")
+        {
+        }
+    };
+
+    uint32 repair_cost(const Item &item, float discountMod)
+    {
+        uint32 maxDurability = item.GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+        if (!maxDurability)
+            return 0;
+
+        uint32 LostDurability = maxDurability - item.GetUInt32Value(ITEM_FIELD_DURABILITY);
+        if (LostDurability>0)
+        {
+            ItemTemplate const* ditemProto = item.GetTemplate();
+
+            DurabilityCostsEntry const* dcost = sDurabilityCostsStore.LookupEntry(ditemProto->ItemLevel);
+            if (!dcost)
+            {
+                sLog->outError("RepairDurability: Wrong item lvl %u", ditemProto->ItemLevel);
+                throw repair_error();
+            }
+
+            uint32 dQualitymodEntryId = (ditemProto->Quality+1)*2;
+            DurabilityQualityEntry const* dQualitymodEntry = sDurabilityQualityStore.LookupEntry(dQualitymodEntryId);
+            if (!dQualitymodEntry)
+            {
+                sLog->outError("RepairDurability: Wrong dQualityModEntry %u", dQualitymodEntryId);
+                throw repair_error();
+            }
+
+            uint32 dmultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(ditemProto->Class, ditemProto->SubClass)];
+            uint32 costs = uint32(LostDurability*dmultiplier*double(dQualitymodEntry->quality_mod));
+
+            costs = uint32(costs * discountMod * sWorld->getRate(RATE_REPAIRCOST));
+
+            if (costs == 0)                                   //fix for ITEM_QUALITY_ARTIFACT
+                costs = 1;
+
+            return costs;
+        }
+        return 0;
+    }
+
+    uint32 pay_for_repairs(Player &p, bool guildBank, uint32 costs)
+    {
+        if (!costs)
+            return 0;
+        if (guildBank)
+        {
+            if (p.GetGuildId() == 0)
+            {
+                sLog->outStaticDebug("You are not member of a guild");
+                throw repair_error();
+            }
+
+            Guild* guild = sGuildMgr->GetGuildById(p.GetGuildId());
+            if (!guild)
+                throw repair_error();
+
+            if (!guild->HandleMemberWithdrawMoney(p.GetSession(), costs, true))
+                throw repair_error();
+
+            return costs;
+        }
+        else if (!p.HasEnoughMoney(costs))
+        {
+            sLog->outStaticDebug("You do not have enough money");
+            throw repair_error();
+        }
+        else
+            p.ModifyMoney(-int32(costs));
+        return 0;
+    }
+
+    void repair_item(Player *p, Item *item)
+    {
+        uint32 maxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+        if (!maxDurability)
+            return;
+
+        uint32 curDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
+
+        item->SetUInt32Value(ITEM_FIELD_DURABILITY, maxDurability);
+        item->SetState(ITEM_CHANGED, p);
+
+        // reapply mods for total broken and repaired item if equipped
+        if (p->IsEquipmentPos(item->GetPos()) && !curDurability)
+            p->_ApplyItemMods(item, item->GetSlot(), true);
+    }
+
+    template<class Fn>
+    void for_all_items(Player &p, Fn f)
+    {
+        // equipped, backpack, bags itself
+        for (uint8 i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
+            if (auto item = p.GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+                f(item);
+
+        // bank, buyback and keys not repaired
+
+        // items in inventory bags
+        for (uint8 j = INVENTORY_SLOT_BAG_START; j < INVENTORY_SLOT_BAG_END; j++)
+            for (uint8 i = 0; i < MAX_BAG_SIZE; i++)
+                if (auto item = p.GetItemByPos(j, i))
+                    f(item);
+    }
+}
+
 uint32 Player::DurabilityRepairAll(bool cost, float discountMod, bool guildBank)
 {
     uint32 TotalCost = 0;
-    // equipped, backpack, bags itself
-    for (uint8 i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
-        TotalCost += DurabilityRepair(((INVENTORY_SLOT_BAG_0 << 8) | i), cost, discountMod, guildBank);
-
-    // bank, buyback and keys not repaired
-
-    // items in inventory bags
-    for (uint8 j = INVENTORY_SLOT_BAG_START; j < INVENTORY_SLOT_BAG_END; j++)
-        for (uint8 i = 0; i < MAX_BAG_SIZE; i++)
-            TotalCost += DurabilityRepair(((j << 8) | i), cost, discountMod, guildBank);
+    if (cost)
+    try {
+        uint32 costs = 0;
+        for_all_items(*this, [discountMod, &costs](Item *item)
+                {
+                    costs += repair_cost(*item, discountMod);
+                }
+            );
+        TotalCost = pay_for_repairs(*this, guildBank, costs);
+    }
+    catch (const repair_error &e) {
+        return TotalCost;
+    }
+    for_all_items(*this, [this](Item *item)
+            {
+                repair_item(this, item);
+            }
+        );
     return TotalCost;
 }
 
@@ -5557,75 +5680,15 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool g
     if (!item)
         return TotalCost;
 
-    uint32 maxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
-    if (!maxDurability)
-        return TotalCost;
-
-    uint32 curDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
-
     if (cost)
-    {
-        uint32 LostDurability = maxDurability - curDurability;
-        if (LostDurability>0)
-        {
-            ItemTemplate const* ditemProto = item->GetTemplate();
-
-            DurabilityCostsEntry const* dcost = sDurabilityCostsStore.LookupEntry(ditemProto->ItemLevel);
-            if (!dcost)
-            {
-                sLog->outError("RepairDurability: Wrong item lvl %u", ditemProto->ItemLevel);
-                return TotalCost;
-            }
-
-            uint32 dQualitymodEntryId = (ditemProto->Quality+1)*2;
-            DurabilityQualityEntry const* dQualitymodEntry = sDurabilityQualityStore.LookupEntry(dQualitymodEntryId);
-            if (!dQualitymodEntry)
-            {
-                sLog->outError("RepairDurability: Wrong dQualityModEntry %u", dQualitymodEntryId);
-                return TotalCost;
-            }
-
-            uint32 dmultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(ditemProto->Class, ditemProto->SubClass)];
-            uint32 costs = uint32(LostDurability*dmultiplier*double(dQualitymodEntry->quality_mod));
-
-            costs = uint32(costs * discountMod * sWorld->getRate(RATE_REPAIRCOST));
-
-            if (costs == 0)                                   //fix for ITEM_QUALITY_ARTIFACT
-                costs = 1;
-
-            if (guildBank)
-            {
-                if (GetGuildId() == 0)
-                {
-                    sLog->outStaticDebug("You are not member of a guild");
-                    return TotalCost;
-                }
-
-                Guild* guild = sGuildMgr->GetGuildById(GetGuildId());
-                if (!guild)
-                    return TotalCost;
-
-                if (!guild->HandleMemberWithdrawMoney(GetSession(), costs, true))
-                    return TotalCost;
-
-                TotalCost = costs;
-            }
-            else if (!HasEnoughMoney(costs))
-            {
-                sLog->outStaticDebug("You do not have enough money");
-                return TotalCost;
-            }
-            else
-                ModifyMoney(-int32(costs));
-        }
+    try {
+        TotalCost = pay_for_repairs(*this, guildBank, repair_cost(*item, discountMod));
+    }
+    catch (const repair_error &e) {
+        return TotalCost;
     }
 
-    item->SetUInt32Value(ITEM_FIELD_DURABILITY, maxDurability);
-    item->SetState(ITEM_CHANGED, this);
-
-    // reapply mods for total broken and repaired item if equipped
-    if (IsEquipmentPos(pos) && !curDurability)
-        _ApplyItemMods(item, pos & 255, true);
+    repair_item(this, item);
     return TotalCost;
 }
 
