@@ -59,7 +59,7 @@ enum Spells
     SPELL_MALLABLE_GOO_H                = 72296,
 
     // Rotface
-    SPELL_VILE_GAS_H                    = 69240,
+    SPELL_VILE_GAS_H                    = 72272,
 
     // Professor Putricide
     SPELL_SLIME_PUDDLE_TRIGGER          = 70341,
@@ -430,7 +430,7 @@ class boss_professor_putricide : public CreatureScript
                         _oozeFloodStage = 0;
                         DoZoneInCombat(me);
                         if (IsHeroic())
-                            events.ScheduleEvent(EVENT_ROTFACE_VILE_GAS, urand(15000, 20000), 0, PHASE_ROTFACE);
+                            events.ScheduleEvent(EVENT_ROTFACE_VILE_GAS, 24000U, 0, PHASE_ROTFACE);
                         // init random sequence of floods
                         if (Creature* rotface = Unit::GetCreature(*me, instance->GetData64(DATA_ROTFACE)))
                         {
@@ -544,9 +544,25 @@ class boss_professor_putricide : public CreatureScript
                             EnterEvadeMode();
                             break;
                         case EVENT_ROTFACE_VILE_GAS:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
-                                DoCast(target, SPELL_VILE_GAS_H, true); // triggered, to skip LoS check
-                            events.ScheduleEvent(EVENT_ROTFACE_VILE_GAS, urand(15000, 20000), 0, PHASE_ROTFACE);
+                            if (auto rotface = Unit::GetCreature(*me, instance->GetData64(DATA_ROTFACE)))
+                                if (auto ai = dynamic_pointer_cast<BossAI>(rotface->AI()))
+                                {
+                                    std::list<Unit*> targets;
+                                    uint32 minTargets = ai->RAID_MODE<uint32>(3, 8, 3, 8);
+                                    uint32 vileGasCount = ai->RAID_MODE<uint32>(1, 3, 1, 3);
+                                    ai->SelectTargetList(targets, minTargets, SELECT_TARGET_RANDOM, -5.0f, true);
+                                    if (targets.size() < minTargets)
+                                      ai->SelectTargetList(targets, minTargets, SELECT_TARGET_RANDOM, 5.0f, true);
+                            
+                                    for(uint8 i = 0 ; (i < vileGasCount) && (targets.size() > 0); i++)
+                                    {
+                                      std::list<Unit*>::iterator itr = targets.begin();
+                                      std::advance(itr, urand(0, targets.size() - 1));                           
+                                      DoCast(*itr, SPELL_VILE_GAS_H);
+                                      targets.erase(itr);
+                                    }
+                                }
+                            events.ScheduleEvent(EVENT_ROTFACE_VILE_GAS, 30000U, 0, PHASE_ROTFACE);
                             break;
                         case EVENT_ROTFACE_OOZE_FLOOD:
                             DoAction(ACTION_ROTFACE_OOZE);
