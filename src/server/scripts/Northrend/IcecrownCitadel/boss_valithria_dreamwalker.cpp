@@ -24,6 +24,7 @@
 #include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
+#include "utility.hpp"
 #include "icecrown_citadel.h"
 
 using std::vector;
@@ -1496,7 +1497,7 @@ class spell_dreamwalker_twisted_nightmares : public SpellScriptLoader
         {
             PrepareSpellScript(spell_dreamwalker_twisted_nightmares_SpellScript);
 
-            void HandleScript(SpellEffIndex effIndex)
+            void HandleScript(SpellEffIndex effIndex UNUSED)
             {
             }
 
