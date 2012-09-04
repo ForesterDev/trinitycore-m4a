@@ -178,19 +178,19 @@ class boss_rotface : public CreatureScript
                             {
                               case 0:
                                 me->RemoveAurasDueToSpell(SPELL_MUTATED_INFECTION_TRIGGER_14);
-                                DoCast(me,SPELL_MUTATED_INFECTION_TRIGGER_12);
+                                DoCast(me,SPELL_MUTATED_INFECTION_TRIGGER_12,true);                                
                                 break;
                               case 1:
                                 me->RemoveAurasDueToSpell(SPELL_MUTATED_INFECTION_TRIGGER_12);
-                                DoCast(me,SPELL_MUTATED_INFECTION_TRIGGER_10);
+                                DoCast(me,SPELL_MUTATED_INFECTION_TRIGGER_10,true);
                                 break;
                               case 2:
                                 me->RemoveAurasDueToSpell(SPELL_MUTATED_INFECTION_TRIGGER_10);
-                                DoCast(me,SPELL_MUTATED_INFECTION_TRIGGER_8);
+                                DoCast(me,SPELL_MUTATED_INFECTION_TRIGGER_8,true);
                                 break;
                               case 3:
                                 me->RemoveAurasDueToSpell(SPELL_MUTATED_INFECTION_TRIGGER_8);
-                                DoCast(me,SPELL_MUTATED_INFECTION_TRIGGER_6);
+                                DoCast(me,SPELL_MUTATED_INFECTION_TRIGGER_6,true);
                                 break;
                             }
                   }
