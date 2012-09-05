@@ -2924,6 +2924,9 @@ void SpellMgr::LoadSpellCustomAttr()
             case 73034 /* Blighted Spores */:
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_STACK_DIFF_CASTERS;
                 break;
+            case 70964: /* Icc- Shield Bash */
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_STACK_DIFF_CASTERS;
+                break;
             case 71940 /* Twisted Nightmares */:
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_STACK_DIFF_CASTERS;
                 break;
@@ -3398,6 +3401,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 71123: // Decimate (Stinky & Precious)
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_100_YARDS;   // 100yd
                 break;
+            case 70964: /* Icc- Shield Bash */
+              spellInfo->AttributesEx2 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+              break;
             case 71940 /* Twisted Nightmares */:
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                 break;
