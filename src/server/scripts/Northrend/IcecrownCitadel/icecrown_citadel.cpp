@@ -2440,38 +2440,6 @@ class spell_icc_soul_missile : public SpellScriptLoader
         }
 };
 
-class spell_icc_shield_bash : public SpellScriptLoader
-{
-    public:
-        spell_icc_shield_bash() : SpellScriptLoader("spell_icc_shield_bash") { }
-
-        class spell_icc_shield_bash_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_icc_shield_bash_SpellScript);
-
-            void HandleScript(SpellEffIndex /*effIndex*/)
-            {
-                
-                if (Aura* shieldBash = GetCaster()->GetAura(SPELL_SHIELD_BASH))
-                {
-                    uint8 stackAmount = uint8(shieldBash->GetStackAmount());
-                    if(stackAmount < 5)
-                      shieldBash->SetStackAmount(stackAmount+1);
-                }
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_icc_shield_bash_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_icc_shield_bash_SpellScript();
-        }
-};
-
 class spell_icc_web_wrap : public SpellScriptLoader
 {
     public:
@@ -2657,8 +2625,7 @@ void AddSC_icecrown_citadel()
     new spell_svalna_revive_champion();
     new spell_svalna_remove_spear();
     new spell_icc_soul_missile();
-    new spell_icc_shield_bash();
-    new spell_icc_web_wrap();
+    //new spell_icc_web_wrap();
     new at_icc_saurfang_portal();
     new at_icc_shutdown_traps();
     new at_icc_start_blood_quickening();
