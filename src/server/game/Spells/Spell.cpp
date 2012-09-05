@@ -7452,7 +7452,7 @@ WorldObjectSpellAreaTargetCheck::WorldObjectSpellAreaTargetCheck(float range, Po
 
 bool WorldObjectSpellAreaTargetCheck::operator()(WorldObject* target)
 {
-    if (!target->IsWithinDist3d(_position, _range))
+    if (_range && !target->IsWithinDist3d(_position, _range))
         return false;
     return WorldObjectSpellTargetCheck::operator ()(target);
 }

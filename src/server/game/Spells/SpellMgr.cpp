@@ -3401,20 +3401,10 @@ void SpellMgr::LoadDbcDataCorrections()
             case 71940 /* Twisted Nightmares */:
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                 break;
-            case 72015 /* Frostbolt Volley */:
-            case 72016 /* Frostbolt Volley */:
-                spellInfo->EffectRadiusIndex[2] = spellInfo->EffectRadiusIndex[1];
-                break;
             case 72378: // Blood Nova (Deathbringer Saurfang)
             case 73058: // Blood Nova (Deathbringer Saurfang)
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_200_YARDS;
                 spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_200_YARDS;
-                break;
-            case 72385 /* Boiling Blood */:
-            case 72441 /* Boiling Blood */:
-            case 72442 /* Boiling Blood */:
-            case 72443 /* Boiling Blood */:
-                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_200_YARDS;
                 break;
             case 72769: // Scent of Blood (Deathbringer Saurfang)
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_200_YARDS;
