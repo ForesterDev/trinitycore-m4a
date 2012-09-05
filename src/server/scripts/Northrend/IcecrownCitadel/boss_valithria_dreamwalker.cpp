@@ -24,8 +24,8 @@
 #include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
-#include "utility.hpp"
 #include "icecrown_citadel.h"
+#include "utility.hpp"
 
 using std::vector;
 
@@ -160,7 +160,7 @@ class RisenArchmageCheck
         bool operator()(Creature* creature)
         {
             return creature->isAlive() && creature->GetEntry() == NPC_RISEN_ARCHMAGE &&
-                creature->GetDBTableGUIDLow() && !creature->isInCombat();
+                creature->GetDBTableGUIDLow();
         }
 };
 
@@ -364,8 +364,11 @@ class boss_valithria_dreamwalker : public CreatureScript
                     Talk(SAY_VALITHRIA_75_PERCENT);
                 }
                 else if (_instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) == NOT_STARTED)
-                    if (Creature* archmage = me->FindNearestCreature(NPC_RISEN_ARCHMAGE, 30.0f))
-                        archmage->AI()->DoZoneInCombat();   // call EnterCombat on one of them, that will make it all start
+                    if (Creature* trigger = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_TRIGGER)))
+                    {
+                        trigger->AddThreat(healer, 0.0F);
+                        trigger->SetInCombatWith(healer);
+                    }
             }
 
             void DamageTaken(Unit* /*attacker*/, uint32& damage)
@@ -524,8 +527,23 @@ class npc_green_dragon_combat_trigger : public CreatureScript
                 me->setActive(true);
                 DoZoneInCombat();
                 instance->SetBossState(DATA_VALITHRIA_DREAMWALKER, IN_PROGRESS);
+                if (Creature* lichKing = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALITHRIA_LICH_KING)))
+                    lichKing->AI()->DoZoneInCombat();
                 if (Creature* valithria = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALITHRIA_DREAMWALKER)))
+                {
                     valithria->AI()->DoAction(ACTION_ENTER_COMBAT);
+                    std::list<Creature*> archmages;
+                    RisenArchmageCheck check;
+                    Trinity::CreatureListSearcher<RisenArchmageCheck> searcher(me, archmages, check);
+                    me->VisitNearbyGridObject(100.0f, searcher);
+                    for (std::list<Creature*>::iterator itr = archmages.begin(); itr != archmages.end(); ++itr)
+                    {
+                        auto c = *itr;
+                        c->AddThreat(target, 0.0F);
+                        c->SetInCombatWith(target);
+                        c->AddThreat(valithria, 0.0F);
+                    }
+                }
             }
 
             void AttackStart(Unit* target)
@@ -559,25 +577,7 @@ class npc_green_dragon_combat_trigger : public CreatureScript
                 if (!me->isInCombat())
                     return;
 
-                std::list<HostileReference*> const& threatList = me->getThreatManager().getThreatList();
-                if (threatList.empty())
-                {
-                    EnterEvadeMode();
-                    return;
-                }
-
-                // check evade every second tick
-                _evadeCheck ^= true;
-                if (!_evadeCheck)
-                    return;
-
-                // check if there is any player on threatlist, if not - evade
-                for (std::list<HostileReference*>::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
-                    if (Unit* target = (*itr)->getTarget())
-                        if (target->GetTypeId() == TYPEID_PLAYER)
-                            return; // found any player, return
-
-                EnterEvadeMode();
+                me->SelectVictim();
             }
 
         private:
@@ -629,8 +629,7 @@ class npc_the_lich_king_controller : public CreatureScript
                 // must not be in dream phase
                 summon->SetPhaseMask((summon->GetPhaseMask() & ~0x10), true);
                 if (summon->GetEntry() != NPC_SUPPRESSER)
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
-                        summon->AI()->AttackStart(target);
+                    summon->AI()->AttackStart(me->GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_DREAMWALKER)));
             }
 
             void UpdateAI(uint32 const diff)
@@ -693,7 +692,7 @@ class npc_risen_archmage : public CreatureScript
 
             bool CanAIAttack(Unit const* target) const
             {
-                return target->GetEntry() != NPC_VALITHRIA_DREAMWALKER;
+                return !me->isInCombat() ? target->GetEntry() != NPC_VALITHRIA_DREAMWALKER : true;
             }
 
             void Reset()
@@ -705,24 +704,16 @@ class npc_risen_archmage : public CreatureScript
                 _canCallEnterCombat = true;
             }
 
-            void EnterCombat(Unit* /*target*/)
+            void EnterCombat(Unit* target)
             {
                 me->FinishSpell(CURRENT_CHANNELED_SPELL, false);
+                DoZoneInCombat();
                 if (me->GetDBTableGUIDLow() && _canCallEnterCombat)
-                {
-                    std::list<Creature*> archmages;
-                    RisenArchmageCheck check;
-                    Trinity::CreatureListSearcher<RisenArchmageCheck> searcher(me, archmages, check);
-                    me->VisitNearbyGridObject(100.0f, searcher);
-                    for (std::list<Creature*>::iterator itr = archmages.begin(); itr != archmages.end(); ++itr)
-                        (*itr)->AI()->DoAction(ACTION_ENTER_COMBAT);
-
-                    if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_LICH_KING)))
-                        lichKing->AI()->DoZoneInCombat();
-
                     if (Creature* trigger = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_VALITHRIA_TRIGGER)))
-                        trigger->AI()->DoZoneInCombat();
-                }
+                    {
+                        trigger->AddThreat(target, 0.0F);
+                        trigger->SetInCombatWith(target);
+                    }
             }
 
             void DoAction(int32 const action)
@@ -731,7 +722,7 @@ class npc_risen_archmage : public CreatureScript
                     return;
 
                 _canCallEnterCombat = false;
-                DoZoneInCombat();
+                me->UpdateObjectVisibility();
                 _canCallEnterCombat = true;
             }
 
@@ -848,6 +839,11 @@ class npc_blazing_skeleton : public CreatureScript
                 }
 
                 DoMeleeAttackIfReady();
+            }
+
+            void EnterCombat(Unit *victim UNUSED) override
+            {
+                DoZoneInCombat();
             }
 
         private:
@@ -985,6 +981,11 @@ class npc_blistering_zombie : public CreatureScript
                 DoMeleeAttackIfReady();
             }
 
+            void EnterCombat(Unit *victim UNUSED) override
+            {
+                DoZoneInCombat();
+            }
+
             bool burst;
         };
 
@@ -1040,6 +1041,11 @@ class npc_gluttonous_abomination : public CreatureScript
                 }
 
                 DoMeleeAttackIfReady();
+            }
+
+            void EnterCombat(Unit *victim UNUSED) override
+            {
+                DoZoneInCombat();
             }
 
         private:
