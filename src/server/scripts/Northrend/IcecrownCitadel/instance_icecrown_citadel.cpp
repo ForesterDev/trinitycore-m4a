@@ -178,6 +178,12 @@ class instance_icecrown_citadel : public InstanceMapScript
 
                 switch (creature->GetEntry())
                 {
+                case NPC_BLAZING_SKELETON:
+                case NPC_SUPPRESSER:
+                case NPC_RISEN_ARCHMAGE:
+                case NPC_ROT_WORM:
+                    creature->SetCorpseDelay(3U);
+                    break;
                     case NPC_KOR_KRON_GENERAL:
                         if (TeamInInstance == ALLIANCE)
                             creature->UpdateEntry(NPC_ALLIANCE_COMMANDER, ALLIANCE);
@@ -185,6 +191,9 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case NPC_DRUDGE_GHOUL:
                     case NPC_VILE_SPIRIT:
                         creature->SetReactState(REACT_PASSIVE);
+                        break;
+                    case NPC_GLUTTONOUS_ABOMINATION:
+                        creature->SetCorpseDelay(8U);
                         break;
                     case NPC_KOR_KRON_LIEUTENANT:
                         if (TeamInInstance == ALLIANCE)
