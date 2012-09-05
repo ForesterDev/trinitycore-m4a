@@ -1014,7 +1014,11 @@ class npc_gluttonous_abomination : public CreatureScript
 
             void JustDied(Unit* /*killer*/)
             {
-                DoCast(me, SPELL_ROT_WORM_SPAWNER, true);
+                add_simple_event(me->m_Events, [this]()
+                        {
+                            DoCast(me, SPELL_ROT_WORM_SPAWNER, true);
+                        },
+                    3000U);
             }
 
             void UpdateAI(uint32 const diff)
