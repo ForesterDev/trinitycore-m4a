@@ -777,8 +777,7 @@ class boss_sister_svalna : public CreatureScript
             {
                 _EnterCombat();
                 Talk(SAY_SVALNA_AGGRO);
-                events.ScheduleEvent(EVENT_IMPALING_SPEAR, urand(40000, 50000));
-                events.ScheduleEvent(EVENT_AETHER_SHIELD, urand(100000, 110000));
+                events.ScheduleEvent(EVENT_IMPALING_SPEAR, 40000U);
             }
 
             void KilledUnit(Unit* victim)
@@ -917,7 +916,7 @@ class boss_sister_svalna : public CreatureScript
                                 DoCast(me, SPELL_AETHER_SHIELD);
                                 DoCast(target, SPELL_IMPALING_SPEAR);
                             }
-                            events.ScheduleEvent(EVENT_IMPALING_SPEAR, urand(20000, 25000));
+                            events.ScheduleEvent(EVENT_IMPALING_SPEAR, 20000U);
                             break;
                         default:
                             break;
