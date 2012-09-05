@@ -861,6 +861,7 @@ class boss_sister_svalna : public CreatureScript
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
                 me->SetDisableGravity(false);
                 me->SetHover(false);
+                DoCastAOE(71465 /* Divine Surge */);
                 me->SetReactState(REACT_DEFENSIVE);
             }
 
