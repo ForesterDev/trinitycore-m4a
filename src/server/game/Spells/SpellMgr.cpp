@@ -2924,6 +2924,9 @@ void SpellMgr::LoadSpellCustomAttr()
             case 73034 /* Blighted Spores */:
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_STACK_DIFF_CASTERS;
                 break;
+            case 71940 /* Twisted Nightmares */:
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_STACK_DIFF_CASTERS;
+                break;
             case 72293: // Mark of the Fallen Champion (Deathbringer Saurfang)
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
                 break;
@@ -3394,6 +3397,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 71161: // Plague Stench (Stinky)
             case 71123: // Decimate (Stinky & Precious)
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_100_YARDS;   // 100yd
+                break;
+            case 71940 /* Twisted Nightmares */:
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                 break;
             case 72015 /* Frostbolt Volley */:
             case 72016 /* Frostbolt Volley */:
