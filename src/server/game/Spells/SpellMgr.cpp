@@ -2990,6 +2990,7 @@ void SpellMgr::LoadDbcDataCorrections()
             case 40246: // Simon Game Visual
             case 40247: // Simon Game Visual
             case 42835: // Spout, remove damage effect, only anim is needed
+            case 56578: // Skadi - Harpoon Damage
                 spellInfo->Effect[0] = 0;
                 break;
             case 30657: // Quake

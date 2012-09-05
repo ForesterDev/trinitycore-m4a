@@ -186,7 +186,9 @@ public:
         uint32 m_uiMountTimer;
         uint32 m_uiSummonTimer;
         uint8  m_uiSpellHitCount;
+        uint8  m_uiOddWave;
         bool   m_bSaidEmote;
+        
 
         eCombatPhase Phase;
 
@@ -201,6 +203,7 @@ public:
             m_uiWaypointId = 0;
             m_bSaidEmote = false;
             m_uiSpellHitCount = 0;
+            m_uiOddWave = 1;
 
             Phase = SKADI;
 
@@ -424,7 +427,8 @@ public:
         {
             for (uint8 i = 0; i < DUNGEON_MODE(5, 6); ++i)
             {
-                switch (urand(0, 2))
+                
+                switch (urand(0, 2 - m_uiOddWave))
                 {
                     case 0:
                         me->SummonCreature(CREATURE_YMIRJAR_WARRIOR, SpawnLoc.GetPositionX()+rand()%5, SpawnLoc.GetPositionY()+rand()%5, SpawnLoc.GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
@@ -439,6 +443,7 @@ public:
                         break;
                 }
             }
+            m_uiOddWave = !m_uiOddWave;
         }
 
         void SpawnTrigger()
