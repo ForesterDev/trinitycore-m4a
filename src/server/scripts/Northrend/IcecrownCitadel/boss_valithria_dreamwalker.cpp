@@ -1052,6 +1052,12 @@ class npc_gluttonous_abomination : public CreatureScript
                 DoZoneInCombat();
             }
 
+            void SpellHit(Unit *caster UNUSED, const SpellInfo *spell) override
+            {
+                if (spell->Id == SPELL_DREAMWALKERS_RAGE)
+                    me->SetCorpseDelay(3U);
+            }
+
         private:
             EventMap _events;
         };
