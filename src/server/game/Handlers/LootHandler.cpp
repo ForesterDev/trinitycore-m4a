@@ -219,7 +219,10 @@ void WorldSession::HandleLootOpcode(WorldPacket & recv_data)
         return;
     }
     if (!_player->isAlive())
+    {
+        _player->SendLootRelease(guid);
         return;
+    }
 
     GetPlayer()->SendLoot(guid, LOOT_CORPSE);
 
