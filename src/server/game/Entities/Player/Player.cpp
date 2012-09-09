@@ -9149,7 +9149,10 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             // the player whose group may loot the corpse
             Player* recipient = creature->GetLootRecipient();
             if (!recipient)
+            {
+                SendLootRelease(guid);
                 return;
+            }
 
             if (!creature->lootForBody)
             {
