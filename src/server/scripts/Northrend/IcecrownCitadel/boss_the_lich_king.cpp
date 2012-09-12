@@ -347,6 +347,10 @@ enum EncounterActions
     ACTION_SUMMON_TERENAS       = 6,
     ACTION_FINISH_OUTRO         = 7,
     ACTION_TELEPORT_BACK        = 8,
+
+    //Raging Spirit (Acrions when players are sent in frostmorune)
+    ACTION_RAGING_SPIRIT_PASSIVE = 9,
+    ACTION_RAGING_SPIRIT_AGGRESSIVE = 10,
 };
 
 enum MiscData
@@ -460,6 +464,24 @@ class StartMovementEvent : public BasicEvent
 
     private:
         Creature* _summoner;
+        Creature* _owner;
+};
+
+class RagingSpiritActivateEvent : public BasicEvent
+{
+    public:
+        explicit RagingSpiritActivateEvent(Creature* owner)
+            : _owner(owner)
+        {
+        }
+
+        bool Execute(uint64 /*time*/, uint32 /*diff*/)
+        {
+          _owner->AI()->DoAction(ACTION_RAGING_SPIRIT_AGGRESSIVE);            
+            return true;
+        }
+
+    private:
         Creature* _owner;
 };
 
@@ -1042,6 +1064,33 @@ class boss_the_lich_king : public CreatureScript
                                 events.SetPhase(PHASE_FROSTMOURNE); // will stop running UpdateVictim (no evading)
                                 me->SetReactState(REACT_PASSIVE);
                                 me->AttackStop();
+
+                                for (SummonList::iterator i = summons.begin(); i != summons.end(); ++i)
+                                    {
+                                        Creature* summon = ObjectAccessor::GetCreature(*me, *i);
+
+                                        if(!summon)
+                                          continue;
+
+                                        switch(summon->GetEntry())
+                                        {
+                                          case NPC_VILE_SPIRIT:
+                                            summon->m_Events.KillAllEvents(true);
+                                            summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(53000));
+                                            summon->GetMotionMaster()->MoveRandom(10.0f);
+                                            summon->SetReactState(REACT_PASSIVE);
+                                            summon->AI()->EnterEvadeMode(); 
+                                            break;
+                                          case NPC_RAGING_SPIRIT:
+                                            summon->m_Events.KillAllEvents(true);
+                                            summon->m_Events.AddEvent(new RagingSpiritActivateEvent(summon), summon->m_Events.CalculateTime(53000));
+                                            summon->AI()->DoAction(ACTION_RAGING_SPIRIT_PASSIVE);
+                                            break;
+                                          default:
+                                            break;
+                                        }                                      
+                                    }
+
                                 events.DelayEvents(50000, EVENT_GROUP_VILE_SPIRITS);
                                 events.RescheduleEvent(EVENT_DEFILE, 50000, 0, PHASE_THREE);
                                 events.RescheduleEvent(EVENT_SOUL_REAPER, urand(57000, 62000), 0, PHASE_THREE);
@@ -1061,19 +1110,7 @@ class boss_the_lich_king : public CreatureScript
                                         spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_1, true);  // summons bombs randomly
                                         spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_2, true);  // summons bombs on players
                                         spawner->m_Events.AddEvent(new TriggerWickedSpirit(spawner), spawner->m_Events.CalculateTime(3000));
-                                    }
-
-                                    for (SummonList::iterator i = summons.begin(); i != summons.end(); ++i)
-                                    {
-                                        Creature* summon = ObjectAccessor::GetCreature(*me, *i);
-                                        if (summon && summon->GetEntry() == NPC_VILE_SPIRIT)
-                                        {
-                                            summon->m_Events.KillAllEvents(true);
-                                            summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(50000));
-                                            summon->GetMotionMaster()->MoveRandom(10.0f);
-                                            summon->SetReactState(REACT_PASSIVE);
-                                        }
-                                    }
+                                    }                                    
                                 }
                                 break;
                             case EVENT_OUTRO_TALK_1:
@@ -1423,6 +1460,7 @@ class npc_raging_spirit : public CreatureScript
                 _instance(creature->GetInstanceScript())
             {
                 creature->SetReactState(REACT_PASSIVE);
+                frostmorune = false;
             }
 
             void Reset()
@@ -1457,8 +1495,26 @@ class npc_raging_spirit : public CreatureScript
                     summon->SetTempSummonType(TEMPSUMMON_CORPSE_DESPAWN);
             }
 
+            void DoAction(int32 const action)
+            {
+                switch (action)
+                {
+                    case ACTION_RAGING_SPIRIT_PASSIVE:
+                      _events.DelayEvents(53000);
+                      me->SetReactState(REACT_PASSIVE);
+                      me->AttackStop();
+                      frostmorune = true;
+                      break;
+                    case ACTION_RAGING_SPIRIT_AGGRESSIVE:
+                      me->SetReactState(REACT_AGGRESSIVE);
+                      frostmorune = false;
+                      break;
+                }
+            }
+
             void UpdateAI(uint32 const diff)
             {
+              if(!frostmorune)
                 if (!UpdateVictim())
                     return;
 
@@ -1486,6 +1542,7 @@ class npc_raging_spirit : public CreatureScript
         private:
             EventMap _events;
             InstanceScript* _instance;
+            bool frostmorune;
         };
 
         CreatureAI* GetAI(Creature* creature) const
