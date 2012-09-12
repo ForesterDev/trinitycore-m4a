@@ -10198,6 +10198,7 @@ Unit* Unit::GetNextRandomRaidMemberOrPet(float radius)
 // so move it to Player?
 void Unit::AddPlayerToVision(Player* player)
 {
+    ASSERT(IsInWorld());
     if (m_sharedVision.empty())
     {
         setActive(true);
@@ -13804,6 +13805,7 @@ void Unit::RemoveFromWorld()
 
         RemoveCharmAuras();
         RemoveBindSightAuras();
+        ASSERT(m_sharedVision.empty());
         RemoveNotOwnSingleTargetAuras();
 
         RemoveAllGameObjects();
