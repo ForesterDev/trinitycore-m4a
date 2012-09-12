@@ -2407,6 +2407,9 @@ class spell_the_lich_king_shadow_trap_periodic : public SpellScriptLoader
                     return;
 
                 GetCaster()->CastSpell((Unit*)NULL, SPELL_SHADOW_TRAP_KNOCKBACK, true);
+
+                if (GetCaster()->GetTypeId() == TYPEID_UNIT)
+                  GetCaster()->ToCreature()->DespawnOrUnsummon(500);
             }
 
             void Register()
