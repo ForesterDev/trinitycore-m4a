@@ -7913,6 +7913,9 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
                 ApplyModInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE, -val, apply);
                 m_spellPenetrationItemMod += apply ? val : -val;
                 break;
+            case ITEM_MOD_BLOCK_VALUE:
+                HandleBaseModValue(SHIELD_BLOCK_VALUE, FLAT_MOD, float(val), apply);
+                break;
             // deprecated item mods
             case ITEM_MOD_SPELL_HEALING_DONE:
             case ITEM_MOD_SPELL_DAMAGE_DONE:
@@ -11528,7 +11531,11 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16 &dest, Item* pItem, bool
 
             if (eslot == EQUIPMENT_SLOT_OFFHAND)
             {
-                if (type == INVTYPE_WEAPON || type == INVTYPE_WEAPONOFFHAND)
+                // Do not allow polearm to be equipped in the offhand (rare case for the only 1h polearm 41750)
+                if (type == INVTYPE_WEAPON && pProto->SubClass == ITEM_SUBCLASS_WEAPON_POLEARM)
+                    return EQUIP_ERR_ITEM_DOESNT_GO_TO_SLOT;
+
+                else if (type == INVTYPE_WEAPON || type == INVTYPE_WEAPONOFFHAND)
                 {
                     if (!CanDualWield())
                         return EQUIP_ERR_CANT_DUAL_WIELD;
@@ -14723,13 +14730,14 @@ bool Player::CanSeeStartQuest(Quest const* quest)
 
 bool Player::CanTakeQuest(Quest const* quest, bool msg)
 {
-    return SatisfyQuestStatus(quest, msg) && SatisfyQuestExclusiveGroup(quest, msg)
+    return !DisableMgr::IsDisabledFor(DISABLE_TYPE_QUEST, quest->GetQuestId(), this)
+        && SatisfyQuestStatus(quest, msg) && SatisfyQuestExclusiveGroup(quest, msg)
         && SatisfyQuestClass(quest, msg) && SatisfyQuestRace(quest, msg) && SatisfyQuestLevel(quest, msg)
         && SatisfyQuestSkill(quest, msg) && SatisfyQuestReputation(quest, msg)
         && SatisfyQuestPreviousQuest(quest, msg) && SatisfyQuestTimed(quest, msg)
         && SatisfyQuestNextChain(quest, msg) && SatisfyQuestPrevChain(quest, msg)
         && SatisfyQuestDay(quest, msg) && SatisfyQuestWeek(quest, msg)
-        && SatisfyQuestSeasonal(quest,msg) && !DisableMgr::IsDisabledFor(DISABLE_TYPE_QUEST, quest->GetQuestId(), this)
+        && SatisfyQuestSeasonal(quest,msg)
         && SatisfyQuestConditions(quest, msg);
 }
 
@@ -24502,11 +24510,11 @@ bool Player::canSeeSpellClickOn(Creature const* c) const
 
         ConditionList conds = sConditionMgr->GetConditionsForSpellClickEvent(c->GetEntry(), itr->second.spellId);
         ConditionSourceInfo info = ConditionSourceInfo(const_cast<Player*>(this), const_cast<Creature*>(c));
-        if (!sConditionMgr->IsObjectMeetToConditions(info, conds))
-            return false;
+        if (sConditionMgr->IsObjectMeetToConditions(info, conds))
+            return true;
     }
 
-    return true;
+    return false;
 }
 
 void Player::BuildPlayerTalentsInfoData(WorldPacket* data)

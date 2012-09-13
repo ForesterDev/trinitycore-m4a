@@ -1135,7 +1135,7 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
         case 68719: // Oil Refinery - Isle of Conquest.
         case 68720: // Quarry - Isle of Conquest.
         {
-            if (player->GetBattlegroundTypeId() != BATTLEGROUND_IC || !player->GetBattleground())
+            if (!player || player->GetBattlegroundTypeId() != BATTLEGROUND_IC || !player->GetBattleground())
                 return false;
 
             uint8 nodeType = spellId == 68719 ? NODE_TYPE_REFINERY : NODE_TYPE_QUARRY;
@@ -3421,6 +3421,9 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
             case 71159: // Awaken Plagued Zombies
                 spellInfo->DurationIndex = 21;
+                break;
+            case 70530: // Volatile Ooze Beam Protection (Professor Putricide)
+                spellInfo->Effect[0] = SPELL_EFFECT_APPLY_AURA; // for an unknown reason this was SPELL_EFFECT_APPLY_AREA_AURA_RAID
                 break;
             // THIS IS HERE BECAUSE COOLDOWN ON CREATURE PROCS IS NOT IMPLEMENTED
             case 71604: // Mutated Strength (Professor Putricide)

@@ -30,12 +30,15 @@ enum WGVehicles
     NPC_WG_SEIGE_ENGINE_ALLIANCE        = 28312,
     NPC_WG_SEIGE_ENGINE_HORDE           = 32627,
     NPC_WG_DEMOLISHER                   = 28094,
-    NPC_WG_CATAPULT                     = 27881,
+    NPC_WG_CATAPULT                     = 27881
 };
 
 BattlefieldWG::~BattlefieldWG()
 {
     for (Workshop::const_iterator itr = WorkshopsList.begin(); itr != WorkshopsList.end(); ++itr)
+        delete *itr;
+
+    for (GameObjectBuilding::const_iterator itr = BuildingsInZone.begin(); itr != BuildingsInZone.end(); ++itr)
         delete *itr;
 }
 

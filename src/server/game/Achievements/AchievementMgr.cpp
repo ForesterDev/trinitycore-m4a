@@ -128,12 +128,6 @@ bool AchievementCriteriaData::IsValid(AchievementCriteriaEntry const* criteria)
             }
             return true;
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE:
-            if (!classRace.class_id && !classRace.race_id)
-            {
-                sLog->outError(LOG_FILTER_SQL, "Table `achievement_criteria_data` (Entry: %u Type: %u) for data type ACHIEVEMENT_CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE (%u) must not have 0 in either value field, ignored.",
-                    criteria->ID, criteria->requiredType, dataType);
-                return false;
-            }
             if (classRace.class_id && ((1 << (classRace.class_id-1)) & CLASSMASK_ALL_PLAYABLE) == 0)
             {
                 sLog->outError(LOG_FILTER_SQL, "Table `achievement_criteria_data` (Entry: %u Type: %u) for data type ACHIEVEMENT_CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE (%u) has non-existing class in value1 (%u), ignored.",
@@ -364,7 +358,7 @@ bool AchievementCriteriaData::Meets(uint32 criteria_id, Player const* source, Un
             return sScriptMgr->OnCriteriaCheck(this, const_cast<Player*>(source), const_cast<Unit*>(target));
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_MAP_DIFFICULTY:
             if (source->GetMap()->IsRaid())
-                if (source->GetMap()->Is25ManRaid() != (difficulty.difficulty & RAID_DIFFICULTY_MASK_25MAN))
+                if (source->GetMap()->Is25ManRaid() != ((difficulty.difficulty & RAID_DIFFICULTY_MASK_25MAN) != 0))
                     return false;
             return source->GetMap()->GetSpawnMode() >= difficulty.difficulty;
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_MAP_PLAYER_COUNT:
