@@ -46,6 +46,7 @@ class instance_zulgurub : public InstanceMapScript
             uint64 m_uiZathGUID;
             uint64 m_uiThekalGUID;
             uint64 m_uiJindoGUID;
+            uint64 m_uiMandokirGUID;
 
             void Initialize()
             {
@@ -55,6 +56,7 @@ class instance_zulgurub : public InstanceMapScript
                 m_uiZathGUID = 0;
                 m_uiThekalGUID = 0;
                 m_uiJindoGUID = 0;
+                m_uiMandokirGUID = 0;
             }
 
             bool IsEncounterInProgress() const
@@ -71,6 +73,7 @@ class instance_zulgurub : public InstanceMapScript
                     case 11348: m_uiZathGUID = creature->GetGUID(); break;
                     case 14509: m_uiThekalGUID = creature->GetGUID(); break;
                     case 11380: m_uiJindoGUID = creature->GetGUID(); break;
+                    case 11382: m_uiMandokirGUID = creature->GetGUID(); break;
                 }
             }
 
@@ -106,7 +109,7 @@ class instance_zulgurub : public InstanceMapScript
                         m_auiEncounter[6] = uiData;
                         break;
 
-                    case DATA_OHGAN:
+                    case DATA_MANDOKIR:
                         m_auiEncounter[7] = uiData;
                         break;
                 }
@@ -130,7 +133,7 @@ class instance_zulgurub : public InstanceMapScript
                         return m_auiEncounter[5];
                     case DATA_ZATH:
                         return m_auiEncounter[6];
-                    case DATA_OHGAN:
+                    case DATA_MANDOKIR:
                         return m_auiEncounter[7];
                 }
                 return 0;
@@ -148,6 +151,8 @@ class instance_zulgurub : public InstanceMapScript
                         return m_uiThekalGUID;
                     case DATA_JINDO:
                         return m_uiJindoGUID;
+                    case DATA_MANDOKIR:
+                        return m_uiMandokirGUID;
                 }
                 return 0;
             }

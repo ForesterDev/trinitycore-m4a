@@ -44,6 +44,11 @@ EndScriptData */
 //Ohgans Spells
 #define SPELL_SUNDERARMOR       24317
 
+#define SPELL_SPEAKER_DEM_SHOUT 13730
+#define SPELL_SPEAKER_CLEAVE    15284
+
+#define ACTION_RAPTOR_DEAD      1
+
 class boss_mandokir : public CreatureScript
 {
     public:
@@ -67,7 +72,6 @@ class boss_mandokir : public CreatureScript
             uint32 Whirlwind_Timer;
             uint32 Fear_Timer;
             uint32 MortalStrike_Timer;
-            uint32 Check_Timer;
             float targetX;
             float targetY;
             float targetZ;
@@ -89,7 +93,6 @@ class boss_mandokir : public CreatureScript
                 Whirlwind_Timer = 20000;
                 Fear_Timer = 1000;
                 MortalStrike_Timer = 1000;
-                Check_Timer = 1000;
 
                 targetX = 0.0f;
                 targetY = 0.0f;
@@ -137,6 +140,22 @@ class boss_mandokir : public CreatureScript
             void EnterCombat(Unit* /*who*/)
             {
              DoScriptText(SAY_AGGRO, me);
+            }
+
+            void JustDied(Unit* /*killer*/)
+            {
+                if (instance)
+                    instance->SetData(DATA_MANDOKIR, DONE);
+            }
+
+             void DoAction(int32 const action)
+            {
+                switch (action)
+                {
+                  case ACTION_RAPTOR_DEAD:
+                    DoCast(me, SPELL_ENRAGE);
+                    break;
+                }
             }
 
             void UpdateAI(const uint32 diff)
@@ -254,22 +273,6 @@ class boss_mandokir : public CreatureScript
                         }
                     }
                     //Checking if Ohgan is dead. If yes Mandokir will enrage.
-                    if (Check_Timer <= diff)
-                    {
-                        if (instance)
-                        {
-                            if (instance->GetData(DATA_OHGAN) == DONE)
-                            {
-                                if (!RaptorDead)
-                                {
-                                    DoCast(me, SPELL_ENRAGE);
-                                    RaptorDead = true;
-                                }
-                            }
-                        }
-
-                        Check_Timer = 1000;
-                    } else Check_Timer -= diff;
 
                     DoMeleeAttackIfReady();
                 }
@@ -311,8 +314,8 @@ class mob_ohgan : public CreatureScript
 
             void JustDied(Unit* /*killer*/)
             {
-                if (instance)
-                    instance->SetData(DATA_OHGAN, DONE);
+                if (auto mandokir = Unit::GetCreature(*me, instance->GetData64(DATA_MANDOKIR)))
+                    mandokir->AI()->DoAction(ACTION_RAPTOR_DEAD);
             }
 
             void UpdateAI (const uint32 diff)
@@ -338,9 +341,64 @@ class mob_ohgan : public CreatureScript
         }
 };
 
+class npc_vilebranch_speaker : public CreatureScript
+{
+    public:
+
+        npc_vilebranch_speaker(): CreatureScript("npc_vilebranch_speaker")
+        {
+        }
+
+        struct npc_vilebranch_speakerAI : public ScriptedAI
+        {
+            npc_vilebranch_speakerAI(Creature* creature) : ScriptedAI(creature)
+            {            
+               instance = creature->GetInstanceScript();
+            }
+
+            uint32 Cleave_Timer;
+            InstanceScript* instance;
+
+            void Reset()
+            {
+                Cleave_Timer = 10000;
+            }
+
+            void EnterCombat(Unit* /*who*/) 
+            {
+                DoCast(me->getVictim(),SPELL_SPEAKER_DEM_SHOUT);
+            }
+
+            void JustDied(Unit* /*killer*/)
+            {
+              if (auto mandokir = Unit::GetCreature(*me, instance->GetData64(DATA_MANDOKIR)))
+                mandokir->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                if (Cleave_Timer <= diff)
+                {
+                    DoCast(me->getVictim(),SPELL_SPEAKER_CLEAVE);
+                    Cleave_Timer = urand(13000, 16000);
+                } else Cleave_Timer -= diff;
+            }     
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_vilebranch_speakerAI(creature);
+        }
+};
+
+
 void AddSC_boss_mandokir()
 {
     new boss_mandokir();
     new mob_ohgan();
+    new npc_vilebranch_speaker();
 }
 
