@@ -2406,10 +2406,12 @@ class spell_the_lich_king_shadow_trap_periodic : public SpellScriptLoader
                 if (targets.empty())
                     return;
 
-                GetCaster()->CastSpell((Unit*)NULL, SPELL_SHADOW_TRAP_KNOCKBACK, true);
+                auto caster = GetCaster();
+                caster->CastSpell((Unit*)NULL, SPELL_SHADOW_TRAP_KNOCKBACK, true);
 
-                if (GetCaster()->GetTypeId() == TYPEID_UNIT)
-                  GetCaster()->ToCreature()->DespawnOrUnsummon(500);
+                caster->RemoveAurasDueToSpell(SPELL_SHADOW_TRAP_AURA);
+                if (caster->GetTypeId() == TYPEID_UNIT)
+                  caster->ToCreature()->DespawnOrUnsummon(3000U);
             }
 
             void Register()
