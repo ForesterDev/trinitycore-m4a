@@ -23,7 +23,7 @@ SDComment: Place Holder
 SDCategory: Molten Core
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "stdafx.hpp"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "InstanceScript.h"

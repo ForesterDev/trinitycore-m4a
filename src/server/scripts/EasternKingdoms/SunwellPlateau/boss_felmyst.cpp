@@ -21,6 +21,7 @@ SD%Complete: 0
 SDComment:
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "sunwell_plateau.h"
 

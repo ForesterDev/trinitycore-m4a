@@ -27,6 +27,7 @@ EndScriptData */
 boss_warchief_kargath_bladefist
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 enum eSays

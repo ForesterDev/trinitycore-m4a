@@ -27,6 +27,7 @@ EndScriptData */
 npc_kalecgos
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 /*######

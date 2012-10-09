@@ -22,6 +22,7 @@ SDComment: Is not working SPELL_ARCANE_SHIELD. SPELL_FROSTBOMB has some issues, 
 SDCategory: Instance Script
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "oculus.h"
 

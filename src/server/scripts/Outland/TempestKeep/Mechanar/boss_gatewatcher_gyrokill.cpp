@@ -23,6 +23,7 @@ SDComment: Place Holder
 SDCategory: Tempest Keep, The Mechanar
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 //not used

@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Scarlet Monastery
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "SpellMgr.h"
 #include "scarlet_monastery.h"

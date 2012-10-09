@@ -8,28 +8,19 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-include_directories(${Boost_INCLUDE_DIRS})
-
 file(GLOB_RECURSE sources_CommandLine CommandLine/*.cpp CommandLine/*.h)
 file(GLOB_RECURSE sources_RemoteAccess RemoteAccess/*.cpp RemoteAccess/*.h)
 file(GLOB_RECURSE sources_TCSoap TCSoap/*.cpp TCSoap/*.h)
 file(GLOB_RECURSE sources_WorldThread WorldThread/*.cpp WorldThread/*.h)
-file(GLOB sources_localdir *.cpp *.h)
+file(GLOB sources_localdir *.cpp *.h *.hpp)
 
 if( USE_COREPCH )
   include_directories(${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
-if ( USE_COREPCH AND MSVC )
-  set(worldserver_SRCS
-    PrecompiledHeaders/worldPCH.cpp
-    PrecompiledHeaders/worldPCH.h
-  )
-endif()
-
 set(worldserver_SRCS
-  ${worldserver_SRCS}
   ${sources_CommandLine}
+  PrecompiledHeaders/worldPCH.h
   ${sources_RemoteAccess}
   ${sources_TCSoap}
   ${sources_WorldThread}
@@ -42,10 +33,15 @@ if( WIN32 )
     ${sources_Debugging}
     worldserver.rc
   )
-  set_ignore_precompiled_header(${sources_Debugging})
 endif()
 
 include_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/CommandLine
+  ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders
+  ${CMAKE_CURRENT_SOURCE_DIR}/RemoteAccess
+  ${CMAKE_CURRENT_SOURCE_DIR}/TCSoap
+  ${CMAKE_CURRENT_SOURCE_DIR}/WorldThread
   ${CMAKE_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/dep/g3dlite/include
   ${CMAKE_SOURCE_DIR}/dep/gsoap
@@ -137,13 +133,8 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/game/World
   ${CMAKE_SOURCE_DIR}/src/server/authserver/Server
   ${CMAKE_SOURCE_DIR}/src/server/authserver/Realms
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}/CommandLine
-  ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders
-  ${CMAKE_CURRENT_SOURCE_DIR}/RemoteAccess
-  ${CMAKE_CURRENT_SOURCE_DIR}/TCSoap
-  ${CMAKE_CURRENT_SOURCE_DIR}/WorldThread
   ${ACE_INCLUDE_DIR}
+  ${Boost_INCLUDE_DIRS}
   ${MYSQL_INCLUDE_DIR}
   ${OPENSSL_INCLUDE_DIR}
 )
@@ -200,9 +191,9 @@ endif()
 # Generate precompiled header
 if( USE_COREPCH )
   if(CMAKE_COMPILER_IS_GNUCXX)
-    add_precompiled_header(worldserver ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/worldPCH.h)
+    add_precompiled_header(worldserver ${CMAKE_CURRENT_SOURCE_DIR}/stdafx.hpp)
   elseif(MSVC)
-    set_precompiled_header(worldserver "worldPCH.h"
-      "${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/worldPCH.cpp")
+    set_precompiled_header(worldserver "stdafx.hpp"
+      "${CMAKE_CURRENT_SOURCE_DIR}/stdafx.cpp")
   endif()
 endif()

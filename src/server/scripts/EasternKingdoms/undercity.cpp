@@ -29,6 +29,7 @@ npc_highborne_lamenter
 npc_parqual_fintallas
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 /*######

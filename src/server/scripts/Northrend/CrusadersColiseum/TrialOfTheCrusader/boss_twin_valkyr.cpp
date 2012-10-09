@@ -27,6 +27,7 @@ EndScriptData */
 //    - They should be floating but they aren't respecting the floor =(
 //    - Hardcoded bullets spawner
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "trial_of_the_crusader.h"
 

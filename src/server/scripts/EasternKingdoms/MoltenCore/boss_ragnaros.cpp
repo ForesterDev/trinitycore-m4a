@@ -23,6 +23,7 @@ SDComment: some spells doesnt work correctly
 SDCategory: Molten Core
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "molten_core.h"
 

@@ -30,7 +30,7 @@ npc_dalinda_malem
 go_demon_portal
 EndContentData */
 
-#include "ScriptPCH.h"
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"

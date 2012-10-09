@@ -15,7 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "worldPCH.h"
+#include "stdafx.hpp"
 #include "TCSoap.h"
 #include "soapH.h"
 #include "soapStub.h"

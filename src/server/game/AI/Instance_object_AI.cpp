@@ -1,4 +1,4 @@
-#include "gamePCH.h"
+#include "stdafx.hpp"
 #include "Instance_object_AI.hpp"
 #include "Creature.h"
 

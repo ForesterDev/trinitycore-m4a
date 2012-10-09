@@ -23,6 +23,7 @@ SDComment: TODO: Intro
 SDCategory:
 Script Data End */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "culling_of_stratholme.h"
 

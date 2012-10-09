@@ -23,6 +23,7 @@ SDComment: Seems to be complete.
 SDCategory: Black Temple
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "black_temple.h"
 

@@ -23,6 +23,7 @@ SDComment: All ready.
 SDCategory: Halls of Lightning
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "halls_of_lightning.h"
 

@@ -29,6 +29,7 @@ npc_time_rift
 npc_saat
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "dark_portal.h"
 

@@ -20,7 +20,7 @@
 /// @{
 /// \file
 
-#include "worldPCH.h"
+#include "stdafx.hpp"
 #include "Common.h"
 #include "ObjectMgr.h"
 #include "World.h"

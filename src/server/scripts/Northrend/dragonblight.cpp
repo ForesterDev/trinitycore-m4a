@@ -27,6 +27,7 @@ EndScriptData */
 npc_alexstrasza_wr_gate
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "ScriptedEscortAI.h"
 

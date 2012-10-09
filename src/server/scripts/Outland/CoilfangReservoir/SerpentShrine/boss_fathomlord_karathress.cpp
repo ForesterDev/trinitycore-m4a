@@ -23,6 +23,7 @@ SDComment: Cyclone workaround
 SDCategory: Coilfang Resevoir, Serpent Shrine Cavern
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "serpent_shrine.h"
 #include "ScriptedEscortAI.h"

@@ -27,6 +27,7 @@ EndScriptData */
 mob_crystalcore_devastator
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "the_eye.h"
 

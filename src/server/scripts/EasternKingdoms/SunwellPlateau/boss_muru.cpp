@@ -21,6 +21,7 @@ SD%Complete: 80
 SDComment: all sounds, black hole effect triggers to often (46228)
 */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "sunwell_plateau.h"
 

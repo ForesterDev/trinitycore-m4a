@@ -22,7 +22,7 @@
  * Scriptnames of files in this file should be prefixed with "spell_gen_"
  */
 
-#include "ScriptPCH.h"
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"

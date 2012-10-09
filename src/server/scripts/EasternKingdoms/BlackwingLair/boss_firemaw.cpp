@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Blackwing Lair
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 #define SPELL_SHADOWFLAME       22539

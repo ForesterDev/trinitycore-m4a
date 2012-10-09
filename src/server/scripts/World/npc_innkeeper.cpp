@@ -23,6 +23,7 @@ SDComment: Complete
 SDCategory: NPCs
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 #define HALLOWEEN_EVENTID       12

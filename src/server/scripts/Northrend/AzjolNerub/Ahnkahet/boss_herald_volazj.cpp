@@ -19,6 +19,7 @@
  * Comment: Missing AI for Twisted Visages
  */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "ahnkahet.h"
 

@@ -15,7 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "sharedPCH.h"
+#include "stdafx.hpp"
 #include "LoginDatabase.h"
 
 void LoginDatabaseConnection::DoPrepareStatements()

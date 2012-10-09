@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Zul'Aman
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "zulaman.h"
 

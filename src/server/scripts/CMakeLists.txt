@@ -8,19 +8,10 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-include_directories(.)
-include_directories(${Boost_INCLUDE_DIRS})
 # Enable precompiled headers when using the GCC compiler.
 if( USE_SCRIPTPCH )
   include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
-  )
-endif()
-
-if( USE_SCRIPTPCH AND MSVC )
-  set(scripts_STAT_SRCS
-    PrecompiledHeaders/ScriptPCH.cpp
-    PrecompiledHeaders/ScriptPCH.h
   )
 endif()
 
@@ -31,6 +22,8 @@ include(Commands/CMakeLists.txt)
 
 include(Examples/CMakeLists.txt)
 
+file(GLOB sources_localdir *.cpp *.hpp)
+
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
   ../game/AI/ScriptedAI/ScriptedEscortAI.cpp
@@ -39,7 +32,8 @@ set(scripts_STAT_SRCS
   ../game/Scripting/ScriptLoader.cpp
   ../game/Scripting/ScriptMgr.cpp
   ../game/Scripting/ScriptSystem.cpp
-  utility.hpp
+  PrecompiledHeaders/ScriptPCH.h
+  ${sources_localdir}
 )
 
 if(SCRIPTS)
@@ -56,6 +50,8 @@ message(STATUS "SCRIPT PREPARATION COMPLETE")
 message("")
 
 include_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders
   ${CMAKE_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/dep/g3dlite/include
   ${CMAKE_SOURCE_DIR}/dep/SFMT
@@ -147,8 +143,8 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/game/Warden/Modules
   ${CMAKE_SOURCE_DIR}/src/server/game/Weather
   ${CMAKE_SOURCE_DIR}/src/server/game/World
-  ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders
   ${ACE_INCLUDE_DIR}
+  ${Boost_INCLUDE_DIRS}
   ${MYSQL_INCLUDE_DIR}
 )
 
@@ -161,9 +157,9 @@ target_link_libraries(scripts ${Boost_LIBRARIES} game)
 # Generate precompiled header
 if( USE_SCRIPTPCH )
   if(CMAKE_COMPILER_IS_GNUCXX)
-    add_precompiled_header(scripts ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/ScriptPCH.h)
+    add_precompiled_header(scripts ${CMAKE_CURRENT_SOURCE_DIR}/stdafx.hpp)
   elseif(MSVC)
-    set_precompiled_header(scripts "ScriptPCH.h"
-      "${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/ScriptPCH.cpp")
+    set_precompiled_header(scripts "stdafx.hpp"
+      "${CMAKE_CURRENT_SOURCE_DIR}/stdafx.cpp")
   endif()
 endif()

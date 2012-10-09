@@ -23,6 +23,7 @@ SDComment: TODO: if this guy not involved in some special event, remove (and let
 SDCategory: Scarlet Monastery
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 enum eSpells

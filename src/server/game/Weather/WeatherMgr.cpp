@@ -20,7 +20,7 @@
     \ingroup world
 */
 
-#include "gamePCH.h"
+#include "stdafx.hpp"
 #include "WeatherMgr.h"
 #include "Weather.h"
 #include "Log.h"

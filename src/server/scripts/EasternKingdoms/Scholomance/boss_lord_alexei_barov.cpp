@@ -23,6 +23,7 @@ SDComment: aura applied/defined in database
 SDCategory: Scholomance
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "scholomance.h"
 

@@ -23,6 +23,7 @@ SDComment:  Only Horde Heroic
 SDCategory:
 Script Data End */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 #define SPELL_BATTLE_SHOUT                                       31403

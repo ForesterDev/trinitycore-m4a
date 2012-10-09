@@ -20,7 +20,7 @@
     \ingroup world
 */
 
-#include "gamePCH.h"
+#include "stdafx.hpp"
 #include <iomanip>
 #include "Common.h"
 #include "DatabaseEnv.h"

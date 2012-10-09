@@ -22,7 +22,7 @@ SDComment:
 SDCategory: Onyxia's Lair
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
 #include "Cell.h"

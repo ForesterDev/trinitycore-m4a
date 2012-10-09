@@ -27,6 +27,7 @@ EndScriptData */
 // - Need better implementation of Gossip and correct gossip text and option
 // - Misses Dalaran Teleport at the end.
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "trial_of_the_crusader.h"
 #include "utility.hpp"

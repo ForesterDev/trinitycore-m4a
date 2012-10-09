@@ -30,6 +30,7 @@ go_keystone_chamber
 at_map_chamber
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "uldaman.h"
 

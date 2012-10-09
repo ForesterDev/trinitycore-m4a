@@ -31,6 +31,7 @@ EndScriptData */
 // Scarab   - Kill credit isn't crediting?
 // FrostSph - often they are casting Permafrost a little above the ground
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include <Spell.h>
 #include "trial_of_the_crusader.h"

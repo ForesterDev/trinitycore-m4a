@@ -32,6 +32,7 @@ EndScriptData */
 // Redone summon's scripts in SAI
 // Add immunities to the boss and summons
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "trial_of_the_crusader.h"
 

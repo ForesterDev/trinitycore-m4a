@@ -25,6 +25,7 @@ SQLUpdate:
 
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "zulaman.h"
 #include "Weather.h"

@@ -27,6 +27,7 @@ EndScriptData */
 npc_arete
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 /*######

@@ -15,8 +15,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "gamePCH.h"
-
 /*
 
 DROP TABLE IF EXISTS `calendar_events`;
@@ -48,6 +46,7 @@ CREATE TABLE IF NOT EXISTS `calendar_invites` (
 );
 */
 
+#include "stdafx.hpp"
 #include "CalendarMgr.h"
 #include "QueryResult.h"
 #include "DatabaseEnv.h"

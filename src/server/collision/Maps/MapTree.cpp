@@ -16,7 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "collisionPCH.h"
+#include "stdafx.hpp"
 #include "MapTree.h"
 #include "ModelInstance.h"
 #include "VMapManager2.h"

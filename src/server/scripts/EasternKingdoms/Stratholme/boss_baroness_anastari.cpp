@@ -23,6 +23,7 @@ SDComment: MC disabled
 SDCategory: Stratholme
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "stratholme.h"
 

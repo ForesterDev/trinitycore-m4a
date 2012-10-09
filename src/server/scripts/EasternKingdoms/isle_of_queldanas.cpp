@@ -28,6 +28,7 @@ npc_converted_sentry
 npc_greengill_slave
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 /*######

@@ -22,8 +22,7 @@
  *          if reached brann speaks through his radio..
  */
 
-#include "ScriptPCH.h"
-#include "ScriptPCH.h"
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"

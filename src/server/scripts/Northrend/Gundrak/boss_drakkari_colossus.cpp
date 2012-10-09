@@ -19,6 +19,7 @@
  * Comment: The event with the Living Mojos is not implemented, just is done that when one of the mojos around the boss take damage will make the boss enter in combat!
  */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "gundrak.h"
 

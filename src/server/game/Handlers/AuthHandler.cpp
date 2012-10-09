@@ -15,7 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "gamePCH.h"
+#include "stdafx.hpp"
 #include "Opcodes.h"
 #include "WorldSession.h"
 #include "WorldPacket.h"

@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Karazhan
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 #define SAY_AGGRO               -1532018

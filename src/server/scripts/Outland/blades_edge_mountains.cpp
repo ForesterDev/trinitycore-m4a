@@ -33,6 +33,7 @@ go_legion_obelisk
 go_thunderspike
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 //Support for quest: You're Fired! (10821)

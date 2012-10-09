@@ -22,7 +22,7 @@ Comment: All reset related commands
 Category: commandscripts
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "Chat.h"
 #include "ObjectAccessor.h"

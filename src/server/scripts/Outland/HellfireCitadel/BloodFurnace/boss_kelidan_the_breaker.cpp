@@ -28,6 +28,7 @@ boss_kelidan_the_breaker
 mob_shadowmoon_channeler
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "blood_furnace.h"
 

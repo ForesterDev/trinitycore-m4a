@@ -17,7 +17,7 @@
  */
 
 
-#include "gamePCH.h"
+#include "stdafx.hpp"
 #include "Player.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"

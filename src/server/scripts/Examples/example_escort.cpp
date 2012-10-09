@@ -23,6 +23,7 @@ SDComment: Script used for testing escortAI
 SDCategory: Script Examples
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "ScriptedEscortAI.h"
 

@@ -28,6 +28,7 @@ npc_vekjik
 avatar_of_freya
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "ScriptedEscortAI.h"
 

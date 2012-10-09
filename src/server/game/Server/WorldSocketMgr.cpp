@@ -21,7 +21,7 @@
 *  \author Derex <derex101@gmail.com>
 */
 
-#include "gamePCH.h"
+#include "stdafx.hpp"
 #include "WorldSocketMgr.h"
 
 #include <ace/ACE.h>

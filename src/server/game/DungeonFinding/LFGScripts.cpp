@@ -19,13 +19,14 @@
  * Interaction between core and LFGScripts
  */
 
-#include "gamePCH.h"
+#include "stdafx.hpp"
 #include "Common.h"
 #include "SharedDefines.h"
 #include "Player.h"
 #include "Group.h"
 #include "LFGScripts.h"
 #include "LFGMgr.h"
+#include "ObjectAccessor.h"
 
 LFGPlayerScript::LFGPlayerScript() : PlayerScript("LFGPlayerScript")
 {

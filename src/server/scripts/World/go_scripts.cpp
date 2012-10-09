@@ -50,6 +50,7 @@ go_large_gjalerbron_cage
 go_veil_skith_cage
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 /*######

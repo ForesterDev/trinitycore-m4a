@@ -23,6 +23,7 @@ SDComment: Doors missing in instance script.
 SDCategory: Scholomance
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "scholomance.h"
 

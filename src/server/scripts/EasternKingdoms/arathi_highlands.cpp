@@ -27,6 +27,7 @@ EndScriptData */
 npc_professor_phizzlethorpe
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "ScriptedEscortAI.h"
 

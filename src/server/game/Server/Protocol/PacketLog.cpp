@@ -15,7 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "gamePCH.h"
+#include "stdafx.hpp"
 #include "PacketLog.h"
 #include "Config.h"
 #include "ByteBuffer.h"

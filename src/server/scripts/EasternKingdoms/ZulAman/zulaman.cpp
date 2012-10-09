@@ -27,6 +27,7 @@ EndScriptData */
 npc_forest_frog
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "zulaman.h"
 

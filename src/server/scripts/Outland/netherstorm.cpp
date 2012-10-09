@@ -32,6 +32,7 @@ npc_maxx_a_million
 go_captain_tyralius_prison
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "ScriptedEscortAI.h"
 

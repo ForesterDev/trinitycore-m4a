@@ -22,6 +22,7 @@ SDComment: Some Problems with Annhylde Movement, Blizzlike Timers (just shadow a
 SDCategory: Udgarde Keep
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "utgarde_keep.h"
 
