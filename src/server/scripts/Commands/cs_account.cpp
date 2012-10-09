@@ -22,7 +22,7 @@ Comment: All account related commands
 Category: commandscripts
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "AccountMgr.h"
 #include "Chat.h"

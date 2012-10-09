@@ -23,6 +23,7 @@ SDComment: VERIFY SCRIPT
 SDCategory: Naxxramas
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "naxxramas.h"
 

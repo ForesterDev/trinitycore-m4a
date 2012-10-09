@@ -9,6 +9,7 @@ SDComment:
 SDCategory: Npc
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "ScriptedEscortAI.h"
 #include "Group.h"

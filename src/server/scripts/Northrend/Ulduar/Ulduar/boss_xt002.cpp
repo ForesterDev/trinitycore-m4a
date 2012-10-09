@@ -23,7 +23,7 @@
         Codestyle
 */
 
-#include "ScriptPCH.h"
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellScript.h"

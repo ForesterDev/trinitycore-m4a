@@ -23,6 +23,7 @@ SDComment: sound not implemented
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 #define SOUND_SENTENCE_YOU 8588

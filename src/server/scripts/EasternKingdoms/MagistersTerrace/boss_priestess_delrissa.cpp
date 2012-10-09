@@ -23,6 +23,7 @@ SDComment: No Heroic support yet. Needs further testing. Several scripts for pet
 SDCategory: Magister's Terrace
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "magisters_terrace.h"
 

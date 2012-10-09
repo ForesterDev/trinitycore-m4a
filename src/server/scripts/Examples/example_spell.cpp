@@ -22,6 +22,7 @@
  * and `ScriptName` is the name of a script assigned on registration
  */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "SpellAuras.h"
 #include "SpellAuraEffects.h"

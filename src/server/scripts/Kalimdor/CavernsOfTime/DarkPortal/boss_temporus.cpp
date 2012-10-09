@@ -23,6 +23,7 @@ SDComment: More abilities need to be implemented
 SDCategory: Caverns of Time, The Dark Portal
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "dark_portal.h"
 

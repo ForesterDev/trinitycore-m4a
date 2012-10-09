@@ -17,7 +17,7 @@
 
 //TODO: Harpoon chain from 62505 should not get removed when other chain is applied
 
-#include "ScriptPCH.h"
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"

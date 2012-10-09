@@ -16,7 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "sharedPCH.h"
+#include "stdafx.hpp"
 #include "Config.h"
 #include <ace/Auto_Ptr.h>
 #include <ace/Configuration_Import_Export.h>

@@ -131,13 +131,13 @@ MACRO(_PCH_GET_TARGET_COMPILE_FLAGS _cflags  _header_name _pch_path _dowarn )
     # if you have different versions of the headers for different build types
     # you may set _pch_dowarn
     IF (_dowarn)
-      SET(${_cflags} "${PCH_ADDITIONAL_COMPILER_FLAGS} -include ${CMAKE_CURRENT_BINARY_DIR}/${_header_name} -Winvalid-pch " )
+      SET(${_cflags} "${PCH_ADDITIONAL_COMPILER_FLAGS} -D USE_PRECOMPILED_HEADERS -include ${CMAKE_CURRENT_BINARY_DIR}/${_header_name} -Winvalid-pch " )
     ELSE (_dowarn)
-      SET(${_cflags} "${PCH_ADDITIONAL_COMPILER_FLAGS} -include ${CMAKE_CURRENT_BINARY_DIR}/${_header_name} " )
+      SET(${_cflags} "${PCH_ADDITIONAL_COMPILER_FLAGS} -D USE_PRECOMPILED_HEADERS -include ${CMAKE_CURRENT_BINARY_DIR}/${_header_name} " )
     ENDIF (_dowarn)
   ELSE(CMAKE_COMPILER_IS_GNUCXX)
 
-    set(${_cflags} "/Fp${_native_pch_path} /Yu${_header_name}" )
+    set(${_cflags} "/Fp${_native_pch_path} /Yu${_header_name} /DUSE_PRECOMPILED_HEADERS" )
 
   ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
@@ -281,7 +281,7 @@ MACRO(ADD_NATIVE_PRECOMPILED_HEADER _targetName _input)
         SET(oldProps "")
     endif(${oldProps} MATCHES NOTFOUND)
 
-    SET(newProperties "${oldProps} /Yu\"${_input}.h\" /FI\"${_input}.h\"")
+    SET(newProperties "${oldProps} /Yu\"${_input}.h\" /DUSE_PRECOMPILED_HEADERS /FI\"${_input}.h\"")
     SET_TARGET_PROPERTIES(${_targetName} PROPERTIES COMPILE_FLAGS "${newProperties}")
 
     #also inlude ${oldProps} to have the same compile options
@@ -316,7 +316,7 @@ ENDMACRO(ADD_NATIVE_PRECOMPILED_HEADER)
 
 function(set_precompiled_header TARGET FILENAME SOURCE)
     if(MSVC)
-        set_target_properties(${TARGET} PROPERTIES COMPILE_FLAGS "/Yu\"${FILENAME}\"")
+        set_target_properties(${TARGET} PROPERTIES COMPILE_FLAGS "/Yu\"${FILENAME}\" /DUSE_PRECOMPILED_HEADERS")
         set_source_files_properties(${SOURCE} PROPERTIES COMPILE_FLAGS "/Yc")
     endif(MSVC)
 endfunction(set_precompiled_header)
@@ -324,7 +324,7 @@ endfunction(set_precompiled_header)
 function(set_ignore_precompiled_header SOURCES)
     if(MSVC)
         foreach(SOURCE ${SOURCES})
-            set_source_files_properties(${SOURCE} PROPERTIES COMPILE_FLAGS "/Y-")
+            set_source_files_properties(${SOURCE} PROPERTIES COMPILE_FLAGS "/Y- /UUSE_PRECOMPILED_HEADERS")
         endforeach(SOURCE)
     endif(MSVC)
 endfunction(set_ignore_precompiled_header)

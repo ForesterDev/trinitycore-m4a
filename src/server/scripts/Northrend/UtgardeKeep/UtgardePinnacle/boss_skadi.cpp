@@ -25,6 +25,7 @@ SDComment: <Known Bugs>
 SDCategory: Utgarde Pinnacle
 Script Data End */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "utgarde_pinnacle.h"
 

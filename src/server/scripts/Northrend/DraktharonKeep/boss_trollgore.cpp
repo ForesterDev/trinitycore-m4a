@@ -19,6 +19,7 @@
  * Comment: TODO: spawn troll waves
  */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "drak_tharon_keep.h"
 

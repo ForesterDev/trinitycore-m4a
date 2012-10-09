@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Razorfen Downs
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 #define SAY_AGGRO               -1129000

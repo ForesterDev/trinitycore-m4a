@@ -29,6 +29,7 @@ npc_thrall_old_hillsbrad
 npc_taretha
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "ScriptedEscortAI.h"
 #include "old_hillsbrad.h"

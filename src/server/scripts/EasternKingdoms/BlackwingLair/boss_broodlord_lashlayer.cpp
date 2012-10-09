@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Blackwing Lair
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 enum Say
 {

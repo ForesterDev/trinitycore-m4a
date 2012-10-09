@@ -23,6 +23,7 @@ SDComment: TODO: Intro, consecutive attacks to a random target durin time wrap, 
 SDCategory:
 Script Data End */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "culling_of_stratholme.h"
 

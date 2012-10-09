@@ -22,6 +22,7 @@ SDComment:
 SDCategory: Utgarde Keep
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "utgarde_keep.h"
 

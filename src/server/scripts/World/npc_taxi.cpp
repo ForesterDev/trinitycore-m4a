@@ -24,6 +24,7 @@ SDCategory: NPCs
 EndScriptData
 */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 #define GOSSIP_SUSURRUS         "I am ready."

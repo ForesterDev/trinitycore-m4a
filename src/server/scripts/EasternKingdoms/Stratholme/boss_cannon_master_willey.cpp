@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Stratholme
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 //front, left

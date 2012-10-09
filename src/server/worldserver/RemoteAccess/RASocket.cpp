@@ -20,7 +20,7 @@
     \ingroup Trinityd
 */
 
-#include "worldPCH.h"
+#include "stdafx.hpp"
 #include "Common.h"
 #include "Configuration/Config.h"
 #include "Database/DatabaseEnv.h"

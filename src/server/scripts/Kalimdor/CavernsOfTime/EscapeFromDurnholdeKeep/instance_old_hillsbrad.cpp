@@ -23,6 +23,7 @@ SDComment: If thrall escort fail, all parts will reset. In future, save sub-part
 SDCategory: Caverns of Time, Old Hillsbrad Foothills
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "old_hillsbrad.h"
 

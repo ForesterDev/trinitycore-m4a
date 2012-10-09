@@ -15,7 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "stdafx.hpp"
+#include <boost/numeric/conversion/cast.hpp>
 #include "ObjectMgr.h"
 #include <Spell.h>
 #include <ThreatManager.h>

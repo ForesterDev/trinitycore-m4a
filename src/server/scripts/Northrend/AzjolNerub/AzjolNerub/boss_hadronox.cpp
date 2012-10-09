@@ -28,6 +28,7 @@
 * Hadronox to make his way to you. When Hadronox enters the main room, she will web the doors, and no more non-elites will spawn.
 */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "azjol_nerub.h"
 

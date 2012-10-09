@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Gruul's Lair
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "gruuls_lair.h"
 

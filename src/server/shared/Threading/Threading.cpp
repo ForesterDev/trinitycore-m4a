@@ -16,7 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "sharedPCH.h"
+#include "stdafx.hpp"
 #include "Threading.h"
 #include "Debugging/Errors.h"
 #include <ace/OS_NS_unistd.h>

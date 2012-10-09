@@ -23,6 +23,7 @@ SDComment: Massive Geyser with knockback not working. Spell buggy.
 SDCategory: Zul'Gurub
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 #define SPELL_FROSTBREATH            16099

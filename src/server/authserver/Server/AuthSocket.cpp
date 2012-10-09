@@ -16,11 +16,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "authPCH.h"
+#include "stdafx.hpp"
 #include <algorithm>
 #include <openssl/md5.h>
 
-#include "authPCH.h"
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "ByteBuffer.h"

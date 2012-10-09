@@ -30,6 +30,7 @@ item_gor_dreks_ointment(i30175)     Protecting Our Own(q10488)
 item_only_for_flight                Items which should only useable while flying
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "Spell.h"
 

@@ -13,22 +13,15 @@
 file(GLOB_RECURSE sources_authentication Authentication/*.cpp Authentication/*.h)
 file(GLOB_RECURSE sources_realms Realms/*.cpp Realms/*.h)
 file(GLOB_RECURSE sources_server Server/*.cpp Server/*.h)
-file(GLOB sources_localdir *.cpp *.h)
+file(GLOB sources_localdir *.cpp *.h *.hpp)
 
 if( USE_COREPCH )
   include_directories(${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
-if ( USE_COREPCH AND MSVC )
-  set(authserver_SRCS
-    PrecompiledHeaders/authPCH.cpp
-    PrecompiledHeaders/authPCH.h
-  )
-endif()
-
 set(authserver_SRCS
-  ${authserver_SRCS}
   ${sources_authentication}
+  PrecompiledHeaders/authPCH.h
   ${sources_realms}
   ${sources_server}
   ${sources_localdir}
@@ -40,10 +33,14 @@ set(authserver_SRCS
     ${sources_Debugging}
     authserver.rc
 )
-set_ignore_precompiled_header(${sources_Debugging})
 endif()
 
 include_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/Authentication
+  ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders
+  ${CMAKE_CURRENT_SOURCE_DIR}/Realms
+  ${CMAKE_CURRENT_SOURCE_DIR}/Server
   ${CMAKE_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/src/server/shared
   ${CMAKE_SOURCE_DIR}/src/server/shared/Database
@@ -54,11 +51,6 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/shared/Logging
   ${CMAKE_SOURCE_DIR}/src/server/shared/Threading
   ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}/Authentication
-  ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders
-  ${CMAKE_CURRENT_SOURCE_DIR}/Realms
-  ${CMAKE_CURRENT_SOURCE_DIR}/Server
   ${ACE_INCLUDE_DIR}
   ${MYSQL_INCLUDE_DIR}
   ${OPENSSL_INCLUDE_DIR}
@@ -112,10 +104,10 @@ endif()
 # Generate precompiled header
 if( USE_COREPCH )
   if(CMAKE_COMPILER_IS_GNUCXX)
-    add_precompiled_header(authserver ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/authPCH.h)
+    add_precompiled_header(authserver ${CMAKE_CURRENT_SOURCE_DIR}/stdafx.hpp)
   elseif(MSVC)
-    set_precompiled_header(authserver "authPCH.h"
-      "${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/authPCH.cpp")
+    set_precompiled_header(authserver "stdafx.hpp"
+      "${CMAKE_CURRENT_SOURCE_DIR}/stdafx.cpp")
   endif()
 endif()
 

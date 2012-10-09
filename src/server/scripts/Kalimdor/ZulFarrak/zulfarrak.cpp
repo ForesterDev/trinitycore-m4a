@@ -28,6 +28,7 @@ npc_sergeant_bly
 npc_weegli_blastfuse
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "zulfarrak.h"
 

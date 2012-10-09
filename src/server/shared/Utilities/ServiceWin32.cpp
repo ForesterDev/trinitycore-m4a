@@ -16,7 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "sharedPCH.h"
+#include "stdafx.hpp"
 
 #ifdef _WIN32
 

@@ -33,6 +33,7 @@ npc_trollbane
 npc_wounded_blood_elf
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "ScriptedEscortAI.h"
 

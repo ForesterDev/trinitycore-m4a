@@ -20,6 +20,7 @@
  * Scriptnames in this file should be prefixed with "spell_#holidayname_".
  */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 // 45102 Romantic Picnic

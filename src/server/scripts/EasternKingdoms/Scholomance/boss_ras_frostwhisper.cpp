@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Scholomance
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 #define SPELL_FROSTBOLT         21369

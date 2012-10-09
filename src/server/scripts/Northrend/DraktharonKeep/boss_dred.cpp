@@ -19,6 +19,7 @@
  * Comment: MAYBE need more improve the "Raptor Call".
  */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "drak_tharon_keep.h"
 

@@ -29,6 +29,7 @@ EndScriptData */
 // Snakes - miss the 1-hitkill from emerging
 //        - visual changes between mobile and stationary models seems not to work sometimes
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "trial_of_the_crusader.h"
 

@@ -23,6 +23,7 @@ SDComment: Short custom scripting example
 SDCategory: Script Examples
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 // **** This script is designed as an example for others to build on ****

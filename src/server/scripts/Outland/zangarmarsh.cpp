@@ -32,6 +32,7 @@ npc_kayra_longmane
 npc_timothy_daniels
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "ScriptedEscortAI.h"
 

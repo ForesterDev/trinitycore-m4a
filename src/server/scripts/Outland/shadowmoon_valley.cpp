@@ -40,6 +40,7 @@ go_crystal_prison
 npc_enraged_spirit
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "ScriptedEscortAI.h"
 #include "Group.h"

@@ -28,6 +28,7 @@ npc_mikhail
 npc_tapoke_slim_jahn
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "ScriptedEscortAI.h"
 

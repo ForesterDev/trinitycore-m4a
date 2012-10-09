@@ -23,6 +23,7 @@ SDComment: Instance Data for Sethekk Halls instance
 SDCategory: Auchindoun, Sethekk Halls
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "sethekk_halls.h"
 

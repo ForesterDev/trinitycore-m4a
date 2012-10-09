@@ -16,7 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "collisionPCH.h"
+#include "stdafx.hpp"
 #include "DynamicTree.h"
 //#include "QuadTree.h"
 //#include "RegularGrid.h"

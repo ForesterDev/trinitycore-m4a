@@ -23,6 +23,7 @@ SDComment: Missing adds, missing waypoints to move up to Thrall once spawned + s
 SDCategory: Caverns of Time, Old Hillsbrad Foothills
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "old_hillsbrad.h"
 

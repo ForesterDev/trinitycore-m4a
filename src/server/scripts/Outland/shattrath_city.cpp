@@ -34,6 +34,7 @@ npc_ishanah
 npc_khadgar
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "ScriptedEscortAI.h"
 

@@ -28,6 +28,7 @@ boss_harbinger_skyriss
 boss_harbinger_skyriss_illusion
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "arcatraz.h"
 

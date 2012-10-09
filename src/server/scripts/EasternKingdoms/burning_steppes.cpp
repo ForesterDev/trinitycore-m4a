@@ -27,6 +27,7 @@ EndScriptData */
 npc_ragged_john
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 /*######

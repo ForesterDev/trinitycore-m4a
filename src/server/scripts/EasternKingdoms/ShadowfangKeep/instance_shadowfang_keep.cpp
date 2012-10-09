@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Shadowfang Keep
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "shadowfang_keep.h"
 

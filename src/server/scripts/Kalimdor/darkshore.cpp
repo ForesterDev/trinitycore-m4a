@@ -29,7 +29,7 @@ npc_prospector_remtravel
 npc_threshwackonator
 EndContentData */
 
-#include "ScriptPCH.h"
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"

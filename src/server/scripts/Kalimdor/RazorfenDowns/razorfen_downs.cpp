@@ -27,6 +27,7 @@ EndScriptData */
 npc_henry_stern
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "razorfen_downs.h"
 

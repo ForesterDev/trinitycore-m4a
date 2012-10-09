@@ -27,6 +27,7 @@ EndScriptData */
 npc_deathly_usher
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 
 /*######

@@ -20,7 +20,7 @@
     \ingroup Trinityd
 */
 
-#include "worldPCH.h"
+#include "stdafx.hpp"
 #include <ace/Sig_Handler.h>
 
 #include "Common.h"

@@ -16,7 +16,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "gamePCH.h"
+#include "stdafx.hpp"
+#include <boost/math/special_functions/round.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 #include "Common.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"

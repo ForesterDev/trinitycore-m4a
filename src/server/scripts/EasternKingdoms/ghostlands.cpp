@@ -30,6 +30,7 @@ npc_rathis_tomber
 npc_ranger_lilatha
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "ScriptedEscortAI.h"
 

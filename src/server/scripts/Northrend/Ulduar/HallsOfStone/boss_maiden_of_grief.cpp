@@ -23,6 +23,7 @@ SDComment:
 SDCategory:
 Script Data End */
 
+#include "stdafx.hpp"
 #include "ScriptPCH.h"
 #include "halls_of_stone.h"
 
