@@ -23992,6 +23992,14 @@ void Player::RemoveRunesByAuraEffect(AuraEffect const* aura)
     }
 }
 
+bool Player::has_runes_with_aura_effect(const AuraEffect *effect) const
+{
+    for (int i = 0; i < MAX_RUNES; ++i)
+        if (m_runes->runes[i].ConvertAura == effect)
+            return true;
+    return false;
+}
+
 void Player::RestoreBaseRune(uint8 index)
 {
     AuraEffect const* aura = m_runes->runes[index].ConvertAura;

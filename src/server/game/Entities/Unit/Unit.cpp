@@ -3364,6 +3364,11 @@ void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMo
         ModifyAuraState(auraState, false);
 
     aura->HandleAuraSpecificMods(aurApp, caster, false, false);
+    if (getClass() == CLASS_DEATH_KNIGHT)
+        if (auto player = dynamic_cast<const Player *>(this))
+            for (auto i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                if (auto effect = aura->GetEffect(i))
+                    ASSERT(!player->has_runes_with_aura_effect(effect));
 
     // only way correctly remove all auras from list
     //if (removedAuras != m_removedAurasCount) new aura may be added
