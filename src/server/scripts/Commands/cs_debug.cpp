@@ -264,27 +264,26 @@ public:
             unit = player;
 
         std::ifstream ifs("opcode.txt");
-        if (ifs.bad())
+        if (!ifs.is_open())
+        {
+            std::perror("error while opening opcode.txt");
             return false;
+        }
 
         // remove comments from file
         std::stringstream parsedStream;
-        while (!ifs.eof())
+        char commentToken[2];
+        while (ifs.get(commentToken[0]))
         {
-            char commentToken[2];
-            ifs.get(commentToken[0]);
-            if (commentToken[0] == '/' && !ifs.eof())
+            if (commentToken[0] == '/' && ifs.get(commentToken[1]))
             {
-                ifs.get(commentToken[1]);
                 // /* comment
                 if (commentToken[1] == '*')
                 {
-                    while (!ifs.eof())
+                    while (ifs.get(commentToken[0]))
                     {
-                        ifs.get(commentToken[0]);
-                        if (commentToken[0] == '*' && !ifs.eof())
+                        if (commentToken[0] == '*' && ifs.get(commentToken[1]))
                         {
-                            ifs.get(commentToken[1]);
                             if (commentToken[1] == '/')
                                 break;
                             else
@@ -306,56 +305,61 @@ public:
             }
             parsedStream.put(commentToken[0]);
         }
+        if (ifs.bad())
+        {
+            std::perror("error while reading opcode.txt");
+            ifs.close();
+            return false;
+        }
         ifs.close();
 
-        uint32 opcode;
-        parsedStream >> opcode;
+        uint16 opcode;
+        if (!(parsedStream >> opcode))
+            return false;
 
         WorldPacket data(opcode, 0);
 
-        while (!parsedStream.eof())
+        std::string type;
+        while (parsedStream >> type)
         {
-            std::string type;
-            parsedStream >> type;
-
             if (type == "")
                 break;
 
             if (type == "uint8")
             {
                 uint16 val1;
-                parsedStream >> val1;
-                data << uint8(val1);
+                if (parsedStream >> val1)
+                    data << uint8(val1);
             }
             else if (type == "uint16")
             {
                 uint16 val2;
-                parsedStream >> val2;
-                data << val2;
+                if (parsedStream >> val2)
+                    data << val2;
             }
             else if (type == "uint32")
             {
                 uint32 val3;
-                parsedStream >> val3;
-                data << val3;
+                if (parsedStream >> val3)
+                    data << val3;
             }
             else if (type == "uint64")
             {
                 uint64 val4;
-                parsedStream >> val4;
-                data << val4;
+                if (parsedStream >> val4)
+                    data << val4;
             }
             else if (type == "float")
             {
                 float val5;
-                parsedStream >> val5;
-                data << val5;
+                if (parsedStream >> val5)
+                    data << val5;
             }
             else if (type == "string")
             {
                 std::string val6;
-                parsedStream >> val6;
-                data << val6;
+                if (parsedStream >> val6)
+                    data << val6;
             }
             else if (type == "appitsguid")
             {
@@ -372,7 +376,6 @@ public:
                 {
                     handler->PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, 0);
                     handler->SetSentErrorMessage(true);
-                    ifs.close();
                     return false;
                 }
                 data.append(obj->GetPackGUID());
@@ -384,7 +387,6 @@ public:
                 {
                     handler->PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, 0);
                     handler->SetSentErrorMessage(true);
-                    ifs.close();
                     return false;
                 }
                 data << uint64(obj->GetGUID());
@@ -414,6 +416,11 @@ public:
                 sLog->outError("Sending opcode that has unknown type '%s'", type.c_str());
                 break;
             }
+        }
+        if (parsedStream.bad())
+        {
+            std::perror("error while reading opcode.txt");
+            return false;
         }
         sLog->outDebug(LOG_FILTER_NETWORKIO, "Sending opcode %u", data.GetOpcode());
         data.hexlike();
