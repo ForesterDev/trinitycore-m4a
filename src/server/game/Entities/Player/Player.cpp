@@ -18468,7 +18468,7 @@ InstancePlayerBind* Player::GetBoundInstance(const MapEntry &map_entry, Difficul
 
 InstancePlayerBind* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty)
 {
-    if (auto map_entry = sMapStore.LookupEntry(GetMapId()))
+    if (auto map_entry = sMapStore.LookupEntry(mapid))
         return GetBoundInstance(*map_entry, difficulty);
     return nullptr;
 }
