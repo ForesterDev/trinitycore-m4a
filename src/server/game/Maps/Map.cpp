@@ -60,6 +60,22 @@ u_map_magic MapLiquidMagic  = { {'M','L','I','Q'} };
 
 GridState* si_GridStates[MAX_GRID_STATE];
 
+instance_difficulty make_instance_difficulty(const MapEntry &map_entry, Difficulty difficulty)
+{
+    instance_difficulty instance_difficulty_;
+    if (map_entry.unk_330 & MapEntry::dynamic_bit && map_entry.IsRaid())
+    {
+        instance_difficulty_.player_difficulty = difficulty >= RAID_DIFFICULTY_10MAN_HEROIC ? 1 : 0;
+        instance_difficulty_.difficulty = instance_difficulty_.player_difficulty == 1 ? static_cast<Difficulty>(difficulty - 2) : difficulty;
+    }
+    else
+    {
+        instance_difficulty_.difficulty = difficulty;
+        instance_difficulty_.player_difficulty = int();
+    }
+    return instance_difficulty_;
+}
+
 Map::~Map()
 {
     sScriptMgr->OnDestroyMap(this);
@@ -237,21 +253,7 @@ i_scriptLock(false)
             setNGrid(NULL, idx, j);
         }
     }
-    if (i_mapEntry->unk_330 & MapEntry::dynamic_bit)
-    {
-        if (IsNonRaidDungeon())
-            difficulty_ = DUNGEON_DIFFICULTY_NORMAL;
-        else if (IsRaid())
-            difficulty_ = Is25ManRaid() ? RAID_DIFFICULTY_25MAN_NORMAL : RAID_DIFFICULTY_10MAN_NORMAL;
-        else
-            difficulty_ = SpawnMode;
-        dynamic_difficulty_ = IsHeroic() ? 1 : 0;
-    }
-    else
-    {
-        difficulty_ = SpawnMode;
-        dynamic_difficulty_ = 0;
-    }
+    instance_difficulty_ = make_instance_difficulty(*i_mapEntry, GetDifficulty());
 
     //lets initialize visibility distance for map
     Map::InitVisibilityDistance();
@@ -2458,11 +2460,11 @@ bool InstanceMap::AddPlayerToMap(Player* player)
             if (!mapSave)
             {
                 sLog->outDetail("InstanceMap::Add: creating instance save for map %d spawnmode %d with instance id %d", GetId(), GetSpawnMode(), GetInstanceId());
-                mapSave = sInstanceSaveMgr->AddInstanceSave(GetId(), GetInstanceId(), Difficulty(GetSpawnMode()), 0, true);
+                mapSave = sInstanceSaveMgr->AddInstanceSave(GetId(), GetInstanceId(), get_instance_difficulty().difficulty, 0, true);
             }
 
             // check for existing instance binds
-            InstancePlayerBind* playerBind = player->GetBoundInstance(GetId(), Difficulty(GetSpawnMode()));
+            InstancePlayerBind* playerBind = GetEntry() ? player->GetBoundInstance(*GetEntry(), Difficulty(GetSpawnMode())) : nullptr;
             if (playerBind && playerBind->perm)
             {
                 // cannot enter other instances if bound permanently
@@ -2957,6 +2959,51 @@ void Map::DeleteRespawnTimesInDB(uint16 mapId, uint32 instanceId)
     stmt->setUInt16(0, mapId);
     stmt->setUInt32(1, instanceId);
     CharacterDatabase.Execute(stmt);
+}
+
+instance_difficulty Map::get_instance_difficulty() const
+{
+    return instance_difficulty_;
+}
+
+void Map::change_player_difficulty(int player_difficulty)
+{
+    for (auto &ref : *this)
+    {
+        auto &ngrid = *ref.getSource();
+
+        {
+            ObjectGridCleaner worker;
+            TypeContainerVisitor<ObjectGridCleaner, GridTypeMapContainer> visitor(worker);
+            ngrid.VisitAllGrids(visitor);
+        }
+
+        RemoveAllObjectsInRemoveList();
+
+        {
+            ObjectGridUnloader worker;
+            TypeContainerVisitor<ObjectGridUnloader, GridTypeMapContainer> visitor(worker);
+            ngrid.VisitAllGrids(visitor);
+        }
+
+        ASSERT(i_objectsToRemove.empty());
+    }
+
+    instance_difficulty_.player_difficulty = player_difficulty;
+    i_spawnMode = instance_difficulty_.difficulty + 2 * player_difficulty;
+
+    for (auto &ref : *this)
+    {
+        auto grid = ref.getSource();
+        Cell cell;
+        cell.data.Part.grid_x = grid->getX();
+        cell.data.Part.grid_y = grid->getY();
+        ObjectGridLoader loader(*grid, this, cell);
+        loader.LoadN();
+    }
+
+    for (auto &ref : m_mapRefManager)
+        ref.getSource()->UpdateObjectVisibility(true);
 }
 
 time_t Map::GetLinkedRespawnTime(uint64 guid) const

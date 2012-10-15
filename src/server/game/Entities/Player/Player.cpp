@@ -18451,18 +18451,26 @@ void Player::_LoadBoundInstances(PreparedQueryResult result)
     }
 }
 
-InstancePlayerBind* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty)
+InstancePlayerBind* Player::GetBoundInstance(const MapEntry &map_entry, Difficulty difficulty)
 {
+    difficulty = make_instance_difficulty(map_entry, difficulty).difficulty;
     // some instances only have one difficulty
-    MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(mapid, difficulty);
+    MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(map_entry.MapID, difficulty);
     if (!mapDiff)
         return NULL;
 
-    BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
+    BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(map_entry.MapID);
     if (itr != m_boundInstances[difficulty].end())
         return &itr->second;
     else
         return NULL;
+}
+
+InstancePlayerBind* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty)
+{
+    if (auto map_entry = sMapStore.LookupEntry(GetMapId()))
+        return GetBoundInstance(*map_entry, difficulty);
+    return nullptr;
 }
 
 InstanceSave* Player::GetInstanceSave(uint32 mapid, bool raid)
@@ -19912,45 +19920,46 @@ void Player::ResetInstances(uint8 method, bool isRaid)
     // we assume that when the difficulty changes, all instances that can be reset will be
     Difficulty diff = GetDifficulty(isRaid);
 
-    for (BoundInstancesMap::iterator itr = m_boundInstances[diff].begin(); itr != m_boundInstances[diff].end();)
-    {
-        InstanceSave* p = itr->second.save;
-        const MapEntry* entry = sMapStore.LookupEntry(itr->first);
-        if (!entry || entry->IsRaid() != isRaid || !p->CanReset())
+    for (auto i = 0; i < MAX_DIFFICULTY; ++i)
+        for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end();)
         {
-            ++itr;
-            continue;
-        }
-
-        if (method == INSTANCE_RESET_ALL)
-        {
-            // the "reset all instances" method can only reset normal maps
-            if (entry->map_type == MAP_RAID || diff == DUNGEON_DIFFICULTY_HEROIC)
-            {
-                ++itr;
-                continue;
-            }
-        }
-
-        // if the map is loaded, reset it
-        Map* map = sMapMgr->FindMap(p->GetMapId(), p->GetInstanceId());
-        if (map && map->IsDungeon())
-            if (!((InstanceMap*)map)->Reset(method))
+            InstanceSave* p = itr->second.save;
+            const MapEntry* entry = sMapStore.LookupEntry(itr->first);
+            if (!entry || entry->IsRaid() != isRaid || make_instance_difficulty(*entry, diff).difficulty != i || !p->CanReset())
             {
                 ++itr;
                 continue;
             }
 
-        // since this is a solo instance there should not be any players inside
-        if (method == INSTANCE_RESET_ALL || method == INSTANCE_RESET_CHANGE_DIFFICULTY)
-            SendResetInstanceSuccess(p->GetMapId());
+            if (method == INSTANCE_RESET_ALL)
+            {
+                // the "reset all instances" method can only reset normal maps
+                if (entry->map_type == MAP_RAID || diff == DUNGEON_DIFFICULTY_HEROIC)
+                {
+                    ++itr;
+                    continue;
+                }
+            }
 
-        p->DeleteFromDB();
-        m_boundInstances[diff].erase(itr++);
+            // if the map is loaded, reset it
+            Map* map = sMapMgr->FindMap(p->GetMapId(), p->GetInstanceId());
+            if (map && map->IsDungeon())
+                if (!((InstanceMap*)map)->Reset(method))
+                {
+                    ++itr;
+                    continue;
+                }
 
-        // the following should remove the instance save from the manager and delete it as well
-        p->RemovePlayer(this);
-    }
+            // since this is a solo instance there should not be any players inside
+            if (method == INSTANCE_RESET_ALL || method == INSTANCE_RESET_CHANGE_DIFFICULTY)
+                SendResetInstanceSuccess(p->GetMapId());
+
+            p->DeleteFromDB();
+            m_boundInstances[i].erase(itr++);
+
+            // the following should remove the instance save from the manager and delete it as well
+            p->RemovePlayer(this);
+        }
 }
 
 void Player::SendResetInstanceSuccess(uint32 MapId)
@@ -22331,8 +22340,8 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     // SMSG_INSTANCE_DIFFICULTY
     data.Initialize(SMSG_INSTANCE_DIFFICULTY, 4+4);
-    data << int32(GetMap()->difficulty());
-    data << int32(GetMap()->dynamic_difficulty());
+    data << int32(GetMap()->get_instance_difficulty().difficulty);
+    data << int32(GetMap()->get_instance_difficulty().player_difficulty);
     GetSession()->SendPacket(&data);
 
     SendInitialSpells();

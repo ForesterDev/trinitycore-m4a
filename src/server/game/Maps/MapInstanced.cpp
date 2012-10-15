@@ -142,7 +142,7 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
     }
     else
     {
-        InstancePlayerBind* pBind = player->GetBoundInstance(GetId(), player->GetDifficulty(IsRaid()));
+        InstancePlayerBind* pBind = GetEntry() ? player->GetBoundInstance(*GetEntry(), player->GetDifficulty(IsRaid())) : nullptr;
         InstanceSave* pSave = pBind ? pBind->save : NULL;
 
         // the player's permanent player bind is taken into consideration first
@@ -159,6 +159,7 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
                     pSave = groupBind->save;
             }
         }
+        Difficulty diff = player->GetGroup() ? player->GetGroup()->GetDifficulty(IsRaid()) : player->GetDifficulty(IsRaid());
         if (pSave)
         {
             // solo/perm/group
@@ -166,7 +167,7 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
             map = FindInstanceMap(newInstanceId);
             // it is possible that the save exists but the map doesn't
             if (!map)
-                map = CreateInstance(newInstanceId, pSave, pSave->GetDifficulty());
+                map = CreateInstance(newInstanceId, pSave, diff);
         }
         else
         {
@@ -174,7 +175,6 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
             // the instance will be created for the first time
             newInstanceId = sMapMgr->GenerateInstanceId();
 
-            Difficulty diff = player->GetGroup() ? player->GetGroup()->GetDifficulty(IsRaid()) : player->GetDifficulty(IsRaid());
             //Seems it is now possible, but I do not know if it should be allowed
             //ASSERT(!FindInstanceMap(NewInstanceId));
             map = FindInstanceMap(newInstanceId);

@@ -1717,6 +1717,60 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket & recv_data)
     }
 }
 
+void WorldSession::handle_changeplayer_difficulty(WorldPacket &recvPacket)
+{
+    sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_CHANGEPLAYER_DIFFICULTY");
+    std::int32_t player_difficulty;
+    recvPacket >> player_difficulty;
+    if (player_difficulty < 0 || player_difficulty > 1)
+        return;
+    auto map = _player->GetMap();
+    if (!map || !map->IsRaid())
+        return;
+    auto difficulty = map->get_instance_difficulty().difficulty + 2 * player_difficulty;
+    if (difficulty >= MAX_DIFFICULTY)
+        return;
+    auto map_difficulty = GetMapDifficultyData(map->GetId(), Difficulty(difficulty));
+    if (!map_difficulty)
+        return;
+    WorldPacket result(SMSG_CHANGEPLAYER_DIFFICULTY_RESULT, 4 + 4);
+    enum
+    {
+        result_player_difficulty,
+        result_cooldown,
+        result_world_state,
+        result_encounter,
+        result_combat,
+        result_player_busy,
+        result_time,
+        result_already_started,
+        result_map_difficulty_requirement,
+        result_difficulty_changed,
+    };
+    if (auto script = static_cast<InstanceMap *>(map)->GetInstanceScript())
+        if (script->IsEncounterInProgress())
+        {
+            result << std::int32_t(result_encounter);
+            SendPacket(&result);
+            return;
+        }
+    if (!_player->Satisfy(sObjectMgr->GetAccessRequirement(map->GetId(), Difficulty(difficulty)), map->GetId()))
+    {
+        result << std::int32_t(result_map_difficulty_requirement) << std::int32_t(map_difficulty->id);
+        SendPacket(&result);
+        return;
+    }
+    result << std::int32_t(result_player_difficulty) << std::uint8_t(player_difficulty);
+    map->SendToPlayers(&result);
+    result.clear();
+    result << std::int32_t(result_time) << std::int32_t();
+    map->SendToPlayers(&result);
+    map->change_player_difficulty(int(player_difficulty));
+    result.clear();
+    result << std::int32_t(result_difficulty_changed);
+    map->SendToPlayers(&result);
+}
+
 void WorldSession::HandleCancelMountAuraOpcode(WorldPacket & /*recv_data*/)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_CANCEL_MOUNT_AURA");
