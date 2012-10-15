@@ -1485,7 +1485,7 @@ void Group::SendUpdateToPlayer(uint64 playerGUID, MemberSlot* slot)
         data << uint8(m_lootThreshold);                 // loot threshold
         data << uint8(m_dungeonDifficulty);             // Dungeon Difficulty
         data << uint8(m_raidDifficulty);                // Raid Difficulty
-        data << uint8(player->GetMap()->dynamic_difficulty());  // 3.3
+        data << uint8(player->GetMap()->get_instance_difficulty().player_difficulty);  // 3.3
     }
 
     player->GetSession()->SendPacket(&data);
@@ -1871,70 +1871,71 @@ void Group::ResetInstances(uint8 method, bool isRaid, Player* SendMsgTo)
     // we assume that when the difficulty changes, all instances that can be reset will be
     Difficulty diff = GetDifficulty(isRaid);
 
-    for (BoundInstancesMap::iterator itr = m_boundInstances[diff].begin(); itr != m_boundInstances[diff].end();)
-    {
-        InstanceSave* instanceSave = itr->second.save;
-        const MapEntry* entry = sMapStore.LookupEntry(itr->first);
-        if (!entry || entry->IsRaid() != isRaid || (!instanceSave->CanReset() && method != INSTANCE_RESET_GROUP_DISBAND))
+    for (auto i = 0; i < MAX_DIFFICULTY; ++i)
+        for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end();)
         {
-            ++itr;
-            continue;
-        }
-
-        if (method == INSTANCE_RESET_ALL)
-        {
-            // the "reset all instances" method can only reset normal maps
-            if (entry->map_type == MAP_RAID || diff == DUNGEON_DIFFICULTY_HEROIC)
+            InstanceSave* instanceSave = itr->second.save;
+            const MapEntry* entry = sMapStore.LookupEntry(itr->first);
+            if (!entry || entry->IsRaid() != isRaid || make_instance_difficulty(*entry, diff).difficulty != i || (!instanceSave->CanReset() && method != INSTANCE_RESET_GROUP_DISBAND))
             {
                 ++itr;
                 continue;
             }
-        }
 
-        bool isEmpty = true;
-        // if the map is loaded, reset it
-        Map* map = sMapMgr->FindMap(instanceSave->GetMapId(), instanceSave->GetInstanceId());
-        if (map && map->IsDungeon() && !(method == INSTANCE_RESET_GROUP_DISBAND && !instanceSave->CanReset()))
-        {
-            if (instanceSave->CanReset())
-                isEmpty = ((InstanceMap*)map)->Reset(method);
-            else
-                isEmpty = !map->HavePlayers();
-        }
-
-        if (SendMsgTo)
-        {
-            if (isEmpty)
-                SendMsgTo->SendResetInstanceSuccess(instanceSave->GetMapId());
-            else
-                SendMsgTo->SendResetInstanceFailed(0, instanceSave->GetMapId());
-        }
-
-        if (isEmpty || method == INSTANCE_RESET_GROUP_DISBAND || method == INSTANCE_RESET_CHANGE_DIFFICULTY)
-        {
-            // do not reset the instance, just unbind if others are permanently bound to it
-            if (instanceSave->CanReset())
-                instanceSave->DeleteFromDB();
-            else
+            if (method == INSTANCE_RESET_ALL)
             {
-                PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GROUP_INSTANCE_BY_INSTANCE);
-
-                stmt->setUInt32(0, instanceSave->GetInstanceId());
-
-                CharacterDatabase.Execute(stmt);
+                // the "reset all instances" method can only reset normal maps
+                if (entry->map_type == MAP_RAID || diff == DUNGEON_DIFFICULTY_HEROIC)
+                {
+                    ++itr;
+                    continue;
+                }
             }
 
+            bool isEmpty = true;
+            // if the map is loaded, reset it
+            Map* map = sMapMgr->FindMap(instanceSave->GetMapId(), instanceSave->GetInstanceId());
+            if (map && map->IsDungeon() && !(method == INSTANCE_RESET_GROUP_DISBAND && !instanceSave->CanReset()))
+            {
+                if (instanceSave->CanReset())
+                    isEmpty = ((InstanceMap*)map)->Reset(method);
+                else
+                    isEmpty = !map->HavePlayers();
+            }
 
-            // i don't know for sure if hash_map iterators
-            m_boundInstances[diff].erase(itr);
-            itr = m_boundInstances[diff].begin();
-            // this unloads the instance save unless online players are bound to it
-            // (eg. permanent binds or GM solo binds)
-            instanceSave->RemoveGroup(this);
+            if (SendMsgTo)
+            {
+                if (isEmpty)
+                    SendMsgTo->SendResetInstanceSuccess(instanceSave->GetMapId());
+                else
+                    SendMsgTo->SendResetInstanceFailed(0, instanceSave->GetMapId());
+            }
+
+            if (isEmpty || method == INSTANCE_RESET_GROUP_DISBAND || method == INSTANCE_RESET_CHANGE_DIFFICULTY)
+            {
+                // do not reset the instance, just unbind if others are permanently bound to it
+                if (instanceSave->CanReset())
+                    instanceSave->DeleteFromDB();
+                else
+                {
+                    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GROUP_INSTANCE_BY_INSTANCE);
+
+                    stmt->setUInt32(0, instanceSave->GetInstanceId());
+
+                    CharacterDatabase.Execute(stmt);
+                }
+
+
+                // i don't know for sure if hash_map iterators
+                m_boundInstances[i].erase(itr);
+                itr = m_boundInstances[i].begin();
+                // this unloads the instance save unless online players are bound to it
+                // (eg. permanent binds or GM solo binds)
+                instanceSave->RemoveGroup(this);
+            }
+            else
+                ++itr;
         }
-        else
-            ++itr;
-    }
 }
 
 InstanceGroupBind* Group::GetBoundInstance(Player* player)
@@ -1946,17 +1947,8 @@ InstanceGroupBind* Group::GetBoundInstance(Player* player)
 
 InstanceGroupBind* Group::GetBoundInstance(Map* aMap)
 {
-    // Currently spawn numbering not different from map difficulty
-    Difficulty difficulty = GetDifficulty(aMap->IsRaid());
-
-    // some instances only have one difficulty
-    GetDownscaledMapDifficultyData(aMap->GetId(), difficulty);
-
-    BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(aMap->GetId());
-    if (itr != m_boundInstances[difficulty].end())
-        return &itr->second;
-    else
-        return NULL;
+    ASSERT(aMap->GetEntry());
+    return GetBoundInstance(aMap->GetEntry());
 }
 
 InstanceGroupBind* Group::GetBoundInstance(MapEntry const* mapEntry)
@@ -1964,7 +1956,7 @@ InstanceGroupBind* Group::GetBoundInstance(MapEntry const* mapEntry)
     if (!mapEntry)
         return NULL;
 
-    Difficulty difficulty = GetDifficulty(mapEntry->IsRaid());
+    Difficulty difficulty = make_instance_difficulty(*mapEntry, GetDifficulty(mapEntry->IsRaid())).difficulty;
 
     // some instances only have one difficulty
     GetDownscaledMapDifficultyData(mapEntry->MapID, difficulty);

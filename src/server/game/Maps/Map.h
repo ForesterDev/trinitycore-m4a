@@ -19,7 +19,6 @@
 #ifndef TRINITY_MAP_H
 #define TRINITY_MAP_H
 
-#include <cstdint>
 #include "Define.h"
 #include <ace/RW_Thread_Mutex.h>
 #include <ace/Thread_Mutex.h>
@@ -235,6 +234,14 @@ enum LevelRequirementVsMode
 #define MIN_UNLOAD_DELAY      1                             // immediate unload
 
 typedef std::map<uint32/*leaderDBGUID*/, CreatureGroup*>        CreatureGroupHolderType;
+
+struct instance_difficulty
+{
+    Difficulty difficulty;
+    int player_difficulty;
+};
+
+instance_difficulty make_instance_difficulty(const MapEntry &map_entry, Difficulty difficulty);
 
 class Map : public GridRefManager<NGridType>
 {
@@ -483,15 +490,9 @@ class Map : public GridRefManager<NGridType>
 
         static void DeleteRespawnTimesInDB(uint16 mapId, uint32 instanceId);
 
-        std::int32_t difficulty() const
-        {
-            return difficulty_;
-        }
+        instance_difficulty get_instance_difficulty() const;
 
-        std::int32_t dynamic_difficulty() const
-        {
-            return dynamic_difficulty_;
-        }
+        void change_player_difficulty(int player_difficulty);
 
     private:
         void LoadMapAndVMap(int gx, int gy);
@@ -624,8 +625,7 @@ class Map : public GridRefManager<NGridType>
 
         UNORDERED_MAP<uint32 /*dbGUID*/, time_t> _creatureRespawnTimes;
         UNORDERED_MAP<uint32 /*dbGUID*/, time_t> _goRespawnTimes;
-        std::int32_t difficulty_;
-        std::int32_t dynamic_difficulty_;
+        instance_difficulty instance_difficulty_;
 };
 
 enum InstanceResetMethod

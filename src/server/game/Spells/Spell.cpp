@@ -5401,8 +5401,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                     uint32 mapId = m_caster->GetMap()->GetId();
                     Difficulty difficulty = m_caster->GetMap()->GetDifficulty();
                     if (map->IsRaid())
-                        if (InstancePlayerBind* targetBind = target->GetBoundInstance(mapId, difficulty))
-                            if (InstancePlayerBind* casterBind = m_caster->ToPlayer()->GetBoundInstance(mapId, difficulty))
+                        if (InstancePlayerBind* targetBind = target->GetBoundInstance(*map, difficulty))
+                            if (InstancePlayerBind* casterBind = m_caster->ToPlayer()->GetBoundInstance(*map, difficulty))
                                 if (targetBind->perm && targetBind->save != casterBind->save)
                                     return SPELL_FAILED_TARGET_LOCKED_TO_RAID_INSTANCE;
 

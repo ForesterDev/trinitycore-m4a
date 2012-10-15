@@ -72,6 +72,11 @@ class LinkedListElement
             iNext->iPrev = pElem;
             iNext = pElem;
         }
+
+private:
+    LinkedListElement(const LinkedListElement &right);
+
+    LinkedListElement &operator=(const LinkedListElement &right);
 };
 
 //============================================

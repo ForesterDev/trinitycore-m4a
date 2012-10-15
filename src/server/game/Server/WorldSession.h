@@ -778,6 +778,7 @@ class WorldSession
         void HandleFarSightOpcode(WorldPacket& recv_data);
         void HandleSetDungeonDifficultyOpcode(WorldPacket& recv_data);
         void HandleSetRaidDifficultyOpcode(WorldPacket& recv_data);
+        void handle_changeplayer_difficulty(WorldPacket &recvPacket);
         void HandleMoveSetCanFlyAckOpcode(WorldPacket& recv_data);
         void HandleSetTitleOpcode(WorldPacket& recv_data);
         void HandleRealmSplitOpcode(WorldPacket& recv_data);

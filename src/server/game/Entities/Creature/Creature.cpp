@@ -1157,7 +1157,8 @@ void Creature::SelectLevel(const CreatureTemplate* cinfo)
 
     SetCreateHealth(health);
     SetMaxHealth(health);
-    SetHealth(health);
+    if (isAlive())
+        SetHealth(health);
     ResetPlayerDamageReq();
 
     // mana
