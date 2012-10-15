@@ -2998,8 +2998,11 @@ void Map::change_player_difficulty(int player_difficulty)
         Cell cell;
         cell.data.Part.grid_x = grid->getX();
         cell.data.Part.grid_y = grid->getY();
-        ObjectGridLoader loader(*grid, this, cell);
-        loader.LoadN();
+        if (isGridObjectDataLoaded(cell.GridX(), cell.GridY()))
+        {
+            ObjectGridLoader loader(*grid, this, cell);
+            loader.LoadN();
+        }
     }
 
     for (auto &ref : m_mapRefManager)
