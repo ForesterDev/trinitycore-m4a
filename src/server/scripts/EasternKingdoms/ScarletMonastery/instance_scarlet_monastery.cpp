@@ -27,14 +27,6 @@ EndScriptData */
 #include "ScriptPCH.h"
 #include "scarlet_monastery.h"
 
-enum Entry
-{
-    ENTRY_PUMPKIN_SHRINE    = 186267,
-    ENTRY_HORSEMAN          = 23682,
-    ENTRY_HEAD              = 23775,
-    ENTRY_PUMPKIN           = 23694
-};
-
 #define MAX_ENCOUNTER 2
 
 class instance_scarlet_monastery : public InstanceMapScript
@@ -136,9 +128,9 @@ public:
         {
             switch (type)
             {
-                //case GAMEOBJECT_PUMPKIN_SHRINE:   return PumpkinShrineGUID;
-                //case DATA_HORSEMAN:               return HorsemanGUID;
-                //case DATA_HEAD:                   return HeadGUID;
+                case GAMEOBJECT_PUMPKIN_SHRINE:   return PumpkinShrineGUID;
+                case ENTRY_HORSEMAN:               return HorsemanGUID;
+                case ENTRY_HEAD:                   return HeadGUID;
                 case DATA_MOGRAINE:             return MograineGUID;
                 case DATA_WHITEMANE:            return WhitemaneGUID;
                 case DATA_VORREL:               return VorrelGUID;
