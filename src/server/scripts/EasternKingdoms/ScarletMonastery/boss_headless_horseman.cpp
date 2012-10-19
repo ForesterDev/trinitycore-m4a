@@ -121,15 +121,6 @@ enum Actions
    ACTION_DEATH                  = 4,
 };
 
-enum Points
-{
-  POINT_0                 = 0,
-  POINT_1                 = 1,
-  POINT_2                 = 2,
-  POINT_3                 = 3,
-  POINT_4                 = 4,
-};
-
 struct Locations
 {
     float x, y, z;
@@ -140,6 +131,7 @@ static Locations FlightPoint[]=
     {1754.00f, 1346.00f, 17.50f},
     {1765.00f, 1347.00f, 19.00f},
     {1784.00f, 1346.80f, 25.40f},
+    {1803.30f, 1347.60f, 33.00f},
     {1824.00f, 1350.00f, 42.60f},
     {1838.80f, 1353.20f, 49.80f},
     {1852.00f, 1357.60f, 55.70f},
@@ -406,13 +398,13 @@ public:
         {
             count = 0;
             pointID = 0;
+            me->SetVisible(false);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT | MOVEMENTFLAG_DISABLE_GRAVITY);
             me->SetSpeed(MOVE_WALK, 5.0f, true);
             me->SetReactState(REACT_PASSIVE);
             _events.SetPhase(PHASE_INTRO);
-            _events.ScheduleEvent(EVENT_SAY_PLAYER, 3000, 0, PHASE_INTRO);
-            
+            _events.ScheduleEvent(EVENT_SAY_PLAYER, 3000, 0, PHASE_INTRO);            
             _events.ScheduleEvent(EVENT_LAUGH, urand(25000,30000));      
 
             DoCast(me, SPELL_HEAD);
@@ -426,12 +418,16 @@ public:
 
             switch (i)
             {
+                case 0:
+                    me->SetVisible(true);
+                    DoCast(me, SPELL_RHYME_BIG);
+                    me->MonsterYell(SAY_ENTRANCE, 0,0);
+                  break;
                 case 1:
                 {
                     if (Creature* smoke = me->SummonCreature(HELPER, Spawn[1].x, Spawn[1].y, Spawn[1].z, 0, TEMPSUMMON_TIMED_DESPAWN, 20000))
                         CAST_AI(mob_wisp_invis::mob_wisp_invisAI, smoke->AI())->SetType(3);
-                    DoCast(me, SPELL_RHYME_BIG);
-                    me->MonsterYell(SAY_ENTRANCE, 0,0);
+
                     break;
                 }
                 case 6:
@@ -787,7 +783,7 @@ public:
         if (player->GetQuestStatus(11405) == QUEST_STATUS_INCOMPLETE && player->getLevel() > 64)
         { */
             player->AreaExploredOrEventHappens(11405);
-            Creature* horseman = soil->SummonCreature(HH_MOUNTED, FlightPoint[POINT_0].x, FlightPoint[POINT_0].y, FlightPoint[POINT_0].z, 0, TEMPSUMMON_MANUAL_DESPAWN, 0);             
+            Creature* horseman = soil->SummonCreature(HH_MOUNTED, FlightPoint[20].x, FlightPoint[20].y, FlightPoint[20].z, 0, TEMPSUMMON_MANUAL_DESPAWN, 0);             
         //}
         return true;
     }
