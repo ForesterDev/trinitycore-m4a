@@ -22,7 +22,6 @@
 #include "Log.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
-#include <boost/thread/locks.hpp>
 #include "ArenaTeamMgr.h"
 #include "GuildMgr.h"
 #include "GroupMgr.h"
@@ -47,9 +46,6 @@
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 #include "PoolMgr.h"
-
-using boost::unique_lock;
-using boost::mutex;
 
 ScriptMapMap sQuestEndScripts;
 ScriptMapMap sQuestStartScripts;
@@ -6200,9 +6196,11 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
         }
         case HIGHGUID_UNIT:
         {
-            unique_lock<mutex> l(hi_creature_guid_mutex);
-            ASSERT(_hiCreatureGuid < 0x00FFFFFE && "Creature guid overflow!");
-            return _hiCreatureGuid++;
+            auto guid = _hiCreatureGuid.load();
+            do
+                ASSERT(guid < 0x00FFFFFE && "Creature guid overflow!");
+            while (!_hiCreatureGuid.compare_exchange_weak(guid, guid + 1));
+            return guid;
         }
         case HIGHGUID_PET:
         {
@@ -6221,9 +6219,11 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
         }
         case HIGHGUID_GAMEOBJECT:
         {
-            unique_lock<mutex> l(hi_go_guid_mutex);
-            ASSERT(_hiGoGuid < 0x00FFFFFE && "Gameobject guid overflow!");
-            return _hiGoGuid++;
+            auto guid = _hiGoGuid.load();
+            do
+                ASSERT(guid < 0x00FFFFFE && "Gameobject guid overflow!");
+            while (!_hiGoGuid.compare_exchange_weak(guid, guid + 1));
+            return guid;
         }
         case HIGHGUID_CORPSE:
         {
@@ -6232,9 +6232,11 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
         }
         case HIGHGUID_DYNAMICOBJECT:
         {
-            unique_lock<mutex> l(hi_do_guid_mutex);
-            ASSERT(_hiDoGuid < 0xFFFFFFFE && "DynamicObject guid overflow!");
-            return _hiDoGuid++;
+            auto guid = _hiDoGuid.load();
+            do
+                ASSERT(guid < 0xFFFFFFFE && "DynamicObject guid overflow!");
+            while (!_hiDoGuid.compare_exchange_weak(guid, guid + 1));
+            return guid;
         }
         case HIGHGUID_MO_TRANSPORT:
         {

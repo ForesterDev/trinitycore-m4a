@@ -17,6 +17,7 @@
  */
 
 #include "stdafx.hpp"
+#include <mutex>
 #include "Map.h"
 #include "GridStates.h"
 #include "ScriptMgr.h"
@@ -30,17 +31,11 @@
 #include "ObjectAccessor.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
-#include "Detail/Vmap_mutex.hpp"
+#include "vmap_mutex.hpp"
 #include "Group.h"
 #include "LFGMgr.h"
 #include "DynamicTree.h"
 #include "Vehicle.h"
-
-using boost::unique_lock;
-using boost::shared_lock;
-using boost::upgrade_lock;
-using Detail::Vmap_mutex;
-using Detail::vmap_mutex;
 
 union u_map_magic
 {
@@ -126,15 +121,14 @@ bool Map::ExistVMap(uint32 mapid, int gx, int gy)
 {
     if (VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager())
     {
-        upgrade_lock<Vmap_mutex> l(vmap_mutex());
+        std::unique_lock<vmap_mutex_type> l(vmap_mutex());
         if (vmgr->isMapLoadingEnabled())
         {
-            unique_lock<Vmap_mutex> ul(move(l));
             bool exists = vmgr->existsMap((sWorld->GetDataPath()+ "vmaps").c_str(),  mapid, gx, gy);
             if (!exists)
             {
                 std::string name = vmgr->getDirFileName(mapid, gx, gy);
-                ul.unlock();
+                l.unlock();
                 sLog->outError("VMap file '%s' is missing or points to wrong version of vmap file. Redo vmaps with latest version of vmap_assembler.exe.", (sWorld->GetDataPath()+"vmaps/"+name).c_str());
                 return false;
             }
@@ -149,7 +143,7 @@ void Map::LoadVMap(int gx, int gy)
     int vmapLoadResult;
     {
         auto &m = *VMAP::VMapFactory::createOrGetVMapManager();
-        unique_lock<Vmap_mutex> l(vmap_mutex());
+        std::lock_guard<vmap_mutex_type> l(vmap_mutex());
                                                                 // x and y are swapped !!
         vmapLoadResult = m.loadMap((sWorld->GetDataPath() + "vmaps").c_str(), GetId(), gx, gy);
     }
@@ -1035,7 +1029,7 @@ bool Map::UnloadGrid(NGridType& ngrid, bool unloadAll)
                 delete GridMaps[gx][gy];
             }
             auto &m = *VMAP::VMapFactory::createOrGetVMapManager();
-            unique_lock<Vmap_mutex> l(vmap_mutex());
+            std::lock_guard<vmap_mutex_type> l(vmap_mutex());
             // x and y are swapped
             m.unloadMap(GetId(), gx, gy);
         }
@@ -1675,12 +1669,9 @@ float Map::GetHeight(float x, float y, float z, bool checkVMap /*= true*/, float
     if (checkVMap)
     {
         VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
-        upgrade_lock<Vmap_mutex> l(vmap_mutex());
+        std::lock_guard<vmap_mutex_type> l(vmap_mutex());
         if (vmgr->isHeightCalcEnabled())
-        {
-            unique_lock<Vmap_mutex> ul(move(l));
             vmapHeight = vmgr->getHeight(GetId(), x, y, z + 2.0f, maxSearchDist);   // look from a bit higher pos to find the floor
-        }
     }
 
     // mapHeight set for any above raw ground Z or <= INVALID_HEIGHT
@@ -1753,7 +1744,7 @@ bool Map::GetAreaInfo(float x, float y, float z, uint32 &flags, int32 &adtId, in
     float vmap_z = z;
     VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
     {
-        shared_lock<Vmap_mutex> l(vmap_mutex());
+        std::unique_lock<vmap_mutex_type> l(vmap_mutex());
         if (vmgr->getAreaInfo(GetId(), x, y, vmap_z, flags, adtId, rootId, groupId))
         {
             l.unlock();
@@ -1826,7 +1817,7 @@ ZLiquidStatus Map::getLiquidStatus(float x, float y, float z, uint8 ReqLiquidTyp
     float ground_level = INVALID_HEIGHT;
     uint32 liquid_type = 0;
     {
-        shared_lock<Vmap_mutex> l(vmap_mutex());
+        std::unique_lock<vmap_mutex_type> l(vmap_mutex());
         if (vmgr->GetLiquidLevel(GetId(), x, y, z, ReqLiquidType, liquid_level, ground_level, liquid_type))
         {
             l.unlock();

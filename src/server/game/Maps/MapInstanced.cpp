@@ -17,12 +17,13 @@
  */
 
 #include "stdafx.hpp"
+#include <mutex>
 #include "MapInstanced.h"
 #include "ObjectMgr.h"
 #include "MapManager.h"
 #include "Battleground.h"
 #include "VMapFactory.h"
-#include "Detail/Vmap_mutex.hpp"
+#include "vmap_mutex.hpp"
 #include "InstanceSaveMgr.h"
 #include "World.h"
 #include "Group.h"
@@ -263,7 +264,7 @@ bool MapInstanced::DestroyInstance(InstancedMaps::iterator &itr)
     {
         {
             auto &m = *VMAP::VMapFactory::createOrGetVMapManager();
-            boost::unique_lock<Detail::Vmap_mutex> l(Detail::vmap_mutex());
+            std::lock_guard<vmap_mutex_type> l(vmap_mutex());
             m.unloadMap(itr->second->GetId());
         }
         // in that case, unload grids of the base map, too

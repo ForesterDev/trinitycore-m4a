@@ -3,8 +3,10 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <atomic>
 #include <memory>
 #include <algorithm>
+#include <mutex>
 #include <stdexcept>
 #include <utility>
 #include <functional>
@@ -15,7 +17,6 @@
 #include <boost/none.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/optional/optional.hpp>
-#include <boost/thread/locks.hpp>
 #include "WorldSocket.h"        // must be first to make ACE happy with ACE includes in it
 
 #include "Common.h"
