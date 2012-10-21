@@ -20,8 +20,6 @@
 #define _PLAYER_H
 
 #include <array>
-#include <boost/signal.hpp>
-#include <boost/signals/connection.hpp>
 #include "AchievementMgr.h"
 #include "Battleground.h"
 #include "Bag.h"
@@ -1067,9 +1065,6 @@ class Player : public Unit, public GridObject<Player>
     friend void Item::AddToUpdateQueueOf(Player* player);
     friend void Item::RemoveFromUpdateQueueOf(Player* player);
     public:
-        typedef boost::signal<void (Player &player, uint32 zone_id, uint32 area_id)> Area_signal;
-        typedef boost::signals::connection Area_connection;
-
         explicit Player (WorldSession* session);
         ~Player();
 
@@ -2494,16 +2489,6 @@ class Player : public Unit, public GridObject<Player>
         float GetAverageItemLevel();
         bool isDebugAreaTriggers;
 
-        Area_connection connect_area(Area_signal::slot_function_type subscriber)
-        {
-            return area_sig.connect(std::move(subscriber));
-        }
-
-        void disconnect_area(Area_connection subscriber)
-        {
-            subscriber.disconnect();
-        }
-
         void ClearWhisperWhiteList() { WhisperList.clear(); }
         void AddWhisperWhiteList(uint64 guid) { WhisperList.push_back(guid); }
         bool IsInWhisperWhiteList(uint64 guid);
@@ -2882,12 +2867,11 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_timeSyncTimer;
         uint32 m_timeSyncClient;
         uint32 m_timeSyncServer;
-        WMO_id wmo_id_;
-        Area_signal area_sig;
 
         InstanceTimeMap _instanceResetTimes;
         uint32 _pendingBindId;
         uint32 _pendingBindTimer;
+        WMO_id wmo_id_;
         std::array<std::array<int, MAX_TALENT_TABS>, MAX_TALENT_SPECS> talent_points_spent;
 };
 
