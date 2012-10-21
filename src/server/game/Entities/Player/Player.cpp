@@ -17,6 +17,7 @@
  */
 
 #include "stdafx.hpp"
+#include <stdexcept>
 #include "Common.h"
 #include "Language.h"
 #include "DatabaseEnv.h"

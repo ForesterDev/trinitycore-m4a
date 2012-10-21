@@ -33,6 +33,7 @@ EndScriptData */
 // Add immunities to the boss and summons
 
 #include "stdafx.hpp"
+#include <stdexcept>
 #include "ScriptPCH.h"
 #include "trial_of_the_crusader.h"
 
