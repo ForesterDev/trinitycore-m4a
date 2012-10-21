@@ -61,11 +61,7 @@ set(Boost_ADDITIONAL_VERSIONS
   "1.47"
 )
 find_package(Boost 1.47.0 REQUIRED
-  chrono
-  date_time
   signals
-  system
-  thread
 )
 find_package(PCHSupport)
 find_package(ACE REQUIRED)

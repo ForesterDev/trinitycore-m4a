@@ -17,6 +17,7 @@
  */
 
 #include "stdafx.hpp"
+#include <mutex>
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -45,7 +46,7 @@
 #include "VMapFactory.h"
 #include "Battleground.h"
 #include "Util.h"
-#include "Detail/Vmap_mutex.hpp"
+#include "vmap_mutex.hpp"
 #include "TemporarySummon.h"
 #include "Vehicle.h"
 #include "SpellAuraEffects.h"
@@ -4825,7 +4826,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         auto &m = *VMAP::VMapFactory::createOrGetVMapManager();
-        boost::shared_lock<Detail::Vmap_mutex> l(Detail::vmap_mutex());
+        std::unique_lock<vmap_mutex_type> l(vmap_mutex());
         if (m.isLineOfSightCalcEnabled())
         {
             l.unlock();
