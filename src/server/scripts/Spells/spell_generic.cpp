@@ -811,21 +811,11 @@ namespace
                     ;
                 else
                     apply_warning(t);
-                connection = t.connect_area([this](Player &player, uint32 zone_id, uint32 area_id)
-                        {
-                            if (in_area(player, zone_id, area_id))
-                                unapply_warning(player);
-                            else
-                                apply_warning(player);
-                        }
-                    );
             }
 
             void removed(const AuraEffect *, AuraEffectHandleModes mode UNUSED)
             {
-                auto &t = target();
-                t.disconnect_area(std::move(connection));
-                unapply_warning(t);
+                unapply_warning(target());
             }
 
             Player &target()
@@ -839,7 +829,6 @@ namespace
             }
 
             bool warning_applied;
-            Player::Area_connection connection;
         };
 
         Wintergarde_gryphon_commander()
