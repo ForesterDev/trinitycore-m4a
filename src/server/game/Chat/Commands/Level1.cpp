@@ -39,7 +39,6 @@
 
 #ifdef _DEBUG_VMAPS
 #include "VMapFactory.h"
-#include "Detail/Vmap_mutex.hpp"
 #endif
 
 bool ChatHandler::HandleNameAnnounceCommand(const char* args)

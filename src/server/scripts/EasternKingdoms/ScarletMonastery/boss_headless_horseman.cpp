@@ -24,6 +24,7 @@ SDCategory: Scarlet Monastery
 EndScriptData */
 
 #include "stdafx.hpp"
+#include <utility>
 #include "ScriptPCH.h"
 #include "SpellMgr.h"
 #include "scarlet_monastery.h"
@@ -768,24 +769,7 @@ public:
 
     bool OnGossipHello(Player* player, GameObject* soil)
     {
-       InstanceScript* instance = player->GetInstanceScript();
-        if (instance)
-        {
-            if (instance->GetData(DATA_HORSEMAN_EVENT) != NOT_STARTED)
-                return true;
-            instance->SetData(DATA_HORSEMAN_EVENT, IN_PROGRESS);
-        }
-    /*  if (soil->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER && player->getLevel() > 64)
-        {
-            player->PrepareQuestMenu(soil->GetGUID());
-            player->SendPreparedQuest(soil->GetGUID());
-        }
-        if (player->GetQuestStatus(11405) == QUEST_STATUS_INCOMPLETE && player->getLevel() > 64)
-        { */
-            player->AreaExploredOrEventHappens(11405);
-            Creature* horseman = soil->SummonCreature(HH_MOUNTED, FlightPoint[20].x, FlightPoint[20].y, FlightPoint[20].z, 0, TEMPSUMMON_MANUAL_DESPAWN, 0);             
-        //}
-        return true;
+        return GameObjectScript::OnGossipHello(std::move(player), std::move(soil));
     }
 };
 
