@@ -829,6 +829,12 @@ class boss_the_lich_king : public CreatureScript
                 case 73788 /* Pain and Suffering */:
                 case 73789 /* Pain and Suffering */:
                 case 73790 /* Pain and Suffering */:
+                    if (auto time = events.GetNextEventTime(EVENT_SUMMON_RAGING_SPIRIT))
+                        if (time < events.GetTimer() + 700U)
+                            events.RescheduleEvent(EVENT_SUMMON_RAGING_SPIRIT, 700U, 0U, PHASE_TRANSITION);
+                    if (auto time = events.GetNextEventTime(EVENT_SUMMON_ICE_SPHERE))
+                        if (time < events.GetTimer() + 700U)
+                            events.RescheduleEvent(EVENT_SUMMON_ICE_SPHERE, 700U, 0U, PHASE_TRANSITION);
                     events.RescheduleEvent(EVENT_PAIN_AND_SUFFERING, 700U, 0, PHASE_TRANSITION);
                     break;
                 default:
@@ -1017,13 +1023,19 @@ class boss_the_lich_king : public CreatureScript
                                 break;
                             case EVENT_SUMMON_ICE_SPHERE:
                                 DoCastAOE(SPELL_SUMMON_ICE_SPHERE);
-                                events.RescheduleEvent(EVENT_PAIN_AND_SUFFERING, 1900,  0, PHASE_TRANSITION);
+                                if (auto time = events.GetNextEventTime(EVENT_SUMMON_RAGING_SPIRIT))
+                                    if (time < events.GetTimer() + 1200U)
+                                        events.RescheduleEvent(EVENT_SUMMON_RAGING_SPIRIT, 1200U, 0U, PHASE_TRANSITION);
+                                events.RescheduleEvent(EVENT_PAIN_AND_SUFFERING, 1200U,  0, PHASE_TRANSITION);
                                 events.ScheduleEvent(EVENT_SUMMON_ICE_SPHERE, urand(7500, 8500), 0, PHASE_TRANSITION);
                                 break;
                             case EVENT_SUMMON_RAGING_SPIRIT:
                                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                                     me->CastSpell(target, SPELL_RAGING_SPIRIT, TRIGGERED_NONE);
-                                events.RescheduleEvent(EVENT_PAIN_AND_SUFFERING, 1900,  0, PHASE_TRANSITION);
+                                if (auto time = events.GetNextEventTime(EVENT_SUMMON_ICE_SPHERE))
+                                    if (time < events.GetTimer() + 1200U)
+                                        events.RescheduleEvent(EVENT_SUMMON_ICE_SPHERE, 1200U, 0U, PHASE_TRANSITION);
+                                events.RescheduleEvent(EVENT_PAIN_AND_SUFFERING, 1200U,  0, PHASE_TRANSITION);
                                 events.ScheduleEvent(EVENT_SUMMON_RAGING_SPIRIT, urand(22000, 23000), 0, PHASE_TRANSITION);
                                 break;
                             case EVENT_QUAKE:
