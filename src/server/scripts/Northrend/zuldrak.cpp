@@ -248,6 +248,7 @@ enum eGurgthock
     QUEST_AMPHITHEATER_ANGUISH_YGGDRAS_1          = 12932,
     QUEST_AMPHITHEATER_ANGUISH_MAGNATAUR          = 12933,
     QUEST_AMPHITHEATER_ANGUISH_FROM_BEYOND        = 12934,
+    QUEST_AMPHITHEATER_ANGUISH_VLADOF             = 12948,
 
     NPC_ORINOKO_TUSKBREAKER                       = 30020,
     NPC_KORRAK_BLOODRAGER                         = 30023,
@@ -261,7 +262,8 @@ enum eGurgthock
     NPC_FIEND_AIR                                 = 30045,
     NPC_FIEND_FIRE                                = 30042,
     NPC_FIEND_EARTH                               = 30043,
-
+    NPC_VLADOF_THE_BUTCHER                        = 30022,
+      
     SAY_QUEST_ACCEPT_TUSKARRMAGEDON               = -1571031,
     SAY_QUEST_ACCEPT_KORRAK_1                     = -1571033,
     SAY_QUEST_ACCEPT_KORRAK_2                     = -1571034,
@@ -399,6 +401,10 @@ public:
                             uiTimer = 2000;
                             uiPhase = 12;
                             break;
+                        case QUEST_AMPHITHEATER_ANGUISH_VLADOF:
+                          uiTimer = 3000;
+                          uiPhase = 15;
+                          break;
                    }
                         break;
                 }
@@ -521,6 +527,22 @@ public:
                                 creature->AI()->SetData(1, uiBossRandom);
                             uiPhase = 0;
                             break;
+                        case 15:
+                        {
+                          if (!player)
+                                return;
+
+                            std::string sText = ("Prepare to make you stand, " + std::string(player->GetName()) + "! Get in the Amphitheater and stand ready! Remember, you and your opponent must stay in the arena at all times or you will be disqualified!");
+                            me->MonsterSay(sText.c_str(), LANG_UNIVERSAL, 0);
+                            uiTimer = 5000;
+                            uiPhase = 16;
+                        }
+                        break;
+                        case 16:
+                          if (Creature* creature = me->SummonCreature(NPC_VLADOF_THE_BUTCHER, SpawnPosition[2], TEMPSUMMON_CORPSE_DESPAWN, 1000)){}
+
+                            uiPhase = 0;
+                          break;
                     }
                 }else uiTimer -= uiDiff;
             }
@@ -545,6 +567,9 @@ public:
                 creature->AI()->SetData(1, quest->GetQuestId());
                 break;
             case QUEST_AMPHITHEATER_ANGUISH_FROM_BEYOND:
+                creature->AI()->SetData(1, quest->GetQuestId());
+                break;
+            case QUEST_AMPHITHEATER_ANGUISH_VLADOF:
                 creature->AI()->SetData(1, quest->GetQuestId());
                 break;
         }
@@ -1026,6 +1051,118 @@ public:
 };
 
 /*####
+## npc_vladof_the_butcher
+####*/
+
+enum eVladofTheButcher
+{
+    SPELL_BLOOD_PRESENCE     = 50689,
+    SPELL_BLOOD_PLAGUE       = 55973,
+    SPELL_HYSTERIA           = 55975,
+    SPELL_FROST_FEVER        = 55095,
+    SPELL_BLOOD_BOIL         = 55974,
+    SPELL_WHIRLWIND          = 55976,
+
+    EVENT_BLOOD_PLAGUE       = 1,
+    EVENT_FROST_FEVER        = 2,
+    EVENT_WHIRLWIND          = 3,
+    EVENT_BLOOD_BOIL         = 4,
+};
+
+class npc_vladof_the_butcher : public CreatureScript
+{
+public:
+    npc_vladof_the_butcher() : CreatureScript("npc_vladof_the_butcher") { }
+
+    struct npc_vladof_the_butcherAI : public ScriptedAI
+    {
+        npc_vladof_the_butcherAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void Reset()
+        {
+          events.ScheduleEvent(EVENT_BLOOD_PLAGUE,urand(2000,5000));
+          events.ScheduleEvent(EVENT_FROST_FEVER, urand(5000,8000));
+          events.ScheduleEvent(EVENT_BLOOD_BOIL, 8000);
+          events.ScheduleEvent(EVENT_WHIRLWIND, urand(10000,15000));
+          mounted = false;
+          enraged = false;
+
+          DoCast(me, SPELL_BLOOD_PRESENCE);
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
+        {
+           if (!HealthAbovePct(30) && !enraged && !me->HasUnitState(UNIT_STATE_CASTING))
+           {
+             DoCast(me,SPELL_HYSTERIA);
+             enraged = true;
+            }
+         }
+
+        void UpdateAI(const uint32 uiDiff)
+        {
+            if (!UpdateVictim() || mounted)
+                return;
+
+            events.Update(uiDiff);
+
+             if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+             while (uint32 eventId = events.ExecuteEvent())
+             {
+               switch (eventId)
+               {
+               case EVENT_BLOOD_PLAGUE:
+                 DoCastVictim(SPELL_BLOOD_PLAGUE);
+                 events.ScheduleEvent(EVENT_BLOOD_PLAGUE,urand(8000, 10000));
+                 break;
+               case EVENT_FROST_FEVER:
+                 DoCastVictim(SPELL_FROST_FEVER);
+                 events.ScheduleEvent(EVENT_FROST_FEVER,urand(10000, 13000));
+                 break;
+               case EVENT_BLOOD_BOIL:
+                 DoCastVictim(SPELL_BLOOD_BOIL);
+                 events.ScheduleEvent(EVENT_BLOOD_BOIL, 15000);
+                 break;
+               case EVENT_WHIRLWIND:
+                 DoCast(me,SPELL_WHIRLWIND);
+                 events.ScheduleEvent(EVENT_WHIRLWIND, urand(20000,25000));
+                 break;
+               }
+             }
+
+            DoMeleeAttackIfReady();
+        }
+
+        void JustDied(Unit* killer)
+        {
+            if (Unit* summoner = me->ToTempSummon()->GetSummoner())
+            {
+                std::string sText = (std::string(killer->GetName()) + " did it!");
+                summoner->MonsterYell(sText.c_str(), LANG_UNIVERSAL, 0);
+            }
+
+            if (Player* player = killer->GetCharmerOrOwnerPlayerOrPlayerItself())
+            {
+                player->GroupEventHappens(QUEST_AMPHITHEATER_ANGUISH_VLADOF, killer);
+            }
+        }
+
+
+    private:
+      EventMap events;
+      bool mounted;
+      bool enraged;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_vladof_the_butcherAI(creature);
+    }
+};
+
+/*####
 ## npc_elemental_lord
 ####*/
 
@@ -1424,6 +1561,7 @@ void AddSC_zuldrak()
     new npc_korrak_bloodrager;
     new npc_yggdras;
     new npc_stinkbeard;
+    new npc_vladof_the_butcher;
     new npc_released_offspring_harkoa;
     new npc_crusade_recruit;
     new npc_elemental_lord;
