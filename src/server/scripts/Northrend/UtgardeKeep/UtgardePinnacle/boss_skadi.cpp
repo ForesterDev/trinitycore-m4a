@@ -295,7 +295,7 @@ public:
                         pGrauf->GetMotionMaster()->MoveFall();
                         pGrauf->HandleEmoteCommand(EMOTE_ONESHOT_FLYDEATH);
                     }
-                    me->GetMotionMaster()->MoveJump(Location[4].GetPositionX(), Location[4].GetPositionY(), Location[4].GetPositionZ(), 5.0f, 10.0f);
+                    me->GetMotionMaster()->MoveJump(Location[4].GetPositionX(), Location[4].GetPositionY(), Location[4].GetPositionZ(), 20.0f, 20.0f);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                     DoScriptText(SAY_DRAKE_DEATH, me);
                     m_uiCrushTimer = 8000;
