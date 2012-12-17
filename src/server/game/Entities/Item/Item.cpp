@@ -26,6 +26,8 @@
 #include "SpellInfo.h"
 #include "ScriptMgr.h"
 #include "ConditionMgr.h"
+#include "Player.h"
+#include "Opcodes.h"
 
 void AddItemsSetItem(Player* player, Item* item)
 {
@@ -36,7 +38,7 @@ void AddItemsSetItem(Player* player, Item* item)
 
     if (!set)
     {
-        sLog->outErrorDb("Item set %u for item (id %u) not found, mods not applied.", setid, proto->ItemId);
+        sLog->outError(LOG_FILTER_SQL, "Item set %u for item (id %u) not found, mods not applied.", setid, proto->ItemId);
         return;
     }
 
@@ -96,7 +98,7 @@ void AddItemsSetItem(Player* player, Item* item)
                 SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(set->spells[x]);
                 if (!spellInfo)
                 {
-                    sLog->outError("WORLD: unknown spell id %u in items set %u effects", set->spells[x], setid);
+                    sLog->outError(LOG_FILTER_PLAYER_ITEMS, "WORLD: unknown spell id %u in items set %u effects", set->spells[x], setid);
                     break;
                 }
 
@@ -117,7 +119,7 @@ void RemoveItemsSetItem(Player*player, ItemTemplate const* proto)
 
     if (!set)
     {
-        sLog->outErrorDb("Item set #%u for item #%u not found, mods not removed.", setid, proto->ItemId);
+        sLog->outError(LOG_FILTER_SQL, "Item set #%u for item #%u not found, mods not removed.", setid, proto->ItemId);
         return;
     }
 
@@ -424,7 +426,7 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entr
         need_save = true;
     }
 
-    Tokens tokens(fields[4].GetString(), ' ', MAX_ITEM_PROTO_SPELLS);
+    Tokenizer tokens(fields[4].GetString(), ' ', MAX_ITEM_PROTO_SPELLS);
     if (tokens.size() == MAX_ITEM_PROTO_SPELLS)
         for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
             SetSpellCharges(i, atoi(tokens[i]));
@@ -597,7 +599,7 @@ int32 Item::GenerateItemRandomPropertyId(uint32 item_id)
     // item can have not null only one from field values
     if ((itemProto->RandomProperty) && (itemProto->RandomSuffix))
     {
-        sLog->outErrorDb("Item template %u have RandomProperty == %u and RandomSuffix == %u, but must have one from field =0", itemProto->ItemId, itemProto->RandomProperty, itemProto->RandomSuffix);
+        sLog->outError(LOG_FILTER_SQL, "Item template %u have RandomProperty == %u and RandomSuffix == %u, but must have one from field =0", itemProto->ItemId, itemProto->RandomProperty, itemProto->RandomSuffix);
         return 0;
     }
 
@@ -608,7 +610,7 @@ int32 Item::GenerateItemRandomPropertyId(uint32 item_id)
         ItemRandomPropertiesEntry const* random_id = sItemRandomPropertiesStore.LookupEntry(randomPropId);
         if (!random_id)
         {
-            sLog->outErrorDb("Enchantment id #%u used but it doesn't have records in 'ItemRandomProperties.dbc'", randomPropId);
+            sLog->outError(LOG_FILTER_SQL, "Enchantment id #%u used but it doesn't have records in 'ItemRandomProperties.dbc'", randomPropId);
             return 0;
         }
 
@@ -621,7 +623,7 @@ int32 Item::GenerateItemRandomPropertyId(uint32 item_id)
         ItemRandomSuffixEntry const* random_id = sItemRandomSuffixStore.LookupEntry(randomPropId);
         if (!random_id)
         {
-            sLog->outErrorDb("Enchantment id #%u used but it doesn't have records in sItemRandomSuffixStore.", randomPropId);
+            sLog->outError(LOG_FILTER_SQL, "Enchantment id #%u used but it doesn't have records in sItemRandomSuffixStore.", randomPropId);
             return 0;
         }
 
@@ -1019,7 +1021,7 @@ Item* Item::CreateItem(uint32 item, uint32 count, Player const* player)
         if (count > pProto->GetMaxStackSize())
             count = pProto->GetMaxStackSize();
 
-        ASSERT(count !=0 && "pProto->Stackable == 0 but checked at loading already");
+        ASSERT(count != 0 && "pProto->Stackable == 0 but checked at loading already");
 
         Item* pItem = NewItemOrBag(pProto);
         if (pItem->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_ITEM), item, player))
@@ -1043,7 +1045,7 @@ Item* Item::CloneItem(uint32 count, Player const* player) const
 
     newItem->SetUInt32Value(ITEM_FIELD_CREATOR,      GetUInt32Value(ITEM_FIELD_CREATOR));
     newItem->SetUInt32Value(ITEM_FIELD_GIFTCREATOR,  GetUInt32Value(ITEM_FIELD_GIFTCREATOR));
-    newItem->SetUInt32Value(ITEM_FIELD_FLAGS,        GetUInt32Value(ITEM_FIELD_FLAGS));
+    newItem->SetUInt32Value(ITEM_FIELD_FLAGS,        GetUInt32Value(ITEM_FIELD_FLAGS) & ~(ITEM_FLAG_REFUNDABLE | ITEM_FLAG_BOP_TRADEABLE));
     newItem->SetUInt32Value(ITEM_FIELD_DURATION,     GetUInt32Value(ITEM_FIELD_DURATION));
     // player CAN be NULL in which case we must not update random properties because that accesses player's item update queue
     if (player)

@@ -15,7 +15,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "SpellScript.h"
+#include "SpellAuraEffects.h"
 #include "utgarde_pinnacle.h"
 
 enum Spells
@@ -585,7 +588,7 @@ class npc_scourge_hulk : public CreatureScript
                 killedByRitualStrike = false;
             }
 
-            uint32 GetData(uint32 type)
+            uint32 GetData(uint32 type) const
             {
                 return type == DATA_INCREDIBLE_HULK ? killedByRitualStrike : 0;
             }

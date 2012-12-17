@@ -22,11 +22,12 @@ Comment: All guild related commands
 Category: commandscripts
 EndScriptData */
 
-#include "ScriptMgr.h"
 #include "Chat.h"
+#include "Language.h"
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "ObjectAccessor.h"
+#include "ScriptMgr.h"
 
 class guild_commandscript : public CommandScript
 {
@@ -51,7 +52,7 @@ public:
         };
         return commandTable;
     }
-    
+
     /** \brief GM command level 3 - Create a guild.
      *
      * This command allows a GM (level 3) to create a guild.

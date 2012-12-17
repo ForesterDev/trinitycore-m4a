@@ -51,7 +51,7 @@ enum TypeMask
     TYPEMASK_OBJECT         = 0x0001,
     TYPEMASK_ITEM           = 0x0002,
     TYPEMASK_CONTAINER      = 0x0006,                       // TYPEMASK_ITEM | 0x0004
-    TYPEMASK_UNIT           = 0x0008, // creature
+    TYPEMASK_UNIT           = 0x0008,                       // creature
     TYPEMASK_PLAYER         = 0x0010,
     TYPEMASK_GAMEOBJECT     = 0x0020,
     TYPEMASK_DYNAMICOBJECT  = 0x0040,
@@ -300,6 +300,9 @@ class Object
         virtual void BuildUpdate(UpdateDataMapType&) {}
         void BuildFieldsUpdate(Player*, UpdateDataMapType &) const;
 
+        void SetFieldNotifyFlag(uint16 flag) { _fieldNotifyFlags |= flag; }
+        void RemoveFieldNotifyFlag(uint16 flag) { _fieldNotifyFlags &= ~flag; }
+
         // FG: some hacky helpers
         void ForceValuesUpdateAtIndex(uint32);
 
@@ -320,13 +323,16 @@ class Object
         Object();
 
         void _InitValues();
-        void _Create (uint32 guidlow, uint32 entry, HighGuid guidhigh);
+        void _Create(uint32 guidlow, uint32 entry, HighGuid guidhigh);
         std::string _ConcatFields(uint16 startIndex, uint16 size) const;
-        void _LoadIntoDataField(const char* data, uint32 startOffset, uint32 count);
+        void _LoadIntoDataField(std::string const& data, uint32 startOffset, uint32 count);
 
-        virtual void _SetUpdateBits(UpdateMask* updateMask, Player* target) const;
+        void GetUpdateFieldData(Player const* target, uint32*& flags, bool& isOwner, bool& isItemOwner, bool& hasSpecialInfo, bool& isPartyMember) const;
 
-        virtual void _SetCreateBits(UpdateMask* updateMask, Player* target) const;
+        bool IsUpdateFieldVisible(uint32 flags, bool isSelf, bool isOwner, bool isItemOwner, bool isPartyMember) const;
+
+        void _SetUpdateBits(UpdateMask* updateMask, Player* target) const;
+        void _SetCreateBits(UpdateMask* updateMask, Player* target) const;
         void _BuildMovementUpdate(ByteBuffer * data, uint16 flags) const;
         void _BuildValuesUpdate(uint8 updatetype, ByteBuffer *data, UpdateMask* updateMask, Player* target) const;
 
@@ -345,6 +351,8 @@ class Object
         bool* _changedFields;
 
         uint16 m_valuesCount;
+
+        uint16 _fieldNotifyFlags;
 
         bool m_objectUpdated;
 
@@ -646,10 +654,10 @@ class WorldObject : public Object, public WorldLocation
 
         InstanceScript* GetInstanceScript();
 
-        const char* GetName() const { return m_name.c_str(); }
-        void SetName(const std::string& newname) { m_name=newname; }
+        std::string const& GetName() const { return m_name; }
+        void SetName(std::string const& newname) { m_name=newname; }
 
-        virtual const char* GetNameForLocaleIdx(LocaleConstant /*locale_idx*/) const { return GetName(); }
+        virtual std::string const& GetNameForLocaleIdx(LocaleConstant /*locale_idx*/) const { return m_name; }
 
         float GetDistance(const WorldObject* obj) const
         {
@@ -735,7 +743,7 @@ class WorldObject : public Object, public WorldLocation
         void MonsterTextEmote(int32 textId, uint64 TargetGuid, bool IsBossEmote = false);
         void MonsterWhisper(int32 textId, uint64 receiver, bool IsBossWhisper = false);
         void MonsterYellToZone(int32 textId, uint32 language, uint64 TargetGuid);
-        void BuildMonsterChat(WorldPacket* data, uint8 msgtype, char const* text, uint32 language, char const* name, uint64 TargetGuid) const;
+        void BuildMonsterChat(WorldPacket* data, uint8 msgtype, char const* text, uint32 language, std::string const& name, uint64 TargetGuid) const;
 
         void PlayDistanceSound(uint32 sound_id, Player* target = NULL);
         void PlayDirectSound(uint32 sound_id, Player* target = NULL);
@@ -791,6 +799,7 @@ class WorldObject : public Object, public WorldLocation
 
         Creature*   FindNearestCreature(uint32 entry, float range, bool alive = true) const;
         GameObject* FindNearestGameObject(uint32 entry, float range) const;
+        GameObject* FindNearestGameObjectOfType(GameobjectTypes type, float range) const;
 
         void GetGameObjectListWithEntryInGrid(std::list<GameObject*>& lList, uint32 uiEntry, float fMaxSearchRange) const;
         void GetCreatureListWithEntryInGrid(std::list<Creature*>& lList, uint32 uiEntry, float fMaxSearchRange) const;
