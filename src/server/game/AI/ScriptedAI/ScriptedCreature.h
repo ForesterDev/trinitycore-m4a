@@ -41,8 +41,10 @@ class SummonList : public std::list<uint64>
 
         template <class Predicate> void DoAction(int32 info, Predicate& predicate, uint16 max = 0)
         {
-            Trinity::Containers::RandomResizeList<uint64, Predicate>(*this, predicate, max);
-            for (iterator i = begin(); i != end(); )
+            // We need to use a copy of SummonList here, otherwise original SummonList would be modified
+            std::list<uint64> listCopy = *this;
+            Trinity::Containers::RandomResizeList<uint64, Predicate>(listCopy, predicate, max);
+            for (iterator i = listCopy.begin(); i != listCopy.end(); )
             {
                 Creature* summon = Unit::GetCreature(*me, *i++);
                 if (summon && summon->IsAIEnabled)
@@ -52,7 +54,7 @@ class SummonList : public std::list<uint64>
 
         void DoZoneInCombat(uint32 entry = 0);
         void RemoveNotExisting();
-        bool HasEntry(uint32 entry);
+        bool HasEntry(uint32 entry) const;
     private:
         Creature* me;
 };

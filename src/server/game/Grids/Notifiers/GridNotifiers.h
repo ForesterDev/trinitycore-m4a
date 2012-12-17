@@ -31,6 +31,7 @@
 #include "Unit.h"
 #include "CreatureAI.h"
 #include "Spell.h"
+#include "WorldSession.h"
 
 class Player;
 //class Map;
@@ -694,6 +695,30 @@ namespace Trinity
             NearestGameObjectEntryInObjectRangeCheck(NearestGameObjectEntryInObjectRangeCheck const&);
     };
 
+    // Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO with a certain type)
+    class NearestGameObjectTypeInObjectRangeCheck
+    {
+    public:
+        NearestGameObjectTypeInObjectRangeCheck(WorldObject const& obj, GameobjectTypes type, float range) : i_obj(obj), i_type(type), i_range(range) {}
+        bool operator()(GameObject* go)
+        {
+            if (go->GetGoType() == i_type && i_obj.IsWithinDistInMap(go, i_range))
+            {
+                i_range = i_obj.GetDistance(go);        // use found GO range as new range limit for next check
+                return true;
+            }
+            return false;
+        }
+        float GetLastRange() const { return i_range; }
+    private:
+        WorldObject const& i_obj;
+        GameobjectTypes i_type;
+        float  i_range;
+
+        // prevent clone this object
+        NearestGameObjectTypeInObjectRangeCheck(NearestGameObjectTypeInObjectRangeCheck const&);
+    };
+
     class GameObjectWithDbGUIDCheck
     {
         public:
@@ -1060,6 +1085,35 @@ namespace Trinity
             float m_range;
             bool m_force;
             NearestHostileUnitInAttackDistanceCheck(NearestHostileUnitInAttackDistanceCheck const&);
+    };
+
+    class NearestHostileUnitInAggroRangeCheck
+    {
+        public:
+            explicit NearestHostileUnitInAggroRangeCheck(Creature const* creature, bool useLOS = false) : _me(creature), _useLOS(useLOS)
+            {
+            }
+            bool operator()(Unit* u)
+            {
+                if (!u->IsHostileTo(_me))
+                    return false;
+
+                if (!u->IsWithinDistInMap(_me, _me->GetAggroRange(u)))
+                    return false;
+
+                if (!_me->IsValidAttackTarget(u))
+                    return false;
+
+                if (_useLOS && !u->IsWithinLOSInMap(_me))
+                    return false;
+
+                return true;
+            }
+
+    private:
+            Creature const* _me;
+            bool _useLOS;
+            NearestHostileUnitInAggroRangeCheck(NearestHostileUnitInAggroRangeCheck const&);
     };
 
     class AnyAssistCreatureInRangeCheck

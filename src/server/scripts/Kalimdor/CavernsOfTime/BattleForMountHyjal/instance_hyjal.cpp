@@ -27,6 +27,9 @@ EndScriptData */
 #include "InstanceScript.h"
 #include "ScriptedCreature.h"
 #include "hyjal_trash.h"
+#include "Player.h"
+#include "WorldPacket.h"
+#include "Opcodes.h"
 
 enum Misc
 {
@@ -156,7 +159,7 @@ public:
             }
         }
 
-        uint64 GetData64(uint32 identifier)
+        uint64 GetData64(uint32 identifier) const
         {
             switch (identifier)
             {
@@ -273,7 +276,7 @@ public:
                     break;
             }
 
-             sLog->outDebug(LOG_FILTER_TSCR, "TSCR: Instance Hyjal: Instance data updated for event %u (Data=%u)", type, data);
+             sLog->outDebug(LOG_FILTER_TSCR, "Instance Hyjal: Instance data updated for event %u (Data=%u)", type, data);
 
             if (data == DONE)
             {
@@ -293,7 +296,7 @@ public:
 
         }
 
-        uint32 GetData(uint32 type)
+        uint32 GetData(uint32 type) const
         {
             switch (type)
             {

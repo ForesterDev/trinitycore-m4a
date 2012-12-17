@@ -176,7 +176,7 @@ class GridMap
 
 
     bool loadAreaData(FILE* in, uint32 offset, uint32 size);
-    bool loadHeihgtData(FILE* in, uint32 offset, uint32 size);
+    bool loadHeightData(FILE* in, uint32 offset, uint32 size);
     bool loadLiquidData(FILE* in, uint32 offset, uint32 size);
 
     // Get height functions and pointers
@@ -439,9 +439,9 @@ class Map : public GridRefManager<NGridType>
         float GetHeight(uint32 phasemask, float x, float y, float z, bool vmap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const;
         bool isInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask) const;
         void Balance() { _dynamicTree.balance(); }
-        void Remove(const GameObjectModel& mdl) { _dynamicTree.remove(mdl); }
-        void Insert(const GameObjectModel& mdl) { _dynamicTree.insert(mdl); }
-        bool Contains(const GameObjectModel& mdl) const { return _dynamicTree.contains(mdl);}
+        void RemoveGameObjectModel(const GameObjectModel& model) { _dynamicTree.remove(model); }
+        void InsertGameObjectModel(const GameObjectModel& model) { _dynamicTree.insert(model); }
+        bool ContainsGameObjectModel(const GameObjectModel& model) const { return _dynamicTree.contains(model);}
         bool getObjectHitPos(uint32 phasemask, float x1, float y1, float z1, float x2, float y2, float z2, float& rx, float &ry, float& rz, float modifyDist);
 
         /*
@@ -499,6 +499,7 @@ class Map : public GridRefManager<NGridType>
 
         bool IsGridLoaded(const GridCoord &) const;
         void EnsureGridCreated(const GridCoord &);
+        void EnsureGridCreated_i(const GridCoord &);
         bool EnsureGridLoaded(Cell const&);
         void EnsureGridLoadedForActiveObject(Cell const&, WorldObject* object);
 

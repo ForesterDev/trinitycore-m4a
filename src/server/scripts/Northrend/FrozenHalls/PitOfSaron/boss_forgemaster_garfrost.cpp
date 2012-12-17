@@ -15,20 +15,23 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "SpellScript.h"
+#include "SpellAuras.h"
 #include "pit_of_saron.h"
 
 enum Yells
 {
-    SAY_AGGRO             = 0,
-    SAY_PHASE2            = 1,
-    SAY_PHASE3            = 2,
-    SAY_DEATH             = 3,
-    SAY_SLAY              = 4,
-    SAY_THROW_SARONITE    = 5,
-    SAY_CAST_DEEP_FREEZE  = 6,
+    SAY_AGGRO               = 0,
+    SAY_PHASE2              = 1,
+    SAY_PHASE3              = 2,
+    SAY_DEATH               = 3,
+    SAY_SLAY                = 4,
+    SAY_THROW_SARONITE      = 5,
+    SAY_CAST_DEEP_FREEZE    = 6,
 
-    SAY_TYRANNUS_DEATH  = -1658007, // todo
+    SAY_TYRANNUS_DEATH      = 0
 };
 
 enum Spells
@@ -44,16 +47,6 @@ enum Spells
 
 #define SPELL_PERMAFROST_HELPER RAID_MODE<uint32>(68786, 70336)
 #define SPELL_FORGE_BLADE_HELPER RAID_MODE<uint32>(68774, 70334)
-
-enum Events
-{
-    EVENT_THROW_SARONITE    = 1,
-    EVENT_CHILLING_WAVE     = 2,
-    EVENT_DEEP_FREEZE       = 3,
-    EVENT_JUMP              = 4,
-    EVENT_FORGING           = 5,
-    EVENT_RESUME_ATTACK     = 6,
-};
 
 enum Phases
 {
@@ -79,6 +72,15 @@ Position const southForgePos = {639.257f, -210.1198f, 529.015f, 0.523599f};
 
 class boss_garfrost : public CreatureScript
 {
+enum Events
+{
+    EVENT_THROW_SARONITE    = 1,
+    EVENT_CHILLING_WAVE     = 2,
+    EVENT_DEEP_FREEZE       = 3,
+    EVENT_JUMP              = 4,
+    EVENT_FORGING           = 5,
+    EVENT_RESUME_ATTACK     = 6,
+};
     public:
         boss_garfrost() : CreatureScript("boss_garfrost") { }
 
@@ -127,7 +129,7 @@ class boss_garfrost : public CreatureScript
                 Talk(SAY_DEATH);
 
                 if (Creature* tyrannus = me->GetCreature(*me, instance->GetData64(DATA_TYRANNUS)))
-                    DoScriptText(SAY_TYRANNUS_DEATH, tyrannus);
+                    tyrannus->AI()->Talk(SAY_TYRANNUS_DEATH);
 
                 instance->SetBossState(DATA_GARFROST, DONE);
             }
@@ -157,15 +159,19 @@ class boss_garfrost : public CreatureScript
 
             void MovementInform(uint32 type, uint32 id)
             {
-                if (type != POINT_MOTION_TYPE || id != POINT_FORGE)
+                if (type != EFFECT_MOTION_TYPE || id != POINT_FORGE)
                     return;
 
                 if (events.GetPhaseMask() & PHASE_TWO_MASK)
+                {
                     DoCast(me, SPELL_FORGE_BLADE);
+                    SetEquipmentSlots(false, EQUIP_ID_SWORD);
+                }
                 if (events.GetPhaseMask() & PHASE_THREE_MASK)
                 {
                     me->RemoveAurasDueToSpell(SPELL_FORGE_BLADE_HELPER);
                     DoCast(me, SPELL_FORGE_MACE);
+                    SetEquipmentSlots(false, EQUIP_ID_MACE);
                 }
                 events.ScheduleEvent(EVENT_RESUME_ATTACK, 5000);
             }
@@ -177,13 +183,9 @@ class boss_garfrost : public CreatureScript
                     if (Aura* aura = target->GetAura(SPELL_PERMAFROST_HELPER))
                         _permafrostStack = std::max<uint32>(_permafrostStack, aura->GetStackAmount());
                 }
-                else if (spell->Id == SPELL_FORGE_BLADE)
-                    SetEquipmentSlots(false, EQUIP_ID_SWORD);
-                else if (spell->Id == SPELL_FORGE_MACE)
-                    SetEquipmentSlots(false, EQUIP_ID_MACE);
             }
 
-            uint32 GetData(uint32 /*type*/)
+            uint32 GetData(uint32 /*type*/) const
             {
                 return _permafrostStack;
             }
@@ -205,7 +207,7 @@ class boss_garfrost : public CreatureScript
                         case EVENT_THROW_SARONITE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             {
-                                Talk(SAY_THROW_SARONITE);
+                                Talk(SAY_THROW_SARONITE, target->GetGUID());
                                 DoCast(target, SPELL_THROW_SARONITE);
                             }
                             events.ScheduleEvent(EVENT_THROW_SARONITE, urand(12500, 20000));
@@ -217,7 +219,7 @@ class boss_garfrost : public CreatureScript
                         case EVENT_DEEP_FREEZE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             {
-                                Talk(SAY_CAST_DEEP_FREEZE);
+                                Talk(SAY_CAST_DEEP_FREEZE, target->GetGUID());
                                 DoCast(target, SPELL_DEEP_FREEZE);
                             }
                             events.ScheduleEvent(EVENT_DEEP_FREEZE, 35000, 0, PHASE_THREE);
