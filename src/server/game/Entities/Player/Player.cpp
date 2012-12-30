@@ -21633,6 +21633,13 @@ void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time)
     }
 }
 
+void Player::ModifySpellCooldown(uint32 spellid, time_t end_time)
+{
+    auto cd = m_spellCooldowns.find(spellid);
+    if (cd != m_spellCooldowns.end())
+        cd->second.end = end_time;
+}
+
 void Player::SendCooldownEvent(SpellInfo const* spellInfo, uint32 itemId /*= 0*/, Spell* spell /*= NULL*/, bool setCooldown /*= true*/)
 {
     // start cooldowns at server side, if any
