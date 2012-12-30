@@ -7225,7 +7225,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                                 newCooldownDelay = 0;
                             else
                                 newCooldownDelay -= 2;
-                            ToPlayer()->AddSpellCooldown(16166, 0, uint32(time(NULL) + newCooldownDelay));
+                            ToPlayer()->ModifySpellCooldown(16166, uint32(time(NULL) + newCooldownDelay));
 
                             WorldPacket data(SMSG_MODIFY_COOLDOWN, 4+8+4);
                             data << uint32(16166);                  // Spell ID
