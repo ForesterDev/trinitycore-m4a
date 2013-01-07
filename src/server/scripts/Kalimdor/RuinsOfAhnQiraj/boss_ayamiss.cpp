@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -21,18 +21,20 @@
 #include "ScriptedCreature.h"
 #include "ruins_of_ahnqiraj.h"
 
-enum eAyamiss
+enum Spells
 {
     SPELL_STINGERSPRAY          =  25749,
-    SPELL_POISONSTINGER         =  25748,                          //only used in phase1
+    SPELL_POISONSTINGER         =  25748, // Only used in phase 1
     SPELL_PARALYZE              =  25725,
     SPELL_TRASH                 =  3391,
-    SPELL_FRENZY                =  8269,
+    SPELL_FRENZY                =  8269,  // Not used
     SPELL_LASH                  =  25852,
-
-    EMOTE_FRENZY                =  -1000002,
-
     SPELL_FEED                  =  25721,
+};
+
+enum Says
+{
+    EMOTE_FRENZY                =  0 // Not used
 };
 
 class boss_ayamiss : public CreatureScript
