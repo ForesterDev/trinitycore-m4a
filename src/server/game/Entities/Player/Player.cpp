@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -1753,7 +1753,8 @@ void Player::Update(uint32 p_time)
     {
         if (p_time >= m_nextSave)
         {
-            // m_nextSave reseted in SaveToDB call
+            // m_nextSave reset in SaveToDB call
+            sScriptMgr->OnPlayerSave(this);
             SaveToDB();
             sLog->outDebug(LOG_FILTER_PLAYER, "Player '%s' (GUID: %u) saved", GetName().c_str(), GetGUIDLow());
         }
@@ -2031,24 +2032,18 @@ bool Player::BuildEnumData(PreparedQueryResult result, WorldPacket* data)
     return true;
 }
 
-bool Player::ToggleAFK()
+void Player::ToggleAFK()
 {
     ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK);
 
-    bool state = HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK);
-
     // afk player not allowed in battleground
-    if (state && InBattleground() && !InArena())
+    if (isAFK() && InBattleground() && !InArena())
         LeaveBattleground();
-
-    return state;
 }
 
-bool Player::ToggleDND()
+void Player::ToggleDND()
 {
     ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_DND);
-
-    return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DND);
 }
 
 uint8 Player::GetChatTag() const
@@ -2065,15 +2060,6 @@ uint8 Player::GetChatTag() const
         tag |= CHAT_TAG_DEV;
 
     return tag;
-}
-
-void Player::SendTeleportPacket(Position &oldPos)
-{
-    WorldPacket data2(MSG_MOVE_TELEPORT, 38);
-    data2.append(GetPackGUID());
-    BuildMovementPacket(&data2);
-    Relocate(&oldPos);
-    SendMessageToSet(&data2, false);
 }
 
 void Player::SendTeleportAckPacket()
@@ -7972,8 +7958,12 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
     // If set ScalingStatValue armor get it or use item armor
     uint32 armor = proto->Armor;
     if (ssv)
+    {
         if (uint32 ssvarmor = ssv->getArmorMod(proto->ScalingStatValue))
             armor = ssvarmor;
+    }
+    else if (armor && proto->ArmorDamageModifier)
+        armor -= uint32(proto->ArmorDamageModifier);
 
     if (armor)
     {
@@ -8231,8 +8221,8 @@ void Player::ApplyEquipSpell(SpellInfo const* spellInfo, Item* item, bool apply,
 
         if (form_change)                                    // check aura active state from other form
         {
-            AuraApplicationMap const& auras = GetAppliedAuras();
-            for (AuraApplicationMap::const_iterator itr = auras.lower_bound(spellInfo->Id); itr != auras.upper_bound(spellInfo->Id); ++itr)
+            AuraApplicationMapBounds range = GetAppliedAuras().equal_range(spellInfo->Id);
+            for (AuraApplicationMap::const_iterator itr = range.first; itr != range.second; ++itr)
                 if (!item || itr->second->GetBase()->GetCastItemGUID() == item->GetGUID())
                     return;
         }
@@ -8251,7 +8241,7 @@ void Player::ApplyEquipSpell(SpellInfo const* spellInfo, Item* item, bool apply,
         }
 
         if (item)
-            RemoveAurasDueToItemSpell(item, spellInfo->Id);  // un-apply all spells, not only at-equipped
+            RemoveAurasDueToItemSpell(spellInfo->Id, item->GetGUID());  // un-apply all spells, not only at-equipped
         else
             RemoveAurasDueToSpell(spellInfo->Id);           // un-apply spell (item set case)
     }
@@ -8850,7 +8840,9 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
         loot = &item->loot;
 
-        if (!item->m_lootGenerated)
+        // If item doesn't already have loot, attempt to load it. If that
+        //  fails then this is first time opening, generate loot
+        if (!item->m_lootGenerated && !item->ItemContainerLoadLootFromDB())
         {
             item->m_lootGenerated = true;
             loot->clear();
@@ -8869,6 +8861,12 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 default:
                     loot->generateMoneyLoot(item->GetTemplate()->MinMoneyLoot, item->GetTemplate()->MaxMoneyLoot);
                     loot->FillLoot(item->GetEntry(), LootTemplates_Item, this, true, loot->gold != 0);
+
+                    // Force save the loot and money items that were just rolled
+                    //  Also saves the container item ID in Loot struct (not to DB)
+                    if (loot->gold > 0 || loot->unlootedCount > 0)
+                        item->ItemContainerSaveLootToDB();
+
                     break;
             }
         }
@@ -12621,6 +12619,12 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
         else if (Bag* pBag = GetBagByPos(bag))
             pBag->RemoveItem(slot, update);
 
+        // Delete rolled money / loot from db.
+        // MUST be done before RemoveFromWorld() or GetTemplate() fails
+        if (ItemTemplate const* pTmp = pItem->GetTemplate())
+            if (pTmp->Flags & ITEM_PROTO_FLAG_OPENABLE)
+                pItem->ItemContainerDeleteLootMoneyAndLootItemsFromDB();
+
         if (IsInWorld() && update)
         {
             pItem->RemoveFromWorld();
@@ -13848,7 +13852,7 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                                 CastSpell(this, enchant_spell_id, true, item);
                         }
                         else
-                            RemoveAurasDueToItemSpell(item, enchant_spell_id);
+                            RemoveAurasDueToItemSpell(enchant_spell_id, item->GetGUID());
                     }
                     break;
                 case ITEM_ENCHANTMENT_TYPE_RESISTANCE:
@@ -15227,7 +15231,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     _SaveQuestStatus(trans);
 
     if (announce)
-        SendQuestReward(quest, XP, questGiver);
+        SendQuestReward(quest, XP);
 
     // cast spells after mark quest complete (some spells have quest completed state requirements in spell_area data)
     if (quest->GetRewSpellCast() > 0)
@@ -15357,14 +15361,14 @@ bool Player::SatisfyQuestPreviousQuest(Quest const* qInfo, bool msg)
 
                 // each-from-all exclusive group (< 0)
                 // can be start if only all quests in prev quest exclusive group completed and rewarded
-                ObjectMgr::ExclusiveQuestGroups::iterator iter2 = sObjectMgr->mExclusiveQuestGroups.lower_bound(qPrevInfo->GetExclusiveGroup());
-                ObjectMgr::ExclusiveQuestGroups::iterator end  = sObjectMgr->mExclusiveQuestGroups.upper_bound(qPrevInfo->GetExclusiveGroup());
+                ObjectMgr::ExclusiveQuestGroupsBounds range(sObjectMgr->mExclusiveQuestGroups.equal_range(qPrevInfo->GetExclusiveGroup()));
 
-                ASSERT(iter2 != end);                         // always must be found if qPrevInfo->ExclusiveGroup != 0
+                // always must be found if qPrevInfo->ExclusiveGroup != 0
+                ASSERT(range.first != range.second);
 
-                for (; iter2 != end; ++iter2)
+                for (; range.first != range.second; ++range.first)
                 {
-                    uint32 exclude_Id = iter2->second;
+                    uint32 exclude_Id = range.first->second;
 
                     // skip checked quest id, only state of other quests in group is interesting
                     if (exclude_Id == prevId)
@@ -15390,14 +15394,14 @@ bool Player::SatisfyQuestPreviousQuest(Quest const* qInfo, bool msg)
 
                 // each-from-all exclusive group (< 0)
                 // can be start if only all quests in prev quest exclusive group active
-                ObjectMgr::ExclusiveQuestGroups::iterator iter2 = sObjectMgr->mExclusiveQuestGroups.lower_bound(qPrevInfo->GetExclusiveGroup());
-                ObjectMgr::ExclusiveQuestGroups::iterator end  = sObjectMgr->mExclusiveQuestGroups.upper_bound(qPrevInfo->GetExclusiveGroup());
+                ObjectMgr::ExclusiveQuestGroupsBounds range(sObjectMgr->mExclusiveQuestGroups.equal_range(qPrevInfo->GetExclusiveGroup()));
 
-                ASSERT(iter2 != end);                         // always must be found if qPrevInfo->ExclusiveGroup != 0
+                // always must be found if qPrevInfo->ExclusiveGroup != 0
+                ASSERT(range.first != range.second);
 
-                for (; iter2 != end; ++iter2)
+                for (; range.first != range.second; ++range.first)
                 {
-                    uint32 exclude_Id = iter2->second;
+                    uint32 exclude_Id = range.first->second;
 
                     // skip checked quest id, only state of other quests in group is interesting
                     if (exclude_Id == prevId)
@@ -15528,14 +15532,14 @@ bool Player::SatisfyQuestExclusiveGroup(Quest const* qInfo, bool msg)
     if (qInfo->GetExclusiveGroup() <= 0)
         return true;
 
-    ObjectMgr::ExclusiveQuestGroups::iterator iter = sObjectMgr->mExclusiveQuestGroups.lower_bound(qInfo->GetExclusiveGroup());
-    ObjectMgr::ExclusiveQuestGroups::iterator end  = sObjectMgr->mExclusiveQuestGroups.upper_bound(qInfo->GetExclusiveGroup());
+    ObjectMgr::ExclusiveQuestGroupsBounds range(sObjectMgr->mExclusiveQuestGroups.equal_range(qInfo->GetExclusiveGroup()));
 
-    ASSERT(iter != end);                                      // always must be found if qInfo->ExclusiveGroup != 0
+    // always must be found if qInfo->ExclusiveGroup != 0
+    ASSERT(range.first != range.second);
 
-    for (; iter != end; ++iter)
+    for (; range.first != range.second; ++range.first)
     {
-        uint32 exclude_Id = iter->second;
+        uint32 exclude_Id = range.first->second;
 
         // skip checked quest id, only state of other quests in group is interesting
         if (exclude_Id == qInfo->GetQuestId())
@@ -15543,7 +15547,7 @@ bool Player::SatisfyQuestExclusiveGroup(Quest const* qInfo, bool msg)
 
         // not allow have daily quest if daily quest from exclusive group already recently completed
         Quest const* Nquest = sObjectMgr->GetQuestTemplate(exclude_Id);
-        if (!SatisfyQuestDay(Nquest, false) || !SatisfyQuestWeek(Nquest, false) || !SatisfyQuestSeasonal(Nquest,false))
+        if (!SatisfyQuestDay(Nquest, false) || !SatisfyQuestWeek(Nquest, false) || !SatisfyQuestSeasonal(Nquest, false))
         {
             if (msg)
                 SendCanTakeQuestResponse(INVALIDREASON_DONT_HAVE_REQ);
@@ -16004,6 +16008,8 @@ void Player::ItemRemovedQuestCheck(uint32 entry, uint32 count)
 
 void Player::KilledMonster(CreatureTemplate const* cInfo, uint64 guid)
 {
+    ASSERT(cInfo);
+
     if (cInfo->Entry)
         KilledMonsterCredit(cInfo->Entry, guid);
 
@@ -16037,7 +16043,7 @@ void Player::KilledMonsterCredit(uint32 entry, uint64 guid)
             continue;
         // just if !ingroup || !noraidgroup || raidgroup
         QuestStatusData& q_status = m_QuestStatus[questid];
-        if (q_status.Status == QUEST_STATUS_INCOMPLETE && (!GetGroup() || !GetGroup()->isRaidGroup() || qInfo->IsAllowedInRaid()))
+        if (q_status.Status == QUEST_STATUS_INCOMPLETE && (!GetGroup() || !GetGroup()->isRaidGroup() || qInfo->IsAllowedInRaid(GetMap()->GetDifficulty())))
         {
             if (qInfo->HasFlag(QUEST_TRINITY_FLAGS_KILL_OR_CAST))
             {
@@ -16092,7 +16098,7 @@ void Player::KilledPlayerCredit()
             continue;
         // just if !ingroup || !noraidgroup || raidgroup
         QuestStatusData& q_status = m_QuestStatus[questid];
-        if (q_status.Status == QUEST_STATUS_INCOMPLETE && (!GetGroup() || !GetGroup()->isRaidGroup() || qInfo->IsAllowedInRaid()))
+        if (q_status.Status == QUEST_STATUS_INCOMPLETE && (!GetGroup() || !GetGroup()->isRaidGroup() || qInfo->IsAllowedInRaid(GetMap()->GetDifficulty())))
         {
             if (qInfo->HasFlag(QUEST_TRINITY_FLAGS_PLAYER_KILL))
             {
@@ -16156,6 +16162,12 @@ void Player::CastedCreatureOrGO(uint32 entry, uint64 guid, uint32 spell_id)
                             if (reqTarget != entry) // if entry doesn't match, check for killcredits referenced in template
                             {
                                 CreatureTemplate const* cinfo = sObjectMgr->GetCreatureTemplate(entry);
+                                if (!cinfo)
+                                {
+                                    sLog->outError(LOG_FILTER_PLAYER, "Player::CastedCreatureOrGO: GetCreatureTemplate failed for entry %u. Skipping.", entry);
+                                    continue;
+                                }
+
                                 for (uint8 k = 0; k < MAX_KILL_CREDIT; ++k)
                                     if (cinfo->KillCredit[k] == reqTarget)
                                         entry = cinfo->KillCredit[k];
@@ -16360,7 +16372,7 @@ bool Player::HasQuestForItem(uint32 itemid) const
                 continue;
 
             // hide quest if player is in raid-group and quest is no raid quest
-            if (GetGroup() && GetGroup()->isRaidGroup() && !qinfo->IsAllowedInRaid())
+            if (GetGroup() && GetGroup()->isRaidGroup() && !qinfo->IsAllowedInRaid(GetMap()->GetDifficulty()))
                 if (!InBattleground()) //there are two ways.. we can make every bg-quest a raidquest, or add this code here.. i don't know if this can be exploited by other quests, but i think all other quests depend on a specific area.. but keep this in mind, if something strange happens later
                     continue;
 
@@ -16408,7 +16420,7 @@ void Player::SendQuestComplete(uint32 quest_id)
     }
 }
 
-void Player::SendQuestReward(Quest const* quest, uint32 XP, Object* questGiver)
+void Player::SendQuestReward(Quest const* quest, uint32 XP)
 {
     uint32 questid = quest->GetQuestId();
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Sent SMSG_QUESTGIVER_QUEST_COMPLETE quest = %u", questid);
@@ -16431,9 +16443,6 @@ void Player::SendQuestReward(Quest const* quest, uint32 XP, Object* questGiver)
     data << uint32(quest->GetBonusTalents());              // bonus talents
     data << uint32(quest->GetRewArenaPoints());
     GetSession()->SendPacket(&data);
-
-    if (quest->GetQuestCompleteScript() != 0)
-        GetMap()->ScriptsStart(sQuestEndScripts, quest->GetQuestCompleteScript(), questGiver, this);
 }
 
 void Player::SendQuestFailed(uint32 questId, InventoryResult reason)
@@ -20084,28 +20093,17 @@ void Player::Whisper(const std::string& text, uint32 language, uint64 receiver)
     std::string _text(text);
     sScriptMgr->OnPlayerChat(this, CHAT_MSG_WHISPER, language, _text, rPlayer);
 
-    // when player you are whispering to is dnd, he cannot receive your message, unless you are in gm mode
-    if (!rPlayer->isDND() || isGameMaster())
-    {
-        WorldPacket data(SMSG_MESSAGECHAT, 200);
-        BuildPlayerChat(&data, CHAT_MSG_WHISPER, _text, language);
-        rPlayer->GetSession()->SendPacket(&data);
-
-        // not send confirmation for addon messages
-        if (!isAddonMessage)
-        {
-            data.Initialize(SMSG_MESSAGECHAT, 200);
-            rPlayer->BuildPlayerChat(&data, CHAT_MSG_WHISPER_INFORM, _text, language);
-            GetSession()->SendPacket(&data);
-        }
-    }
-    else if (!isAddonMessage)
-        // announce to player that player he is whispering to is dnd and cannot receive his message
-        ChatHandler(GetSession()).PSendSysMessage(LANG_PLAYER_DND, rPlayer->GetName().c_str(), rPlayer->dndMsg.c_str());
+    WorldPacket data(SMSG_MESSAGECHAT, 200);
+    BuildPlayerChat(&data, CHAT_MSG_WHISPER, _text, language);
+    rPlayer->GetSession()->SendPacket(&data);
 
     // rest stuff shouldn't happen in case of addon message
     if (isAddonMessage)
         return;
+
+    data.Initialize(SMSG_MESSAGECHAT, 200);
+    rPlayer->BuildPlayerChat(&data, CHAT_MSG_WHISPER_INFORM, _text, language);
+    GetSession()->SendPacket(&data);
 
     if (!isAcceptWhispers() && !isGameMaster() && !rPlayer->isGameMaster())
     {
@@ -20113,13 +20111,11 @@ void Player::Whisper(const std::string& text, uint32 language, uint64 receiver)
         ChatHandler(GetSession()).SendSysMessage(LANG_COMMAND_WHISPERON);
     }
 
-    // announce to player that player he is whispering to is afk
+    // announce afk or dnd message
     if (rPlayer->isAFK())
-        ChatHandler(GetSession()).PSendSysMessage(LANG_PLAYER_AFK, rPlayer->GetName().c_str(), rPlayer->afkMsg.c_str());
-
-    // if player whisper someone, auto turn of dnd to be able to receive an answer
-    if (isDND() && !rPlayer->isGameMaster())
-        ToggleDND();
+        ChatHandler(GetSession()).PSendSysMessage(LANG_PLAYER_AFK, rPlayer->GetName().c_str(), rPlayer->autoReplyMsg.c_str());
+    else if (rPlayer->isDND())
+        ChatHandler(GetSession()).PSendSysMessage(LANG_PLAYER_DND, rPlayer->GetName().c_str(), rPlayer->autoReplyMsg.c_str());
 }
 
 void Player::PetSpellInitialize()
@@ -22781,7 +22777,7 @@ bool Player::HasQuestForGO(int32 GOId) const
             if (!qinfo)
                 continue;
 
-            if (GetGroup() && GetGroup()->isRaidGroup() && !qinfo->IsAllowedInRaid())
+            if (GetGroup() && GetGroup()->isRaidGroup() && !qinfo->IsAllowedInRaid(GetMap()->GetDifficulty()))
                 continue;
 
             for (uint8 j = 0; j < QUEST_OBJECTIVES_COUNT; ++j)
@@ -23528,7 +23524,10 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
         if (liquid && liquid->SpellId)
         {
             if (res & (LIQUID_MAP_UNDER_WATER | LIQUID_MAP_IN_WATER))
-                CastSpell(this, liquid->SpellId, true);
+            {
+                if (!HasAura(liquid->SpellId))
+                    CastSpell(this, liquid->SpellId, true);
+            }
             else
                 RemoveAurasDueToSpell(liquid->SpellId);
         }
@@ -24062,6 +24061,11 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, item->itemid, item->count);
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_TYPE, loot->loot_type, item->count);
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_EPIC_ITEM, item->itemid, item->count);
+
+        // LootItem is being removed (looted) from the container, delete it from the DB.
+        if (loot->containerID > 0)
+            loot->DeleteLootItemFromContainerItemDB(item->itemid);
+
     }
     else
         SendEquipError(msg, NULL, NULL, item->itemid);
