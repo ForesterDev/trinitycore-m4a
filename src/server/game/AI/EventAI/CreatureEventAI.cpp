@@ -746,15 +746,12 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             break;
         case ACTION_T_SUMMON_GO:
         {
-            GameObject* object = NULL;
-
             float x, y, z;
             me->GetPosition(x, y, z);
-            object = me->SummonGameObject(action.raw.param1, x, y, z, 0, 0, 0, 0, 0, action.raw.param2);
+            GameObject* object = me->SummonGameObject(action.raw.param1, x, y, z, 0, 0, 0, 0, 0, action.raw.param2);
             if (!object)
-            {
                 sLog->outError(LOG_FILTER_TSCR, "EventAI failed to spawn object %u. Spawn event %d is on creature %d", action.raw.param1, eventId, me->GetEntry());
-            }
+
             break;
         }
         case ACTION_T_SET_SHEATH:
@@ -1268,7 +1265,7 @@ bool CreatureEventAI::CanCast(Unit* target, SpellInfo const* spell, bool trigger
         return false;
 
     //Check for power
-    if (!triggered && me->GetPower((Powers)spell->PowerType) < spell->CalcPowerCost(me, spell->GetSchoolMask()))
+    if (!triggered && me->GetPower((Powers)spell->PowerType) < uint32(spell->CalcPowerCost(me, spell->GetSchoolMask())))
         return false;
 
     //Unit is out of range of this spell
