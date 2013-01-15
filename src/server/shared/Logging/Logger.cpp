@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdafx.hpp>
 #include "Logger.h"
 
 Logger::Logger(): name(""), type(LOG_FILTER_GENERAL), level(LOG_LEVEL_DISABLED)

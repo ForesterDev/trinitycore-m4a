@@ -23,6 +23,7 @@ SDComment: Contains workarounds regarding warlord's rage spells not acting as ex
 SDCategory: Coilfang Resevoir, The Steamvault
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "steam_vault.h"

@@ -29,6 +29,7 @@ guard_shattrath_aldor
 guard_shattrath_scryer
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "GuardAI.h"

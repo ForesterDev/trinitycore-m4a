@@ -22,6 +22,7 @@ SDComment: AI for Argent Soldiers are not implemented. AI from bosses need more 
 SDCategory: Trial of the Champion
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellScript.h"

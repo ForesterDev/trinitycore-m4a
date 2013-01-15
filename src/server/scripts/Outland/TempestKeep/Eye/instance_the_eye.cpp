@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Tempest Keep, The Eye
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
 #include "the_eye.h"

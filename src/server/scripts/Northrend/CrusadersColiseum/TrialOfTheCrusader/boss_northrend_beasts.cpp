@@ -29,23 +29,27 @@ EndScriptData */
 // Snakes - miss the 1-hitkill from emerging
 //        - visual changes between mobile and stationary models seems not to work sometimes
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "trial_of_the_crusader.h"
 
-enum Yells
+namespace
 {
-    // Gormok
-    EMOTE_SNOBOLLED         = 0,
+    enum Yells
+    {
+        // Gormok
+        EMOTE_SNOBOLLED         = 0,
 
-    // Acidmaw & Dreadscale
-    EMOTE_ENRAGE            = 0,
+        // Acidmaw & Dreadscale
+        EMOTE_ENRAGE            = 0,
 
-    // Icehowl
-    EMOTE_TRAMPLE_START     = 0,
-    EMOTE_TRAMPLE_CRASH     = 1,
-    EMOTE_TRAMPLE_FAIL      = 2,
-};
+        // Icehowl
+        EMOTE_TRAMPLE_START     = 0,
+        EMOTE_TRAMPLE_CRASH     = 1,
+        EMOTE_TRAMPLE_FAIL      = 2,
+    };
+}
 
 enum Equipment
 {

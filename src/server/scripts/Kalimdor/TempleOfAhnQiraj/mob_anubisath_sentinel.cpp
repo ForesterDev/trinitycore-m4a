@@ -23,6 +23,7 @@ SDComment: Shadow storm is not properly implemented in core it should only targe
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "WorldPacket.h"
@@ -119,7 +120,7 @@ public:
 
         void GiveBuddyMyList(Creature* c)
         {
-            aqsentinelAI* cai = CAST_AI(aqsentinelAI, (c)->AI());
+            auto cai = CAST_AI(aqsentinelAI, (c)->AI());
             for (int i=0; i<3; ++i)
                 if (NearbyGUID[i] && NearbyGUID[i] != c->GetGUID())
                     cai->AddBuddyToList(NearbyGUID[i]);

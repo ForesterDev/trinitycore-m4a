@@ -23,6 +23,7 @@ SDComment: It may need timer adjustment
 SDCategory:
 Script Data End */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "culling_of_stratholme.h"

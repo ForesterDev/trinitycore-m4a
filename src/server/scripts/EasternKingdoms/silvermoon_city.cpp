@@ -27,6 +27,7 @@ EndScriptData */
 npc_blood_knight_stillblade
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

@@ -22,6 +22,7 @@ SD%Complete: 85%
 SDComment:
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "zulaman.h"

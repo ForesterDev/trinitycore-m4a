@@ -23,6 +23,7 @@ SDComment: Complete! Needs adjustments to use spell though.
 SDCategory: Karazhan
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "karazhan.h"

@@ -21,6 +21,7 @@
 *  \author Derex <derex101@gmail.com>
 */
 
+#include "stdafx.hpp"
 #include "WorldSocketMgr.h"
 
 #include <ace/ACE.h>

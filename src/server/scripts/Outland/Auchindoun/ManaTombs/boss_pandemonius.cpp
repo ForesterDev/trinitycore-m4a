@@ -23,6 +23,7 @@ SDComment: Not known how void blast is done (amount of rapid cast seems to be re
 SDCategory: Auchindoun, Mana Tombs
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

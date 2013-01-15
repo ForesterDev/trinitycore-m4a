@@ -28,6 +28,7 @@ npc_braug_dimspirit
 npc_kaya_flathoof
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
@@ -150,7 +151,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_PROTECT_KAYA)
         {
-            if (npc_escortAI* pEscortAI = CAST_AI(npc_kaya_flathoof::npc_kaya_flathoofAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_kaya_flathoof::npc_kaya_flathoofAI, creature->AI()))
                 pEscortAI->Start(true, false, player->GetGUID());
 
             DoScriptText(SAY_START, creature);

@@ -21,6 +21,7 @@
  * Scriptnames of files in this file should be prefixed with "spell_hun_".
  */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "Cell.h"
 #include "CellImpl.h"
@@ -427,7 +428,7 @@ class spell_hun_sniper_training : public SpellScriptLoader
                         {
                             SpellInfo const* triggeredSpellInfo = sSpellMgr->GetSpellInfo(spellId);
                             Unit* triggerCaster = triggeredSpellInfo->NeedsToBeTriggeredByCaster() ? caster : target;
-                            triggerCaster->CastSpell(target, triggeredSpellInfo, true, 0, aurEff);
+                            triggerCaster->CastSpell(target, triggeredSpellInfo, true, 0, aurEff, aurEff->GetCasterGUID());
                         }
                 }
             }

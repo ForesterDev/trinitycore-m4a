@@ -23,6 +23,7 @@ SDComment: Chromatic Mutation disabled due to lack of core support
 SDCategory: Blackwing Lair
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

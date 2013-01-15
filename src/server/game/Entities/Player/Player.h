@@ -19,6 +19,7 @@
 #ifndef _PLAYER_H
 #define _PLAYER_H
 
+#include <array>
 #include "AchievementMgr.h"
 #include "Battleground.h"
 #include "Bag.h"
@@ -487,7 +488,8 @@ enum PlayerExtraFlags
     PLAYER_EXTRA_HAS_310_FLYER      = 0x0040,               // Marks if player already has 310% speed flying mount
 
     // other states
-    PLAYER_EXTRA_PVP_DEATH          = 0x0100                // store PvP death status until corpse creating.
+    PLAYER_EXTRA_PVP_DEATH = 0x0100,   // store PvP death status until corpse creating.
+    PLAYER_EXTRA_hide_armor = 0x8000,
 };
 
 // 2^n values
@@ -1076,6 +1078,11 @@ class Player : public Unit, public GridObject<Player>
     public:
         explicit Player (WorldSession* session);
         ~Player();
+
+        WMO_id wmo_id() const
+        {
+            return wmo_id_;
+        }
 
         void CleanupsBeforeDelete(bool finalCleanup = true);
 
@@ -1675,6 +1682,7 @@ class Player : public Unit, public GridObject<Player>
         void SendTalentsInfoData(bool pet);
         void LearnTalent(uint32 talentId, uint32 talentRank);
         void LearnPetTalent(uint64 petGuid, uint32 talentId, uint32 talentRank);
+        std::array<int, MAX_TALENT_TABS> talent_tab_points_spent(int talent_group) const;
 
         bool AddTalent(uint32 spellId, uint8 spec, bool learning);
         bool HasTalent(uint32 spell_id, uint8 spec) const;
@@ -1683,7 +1691,7 @@ class Player : public Unit, public GridObject<Player>
 
         // Dual Spec
         void UpdateSpecCount(uint8 count);
-        uint32 GetActiveSpec() { return m_activeSpec; }
+        uint32 GetActiveSpec() const { return m_activeSpec; }
         void SetActiveSpec(uint8 spec){ m_activeSpec = spec; }
         uint8 GetSpecsCount() { return m_specsCount; }
         void SetSpecsCount(uint8 count) { m_specsCount = count; }
@@ -1732,6 +1740,7 @@ class Player : public Unit, public GridObject<Player>
         }
         void AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 itemId, Spell* spell = NULL, bool infinityCooldown = false);
         void AddSpellCooldown(uint32 spell_id, uint32 itemid, time_t end_time);
+        void ModifySpellCooldown(uint32 spell_id, time_t end_time);
         void SendCooldownEvent(SpellInfo const* spellInfo, uint32 itemId = 0, Spell* spell = NULL, bool setCooldown = true);
         void ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs);
         void RemoveSpellCooldown(uint32 spell_id, bool update = false);
@@ -1891,6 +1900,7 @@ class Player : public Unit, public GridObject<Player>
         void UpdateDefenseBonusesMod();
         inline void RecalculateRating(CombatRating cr) { ApplyRatingMod(cr, 0, true);}
         float GetMeleeCritFromAgility();
+        float GetBaseDodge();
         void GetDodgeFromAgility(float &diminishing, float &nondiminishing);
         float GetMissPercentageFromDefence() const;
         float GetSpellCritFromIntellect();
@@ -2383,6 +2393,7 @@ class Player : public Unit, public GridObject<Player>
         bool m_InstanceValid;
         // permanent binds and solo binds by difficulty
         BoundInstancesMap m_boundInstances[MAX_DIFFICULTY];
+        InstancePlayerBind* GetBoundInstance(const MapEntry &map_entry, Difficulty difficulty);
         InstancePlayerBind* GetBoundInstance(uint32 mapid, Difficulty difficulty);
         BoundInstancesMap& GetBoundInstances(Difficulty difficulty) { return m_boundInstances[difficulty]; }
         InstanceSave* GetInstanceSave(uint32 mapid, bool raid);
@@ -2466,6 +2477,7 @@ class Player : public Unit, public GridObject<Player>
         void SetRuneConvertAura(uint8 index, AuraEffect const* aura) { m_runes->runes[index].ConvertAura = aura; }
         void AddRuneByAuraEffect(uint8 index, RuneType newType, AuraEffect const* aura) { SetRuneConvertAura(index, aura); ConvertRune(index, newType); }
         void RemoveRunesByAuraEffect(AuraEffect const* aura);
+        bool has_runes_with_aura_effect(const AuraEffect *effect) const;
         void RestoreBaseRune(uint8 index);
         void ConvertRune(uint8 index, RuneType newType);
         void ResyncRunes(uint8 count);
@@ -2871,6 +2883,8 @@ class Player : public Unit, public GridObject<Player>
         uint32 _pendingBindTimer;
 
         uint32 _activeCheats;
+        WMO_id wmo_id_;
+        std::array<std::array<int, MAX_TALENT_TABS>, MAX_TALENT_SPECS> talent_points_spent;
 };
 
 void AddItemsSetItem(Player*player, Item* item);

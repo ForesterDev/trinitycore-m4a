@@ -21,6 +21,7 @@
  * Scriptnames of files in this file should be prefixed with "spell_q#questID_".
  */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellScript.h"

@@ -20,6 +20,7 @@
 #define __UNIT_H
 
 #include "Common.h"
+#include "ai_ptr.hpp"
 #include "Object.h"
 #include "Opcodes.h"
 #include "SpellAuraDefines.h"
@@ -499,13 +500,15 @@ enum UnitState
     UNIT_STATE_FLEEING_MOVE    = 0x02000000,
     UNIT_STATE_CHASE_MOVE      = 0x04000000,
     UNIT_STATE_FOLLOW_MOVE     = 0x08000000,
+    UNIT_STATE_CASTING_IMMOBILE = 0x10000000,
+    UNIT_STATE_TRACKING_CHANNEL_OBJECT = 0x20000000,
     UNIT_STATE_UNATTACKABLE    = (UNIT_STATE_IN_FLIGHT | UNIT_STATE_ONVEHICLE),
     // for real move using movegen check and stop (except unstoppable flight)
     UNIT_STATE_MOVING          = UNIT_STATE_ROAMING_MOVE | UNIT_STATE_CONFUSED_MOVE | UNIT_STATE_FLEEING_MOVE | UNIT_STATE_CHASE_MOVE | UNIT_STATE_FOLLOW_MOVE ,
     UNIT_STATE_CONTROLLED      = (UNIT_STATE_CONFUSED | UNIT_STATE_STUNNED | UNIT_STATE_FLEEING),
     UNIT_STATE_LOST_CONTROL    = (UNIT_STATE_CONTROLLED | UNIT_STATE_JUMPING | UNIT_STATE_CHARGING),
     UNIT_STATE_SIGHTLESS       = (UNIT_STATE_LOST_CONTROL | UNIT_STATE_EVADE),
-    UNIT_STATE_CANNOT_AUTOATTACK     = (UNIT_STATE_LOST_CONTROL | UNIT_STATE_CASTING),
+    UNIT_STATE_CANNOT_AUTOATTACK     = (UNIT_STATE_LOST_CONTROL | UNIT_STATE_CASTING_IMMOBILE),
     UNIT_STATE_CANNOT_TURN     = (UNIT_STATE_LOST_CONTROL | UNIT_STATE_ROTATING),
     // stay by different reasons
     UNIT_STATE_NOT_MOVE        = UNIT_STATE_ROOT | UNIT_STATE_STUNNED | UNIT_STATE_DIED | UNIT_STATE_DISTRACTED,
@@ -1005,7 +1008,7 @@ public:
     GlobalCooldownMgr() {}
 
 public:
-    bool HasGlobalCooldown(SpellInfo const* spellInfo) const;
+    bool HasGlobalCooldown(SpellInfo const* spellInfo, int offset) const;
     void AddGlobalCooldown(SpellInfo const* spellInfo, uint32 gcd);
     void CancelGlobalCooldown(SpellInfo const* spellInfo);
 
@@ -1218,7 +1221,7 @@ class Unit : public WorldObject
 
         virtual ~Unit();
 
-        UnitAI* GetAI() { return i_AI; }
+        ai_ptr<UnitAI> GetAI() { return ai_ptr<UnitAI>(i_AI, nullptr); }
         void SetAI(UnitAI* newAI) { i_AI = newAI; }
 
         void AddToWorld();
@@ -1822,7 +1825,7 @@ class Unit : public WorldObject
 
         int32 GetTotalAuraModifier(AuraType auratype) const;
         float GetTotalAuraMultiplier(AuraType auratype) const;
-        int32 GetMaxPositiveAuraModifier(AuraType auratype);
+        int32 GetMaxPositiveAuraModifier(AuraType auratype) const;
         int32 GetMaxNegativeAuraModifier(AuraType auratype) const;
 
         int32 GetTotalAuraModifierByMiscMask(AuraType auratype, uint32 misc_mask) const;
@@ -2066,7 +2069,7 @@ class Unit : public WorldObject
         int32 CalculateSpellDamage(Unit const* target, SpellInfo const* spellProto, uint8 effect_index, int32 const* basePoints = NULL) const;
         int32 CalcSpellDuration(SpellInfo const* spellProto);
         int32 ModSpellDuration(SpellInfo const* spellProto, Unit const* target, int32 duration, bool positive, uint32 effectMask);
-        void  ModSpellCastTime(SpellInfo const* spellProto, int32 & castTime, Spell* spell=NULL);
+        void  ModSpellCastTime(SpellInfo const* spellProto, int32 & castTime, Spell* spell=NULL, bool round_toward_infinity = false);
         float CalculateLevelPenalty(SpellInfo const* spellProto) const;
 
         void addFollower(FollowerReference* pRef) { m_FollowingRefManager.insertFirst(pRef); }
@@ -2238,6 +2241,8 @@ class Unit : public WorldObject
 
         // Movement info
         Movement::MoveSpline * movespline;
+
+        int spell_start_recovery_offset() const;
 
     protected:
         explicit Unit (bool isWorldObject);

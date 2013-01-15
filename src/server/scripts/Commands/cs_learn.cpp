@@ -22,6 +22,7 @@ Comment: All learn related commands
 Category: commandscripts
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "Chat.h"
 #include "ScriptMgr.h"
 #include "ObjectMgr.h"

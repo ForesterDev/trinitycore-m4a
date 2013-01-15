@@ -23,6 +23,7 @@ SDComment: Somewhat of a workaround for Parasitic Shadowfiend, unable to summon 
 SDCategory: Black Temple
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
@@ -480,7 +481,10 @@ public:
 
     struct boss_illidan_stormrageAI : public ScriptedAI
     {
-        boss_illidan_stormrageAI(Creature* creature) : ScriptedAI(creature), Summons(me)
+        boss_illidan_stormrageAI(Creature* creature)
+        : ScriptedAI(creature),
+            AkamaGUID(),
+            Summons(me)
         {
             instance = creature->GetInstanceScript();
             DoCast(me, SPELL_DUAL_WIELD, true);

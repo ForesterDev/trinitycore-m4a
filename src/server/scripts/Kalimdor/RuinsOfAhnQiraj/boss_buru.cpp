@@ -23,6 +23,7 @@ SDComment: Place Holder
 SDCategory: Ruins of Ahn'Qiraj
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ruins_of_ahnqiraj.h"

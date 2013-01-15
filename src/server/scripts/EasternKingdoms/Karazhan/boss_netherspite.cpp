@@ -23,6 +23,7 @@ SDComment: Not sure about timing and portals placing
 SDCategory: Karazhan
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "karazhan.h"

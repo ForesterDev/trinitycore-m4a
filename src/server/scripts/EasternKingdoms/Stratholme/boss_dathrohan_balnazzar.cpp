@@ -23,6 +23,7 @@ SDComment: Possibly need to fix/improve summons after death
 SDCategory: Stratholme
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

@@ -23,6 +23,7 @@ SDComment: Includes Sapling (need some better control with these).
 SDCategory: Tempest Keep, The Botanica
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

@@ -21,6 +21,7 @@ SD%Complete:
 SDComment: Timers and say taken from acid script
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "deadmines.h"

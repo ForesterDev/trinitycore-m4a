@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "Battleground.h"
 #include "BattlegroundSA.h"
 #include "Language.h"
@@ -899,6 +900,7 @@ void BattlegroundSA::UpdateDemolisherSpawns()
                                   BG_SA_NpcSpawnlocs[i][2], BG_SA_NpcSpawnlocs[i][3]);
 
                             Demolisher->Respawn();
+                            Demolisher->setFaction(BG_SA_Factions[Attackers]);
                             DemoliserRespawnList.erase(i);
                         }
                     }

@@ -19,6 +19,7 @@
 #ifndef _OBJECTMGR_H
 #define _OBJECTMGR_H
 
+#include <atomic>
 #include "Log.h"
 #include "Object.h"
 #include "Bag.h"
@@ -1155,12 +1156,12 @@ class ObjectMgr
 
         // first free low guid for selected guid type
         uint32 _hiCharGuid;
-        uint32 _hiCreatureGuid;
+        std::atomic<uint32> _hiCreatureGuid;
         uint32 _hiPetGuid;
         uint32 _hiVehicleGuid;
         uint32 _hiItemGuid;
-        uint32 _hiGoGuid;
-        uint32 _hiDoGuid;
+        std::atomic<uint32> _hiGoGuid;
+        std::atomic<uint32> _hiDoGuid;
         uint32 _hiCorpseGuid;
         uint32 _hiMoTransGuid;
 

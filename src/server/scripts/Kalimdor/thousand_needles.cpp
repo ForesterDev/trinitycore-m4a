@@ -32,6 +32,7 @@ npc_enraged_panther
 go_panther_cage
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
@@ -59,7 +60,7 @@ public:
     bool OnQuestAccept(Player* player, Creature* creature, const Quest* quest)
     {
         if (quest->GetQuestId() == QUEST_PROTECT_KANATI)
-            if (npc_kanatiAI* pEscortAI = CAST_AI(npc_kanati::npc_kanatiAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_kanati::npc_kanatiAI, creature->AI()))
                 pEscortAI->Start(false, false, player->GetGUID(), quest, true);
 
         return true;
@@ -148,7 +149,7 @@ public:
             DoScriptText(SAY_LAKO_START, creature, player);
             creature->setFaction(FACTION_ESCORTEE_LAKO);
 
-            if (npc_lakota_windsongAI* pEscortAI = CAST_AI(npc_lakota_windsong::npc_lakota_windsongAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_lakota_windsong::npc_lakota_windsongAI, creature->AI()))
                 pEscortAI->Start(false, false, player->GetGUID(), quest);
         }
         return true;
@@ -231,7 +232,7 @@ public:
             DoScriptText(SAY_START, creature, player);
             creature->setFaction(FACTION_ESCORTEE);
 
-            if (npc_paoka_swiftmountainAI* pEscortAI = CAST_AI(npc_paoka_swiftmountain::npc_paoka_swiftmountainAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_paoka_swiftmountain::npc_paoka_swiftmountainAI, creature->AI()))
                 pEscortAI->Start(false, false, player->GetGUID(), quest);
         }
         return true;

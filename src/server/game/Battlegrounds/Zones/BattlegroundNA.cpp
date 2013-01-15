@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "Battleground.h"
 #include "BattlegroundNA.h"
 #include "Language.h"

@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "Log.h"
@@ -6131,8 +6132,11 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
         }
         case HIGHGUID_UNIT:
         {
-            ASSERT(_hiCreatureGuid < 0x00FFFFFE && "Creature guid overflow!");
-            return _hiCreatureGuid++;
+            auto guid = _hiCreatureGuid.load();
+            do
+                ASSERT(guid < 0x00FFFFFE && "Creature guid overflow!");
+            while (!_hiCreatureGuid.compare_exchange_weak(guid, guid + 1));
+            return guid;
         }
         case HIGHGUID_PET:
         {
@@ -6151,8 +6155,11 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
         }
         case HIGHGUID_GAMEOBJECT:
         {
-            ASSERT(_hiGoGuid < 0x00FFFFFE && "Gameobject guid overflow!");
-            return _hiGoGuid++;
+            auto guid = _hiGoGuid.load();
+            do
+                ASSERT(guid < 0x00FFFFFE && "Gameobject guid overflow!");
+            while (!_hiGoGuid.compare_exchange_weak(guid, guid + 1));
+            return guid;
         }
         case HIGHGUID_CORPSE:
         {
@@ -6161,8 +6168,11 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
         }
         case HIGHGUID_DYNAMICOBJECT:
         {
-            ASSERT(_hiDoGuid < 0xFFFFFFFE && "DynamicObject guid overflow!");
-            return _hiDoGuid++;
+            auto guid = _hiDoGuid.load();
+            do
+                ASSERT(guid < 0xFFFFFFFE && "DynamicObject guid overflow!");
+            while (!_hiDoGuid.compare_exchange_weak(guid, guid + 1));
+            return guid;
         }
         case HIGHGUID_MO_TRANSPORT:
         {

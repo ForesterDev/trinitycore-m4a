@@ -17,6 +17,7 @@
 
 //! TODO - Boss not scripted, just ported required spellscript from core
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellScript.h"

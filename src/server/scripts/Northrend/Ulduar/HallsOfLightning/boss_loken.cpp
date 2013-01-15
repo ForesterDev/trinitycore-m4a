@@ -23,6 +23,7 @@ SDComment: Missing intro.
 SDCategory: Halls of Lightning
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellScript.h"

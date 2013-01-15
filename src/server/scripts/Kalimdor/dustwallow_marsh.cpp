@@ -31,6 +31,7 @@ npc_private_hendel
 npc_cassa_crimsonwing - handled by npc_taxi
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
@@ -508,7 +509,7 @@ public:
     {
          if (quest->GetQuestId() == QUEST_STINKYS_ESCAPE_H || quest->GetQuestId() == QUEST_STINKYS_ESCAPE_A)
          {
-             if (npc_stinkyAI* pEscortAI = CAST_AI(npc_stinky::npc_stinkyAI, creature->AI()))
+             if (auto pEscortAI = CAST_AI(npc_stinky::npc_stinkyAI, creature->AI()))
              {
                  creature->setFaction(FACTION_ESCORT_N_NEUTRAL_ACTIVE);
                  creature->SetStandState(UNIT_STAND_STATE_STAND);

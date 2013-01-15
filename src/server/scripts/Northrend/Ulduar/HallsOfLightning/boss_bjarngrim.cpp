@@ -23,6 +23,7 @@ SDComment: Waypoint needed, we expect boss to always have 2x Stormforged Lieuten
 SDCategory: Halls of Lightning
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "halls_of_lightning.h"

@@ -23,6 +23,7 @@ SDComment: Ground Slam need further development (knock back effect must be added
 SDCategory: Gruul's Lair
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellScript.h"

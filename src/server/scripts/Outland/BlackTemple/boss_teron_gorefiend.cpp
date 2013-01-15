@@ -23,6 +23,7 @@ SDComment: Requires Mind Control support for Ghosts.
 SDCategory: Black Temple
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "black_temple.h"

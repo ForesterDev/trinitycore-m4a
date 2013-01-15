@@ -27,6 +27,7 @@ EndScriptData */
 at_malfurion_Stormrage_trigger
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "sunken_temple.h"

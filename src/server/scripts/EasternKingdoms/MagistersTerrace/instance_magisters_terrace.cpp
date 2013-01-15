@@ -23,6 +23,7 @@ SDComment:  Designed only for Selin Fireheart
 SDCategory: Magister's Terrace
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
 #include "magisters_terrace.h"

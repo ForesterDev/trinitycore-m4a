@@ -23,6 +23,7 @@ SDComment: Instance Data Scripts and functions to acquire mobs and set encounter
 SDCategory: Coilfang Resevoir, Serpent Shrine Cavern
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
 #include "serpent_shrine.h"

@@ -28,6 +28,7 @@ mob_omrogg_heads
 boss_warbringer_omrogg
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "shattered_halls.h"

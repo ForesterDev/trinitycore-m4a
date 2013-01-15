@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Hellfire Citadel, Blood Furnace
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
 #include "blood_furnace.h"

@@ -23,6 +23,7 @@ SDComment:
 SDCategory: CrystalsongForest
 Script Data End */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

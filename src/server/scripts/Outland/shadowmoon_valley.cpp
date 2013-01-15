@@ -40,6 +40,7 @@ go_crystal_prison
 npc_enraged_spirit
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
@@ -991,7 +992,7 @@ public:
             DoScriptText(SAY_WIL_START, creature, player);
             creature->setFaction(FACTION_EARTHEN);
 
-            if (npc_earthmender_wildaAI* pEscortAI = CAST_AI(npc_earthmender_wilda::npc_earthmender_wildaAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_earthmender_wilda::npc_earthmender_wildaAI, creature->AI()))
                 pEscortAI->Start(false, false, player->GetGUID(), quest);
         }
         return true;

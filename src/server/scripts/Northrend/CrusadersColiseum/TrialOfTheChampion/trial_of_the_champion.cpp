@@ -26,6 +26,7 @@ EndScriptData */
 npc_announcer_toc5
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"

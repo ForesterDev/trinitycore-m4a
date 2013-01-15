@@ -29,6 +29,7 @@ npc_warden_mellichar
 mob_zerekethvoidzone
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "arcatraz.h"

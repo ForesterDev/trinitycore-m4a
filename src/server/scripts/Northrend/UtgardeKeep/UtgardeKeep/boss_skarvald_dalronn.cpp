@@ -22,6 +22,7 @@ SDComment: Needs adjustments to blizzlike timers, Yell Text + Sound to DB
 SDCategory: Utgarde Keep
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "utgarde_keep.h"

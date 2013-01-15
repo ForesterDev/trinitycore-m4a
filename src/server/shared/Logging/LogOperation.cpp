@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdafx.hpp>
 #include "LogOperation.h"
 #include "Logger.h"
 

@@ -22,6 +22,7 @@ Comment: All cheat related commands
 Category: commandscripts
 EndScriptData */
 
+#include <stdafx.hpp>
 #include "ScriptMgr.h"
 #include "ObjectMgr.h"
 #include "Chat.h"

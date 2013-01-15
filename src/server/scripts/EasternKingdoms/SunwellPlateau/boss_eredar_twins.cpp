@@ -21,6 +21,7 @@ SD%Complete: 100
 SDComment:
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "sunwell_plateau.h"

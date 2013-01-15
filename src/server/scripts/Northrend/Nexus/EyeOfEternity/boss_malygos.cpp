@@ -27,6 +27,7 @@ Script Data End */
 // Remove hack that re-adds targets to the aggro list after they enter to a vehicle when it works as expected
 // Improve whatever can be improved :)
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellScript.h"

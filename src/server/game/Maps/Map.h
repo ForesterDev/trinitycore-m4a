@@ -54,6 +54,8 @@ class MapInstanced;
 class InstanceMap;
 namespace Trinity { struct ObjectUpdater; }
 
+typedef uint32 WMO_id;
+
 struct ScriptAction
 {
     uint64 sourceGUID;
@@ -233,6 +235,14 @@ enum LevelRequirementVsMode
 
 typedef std::map<uint32/*leaderDBGUID*/, CreatureGroup*>        CreatureGroupHolderType;
 
+struct instance_difficulty
+{
+    Difficulty difficulty;
+    int player_difficulty;
+};
+
+instance_difficulty make_instance_difficulty(const MapEntry &map_entry, Difficulty difficulty);
+
 class Map : public GridRefManager<NGridType>
 {
     friend class MapReference;
@@ -340,6 +350,8 @@ class Map : public GridRefManager<NGridType>
             GetZoneAndAreaIdByAreaFlag(zoneid, areaid, GetAreaFlag(x, y, z), GetId());
         }
 
+        WMO_id wmo_id(const Position &p) const;
+
         void MoveAllCreaturesInMoveList();
         void RemoveAllObjectsInRemoveList();
         virtual void RemoveAllPlayers();
@@ -421,6 +433,9 @@ class Map : public GridRefManager<NGridType>
         template<class NOTIFIER> void VisitFirstFound(const float &x, const float &y, float radius, NOTIFIER &notifier);
         template<class NOTIFIER> void VisitWorld(const float &x, const float &y, float radius, NOTIFIER &notifier);
         template<class NOTIFIER> void VisitGrid(const float &x, const float &y, float radius, NOTIFIER &notifier);
+
+        void player_zone_changed(Player &p);
+
         CreatureGroupHolderType CreatureGroupHolder;
 
         void UpdateIteratorBack(Player* player);
@@ -474,6 +489,10 @@ class Map : public GridRefManager<NGridType>
         void DeleteRespawnTimes();
 
         static void DeleteRespawnTimesInDB(uint16 mapId, uint32 instanceId);
+
+        instance_difficulty get_instance_difficulty() const;
+
+        void change_player_difficulty(int player_difficulty);
 
     private:
         void LoadMapAndVMap(int gx, int gy);
@@ -606,6 +625,7 @@ class Map : public GridRefManager<NGridType>
 
         UNORDERED_MAP<uint32 /*dbGUID*/, time_t> _creatureRespawnTimes;
         UNORDERED_MAP<uint32 /*dbGUID*/, time_t> _goRespawnTimes;
+        instance_difficulty instance_difficulty_;
 };
 
 enum InstanceResetMethod

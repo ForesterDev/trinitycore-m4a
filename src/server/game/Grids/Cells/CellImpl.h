@@ -69,11 +69,8 @@ inline void Cell::Visit(CellCoord const& standing_cell, TypeContainerVisitor<T, 
     //no jokes here... Actually placing ASSERT() here was good idea, but
     //we had some problems with DynamicObjects, which pass radius = 0.0f (DB issue?)
     //maybe it is better to just return when radius <= 0.0f?
-    if (radius <= 0.0f)
-    {
-        map.Visit(*this, visitor);
-        return;
-    }
+    if (!radius)
+        radius = SIZE_OF_GRIDS;
     //lets limit the upper value for search radius
     if (radius > SIZE_OF_GRIDS)
         radius = SIZE_OF_GRIDS;

@@ -16,6 +16,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
+#include "InstanceScript.h"
 #include "SpellMgr.h"
 #include "SpellInfo.h"
 #include "ObjectMgr.h"
@@ -32,6 +34,8 @@
 #include "BattlegroundIC.h"
 #include "BattlefieldWG.h"
 #include "BattlefieldMgr.h"
+
+using std::forward;
 
 bool IsPrimaryProfessionSkill(uint32 skill)
 {
@@ -1110,6 +1114,17 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
     // Extra conditions -- leaving the possibility add extra conditions...
     switch (spellId)
     {
+    case 48388 /* Call Wintergarde Gryphon */:
+        switch (player->GetAreaId())
+        {
+        case 4177 /* Wintergarde Keep */:
+        case 4178 /* Wintergarde Mine */:
+        case 4188 /* The Carrion Fields */:
+            break;
+        default:
+            return false;
+        }
+        break;
         case 58600: // No fly Zone - Dalaran
         {
             if (!player)
@@ -1177,6 +1192,10 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
                 return battlefieldWG->IsEnabled() && (player->GetTeamId() == battlefieldWG->GetDefenderTeam()) && !battlefieldWG->IsWarTime();
             break;
         }
+        case 73828 /* Strength of Wrynn */:
+            if (player && const_cast<Player *>(player)->GetInstanceScript()->GetData(27 /* DATA_TEAM_IN_INSTANCE */) != ALLIANCE)
+                return false;
+            break;
         case 74411: // Battleground - Dampening
         {
             if (!player)
@@ -2922,6 +2941,18 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
                 break;
+            case 69290 /* Blighted Spores */:
+            case 71222 /* Blighted Spores */:
+            case 73033 /* Blighted Spores */:
+            case 73034 /* Blighted Spores */:
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_STACK_DIFF_CASTERS;
+                break;
+            case 70964: /* Icc- Shield Bash */
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_STACK_DIFF_CASTERS;
+                break;
+            case 71940 /* Twisted Nightmares */:
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_STACK_DIFF_CASTERS;
+                break;
             case 72293: // Mark of the Fallen Champion (Deathbringer Saurfang)
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
                 break;
@@ -2987,6 +3018,7 @@ void SpellMgr::LoadDbcDataCorrections()
             case 40246: // Simon Game Visual
             case 40247: // Simon Game Visual
             case 42835: // Spout, remove damage effect, only anim is needed
+            case 56578: // Skadi - Harpoon Damage
                 spellInfo->Effect[0] = 0;
                 break;
             case 30657: // Quake
@@ -3371,6 +3403,12 @@ void SpellMgr::LoadDbcDataCorrections()
             //
             // ICECROWN CITADEL SPELLS
             //
+            case 69290 /* Blighted Spores */:
+            case 71222 /* Blighted Spores */:
+            case 73033 /* Blighted Spores */:
+            case 73034 /* Blighted Spores */:
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+                break;
             // THESE SPELLS ARE WORKING CORRECTLY EVEN WITHOUT THIS HACK
             // THE ONLY REASON ITS HERE IS THAT CURRENT GRID SYSTEM
             // DOES NOT ALLOW FAR OBJECT SELECTION (dist > 333)
@@ -3397,6 +3435,12 @@ void SpellMgr::LoadDbcDataCorrections()
             case 71123: // Decimate (Stinky & Precious)
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_100_YARDS;   // 100yd
                 break;
+            case 70964: /* Icc- Shield Bash */
+              spellInfo->AttributesEx2 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+              break;
+            case 71940 /* Twisted Nightmares */:
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+                break;
             case 72378: // Blood Nova (Deathbringer Saurfang)
             case 73058: // Blood Nova (Deathbringer Saurfang)
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_200_YARDS;
@@ -3404,9 +3448,14 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
             case 72769: // Scent of Blood (Deathbringer Saurfang)
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_200_YARDS;
-                // no break
-            case 72771: // Scent of Blood (Deathbringer Saurfang)
                 spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_200_YARDS;
+                break;
+            case 72771: // Scent of Blood (Deathbringer Saurfang)
+                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_200_YARDS;
+                spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_200_YARDS;
+                break;
+            case 71169 /* Shadow's Fate */:
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                 break;
             case 72723: // Resistant Skin (Deathbringer Saurfang adds)
                 // this spell initially granted Shadow damage immunity, however it was removed but the data was left in client
@@ -3592,6 +3641,8 @@ void SpellMgr::LoadDbcDataCorrections()
                 // Seals of the Pure should affect Seal of Righteousness
                 if (spellInfo->SpellIconID == 25 && spellInfo->Attributes & SPELL_ATTR0_PASSIVE)
                     spellInfo->EffectSpellClassMask[0][1] |= 0x20000000;
+                if (spellInfo->SpellFamilyFlags[1] & 0x00040000 /* Hammer of the Righteous */)
+                    spellInfo->AttributesEx6 |= SPELL_ATTR6_NO_DONE_PCT_DAMAGE_MODS;
                 break;
             case SPELLFAMILY_DEATHKNIGHT:
                 // Icy Touch - extend FamilyFlags (unused value) for Sigil of the Frozen Conscience to use

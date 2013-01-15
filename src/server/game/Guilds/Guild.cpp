@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "DatabaseEnv.h"
 #include "Guild.h"
 #include "GuildMgr.h"
@@ -1657,6 +1658,9 @@ bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint32 amount, bool
 
     if (remainingMoney < amount)
         return false;
+    if (!repair)
+        if (amount > MAX_MONEY_AMOUNT || player->GetMoney() >= MAX_MONEY_AMOUNT - amount)
+            return false;
 
     // Call script after validation and before money transfer.
     sScriptMgr->OnGuildMemberWitdrawMoney(this, player, amount, repair);
@@ -1671,7 +1675,7 @@ bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint32 amount, bool
     // Add money to player (if required)
     if (!repair)
     {
-        player->ModifyMoney(amount);
+        player->SetMoney(player->GetMoney() + amount);
         player->SaveGoldToDB(trans);
     }
     // Log guild bank event

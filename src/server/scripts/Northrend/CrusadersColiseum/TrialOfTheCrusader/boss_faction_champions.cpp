@@ -27,6 +27,7 @@ EndScriptData */
 // All - untested
 // Pets aren't being summoned by their masters
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellScript.h"

@@ -25,6 +25,7 @@ SDComment: <Known bugs>
 SDCategory: Onyxia's Lair
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "Cell.h"

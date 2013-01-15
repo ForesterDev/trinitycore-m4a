@@ -20,6 +20,7 @@
     \ingroup u2w
 */
 
+#include "stdafx.hpp"
 #include "Opcodes.h"
 #include "WorldSession.h"
 
@@ -106,9 +107,9 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x04D*/ { "SMSG_LOGOUT_COMPLETE",                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x04E*/ { "CMSG_LOGOUT_CANCEL",                           STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT, PROCESS_THREADUNSAFE, &WorldSession::HandleLogoutCancelOpcode },
     /*0x04F*/ { "SMSG_LOGOUT_CANCEL_ACK",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x050*/ { "CMSG_NAME_QUERY",                              STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleNameQueryOpcode           },
+    /*0x050*/ { "CMSG_NAME_QUERY",                              STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::HandleNameQueryOpcode           },
     /*0x051*/ { "SMSG_NAME_QUERY_RESPONSE",                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x052*/ { "CMSG_PET_NAME_QUERY",                          STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandlePetNameQuery              },
+    /*0x052*/ { "CMSG_PET_NAME_QUERY",                          STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::HandlePetNameQuery              },
     /*0x053*/ { "SMSG_PET_NAME_QUERY_RESPONSE",                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x054*/ { "CMSG_GUILD_QUERY",                             STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::HandleGuildQueryOpcode          },
     /*0x055*/ { "SMSG_GUILD_QUERY_RESPONSE",                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
@@ -535,7 +536,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x1FA*/ { "CMSG_GM_NUKE",                                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x1FB*/ { "MSG_RANDOM_ROLL",                              STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleRandomRollOpcode          },
     /*0x1FC*/ { "SMSG_ENVIRONMENTALDAMAGELOG",                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1FD*/ { "CMSG_CHANGEPLAYER_DIFFICULTY",                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
+    /*0x1FD*/ { "CMSG_CHANGEPLAYER_DIFFICULTY",                 STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::handle_changeplayer_difficulty  },
     /*0x1FE*/ { "SMSG_RWHOIS",                                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x1FF*/ { "SMSG_LFG_PLAYER_REWARD",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x200*/ { "SMSG_LFG_TELEPORT_DENIED",                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },

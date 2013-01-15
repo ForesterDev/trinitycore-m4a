@@ -23,6 +23,7 @@ SDComment: Immunities are wrong, must be adjusted to use resistance from creatur
 SDCategory: Tempest Keep, The Botanica
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

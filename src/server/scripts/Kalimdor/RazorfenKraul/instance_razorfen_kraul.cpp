@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Razorfen Kraul
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
 #include "razorfen_kraul.h"

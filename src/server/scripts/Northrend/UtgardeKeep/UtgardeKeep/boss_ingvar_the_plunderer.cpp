@@ -22,6 +22,7 @@ SDComment: Some Problems with Annhylde Movement, Blizzlike Timers (just shadow a
 SDCategory: Udgarde Keep
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "utgarde_keep.h"
@@ -394,7 +395,7 @@ public:
                             ingvar->RemoveAurasDueToSpell(SPELL_SCOURG_RESURRECTION_DUMMY);
 
                             if (ingvar->getVictim())
-                                if (boss_ingvar_the_plunderer::boss_ingvar_the_plundererAI* ai = CAST_AI(boss_ingvar_the_plunderer::boss_ingvar_the_plundererAI, ingvar->AI()))
+                                if (auto ai = CAST_AI(boss_ingvar_the_plunderer::boss_ingvar_the_plundererAI, ingvar->AI()))
                                     ai->StartZombiePhase();
 
                             me->GetMotionMaster()->MovePoint(2, x+1, y, z+30);

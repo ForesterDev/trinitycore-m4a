@@ -23,6 +23,7 @@ SDComment: Heroic and Normal Support. Needs further testing.
 SDCategory: Magister's Terrace
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "magisters_terrace.h"

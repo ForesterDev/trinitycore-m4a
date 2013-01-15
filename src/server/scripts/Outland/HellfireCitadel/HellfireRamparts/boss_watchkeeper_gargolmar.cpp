@@ -23,6 +23,7 @@ SDComment: Missing adds to heal him. Surge should be used on target furthest awa
 SDCategory: Hellfire Citadel, Hellfire Ramparts
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

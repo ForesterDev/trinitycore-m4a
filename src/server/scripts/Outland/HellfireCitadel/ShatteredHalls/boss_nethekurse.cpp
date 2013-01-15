@@ -29,6 +29,7 @@ mob_fel_orc_convert
 mob_lesser_shadow_fissure
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "shattered_halls.h"

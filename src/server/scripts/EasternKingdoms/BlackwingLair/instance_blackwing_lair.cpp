@@ -23,5 +23,6 @@ SDComment:
 SDCategory: Blackwing Lair
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "InstanceScript.h"

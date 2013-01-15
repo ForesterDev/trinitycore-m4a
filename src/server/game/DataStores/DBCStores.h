@@ -58,7 +58,7 @@ typedef std::map<uint32/*pair32(map, diff)*/, MapDifficulty> MapDifficultyMap;
 MapDifficulty const* GetMapDifficultyData(uint32 mapId, Difficulty difficulty);
 MapDifficulty const* GetDownscaledMapDifficultyData(uint32 mapId, Difficulty &difficulty);
 
-uint32 const* /*[MAX_TALENT_TABS]*/ GetTalentTabPages(uint8 cls);
+uint32 const (&GetTalentTabPages(uint8 cls))[MAX_TALENT_TABS];
 
 uint32 GetLiquidFlags(uint32 liquidType);
 

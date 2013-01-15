@@ -21,17 +21,17 @@
 
 enum DataTypes
 {
-    MAX_ENCOUNTERS          = 8,
-
-    DATA_ARLOKK             = 1,
+    DATA_ARLOKK             = 0,
+    DATA_JINDO              = 1,
     DATA_JEKLIK             = 2,
     DATA_VENOXIS            = 3,
     DATA_MARLI              = 4,
-    DATA_OHGAN              = 5,
+    DATA_MANDOKIR           = 5,
     DATA_THEKAL             = 6,
     DATA_ZATH               = 7,
     DATA_LORKHAN            = 8,
-    DATA_JINDO              = 10,
+
+    MAX_ENCOUNTERS          = 9,
 };
 
 #endif

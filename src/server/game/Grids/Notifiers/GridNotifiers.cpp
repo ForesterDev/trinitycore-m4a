@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "WorldPacket.h"
@@ -235,6 +236,13 @@ void AIRelocationNotifier::Visit(CreatureMapType &m)
         if (isCreature)
             CreatureUnitRelocationWorker((Creature*)&i_unit, c);
     }
+}
+
+void AIRelocationNotifier::Visit(PlayerMapType &m)
+{
+    for (auto &r : m)
+        if (isCreature)
+            CreatureUnitRelocationWorker(static_cast<Creature *>(&i_unit), r.getSource());
 }
 
 void MessageDistDeliverer::Visit(PlayerMapType &m)

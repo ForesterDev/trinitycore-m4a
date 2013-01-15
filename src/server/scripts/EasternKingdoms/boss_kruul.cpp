@@ -23,6 +23,7 @@ SDComment: Highlord Kruul are presumably no longer in-game on regular bases, how
 SDCategory: Bosses
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

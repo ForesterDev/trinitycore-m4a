@@ -20,6 +20,7 @@
  * Comment: Timer check pending
  */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "halls_of_lightning.h"

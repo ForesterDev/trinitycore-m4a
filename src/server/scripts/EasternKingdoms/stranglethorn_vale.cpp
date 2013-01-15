@@ -27,6 +27,7 @@ EndScriptData */
 mob_yenniku
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 
@@ -116,10 +117,6 @@ public:
         }
     };
 };
-
-/*######
-##
-######*/
 
 void AddSC_stranglethorn_vale()
 {

@@ -23,6 +23,7 @@ SDComment: In progress. Undead side 75% implemented. Save/load not implemented.
 SDCategory: Stratholme
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "InstanceScript.h"

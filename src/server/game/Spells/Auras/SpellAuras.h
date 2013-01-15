@@ -19,6 +19,7 @@
 #ifndef TRINITY_SPELLAURAS_H
 #define TRINITY_SPELLAURAS_H
 
+#include <boost/optional/optional.hpp>
 #include "SpellAuraDefines.h"
 #include "SpellInfo.h"
 #include "Unit.h"
@@ -50,7 +51,7 @@ class AuraApplication
         Unit* const _target;
         Aura* const _base;
         AuraRemoveMode _removeMode:8;                  // Store info for know remove aura reason
-        uint8 _slot;                                   // Aura slot on unit
+        boost::optional<uint8> _slot;                  // Aura slot on unit
         uint8 _flags;                                  // Aura info flag
         uint8 _effectsToApply;                         // Used only at spell hit to determine which effect should be applied
         bool _needClientUpdate:1;
@@ -65,7 +66,7 @@ class AuraApplication
         Unit* GetTarget() const { return _target; }
         Aura* GetBase() const { return _base; }
 
-        uint8 GetSlot() const { return _slot; }
+        boost::optional<uint8> GetSlot() const { return _slot; }
         uint8 GetFlags() const { return _flags; }
         uint8 GetEffectMask() const { return _flags & (AFLAG_EFF_INDEX_0 | AFLAG_EFF_INDEX_1 | AFLAG_EFF_INDEX_2); }
         bool HasEffect(uint8 effect) const { ASSERT(effect < MAX_SPELL_EFFECTS);  return _flags & (1<<effect); }
@@ -153,7 +154,12 @@ class Aura
         bool IsArea() const;
         bool IsPassive() const;
         bool IsDeathPersistent() const;
-        bool IsRemovedOnShapeLost(Unit* target) const { return (GetCasterGUID() == target->GetGUID() && m_spellInfo->Stances && !(m_spellInfo->AttributesEx2 & SPELL_ATTR2_NOT_NEED_SHAPESHIFT) && !(m_spellInfo->Attributes & SPELL_ATTR0_NOT_SHAPESHIFT)); }
+
+        bool IsRemovedOnShapeLost(Unit *target) const
+        {
+            return GetCasterGUID() == target->GetGUID() && m_spellInfo->Stances && !(m_spellInfo->AttributesEx2 & SPELL_ATTR2_NOT_NEED_SHAPESHIFT);
+        }
+
         bool CanBeSaved() const;
         bool IsRemoved() const { return m_isRemoved; }
         bool CanBeSentToClient() const;

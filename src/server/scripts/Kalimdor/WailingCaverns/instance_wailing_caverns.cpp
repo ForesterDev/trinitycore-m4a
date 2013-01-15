@@ -23,6 +23,7 @@ SDComment: Everything seems to work, still need some checking
 SDCategory: Wailing Caverns
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
 #include "wailing_caverns.h"

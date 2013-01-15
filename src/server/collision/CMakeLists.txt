@@ -15,24 +15,22 @@ endif()
 file(GLOB_RECURSE sources_Management Management/*.cpp Management/*.h)
 file(GLOB_RECURSE sources_Maps Maps/*.cpp Maps/*.h)
 file(GLOB_RECURSE sources_Models Models/*.cpp Models/*.h)
-file(GLOB sources_localdir *.cpp *.h)
-
-if( USE_COREPCH AND MSVC )
-  set(collision_STAT_SRCS
-    PrecompiledHeaders/collisionPCH.cpp
-    PrecompiledHeaders/collisionPCH.h
-  )
-endif()
+file(GLOB sources_localdir *.cpp *.h *.hpp)
 
 set(collision_STAT_SRCS
-  ${collision_STAT_SRCS}
   ${sources_Management}
   ${sources_Maps}
   ${sources_Models}
+  PrecompiledHeaders/collisionPCH.h
   ${sources_localdir}
 )
 
 include_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/Management
+  ${CMAKE_CURRENT_SOURCE_DIR}/Maps
+  ${CMAKE_CURRENT_SOURCE_DIR}/Models
+  ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders
   ${CMAKE_SOURCE_DIR}/dep/g3dlite/include
   ${CMAKE_SOURCE_DIR}/src/server/shared
   ${CMAKE_SOURCE_DIR}/src/server/shared/Debugging
@@ -45,6 +43,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/shared/Packets
   ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
   ${CMAKE_SOURCE_DIR}/src/server/shared/DataStores
+  ${CMAKE_SOURCE_DIR}/src/server/game
   ${CMAKE_SOURCE_DIR}/src/server/game/Addons
   ${CMAKE_SOURCE_DIR}/src/server/game/Conditions
   ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Item
@@ -69,10 +68,6 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/game/World
   ${CMAKE_SOURCE_DIR}/src/server/game/Spells
   ${CMAKE_SOURCE_DIR}/src/server/game/Spells/Auras
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}/Management
-  ${CMAKE_CURRENT_SOURCE_DIR}/Maps
-  ${CMAKE_CURRENT_SOURCE_DIR}/Models
   ${CMAKE_BINARY_DIR}
   ${ACE_INCLUDE_DIR}
   ${MYSQL_INCLUDE_DIR}
@@ -84,9 +79,10 @@ add_library(collision STATIC ${collision_STAT_SRCS})
 # Generate precompiled header
 if( USE_COREPCH )
   if(CMAKE_COMPILER_IS_GNUCXX)
-    add_precompiled_header(collision ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/collisionPCH.h)
+    add_precompiled_header(collision ${CMAKE_CURRENT_SOURCE_DIR}/stdafx.hpp)
   elseif(MSVC)
-    add_native_precompiled_header(collision ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/collisionPCH)
+    set_precompiled_header(collision "stdafx.hpp"
+      "${CMAKE_CURRENT_SOURCE_DIR}/stdafx.cpp")
   endif()
 endif()
 

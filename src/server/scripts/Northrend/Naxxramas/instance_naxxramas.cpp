@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "InstanceScript.h"
@@ -455,9 +456,10 @@ public:
 
         void Load(const char * data)
         {
-            std::istringstream loadStream(LoadBossState(data));
+            std::istringstream loadStream(data);
             uint32 temp, buff, buff2;
 
+            LoadBossState(loadStream);
             for (uint32 i = 0; i < MAX_BOSS_NUMBER; ++i)
                 loadStream >> temp;
 

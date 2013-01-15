@@ -29,6 +29,10 @@ class Field
     friend class PreparedResultSet;
 
     public:
+        bool is_null() const
+        {
+            return !data.value ? true : false;
+        }
 
         bool GetBool() const // Wrapper, actually gets integer
         {
@@ -340,7 +344,11 @@ class Field
                     data.type == MYSQL_TYPE_LONG ||
                     data.type == MYSQL_TYPE_FLOAT ||
                     data.type == MYSQL_TYPE_DOUBLE ||
-                    data.type == MYSQL_TYPE_LONGLONG );
+                    data.type == MYSQL_TYPE_LONGLONG ||
+                    data.type == MYSQL_TYPE_TIMESTAMP ||
+                    data.type == MYSQL_TYPE_DATE ||
+                    data.type == MYSQL_TYPE_TIME ||
+                    data.type == MYSQL_TYPE_DATETIME);
         }
 
     private:

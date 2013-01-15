@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "Common.h"
 #include "WorldPacket.h"
 #include "Log.h"
@@ -210,8 +211,18 @@ void WorldSession::HandleLootOpcode(WorldPacket & recv_data)
     recv_data >> guid;
 
     // Check possible cheat
-    if (!_player->isAlive())
+    if (!IS_ITEM_GUID(guid))
+        ;
+    else
+    {
+        KickPlayer();
         return;
+    }
+    if (!_player->isAlive())
+    {
+        _player->SendLootRelease(guid);
+        return;
+    }
 
     GetPlayer()->SendLoot(guid, LOOT_CORPSE);
 

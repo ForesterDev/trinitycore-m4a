@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -144,7 +145,7 @@ lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGrou
 m_PlayerDamageReq(0), m_lootRecipient(0), m_lootRecipientGroup(0), m_corpseRemoveTime(0), m_respawnTime(0),
 m_respawnDelay(300), m_corpseDelay(60), m_respawnradius(0.0f), m_reactState(REACT_AGGRESSIVE),
 m_defaultMovementType(IDLE_MOTION_TYPE), m_DBTableGuid(0), m_equipmentId(0), m_AlreadyCallAssistance(false),
-m_AlreadySearchedAssistance(false), m_regenHealth(true), m_AI_locked(false), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),
+m_AlreadySearchedAssistance(false), m_regenHealth(true), ai_rep(), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),
 m_creatureInfo(NULL), m_creatureData(NULL), m_path_id(0), m_formation(NULL)
 {
     m_regenTimer = CREATURE_REGEN_INTERVAL;
@@ -190,6 +191,7 @@ void Creature::AddToWorld()
         if (IsVehicle())
             GetVehicleKit()->Install();
     }
+    ASSERT(i_AI);
 }
 
 void Creature::RemoveFromWorld()
@@ -330,8 +332,8 @@ bool Creature::InitEntry(uint32 Entry, uint32 /*team*/, const CreatureData* data
 
     SetSpeed(MOVE_WALK,     cinfo->speed_walk);
     SetSpeed(MOVE_RUN,      cinfo->speed_run);
-    SetSpeed(MOVE_SWIM, 1.0f);      // using 1.0 rate
-    SetSpeed(MOVE_FLIGHT, 1.0f);    // using 1.0 rate
+    SetSpeed(MOVE_SWIM, cinfo->speed_run);
+    SetSpeed(MOVE_FLIGHT, cinfo->speed_run);
 
     SetObjectScale(cinfo->scale);
 
@@ -448,6 +450,10 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData* data)
 
 void Creature::Update(uint32 diff)
 {
+    if (movespline->Finalized())
+        if (auto target = HasUnitState(UNIT_STATE_TRACKING_CHANNEL_OBJECT) ? GetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT) : GetUInt64Value(UNIT_FIELD_TARGET))
+            if (auto unit = ObjectAccessor::GetUnit(*this, target))
+                SetInFront(unit);
     if (IsAIEnabled && TriggerJustRespawned)
     {
         TriggerJustRespawned = false;
@@ -546,12 +552,8 @@ void Creature::Update(uint32 diff)
             }
 
             if (!IsInEvadeMode() && IsAIEnabled)
-            {
                 // do not allow the AI to be changed during update
-                m_AI_locked = true;
-                i_AI->UpdateAI(diff);
-                m_AI_locked = false;
-            }
+                AI()->UpdateAI(diff);
 
             // creature can be dead after UpdateAI call
             // CORPSE/DEAD state will processed at next tick (in other case death timer will be updated unexpectedly)
@@ -711,21 +713,22 @@ void Creature::DoFleeToGetAssistance()
 
 bool Creature::AIM_Initialize(CreatureAI* ai)
 {
+    auto oldAI = AI();
+
     // make sure nothing can change the AI during AI update
-    if (m_AI_locked)
+    if (!oldAI.unique())
     {
         sLog->outDebug(LOG_FILTER_TSCR, "AIM_Initialize: failed to init, locked.");
         return false;
     }
 
-    UnitAI* oldAI = i_AI;
-
     Motion_Initialize();
 
     i_AI = ai ? ai : FactorySelector::selectAI(this);
-    delete oldAI;
+    delete oldAI.get();
+    oldAI.reset();
     IsAIEnabled = true;
-    i_AI->InitializeAI();
+    AI()->InitializeAI();
     // Initialize vehicle
     if (GetVehicleKit())
         GetVehicleKit()->Reset();
@@ -1155,7 +1158,8 @@ void Creature::SelectLevel(const CreatureTemplate* cinfo)
 
     SetCreateHealth(health);
     SetMaxHealth(health);
-    SetHealth(health);
+    if (isAlive())
+        SetHealth(health);
     ResetPlayerDamageReq();
 
     // mana
@@ -1264,8 +1268,11 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 vehId, uint3
 
     if (vehId && !CreateVehicleKit(vehId, Entry))
         vehId = 0;
-
-    Object::_Create(guidlow, Entry, vehId ? HIGHGUID_VEHICLE : HIGHGUID_UNIT);
+    auto guidhigh = vehId ? HIGHGUID_VEHICLE : HIGHGUID_UNIT;
+    if (!GetMap()->GetCreature(MAKE_NEW_GUID(guidlow, Entry, guidhigh)))
+        Object::_Create(guidlow, Entry, std::move(guidhigh));
+    else
+        return false;
 
     if (!UpdateEntry(Entry, team, data))
         return false;
@@ -1285,10 +1292,7 @@ bool Creature::LoadCreatureFromDB(uint32 guid, Map* map, bool addToMap)
 
     m_DBTableGuid = guid;
     if (map->GetInstanceId() == 0)
-    {
-        if (map->GetCreature(MAKE_NEW_GUID(guid, data->id, HIGHGUID_UNIT)))
-            return false;
-    }
+        ;
     else
         guid = sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT);
 
@@ -1520,11 +1524,12 @@ float Creature::GetAttackDistance(Unit const* player) const
 
 void Creature::setDeathState(DeathState s)
 {
+    if (s == JUST_DIED)
+        m_corpseRemoveTime = time(NULL) + m_corpseDelay;
     Unit::setDeathState(s);
 
     if (s == JUST_DIED)
     {
-        m_corpseRemoveTime = time(NULL) + m_corpseDelay;
         m_respawnTime = time(NULL) + m_respawnDelay + m_corpseDelay;
 
         // always save boss respawn time at death to prevent crash cheating
@@ -1602,12 +1607,15 @@ void Creature::Respawn(bool force)
             GetMap()->RemoveCreatureRespawnTime(m_DBTableGuid);
 
         sLog->outDebug(LOG_FILTER_UNITS, "Respawning creature %s (GuidLow: %u, Full GUID: " UI64FMTD " Entry: %u)", GetName(), GetGUIDLow(), GetGUID(), GetEntry());
+        CleanupBeforeRemoveFromMap(false);
+        auto map = GetMap();
+        map->RemoveFromMap(this, false);
         m_respawnTime = 0;
         lootForPickPocketed = false;
         lootForBody         = false;
 
-        if (m_originalEntry != GetEntry())
-            UpdateEntry(m_originalEntry);
+        SetMap(map);
+        UpdateEntry(m_originalEntry);
 
         CreatureTemplate const* cinfo = GetCreatureTemplate();
         SelectLevel(cinfo);
@@ -1635,9 +1643,10 @@ void Creature::Respawn(bool force)
 
         //Re-initialize reactstate that could be altered by movementgenerators
         InitializeReactState();
+        GetMap()->AddToMap(this);
     }
-
-    UpdateObjectVisibility();
+    else
+        UpdateObjectVisibility();
 }
 
 void Creature::ForcedDespawn(uint32 timeMSToDespawn)
@@ -2257,7 +2266,7 @@ void Creature::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs
         if ((idSchoolMask & spellInfo->GetSchoolMask()) && GetCreatureSpellCooldownDelay(unSpellId) < unTimeMs)
         {
             _AddCreatureSpellCooldown(unSpellId, curTime + unTimeMs/IN_MILLISECONDS);
-            if (UnitAI* ai = GetAI())
+            if (auto ai = GetAI())
                 ai->SpellInterrupted(unSpellId, unTimeMs);
         }
     }

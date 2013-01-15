@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "Vehicle.h"
@@ -460,7 +461,7 @@ class spell_mount_check : public SpellScriptLoader
 
                 if (owner->IsMounted() && !target->IsMounted())
                 {
-                    if (VolunteerAI* volunteerAI = CAST_AI(VolunteerAI, target->GetAI()))
+                    if (auto volunteerAI = CAST_AI(VolunteerAI, target->GetAI()))
                         target->Mount(volunteerAI->GetMountId());
                 }
                 else if (!owner->IsMounted() && target->IsMounted())

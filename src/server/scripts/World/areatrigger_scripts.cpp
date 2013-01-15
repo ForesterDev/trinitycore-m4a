@@ -35,6 +35,7 @@ at_brewfest
 at_area_52_entrance
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

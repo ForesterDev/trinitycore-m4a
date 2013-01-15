@@ -23,6 +23,7 @@ SDComment: aura applied/defined in database
 SDCategory: Stratholme
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "stratholme.h"

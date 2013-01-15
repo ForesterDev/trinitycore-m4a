@@ -23,6 +23,7 @@ Comment: Short custom scripting example
 Category: Script Examples
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "Chat.h"
 

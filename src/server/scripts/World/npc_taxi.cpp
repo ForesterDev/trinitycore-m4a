@@ -24,6 +24,7 @@ SDCategory: NPCs
 EndScriptData
 */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"

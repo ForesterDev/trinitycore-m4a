@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Uldaman
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

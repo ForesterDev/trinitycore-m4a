@@ -16,12 +16,22 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "ObjectMgr.h"
 #include "WorldPacket.h"
 #include "ArenaTeam.h"
 #include "World.h"
 #include "Group.h"
 #include "ArenaTeamMgr.h"
+
+
+namespace
+{
+    enum
+    {
+        low_rating_threshold = 1300
+    };
+}
 
 ArenaTeam::ArenaTeam()
     : TeamId(0), Type(0), TeamName(), CaptainGuid(0), BackgroundColor(0), EmblemStyle(0), EmblemColor(0),
@@ -127,8 +137,8 @@ bool ArenaTeam::AddMember(uint64 playerGuid)
 
     if (sWorld->getIntConfig(CONFIG_ARENA_START_PERSONAL_RATING) > 0)
         personalRating = sWorld->getIntConfig(CONFIG_ARENA_START_PERSONAL_RATING);
-    else if (GetRating() >= 1000)
-        personalRating = 1000;
+    else if (GetRating() >= low_rating_threshold)
+        personalRating = low_rating_threshold;
 
     // Try to get player's match maker rating from db and fall back to config setting if not found
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_MATCH_MAKER_RATING);
@@ -637,7 +647,7 @@ int32 ArenaTeam::GetRatingMod(uint32 ownRating, uint32 opponentRating, bool won 
     // TODO: Replace this hack with using the confidence factor (limiting the factor to 2.0f)
     if (won && ownRating < 1300)
     {
-        if (ownRating < 1000)
+        if (ownRating < low_rating_threshold)
             mod = 48.0f * (won_mod - chance);
         else
             mod = (24.0f + (24.0f * (1300.0f - float(ownRating)) / 300.0f)) * (won_mod - chance);

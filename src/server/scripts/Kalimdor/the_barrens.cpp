@@ -32,6 +32,7 @@ npc_twiggy_flathead
 npc_wizzlecrank_shredder
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
@@ -112,7 +113,7 @@ public:
 
             DoScriptText(SAY_GIL_START, creature, player);
 
-            if (npc_giltharesAI* pEscortAI = CAST_AI(npc_gilthares::npc_giltharesAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_gilthares::npc_giltharesAI, creature->AI()))
                 pEscortAI->Start(false, false, player->GetGUID(), quest);
         }
         return true;
@@ -672,7 +673,7 @@ public:
         if (quest->GetQuestId() == QUEST_ESCAPE)
         {
             creature->setFaction(FACTION_RATCHET);
-            if (npc_escortAI* pEscortAI = CAST_AI(npc_wizzlecrank_shredder::npc_wizzlecrank_shredderAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_wizzlecrank_shredder::npc_wizzlecrank_shredderAI, creature->AI()))
                 pEscortAI->Start(true, false, player->GetGUID());
         }
         return true;

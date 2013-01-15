@@ -30,6 +30,7 @@ item_gor_dreks_ointment(i30175)     Protecting Our Own(q10488)
 item_only_for_flight                Items which should only useable while flying
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "Spell.h"
@@ -411,6 +412,20 @@ public:
     }
 };
 
+class item_tricky_treat : public ItemScript
+{
+    public:
+        item_tricky_treat() : ItemScript("item_tricky_treat") { }
+
+        bool OnUse(Player* player, Item* /*item*/, SpellCastTargets const& /*targets*/)
+        {
+
+           if(!urand(0,4))
+		          player->CastSpell(player, 42966 /* Upset Tummy */, true);
+           return false;
+        }
+};
+
 void AddSC_item_scripts()
 {
     new item_only_for_flight();
@@ -424,4 +439,5 @@ void AddSC_item_scripts()
     new item_dehta_trap_smasher();
     new item_trident_of_nazjan();
     new item_captured_frog();
+    new item_tricky_treat();
 }

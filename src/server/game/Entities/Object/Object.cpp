@@ -16,6 +16,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
+#include <mutex>
 #include "Common.h"
 #include "SharedDefines.h"
 #include "WorldPacket.h"
@@ -37,6 +39,7 @@
 #include "TargetedMovementGenerator.h"
 #include "WaypointMovementGenerator.h"
 #include "VMapFactory.h"
+#include "vmap_mutex.hpp"
 #include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
@@ -753,6 +756,11 @@ void Object::ClearUpdateMask(bool remove)
     }
 }
 
+bool Object::is_object_updated() const
+{
+    return m_objectUpdated;
+}
+
 void Object::BuildFieldsUpdate(Player* player, UpdateDataMapType& data_map) const
 {
     UpdateDataMapType::iterator iter = data_map.find(player);
@@ -1400,6 +1408,9 @@ bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool
 
 bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
 {
+    if (auto c = dynamic_cast<const Creature *>(obj))
+        if (c->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_IGNORE_LOS)
+            return true;
     if (!IsInMap(obj))
         return false;
 
@@ -1410,9 +1421,13 @@ bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
 
 bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
 {
+    if (auto c = dynamic_cast<const Creature *>(this))
+        if (c->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_IGNORE_LOS)
+            return true;
     /*float x, y, z;
     GetPosition(x, y, z);
     VMAP::IVMapManager* vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
+    std::lock_guard<vmap_mutex_type> l(vmap_mutex());
     return vMapManager->isInLineOfSight(GetMapId(), x, y, z+2.0f, ox, oy, oz+2.0f);*/
     if (IsInWorld())
         return GetMap()->isInLineOfSight(GetPositionX(), GetPositionY(), GetPositionZ()+2.f, ox, oy, oz+2.f, GetPhaseMask());
@@ -2845,7 +2860,14 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
     floor = GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true);
     destz = fabs(ground - pos.m_positionZ) <= fabs(floor - pos.m_positionZ) ? ground : floor;
 
-    bool col = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(GetMapId(), pos.m_positionX, pos.m_positionY, pos.m_positionZ+0.5f, destx, desty, destz+0.5f, destx, desty, destz, -0.5f);
+    bool col;
+    {
+        auto &m = *VMAP::VMapFactory::createOrGetVMapManager();
+        std::lock_guard<vmap_mutex_type> l(vmap_mutex());
+        col = m.getObjectHitPos(GetMapId(), pos.m_positionX, pos.m_positionY,
+                    pos.m_positionZ + 0.5f, destx, desty, destz + 0.5f, destx, desty,
+                    destz, -0.5f);
+    }
 
     // collision occured
     if (col)

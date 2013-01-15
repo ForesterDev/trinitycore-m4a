@@ -33,6 +33,7 @@ npc_OOX17
 npc_tooga
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
@@ -454,7 +455,7 @@ public:
             creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
             DoScriptText(SAY_OOX_START, creature);
 
-            if (npc_escortAI* pEscortAI = CAST_AI(npc_OOX17::npc_OOX17AI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_OOX17::npc_OOX17AI, creature->AI()))
                 pEscortAI->Start(true, false, player->GetGUID());
         }
         return true;
@@ -544,7 +545,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_TOOGA)
         {
-            if (npc_toogaAI* pToogaAI = CAST_AI(npc_tooga::npc_toogaAI, creature->AI()))
+            if (auto pToogaAI = CAST_AI(npc_tooga::npc_toogaAI, creature->AI()))
                 pToogaAI->StartFollow(player, FACTION_TOOG_ESCORTEE, quest);
         }
 

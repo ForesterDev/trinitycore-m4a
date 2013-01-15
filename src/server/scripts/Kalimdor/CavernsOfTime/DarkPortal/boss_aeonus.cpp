@@ -23,6 +23,7 @@ SDComment: Some spells not implemented
 SDCategory: Caverns of Time, The Dark Portal
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "dark_portal.h"

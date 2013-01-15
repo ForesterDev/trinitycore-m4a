@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Zul'Aman
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "zulaman.h"

@@ -28,6 +28,7 @@ npc_torek
 npc_ruul_snowhoof
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
@@ -157,7 +158,7 @@ class npc_torek : public CreatureScript
                 creature->AI()->Talk(SAY_READY, player->GetGUID());
                 creature->setFaction(113);
 
-                if (npc_escortAI* pEscortAI = CAST_AI(npc_torekAI, creature->AI()))
+                if (auto pEscortAI = CAST_AI(npc_torekAI, creature->AI()))
                     pEscortAI->Start(true, true, player->GetGUID());
             }
 
@@ -258,7 +259,7 @@ class npc_ruul_snowhoof : public CreatureScript
             {
                 creature->setFaction(113);
 
-                if (npc_escortAI* pEscortAI = CAST_AI(npc_ruul_snowhoofAI, (creature->AI())))
+                if (auto pEscortAI = CAST_AI(npc_ruul_snowhoofAI, (creature->AI())))
                     pEscortAI->Start(true, false, player->GetGUID());
             }
 
@@ -442,7 +443,7 @@ class npc_muglash : public CreatureScript
         {
             if (quest->GetQuestId() == QUEST_VORSHA)
             {
-                if (npc_muglashAI* pEscortAI = CAST_AI(npc_muglashAI, creature->AI()))
+                if (auto pEscortAI = CAST_AI(npc_muglashAI, creature->AI()))
                 {
                     DoScriptText(SAY_MUG_START1, creature);
                     creature->setFaction(113);
@@ -463,7 +464,7 @@ class go_naga_brazier : public GameObjectScript
         {
             if (Creature* creature = GetClosestCreatureWithEntry(go, NPC_MUGLASH, INTERACTION_DISTANCE*2))
             {
-                if (npc_muglash::npc_muglashAI* pEscortAI = CAST_AI(npc_muglash::npc_muglashAI, creature->AI()))
+                if (auto pEscortAI = CAST_AI(npc_muglash::npc_muglashAI, creature->AI()))
                 {
                     DoScriptText(SAY_MUG_BRAZIER_WAIT, creature);
 

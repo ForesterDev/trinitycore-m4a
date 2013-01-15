@@ -23,6 +23,7 @@ SDComment: Charging healers and casters not working. Perhaps wrong Spell Timers.
 SDCategory: Zul'Gurub
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "zulgurub.h"

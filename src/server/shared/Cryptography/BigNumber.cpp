@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include <ace/Guard_T.h>
 
 #include "Cryptography/BigNumber.h"

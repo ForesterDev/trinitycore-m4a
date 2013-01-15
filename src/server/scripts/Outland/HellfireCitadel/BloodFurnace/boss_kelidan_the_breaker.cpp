@@ -28,6 +28,7 @@ boss_kelidan_the_breaker
 mob_shadowmoon_channeler
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellAuras.h"

@@ -16,11 +16,14 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
+#include <mutex>
 #include "MapInstanced.h"
 #include "ObjectMgr.h"
 #include "MapManager.h"
 #include "Battleground.h"
 #include "VMapFactory.h"
+#include "vmap_mutex.hpp"
 #include "InstanceSaveMgr.h"
 #include "World.h"
 #include "Group.h"
@@ -140,7 +143,7 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
     }
     else
     {
-        InstancePlayerBind* pBind = player->GetBoundInstance(GetId(), player->GetDifficulty(IsRaid()));
+        InstancePlayerBind* pBind = GetEntry() ? player->GetBoundInstance(*GetEntry(), player->GetDifficulty(IsRaid())) : nullptr;
         InstanceSave* pSave = pBind ? pBind->save : NULL;
 
         // the player's permanent player bind is taken into consideration first
@@ -157,6 +160,7 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
                     pSave = groupBind->save;
             }
         }
+        Difficulty diff = player->GetGroup() ? player->GetGroup()->GetDifficulty(IsRaid()) : player->GetDifficulty(IsRaid());
         if (pSave)
         {
             // solo/perm/group
@@ -164,7 +168,7 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
             map = FindInstanceMap(newInstanceId);
             // it is possible that the save exists but the map doesn't
             if (!map)
-                map = CreateInstance(newInstanceId, pSave, pSave->GetDifficulty());
+                map = CreateInstance(newInstanceId, pSave, diff);
         }
         else
         {
@@ -172,7 +176,6 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
             // the instance will be created for the first time
             newInstanceId = sMapMgr->GenerateInstanceId();
 
-            Difficulty diff = player->GetGroup() ? player->GetGroup()->GetDifficulty(IsRaid()) : player->GetDifficulty(IsRaid());
             //Seems it is now possible, but I do not know if it should be allowed
             //ASSERT(!FindInstanceMap(NewInstanceId));
             map = FindInstanceMap(newInstanceId);
@@ -259,7 +262,11 @@ bool MapInstanced::DestroyInstance(InstancedMaps::iterator &itr)
     // should only unload VMaps if this is the last instance and grid unloading is enabled
     if (m_InstancedMaps.size() <= 1 && sWorld->getBoolConfig(CONFIG_GRID_UNLOAD))
     {
-        VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(itr->second->GetId());
+        {
+            auto &m = *VMAP::VMapFactory::createOrGetVMapManager();
+            std::lock_guard<vmap_mutex_type> l(vmap_mutex());
+            m.unloadMap(itr->second->GetId());
+        }
         // in that case, unload grids of the base map, too
         // so in the next map creation, (EnsureGridCreated actually) VMaps will be reloaded
         Map::UnloadAll();

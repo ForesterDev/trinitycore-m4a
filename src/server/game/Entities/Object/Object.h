@@ -56,7 +56,6 @@ enum TypeMask
     TYPEMASK_GAMEOBJECT     = 0x0020,
     TYPEMASK_DYNAMICOBJECT  = 0x0040,
     TYPEMASK_CORPSE         = 0x0080,
-    TYPEMASK_SEER           = TYPEMASK_UNIT | TYPEMASK_DYNAMICOBJECT
 };
 
 enum TypeID
@@ -294,6 +293,8 @@ class Object
         void ClearUpdateMask(bool remove);
 
         uint16 GetValuesCount() const { return m_valuesCount; }
+
+        bool is_object_updated() const;
 
         virtual bool hasQuest(uint32 /* quest_id */) const { return false; }
         virtual bool hasInvolvedQuest(uint32 /* quest_id */) const { return false; }

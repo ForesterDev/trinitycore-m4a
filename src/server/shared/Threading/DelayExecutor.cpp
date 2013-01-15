@@ -1,3 +1,4 @@
+#include "stdafx.hpp"
 #include <ace/Singleton.h>
 #include <ace/Thread_Mutex.h>
 #include <ace/Log_Msg.h>

@@ -23,6 +23,7 @@ SDComment: Should be replaced with core based AI
 SDCategory: Creatures
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "PassiveAI.h"

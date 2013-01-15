@@ -23,6 +23,7 @@ SDComment: Need some cosmetics updates when archeadas door are closing (Guardian
 SDCategory: Uldaman
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
 #include "uldaman.h"

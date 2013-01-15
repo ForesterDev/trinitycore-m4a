@@ -19,6 +19,7 @@
  * Comment: TODO: spawn troll waves
  */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellAuras.h"

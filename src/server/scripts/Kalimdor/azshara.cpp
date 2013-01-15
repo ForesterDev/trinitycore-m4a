@@ -30,6 +30,7 @@ mob_rizzle_sprysprocket
 mob_depth_charge
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"

@@ -1,0 +1,23 @@
+# use glob syntax.
+syntax: glob
+
+build*/
+.directory
+.mailmap
+*.orig
+*.rej
+*~
+.git/
+*.kdev*
+*.bak
+*.patch
+*.diff
+*.REMOTE.*
+*.BACKUP.*
+*.BASE.*
+*.LOCAL.*
+
+# use regexp syntax.
+syntax: regexp
+glob:**.sdf
+glob:**.opensdf

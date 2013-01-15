@@ -20,6 +20,7 @@
 #define TRINITYCORE_GAMEOBJECT_H
 
 #include "Common.h"
+#include "ai_ptr.hpp"
 #include "SharedDefines.h"
 #include "Unit.h"
 #include "Object.h"
@@ -798,7 +799,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>
 
         uint64 GetRotation() const { return m_rotation; }
         virtual uint32 GetScriptId() const { return GetGOInfo()->ScriptId; }
-        GameObjectAI* AI() const { return m_AI; }
+        ai_ptr<GameObjectAI> AI() const { return ai_ptr<GameObjectAI>(m_AI, nullptr); }
 
         std::string GetAIName() const;
         void SetDisplayId(uint32 displayid);

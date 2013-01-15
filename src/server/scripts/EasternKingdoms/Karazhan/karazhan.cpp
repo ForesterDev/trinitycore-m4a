@@ -29,6 +29,7 @@ npc_berthold
 npc_image_of_medivh
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
@@ -329,7 +330,7 @@ public:
     bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        npc_barnesAI* pBarnesAI = CAST_AI(npc_barnes::npc_barnesAI, creature->AI());
+        auto pBarnesAI = CAST_AI(npc_barnes::npc_barnesAI, creature->AI());
 
         switch (action)
         {
@@ -377,7 +378,7 @@ public:
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, OZ_GM_GOSSIP3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
                 }
 
-                if (npc_barnesAI* pBarnesAI = CAST_AI(npc_barnes::npc_barnesAI, creature->AI()))
+                if (auto pBarnesAI = CAST_AI(npc_barnes::npc_barnesAI, creature->AI()))
                 {
                     if (!pBarnesAI->RaidWiped)
                         player->SEND_GOSSIP_MENU(8970, creature->GetGUID());

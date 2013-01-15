@@ -23,6 +23,7 @@ Comment:
 Category: Hellfire Citadel, Hellfire Ramparts
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

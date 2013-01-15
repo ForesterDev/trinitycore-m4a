@@ -32,6 +32,7 @@ npc_maxx_a_million
 go_captain_tyralius_prison
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
@@ -1025,7 +1026,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_MARK_V_IS_ALIVE)
         {
-            if (npc_maxx_a_million_escortAI* pEscortAI = CAST_AI(npc_maxx_a_million_escort::npc_maxx_a_million_escortAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_maxx_a_million_escort::npc_maxx_a_million_escortAI, creature->AI()))
             {
                 creature->setFaction(113);
                 pEscortAI->Start(false, false, player->GetGUID());

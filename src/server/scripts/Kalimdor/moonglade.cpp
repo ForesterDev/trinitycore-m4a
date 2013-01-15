@@ -31,6 +31,7 @@ npc_clintar_spirit
 npc_clintar_dreamwalker
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"

@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "MapManager.h"
 #include "InstanceSaveMgr.h"
 #include "DatabaseEnv.h"
@@ -238,7 +239,7 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
             /*
                 This check has to be moved to InstanceMap::CanEnter()
                 // Player permanently bounded to different instance than groups one
-                InstancePlayerBind* playerBoundedInstance = player->GetBoundInstance(mapid, player->GetDifficulty(entry->IsRaid()));
+                InstancePlayerBind* playerBoundedInstance = player->GetBoundInstance(*entry, player->GetDifficulty(entry->IsRaid()));
                 if (playerBoundedInstance && playerBoundedInstance->perm && playerBoundedInstance->save &&
                     boundedInstance->save->GetInstanceId() != playerBoundedInstance->save->GetInstanceId())
                 {

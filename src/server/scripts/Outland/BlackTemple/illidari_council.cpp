@@ -23,6 +23,7 @@ SDComment: Circle of Healing not working properly.
 SDCategory: Black Temple
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellScript.h"

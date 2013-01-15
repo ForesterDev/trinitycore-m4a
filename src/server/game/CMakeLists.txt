@@ -15,7 +15,15 @@ endif()
 file(GLOB_RECURSE sources_Accounts Accounts/*.cpp Accounts/*.h)
 file(GLOB_RECURSE sources_Achievements Achievements/*.cpp Achievements/*.h)
 file(GLOB_RECURSE sources_Addons Addons/*.cpp Addons/*.h)
-file(GLOB_RECURSE sources_AI AI/*.cpp AI/*.h)
+file(GLOB_RECURSE sources_AI AI/*.cpp AI/*.h AI/*.hpp)
+file(GLOB EXCLUDED_SOURCES
+  AI/ScriptedAI/ScriptedCreature.cpp
+  AI/ScriptedAI/ScriptedEscortAI.cpp
+  AI/ScriptedAI/ScriptedFollowerAI.cpp
+  AI/ScriptedAI/ScriptedGuardAI.cpp
+  AI/ScriptedAI/ScriptedSimpleAI.cpp)
+list(REMOVE_ITEM sources_AI ${EXCLUDED_SOURCES})
+unset(EXCLUDED_SOURCES)
 file(GLOB_RECURSE sources_AuctionHouse AuctionHouse/*.cpp AuctionHouse/*.h)
 file(GLOB_RECURSE sources_Battlefield Battlefield/*.cpp Battlefield/*.h)
 file(GLOB_RECURSE sources_Battlegrounds Battlegrounds/*.cpp Battlegrounds/*.h)
@@ -43,6 +51,12 @@ file(GLOB_RECURSE sources_Pools Pools/*.cpp Pools/*.h)
 file(GLOB_RECURSE sources_Quests Quests/*.cpp Quests/*.h)
 file(GLOB_RECURSE sources_Reputation Reputation/*.cpp Reputation/*.h)
 file(GLOB_RECURSE sources_Scripting Scripting/*.cpp Scripting/*.h)
+file(GLOB EXCLUDED_SOURCES
+  Scripting/ScriptLoader.cpp
+  Scripting/ScriptMgr.cpp
+  Scripting/ScriptSystem.cpp)
+list(REMOVE_ITEM sources_Scripting ${EXCLUDED_SOURCES})
+unset(EXCLUDED_SOURCES)
 file(GLOB_RECURSE sources_Server Server/*.cpp Server/*.h)
 file(GLOB_RECURSE sources_Skills Skills/*.cpp Skills/*.h)
 file(GLOB_RECURSE sources_Spells Spells/*.cpp Spells/*.h)
@@ -52,18 +66,11 @@ file(GLOB_RECURSE sources_Tickets Tickets/*.cpp Tickets/*.h)
 file(GLOB_RECURSE sources_Warden Warden/*.cpp Warden/*.h)
 file(GLOB_RECURSE sources_Weather Weather/*.cpp Weather/*.h)
 file(GLOB_RECURSE sources_World World/*.cpp World/*.h)
+file(GLOB sources_localdir *.cpp *.hpp)
 
 # Create game-libary
 
-if( USE_COREPCH AND MSVC )
-  set(game_STAT_SRCS
-    PrecompiledHeaders/gamePCH.cpp
-    PrecompiledHeaders/gamePCH.h
-  )
-endif()
-
 set(game_STAT_SRCS
-  ${game_STAT_SRCS}
   ${sources_Accounts}
   ${sources_Achievements}
   ${sources_Addons}
@@ -92,6 +99,7 @@ set(game_STAT_SRCS
   ${sources_Movement}
   ${sources_OutdoorPvP}
   ${sources_Pools}
+  PrecompiledHeaders/gamePCH.h
   ${sources_Quests}
   ${sources_Reputation}
   ${sources_Scripting}
@@ -104,30 +112,10 @@ set(game_STAT_SRCS
   ${sources_Warden}
   ${sources_Weather}
   ${sources_World}
+  ${sources_localdir}
 )
 
 include_directories(
-  ${CMAKE_BINARY_DIR}
-  ${CMAKE_SOURCE_DIR}/dep/g3dlite/include
-  ${CMAKE_SOURCE_DIR}/dep/SFMT
-  ${CMAKE_SOURCE_DIR}/dep/zlib
-  ${CMAKE_SOURCE_DIR}/src/server/collision
-  ${CMAKE_SOURCE_DIR}/src/server/collision/Management
-  ${CMAKE_SOURCE_DIR}/src/server/collision/Models
-  ${CMAKE_SOURCE_DIR}/src/server/collision/Maps
-  ${CMAKE_SOURCE_DIR}/src/server/shared
-  ${CMAKE_SOURCE_DIR}/src/server/shared/Configuration
-  ${CMAKE_SOURCE_DIR}/src/server/shared/Cryptography
-  ${CMAKE_SOURCE_DIR}/src/server/shared/Cryptography/Authentication
-  ${CMAKE_SOURCE_DIR}/src/server/shared/Database
-  ${CMAKE_SOURCE_DIR}/src/server/shared/DataStores
-  ${CMAKE_SOURCE_DIR}/src/server/shared/Debugging
-  ${CMAKE_SOURCE_DIR}/src/server/shared/Dynamic/LinkedReference
-  ${CMAKE_SOURCE_DIR}/src/server/shared/Dynamic
-  ${CMAKE_SOURCE_DIR}/src/server/shared/Logging
-  ${CMAKE_SOURCE_DIR}/src/server/shared/Packets
-  ${CMAKE_SOURCE_DIR}/src/server/shared/Threading
-  ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/Accounts
   ${CMAKE_CURRENT_SOURCE_DIR}/Achievements
@@ -199,8 +187,30 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/Warden/Modules
   ${CMAKE_CURRENT_SOURCE_DIR}/Weather
   ${CMAKE_CURRENT_SOURCE_DIR}/World
+  ${CMAKE_BINARY_DIR}
+  ${CMAKE_SOURCE_DIR}/dep/g3dlite/include
+  ${CMAKE_SOURCE_DIR}/dep/SFMT
+  ${CMAKE_SOURCE_DIR}/dep/zlib
+  ${CMAKE_SOURCE_DIR}/src/server/collision
+  ${CMAKE_SOURCE_DIR}/src/server/collision/Management
+  ${CMAKE_SOURCE_DIR}/src/server/collision/Models
+  ${CMAKE_SOURCE_DIR}/src/server/collision/Maps
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Configuration
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Cryptography
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Cryptography/Authentication
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Database
+  ${CMAKE_SOURCE_DIR}/src/server/shared/DataStores
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Debugging
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Dynamic/LinkedReference
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Dynamic
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Logging
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Packets
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Threading
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
   ${CMAKE_SOURCE_DIR}/src/server/scripts/PrecompiledHeaders
   ${ACE_INCLUDE_DIR}
+  ${Boost_INCLUDE_DIRS}
   ${MYSQL_INCLUDE_DIR}
   ${OPENSSL_INCLUDE_DIR}
 )
@@ -209,11 +219,14 @@ add_library(game STATIC ${game_STAT_SRCS})
 
 add_dependencies(game revision.h)
 
+target_link_libraries(game)
+
 # Generate precompiled header
 if( USE_COREPCH )
   if(CMAKE_COMPILER_IS_GNUCXX)
-    add_precompiled_header(game ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/gamePCH.h)
+    add_precompiled_header(game ${CMAKE_CURRENT_SOURCE_DIR}/stdafx.hpp)
   elseif(MSVC)
-    add_native_precompiled_header(game ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/gamePCH)
+    set_precompiled_header(game "stdafx.hpp"
+      "${CMAKE_CURRENT_SOURCE_DIR}/stdafx.cpp")
   endif()
 endif()

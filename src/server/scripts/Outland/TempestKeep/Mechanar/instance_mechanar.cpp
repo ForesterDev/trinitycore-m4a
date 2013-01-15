@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Mechanar
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
 #include "mechanar.h"

@@ -24,6 +24,7 @@ EndScriptData */
 
 //TODO rewrite Armageddon
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "sunwell_plateau.h"

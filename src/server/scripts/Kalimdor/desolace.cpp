@@ -30,6 +30,7 @@ npc_dalinda_malem
 go_demon_portal
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
@@ -215,7 +216,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_RETURN_TO_VAHLARRIEL)
        {
-            if (npc_escortAI* pEscortAI = CAST_AI(npc_dalinda::npc_dalindaAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_dalinda::npc_dalindaAI, creature->AI()))
             {
                 pEscortAI->Start(true, false, player->GetGUID());
                 creature->setFaction(113);

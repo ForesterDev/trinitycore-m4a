@@ -21,6 +21,7 @@ SD%Complete: 100%
 SDComment: Support for quest 219.
 Script Data End */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"

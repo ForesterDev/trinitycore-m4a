@@ -30,6 +30,7 @@ npc_the_scourge_cauldron
 npc_andorhal_tower
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
@@ -295,7 +296,7 @@ public:
 
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
     {
-        npc_escortAI* pEscortAI = CAST_AI(npc_anchorite_truuen::npc_anchorite_truuenAI, creature->AI());
+        auto pEscortAI = CAST_AI(npc_anchorite_truuen::npc_anchorite_truuenAI, creature->AI());
 
         if (quest->GetQuestId() == QUEST_TOMB_LIGHTBRINGER)
             pEscortAI->Start(true, true, player->GetGUID());

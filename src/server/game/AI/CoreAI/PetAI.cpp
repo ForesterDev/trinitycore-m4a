@@ -16,8 +16,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "PetAI.h"
-#include "Errors.h"
+#include <Debugging/Errors.h>
 #include "Pet.h"
 #include "Player.h"
 #include "DBCStores.h"
@@ -148,7 +149,7 @@ void PetAI::UpdateAI(const uint32 diff)
             if (!spellInfo)
                 continue;
 
-            if (me->GetCharmInfo() && me->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
+            if (me->GetCharmInfo() && me->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo, 0))
                 continue;
 
             if (spellInfo->IsPositive())

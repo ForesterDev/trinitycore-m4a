@@ -28,6 +28,7 @@ boss_mekgineer_steamrigger
 mob_steamrigger_mechanic
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "steam_vault.h"

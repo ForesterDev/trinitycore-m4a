@@ -23,6 +23,7 @@ SDComment: Some details and adjustments left to do, probably nothing major. Spaw
 SDCategory: Coilfang Resevoir, Serpent Shrine Cavern
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "serpent_shrine.h"

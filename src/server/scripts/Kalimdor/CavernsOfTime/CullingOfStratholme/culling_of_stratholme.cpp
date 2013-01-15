@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
@@ -237,7 +238,7 @@ public:
     bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        npc_arthasAI* ai = CAST_AI(npc_arthas::npc_arthasAI, creature->AI());
+        auto ai = CAST_AI(npc_arthas::npc_arthasAI, creature->AI());
 
         if (!ai)
             return false;
@@ -279,7 +280,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        npc_arthasAI* ai = CAST_AI(npc_arthas::npc_arthasAI, creature->AI());
+        auto ai = CAST_AI(npc_arthas::npc_arthasAI, creature->AI());
 
         if (ai && ai->bStepping == false)
         {

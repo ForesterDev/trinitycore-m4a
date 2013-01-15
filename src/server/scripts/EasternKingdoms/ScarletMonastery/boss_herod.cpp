@@ -23,6 +23,7 @@ SDComment: Should in addition spawn Myrmidons in the hallway outside
 SDCategory: Scarlet Monastery
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"

@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
 #include "temple_of_ahnqiraj.h"

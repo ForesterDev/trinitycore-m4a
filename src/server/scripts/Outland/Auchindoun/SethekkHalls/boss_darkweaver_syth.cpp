@@ -23,6 +23,7 @@ SDComment: Shock spells/times need more work. Heroic partly implemented.
 SDCategory: Auchindoun, Sethekk Halls
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

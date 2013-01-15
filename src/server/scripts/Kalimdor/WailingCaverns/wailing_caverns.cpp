@@ -26,6 +26,7 @@ EndScriptData */
 /* ContentData
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"

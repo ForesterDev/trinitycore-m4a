@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "Common.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
@@ -36,8 +37,12 @@
 #include "SpellScript.h"
 #include "Vehicle.h"
 
+using boost::none;
+using boost::optional;
+using Trinity::UnitListSearcher;
+
 AuraApplication::AuraApplication(Unit* target, Unit* caster, Aura* aura, uint8 effMask):
-_target(target), _base(aura), _removeMode(AURA_REMOVE_NONE), _slot(MAX_AURAS),
+_target(target), _base(aura), _removeMode(AURA_REMOVE_NONE),
 _flags(AFLAG_NONE), _effectsToApply(effMask), _needClientUpdate(false)
 {
     ASSERT(GetTarget() && GetBase());
@@ -45,7 +50,7 @@ _flags(AFLAG_NONE), _effectsToApply(effMask), _needClientUpdate(false)
     if (GetBase()->CanBeSentToClient())
     {
         // Try find slot for aura
-        uint8 slot = MAX_AURAS;
+        optional<uint8> slot;
         // Lookup for auras already applied from spell
         if (AuraApplication * foundAura = GetTarget()->GetAuraApplication(GetBase()->GetId(), GetBase()->GetCasterGUID(), GetBase()->GetCastItemGUID()))
         {
@@ -57,7 +62,7 @@ _flags(AFLAG_NONE), _effectsToApply(effMask), _needClientUpdate(false)
             Unit::VisibleAuraMap const* visibleAuras = GetTarget()->GetVisibleAuras();
             // lookup for free slots in units visibleAuras
             Unit::VisibleAuraMap::const_iterator itr = visibleAuras->find(0);
-            for (uint32 freeSlot = 0; freeSlot < MAX_AURAS; ++itr, ++freeSlot)
+            for (uint32 freeSlot = 0; freeSlot < max_unit_auras; ++itr, ++freeSlot)
             {
                 if (itr == visibleAuras->end() || itr->first != freeSlot)
                 {
@@ -68,12 +73,12 @@ _flags(AFLAG_NONE), _effectsToApply(effMask), _needClientUpdate(false)
         }
 
         // Register Visible Aura
-        if (slot < MAX_AURAS)
+        if (slot)
         {
             _slot = slot;
-            GetTarget()->SetVisibleAura(slot, this);
+            GetTarget()->SetVisibleAura(*slot, this);
             SetNeedClientUpdate();
-            sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Aura: %u Effect: %d put to unit visible auras slot: %u", GetBase()->GetId(), GetEffectMask(), slot);
+            sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Aura: %u Effect: %d put to unit visible auras slot: %u", GetBase()->GetId(), GetEffectMask(), *slot);
         }
         else
             sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Aura: %u Effect: %d could not find empty unit visible slot", GetBase()->GetId(), GetEffectMask());
@@ -84,9 +89,9 @@ _flags(AFLAG_NONE), _effectsToApply(effMask), _needClientUpdate(false)
 
 void AuraApplication::_Remove()
 {
-    uint8 slot = GetSlot();
+    optional<uint8> slot = GetSlot();
 
-    if (slot >= MAX_AURAS)
+    if (!slot)
         return;
 
     if (AuraApplication * foundAura = _target->GetAuraApplication(GetBase()->GetId(), GetBase()->GetCasterGUID(), GetBase()->GetCastItemGUID()))
@@ -94,20 +99,20 @@ void AuraApplication::_Remove()
         // Reuse visible aura slot by aura which is still applied - prevent storing dead pointers
         if (slot == foundAura->GetSlot())
         {
-            if (GetTarget()->GetVisibleAura(slot) == this)
+            if (GetTarget()->GetVisibleAura(*slot) == this)
             {
-                GetTarget()->SetVisibleAura(slot, foundAura);
+                GetTarget()->SetVisibleAura(*slot, foundAura);
                 foundAura->SetNeedClientUpdate();
             }
             // set not valid slot for aura - prevent removing other visible aura
-            slot = MAX_AURAS;
+            slot = none;
         }
     }
 
     // update for out of range group members
-    if (slot < MAX_AURAS)
+    if (slot)
     {
-        GetTarget()->RemoveVisibleAura(slot);
+        GetTarget()->RemoveVisibleAura(*slot);
         ClientUpdate(true);
     }
 }
@@ -177,15 +182,15 @@ void AuraApplication::_HandleEffect(uint8 effIndex, bool apply)
 
 void AuraApplication::BuildUpdatePacket(ByteBuffer& data, bool remove) const
 {
-    data << uint8(_slot);
+    data << uint8(*_slot);
 
     if (remove)
     {
-        ASSERT(!_target->GetVisibleAura(_slot));
+        ASSERT(!_target->GetVisibleAura(*_slot));
         data << uint32(0);
         return;
     }
-    ASSERT(_target->GetVisibleAura(_slot));
+    ASSERT(_target->GetVisibleAura(*_slot));
 
     Aura const* aura = GetBase();
     data << uint32(aura->GetId());
@@ -416,7 +421,7 @@ void Aura::_ApplyForTarget(Unit* target, Unit* caster, AuraApplication * auraApp
 void Aura::_UnapplyForTarget(Unit* target, Unit* caster, AuraApplication * auraApp)
 {
     ASSERT(target);
-    ASSERT(auraApp->GetRemoveMode());
+    ASSERT(auraApp->GetRemoveMode() != AURA_REMOVE_NONE);
     ASSERT(auraApp);
 
     ApplicationMap::iterator itr = m_applications.find(target->GetGUID());
@@ -1298,6 +1303,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         if (target->HasAura(61988) && !target->HasAura(25771))
                             target->RemoveAura(61988);
                         break;
+                    case 63120 /* Insane */:
+                        if (caster)
+                            caster->Kill(target);
+                        break;
+                    case 69674 /* Mutated Infection */:
+                    case 71224 /* Mutated Infection */:
+                    case 73022 /* Mutated Infection */:
+                    case 73023 /* Mutated Infection */:
+                        if (removeMode != AURA_REMOVE_BY_DEFAULT)
+                            target->CastSpell(target, m_spellInfo->Effects[2].CalcValue(), true);
+                        break;
                     case 72368: // Shared Suffering
                     case 72369:
                         if (caster)
@@ -1320,6 +1336,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             break;
                         target->CastSpell(target, 32612, true, NULL, GetEffect(1));
                         target->CombatStop();
+                        break;
+                    case 11129 /* Combustion */:
+                        if (removeMode != AURA_REMOVE_NONE && removeMode != AURA_REMOVE_BY_DEATH)
+                            if (caster)
+                                caster->RemoveAurasDueToSpell(28682);
+                        break;
+                    case 28682 /* Combustion */:
+                        if (removeMode != AURA_REMOVE_NONE && removeMode != AURA_REMOVE_BY_DEATH)
+                            target->RemoveAura(11129 /* Combustion */);
                         break;
                     case 74396: // Fingers of Frost
                         // Remove the IGNORE_AURASTATE aura
@@ -2391,14 +2416,16 @@ void UnitAura::FillTargetMap(std::map<Unit*, uint8> & targets, Unit* caster)
                     {
                         targetList.push_back(GetUnitOwner());
                         Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius);
-                        Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(GetUnitOwner(), targetList, u_check);
+                        UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck>
+                            searcher(GetUnitOwner(), targetList, u_check);
                         GetUnitOwner()->VisitNearbyObject(radius, searcher);
                         break;
                     }
                     case SPELL_EFFECT_APPLY_AREA_AURA_ENEMY:
                     {
                         Trinity::AnyAoETargetUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius); // No GetCharmer in searcher
-                        Trinity::UnitListSearcher<Trinity::AnyAoETargetUnitInObjectRangeCheck> searcher(GetUnitOwner(), targetList, u_check);
+                        UnitListSearcher<Trinity::AnyAoETargetUnitInObjectRangeCheck>
+                            searcher(GetUnitOwner(), targetList, u_check);
                         GetUnitOwner()->VisitNearbyObject(radius, searcher);
                         break;
                     }
@@ -2458,16 +2485,36 @@ void DynObjAura::FillTargetMap(std::map<Unit*, uint8> & targets, Unit* /*caster*
             || GetSpellInfo()->Effects[effIndex].TargetB.GetTarget() == TARGET_UNIT_DEST_AREA_ALLY)
         {
             Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(GetDynobjOwner(), dynObjOwnerCaster, radius);
-            Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(GetDynobjOwner(), targetList, u_check);
+            UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck>
+                searcher(GetDynobjOwner(), targetList, u_check);
             GetDynobjOwner()->VisitNearbyObject(radius, searcher);
         }
         else
         {
             Trinity::AnyAoETargetUnitInObjectRangeCheck u_check(GetDynobjOwner(), dynObjOwnerCaster, radius);
-            Trinity::UnitListSearcher<Trinity::AnyAoETargetUnitInObjectRangeCheck> searcher(GetDynobjOwner(), targetList, u_check);
+            UnitListSearcher<Trinity::AnyAoETargetUnitInObjectRangeCheck>
+                searcher(GetDynobjOwner(), targetList, u_check);
             GetDynobjOwner()->VisitNearbyObject(radius, searcher);
         }
-
+        if (GetSpellInfo()->Effects[effIndex].TargetB.GetTarget() == TARGET_UNIT_DEST_AREA_ENTRY)
+        {
+            int e = 0;
+            switch (GetSpellInfo()->Id)
+            {
+            case 66193 /* Permafrost */:
+            case 67855 /* Permafrost */:
+            case 67856 /* Permafrost */:
+            case 67857 /* Permafrost */:
+                e = 34660 /* Anub'arak */;
+                break;
+            }
+            if (e)
+            {
+                Trinity::AllCreaturesOfEntryInRange c(GetDynobjOwner(), e, radius);
+                UnitListSearcher<decltype(c)> s(GetDynobjOwner(), targetList, c);
+                GetDynobjOwner()->VisitNearbyObject(radius, s);
+            }
+        }
         for (UnitList::iterator itr = targetList.begin(); itr!= targetList.end();++itr)
         {
             std::map<Unit*, uint8>::iterator existing = targets.find(*itr);

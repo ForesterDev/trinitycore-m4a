@@ -27,6 +27,7 @@ npc_plaguehound_tracker
 npc_apothecary_hanes
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
@@ -354,7 +355,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_DEFEAT_AT_RING)
         {
-            if (npc_daegarnAI* pDaegarnAI = CAST_AI(npc_daegarn::npc_daegarnAI, creature->AI()))
+            if (auto pDaegarnAI = CAST_AI(npc_daegarn::npc_daegarnAI, creature->AI()))
                 pDaegarnAI->StartEvent(player->GetGUID());
         }
 

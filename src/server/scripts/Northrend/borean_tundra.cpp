@@ -37,6 +37,7 @@ npc_lurgglbr
 npc_nexus_drake_hatchling
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
@@ -806,7 +807,7 @@ public:
                 go->UseDoorOrButton(20);
             }
 
-            if (npc_escortAI* pEscortAI = CAST_AI(npc_lurgglbr::npc_lurgglbrAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_lurgglbr::npc_lurgglbrAI, creature->AI()))
                 pEscortAI->Start(true, false, player->GetGUID());
 
             switch (player->GetTeam())

@@ -20,6 +20,7 @@
     \ingroup Trinityd
 */
 
+#include "stdafx.hpp"
 #include "Common.h"
 #include "ObjectAccessor.h"
 #include "World.h"

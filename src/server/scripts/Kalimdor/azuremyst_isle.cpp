@@ -33,6 +33,7 @@ go_ravager_cage
 npc_death_ravager
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
@@ -358,7 +359,7 @@ public:
         if (quest->GetQuestId() == QUEST_A_CRY_FOR_SAY_HELP)
         {
             creature->setFaction(113);
-            if (npc_escortAI* pEscortAI = CAST_AI(npc_escortAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_escortAI, creature->AI()))
                 pEscortAI->Start(true, false, player->GetGUID());
         }
         return true;

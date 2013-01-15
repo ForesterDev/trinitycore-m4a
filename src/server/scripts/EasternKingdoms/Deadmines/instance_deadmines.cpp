@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Deadmines
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
 #include "deadmines.h"

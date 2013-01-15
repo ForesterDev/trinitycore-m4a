@@ -29,6 +29,7 @@ go_mausoleum_door
 go_mausoleum_trigger
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

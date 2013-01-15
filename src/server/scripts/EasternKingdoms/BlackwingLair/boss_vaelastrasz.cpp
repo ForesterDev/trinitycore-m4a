@@ -23,6 +23,7 @@ SDComment: Burning Adrenaline not correctly implemented in core
 SDCategory: Blackwing Lair
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"

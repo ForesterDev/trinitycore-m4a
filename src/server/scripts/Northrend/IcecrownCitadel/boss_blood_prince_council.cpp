@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -131,6 +132,7 @@ enum Events
     EVENT_SHOCK_VORTEX          = 10,
     EVENT_BOMB_DESPAWN          = 11,
     EVENT_CONTINUE_FALLING      = 12,
+    EVENT_SHADOW_PRISON,
 };
 
 enum Actions
@@ -212,19 +214,19 @@ class boss_blood_council_controller : public CreatureScript
                 if (Creature* keleseth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_KELESETH_GUID)))
                 {
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, keleseth);
-                    DoZoneInCombat(keleseth);
+                    DoZoneInCombat(keleseth, 0.0F);
                 }
 
                 if (Creature* taldaram = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_TALDARAM_GUID)))
                 {
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, taldaram);
-                    DoZoneInCombat(taldaram);
+                    DoZoneInCombat(taldaram, 0.0F);
                 }
 
                 if (Creature* valanar = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_VALANAR_GUID)))
                 {
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, valanar);
-                    DoZoneInCombat(valanar);
+                    DoZoneInCombat(valanar, 0.0F);
                 }
 
                 events.ScheduleEvent(EVENT_INVOCATION_OF_BLOOD, 46500);
@@ -375,8 +377,6 @@ class boss_prince_keleseth_icc : public CreatureScript
 
                 if (!me->isDead())
                     JustRespawned();
-
-                me->SetReactState(REACT_DEFENSIVE);
             }
 
             void Reset()
@@ -388,7 +388,6 @@ class boss_prince_keleseth_icc : public CreatureScript
                 _isEmpowered = false;
                 me->SetHealth(_spawnHealth);
                 instance->SetData(DATA_ORB_WHISPERER_ACHIEVEMENT, uint32(true));
-                me->SetReactState(REACT_DEFENSIVE);
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -403,6 +402,7 @@ class boss_prince_keleseth_icc : public CreatureScript
                 if (IsHeroic())
                 {
                     me->AddAura(SPELL_SHADOW_PRISON, me);
+                    events.ScheduleEvent(EVENT_SHADOW_PRISON, 0U);
                     DoCast(me, SPELL_SHADOW_PRISON_DUMMY);
                 }
             }
@@ -436,8 +436,15 @@ class boss_prince_keleseth_icc : public CreatureScript
 
             void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
             {
-                if (spell->Id == SPELL_INVOCATION_OF_BLOOD_KELESETH)
+                switch (spell->Id)
+                {
+                case SPELL_INVOCATION_OF_BLOOD_KELESETH:
                     DoAction(ACTION_CAST_INVOCATION);
+                    break;
+                case SPELL_SHADOW_PRISON_DUMMY:
+                    events.CancelEvent(EVENT_SHADOW_PRISON);
+                    break;
+                }
             }
 
             void JustSummoned(Creature* summon)
@@ -482,6 +489,7 @@ class boss_prince_keleseth_icc : public CreatureScript
                 {
                     case ACTION_STAND_UP:
                         me->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
+                        me->InitializeReactState();
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
                         me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
                         me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
@@ -528,13 +536,15 @@ class boss_prince_keleseth_icc : public CreatureScript
 
                 events.Update(diff);
 
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                while (uint32 eventId = events.ExecuteEvent())
+                for (; ; )
                 {
-                    switch (eventId)
+                    if (me->HasUnitState(UNIT_STATE_CASTING))
+                        return;
+
+                    switch (events.ExecuteEvent())
                     {
+                    case 0U:
+                        goto no_events;
                         case EVENT_BERSERK:
                             DoCast(me, SPELL_BERSERK);
                             Talk(EMOTE_KELESETH_BERSERK);
@@ -551,12 +561,18 @@ class boss_prince_keleseth_icc : public CreatureScript
                                 DoCastVictim(SPELL_SHADOW_LANCE);
                             events.ScheduleEvent(EVENT_SHADOW_LANCE, 2000);
                             break;
+                        case EVENT_SHADOW_PRISON:
+                            events.ScheduleEvent(EVENT_SHADOW_PRISON, 0U);
+                            DoCast(me, SPELL_SHADOW_PRISON_DUMMY);
+                            return;
                         default:
                             break;
                     }
                 }
 
+            no_events:
                 // does not melee
+                ;
             }
 
         private:
@@ -591,8 +607,6 @@ class boss_prince_taldaram_icc : public CreatureScript
 
                 if (!me->isDead())
                     JustRespawned();
-
-                me->SetReactState(REACT_DEFENSIVE);
             }
 
             void Reset()
@@ -604,11 +618,11 @@ class boss_prince_taldaram_icc : public CreatureScript
                 _isEmpowered = false;
                 me->SetHealth(_spawnHealth);
                 instance->SetData(DATA_ORB_WHISPERER_ACHIEVEMENT, uint32(true));
-                me->SetReactState(REACT_DEFENSIVE);
             }
 
-            void MoveInLineOfSight(Unit* /*who*/)
+            void MoveInLineOfSight(Unit* who)
             {
+                BossAI::MoveInLineOfSight(who);
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -700,6 +714,7 @@ class boss_prince_taldaram_icc : public CreatureScript
                 {
                     case ACTION_STAND_UP:
                         me->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
+                        me->InitializeReactState();
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
                         me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
                         me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
@@ -814,8 +829,6 @@ class boss_prince_valanar_icc : public CreatureScript
 
                 if (!me->isDead())
                     JustRespawned();
-
-                me->SetReactState(REACT_DEFENSIVE);
             }
 
             void Reset()
@@ -827,11 +840,11 @@ class boss_prince_valanar_icc : public CreatureScript
                 _isEmpowered = false;
                 me->SetHealth(me->GetMaxHealth());
                 instance->SetData(DATA_ORB_WHISPERER_ACHIEVEMENT, uint32(true));
-                me->SetReactState(REACT_DEFENSIVE);
             }
 
-            void MoveInLineOfSight(Unit* /*who*/)
+            void MoveInLineOfSight(Unit* who)
             {
+                BossAI::MoveInLineOfSight(who);
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -883,10 +896,6 @@ class boss_prince_valanar_icc : public CreatureScript
                         break;
                     case NPC_KINETIC_BOMB:
                     {
-                        float x, y, z;
-                        summon->GetPosition(x, y, z);
-                        float ground_Z = summon->GetMap()->GetHeight(summon->GetPhaseMask(), x, y, z, true, 500.0f);
-                        summon->GetMotionMaster()->MovePoint(POINT_KINETIC_BOMB_IMPACT, x, y, ground_Z);
                         summon->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                         break;
                     }
@@ -938,6 +947,7 @@ class boss_prince_valanar_icc : public CreatureScript
                 {
                     case ACTION_STAND_UP:
                         me->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
+                        me->InitializeReactState();
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
                         me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
                         me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
@@ -996,11 +1006,8 @@ class boss_prince_valanar_icc : public CreatureScript
                             Talk(SAY_VALANAR_BERSERK);
                             break;
                         case EVENT_KINETIC_BOMB:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
-                            {
-                                DoCast(target, SPELL_KINETIC_BOMB_TARGET);
-                                Talk(SAY_VALANAR_SPECIAL);
-                            }
+                            DoCastAOE(SPELL_KINETIC_BOMB_TARGET);
+                            Talk(SAY_VALANAR_SPECIAL);
                             events.ScheduleEvent(EVENT_KINETIC_BOMB, urand(18000, 24000));
                             break;
                         case EVENT_SHOCK_VORTEX:
@@ -1233,6 +1240,7 @@ class npc_kinetic_bomb : public CreatureScript
                 me->GetPosition(_x, _y, _groundZ);
                 me->DespawnOrUnsummon(60000);
                 _groundZ = me->GetMap()->GetHeight(me->GetPhaseMask(), _x, _y, _groundZ, true, 500.0f);
+                _events.ScheduleEvent(EVENT_CONTINUE_FALLING, 0U);
             }
 
             void DoAction(int32 const action)
@@ -1242,7 +1250,11 @@ class npc_kinetic_bomb : public CreatureScript
                 else if (action == ACTION_KINETIC_BOMB_JUMP)
                 {
                     if (!me->HasAura(SPELL_KINETIC_BOMB_KNOCKBACK))
-                        me->GetMotionMaster()->MoveCharge(_x, _y, me->GetPositionZ() + 100.0f, me->GetSpeed(MOVE_RUN), 0);
+                    {
+                        auto motion_master = me->GetMotionMaster();
+                        motion_master->Clear(false);
+                        motion_master->MoveCharge(_x, _y, me->GetPositionZ() + 100.0f, me->GetSpeed(MOVE_RUN), 0);
+                    }
                     _events.RescheduleEvent(EVENT_CONTINUE_FALLING, 3000);
                 }
             }
@@ -1260,7 +1272,11 @@ class npc_kinetic_bomb : public CreatureScript
                             me->DespawnOrUnsummon(5000);
                             break;
                         case EVENT_CONTINUE_FALLING:
-                            me->GetMotionMaster()->MoveCharge(_x, _y, _groundZ, me->GetSpeed(MOVE_WALK), POINT_KINETIC_BOMB_IMPACT);
+                            {
+                                auto motion_master = me->GetMotionMaster();
+                                motion_master->Clear(false);
+                                motion_master->MoveCharge(_x, _y, _groundZ, me->GetSpeed(MOVE_WALK), POINT_KINETIC_BOMB_IMPACT);
+                            }
                             break;
                         default:
                             break;

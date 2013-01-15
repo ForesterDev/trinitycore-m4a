@@ -23,6 +23,7 @@ SDComment: Some issues with class calls effecting more than one class
 SDCategory: Blackwing Lair
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

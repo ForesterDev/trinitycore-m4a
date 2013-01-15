@@ -20,6 +20,7 @@
 /// @{
 /// \file
 
+#include "stdafx.hpp"
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
 #include <ace/Version.h>

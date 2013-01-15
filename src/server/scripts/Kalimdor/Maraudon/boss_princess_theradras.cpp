@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Maraudon
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedCreature.h"

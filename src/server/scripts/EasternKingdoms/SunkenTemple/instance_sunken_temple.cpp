@@ -23,6 +23,7 @@ SDComment:Place Holder
 SDCategory: Sunken Temple
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
 #include "sunken_temple.h"

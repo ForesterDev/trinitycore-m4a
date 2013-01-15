@@ -25,11 +25,15 @@ EndScriptData */
 
 // Known bugs:
 // Some visuals aren't appearing right sometimes
+// Nether Portal doesn't spawn mistress in normal difficulty
+// Infernal Volcano doesn't spawn third infernal in normal difficulty
 //
 // TODO:
 // Redone summon's scripts in SAI
 // Add immunities to the boss and summons
 
+#include "stdafx.hpp"
+#include <stdexcept>
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "trial_of_the_crusader.h"
@@ -61,35 +65,36 @@ enum Equipment
 enum Summons
 {
     NPC_LEGION_FLAME     = 34784,
-    NPC_INFERNAL_VOLCANO = 34813,
     NPC_FEL_INFERNAL     = 34815, // immune to all CC on Heroic (stuns, banish, interrupt, etc)
-    NPC_NETHER_PORTAL    = 34825,
     NPC_MISTRESS_OF_PAIN = 34826,
 };
 
-enum BossSpells
+namespace
 {
-    SPELL_LEGION_FLAME                = 66197, // player should run away from raid because he triggers Legion Flame
-    SPELL_LEGION_FLAME_EFFECT         = 66201, // used by trigger npc
-    SPELL_NETHER_POWER                = 66228, // +20% of spell damage per stack, stackable up to 5/10 times, must be dispelled/stealed
-    SPELL_FEL_LIGHTING                = 66528, // jumps to nearby targets
-    SPELL_FEL_FIREBALL                = 66532, // does heavy damage to the tank, interruptable
-    SPELL_INCINERATE_FLESH            = 66237, // target must be healed or will trigger Burning Inferno
-    SPELL_BURNING_INFERNO             = 66242, // triggered by Incinerate Flesh
-    SPELL_INFERNAL_ERUPTION           = 66258, // summons Infernal Volcano
-    SPELL_INFERNAL_ERUPTION_EFFECT    = 66252, // summons Felflame Infernal (3 at Normal and inifinity at Heroic)
-    SPELL_NETHER_PORTAL               = 66269, // summons Nether Portal
-    SPELL_NETHER_PORTAL_EFFECT        = 66263, // summons Mistress of Pain (1 at Normal and infinity at Heroic)
+    enum BossSpells
+    {
+        SPELL_LEGION_FLAME                = 66197, // player should run away from raid because he triggers Legion Flame
+        SPELL_LEGION_FLAME_EFFECT         = 66201, // used by trigger npc
+        SPELL_NETHER_POWER                = 66228, // +20% of spell damage per stack, stackable up to 5/10 times, must be dispelled/stealed
+        SPELL_FEL_LIGHTING                = 66528, // jumps to nearby targets
+        SPELL_FEL_FIREBALL                = 66532, // does heavy damage to the tank, interruptable
+        SPELL_INCINERATE_FLESH            = 66237, // target must be healed or will trigger Burning Inferno
+        SPELL_BURNING_INFERNO             = 66242, // triggered by Incinerate Flesh
+        SPELL_INFERNAL_ERUPTION           = 66258, // summons Infernal Volcano
+        SPELL_INFERNAL_ERUPTION_EFFECT    = 66252, // summons Felflame Infernal (3 at Normal and inifinity at Heroic)
+        SPELL_NETHER_PORTAL               = 66269, // summons Nether Portal
+        SPELL_NETHER_PORTAL_EFFECT        = 66263, // summons Mistress of Pain (1 at Normal and infinity at Heroic)
 
-    SPELL_BERSERK                     = 64238, // unused
+        SPELL_BERSERK                     = 64238, // unused
 
-    // Mistress of Pain spells
-    SPELL_SHIVAN_SLASH                = 67098,
-    SPELL_SPINNING_STRIKE             = 66283,
-    SPELL_MISTRESS_KISS               = 67077,
-    SPELL_FEL_INFERNO                 = 67047,
-    SPELL_FEL_STREAK                  = 66494,
-};
+        // Mistress of Pain spells
+        SPELL_SHIVAN_SLASH                = 67098,
+        SPELL_SPINNING_STRIKE             = 66283,
+        SPELL_MISTRESS_KISS               = 67077,
+        SPELL_FEL_INFERNO                 = 67047,
+        SPELL_FEL_STREAK                  = 66494,
+    };
+}
 
 /*######
 ## boss_jaraxxus
@@ -133,10 +138,10 @@ public:
             m_uiFelFireballTimer = 5*IN_MILLISECONDS;
             m_uiFelLightningTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
             m_uiIncinerateFleshTimer = urand(20*IN_MILLISECONDS, 25*IN_MILLISECONDS);
-            m_uiNetherPowerTimer = 40*IN_MILLISECONDS;
+            m_uiNetherPowerTimer = urand(0 * IN_MILLISECONDS, 55 * IN_MILLISECONDS);
             m_uiLegionFlameTimer = 30*IN_MILLISECONDS;
-            m_uiSummonNetherPortalTimer = 1*MINUTE*IN_MILLISECONDS;
-            m_uiSummonInfernalEruptionTimer = 2*MINUTE*IN_MILLISECONDS;
+            m_uiSummonNetherPortalTimer = 20 * IN_MILLISECONDS;
+            m_uiSummonInfernalEruptionTimer = 80 * IN_MILLISECONDS;
             Summons.DespawnAll();
         }
 
@@ -173,10 +178,15 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            me->SetInCombatWithZone();
-            if (instance)
-                instance->SetData(TYPE_JARAXXUS, IN_PROGRESS);
-            Talk(SAY_AGGRO);
+            if (me->GetReactState() == REACT_PASSIVE)
+                me->CombatStop();
+            else
+            {
+                me->SetInCombatWithZone();
+                if (instance)
+                    instance->SetData(TYPE_JARAXXUS, IN_PROGRESS);
+                Talk(SAY_AGGRO);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff)
@@ -186,18 +196,26 @@ public:
 
             if (m_uiSummonInfernalEruptionTimer <= uiDiff)
             {
-                Talk(EMOTE_INFERNAL_ERUPTION);
-                Talk(SAY_INFERNAL_ERUPTION);
-                DoCast(SPELL_INFERNAL_ERUPTION);
-                m_uiSummonInfernalEruptionTimer = 2*MINUTE*IN_MILLISECONDS;
+                m_uiSummonInfernalEruptionTimer = 0;
+                if (!me->IsNonMeleeSpellCasted(false, false, true))
+                {
+                    Talk(EMOTE_INFERNAL_ERUPTION);
+                    Talk(SAY_INFERNAL_ERUPTION);
+                    DoCastAOE(SPELL_INFERNAL_ERUPTION);
+                    m_uiSummonInfernalEruptionTimer = 2*MINUTE*IN_MILLISECONDS;
+                }
             } else m_uiSummonInfernalEruptionTimer -= uiDiff;
 
             if (m_uiSummonNetherPortalTimer <= uiDiff)
             {
-                Talk(EMOTE_NETHER_PORTAL);
-                Talk(SAY_MISTRESS_OF_PAIN);
-                DoCast(SPELL_NETHER_PORTAL);
-                m_uiSummonNetherPortalTimer = 2*MINUTE*IN_MILLISECONDS;
+                m_uiSummonNetherPortalTimer = 0;
+                if (!me->IsNonMeleeSpellCasted(false, false, true))
+                {
+                    Talk(EMOTE_NETHER_PORTAL);
+                    Talk(SAY_MISTRESS_OF_PAIN);
+                    DoCastAOE(SPELL_NETHER_PORTAL);
+                    m_uiSummonNetherPortalTimer = 2*MINUTE*IN_MILLISECONDS;
+                }
             } else m_uiSummonNetherPortalTimer -= uiDiff;
 
             if (m_uiFelFireballTimer <= uiDiff)
@@ -208,14 +226,17 @@ public:
 
             if (m_uiFelLightningTimer <= uiDiff)
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                Unit *target = SelectTarget(SELECT_TARGET_RANDOM, 0, -5.0f, true);
+                if (!target)
+                    target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true);
+                if (target)
                     DoCast(target, SPELL_FEL_LIGHTING);
                 m_uiFelLightningTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
             } else m_uiFelLightningTimer -= uiDiff;
 
             if (m_uiIncinerateFleshTimer <= uiDiff)
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0, true))
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                 {
                     Talk(EMOTE_INCINERATE, target->GetGUID());
                     Talk(SAY_INCINERATE);
@@ -226,20 +247,23 @@ public:
 
             if (m_uiNetherPowerTimer <= uiDiff)
             {
-                me->CastCustomSpell(SPELL_NETHER_POWER, SPELLVALUE_AURA_STACK, RAID_MODE<uint32>(5, 10, 5,10), me, true);
-                m_uiNetherPowerTimer = 40*IN_MILLISECONDS;
+                m_uiNetherPowerTimer = 0;
+                if (!me->IsNonMeleeSpellCasted(false, false, true))
+                {
+                    DoCastAOE(67009 /* Nether Power */);
+                    m_uiNetherPowerTimer = urand(42 * IN_MILLISECONDS, 60 * IN_MILLISECONDS);
+                }
             } else m_uiNetherPowerTimer -= uiDiff;
 
             if (m_uiLegionFlameTimer <= uiDiff)
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0, true))
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                 {
                     Talk(EMOTE_LEGION_FLAME, target->GetGUID());
                     DoCast(target, SPELL_LEGION_FLAME);
                 }
                 m_uiLegionFlameTimer = 30*IN_MILLISECONDS;
             } else m_uiLegionFlameTimer -= uiDiff;
-
             DoMeleeAttackIfReady();
         }
     };
@@ -290,44 +314,61 @@ public:
 
     struct mob_infernal_volcanoAI : public Scripted_NoMovementAI
     {
-        mob_infernal_volcanoAI(Creature* creature) : Scripted_NoMovementAI(creature), Summons(me)
+        mob_infernal_volcanoAI(Creature* creature) : Scripted_NoMovementAI(creature)
         {
+            if (!dynamic_cast<TempSummon *>(base().me))
+                throw std::runtime_error("bad infernal volcano");
             instance = creature->GetInstanceScript();
             Reset();
         }
 
-        InstanceScript* instance;
+        Scripted_NoMovementAI &base()
+        {
+            return *this;
+        }
 
-        SummonList Summons;
+        TempSummon &me()
+        {
+            return *static_cast<TempSummon *>(base().me);
+        }
+
+        InstanceScript* instance;
 
         void Reset()
         {
-            me->SetReactState(REACT_PASSIVE);
+            me().SetReactState(REACT_PASSIVE);
 
             if (!IsHeroic())
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
+                me().SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
             else
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
-
-            Summons.DespawnAll();
+                me().RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
         }
 
         void IsSummonedBy(Unit* /*summoner*/)
         {
-            DoCast(SPELL_INFERNAL_ERUPTION_EFFECT);
+            DoCastAOE(SPELL_INFERNAL_ERUPTION_EFFECT);
         }
 
         void JustSummoned(Creature* summoned)
         {
-            Summons.Summon(summoned);
+            if (auto p = dynamic_cast<Creature *>(me().GetSummoner()))
+                if (p->IsAIEnabled)
+                    p->AI()->JustSummoned(summoned);
             // makes immediate corpse despawn of summoned Felflame Infernals
             summoned->SetCorpseDelay(0);
+        }
+
+        void SummonedCreatureDespawn(Creature *unit) override
+        {
+            if (auto p = dynamic_cast<Creature *>(me().GetSummoner()))
+                if (p->IsAIEnabled)
+                    p->AI()->SummonedCreatureDespawn(unit);
         }
 
         void JustDied(Unit* /*killer*/)
         {
             // used to despawn corpse immediately
-            me->DespawnOrUnsummon();
+            me().DespawnOrUnsummon();
         }
 
         void UpdateAI(uint32 const /*diff*/) {}

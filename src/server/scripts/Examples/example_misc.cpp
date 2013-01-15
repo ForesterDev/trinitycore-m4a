@@ -23,6 +23,7 @@ SDComment: Item, Areatrigger and other small code examples
 SDCategory: Script Examples
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 
 enum eSay

@@ -20,6 +20,7 @@
     \ingroup world
 */
 
+#include "stdafx.hpp"
 #include "Weather.h"
 #include "WorldPacket.h"
 #include "Player.h"

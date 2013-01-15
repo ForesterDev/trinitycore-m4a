@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -152,6 +153,8 @@ enum EventTypes
     EVENT_DARNAVAN_MORTAL_STRIKE        = 30,
     EVENT_DARNAVAN_SHATTERING_THROW     = 31,
     EVENT_DARNAVAN_SUNDER_ARMOR         = 32,
+
+    EVENT_SHADE_SUICIDE                 = 33,
 };
 
 enum Phases
@@ -251,6 +254,7 @@ class boss_lady_deathwhisper : public CreatureScript
                     events.ScheduleEvent(EVENT_INTRO_6, 48500, 0, PHASE_INTRO);
                     events.ScheduleEvent(EVENT_INTRO_7, 58000, 0, PHASE_INTRO);
                 }
+                BossAI::MoveInLineOfSight(who);
             }
 
             void AttackStart(Unit* victim)
@@ -391,6 +395,7 @@ class boss_lady_deathwhisper : public CreatureScript
                 if (summon->GetEntry() == NPC_VENGEFUL_SHADE)
                 {
                     target = ObjectAccessor::GetUnit(*me, _nextVengefulShadeTargetGUID);   // Vengeful Shade
+                    summon->AddThreat(target, 500000.0f);
                     _nextVengefulShadeTargetGUID = 0;
                 }
                 else
@@ -476,7 +481,7 @@ class boss_lady_deathwhisper : public CreatureScript
                             events.ScheduleEvent(EVENT_P2_TOUCH_OF_INSIGNIFICANCE, urand(9000, 13000), 0, PHASE_TWO);
                             break;
                         case EVENT_P2_SUMMON_SHADE:
-                            if (Unit* shadeTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                            if (Unit* shadeTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             {
                                 _nextVengefulShadeTargetGUID = shadeTarget->GetGUID();
                                 DoCast(shadeTarget, SPELL_SUMMON_SHADE);
@@ -806,6 +811,7 @@ class npc_vengeful_shade : public CreatureScript
             void Reset()
             {
                 me->AddAura(SPELL_VENGEFUL_BLAST_PASSIVE, me);
+                events.ScheduleEvent(EVENT_SHADE_SUICIDE, 8000);
             }
 
             void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
@@ -822,6 +828,31 @@ class npc_vengeful_shade : public CreatureScript
                         break;
                 }
             }
+
+             void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                    case EVENT_SHADE_SUICIDE: 
+                      me->Kill(me);
+                      break;
+                    }
+                }
+                DoMeleeAttackIfReady();
+            }
+
+        private:
+            EventMap events;
         };
 
         CreatureAI* GetAI(Creature* creature) const

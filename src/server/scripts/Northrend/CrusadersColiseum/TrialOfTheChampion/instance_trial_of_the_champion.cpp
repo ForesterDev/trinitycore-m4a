@@ -21,6 +21,7 @@ SDComment:
 SDCategory: Trial Of the Champion
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "InstanceScript.h"

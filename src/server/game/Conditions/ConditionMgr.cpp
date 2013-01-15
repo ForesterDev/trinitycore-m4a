@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "Player.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
@@ -1908,11 +1909,7 @@ void ConditionMgr::Clean()
     for (CreatureSpellConditionContainer::iterator itr = VehicleSpellConditionStore.begin(); itr != VehicleSpellConditionStore.end(); ++itr)
     {
         for (ConditionTypeContainer::iterator it = itr->second.begin(); it != itr->second.end(); ++it)
-        {
-            for (ConditionList::const_iterator i = it->second.begin(); i != it->second.end(); ++i)
-                delete *i;
             it->second.clear();
-        }
         itr->second.clear();
     }
 

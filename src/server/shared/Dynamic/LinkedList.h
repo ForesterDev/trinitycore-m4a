@@ -72,6 +72,11 @@ class LinkedListElement
             iNext->iPrev = pElem;
             iNext = pElem;
         }
+
+private:
+    LinkedListElement(const LinkedListElement &right);
+
+    LinkedListElement &operator=(const LinkedListElement &right);
 };
 
 //============================================
@@ -180,7 +185,7 @@ class LinkedListHead
 
                 Iterator operator++(int)
                 {                                           // postincrement
-                    iterator _Tmp = *this;
+                    auto _Tmp = *this;
                     ++*this;
                     return (_Tmp);
                 }

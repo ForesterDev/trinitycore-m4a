@@ -23,6 +23,7 @@ SDComment: Is missing the ai to make the npcs look for a new mount and use it.
 SDCategory: Trial Of the Champion
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"

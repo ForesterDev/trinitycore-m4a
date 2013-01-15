@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "zlib.h"
 #include "AddonHandler.h"
 #include "DatabaseEnv.h"

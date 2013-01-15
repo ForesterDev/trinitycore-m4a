@@ -27,6 +27,7 @@ EndScriptData */
 npc_mountaineer_pebblebitty
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"

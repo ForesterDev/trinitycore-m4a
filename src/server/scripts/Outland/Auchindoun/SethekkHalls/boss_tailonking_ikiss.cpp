@@ -23,6 +23,7 @@ SDComment: Heroic supported. Some details missing, but most are spell related.
 SDCategory: Auchindoun, Sethekk Halls
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "sethekk_halls.h"

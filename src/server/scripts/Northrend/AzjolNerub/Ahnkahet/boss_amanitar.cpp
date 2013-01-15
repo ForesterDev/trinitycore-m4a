@@ -19,6 +19,7 @@
  * Comment:  Find correct mushrooms spell to make them visible - buffs of the mushrooms not ever applied to the users...
  */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ahnkahet.h"

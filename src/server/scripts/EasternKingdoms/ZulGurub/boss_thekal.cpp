@@ -23,6 +23,7 @@ SDComment: Almost finished.
 SDCategory: Zul'Gurub
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "zulgurub.h"

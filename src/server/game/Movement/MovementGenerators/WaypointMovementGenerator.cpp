@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 //Basic headers
+#include "stdafx.hpp"
 #include "WaypointMovementGenerator.h"
 //Extended headers
 #include "ObjectMgr.h"

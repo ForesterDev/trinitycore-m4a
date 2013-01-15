@@ -20,6 +20,7 @@
 #define TRINITYCORE_CREATURE_H
 
 #include "Common.h"
+#include "ai_ptr.hpp"
 #include "Unit.h"
 #include "UpdateMask.h"
 #include "ItemPrototype.h"
@@ -54,7 +55,8 @@ enum CreatureFlagsExtra
     CREATURE_FLAG_EXTRA_NO_SKILLGAIN    = 0x00040000,       // creature won't increase weapon skills
     CREATURE_FLAG_EXTRA_TAUNT_DIMINISH  = 0x00080000,       // Taunt is a subject to diminishing returns on this creautre
     CREATURE_FLAG_EXTRA_ALL_DIMINISH    = 0x00100000,       // Creature is subject to all diminishing returns as player are
-    CREATURE_FLAG_EXTRA_DUNGEON_BOSS    = 0x10000000        // creature is a dungeon boss (SET DYNAMICALLY, DO NOT ADD IN DB)
+    CREATURE_FLAG_EXTRA_DUNGEON_BOSS    = 0x10000000,       // creature is a dungeon boss (SET DYNAMICALLY, DO NOT ADD IN DB)
+    CREATURE_FLAG_EXTRA_IGNORE_LOS      = 0x80000000,
 };
 
 #define CREATURE_FLAG_EXTRA_DB_ALLOWED (CREATURE_FLAG_EXTRA_INSTANCE_BIND | CREATURE_FLAG_EXTRA_CIVILIAN | \
@@ -62,7 +64,7 @@ enum CreatureFlagsExtra
     CREATURE_FLAG_EXTRA_NO_CRUSH | CREATURE_FLAG_EXTRA_NO_XP_AT_KILL | CREATURE_FLAG_EXTRA_TRIGGER | \
     CREATURE_FLAG_EXTRA_NO_TAUNT | CREATURE_FLAG_EXTRA_WORLDEVENT | CREATURE_FLAG_EXTRA_NO_CRIT | \
     CREATURE_FLAG_EXTRA_NO_SKILLGAIN | CREATURE_FLAG_EXTRA_TAUNT_DIMINISH | CREATURE_FLAG_EXTRA_ALL_DIMINISH | \
-    CREATURE_FLAG_EXTRA_GUARD)
+    CREATURE_FLAG_EXTRA_GUARD | CREATURE_FLAG_EXTRA_IGNORE_LOS)
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push, N), also any gcc version not support it at some platform
 #if defined(__GNUC__)
@@ -521,7 +523,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         void Motion_Initialize();
 
         void AI_SendMoveToPacket(float x, float y, float z, uint32 time, uint32 MovementFlags, uint8 type);
-        CreatureAI* AI() const { return (CreatureAI*)i_AI; }
+        ai_ptr<CreatureAI> AI() const { return ai_ptr<CreatureAI>((CreatureAI*)i_AI, &ai_rep); }
 
         bool SetWalk(bool enable);
         bool SetDisableGravity(bool disable, bool packetOnly = false);
@@ -757,7 +759,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         bool m_AlreadyCallAssistance;
         bool m_AlreadySearchedAssistance;
         bool m_regenHealth;
-        bool m_AI_locked;
+        mutable ai_ref_count ai_rep;
 
         SpellSchoolMask m_meleeDamageSchoolMask;
         uint32 m_originalEntry;

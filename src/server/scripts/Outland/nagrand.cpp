@@ -28,6 +28,7 @@ npc_greatmother_geyah
 npc_maghar_captive
 npc_creditmarker_visit_with_ancestors
 EndContentData */
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
@@ -180,7 +181,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_TOTEM_KARDASH_H)
         {
-            if (npc_maghar_captiveAI* pEscortAI = dynamic_cast<npc_maghar_captiveAI*>(creature->AI()))
+            if (auto pEscortAI = dynamic_pointer_cast<npc_maghar_captiveAI>(creature->AI()))
             {
                 creature->SetStandState(UNIT_STAND_STATE_STAND);
                 creature->setFaction(232);
@@ -515,7 +516,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_TOTEM_KARDASH_A)
         {
-            if (npc_kurenai_captiveAI* EscortAI = dynamic_cast<npc_kurenai_captiveAI*>(creature->AI()))
+            if (auto EscortAI = dynamic_pointer_cast<npc_kurenai_captiveAI>(creature->AI()))
             {
                 creature->SetStandState(UNIT_STAND_STATE_STAND);
                 EscortAI->Start(true, false, player->GetGUID(), quest);

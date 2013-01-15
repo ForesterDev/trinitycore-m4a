@@ -31,6 +31,7 @@ npc_kelerun_bloodmourn
 go_harbinger_second_trial
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"

@@ -30,6 +30,7 @@ npc_darrowshire_spirit
 npc_tirion_fordring
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"

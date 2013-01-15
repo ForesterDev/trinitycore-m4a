@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Hellfire Ramparts
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
 #include "hellfire_ramparts.h"

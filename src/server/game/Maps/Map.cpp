@@ -16,6 +16,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
+#include <mutex>
 #include "Map.h"
 #include "GridStates.h"
 #include "ScriptMgr.h"
@@ -29,6 +31,7 @@
 #include "ObjectAccessor.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
+#include "vmap_mutex.hpp"
 #include "Group.h"
 #include "LFGMgr.h"
 #include "DynamicTree.h"
@@ -51,6 +54,22 @@ u_map_magic MapLiquidMagic  = { {'M','L','I','Q'} };
 #define MAX_CREATURE_ATTACK_RADIUS  (45.0f * sWorld->getRate(RATE_CREATURE_AGGRO))
 
 GridState* si_GridStates[MAX_GRID_STATE];
+
+instance_difficulty make_instance_difficulty(const MapEntry &map_entry, Difficulty difficulty)
+{
+    instance_difficulty instance_difficulty_;
+    if (map_entry.unk_330 & MapEntry::dynamic_bit && map_entry.IsRaid())
+    {
+        instance_difficulty_.player_difficulty = difficulty >= RAID_DIFFICULTY_10MAN_HEROIC ? 1 : 0;
+        instance_difficulty_.difficulty = instance_difficulty_.player_difficulty == 1 ? static_cast<Difficulty>(difficulty - 2) : difficulty;
+    }
+    else
+    {
+        instance_difficulty_.difficulty = difficulty;
+        instance_difficulty_.player_difficulty = int();
+    }
+    return instance_difficulty_;
+}
 
 Map::~Map()
 {
@@ -102,12 +121,14 @@ bool Map::ExistVMap(uint32 mapid, int gx, int gy)
 {
     if (VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager())
     {
+        std::unique_lock<vmap_mutex_type> l(vmap_mutex());
         if (vmgr->isMapLoadingEnabled())
         {
             bool exists = vmgr->existsMap((sWorld->GetDataPath()+ "vmaps").c_str(),  mapid, gx, gy);
             if (!exists)
             {
                 std::string name = vmgr->getDirFileName(mapid, gx, gy);
+                l.unlock();
                 sLog->outError(LOG_FILTER_MAPS, "VMap file '%s' is missing or points to wrong version of vmap file. Redo vmaps with latest version of vmap_assembler.exe.", (sWorld->GetDataPath()+"vmaps/"+name).c_str());
                 return false;
             }
@@ -119,8 +140,13 @@ bool Map::ExistVMap(uint32 mapid, int gx, int gy)
 
 void Map::LoadVMap(int gx, int gy)
 {
-                                                            // x and y are swapped !!
-    int vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld->GetDataPath()+ "vmaps").c_str(),  GetId(), gx, gy);
+    int vmapLoadResult;
+    {
+        auto &m = *VMAP::VMapFactory::createOrGetVMapManager();
+        std::lock_guard<vmap_mutex_type> l(vmap_mutex());
+                                                                // x and y are swapped !!
+        vmapLoadResult = m.loadMap((sWorld->GetDataPath() + "vmaps").c_str(), GetId(), gx, gy);
+    }
     switch (vmapLoadResult)
     {
         case VMAP::VMAP_LOAD_RESULT_OK:
@@ -221,6 +247,7 @@ i_scriptLock(false)
             setNGrid(NULL, idx, j);
         }
     }
+    instance_difficulty_ = make_instance_difficulty(*i_mapEntry, GetDifficulty());
 
     //lets initialize visibility distance for map
     Map::InitVisibilityDistance();
@@ -290,6 +317,13 @@ void Map::SwitchGridContainers(Creature* obj, bool on)
         RemoveWorldObject(obj);
     }
     obj->m_isTempWorldObject = on;
+}
+
+void Map::player_zone_changed(Player &p)
+{
+    if (auto instance = dynamic_cast<InstanceMap *>(this))
+        if (auto script = instance->GetInstanceScript())
+            script->player_zone_changed(p);
 }
 
 template<class T>
@@ -994,8 +1028,10 @@ bool Map::UnloadGrid(NGridType& ngrid, bool unloadAll)
                 GridMaps[gx][gy]->unloadData();
                 delete GridMaps[gx][gy];
             }
+            auto &m = *VMAP::VMapFactory::createOrGetVMapManager();
+            std::lock_guard<vmap_mutex_type> l(vmap_mutex());
             // x and y are swapped
-            VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(GetId(), gx, gy);
+            m.unloadMap(GetId(), gx, gy);
         }
         else
             ((MapInstanced*)m_parentMap)->RemoveGridMapReference(GridCoord(gx, gy));
@@ -1028,12 +1064,8 @@ void Map::UnloadAll()
     // clear all delayed moves, useless anyway do this moves before map unload.
     _creaturesToMove.clear();
 
-    for (GridRefManager<NGridType>::iterator i = GridRefManager<NGridType>::begin(); i != GridRefManager<NGridType>::end();)
-    {
-        NGridType &grid(*i->getSource());
-        ++i;
-        UnloadGrid(grid, true);       // deletes the grid and removes it from the GridRefManager
-    }
+    while (auto ref = GridRefManager::getFirst())
+        UnloadGrid(*ref->getSource(), true);       // deletes the grid and removes it from the GridRefManager
 }
 
 // *****************************
@@ -1637,6 +1669,7 @@ float Map::GetHeight(float x, float y, float z, bool checkVMap /*= true*/, float
     if (checkVMap)
     {
         VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
+        std::lock_guard<vmap_mutex_type> l(vmap_mutex());
         if (vmgr->isHeightCalcEnabled())
             vmapHeight = vmgr->getHeight(GetId(), x, y, z + 2.0f, maxSearchDist);   // look from a bit higher pos to find the floor
     }
@@ -1710,17 +1743,21 @@ bool Map::GetAreaInfo(float x, float y, float z, uint32 &flags, int32 &adtId, in
 {
     float vmap_z = z;
     VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
-    if (vmgr->getAreaInfo(GetId(), x, y, vmap_z, flags, adtId, rootId, groupId))
     {
-        // check if there's terrain between player height and object height
-        if (GridMap* gmap = const_cast<Map*>(this)->GetGrid(x, y))
+        std::unique_lock<vmap_mutex_type> l(vmap_mutex());
+        if (vmgr->getAreaInfo(GetId(), x, y, vmap_z, flags, adtId, rootId, groupId))
         {
-            float _mapheight = gmap->getHeight(x, y);
-            // z + 2.0f condition taken from GetHeight(), not sure if it's such a great choice...
-            if (z + 2.0f > _mapheight &&  _mapheight > vmap_z)
-                return false;
+            l.unlock();
+            // check if there's terrain between player height and object height
+            if (GridMap* gmap = const_cast<Map*>(this)->GetGrid(x, y))
+            {
+                float _mapheight = gmap->getHeight(x, y);
+                // z + 2.0f condition taken from GetHeight(), not sure if it's such a great choice...
+                if (z + 2.0f > _mapheight &&  _mapheight > vmap_z)
+                    return false;
+            }
+            return true;
         }
-        return true;
     }
     return false;
 }
@@ -1779,60 +1816,64 @@ ZLiquidStatus Map::getLiquidStatus(float x, float y, float z, uint8 ReqLiquidTyp
     float liquid_level = INVALID_HEIGHT;
     float ground_level = INVALID_HEIGHT;
     uint32 liquid_type = 0;
-    if (vmgr->GetLiquidLevel(GetId(), x, y, z, ReqLiquidType, liquid_level, ground_level, liquid_type))
     {
-        sLog->outDebug(LOG_FILTER_MAPS, "getLiquidStatus(): vmap liquid level: %f ground: %f type: %u", liquid_level, ground_level, liquid_type);
-        // Check water level and ground level
-        if (liquid_level > ground_level && z > ground_level - 2)
+        std::unique_lock<vmap_mutex_type> l(vmap_mutex());
+        if (vmgr->GetLiquidLevel(GetId(), x, y, z, ReqLiquidType, liquid_level, ground_level, liquid_type))
         {
-            // All ok in water -> store data
-            if (data)
+            l.unlock();
+            sLog->outDebug(LOG_FILTER_MAPS, "getLiquidStatus(): vmap liquid level: %f ground: %f type: %u", liquid_level, ground_level, liquid_type);
+            // Check water level and ground level
+            if (liquid_level > ground_level && z > ground_level - 2)
             {
-                // hardcoded in client like this
-                if (GetId() == 530 && liquid_type == 2)
-                    liquid_type = 15;
-
-                uint32 liquidFlagType = 0;
-                if (LiquidTypeEntry const* liq = sLiquidTypeStore.LookupEntry(liquid_type))
-                    liquidFlagType = liq->Type;
-
-                if (liquid_type && liquid_type < 21)
+                // All ok in water -> store data
+                if (data)
                 {
-                    if (AreaTableEntry const* area = GetAreaEntryByAreaFlagAndMap(GetAreaFlag(x, y, z), GetId()))
-                    {
-                        uint32 overrideLiquid = area->LiquidTypeOverride[liquidFlagType];
-                        if (!overrideLiquid && area->zone)
-                        {
-                            area = GetAreaEntryByAreaID(area->zone);
-                            if (area)
-                                overrideLiquid = area->LiquidTypeOverride[liquidFlagType];
-                        }
+                    // hardcoded in client like this
+                    if (GetId() == 530 && liquid_type == 2)
+                        liquid_type = 15;
 
-                        if (LiquidTypeEntry const* liq = sLiquidTypeStore.LookupEntry(overrideLiquid))
+                    uint32 liquidFlagType = 0;
+                    if (LiquidTypeEntry const* liq = sLiquidTypeStore.LookupEntry(liquid_type))
+                        liquidFlagType = liq->Type;
+
+                    if (liquid_type && liquid_type < 21)
+                    {
+                        if (AreaTableEntry const* area = GetAreaEntryByAreaFlagAndMap(GetAreaFlag(x, y, z), GetId()))
                         {
-                            liquid_type = overrideLiquid;
-                            liquidFlagType = liq->Type;
+                            uint32 overrideLiquid = area->LiquidTypeOverride[liquidFlagType];
+                            if (!overrideLiquid && area->zone)
+                            {
+                                area = GetAreaEntryByAreaID(area->zone);
+                                if (area)
+                                    overrideLiquid = area->LiquidTypeOverride[liquidFlagType];
+                            }
+
+                            if (LiquidTypeEntry const* liq = sLiquidTypeStore.LookupEntry(overrideLiquid))
+                            {
+                                liquid_type = overrideLiquid;
+                                liquidFlagType = liq->Type;
+                            }
                         }
                     }
+
+                    data->level = liquid_level;
+                    data->depth_level = ground_level;
+
+                    data->entry = liquid_type;
+                    data->type_flags = 1 << liquidFlagType;
                 }
 
-                data->level = liquid_level;
-                data->depth_level = ground_level;
+                float delta = liquid_level - z;
 
-                data->entry = liquid_type;
-                data->type_flags = 1 << liquidFlagType;
+                // Get position delta
+                if (delta > 2.0f)                   // Under water
+                    return LIQUID_MAP_UNDER_WATER;
+                if (delta > 0.0f)                   // In water
+                    return LIQUID_MAP_IN_WATER;
+                if (delta > -0.1f)                   // Walk on water
+                    return LIQUID_MAP_WATER_WALK;
+                result = LIQUID_MAP_ABOVE_WATER;
             }
-
-            float delta = liquid_level - z;
-
-            // Get position delta
-            if (delta > 2.0f)                   // Under water
-                return LIQUID_MAP_UNDER_WATER;
-            if (delta > 0.0f)                   // In water
-                return LIQUID_MAP_IN_WATER;
-            if (delta > -0.1f)                   // Walk on water
-                return LIQUID_MAP_WATER_WALK;
-            result = LIQUID_MAP_ABOVE_WATER;
         }
     }
 
@@ -1891,6 +1932,21 @@ void Map::GetZoneAndAreaIdByAreaFlag(uint32& zoneid, uint32& areaid, uint16 area
 
     areaid = entry ? entry->ID : 0;
     zoneid = entry ? ((entry->zone != 0) ? entry->zone : entry->ID) : 0;
+}
+
+WMO_id Map::wmo_id(const Position &p) const
+{
+    {
+        uint32 flags;
+        int32 adt_id;
+        int32 root_id;
+        int32 group_id;
+        if (GetAreaInfo(p.m_positionX, p.m_positionY, p.m_positionZ, flags, adt_id,
+                    root_id, group_id))
+            if (auto e = GetWMOAreaTableEntryByTripple(root_id, adt_id, group_id))
+                return e->Id;
+    }
+    return 0;
 }
 
 bool Map::isInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask) const
@@ -2395,11 +2451,11 @@ bool InstanceMap::AddPlayerToMap(Player* player)
             if (!mapSave)
             {
                 sLog->outInfo(LOG_FILTER_MAPS, "InstanceMap::Add: creating instance save for map %d spawnmode %d with instance id %d", GetId(), GetSpawnMode(), GetInstanceId());
-                mapSave = sInstanceSaveMgr->AddInstanceSave(GetId(), GetInstanceId(), Difficulty(GetSpawnMode()), 0, true);
+                mapSave = sInstanceSaveMgr->AddInstanceSave(GetId(), GetInstanceId(), get_instance_difficulty().difficulty, 0, true);
             }
 
             // check for existing instance binds
-            InstancePlayerBind* playerBind = player->GetBoundInstance(GetId(), Difficulty(GetSpawnMode()));
+            InstancePlayerBind* playerBind = GetEntry() ? player->GetBoundInstance(*GetEntry(), Difficulty(GetSpawnMode())) : nullptr;
             if (playerBind && playerBind->perm)
             {
                 // cannot enter other instances if bound permanently
@@ -2894,6 +2950,54 @@ void Map::DeleteRespawnTimesInDB(uint16 mapId, uint32 instanceId)
     stmt->setUInt16(0, mapId);
     stmt->setUInt32(1, instanceId);
     CharacterDatabase.Execute(stmt);
+}
+
+instance_difficulty Map::get_instance_difficulty() const
+{
+    return instance_difficulty_;
+}
+
+void Map::change_player_difficulty(int player_difficulty)
+{
+    for (auto &ref : *this)
+    {
+        auto &ngrid = *ref.getSource();
+
+        {
+            ObjectGridCleaner worker;
+            TypeContainerVisitor<ObjectGridCleaner, GridTypeMapContainer> visitor(worker);
+            ngrid.VisitAllGrids(visitor);
+        }
+
+        RemoveAllObjectsInRemoveList();
+
+        {
+            ObjectGridUnloader worker;
+            TypeContainerVisitor<ObjectGridUnloader, GridTypeMapContainer> visitor(worker);
+            ngrid.VisitAllGrids(visitor);
+        }
+
+        ASSERT(i_objectsToRemove.empty());
+    }
+
+    instance_difficulty_.player_difficulty = player_difficulty;
+    i_spawnMode = instance_difficulty_.difficulty + 2 * player_difficulty;
+
+    for (auto &ref : *this)
+    {
+        auto grid = ref.getSource();
+        Cell cell;
+        cell.data.Part.grid_x = grid->getX();
+        cell.data.Part.grid_y = grid->getY();
+        if (isGridObjectDataLoaded(cell.GridX(), cell.GridY()))
+        {
+            ObjectGridLoader loader(*grid, this, cell);
+            loader.LoadN();
+        }
+    }
+
+    for (auto &ref : m_mapRefManager)
+        ref.getSource()->UpdateObjectVisibility(true);
 }
 
 time_t Map::GetLinkedRespawnTime(uint64 guid) const

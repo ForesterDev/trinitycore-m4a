@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Blackfathom Deeps
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
 #include "blackfathom_deeps.h"

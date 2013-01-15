@@ -18,7 +18,8 @@
 #ifndef TRINITY_SPELLAURADEFINES_H
 #define TRINITY_SPELLAURADEFINES_H
 
-#define MAX_AURAS 64                                        // client support up to 255, but it will cause problems with group auras updating
+const int max_unit_auras = 256;
+const int max_party_member_auras = 64;
 
 enum AURA_FLAGS
 {
@@ -206,7 +207,7 @@ enum AuraType
     SPELL_AURA_SAFE_FALL = 144,
     SPELL_AURA_MOD_PET_TALENT_POINTS = 145,
     SPELL_AURA_ALLOW_TAME_PET_TYPE = 146,
-    SPELL_AURA_MECHANIC_IMMUNITY_MASK = 147,
+    SPELL_AURA_ADD_CREATURE_IMMUNITY = 147,
     SPELL_AURA_RETAIN_COMBO_POINTS = 148,
     SPELL_AURA_REDUCE_PUSHBACK  = 149,                      //    Reduce Pushback
     SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT = 150,

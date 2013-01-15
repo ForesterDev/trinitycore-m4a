@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include <ace/Message_Block.h>
 #include <ace/OS_NS_string.h>
 #include <ace/OS_NS_unistd.h>
@@ -37,8 +38,8 @@
 #include "ByteBuffer.h"
 #include "Opcodes.h"
 #include "DatabaseEnv.h"
-#include "BigNumber.h"
-#include "SHA1.h"
+#include <Cryptography/BigNumber.h>
+#include <Cryptography/SHA1.h>
 #include "WorldSession.h"
 #include "WorldSocketMgr.h"
 #include "Log.h"
@@ -692,6 +693,8 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
             case CMSG_KEEP_ALIVE:
                 sLog->outDebug(LOG_FILTER_NETWORKIO, "%s", GetOpcodeNameForLogging(opcode).c_str());
                 sScriptMgr->OnPacketReceive(this, WorldPacket(*new_pct));
+                if (m_Session)
+                    m_Session->ResetTimeOutTime();
                 return 0;
             default:
             {
@@ -732,7 +735,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     // NOTE: ATM the socket is singlethread, have this in mind ...
     uint8 digest[20];
     uint32 clientSeed;
-    uint32 unk2, unk3, unk5, unk6, unk7;
+    uint32 unk2, unk3;
     uint64 unk4;
     uint32 BuiltNumberClient;
     uint32 id, security;
@@ -761,7 +764,9 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     recvPacket >> account;
     recvPacket >> unk3;
     recvPacket >> clientSeed;
-    recvPacket >> unk5 >> unk6 >> unk7;
+    recvPacket.read_skip<int32>();
+    recvPacket.read_skip<int32>();
+    recvPacket.read_skip<int32>();
     recvPacket >> unk4;
     recvPacket.read(digest, 20);
 

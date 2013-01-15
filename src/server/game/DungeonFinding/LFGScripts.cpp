@@ -19,6 +19,7 @@
  * Interaction between core and LFGScripts
  */
 
+#include "stdafx.hpp"
 #include "Common.h"
 #include "SharedDefines.h"
 #include "Player.h"

@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "Player.h"
 #include "Battleground.h"
 #include "BattlegroundIC.h"

@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
@@ -185,7 +186,17 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* target)
     if (pData->uiSoundId)
     {
         if (sSoundEntriesStore.LookupEntry(pData->uiSoundId))
-            pSource->SendPlaySound(pData->uiSoundId, false);
+            switch (pData->uiType)
+            {
+            default:
+                pSource->SendPlaySound(pData->uiSoundId, false);
+                break;
+            case CHAT_TYPE_WHISPER:
+            case CHAT_TYPE_BOSS_WHISPER:
+                if (auto p = dynamic_cast<Player *>(target))
+                    pSource->PlayDirectSound(pData->uiSoundId, p);
+                break;
+            }
         else
             sLog->outError(LOG_FILTER_TSCR, "DoScriptText entry %i tried to process invalid sound id %u.", iTextEntry, pData->uiSoundId);
     }

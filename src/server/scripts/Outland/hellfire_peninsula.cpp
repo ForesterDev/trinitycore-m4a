@@ -33,6 +33,7 @@ npc_trollbane
 npc_wounded_blood_elf
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
@@ -385,7 +386,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_ROAD_TO_FALCON_WATCH)
         {
-            if (npc_escortAI* pEscortAI = CAST_AI(npc_wounded_blood_elf::npc_wounded_blood_elfAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_wounded_blood_elf::npc_wounded_blood_elfAI, creature->AI()))
                 pEscortAI->Start(true, false, player->GetGUID());
 
             // Change faction so mobs attack

@@ -23,6 +23,7 @@ SDComment: Need to implement molten punch
 SDCategory: Black Temple
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "PassiveAI.h"

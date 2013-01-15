@@ -28,6 +28,7 @@ npc_mikhail
 npc_tapoke_slim_jahn
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
@@ -153,7 +154,7 @@ public:
             if (!pSlim->HasStealthAura())
                 pSlim->CastSpell(pSlim, SPELL_STEALTH, true);
 
-            if (npc_tapoke_slim_jahn::npc_tapoke_slim_jahnAI* pEscortAI = CAST_AI(npc_tapoke_slim_jahn::npc_tapoke_slim_jahnAI, pSlim->AI()))
+            if (auto pEscortAI = CAST_AI(npc_tapoke_slim_jahn::npc_tapoke_slim_jahnAI, pSlim->AI()))
                 pEscortAI->Start(false, false, player->GetGUID(), quest);
         }
         return false;

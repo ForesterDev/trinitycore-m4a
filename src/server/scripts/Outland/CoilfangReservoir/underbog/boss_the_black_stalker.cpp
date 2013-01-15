@@ -23,6 +23,7 @@ SDComment: Timers may be incorrect
 SDCategory: Coilfang Resevoir, Underbog
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

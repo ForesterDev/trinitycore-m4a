@@ -22,6 +22,7 @@ SD%Complete: 90%
 SDComment: Some visual effects are not implemented.
 Script Data End */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
@@ -102,7 +103,7 @@ public:
         player->PlayerTalkClass->ClearMenus();
         if (action == GOSSIP_ACTION_INFO_DEF+1)
         {
-            if (npc_escortAI* pEscortAI = CAST_AI(npc_blastmaster_emi_shortfuse::npc_blastmaster_emi_shortfuseAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_blastmaster_emi_shortfuse::npc_blastmaster_emi_shortfuseAI, creature->AI()))
                 pEscortAI->Start(true, false, player->GetGUID());
 
             creature->setFaction(player->getFaction());

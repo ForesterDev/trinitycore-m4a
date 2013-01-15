@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Scholomance
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

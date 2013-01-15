@@ -16,9 +16,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "ByteBuffer.h"
 #include "TargetedMovementGenerator.h"
-#include "Errors.h"
+#include <Debugging/Errors.h>
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "World.h"
@@ -135,7 +136,7 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_
     }
 
     // prevent movement while casting spells with cast time or channel time
-    if (owner.HasUnitState(UNIT_STATE_CASTING))
+    if (owner.HasUnitState(UNIT_STATE_CASTING_IMMOBILE))
     {
         if (!owner.IsStopped())
             owner.StopMoving();

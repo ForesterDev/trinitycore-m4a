@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
@@ -23,6 +24,8 @@
 #include "PoolMgr.h"
 #include "AccountMgr.h"
 #include "icecrown_citadel.h"
+
+using std::unique_ptr;
 
 enum EventIds
 {
@@ -175,9 +178,22 @@ class instance_icecrown_citadel : public InstanceMapScript
 
                 switch (creature->GetEntry())
                 {
+                case NPC_BLAZING_SKELETON:
+                case NPC_SUPPRESSER:
+                case NPC_RISEN_ARCHMAGE:
+                case NPC_ROT_WORM:
+                    creature->SetCorpseDelay(3U);
+                    break;
                     case NPC_KOR_KRON_GENERAL:
                         if (TeamInInstance == ALLIANCE)
                             creature->UpdateEntry(NPC_ALLIANCE_COMMANDER, ALLIANCE);
+                        break;
+                    case NPC_DRUDGE_GHOUL:
+                    case NPC_VILE_SPIRIT:
+                        creature->SetReactState(REACT_PASSIVE);
+                        break;
+                    case NPC_GLUTTONOUS_ABOMINATION:
+                        creature->SetCorpseDelay(8U);
                         break;
                     case NPC_KOR_KRON_LIEUTENANT:
                         if (TeamInInstance == ALLIANCE)
@@ -688,6 +704,34 @@ class instance_icecrown_citadel : public InstanceMapScript
                 switch (type)
                 {
                     case DATA_LADY_DEATHWHISPER:
+                        if (state == DONE)
+                        {
+                            unique_ptr<GameObject> chest(new GameObject);
+                            uint32 name_id;
+                            switch (instance->GetDifficulty())
+                            {
+                            case RAID_DIFFICULTY_10MAN_NORMAL:
+                                name_id = 201873 /* Gunship Armory */;
+                                break;
+                            case RAID_DIFFICULTY_25MAN_NORMAL:
+                                name_id = 201874 /* Gunship Armory */;
+                                break;
+                            case RAID_DIFFICULTY_10MAN_HEROIC:
+                                name_id = 201872 /* Gunship Armory */;
+                                break;
+                            case RAID_DIFFICULTY_25MAN_HEROIC:
+                                name_id = 201875 /* Gunship Armory */;
+                                break;
+                            default:
+                                ASSERT(false);
+                            }
+                            if (chest->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), name_id, instance, PHASEMASK_NORMAL, -437.563995f, 1948.219971f, 214.882004f, 0.000000f, 0.000000f, 0.000000f, 0.000000f, 1.000000f, 100, GO_STATE_READY))
+                            {
+                                chest->SetRespawnTime(0);
+                                chest->SetSpawnedByDefault(false);
+                                instance->AddToMap(chest.release());
+                            }
+                        }
                         SetBossState(DATA_GUNSHIP_EVENT, state);    // TEMP HACK UNTIL GUNSHIP SCRIPTED
                         if (state == DONE)
                         {

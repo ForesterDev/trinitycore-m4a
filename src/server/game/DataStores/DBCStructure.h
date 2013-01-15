@@ -19,6 +19,7 @@
 #ifndef TRINITY_DBCSTRUCTURE_H
 #define TRINITY_DBCSTRUCTURE_H
 
+#include <cstdint>
 #include "Common.h"
 #include "DBCEnums.h"
 #include "Define.h"
@@ -1260,10 +1261,12 @@ struct MailTemplateEntry
 
 struct MapEntry
 {
+    static const uint32 dynamic_bit = 0x100U;
+
     uint32  MapID;                                          // 0
     //char*       internalname;                             // 1 unused
     uint32  map_type;                                       // 2
-    //uint32 unk_330;                                       // 3
+    uint32  unk_330;                                        // 3
                                                             // 4 0 or 1 for battlegrounds (not arenas)
     char*   name[16];                                       // 5-20
                                                             // 21 name flags, unused
@@ -1312,7 +1315,7 @@ struct MapEntry
 
 struct MapDifficultyEntry
 {
-    //uint32      Id;                                       // 0
+    std::int32_t Id;                                        // 0
     uint32      MapId;                                      // 1
     uint32      Difficulty;                                 // 2 (for arenas: arena slot)
     char*       areaTriggerText;                            // 3-18 text showed when transfer to map failed (missing requirements)
@@ -2059,11 +2062,14 @@ struct WorldStateUI
 struct MapDifficulty
 {
     MapDifficulty() : resetTime(0), maxPlayers(0), hasErrorMessage(false) {}
-    MapDifficulty(uint32 _resetTime, uint32 _maxPlayers, bool _hasErrorMessage) : resetTime(_resetTime), maxPlayers(_maxPlayers), hasErrorMessage(_hasErrorMessage) {}
+    MapDifficulty(std::int32_t id, uint32 _resetTime, uint32 _maxPlayers, bool _hasErrorMessage) : resetTime(_resetTime), maxPlayers(_maxPlayers), hasErrorMessage(_hasErrorMessage),
+        id(id)
+    {}
 
     uint32 resetTime;
     uint32 maxPlayers;
     bool hasErrorMessage;
+    std::int32_t id;
 };
 
 struct TalentSpellPos

@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Karazhan
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "karazhan.h"

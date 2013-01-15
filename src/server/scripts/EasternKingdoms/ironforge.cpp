@@ -27,6 +27,7 @@ EndScriptData */
 npc_royal_historian_archesonus
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"

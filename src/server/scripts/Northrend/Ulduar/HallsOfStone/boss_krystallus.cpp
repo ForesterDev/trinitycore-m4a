@@ -23,6 +23,7 @@ SDComment:
 SDCategory:
 Script Data End */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellScript.h"

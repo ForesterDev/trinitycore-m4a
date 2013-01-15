@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -141,7 +142,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
             void Reset()
             {
                 _Reset();
-                events.ScheduleEvent(EVENT_BERSERK, 330000);
+                events.ScheduleEvent(EVENT_BERSERK, 320000);
                 events.ScheduleEvent(EVENT_VAMPIRIC_BITE, 15000);
                 events.ScheduleEvent(EVENT_BLOOD_MIRROR, 2500, EVENT_GROUP_CANCELLABLE);
                 events.ScheduleEvent(EVENT_DELIRIOUS_SLASH, urand(20000, 24000), EVENT_GROUP_NORMAL);
@@ -368,9 +369,10 @@ class boss_blood_queen_lana_thel : public CreatureScript
                                         _offtank->CastSpell(me->getVictim(), SPELL_BLOOD_MIRROR_DAMAGE, true);
                                         me->getVictim()->CastSpell(_offtank, SPELL_BLOOD_MIRROR_DUMMY, true);
                                         DoCastVictim(SPELL_BLOOD_MIRROR_VISUAL);
-                                        if (Item* shadowsEdge = _offtank->GetWeaponForAttack(BASE_ATTACK, true))
-                                            if (!_offtank->HasAura(SPELL_THIRST_QUENCHED) && shadowsEdge->GetEntry() == ITEM_SHADOW_S_EDGE && !_offtank->HasAura(SPELL_GUSHING_WOUND))
-                                                _offtank->CastSpell(_offtank, SPELL_GUSHING_WOUND, true);
+                                        if (_offtank->GetMap()->IsRaid() && is_25_player_raid(_offtank->GetMap()->GetDifficulty()))
+                                            if (Item* shadowsEdge = _offtank->GetWeaponForAttack(BASE_ATTACK, true))
+                                                if (!_offtank->HasAura(SPELL_THIRST_QUENCHED) && shadowsEdge->GetEntry() == ITEM_SHADOW_S_EDGE && !_offtank->HasAura(SPELL_GUSHING_WOUND))
+                                                    _offtank->CastSpell(_offtank, SPELL_GUSHING_WOUND, true);
 
                                     }
                                 }
@@ -404,13 +406,17 @@ class boss_blood_queen_lana_thel : public CreatureScript
                             break;
                         }
                         case EVENT_SWARMING_SHADOWS:
-                            if (Player* target = SelectRandomTarget(false))
-                            {
-                                Talk(EMOTE_SWARMING_SHADOWS, target->GetGUID());
-                                Talk(SAY_SWARMING_SHADOWS);
-                                DoCast(target, SPELL_SWARMING_SHADOWS);
-                            }
-                            events.ScheduleEvent(EVENT_SWARMING_SHADOWS, 30500, EVENT_GROUP_NORMAL);
+                            if (auto time = events.GetNextEventTime(EVENT_AIR_PHASE))
+                                if (time >= events.GetTimer() + 1000 * 10)
+                                {
+                                    if (Player* target = SelectRandomTarget(false))
+                                    {
+                                        Talk(EMOTE_SWARMING_SHADOWS, target->GetGUID());
+                                        Talk(SAY_SWARMING_SHADOWS);
+                                        DoCast(target, SPELL_SWARMING_SHADOWS);
+                                    }
+                                    events.ScheduleEvent(EVENT_SWARMING_SHADOWS, 30500, EVENT_GROUP_NORMAL);
+                                }
                             break;
                         case EVENT_TWILIGHT_BLOODBOLT:
                         {
@@ -462,6 +468,8 @@ class boss_blood_queen_lana_thel : public CreatureScript
             // offtank for this encounter is the player standing closest to main tank
             Player* SelectRandomTarget(bool includeOfftank, std::list<Player*>* targetList = NULL)
             {
+                if (!me->getVictim())
+                    return nullptr;
                 std::list<HostileReference*> const& threatlist = me->getThreatManager().getThreatList();
                 std::list<Player*> tempTargets;
 
@@ -550,19 +558,21 @@ class spell_blood_queen_vampiric_bite : public SpellScriptLoader
                 if (GetCaster()->GetMap()->IsHeroic())
                     GetCaster()->CastSpell(GetCaster(), SPELL_PRESENCE_OF_THE_DARKFALLEN, true);
                 // Shadowmourne questline
-                if (GetCaster()->ToPlayer()->GetQuestStatus(QUEST_BLOOD_INFUSION) == QUEST_STATUS_INCOMPLETE)
-                {
-                    if (Aura* aura = GetCaster()->GetAura(SPELL_GUSHING_WOUND))
+                auto &map = *GetCaster()->GetMap();
+                if (map.IsRaid() && is_25_player_raid(map.GetDifficulty()))
+                    if (GetCaster()->ToPlayer()->GetQuestStatus(QUEST_BLOOD_INFUSION) == QUEST_STATUS_INCOMPLETE)
                     {
-                        if (aura->GetStackAmount() == 3)
+                        if (Aura* aura = GetCaster()->GetAura(SPELL_GUSHING_WOUND))
                         {
-                            GetCaster()->CastSpell(GetCaster(), SPELL_THIRST_QUENCHED, true);
-                            GetCaster()->RemoveAura(aura);
+                            if (aura->GetStackAmount() == 3)
+                            {
+                                GetCaster()->CastSpell(GetCaster(), SPELL_THIRST_QUENCHED, true);
+                                GetCaster()->RemoveAura(aura);
+                            }
+                            else
+                                GetCaster()->CastSpell(GetCaster(), SPELL_GUSHING_WOUND, true);
                         }
-                        else
-                            GetCaster()->CastSpell(GetCaster(), SPELL_GUSHING_WOUND, true);
                     }
-                }
                 if (InstanceScript* instance = GetCaster()->GetInstanceScript())
                     if (Creature* bloodQueen = ObjectAccessor::GetCreature(*GetCaster(), instance->GetData64(DATA_BLOOD_QUEEN_LANA_THEL)))
                         bloodQueen->AI()->SetGUID(GetHitUnit()->GetGUID(), GUID_VAMPIRE);
@@ -629,7 +639,7 @@ class spell_blood_queen_frenzied_bloodthirst : public SpellScriptLoader
 class BloodboltHitCheck
 {
     public:
-        explicit BloodboltHitCheck(LanaThelAI* ai) : _ai(ai) {}
+        explicit BloodboltHitCheck(ai_ptr<LanaThelAI> ai) : _ai(ai) {}
 
         bool operator()(WorldObject* object) const
         {
@@ -637,7 +647,7 @@ class BloodboltHitCheck
         }
 
     private:
-        LanaThelAI* _ai;
+        ai_ptr<LanaThelAI> _ai;
 };
 
 class spell_blood_queen_bloodbolt : public SpellScriptLoader
@@ -664,7 +674,7 @@ class spell_blood_queen_bloodbolt : public SpellScriptLoader
             void FilterTargets(std::list<WorldObject*>& targets)
             {
                 uint32 targetCount = (targets.size() + 2) / 3;
-                targets.remove_if(BloodboltHitCheck(static_cast<LanaThelAI*>(GetCaster()->GetAI())));
+                targets.remove_if(BloodboltHitCheck(static_pointer_cast<LanaThelAI>(GetCaster()->GetAI())));
                 Trinity::Containers::RandomResizeList(targets, targetCount);
                 // mark targets now, effect hook has missile travel time delay (might cast next in that time)
                 for (std::list<WorldObject*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
@@ -813,7 +823,7 @@ class achievement_once_bitten_twice_shy_n : public AchievementCriteriaScript
             if (!target)
                 return false;
 
-            if (LanaThelAI* lanaThelAI = CAST_AI(LanaThelAI, target->GetAI()))
+            if (auto lanaThelAI = CAST_AI(LanaThelAI, target->GetAI()))
                 return !lanaThelAI->WasVampire(source->GetGUID());
             return false;
         }
@@ -829,7 +839,7 @@ class achievement_once_bitten_twice_shy_v : public AchievementCriteriaScript
             if (!target)
                 return false;
 
-            if (LanaThelAI* lanaThelAI = CAST_AI(LanaThelAI, target->GetAI()))
+            if (auto lanaThelAI = CAST_AI(LanaThelAI, target->GetAI()))
                 return lanaThelAI->WasVampire(source->GetGUID());
             return false;
         }

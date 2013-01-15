@@ -23,6 +23,7 @@ SDComment: Should reset if raid are out of room.
 SDCategory: Tempest Keep, The Eye
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "the_eye.h"

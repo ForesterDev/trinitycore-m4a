@@ -23,6 +23,7 @@ SDComment: Show a codebox in gossip option
 SDCategory: Script Examples
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"

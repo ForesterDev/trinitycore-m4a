@@ -32,6 +32,7 @@ npc_kayra_longmane
 npc_timothy_daniels
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
@@ -364,7 +365,7 @@ public:
         {
             DoScriptText(SAY_START, creature, player);
 
-            if (npc_escortAI* pEscortAI = CAST_AI(npc_kayra_longmane::npc_kayra_longmaneAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_kayra_longmane::npc_kayra_longmaneAI, creature->AI()))
                 pEscortAI->Start(false, false, player->GetGUID());
         }
         return true;

@@ -28,6 +28,7 @@ npc_daphne_stilwell
 npc_defias_traitor
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
@@ -61,7 +62,7 @@ public:
         {
             DoScriptText(SAY_DS_START, creature);
 
-            if (npc_escortAI* pEscortAI = CAST_AI(npc_daphne_stilwell::npc_daphne_stilwellAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_daphne_stilwell::npc_daphne_stilwellAI, creature->AI()))
                 pEscortAI->Start(true, true, player->GetGUID());
         }
 
@@ -214,7 +215,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_DEFIAS_BROTHERHOOD)
         {
-            if (npc_escortAI* pEscortAI = CAST_AI(npc_defias_traitor::npc_defias_traitorAI, creature->AI()))
+            if (auto pEscortAI = CAST_AI(npc_defias_traitor::npc_defias_traitorAI, creature->AI()))
                 pEscortAI->Start(true, true, player->GetGUID());
 
             DoScriptText(SAY_START, creature, player);

@@ -23,6 +23,7 @@ SDComment: Coilfang Frenzy, find out how could we fishing in the strangepool
 SDCategory: The Lurker Below
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "serpent_shrine.h"

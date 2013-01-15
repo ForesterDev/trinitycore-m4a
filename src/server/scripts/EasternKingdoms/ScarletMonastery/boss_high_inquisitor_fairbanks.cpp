@@ -23,6 +23,7 @@ SDComment: TODO: if this guy not involved in some special event, remove (and let
 SDCategory: Scarlet Monastery
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

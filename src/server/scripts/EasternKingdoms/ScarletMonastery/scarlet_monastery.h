@@ -32,4 +32,13 @@ enum eEnums
 
     DATA_VORREL                     = 7
 };
+
+enum Entry
+{
+    ENTRY_PUMPKIN_SHRINE    = 186267,
+    ENTRY_HORSEMAN          = 23682,
+    ENTRY_HEAD              = 23775,
+    ENTRY_PUMPKIN           = 23694
+};
+
 #endif

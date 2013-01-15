@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Caverns of Time, Mount Hyjal
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
@@ -723,7 +724,7 @@ void hyjalAI::DeSpawnVeins()
     {
         Creature* unit=Unit::GetCreature((*me), instance->GetData64(DATA_JAINAPROUDMOORE));
         if (!unit)return;
-        hyjalAI* ai = CAST_AI(hyjalAI, unit->AI());
+        auto ai = CAST_AI(hyjalAI, unit->AI());
         if (!ai)return;
         for (uint8 i = 0; i<7; ++i)
         {
@@ -734,7 +735,7 @@ void hyjalAI::DeSpawnVeins()
     {
         Creature* unit=Unit::GetCreature((*me), instance->GetData64(DATA_THRALL));
         if (!unit)return;
-        hyjalAI* ai = CAST_AI(hyjalAI, unit->AI());
+        auto ai = CAST_AI(hyjalAI, unit->AI());
         if (!ai)return;
         for (uint8 i = 7; i<14; ++i)
         {

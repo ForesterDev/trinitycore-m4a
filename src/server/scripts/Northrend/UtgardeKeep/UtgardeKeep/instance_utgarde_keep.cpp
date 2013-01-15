@@ -22,6 +22,7 @@ SDComment: Instance Data Scripts and functions to acquire mobs and set encounter
 SDCategory: Utgarde Keep
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
 #include "utgarde_keep.h"

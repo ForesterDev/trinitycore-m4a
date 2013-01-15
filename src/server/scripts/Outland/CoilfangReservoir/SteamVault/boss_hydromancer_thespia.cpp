@@ -28,6 +28,7 @@ boss_hydromancer_thespia
 mob_coilfang_waterelemental
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "steam_vault.h"

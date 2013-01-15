@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stdafx.hpp"
 #include <algorithm>
 #include <openssl/md5.h>
 
@@ -367,6 +368,8 @@ bool AuthSocket::_HandleLogonChallenge()
         pkt << uint8(WOW_FAIL_BANNED);
         sLog->outDebug(LOG_FILTER_AUTHSERVER, "'%s:%d' [AuthChallenge] Banned ip tries to login!",socket().getRemoteAddress().c_str(), socket().getRemotePort());
     }
+    else if (_build != 12340)
+        pkt << static_cast<uint8>(WOW_FAIL_VERSION_INVALID);
     else
     {
         // Get the account details from the account table
@@ -400,27 +403,44 @@ bool AuthSocket::_HandleLogonChallenge()
 
             if (!locked)
             {
-                //set expired bans to inactive
-                LoginDatabase.Execute(LoginDatabase.GetPreparedStatement(LOGIN_UPD_EXPIRED_ACCOUNT_BANS));
-
                 // If the account is banned, reject the logon attempt
+                auto banned = false;
                 stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_BANNED);
-                stmt->setUInt32(0, fields[1].GetUInt32());
+                auto id = fields[1].GetUInt32();
+                stmt->setUInt32(0, id);
                 PreparedQueryResult banresult = LoginDatabase.Query(stmt);
                 if (banresult)
-                {
-                    if ((*banresult)[0].GetUInt32() == (*banresult)[1].GetUInt32())
+                    do
                     {
-                        pkt << uint8(WOW_FAIL_BANNED);
-                        sLog->outDebug(LOG_FILTER_AUTHSERVER, "'%s:%d' [AuthChallenge] Banned account %s tried to login!", socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str ());
+                        auto fields_ = banresult->Fetch();
+                        if (!fields_[2].GetInt64())
+                        {
+                            if (!banned)
+                            {
+                                banned = true;
+                                if (fields_[0].GetInt32() == fields_[1].GetInt32())
+                                {
+                                    pkt << uint8(WOW_FAIL_BANNED);
+                                    sLog->outDebug(LOG_FILTER_AUTHSERVER, "'%s:%d' [AuthChallenge] Banned account %s tried to login!", socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str ());
+                                }
+                                else
+                                {
+                                    pkt << uint8(WOW_FAIL_SUSPENDED);
+                                    sLog->outDebug(LOG_FILTER_AUTHSERVER, "'%s:%d' [AuthChallenge] Temporarily banned account %s tried to login!", socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str ());
+                                }
+                            }
+                        }
+                        else
+                        {
+                            //set expired ban to inactive
+                            stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_EXPIRED_ACCOUNT_BAN);
+                            stmt->setUInt32(0, id);
+                            stmt->setInt64(1, fields_[0].GetInt64());
+                            LoginDatabase.Execute(stmt);
+                        }
                     }
-                    else
-                    {
-                        pkt << uint8(WOW_FAIL_SUSPENDED);
-                        sLog->outDebug(LOG_FILTER_AUTHSERVER, "'%s:%d' [AuthChallenge] Temporarily banned account %s tried to login!", socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str ());
-                    }
-                }
-                else
+                    while (banresult->NextRow());
+                if (!banned)
                 {
                     // Get the password from the account table, upper it, and make the SRP6 calculation
                     std::string rI = fields[0].GetString();
@@ -615,7 +635,7 @@ bool AuthSocket::_HandleLogonProof()
         stmt->setUInt32(2, GetLocaleByName(_localizationName));
         stmt->setString(3, _os);
         stmt->setString(4, _login);
-        LoginDatabase.Execute(stmt);
+        LoginDatabase.DirectExecute(stmt);
 
         OPENSSL_free((void*)K_hex);
 

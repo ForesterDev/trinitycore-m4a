@@ -98,6 +98,7 @@ namespace Trinity
         explicit AIRelocationNotifier(Unit &unit) : i_unit(unit), isCreature(unit.GetTypeId() == TYPEID_UNIT)  {}
         template<class T> void Visit(GridRefManager<T> &) {}
         void Visit(CreatureMapType &);
+        void Visit(PlayerMapType &m);
     };
 
     struct GridUpdater

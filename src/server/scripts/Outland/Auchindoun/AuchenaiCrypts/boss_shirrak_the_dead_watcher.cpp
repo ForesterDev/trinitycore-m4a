@@ -23,6 +23,7 @@ Comment: InhibitMagic should stack slower far from the boss, proper Visual for F
 Category: Auchindoun, Auchenai Crypts
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

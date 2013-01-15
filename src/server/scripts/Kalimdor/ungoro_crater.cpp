@@ -28,6 +28,7 @@ npc_a-me
 npc_ringo
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
@@ -182,7 +183,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_A_LITTLE_HELP)
         {
-            if (npc_ringoAI* pRingoAI = CAST_AI(npc_ringo::npc_ringoAI, creature->AI()))
+            if (auto pRingoAI = CAST_AI(npc_ringo::npc_ringoAI, creature->AI()))
             {
                 creature->SetStandState(UNIT_STAND_STATE_STAND);
                 pRingoAI->StartFollow(player, FACTION_ESCORTEE, quest);

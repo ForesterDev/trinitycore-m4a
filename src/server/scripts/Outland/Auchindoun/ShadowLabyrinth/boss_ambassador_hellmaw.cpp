@@ -23,6 +23,7 @@ SDComment: Enrage spell missing/not known
 SDCategory: Auchindoun, Shadow Labyrinth
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"

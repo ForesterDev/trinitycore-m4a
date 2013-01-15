@@ -23,6 +23,7 @@ SDComment: place holder
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

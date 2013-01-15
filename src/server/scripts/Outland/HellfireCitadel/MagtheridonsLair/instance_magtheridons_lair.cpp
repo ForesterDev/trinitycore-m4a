@@ -23,6 +23,7 @@ SDComment:
 SDCategory: Hellfire Citadel, Magtheridon's lair
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "InstanceScript.h"

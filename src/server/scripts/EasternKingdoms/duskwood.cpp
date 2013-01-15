@@ -23,6 +23,7 @@ SDComment: Quest Support:8735
 SDCategory: Duskwood
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 

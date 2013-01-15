@@ -29,6 +29,7 @@ npc_kyle_frenzied
 npc_plains_vision
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"

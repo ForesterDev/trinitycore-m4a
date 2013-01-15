@@ -22,6 +22,7 @@ Comment: All message related commands
 Category: commandscripts
 EndScriptData */
 
+#include <stdafx.hpp>
 #include "ScriptMgr.h"
 #include "Chat.h"
 #include "ChannelMgr.h"

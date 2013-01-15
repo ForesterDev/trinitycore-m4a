@@ -27,6 +27,7 @@ EndScriptData */
 npc_professor_phizzlethorpe
 EndContentData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
@@ -130,7 +131,7 @@ class npc_professor_phizzlethorpe : public CreatureScript
             if (quest->GetQuestId() == QUEST_SUNKEN_TREASURE)
             {
                 creature->AI()->Talk(SAY_PROGRESS_1, player->GetGUID());
-                if (npc_escortAI* pEscortAI = CAST_AI(npc_professor_phizzlethorpeAI, (creature->AI())))
+                if (auto pEscortAI = CAST_AI(npc_professor_phizzlethorpeAI, (creature->AI())))
                     pEscortAI->Start(false, false, player->GetGUID(), quest);
 
                 creature->setFaction(113);

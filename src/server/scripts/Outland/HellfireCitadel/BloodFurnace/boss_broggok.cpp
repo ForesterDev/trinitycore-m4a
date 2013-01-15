@@ -23,6 +23,7 @@ SDComment: pre-event not made
 SDCategory: Hellfire Citadel, Blood Furnace
 EndScriptData */
 
+#include "stdafx.hpp"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "blood_furnace.h"
