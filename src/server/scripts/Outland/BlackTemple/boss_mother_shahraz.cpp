@@ -24,7 +24,8 @@ SDCategory: Black Temple
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "black_temple.h"
 
 //Speech'n'Sounds
@@ -248,11 +249,9 @@ public:
                 {
                     for (uint8 i = 0; i < 3; ++i)
                     {
-                        Unit* unit = NULL;
                         if (TargetGUID[i])
                         {
-                            unit = Unit::GetUnit(*me, TargetGUID[i]);
-                            if (unit)
+                            if (Unit* unit = Unit::GetUnit(*me, TargetGUID[i]))
                                 unit->CastSpell(unit, SPELL_ATTRACTION, true);
                             TargetGUID[i] = 0;
                         }

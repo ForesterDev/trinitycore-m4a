@@ -20,8 +20,8 @@
  */
 
 #include "Common.h"
-#include "ScriptMgr.h"
 #include "SharedDefines.h"
+#include "ScriptMgr.h"
 
 class Player;
 class Group;

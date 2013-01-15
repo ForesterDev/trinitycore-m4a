@@ -16,7 +16,8 @@
  */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "naxxramas.h"
 
 #define SAY_GREET           RAND(-1533000, -1533004, -1533005, -1533006, -1533007)

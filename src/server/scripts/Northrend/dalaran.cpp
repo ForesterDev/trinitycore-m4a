@@ -24,7 +24,9 @@ SDCategory: Dalaran
 Script Data End */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 
 /*******************************************************
  * npc_mageguard_dalaran

@@ -16,6 +16,7 @@
  */
 
 #include "stdafx.hpp"
+#include "ScriptMgr.h"
 #include "OutdoorPvPHP.h"
 #include "OutdoorPvP.h"
 #include "OutdoorPvPMgr.h"
@@ -24,7 +25,6 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "Language.h"
-#include "ScriptPCH.h"
 
 const uint32 HP_LANG_LOSE_A[HP_TOWER_NUM] = {LANG_OPVP_HP_LOSE_BROKENHILL_A, LANG_OPVP_HP_LOSE_OVERLOOK_A, LANG_OPVP_HP_LOSE_STADIUM_A};
 

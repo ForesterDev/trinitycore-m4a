@@ -24,7 +24,7 @@ Category: Script Examples
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
 #include "Chat.h"
 
 // **** This script is designed as an example for others to build on ****

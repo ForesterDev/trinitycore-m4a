@@ -24,7 +24,8 @@ SDCategory: Gruul's Lair
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "gruuls_lair.h"
 
 #define MAX_ENCOUNTER 2
@@ -171,15 +172,9 @@ public:
             OUT_SAVE_INST_DATA;
             std::ostringstream stream;
             stream << m_auiEncounter[0] << ' ' << m_auiEncounter[1];
-            char* out = new char[stream.str().length() + 1];
-            strcpy(out, stream.str().c_str());
-            if (out)
-            {
-                OUT_SAVE_INST_DATA_COMPLETE;
-                return out;
-            }
 
-            return NULL;
+            OUT_SAVE_INST_DATA_COMPLETE;
+            return stream.str();
         }
 
         void Load(const char* in)

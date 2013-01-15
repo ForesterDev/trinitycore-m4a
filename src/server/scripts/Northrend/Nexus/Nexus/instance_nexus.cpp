@@ -17,7 +17,8 @@
  */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "nexus.h"
 
 #define NUMBER_OF_ENCOUNTERS      4
@@ -58,6 +59,9 @@ public:
 
             Anomalus = 0;
             Keristrasza = 0;
+            AnomalusContainmentSphere = 0;
+            OrmoroksContainmentSphere = 0;
+            TelestrasContainmentSphere = 0;
         }
 
         void OnCreatureCreate(Creature* creature)

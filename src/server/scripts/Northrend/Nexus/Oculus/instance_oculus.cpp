@@ -16,7 +16,9 @@
  */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "InstanceScript.h"
 #include "oculus.h"
 
 #define MAX_ENCOUNTER 4

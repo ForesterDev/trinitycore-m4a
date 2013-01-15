@@ -29,7 +29,8 @@ mob_steamrigger_mechanic
 EndContentData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "steam_vault.h"
 
 #define SAY_MECHANICS               -1545007

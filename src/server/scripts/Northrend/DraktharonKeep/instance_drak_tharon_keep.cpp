@@ -16,7 +16,8 @@
  */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "drak_tharon_keep.h"
 
 #define MAX_ENCOUNTER     4
@@ -70,6 +71,7 @@ public:
 
         void Initialize()
         {
+            memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
             uiTrollgore = 0;
             uiNovos = 0;
             uiDred = 0;
@@ -190,16 +192,12 @@ public:
         {
             OUT_SAVE_INST_DATA;
 
-            std::string str_data;
-
             std::ostringstream saveStream;
             saveStream << "D K " << m_auiEncounter[0] << ' ' << m_auiEncounter[1] << ' '
                 << m_auiEncounter[2] << ' ' << m_auiEncounter[3];
 
-            str_data = saveStream.str();
-
             OUT_SAVE_INST_DATA_COMPLETE;
-            return str_data;
+            return saveStream.str();
         }
 
         void Load(const char* in)

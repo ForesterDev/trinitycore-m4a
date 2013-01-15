@@ -31,7 +31,8 @@ item_only_for_flight                Items which should only useable while flying
 EndContentData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "Spell.h"
 
 /*#####

@@ -24,7 +24,8 @@ SDCategory: Scarlet Monastery
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "scarlet_monastery.h"
 
 enum Says
@@ -281,6 +282,12 @@ public:
         void KilledUnit(Unit* /*victim*/)
         {
             DoScriptText(SAY_WH_KILL, me);
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage)
+        {
+            if (!_bCanResurrectCheck && damage >= me->GetHealth())
+                damage = me->GetHealth() - 1;
         }
 
         void UpdateAI(const uint32 diff)

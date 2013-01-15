@@ -31,7 +31,8 @@ mobs_spectral_ghostly_citizen
 EndContentData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "stratholme.h"
 #include "Group.h"
 

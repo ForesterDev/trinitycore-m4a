@@ -24,7 +24,8 @@ SDCategory: Auchindoun, Sethekk Halls
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "sethekk_halls.h"
 
 enum eEnums

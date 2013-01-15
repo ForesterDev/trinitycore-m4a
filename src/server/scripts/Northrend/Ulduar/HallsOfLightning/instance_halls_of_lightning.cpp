@@ -24,7 +24,8 @@ SDCategory: Halls of Lightning
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "halls_of_lightning.h"
 
 /* Halls of Lightning encounters:

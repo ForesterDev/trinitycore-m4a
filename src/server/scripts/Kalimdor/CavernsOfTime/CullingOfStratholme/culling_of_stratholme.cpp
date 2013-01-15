@@ -16,9 +16,12 @@
  */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "culling_of_stratholme.h"
 #include "ScriptedEscortAI.h"
+#include "PassiveAI.h"
 
 enum Says
 {

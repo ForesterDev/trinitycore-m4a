@@ -93,7 +93,7 @@ Tokens::Tokens(const std::string &src, const char sep, uint32 vectorReserve)
 
 void stripLineInvisibleChars(std::string &str)
 {
-    static std::string invChars = " \t\7\n";
+    static std::string const invChars = " \t\7\n";
 
     size_t wpos = 0;
 
@@ -218,7 +218,7 @@ uint32 CreatePIDFile(const std::string& filename)
     pid_t pid = getpid();
 #endif
 
-    fprintf(pid_file, "%d", pid );
+    fprintf(pid_file, "%u", pid );
     fclose(pid_file);
 
     return (uint32)pid;

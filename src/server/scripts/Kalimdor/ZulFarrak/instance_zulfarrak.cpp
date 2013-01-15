@@ -16,7 +16,8 @@
  */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "zulfarrak.h"
 
 #define NPC_GAHZRILLA 7273
@@ -119,6 +120,18 @@ public:
         void Initialize()
         {
             GahzRillaEncounter = NOT_STARTED;
+            ZumrahGUID = 0;
+            BlyGUID = 0;
+            WeegliGUID = 0;
+            OroGUID = 0;
+            RavenGUID = 0;
+            MurtaGUID = 0;
+            EndDoorGUID = 0;
+            PyramidPhase = 0;
+            major_wave_Timer = 0;
+            minor_wave_Timer = 0;
+            addGroupSize = 0;
+            waypoint = 0;
         }
 
         void OnCreatureCreate(Creature* creature)

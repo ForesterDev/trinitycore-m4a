@@ -24,7 +24,8 @@ SDCategory: Bosses
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 #define SPELL_SHADOWVOLLEY          21341
 #define SPELL_CLEAVE                20677

@@ -23,7 +23,8 @@ SDComment: Find a way to start the intro, best code for the intro
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "sunwell_plateau.h"
 
 enum Quotes
@@ -171,7 +172,7 @@ public:
             else
             {
                 //Madrigosa not found, end intro
-                sLog->outError("Madrigosa was not found");
+                sLog->outError(LOG_FILTER_TSCR, "Madrigosa was not found");
                 EndIntro();
             }
         }

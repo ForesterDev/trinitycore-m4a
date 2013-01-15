@@ -23,7 +23,8 @@ SDComment:
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "zulaman.h"
 
 //Speech
@@ -315,14 +316,12 @@ class boss_zuljin : public CreatureScript
             {
                 for (uint8 i = 0; i < 4; ++i)
                 {
-                    Unit* Temp = NULL;
                     if (SpiritGUID[i])
                     {
-                        Temp = Unit::GetUnit(*me, SpiritGUID[i]);
-                        if (Temp)
+                        if (Unit* temp = Unit::GetUnit(*me, SpiritGUID[i]))
                         {
-                            Temp->SetVisible(false);
-                            Temp->setDeathState(DEAD);
+                            temp->SetVisible(false);
+                            temp->setDeathState(DEAD);
                         }
                     }
                     SpiritGUID[i] = 0;

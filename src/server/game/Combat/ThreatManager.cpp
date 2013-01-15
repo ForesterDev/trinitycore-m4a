@@ -195,7 +195,6 @@ void HostileReference::updateOnlineStatus()
         }
         else
             accessible = true;
-
     }
     setAccessibleState(accessible);
     setOnlineOfflineState(online);

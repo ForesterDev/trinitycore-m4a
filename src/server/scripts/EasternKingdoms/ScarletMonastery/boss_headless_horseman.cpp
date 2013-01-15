@@ -25,7 +25,8 @@ EndScriptData */
 
 #include "stdafx.hpp"
 #include <utility>
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "SpellMgr.h"
 #include "scarlet_monastery.h"
 

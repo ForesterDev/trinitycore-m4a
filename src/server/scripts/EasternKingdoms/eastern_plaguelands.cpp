@@ -31,7 +31,9 @@ npc_tirion_fordring
 EndContentData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 
 class mobs_ghoul_flayer : public CreatureScript
 {

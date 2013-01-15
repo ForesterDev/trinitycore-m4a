@@ -24,7 +24,9 @@ SDCategory: Blackwing Lair
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 
 enum Says
 {
@@ -363,7 +365,7 @@ public:
                             Nefarian->setFaction(103);
                             NefarianGUID = Nefarian->GetGUID();
                         }
-                        else sLog->outError("TSCR: Blackwing Lair: Unable to spawn nefarian properly.");
+                        else sLog->outError(LOG_FILTER_TSCR, "Blackwing Lair: Unable to spawn nefarian properly.");
                     }
 
                     AddSpawnTimer = 4000;
