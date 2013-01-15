@@ -10,7 +10,7 @@
 #   ADD_NATIVE_PRECOMPILED_HEADER _targetName _input _dowarn
 #   GET_NATIVE_PRECOMPILED_HEADER _targetName _input
 
-IF(CMAKE_COMPILER_IS_GNUCXX)
+IF(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES Clang)
 
     EXEC_PROGRAM(
       ${CMAKE_CXX_COMPILER}
@@ -28,7 +28,7 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
 
     SET(_PCH_include_prefix "-I")
 
-ELSE(CMAKE_COMPILER_IS_GNUCXX)
+ELSE(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES Clang)
 
     IF(WIN32)
       SET(PCHSupport_FOUND TRUE) # for experimental msvc support
@@ -37,22 +37,22 @@ ELSE(CMAKE_COMPILER_IS_GNUCXX)
       SET(PCHSupport_FOUND FALSE)
     ENDIF(WIN32)
 
-ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+ENDIF(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES Clang)
 
 MACRO(_PCH_GET_COMPILE_FLAGS _out_compile_flags)
 
   STRING(TOUPPER "CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}" _flags_var_name)
-  SET(${_out_compile_flags} ${${_flags_var_name}} )
+  SET(${_out_compile_flags} "${CMAKE_CXX_FLAGS} ${${_flags_var_name}}" )
 
-  IF(CMAKE_COMPILER_IS_GNUCXX)
+  IF(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES Clang)
     GET_TARGET_PROPERTY(_targetType ${_PCH_current_target} TYPE)
     IF(${_targetType} STREQUAL SHARED_LIBRARY AND NOT WIN32)
       LIST(APPEND ${_out_compile_flags} -fPIC)
     ENDIF()
 
-  ELSE(CMAKE_COMPILER_IS_GNUCXX)
+  ELSE(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES Clang)
     ## TODO ... ? or does it work out of the box
-  ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+  ENDIF(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES Clang)
 
   GET_DIRECTORY_PROPERTY(DIRINC INCLUDE_DIRECTORIES )
   FOREACH(item ${DIRINC})
@@ -60,11 +60,9 @@ MACRO(_PCH_GET_COMPILE_FLAGS _out_compile_flags)
   ENDFOREACH(item)
 
   GET_DIRECTORY_PROPERTY(_directory_flags DEFINITIONS)
-  GET_DIRECTORY_PROPERTY(_global_definitions DIRECTORY ${CMAKE_SOURCE_DIR} DEFINITIONS)
-  #MESSAGE("_directory_flags ${_directory_flags} ${_global_definitions}" )
+  #MESSAGE("_directory_flags ${_directory_flags}" )
   LIST(APPEND ${_out_compile_flags} ${_directory_flags})
-  LIST(APPEND ${_out_compile_flags} ${_global_definitions})
-  LIST(APPEND ${_out_compile_flags} ${CMAKE_CXX_FLAGS} )
+  LIST(APPEND ${_out_compile_flags} "-D USE_PRECOMPILED_HEADERS")
 
   SEPARATE_ARGUMENTS(${_out_compile_flags})
 
@@ -90,7 +88,7 @@ MACRO(_PCH_GET_COMPILE_COMMAND out_command _input _output)
     FILE(TO_NATIVE_PATH ${_output} _native_output)
 
 
-    IF(CMAKE_COMPILER_IS_GNUCXX)
+    IF(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES Clang)
       IF(CMAKE_CXX_COMPILER_ARG1)
     # remove leading space in compiler argument
         STRING(REGEX REPLACE "^ +" "" pchsupport_compiler_cxx_arg1 ${CMAKE_CXX_COMPILER_ARG1})
@@ -103,7 +101,7 @@ MACRO(_PCH_GET_COMPILE_COMMAND out_command _input _output)
       ${CMAKE_CXX_COMPILER}  ${_compile_FLAGS}    -x c++-header -o ${_output} ${_input}
       )
       ENDIF(CMAKE_CXX_COMPILER_ARG1)
-    ELSE(CMAKE_COMPILER_IS_GNUCXX)
+    ELSE(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES Clang)
 
     SET(_dummy_str "#include <${_input}>")
     FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/pch_dummy.cpp ${_dummy_str})
@@ -113,7 +111,7 @@ MACRO(_PCH_GET_COMPILE_COMMAND out_command _input _output)
     )
     #/out:${_output}
 
-    ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+    ENDIF(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES Clang)
 
 ENDMACRO(_PCH_GET_COMPILE_COMMAND )
 
@@ -123,7 +121,7 @@ MACRO(_PCH_GET_TARGET_COMPILE_FLAGS _cflags  _header_name _pch_path _dowarn )
 
   FILE(TO_NATIVE_PATH ${_pch_path} _native_pch_path)
 
-  IF(CMAKE_COMPILER_IS_GNUCXX)
+  IF(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES Clang)
     # for use with distcc and gcc >4.0.1 if preprocessed files are accessible
     # on all remote machines set
     # PCH_ADDITIONAL_COMPILER_FLAGS to -fpch-preprocess
@@ -135,18 +133,18 @@ MACRO(_PCH_GET_TARGET_COMPILE_FLAGS _cflags  _header_name _pch_path _dowarn )
     ELSE (_dowarn)
       SET(${_cflags} "${PCH_ADDITIONAL_COMPILER_FLAGS} -D USE_PRECOMPILED_HEADERS -include ${CMAKE_CURRENT_BINARY_DIR}/${_header_name} " )
     ENDIF (_dowarn)
-  ELSE(CMAKE_COMPILER_IS_GNUCXX)
+  ELSE(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES Clang)
 
     set(${_cflags} "/Fp${_native_pch_path} /Yu${_header_name} /DUSE_PRECOMPILED_HEADERS" )
 
-  ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+  ENDIF(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES Clang)
 
 ENDMACRO(_PCH_GET_TARGET_COMPILE_FLAGS )
 
 MACRO(GET_PRECOMPILED_HEADER_OUTPUT _targetName _input _output)
   GET_FILENAME_COMPONENT(_name ${_input} NAME)
   GET_FILENAME_COMPONENT(_path ${_input} PATH)
-  SET(_output "${CMAKE_CURRENT_BINARY_DIR}/${_name}.gch/${_targetName}_${CMAKE_BUILD_TYPE}.gch")
+  SET(_output "${CMAKE_CURRENT_BINARY_DIR}/${_name}.gch")
 ENDMACRO(GET_PRECOMPILED_HEADER_OUTPUT _targetName _input)
 
 
@@ -209,6 +207,7 @@ MACRO(ADD_PRECOMPILED_HEADER _targetName _input)
   ELSE(${_targetType} STREQUAL SHARED_LIBRARY)
     ADD_LIBRARY(${_targetName}_pch_dephelp STATIC ${_pch_dephelp_cxx})
   ENDIF(${_targetType} STREQUAL SHARED_LIBRARY)
+  set_target_properties(${_targetName}_pch_dephelp PROPERTIES COMPILE_FLAGS "-D USE_PRECOMPILED_HEADERS")
 
   FILE(MAKE_DIRECTORY ${_outdir})
 

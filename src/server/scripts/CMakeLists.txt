@@ -156,7 +156,7 @@ target_link_libraries(scripts ${Boost_LIBRARIES} game)
 
 # Generate precompiled header
 if( USE_SCRIPTPCH )
-  if(CMAKE_COMPILER_IS_GNUCXX)
+  if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES Clang)
     add_precompiled_header(scripts ${CMAKE_CURRENT_SOURCE_DIR}/stdafx.hpp)
   elseif(MSVC)
     set_precompiled_header(scripts "stdafx.hpp"

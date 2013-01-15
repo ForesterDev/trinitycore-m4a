@@ -220,7 +220,7 @@ target_link_libraries(game)
 
 # Generate precompiled header
 if( USE_COREPCH )
-  if(CMAKE_COMPILER_IS_GNUCXX)
+  if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES Clang)
     add_precompiled_header(game ${CMAKE_CURRENT_SOURCE_DIR}/stdafx.hpp)
   elseif(MSVC)
     set_precompiled_header(game "stdafx.hpp"

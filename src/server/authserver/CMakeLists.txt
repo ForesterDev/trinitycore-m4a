@@ -103,7 +103,7 @@ endif()
 
 # Generate precompiled header
 if( USE_COREPCH )
-  if(CMAKE_COMPILER_IS_GNUCXX)
+  if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES Clang)
     add_precompiled_header(authserver ${CMAKE_CURRENT_SOURCE_DIR}/stdafx.hpp)
   elseif(MSVC)
     set_precompiled_header(authserver "stdafx.hpp"

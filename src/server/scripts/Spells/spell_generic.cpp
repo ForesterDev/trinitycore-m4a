@@ -773,7 +773,7 @@ namespace
                 return e;
             }
 
-            static bool in_area(Player &t, uint32 zone_id, uint32 area_id)
+            static bool in_area(uint32 zone_id, uint32 area_id)
             {
                 if (zone_id == 65 /* Dragonblight */)
                     switch (area_id)
@@ -807,7 +807,7 @@ namespace
             void applied(const AuraEffect *, AuraEffectHandleModes mode UNUSED)
             {
                 auto &t = target();
-                if (in_area(t, t.GetZoneId(), t.GetAreaId()))
+                if (in_area(t.GetZoneId(), t.GetAreaId()))
                     ;
                 else
                     apply_warning(t);
