@@ -16,7 +16,9 @@
  */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "SpellScript.h"
 #include "naxxramas.h"
 
 #define SAY_AGGRO           RAND(-1533109, -1533110, -1533111)

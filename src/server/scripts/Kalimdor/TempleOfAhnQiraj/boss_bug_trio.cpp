@@ -24,7 +24,8 @@ SDCategory: Temple of Ahn'Qiraj
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "temple_of_ahnqiraj.h"
 
 #define SPELL_CLEAVE        26350

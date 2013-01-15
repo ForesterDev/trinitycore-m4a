@@ -16,6 +16,7 @@
  */
 
 #include "stdafx.hpp"
+#include "ScriptMgr.h"
 #include "OutdoorPvPNA.h"
 #include "Player.h"
 #include "ObjectMgr.h"
@@ -23,7 +24,6 @@
 #include "WorldPacket.h"
 #include "Language.h"
 #include "World.h"
-#include "ScriptPCH.h"
 
 OutdoorPvPNA::OutdoorPvPNA()
 {

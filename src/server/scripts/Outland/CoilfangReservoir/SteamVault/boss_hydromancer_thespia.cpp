@@ -29,7 +29,8 @@ mob_coilfang_waterelemental
 EndContentData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "steam_vault.h"
 
 #define SAY_SUMMON                  -1545000

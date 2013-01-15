@@ -66,4 +66,3 @@ public:
 ChannelMgr* channelMgr(uint32 team);
 
 #endif
-

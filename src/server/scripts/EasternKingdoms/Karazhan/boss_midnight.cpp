@@ -24,7 +24,8 @@ SDCategory: Karazhan
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 #define SAY_MIDNIGHT_KILL           -1532000
 #define SAY_APPEAR1                 -1532001
@@ -80,6 +81,12 @@ public:
 
         void Reset()
         {
+            ResetTimer = 0;
+        }
+
+        void EnterEvadeMode()
+        {
+            ScriptedAI::EnterEvadeMode();
             ResetTimer = 2000;
         }
 

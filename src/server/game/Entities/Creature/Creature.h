@@ -113,6 +113,7 @@ struct CreatureTemplate
     uint32  rangeattacktime;
     uint32  unit_class;                                     // enum Classes. Note only 4 classes are known for creatures.
     uint32  unit_flags;                                     // enum UnitFlags mask values
+    uint32  unit_flags2;                                    // enum UnitFlags2 mask values
     uint32  dynamicflags;
     uint32  family;                                         // enum CreatureFamily values (optional)
     uint32  trainer_type;
@@ -413,15 +414,15 @@ typedef std::map<uint32, time_t> CreatureSpellCooldowns;
 
 enum CreatureCellMoveState
 {
-    CREATURE_CELL_MOVE_NONE, //not in move list
-    CREATURE_CELL_MOVE_ACTIVE, //in move list
-    CREATURE_CELL_MOVE_INACTIVE, //in move list but should not move
+    CREATURE_CELL_MOVE_NONE,    // not in move list
+    CREATURE_CELL_MOVE_ACTIVE,  // in move list
+    CREATURE_CELL_MOVE_INACTIVE // in move list but should not move
 };
 
 class MapCreature
 {
-    friend class Map; //map for moving creatures
-    friend class ObjectGridLoader; //grid loader for loading creatures
+    friend class Map;              // map for moving creatures
+    friend class ObjectGridLoader; // grid loader for loading creatures
 
 protected:
     MapCreature() : _moveState(CREATURE_CELL_MOVE_NONE) {}
@@ -541,6 +542,13 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         void AddCreatureSpellCooldown(uint32 spellid);
         bool HasSpellCooldown(uint32 spell_id) const;
         bool HasCategoryCooldown(uint32 spell_id) const;
+        uint32 GetCreatureSpellCooldownDelay(uint32 spellId) const
+        {
+            CreatureSpellCooldowns::const_iterator itr = m_CreatureSpellCooldowns.find(spellId);
+            time_t t = time(NULL);
+            return uint32(itr != m_CreatureSpellCooldowns.end() && itr->second > t ? itr->second - t : 0);
+        }
+        virtual void ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs);
 
         bool HasSpell(uint32 spellID) const;
 

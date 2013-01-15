@@ -24,7 +24,8 @@ SDCategory: Stratholme
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "stratholme.h"
 
 #define SPELL_BANSHEEWAIL   16565

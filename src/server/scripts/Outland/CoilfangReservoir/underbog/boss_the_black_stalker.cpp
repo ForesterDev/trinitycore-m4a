@@ -24,7 +24,8 @@ SDCategory: Coilfang Resevoir, Underbog
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 #define SPELL_LEVITATE             31704
 #define SPELL_SUSPENSION           31719

@@ -30,7 +30,8 @@ guard_shattrath_scryer
 EndContentData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "GuardAI.h"
 
 enum GuardGeneric

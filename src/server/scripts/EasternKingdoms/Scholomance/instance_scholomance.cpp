@@ -24,7 +24,8 @@ SDCategory: Scholomance
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "scholomance.h"
 
 #define GO_GATE_KIRTONOS    175570

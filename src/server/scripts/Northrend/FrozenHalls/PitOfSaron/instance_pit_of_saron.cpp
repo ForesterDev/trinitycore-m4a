@@ -16,7 +16,8 @@
  */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "pit_of_saron.h"
 
 // positions for Martin Victus (37591) and Gorkun Ironskull (37592)

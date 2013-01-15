@@ -23,7 +23,9 @@ SDCategory: Trial of the Champion
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "SpellScript.h"
 #include "trial_of_the_champion.h"
 #include "ScriptedEscortAI.h"
 
@@ -218,8 +220,6 @@ public:
         }
 
         InstanceScript* instance;
-
-        Creature* pMemory;
         uint64 MemoryGUID;
 
         bool bHealth;

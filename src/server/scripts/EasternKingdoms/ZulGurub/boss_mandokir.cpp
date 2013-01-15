@@ -24,7 +24,8 @@ SDCategory: Zul'Gurub
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "zulgurub.h"
 
 #define SAY_AGGRO               -1309015
@@ -44,6 +45,8 @@ EndScriptData */
 
 //Ohgans Spells
 #define SPELL_SUNDERARMOR       24317
+
+#define NPC_SPEAKER             11391
 
 #define SPELL_SPEAKER_DEM_SHOUT 13730
 #define SPELL_SPEAKER_CLEAVE    15284
@@ -83,6 +86,7 @@ class boss_mandokir : public CreatureScript
             bool someWatched;
             bool RaptorDead;
             bool CombatStart;
+            bool SpeakerDead;
 
             uint64 WatchTarget;
 
@@ -106,6 +110,7 @@ class boss_mandokir : public CreatureScript
                 endWatch = false;
                 RaptorDead = false;
                 CombatStart = false;
+                SpeakerDead = false;
 
                 DoCast(me, 23243);
             }
@@ -132,15 +137,15 @@ class boss_mandokir : public CreatureScript
                                 }
                             }
                         }
-                    DoCast(me, SPELL_LEVEL_UP, true);
-                     KillCount = 0;
+                        DoCast(me, SPELL_LEVEL_UP, true);
+                        KillCount = 0;
                     }
                 }
             }
 
             void EnterCombat(Unit* /*who*/)
             {
-             DoScriptText(SAY_AGGRO, me);
+                DoScriptText(SAY_AGGRO, me);
             }
 
             void JustDied(Unit* /*killer*/)
@@ -161,6 +166,18 @@ class boss_mandokir : public CreatureScript
 
             void UpdateAI(const uint32 diff)
             {
+                if (!SpeakerDead)
+                {
+                    if (!me->FindNearestCreature(NPC_SPEAKER, 100.0f, true))
+                    {
+                        me->GetMotionMaster()->MovePoint(0, -12196.3f, -1948.37f, 130.36f);
+                        SpeakerDead = true;
+                    }
+                }
+
+                if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != POINT_MOTION_TYPE && SpeakerDead)
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+
                 if (!UpdateVictim())
                     return;
 

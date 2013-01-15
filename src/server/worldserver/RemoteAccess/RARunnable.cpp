@@ -68,11 +68,11 @@ void RARunnable::run()
 
     if (acceptor.open(listen_addr, m_Reactor) == -1)
     {
-        sLog->outError("Trinity RA can not bind to port %d on %s", raport, stringip.c_str());
+        sLog->outError(LOG_FILTER_WORLDSERVER, "Trinity RA can not bind to port %d on %s", raport, stringip.c_str());
         return;
     }
 
-    sLog->outString("Starting Trinity RA on port %d on %s", raport, stringip.c_str());
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "Starting Trinity RA on port %d on %s", raport, stringip.c_str());
 
     while (!World::IsStopped())
     {
@@ -83,5 +83,5 @@ void RARunnable::run()
             break;
     }
 
-    sLog->outStaticDebug("Trinity RA thread exiting");
+    sLog->outDebug(LOG_FILTER_WORLDSERVER, "Trinity RA thread exiting");
 }

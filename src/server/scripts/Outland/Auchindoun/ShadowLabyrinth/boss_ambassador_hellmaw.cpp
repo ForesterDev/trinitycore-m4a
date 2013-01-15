@@ -24,7 +24,8 @@ SDCategory: Auchindoun, Shadow Labyrinth
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
 #include "shadow_labyrinth.h"
 

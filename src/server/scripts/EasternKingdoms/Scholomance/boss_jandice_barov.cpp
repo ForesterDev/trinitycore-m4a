@@ -24,7 +24,8 @@ SDCategory: Scholomance
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 #define SPELL_CURSEOFBLOOD          24673
 //#define SPELL_ILLUSION              17773

@@ -16,6 +16,7 @@
  */
 
 #include "stdafx.hpp"
+#include "ScriptMgr.h"
 #include "OutdoorPvPTF.h"
 #include "OutdoorPvPMgr.h"
 #include "OutdoorPvP.h"
@@ -24,7 +25,6 @@
 #include "ObjectMgr.h"
 #include "Language.h"
 #include "World.h"
-#include "ScriptPCH.h"
 
 OutdoorPvPTF::OutdoorPvPTF()
 {

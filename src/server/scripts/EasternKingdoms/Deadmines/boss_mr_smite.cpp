@@ -22,7 +22,8 @@ SDComment: Timers and say taken from acid script
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "deadmines.h"
 
 enum eSpels

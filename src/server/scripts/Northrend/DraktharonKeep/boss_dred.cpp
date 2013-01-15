@@ -20,7 +20,8 @@
  */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "drak_tharon_keep.h"
 
 enum Spells

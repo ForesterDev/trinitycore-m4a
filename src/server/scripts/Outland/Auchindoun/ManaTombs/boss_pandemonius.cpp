@@ -24,7 +24,8 @@ SDCategory: Auchindoun, Mana Tombs
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 #define SAY_AGGRO_1                     -1557008
 #define SAY_AGGRO_2                     -1557009

@@ -24,7 +24,8 @@ SDCategory: Zul'Gurub
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "zulgurub.h"
 
 enum eYells
@@ -171,7 +172,7 @@ class boss_arlokk : public CreatureScript
                             MarkedTargetGUID = pMarkedTarget->GetGUID();
                         }
                         else
-                            sLog->outError("TSCR: boss_arlokk could not accuire pMarkedTarget.");
+                            sLog->outError(LOG_FILTER_TSCR, "boss_arlokk could not accuire pMarkedTarget.");
 
                         m_uiMark_Timer = 15000;
                     }

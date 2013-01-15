@@ -164,7 +164,7 @@ class ScriptObject
     protected:
 
         ScriptObject(const char* name)
-            : _name(std::string(name))
+            : _name(name)
         {
         }
 
@@ -334,7 +334,7 @@ template<class TMap> class MapScript : public UpdatableScript<TMap>
             : _mapEntry(sMapStore.LookupEntry(mapId))
         {
             if (!_mapEntry)
-                sLog->outError("Invalid MapScript for %u; no such map ID.", mapId);
+                sLog->outError(LOG_FILTER_TSCR, "Invalid MapScript for %u; no such map ID.", mapId);
         }
 
     public:

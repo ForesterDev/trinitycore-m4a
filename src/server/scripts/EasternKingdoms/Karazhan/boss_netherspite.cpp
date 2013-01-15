@@ -24,7 +24,8 @@ SDCategory: Karazhan
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "karazhan.h"
 
 #define EMOTE_PHASE_PORTAL          -1532089

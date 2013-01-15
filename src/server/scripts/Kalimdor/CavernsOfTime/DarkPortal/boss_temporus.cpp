@@ -24,7 +24,8 @@ SDCategory: Caverns of Time, The Dark Portal
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "dark_portal.h"
 
 enum eEnums

@@ -24,7 +24,8 @@ SDCategory: Sunken Temple
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "sunken_temple.h"
 
 #define GO_ATALAI_STATUE1 148830

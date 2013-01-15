@@ -26,6 +26,7 @@
 #include "Group.h"
 #include "LFGScripts.h"
 #include "LFGMgr.h"
+#include "ScriptMgr.h"
 #include "ObjectAccessor.h"
 
 LFGPlayerScript::LFGPlayerScript() : PlayerScript("LFGPlayerScript")
