@@ -24,7 +24,8 @@ SDCategory: Magister's Terrace
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "magisters_terrace.h"
 
 struct Speech

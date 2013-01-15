@@ -24,7 +24,8 @@ SDCategory: Blackwing Lair
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 #define SPELL_SHADOWFLAME           22539
 #define SPELL_WINGBUFFET            18500

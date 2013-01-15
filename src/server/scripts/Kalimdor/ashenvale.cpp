@@ -175,7 +175,7 @@ enum RuulSnowhoof
     NPC_THISTLEFUR_URSA         = 3921,
     NPC_THISTLEFUR_TOTEMIC      = 3922,
     NPC_THISTLEFUR_PATHFINDER   = 3926,
-    
+
     QUEST_FREEDOM_TO_RUUL       = 6482,
 
     GO_CAGE                     = 178147
@@ -448,7 +448,7 @@ class npc_muglash : public CreatureScript
                     DoScriptText(SAY_MUG_START1, creature);
                     creature->setFaction(113);
 
-                    pEscortAI->Start(true, true, player->GetGUID());
+                    pEscortAI->Start(true, false, player->GetGUID());
                 }
             }
             return true;

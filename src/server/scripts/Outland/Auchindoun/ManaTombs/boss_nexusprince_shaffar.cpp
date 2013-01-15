@@ -29,7 +29,8 @@ mob_ethereal_beacon
 EndContentData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 enum ePrince
 {

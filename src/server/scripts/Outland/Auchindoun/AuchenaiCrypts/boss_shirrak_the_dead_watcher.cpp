@@ -24,7 +24,8 @@ Category: Auchindoun, Auchenai Crypts
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 #define SPELL_INHIBITMAGIC          32264
 #define SPELL_ATTRACTMAGIC          32265

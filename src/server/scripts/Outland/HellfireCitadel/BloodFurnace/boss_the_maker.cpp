@@ -24,7 +24,8 @@ SDCategory: Hellfire Citadel, Blood Furnace
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "blood_furnace.h"
 
 enum eEnums

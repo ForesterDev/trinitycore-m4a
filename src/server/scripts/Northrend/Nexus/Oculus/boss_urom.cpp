@@ -23,7 +23,8 @@ SDCategory: Instance Script
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "oculus.h"
 
 enum Spells

@@ -28,7 +28,9 @@ npc_spirit_of_olum
 EndContentData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+    #include "ScriptedGossip.h"
 #include "black_temple.h"
 
 /*###

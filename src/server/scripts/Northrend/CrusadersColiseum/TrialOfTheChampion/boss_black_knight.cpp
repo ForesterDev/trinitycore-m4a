@@ -23,7 +23,8 @@ SDCategory: Trial of the Champion
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
 #include "trial_of_the_champion.h"
 

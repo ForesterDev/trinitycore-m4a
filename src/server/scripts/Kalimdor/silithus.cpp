@@ -538,7 +538,6 @@ public:
             if (!Fandral || !Arygos || !Caelestrasz || !Merithra)
                 return;
 
-            Unit* mob = NULL;
             AnimationTimer = EventAnim[AnimationCount].Timer;
             if (eventEnd == false)
             {
@@ -721,6 +720,7 @@ public:
                     case 51:
                     {
                         uint32 entries[4] = { 15423, 15424, 15414, 15422 };
+                        Unit* mob = NULL;
                         for (uint8 i = 0; i < 4; ++i)
                         {
                             mob = player->FindNearestCreature(entries[i], 50, me);
@@ -845,9 +845,6 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            Unit* target = NULL;
-            //Player* player = me->GetPlayer(PlayerGUID);
-
             if (!Timers)
             {
                 if (me->GetEntry() == 15424 || me->GetEntry() == 15422 || me->GetEntry() == 15414) //all but Kaldorei Soldiers
@@ -891,6 +888,7 @@ public:
             }
             if (!hasTarget)
             {
+                Unit* target = NULL;
                 if (me->GetEntry() == 15424 || me->GetEntry() == 15422 || me->GetEntry() == 15414)
                     target = me->FindNearestCreature(15423, 20, true);
                 if (me->GetEntry() == 15423)

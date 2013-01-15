@@ -24,7 +24,8 @@ SDCategory: Zul'Gurub
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "zulgurub.h"
 
 #define SAY_AGGRO                       -1309014

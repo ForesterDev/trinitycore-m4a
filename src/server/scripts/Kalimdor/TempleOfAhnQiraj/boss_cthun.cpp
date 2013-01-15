@@ -24,7 +24,8 @@ SDCategory: Temple of Ahn'Qiraj
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "temple_of_ahnqiraj.h"
 
 /*
@@ -181,7 +182,7 @@ public:
         {
             instance = creature->GetInstanceScript();
             if (!instance)
-                sLog->outError("TSCR: No Instance eye_of_cthunAI");
+                sLog->outError(LOG_FILTER_TSCR, "No Instance eye_of_cthunAI");
         }
 
         InstanceScript* instance;
@@ -487,7 +488,7 @@ public:
 
             instance = creature->GetInstanceScript();
             if (!instance)
-                sLog->outError("TSCR: No Instance eye_of_cthunAI");
+                sLog->outError(LOG_FILTER_TSCR, "No Instance eye_of_cthunAI");
         }
 
         InstanceScript* instance;

@@ -24,7 +24,8 @@ SDCategory: Magisters' Terrace
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "magisters_terrace.h"
 #include "WorldPacket.h"
 

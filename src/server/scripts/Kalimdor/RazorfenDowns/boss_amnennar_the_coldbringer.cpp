@@ -24,7 +24,8 @@ SDCategory: Razorfen Downs
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 #define SAY_AGGRO               -1129000
 #define SAY_SUMMON60            -1129001

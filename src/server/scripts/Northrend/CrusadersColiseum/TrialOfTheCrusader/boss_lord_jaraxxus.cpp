@@ -34,21 +34,24 @@ EndScriptData */
 
 #include "stdafx.hpp"
 #include <stdexcept>
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "trial_of_the_crusader.h"
 
 enum Yells
 {
-    SAY_INTRO               = -1649030,
-    SAY_AGGRO               = -1649031,
-    SAY_DEATH               = -1649032,
-    EMOTE_INCINERATE        = -1649033,
-    SAY_INCINERATE          = -1649034,
-    EMOTE_LEGION_FLAME      = -1649035,
-    EMOTE_NETHER_PORTAL     = -1649036,
-    SAY_NETHER_PORTAL       = -1649037,
-    EMOTE_INFERNAL_ERUPTION = -1649038,
-    SAY_INFERNAL_ERUPTION   = -1649039,
+    SAY_INTRO               = 0,
+    SAY_AGGRO               = 1,
+    EMOTE_LEGION_FLAME      = 2,
+    EMOTE_NETHER_PORTAL     = 3,
+    SAY_MISTRESS_OF_PAIN    = 4,
+    EMOTE_INCINERATE        = 5,
+    SAY_INCINERATE          = 6,
+    EMOTE_INFERNAL_ERUPTION = 7,
+    SAY_INFERNAL_ERUPTION   = 8,
+    SAY_KILL_PLAYER         = 9,
+    SAY_DEATH               = 10,
+    SAY_BERSERK             = 11,
 };
 
 enum Equipment
@@ -163,7 +166,7 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             Summons.DespawnAll();
-            DoScriptText(SAY_DEATH, me);
+            Talk(SAY_DEATH);
             if (instance)
                 instance->SetData(TYPE_JARAXXUS, DONE);
         }
@@ -182,7 +185,7 @@ public:
                 me->SetInCombatWithZone();
                 if (instance)
                     instance->SetData(TYPE_JARAXXUS, IN_PROGRESS);
-                DoScriptText(SAY_AGGRO, me);
+                Talk(SAY_AGGRO);
             }
         }
 
@@ -196,8 +199,8 @@ public:
                 m_uiSummonInfernalEruptionTimer = 0;
                 if (!me->IsNonMeleeSpellCasted(false, false, true))
                 {
-                    DoScriptText(EMOTE_INFERNAL_ERUPTION, me);
-                    DoScriptText(SAY_INFERNAL_ERUPTION, me);
+                    Talk(EMOTE_INFERNAL_ERUPTION);
+                    Talk(SAY_INFERNAL_ERUPTION);
                     DoCastAOE(SPELL_INFERNAL_ERUPTION);
                     m_uiSummonInfernalEruptionTimer = 2*MINUTE*IN_MILLISECONDS;
                 }
@@ -208,8 +211,8 @@ public:
                 m_uiSummonNetherPortalTimer = 0;
                 if (!me->IsNonMeleeSpellCasted(false, false, true))
                 {
-                    DoScriptText(EMOTE_NETHER_PORTAL, me);
-                    DoScriptText(SAY_NETHER_PORTAL, me);
+                    Talk(EMOTE_NETHER_PORTAL);
+                    Talk(SAY_MISTRESS_OF_PAIN);
                     DoCastAOE(SPELL_NETHER_PORTAL);
                     m_uiSummonNetherPortalTimer = 2*MINUTE*IN_MILLISECONDS;
                 }
@@ -235,8 +238,8 @@ public:
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                 {
-                    DoScriptText(EMOTE_INCINERATE, me, target);
-                    DoScriptText(SAY_INCINERATE, me);
+                    Talk(EMOTE_INCINERATE, target->GetGUID());
+                    Talk(SAY_INCINERATE);
                     DoCast(target, SPELL_INCINERATE_FLESH);
                 }
                 m_uiIncinerateFleshTimer = urand(20*IN_MILLISECONDS, 25*IN_MILLISECONDS);
@@ -256,7 +259,7 @@ public:
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                 {
-                    DoScriptText(EMOTE_LEGION_FLAME, me, target);
+                    Talk(EMOTE_LEGION_FLAME, target->GetGUID());
                     DoCast(target, SPELL_LEGION_FLAME);
                 }
                 m_uiLegionFlameTimer = 30*IN_MILLISECONDS;
@@ -367,6 +370,8 @@ public:
             // used to despawn corpse immediately
             me().DespawnOrUnsummon();
         }
+
+        void UpdateAI(uint32 const /*diff*/) {}
     };
 
 };
@@ -476,6 +481,8 @@ public:
             // used to despawn corpse immediately
             me->DespawnOrUnsummon();
         }
+
+        void UpdateAI(uint32 const /*diff*/) {}
     };
 
 };

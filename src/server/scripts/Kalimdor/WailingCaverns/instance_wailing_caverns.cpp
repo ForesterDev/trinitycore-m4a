@@ -24,7 +24,8 @@ SDCategory: Wailing Caverns
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "wailing_caverns.h"
 
 #define MAX_ENCOUNTER   9

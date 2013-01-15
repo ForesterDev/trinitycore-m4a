@@ -16,7 +16,8 @@
  */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "razorfen_downs.h"
 
 #define    MAX_ENCOUNTER  1

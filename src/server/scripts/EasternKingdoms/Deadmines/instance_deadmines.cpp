@@ -24,7 +24,8 @@ SDCategory: Deadmines
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "deadmines.h"
 
 enum Sounds

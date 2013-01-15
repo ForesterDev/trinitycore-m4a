@@ -29,7 +29,8 @@ boss_harbinger_skyriss_illusion
 EndContentData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "arcatraz.h"
 
 enum eSays

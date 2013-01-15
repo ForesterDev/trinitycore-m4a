@@ -24,7 +24,9 @@ SDCategory: Black Temple
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "PassiveAI.h"
 #include "black_temple.h"
 
 #define EMOTE_NEW_TARGET            -1564010

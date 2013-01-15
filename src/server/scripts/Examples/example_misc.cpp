@@ -24,7 +24,6 @@ SDCategory: Script Examples
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
 #include "ScriptMgr.h"
 
 enum eSay

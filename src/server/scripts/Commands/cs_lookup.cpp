@@ -223,7 +223,7 @@ public:
 
         return true;
     }
-    
+
     static bool HandleLookupEventCommand(ChatHandler* handler, char const* args)
     {
         if (!*args)
@@ -661,7 +661,7 @@ public:
                             {
                                 QuestStatus status = target->GetQuestStatus(qInfo->GetQuestId());
 
-                                switch (status) 
+                                switch (status)
                                 {
                                     case QUEST_STATUS_COMPLETE:
                                         statusStr = handler->GetTrinityString(LANG_COMMAND_QUEST_COMPLETE);
@@ -709,7 +709,7 @@ public:
                 {
                     QuestStatus status = target->GetQuestStatus(qInfo->GetQuestId());
 
-                    switch (status) 
+                    switch (status)
                     {
                         case QUEST_STATUS_COMPLETE:
                             statusStr = handler->GetTrinityString(LANG_COMMAND_QUEST_COMPLETE);
@@ -1157,7 +1157,7 @@ public:
         return true;
     }
 
-    static bool HandleLookupMapCommand(ChatHandler* handler, char const* args)
+    static bool HandleLookupMapCommand(ChatHandler* /*handler*/, char const* args)
     {
         if (!*args)
             return false;
@@ -1316,7 +1316,7 @@ public:
     static bool HandleLookupPlayerEmailCommand(ChatHandler* handler, char const* args)
     {
         if (!*args)
-            return false;   
+            return false;
 
         std::string email = strtok((char*)args, " ");
         char* limitStr = strtok(NULL, " ");
@@ -1365,7 +1365,7 @@ public:
                 do
                 {
                     Field* characterFields  = result2->Fetch();
-                    uint64 guid             = characterFields[0].GetUInt64();
+                    uint32 guid             = characterFields[0].GetUInt32();
                     std::string name        = characterFields[1].GetString();
 
                     handler->PSendSysMessage(LANG_LOOKUP_PLAYER_CHARACTER, name.c_str(), guid);

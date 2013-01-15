@@ -24,7 +24,8 @@ SDCategory: Stratholme
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 #define SAY_SPAWN   "TIMMY!"
 

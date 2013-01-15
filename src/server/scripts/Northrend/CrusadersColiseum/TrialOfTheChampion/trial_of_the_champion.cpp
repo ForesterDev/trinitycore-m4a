@@ -27,7 +27,9 @@ npc_announcer_toc5
 EndContentData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "trial_of_the_champion.h"
 #include "Vehicle.h"
 

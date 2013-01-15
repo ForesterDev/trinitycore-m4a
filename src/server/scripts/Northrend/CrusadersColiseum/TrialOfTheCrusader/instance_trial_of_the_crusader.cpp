@@ -24,7 +24,8 @@ SDCategory: Trial of the Crusader
 EndScriptData */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "trial_of_the_crusader.h"
 
 class instance_trial_of_the_crusader : public InstanceMapScript
@@ -47,6 +48,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
 
             uint64 BarrentGUID;
             uint64 TirionGUID;
+            uint64 TirionFordringGUID;
             uint64 FizzlebangGUID;
             uint64 GarroshGUID;
             uint64 VarianGUID;
@@ -84,6 +86,8 @@ class instance_trial_of_the_crusader : public InstanceMapScript
 
                 TrialCounter = 50;
                 EventStage = 0;
+
+                TirionFordringGUID = 0;
 
                 TributeChestGUID = 0;
                 MainGateDoorGUID = 0;
@@ -145,6 +149,9 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                         break;
                     case NPC_TIRION:
                         TirionGUID = creature->GetGUID();
+                        break;
+                    case NPC_TIRION_FORDRING:
+                        TirionFordringGUID = creature->GetGUID();
                         break;
                     case NPC_FIZZLEBANG:
                         FizzlebangGUID = creature->GetGUID();
@@ -237,10 +244,18 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 switch (type)
                 {
                     case TYPE_JARAXXUS:
+                        // Cleanup Icehowl
+                        if (Creature* icehowl = instance->GetCreature(IcehowlGUID))
+                            icehowl->DespawnOrUnsummon();
                         if (data == DONE)
                             EventStage = 2000;
                         break;
                     case TYPE_CRUSADERS:
+                        // Cleanup Jaraxxus
+                        if (Creature* jaraxxus = instance->GetCreature(JaraxxusGUID))
+                            jaraxxus->DespawnOrUnsummon();
+                        if (Creature* fizzlebang = instance->GetCreature(FizzlebangGUID))
+                            fizzlebang->DespawnOrUnsummon();
                         switch (data)
                         {
                             case IN_PROGRESS:
@@ -260,6 +275,9 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                         }
                         break;
                     case TYPE_VALKIRIES:
+                        // Cleanup chest
+                        if (GameObject* cache = instance->GetGameObject(CrusadersCacheGUID))
+                            cache->Delete();
                         switch (data)
                         {
                             case FAIL:
@@ -314,7 +332,8 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                                 }
                                 if (tributeChest)
                                     if (Creature* tirion =  instance->GetCreature(TirionGUID))
-                                        if (GameObject* chest = tirion->SummonGameObject(tributeChest, 805.62f, 134.87f, 142.16f, 3.27f, 0, 0, 0, 0, 90000000))
+                                        // need proper location.this one is guessed based on videos
+                                        if (GameObject* chest = tirion->SummonGameObject(tributeChest, 643.814f, 136.027f, 141.295f, 0, 0, 0, 0, 0, 90000000))
                                             chest->SetRespawnTime(chest->GetRespawnDelay());
                                 break;
                         }
@@ -393,7 +412,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
 
                 if (type < MAX_ENCOUNTERS)
                 {
-                    sLog->outDetail("[ToCr] EncounterStatus[type %u] %u = data %u;", type, EncounterStatus[type], data);
+                    sLog->outInfo(LOG_FILTER_TSCR, "[ToCr] EncounterStatus[type %u] %u = data %u;", type, EncounterStatus[type], data);
                     if (data == FAIL)
                     {
                         --TrialCounter;
@@ -421,6 +440,8 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                         return BarrentGUID;
                     case NPC_TIRION:
                         return TirionGUID;
+                    case NPC_TIRION_FORDRING:
+                        return TirionFordringGUID;
                     case NPC_FIZZLEBANG:
                         return FizzlebangGUID;
                     case NPC_GARROSH:

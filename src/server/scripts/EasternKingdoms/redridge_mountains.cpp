@@ -22,7 +22,8 @@ SDComment: Support for quest 219.
 Script Data End */
 
 #include "stdafx.hpp"
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
 
 enum eCorporalKeeshan

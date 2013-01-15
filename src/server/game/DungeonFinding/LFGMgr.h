@@ -29,7 +29,7 @@ class Player;
 
 enum LFGenum
 {
-    LFG_TIME_ROLECHECK                           = 40000,
+    LFG_TIME_ROLECHECK                           = 40*IN_MILLISECONDS,
     LFG_TIME_BOOT                                = 40000,
     LFG_TIME_PROPOSAL                            = 40000,
     LFG_TANKS_NEEDED                             = 1,
