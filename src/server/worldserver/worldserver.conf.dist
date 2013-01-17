@@ -1854,6 +1854,14 @@ Rate.XP.Explore = 1
 Rate.RepairCost = 1
 
 #
+#    Rate.TrainingCost
+#        Description: Multiplier for the gold required to train new ability. Higher value
+#                     increses the cost, while lower lowers it.
+#        Default:     1
+
+Rate.TrainingCost = 1;
+
+#
 #    Rate.Rest.InGame
 #    Rate.Rest.Offline.InTavernOrCity
 #    Rate.Rest.Offline.InWilderness

@@ -564,6 +564,12 @@ void World::LoadConfigSettings(bool reload)
         sLog->outError(LOG_FILTER_SERVER_LOADING, "DurabilityLossChance.Block (%f) must be >=0. Using 0.0 instead.", rate_values[RATE_DURABILITY_LOSS_BLOCK]);
         rate_values[RATE_DURABILITY_LOSS_BLOCK] = 0.0f;
     }
+    rate_values[RATE_TRAINING_COST] = ConfigMgr::GetFloatDefault("Rate.TrainingCost", 1.0f);
+    if (rate_values[RATE_TRAINING_COST] < 0.0f)
+    {
+        sLog->outError("DurabilityLossChance.Block (%f) must be >=0. Using 0.0 instead.", rate_values[RATE_TRAINING_COST]);
+        rate_values[RATE_TRAINING_COST] = 0.0f;
+    }
     ///- Read other configuration items from the config file
 
     m_bool_configs[CONFIG_DURABILITY_LOSS_IN_PVP] = ConfigMgr::GetBoolDefault("DurabilityLoss.InPvP", false);
