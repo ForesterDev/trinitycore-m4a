@@ -16,7 +16,6 @@
  */
 
 #include "stdafx.hpp"
-#include <limits>
 #include <utility>
 #include "ScriptMgr.h"
 #include "SpellScript.h"
@@ -1178,13 +1177,15 @@ class npc_combustion_consumption : public CreatureScript
                 if (type != DATA_STACKS_DISPELLED || !_damageSpell || !_explosionSpell || !summoner)
                     return;
 
-                auto count = std::min(stackAmount * (me->GetMap()->IsHeroic() ? 3 : 2), uint32() + std::numeric_limits<uint8>::max());
-                me->CastCustomSpell(SPELL_SCALE_AURA, SPELLVALUE_AURA_STACK, count, me);
+                if (!IsHeroic())
+                    stackAmount = std::min(stackAmount, (uint32)8);
+                if (stackAmount > 1)
+                    me->CastCustomSpell(SPELL_SCALE_AURA, SPELLVALUE_AURA_STACK, stackAmount - 1, me);
                 DoCast(me, _damageSpell);
 
                 CustomSpellValues values;
-                values.AddSpellMod(SPELLVALUE_BASE_POINT0, 1200 + (stackAmount * 1290)); // Needs more researches.
-                values.AddSpellMod(SPELLVALUE_RADIUS_MOD, 10000 * 1 + 10000 * count / 2 / 10);
+                values.AddSpellMod(SPELLVALUE_BASE_POINT0, 3000 + (3000 * (stackAmount - 1) / 2)); // Needs more researches.
+                values.AddSpellMod(SPELLVALUE_RADIUS_MOD, 10000 * 1 + 10000 * (stackAmount - 1) / 2 / 2);
                 summoner->CastCustomSpell(_explosionSpell, values, summoner);
             }
 
@@ -1541,7 +1542,7 @@ class spell_halion_damage_aoe_summon : public SpellScriptLoader
                 caster->GetPosition(&pos);
                 if (Creature* summon = caster->GetMap()->SummonCreature(entry, pos, properties, duration, caster, GetSpellInfo()->Id))
                     if (summon->IsAIEnabled)
-                        summon->AI()->SetData(DATA_STACKS_DISPELLED, GetSpellValue()->EffectBasePoints[EFFECT_1]);
+                        summon->AI()->SetData(DATA_STACKS_DISPELLED, GetSpell()->CalculateDamage(EFFECT_1, nullptr));
             }
 
             void Register()
