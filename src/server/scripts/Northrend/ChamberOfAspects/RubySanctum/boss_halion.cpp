@@ -990,7 +990,9 @@ class npc_meteor_strike_initial : public CreatureScript
         {
             npc_meteor_strike_initialAI(Creature* creature) : Scripted_NoMovementAI(creature),
                 _instance(creature->GetInstanceScript())
-            { }
+            {
+                me->SetOrientation(0);
+            }
 
             void DoAction(int32 const action)
             {
@@ -1020,13 +1022,13 @@ class npc_meteor_strike_initial : public CreatureScript
 
                 if (auto halionAI = CAST_AI(HalionAI, owner->AI()))
                 {
-                    Position const* ownerPos = halionAI->GetMeteorStrikePosition();
+                    auto north = me->GetOrientation();
                     Position newPos;
                     float angle[4];
-                    angle[0] = me->GetAngle(ownerPos);
-                    angle[1] = me->GetAngle(ownerPos) - static_cast<float>(M_PI/2);
-                    angle[2] = me->GetAngle(ownerPos) - static_cast<float>(-M_PI/2);
-                    angle[3] = me->GetAngle(ownerPos) - static_cast<float>(M_PI);
+                    angle[0] = north;
+                    angle[1] = north - static_cast<float>(M_PI/2);
+                    angle[2] = north - static_cast<float>(-M_PI/2);
+                    angle[3] = north - static_cast<float>(M_PI);
 
                     _meteorList.clear();
                     for (uint8 i = 0; i < 4; i++)
@@ -1061,7 +1063,8 @@ class npc_meteor_strike : public CreatureScript
         struct npc_meteor_strikeAI : public Scripted_NoMovementAI
         {
             npc_meteor_strikeAI(Creature* creature) : Scripted_NoMovementAI(creature),
-                _instance(creature->GetInstanceScript())
+                _instance(creature->GetInstanceScript()),
+                last_flame(creature->GetGUID())
             {
                 _range = 5.0f;
                 _spawnCount = 0;
@@ -1092,21 +1095,25 @@ class npc_meteor_strike : public CreatureScript
                 _events.Update(diff);
 
                 if (_events.ExecuteEvent() == EVENT_SPAWN_METEOR_FLAME)
-                {
-                    Position pos;
-                    me->GetNearPosition(pos, _range, 0.0f);
-
-                    if (Creature* flame = me->SummonCreature(NPC_METEOR_STRIKE_FLAME, pos, TEMPSUMMON_TIMED_DESPAWN, 25000))
+                    if (auto prev_flame = ObjectAccessor::GetCreature(*me, last_flame))
                     {
-                        if (Creature* controller = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_HALION_CONTROLLER)))
-                            controller->AI()->JustSummoned(flame);
+                        Position pos;
+                        auto angle = frand(-M_PI / 4, M_PI / 4);
+                        prev_flame->GetNearPosition(pos, 5, angle);
+                        pos.m_orientation += angle;
 
-                        flame->CastSpell(flame, SPELL_METEOR_STRIKE_FIRE_AURA_2, true);
-                        ++_spawnCount;
+                        if (Creature* flame = me->SummonCreature(NPC_METEOR_STRIKE_FLAME, pos, TEMPSUMMON_TIMED_DESPAWN, 25000))
+                        {
+                            if (Creature* controller = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_HALION_CONTROLLER)))
+                                controller->AI()->JustSummoned(flame);
+
+                            flame->CastSpell(flame, SPELL_METEOR_STRIKE_FIRE_AURA_2, true);
+                            ++_spawnCount;
+                            last_flame = flame->GetGUID();
+                        }
+                        _range += 5.0f;
+                        _events.ScheduleEvent(EVENT_SPAWN_METEOR_FLAME, 800);
                     }
-                    _range += 5.0f;
-                    _events.ScheduleEvent(EVENT_SPAWN_METEOR_FLAME, 800);
-                }
             }
 
         private:
@@ -1114,6 +1121,7 @@ class npc_meteor_strike : public CreatureScript
             EventMap _events;
             float _range;
             uint8 _spawnCount;
+            uint64 last_flame;
         };
 
         CreatureAI* GetAI(Creature* creature) const
