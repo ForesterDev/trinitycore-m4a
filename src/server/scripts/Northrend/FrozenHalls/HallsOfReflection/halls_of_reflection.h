@@ -25,22 +25,30 @@ enum Data
     DATA_LICHKING_EVENT,
     DATA_WAVE_COUNT,
     DATA_TEAM_IN_INSTANCE,
-};
-
-enum Data64
-{
     DATA_FALRIC,
     DATA_MARWYN,
     DATA_LICHKING,
     DATA_FROSTMOURNE,
+    DATA_FROSTSWORN_EVENT,
+
+    DATA_ESCAPE_LIDER,
+
+    DATA_SUMMONS,
+    DATA_ICE_WALL_1,       
+    DATA_ICE_WALL_2,        
+    DATA_ICE_WALL_3,        
+    DATA_ICE_WALL_4,        
+
+    DECREASE                   = 100,
+    RESUME                     = 101,
 };
 
 enum Creatures
 {
     NPC_FALRIC                                    = 38112,
     NPC_MARWYN                                    = 38113,
-    NPC_LICH_KING_EVENT                           = 37226,
-    NPC_LICH_KING_BOSS                            = 36954,
+    NPC_LICH_KING_BOSS                            = 37226,
+    NPC_LICH_KING_EVENT                           = 36954,
 
     NPC_UTHER                                     = 37225,
     NPC_JAINA_PART1                               = 37221,
@@ -53,14 +61,40 @@ enum Creatures
     NPC_WAVE_RIFLEMAN                             = 38176,
     NPC_WAVE_PRIEST                               = 38175,
     NPC_WAVE_MAGE                                 = 38172,
+
+    NPC_FROSTWORN_GENERAL                         = 36723,
+    NPC_REFLECTION                                = 37107,
+
+    NPC_ICE_WALL                                  = 37014,
+    NPC_RAGING_GNOUL                              = 36940,
+    NPC_RISEN_WITCH_DOCTOR                        = 36941,
+    NPC_ABON                                      = 37069,
+
+    NPC_BARTLETT                                  = 37182,
+    NPC_KORM                                      = 37833,
 };
 
 enum GameObjects
 {
-    GO_FROSTMOURNE                                = 202302,
-    GO_FROSTMOURNE_ALTAR                          = 202236,
-    GO_FRONT_DOOR                                 = 201976,
-    GO_ARTHAS_DOOR                                = 197341,
+    GO_FROSTMOURNE               = 202302,
+    GO_FROSTMOURNE_ALTAR         = 202236,
+    GO_FRONT_DOOR                = 201976,
+    GO_ARTHAS_DOOR               = 197341,
+    GO_REAR_DOOR                 = 197342,
+    GO_RUN_DOOR                  = 197343,
+ 
+    GO_ICE_WALL                  = 201385,
+    GO_CAVE                      = 201596,
+ 
+    GO_STAIRS_SKYBREAKER         = 201709,
+    GO_SKYBREAKER                = 500002,
+    GO_STAIRS_ORGRIM_HAMMER      = 202211,
+    GO_ORGRIM_HAMMER             = 500003,
+    GO_PORTAL                    = 202079,
+    GO_CAPTAIN_CHEST_1           = 202212, //3145
+    GO_CAPTAIN_CHEST_2           = 201710, //30357
+    GO_CAPTAIN_CHEST_3           = 202337, //3246
+    GO_CAPTAIN_CHEST_4           = 202336, //3333
 };
 
 enum HorWorldStates
@@ -75,6 +109,18 @@ enum Actions
     ACTION_ENTER_COMBAT,
 };
 
+static Position bossSpawnPos[3] =
+{
+  {5271.65f,2042.50f,709.320f,5.51217f},
+  {5344.75f,1972.87f,709.319f,2.33445f},
+  {5413.89f,2116.61f,709.319f,3.95703f},
+};
+
+const Position OutroSpawns[2] =
+{
+  {5564.25f, 2274.69f, 733.01f, 3.93f}, // Lich King
+  {5556.27f, 2266.28f, 733.01f, 0.8f},  // Jaina/Sylvana
+};
 // Base class for FALRIC and MARWYN
 // handled the summonList and the notification events to/from the InstanceScript
 struct boss_horAI : ScriptedAI
@@ -91,7 +137,6 @@ struct boss_horAI : ScriptedAI
     void Reset()
     {
         events.Reset();
-        me->SetVisible(false);
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
         me->SetReactState(REACT_PASSIVE);
     }
@@ -111,7 +156,7 @@ struct boss_horAI : ScriptedAI
                 me->SetVisible(true);
 
                 // Reset flags
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_IMMUNE_TO_PC);
                 me->SetReactState(REACT_AGGRESSIVE);
 
                 if (Unit* unit = me->SelectNearestTarget())
@@ -119,37 +164,6 @@ struct boss_horAI : ScriptedAI
 
                 DoZoneInCombat();
                 break;
-        }
-    }
-
-    void JustSummoned(Creature* summoned)
-    {
-        summons.Summon(summoned);
-
-        if (Unit* target = summoned->SelectNearestTarget())
-        {
-            if (summoned->AI())
-                summoned->AI()->AttackStart(target);
-            else
-            {
-                summoned->GetMotionMaster()->MoveChase(target);
-                summoned->Attack(target, true);
-            }
-        }
-
-        if (summoned->AI())
-            summoned->AI()->DoZoneInCombat();
-    }
-
-    void SummonedCreatureDespawn(Creature* summoned)
-    {
-        summons.Despawn(summoned);
-        if (summons.empty())
-        {
-            if (summoned->isAlive())
-                instance->SetData(DATA_WAVE_COUNT, NOT_STARTED);
-            else
-                instance->SetData(DATA_WAVE_COUNT, SPECIAL);
         }
     }
 };
