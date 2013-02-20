@@ -39,7 +39,7 @@ enum Events
 {
     EVENT_NONE,
     EVENT_NEXT_WAVE,
-    EVENT_START_LICH_KING,
+    EVENT_RESET_LK_EVENT,
 };
 
 static Position SpawnPos[ENCOUNTER_WAVE_COUNT] =
@@ -265,33 +265,29 @@ public:
                 case GO_CAVE:
                     uiCaveDoor = go->GetGUID();
                     break;
-                case GO_CAPTAIN_CHEST_1:
-                    go->SetPhaseMask(2, true);
+                case GO_CAPTAIN_CHEST_HORDE_NM:
                     if (!instance->IsHeroic() && uiTeamInInstance == HORDE)
                         uiChest = go->GetGUID();
                     break;
-                case GO_CAPTAIN_CHEST_3:
-                    go->SetPhaseMask(2, true);
+                case GO_CAPTAIN_CHEST_HORDE_HC:
                     if (instance->IsHeroic() && uiTeamInInstance == HORDE)
                         uiChest = go->GetGUID();
                     break;
-                case GO_CAPTAIN_CHEST_2:
-                    go->SetPhaseMask(2, true);
+                case GO_CAPTAIN_CHEST_ALLIANCE_NM:
                     if (!instance->IsHeroic() && uiTeamInInstance == ALLIANCE)
                         uiChest = go->GetGUID();
                     break;
-                case GO_CAPTAIN_CHEST_4:
-                    go->SetPhaseMask(2, true);
+                case GO_CAPTAIN_CHEST_ALLIANCE_HC:
                     if (instance->IsHeroic() && uiTeamInInstance == ALLIANCE)
                         uiChest = go->GetGUID();
                     break;
                 case GO_SKYBREAKER:
-                    go->SetPhaseMask(2, true);
+                    //go->SetPhaseMask(2, true);
                     if (uiTeamInInstance == ALLIANCE)
                         uiGunship = go->GetGUID();
                     break;
                 case GO_ORGRIM_HAMMER:
-                    go->SetPhaseMask(2, true);
+                    //go->SetPhaseMask(2, true);
                     if (uiTeamInInstance == HORDE)
                         uiGunship = go->GetGUID();
                     break;
@@ -316,6 +312,7 @@ public:
             case NPC_WAVE_PRIEST:
             case NPC_WAVE_RIFLEMAN:
               SetData(DATA_WAVE_COUNT, DECREASE);
+              creature->SetCorpseDelay(40000U);
               break;
           }
         }
@@ -333,24 +330,28 @@ public:
                     uiEncounter[1] = data;
                     if (data == DONE)
                     {
+                        DespawnWaves();
                         HandleGameObject(uiArthasDoor, true);
                         HandleGameObject(uiFrontDoor, true);
-                        HandleGameObject(uiRearDoor, false);
 
-                        //instance->SummonCreature(NPC_LICH_KING_BOSS, OutroSpawns[0]);
-                        //instance->SummonCreature(NPC_JAINA_PART2, OutroSpawns[1]);
+                        instance->SummonCreature(NPC_LICH_KING_BOSS, OutroSpawns[0]);
+                        instance->SummonCreature(NPC_JAINA_PART2, OutroSpawns[1]);
                         instance->SummonCreature(NPC_FROSTWORN_GENERAL, bossSpawnPos[2]);
+
+                        DoUpdateWorldState(WORLD_STATE_HOR, 0);
                     }
                     break;
                 case DATA_FROSTSWORN_EVENT:
                   if (data == DONE)
                   {
-                    HandleGameObject(uiRearDoor, true);
-                    HandleGameObject(uiRunDoor, true);
+                      HandleGameObject(uiRearDoor, true);
+                      HandleGameObject(uiRunDoor, false);
                   }
                   break;
                 case DATA_LICHKING_EVENT:
                     uiEncounter[2] = data;
+                    if(data == FAIL)
+                      events.ScheduleEvent(EVENT_RESET_LK_EVENT, 30000);
                     break;  
                 case DATA_WAVE_COUNT:
                   {
@@ -360,6 +361,7 @@ public:
                       SpawnWaves(ENCOUNTER_WAVE_COUNT);
                       HandleGameObject(uiFrontDoor, false);
                       events.ScheduleEvent(EVENT_NEXT_WAVE, 10000);
+                      bIntroDone = true;
                       break;
                     case RESUME: // Resumes waves in case of wipe
                       if(GetData(DATA_MARWYN_EVENT) != DONE)
@@ -370,7 +372,7 @@ public:
                       }
                       bWiped = false;
                       break;
-                    case DECREASE: // Called on wave spawn death
+                    case DECREASE: // Called on wave creature death
                       if(!--spawnCount)
                         events.ScheduleEvent(EVENT_NEXT_WAVE, 10000);
                       break;
@@ -389,7 +391,7 @@ public:
                 case DATA_FALRIC_EVENT:         return uiEncounter[0];
                 case DATA_MARWYN_EVENT:         return uiEncounter[1];
                 case DATA_LICHKING_EVENT:       return uiEncounter[2];
-                case DATA_WAVE_COUNT:           return (uint32)bWiped;
+                case DATA_WAVE_COUNT:           return bWiped && bIntroDone;
                 case DATA_TEAM_IN_INSTANCE:     return uiTeamInInstance;                
             }
 
@@ -471,7 +473,7 @@ public:
             if (uiEncounter[0] == DONE || uiEncounter[1] == DONE)
                 bIntroDone = true;
 
-            DoWipe(); //On load set the instance in right state
+            //DoWipe(); //On load set the instance in right state
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
@@ -644,6 +646,11 @@ public:
                     uiWaveCount++;
                     AddWave();
                     break;
+                case EVENT_RESET_LK_EVENT:
+                    instance->SummonCreature(NPC_LICH_KING_BOSS, OutroSpawns[0]);
+                    instance->SummonCreature(NPC_JAINA_PART2, OutroSpawns[1]);
+                    HandleGameObject(uiRearDoor, true);
+                  break;
             }
         }     
     };

@@ -87,14 +87,16 @@ enum GameObjects
     GO_CAVE                      = 201596,
  
     GO_STAIRS_SKYBREAKER         = 201709,
-    GO_SKYBREAKER                = 500002,
+    GO_SKYBREAKER                = 201598,
     GO_STAIRS_ORGRIM_HAMMER      = 202211,
-    GO_ORGRIM_HAMMER             = 500003,
+    GO_ORGRIM_HAMMER             = 201599,
+
     GO_PORTAL                    = 202079,
-    GO_CAPTAIN_CHEST_1           = 202212, //3145
-    GO_CAPTAIN_CHEST_2           = 201710, //30357
-    GO_CAPTAIN_CHEST_3           = 202337, //3246
-    GO_CAPTAIN_CHEST_4           = 202336, //3333
+
+    GO_CAPTAIN_CHEST_HORDE_NM              = 202212, 
+    GO_CAPTAIN_CHEST_ALLIANCE_NM           = 201710, 
+    GO_CAPTAIN_CHEST_HORDE_HC              = 202337, 
+    GO_CAPTAIN_CHEST_ALLIANCE_HC           = 202336, 
 };
 
 enum HorWorldStates
@@ -151,9 +153,7 @@ struct boss_horAI : ScriptedAI
     {
         switch (actionID)
         {
-            case ACTION_ENTER_COMBAT:  // called by InstanceScript when boss shall enter in combat.
-                // Just in case. Should have been done by InstanceScript
-                me->SetVisible(true);
+            case ACTION_ENTER_COMBAT:  
 
                 // Reset flags
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_IMMUNE_TO_PC);

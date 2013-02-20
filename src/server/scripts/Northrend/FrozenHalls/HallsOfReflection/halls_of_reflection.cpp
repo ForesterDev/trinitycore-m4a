@@ -22,7 +22,8 @@
 #include "halls_of_reflection.h"
 #include "Player.h"
 #include "ScriptedEscortAI.h"
-
+#include "Transport.h"
+#include "MapManager.h"
 
 enum Yells
 {
@@ -76,7 +77,7 @@ enum Yells
     SAY_MARWYN_INTRO_1                  = 4
 };
 
-enum Events
+enum
 {
     EVENT_NONE,
 
@@ -173,6 +174,7 @@ enum Events
     EVENT_SUMMON_ABO,
     EVENT_SUMMON_WALL,
     EVENT_RESUME_MOVEMENT,
+    EVENT_FINISH_ESCAPE,
 
     //Gnoul
     EVENT_GNOUL_LEAP,
@@ -197,6 +199,7 @@ enum
     ACTION_WALL_03,
     ACTION_WALL_04,
     ACTION_DESTROY_WALL,
+    ACTION_OUTRO,
 
     QUEST_DELIVRANCE_FROM_THE_PIT_A2              = 24710,
     QUEST_DELIVRANCE_FROM_THE_PIT_H2              = 24712,
@@ -289,7 +292,6 @@ enum Spells
     SPELL_DESTROY_ICE_WALL_02                     = 70225, //Sylvana
     SPELL_SYLVANA_JUMP                            = 68339,
     SPELL_SYLVANA_STEP                            = 69087,
-    SPELL_FIRE_CANNON                             = 67461,
 };
 
 const Position HallsofReflectionLocs[]=
@@ -631,7 +633,6 @@ public:
                      // The Lich King banishes Uther to the abyss.
                      if (Creature* uther = me->GetCreature(*me, utherGUID))
                      {
-                         //uther->DisappearAndDie();
                          uther->CastSpell(uther, 70693 /* Uther Despawn*/,true);
                          utherGUID = 0;
                      }
@@ -827,11 +828,7 @@ public:
                             DoCast(target, SPELL_DARK_MENDING);
                             events.ScheduleEvent(EVENT_DARK_MENDING, 20000);
                         }
-                        else
-                        {
-                            // no friendly unit with missing hp. re-check in just 5 sec.
-                            events.ScheduleEvent(EVENT_DARK_MENDING, 5000);
-                        }
+                        else events.ScheduleEvent(EVENT_DARK_MENDING, 5000); // no friendly unit with missing hp. re-check in just 5 sec.                            
                         return;
                 }
             }
@@ -1171,10 +1168,15 @@ public:
         {
           events.Reset();
           me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-          //me->SetReactState(REACT_PASSIVE);
-          me->SetHealth(me->GetMaxHealth()*0.6f);
+          //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+          me->SetReactState(REACT_PASSIVE);
+          me->SetHealth(me->GetMaxHealth()/2);
+
+          if(instance->GetData(DATA_LICHKING_EVENT) == DONE)
+            me->DisappearAndDie();
+
           if(Creature* pLider = me->GetCreature(*me, instance->GetData64(DATA_ESCAPE_LIDER)))
-            AttackStart(pLider);         
+            me->Attack(pLider,true);         
         }
  
         void JustDied(Unit* pKiller) { }
@@ -1186,10 +1188,10 @@ public:
             case ACTION_START_CHASE:
               me->RemoveAurasDueToSpell(SPELL_ICE_PRISON);
               me->RemoveAurasDueToSpell(SPELL_DARK_ARROW);
-              //me->SetSpeed(MOVE_WALK, 2.5f, true);                
-              Start(false, false);
+              me->SetSpeed(MOVE_RUN, 0.8f, false);
+              Start(false, true);
               break;
-            case ACTION_WALL_04:
+            case ACTION_WALL_04:  
               events.ScheduleEvent(EVENT_SUMMON_DOCTOR,1);
               events.ScheduleEvent(EVENT_SUMMON_DOCTOR,1);
               // no break
@@ -1204,8 +1206,8 @@ public:
             case ACTION_WALL_01:
               events.ScheduleEvent(EVENT_SUMMON_DOCTOR,1);
               events.ScheduleEvent(EVENT_SUMMON_GHOULS,1);
-              events.ScheduleEvent(EVENT_RESUME_MOVEMENT,1);
-              DoCast(me,SPELL_WINTER,true);
+              events.ScheduleEvent(EVENT_RESUME_MOVEMENT,5000);
+              DoCast(me,SPELL_WINTER);
               SetEscortPaused(true);
               break;
             }
@@ -1218,7 +1220,11 @@ public:
                 case 66:
                     SetEscortPaused(true);
                     if(Creature* pLider = me->GetCreature(*me, instance->GetData64(DATA_ESCAPE_LIDER)))
+                    {
                         me->CastSpell(pLider, SPELL_HARVEST_SOUL, false);
+                        pLider->AI()->DoAction(ACTION_OUTRO);
+                    }
+                    instance->SetData(DATA_LICHKING_EVENT,DONE);
                     break;
             }
         }
@@ -1226,11 +1232,14 @@ public:
         void SummonedCreatureDespawn(Creature* summoned)
         {
           summons.Despawn(summoned);
+
           if (summons.empty())
           {
             me->RemoveAurasDueToSpell(SPELL_WINTER);
+            me->SetSpeed(MOVE_RUN, 0.8f, false);
             if(Creature* pLider = me->GetCreature(*me, instance->GetData64(DATA_ESCAPE_LIDER)))
               pLider->AI()->DoAction(ACTION_DESTROY_WALL);
+
           }
         }
  
@@ -1244,9 +1253,9 @@ public:
   
         void UpdateEscortAI(const uint32 diff)
         {
-          if (!UpdateVictim())
+          if(instance->GetData(DATA_LICHKING_EVENT) != IN_PROGRESS)
             return;
-          
+
           events.Update(diff);
 
           while(!me->HasUnitState(UNIT_STATE_CASTING))
@@ -1273,16 +1282,17 @@ public:
           // Leader caught, wipe
           if(Creature* pLider = me->GetCreature(*me, instance->GetData64(DATA_ESCAPE_LIDER)))              
             if (pLider->IsWithinDistInMap(me, 2.0f) && instance->GetData(DATA_LICHKING_EVENT) == IN_PROGRESS)
-                    me->CastSpell(me, SPELL_FURY_OF_FROSTMOURNE, false); 
-        }
-        private:
-          Creature* summonWall(float pos_x, float pos_y, float pos_z, float ang)
-          {
-            if(Creature* wall = me->SummonCreature(NPC_ICE_WALL,pos_x, pos_y, pos_z, ang))
-              return wall;
+            {
+                    me->CastSpell(me, SPELL_FURY_OF_FROSTMOURNE, true);     
+                    summons.DespawnAll();
+                    instance->SetData(DATA_LICHKING_EVENT, FAIL);
+                    pLider->DisappearAndDie();
+                    me->DisappearAndDie();
+            }
 
-            return NULL;
-          }
+        }
+
+        private:
         InstanceScript* instance;        
         SummonList summons;
         EventMap events;
@@ -1303,13 +1313,10 @@ public:
         void Reset()
         {
             events.Reset();
-            events.ScheduleEvent(EVENT_GNOUL_LEAP, 2000);
+            events.ScheduleEvent(EVENT_GNOUL_LEAP, 500);
+            me->SetCorpseDelay(0);
         }
         
-        void JustDied(Unit* killer)
-        {
-          me->DespawnOrUnsummon();
-        }
   
         void UpdateAI(const uint32 diff)
         {
@@ -1323,8 +1330,9 @@ public:
                 switch(eventId)
                 {               
                 case EVENT_GNOUL_LEAP:
-                  if(Creature* pLider = me->GetCreature(*me, instance->GetData64(DATA_ESCAPE_LIDER))) 
-                    DoCast(pLider, SPELL_GNOUL_LEAP);
+                  if(Unit *target = SelectTarget(SELECT_TARGET_RANDOM,0,25.0f,true))
+                    DoCast(target, SPELL_GNOUL_LEAP);
+                  else events.ScheduleEvent(EVENT_GNOUL_LEAP, 500); //Polling for target in 25 yd range;
                   break;
                 }
               else break;          
@@ -1361,13 +1369,9 @@ public:
             events.ScheduleEvent(EVENT_DOCTOR_SHADOW_BOLT, 3000);
             events.ScheduleEvent(EVENT_DOCTOR_SHADOW_VALLEY, 8000);
             events.ScheduleEvent(EVENT_DOCTOR_CURSE_OF_DOOM, 5000);
+            me->SetCorpseDelay(0);
         }
         
-        void JustDied(Unit* killer)
-        {
-          me->DespawnOrUnsummon();
-        }
-
         void UpdateAI(const uint32 diff)
         {
             if(!UpdateVictim())
@@ -1428,13 +1432,10 @@ public:
 
           if(Creature* pLider = me->GetCreature(*me, instance->GetData64(DATA_ESCAPE_LIDER)))
             AttackStart(pLider);
+
+          me->SetCorpseDelay(0);
         }
         
-        void JustDied(Unit* killer)
-        {
-          me->DespawnOrUnsummon();
-        }
-
         void UpdateAI(const uint32 diff)
         {
             if(!UpdateVictim())
@@ -1618,8 +1619,7 @@ public:
         switch (uiAction)
         {
             case GOSSIP_ACTION_INFO_DEF+1:
-                player->CLOSE_GOSSIP_MENU();
-                ai->Start(false, true);
+                player->CLOSE_GOSSIP_MENU();                
                 creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
                 creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
  
@@ -1632,6 +1632,7 @@ public:
                 if(Creature* pLichKingBoss = creature->GetCreature(*creature, instance->GetData64(NPC_LICH_KING_BOSS)))
                   pLichKingBoss->AI()->DoAction(ACTION_START_CHASE);
 
+                ai->Start(false, true);
                 return true;
             default:
                 return false;
@@ -1676,25 +1677,21 @@ public:
             events.Reset();
 
             me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-            //me->SetReactState(REACT_PASSIVE);
-            me->SetHealth(me->GetMaxHealth()*0.6f);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+
+            me->SetHealth(me->GetMaxHealth()/10);
 
             if(instance->GetData(DATA_LICHKING_EVENT) == DONE)
-                me->SetVisible(false);
+               me->DisappearAndDie();
 
             SetDespawnAtFar(false);
 
             DoCast(me,SPELL_ICE_BARRIER);
-
-        }
- 
- 
-        void JustDied(Unit* pKiller)
-        {
-            if(!instance)
-                return;
-            instance->SetData(DATA_LICHKING_EVENT, FAIL);
+           
+            //if(Creature* pLichKingBoss = me->GetCreature(*me, instance->GetData64(NPC_LICH_KING_BOSS)))
+              //me->Attack(pLichKingBoss,true);
         }
  
         void WaypointReached(uint32 i)
@@ -1702,43 +1699,44 @@ public:
             switch(i)
             {
               case 3:  // WP3 - Summon first Ice wall
-                summonWall(5540.39f, 2086.48f, 731.066f, 1.00057f);
-                break;
+                  summonWall(5540.39f, 2086.48f, 731.066f, 1.00057f);
+                  break;
               case 4: // WP4 - Start destroying wall
-                SetEscortPaused(true);
-                me->CastSpell(me, me->GetEntry() == NPC_JAINA_PART2? SPELL_DESTROY_ICE_WALL_01 : SPELL_DESTROY_ICE_WALL_02, false);
-                    
-                if(Creature* pLichKingBoss = me->GetCreature(*me, instance->GetData64(NPC_LICH_KING_BOSS)))
-                  pLichKingBoss->AI()->DoAction(ACTION_WALL_01);
-                break;
+                  SetEscortPaused(true);
+                  me->CastSpell(me, me->GetEntry() == NPC_JAINA_PART2? SPELL_DESTROY_ICE_WALL_01 : SPELL_DESTROY_ICE_WALL_02, false);  
+                  if(Creature* pLichKingBoss = me->GetCreature(*me, instance->GetData64(NPC_LICH_KING_BOSS)))
+                    pLichKingBoss->AI()->DoAction(ACTION_WALL_01);
+                  break;
               case 7: // WP8 - Summon second wall
-                summonWall(5494.3f, 1978.27f, 736.689f, 1.0885f);
-                break;
+                  summonWall(5494.3f, 1978.27f, 736.689f, 1.0885f);                               
+                  break;
               case 8: // WP9 - Start destroying wall
-                SetEscortPaused(true);
-                me->CastSpell(me, me->GetEntry() == NPC_JAINA_PART2? SPELL_DESTROY_ICE_WALL_01 : SPELL_DESTROY_ICE_WALL_02, false);
-                
-                if(Creature* pLichKingBoss = me->GetCreature(*me, instance->GetData64(NPC_LICH_KING_BOSS)))
-                  pLichKingBoss->AI()->DoAction(ACTION_WALL_02);
-                break;
+                  SetEscortPaused(true);
+                  me->CastSpell(me, me->GetEntry() == NPC_JAINA_PART2? SPELL_DESTROY_ICE_WALL_01 : SPELL_DESTROY_ICE_WALL_02, false);
+                  if(Creature* pLichKingBoss = me->GetCreature(*me, instance->GetData64(NPC_LICH_KING_BOSS)))
+                    pLichKingBoss->AI()->DoAction(ACTION_WALL_02);
+                  break;
               case 11: // WP11 - Summon third wall                 
-                  summonWall(5426.27f, 1888.12f, 751.303f, 0.923328f);
+                  summonWall(5426.27f, 1888.12f, 751.303f, 0.923328f);                                                     
                   break;
               case 12: // WP12 - Start destroying wall
                   SetEscortPaused(true);
                   me->CastSpell(me, me->GetEntry() == NPC_JAINA_PART2? SPELL_DESTROY_ICE_WALL_01 : SPELL_DESTROY_ICE_WALL_02, false);
-                  
                   if(Creature* pLichKingBoss = me->GetCreature(*me, instance->GetData64(NPC_LICH_KING_BOSS)))
                     pLichKingBoss->AI()->DoAction(ACTION_WALL_03);
                   break;
               case 15: // WP15 - Summon 4th wall                 
-                  summonWall(5323.61f, 1755.85f, 770.305f, 0.784186f);
+                  summonWall(5323.61f, 1755.85f, 770.305f, 0.784186f);                 
                   break;
               case 16: // WP16 - Start destroying wall
                   SetEscortPaused(true);
                   me->CastSpell(me, me->GetEntry() == NPC_JAINA_PART2? SPELL_DESTROY_ICE_WALL_01 : SPELL_DESTROY_ICE_WALL_02, false);
                   if(Creature* pLichKingBoss = me->GetCreature(*me, instance->GetData64(NPC_LICH_KING_BOSS)))
                     pLichKingBoss->AI()->DoAction(ACTION_WALL_04);
+                  break;
+              case 20:
+                  SetEscortPaused(true);
+                  me->SetUInt32Value(UNIT_NPC_EMOTESTATE,me->GetEntry() == NPC_JAINA_PART2 ? EMOTE_STATE_READY2HL : EMOTE_STATE_READY1H);
                   break;
             }
         }
@@ -1753,6 +1751,13 @@ public:
                     SetEscortPaused(false);
                     me->InterruptNonMeleeSpells(false);
                     break;
+                  }
+                case ACTION_OUTRO:
+                  {
+                    ship = createTransport(me->GetEntry() == NPC_JAINA_PART2? GO_SKYBREAKER : GO_ORGRIM_HAMMER);
+                    ship->BuildStartMovePacket(me->GetMap());
+                    events.ScheduleEvent(EVENT_FINISH_ESCAPE,13000);
+                    SetEscortPaused(true);
                   }
             }
         }
@@ -1791,9 +1796,7 @@ public:
               switch(eventId)
               {
               case EVENT_ESCAPE_FREEZ_AND_MOVE:
-                if(me->GetEntry() == NPC_JAINA_PART2)
-                  me->RemoveAurasDueToSpell(SPELL_ICE_BARRIER);
-                else DoCast(me,SPELL_SYLVANA_JUMP);
+                me->RemoveAurasDueToSpell(SPELL_ICE_BARRIER);
 
                 if(Creature* pLichKingBoss = me->GetCreature(*me, instance->GetData64(NPC_LICH_KING_BOSS)))
                 {
@@ -1801,8 +1804,22 @@ public:
                   pLichKingBoss->CastSpell(pLichKingBoss, me->GetEntry() == NPC_JAINA_PART2 ? SPELL_ICE_PRISON : SPELL_DARK_ARROW, true);                  
                 }
 
+                me->AttackStop();
+
                 me->GetMotionMaster()->MovePoint(0, 5577.187f, 2236.003f, 733.012f);
                 me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                me->FindNearestGameObject(GO_RUN_DOOR, 50.0f)->SetGoState(GO_STATE_ACTIVE);                
+                break;
+              case EVENT_FINISH_ESCAPE:
+                ship->BuildStopMovePacket(me->GetMap());
+                me->RemoveAllAuras();
+                me->SummonGameObject(GO_PORTAL, 5297.91f, 1642.62f, 784.302f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0);
+                me->SummonGameObject(me->GetEntry() == NPC_JAINA_PART2 ? DUNGEON_MODE<uint32>(GO_CAPTAIN_CHEST_ALLIANCE_NM,GO_CAPTAIN_CHEST_ALLIANCE_HC) : DUNGEON_MODE<uint32>(GO_CAPTAIN_CHEST_HORDE_NM,GO_CAPTAIN_CHEST_HORDE_HC),5303.36f, 1646.82f, 784.30f, 2.5064f,0.0f, 0.0f,0.0f,0.0f,0);
+                me->FindNearestGameObject(GO_CAVE, 50.0f)->UseDoorOrButton();
+                me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+
+                if(Creature* pLichKingBoss = me->GetCreature(*me, instance->GetData64(NPC_LICH_KING_BOSS)))
+                  pLichKingBoss->DisappearAndDie();
                 break;
               }
             }
@@ -1816,8 +1833,34 @@ public:
               wall->CastSpell((Unit*)NULL,69767,false);
           }
 
+          Transport* createTransport(uint32 entry)
+          {
+
+            GameObjectTemplate const* goinfo = sObjectMgr->GetGameObjectTemplate(entry);
+     
+            std::set<uint32> mapsUsed;
+            Transport* t = new Transport(60000, goinfo->ScriptId);
+            t->GenerateWaypoints(goinfo->moTransport.taxiPathId, mapsUsed);
+
+            if(t->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), entry, t->m_WayPoints[0].mapid, t->m_WayPoints[0].x, t->m_WayPoints[0].y, t->m_WayPoints[0].z, 0.0f, 255, 0))
+            {
+              sMapMgr->m_Transports.insert(t);
+
+              for (std::set<uint32>::const_iterator i = mapsUsed.begin(); i != mapsUsed.end(); ++i)
+                sMapMgr->m_TransportsByMap[*i].insert(t);
+
+              Map* map = me->GetMap();
+
+              t->SetMap(map);
+              t->AddToWorld();                                       
+            }
+
+            return t;
+          }
+
           EventMap events;
-          InstanceScript* instance;        
+          InstanceScript* instance;
+          Transport* ship;
     };
 };
 
@@ -1832,10 +1875,12 @@ void AddSC_halls_of_reflection()
     new npc_spectral_footman();
     new npc_tortured_rifleman();
 
-    new boss_lich_king_hor();
     new npc_frostworn_general();
     new npc_spiritual_reflection();
-    new npc_lumbering_abomination();
 
+    new boss_lich_king_hor();
+    new npc_lumbering_abomination();
+    new npc_risen_witch_doctor();
+    new npc_raging_gnoul();
     new npc_jaina_and_sylvana_hor_part2();
 }
