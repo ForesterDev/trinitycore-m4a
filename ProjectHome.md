@@ -1,0 +1,1 @@
+This is Trinity Core customized for MMORPG4All.
